@@ -19,7 +19,7 @@ class RoutersClient(base.BaseNetworkClient):
         """Create a router.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#createRouter
+                              api-ref/networking/v2/index.html#create-router
         """
         post_body = {'router': kwargs}
         uri = '/routers'
@@ -29,7 +29,7 @@ class RoutersClient(base.BaseNetworkClient):
         """Updates a logical router.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#updateRouter
+                              api-ref/networking/v2/index.html#update-router
         """
         uri = '/routers/%s' % router_id
         update_body = {'router': kwargs}
@@ -39,7 +39,8 @@ class RoutersClient(base.BaseNetworkClient):
         """Shows details for a router.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#showRouter
+                              api-ref/networking/v2/index.html#
+                              show-router-details
         """
         uri = '/routers/%s' % router_id
         return self.show_resource(uri, **fields)
@@ -52,7 +53,7 @@ class RoutersClient(base.BaseNetworkClient):
         """Lists logical routers.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#listRouters
+                              api-ref/networking/v2/index.html#list-routers
         """
         uri = '/routers'
         return self.list_resources(uri, **filters)
@@ -61,8 +62,8 @@ class RoutersClient(base.BaseNetworkClient):
         """Add router interface.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#
-                              addRouterInterface
+                              api-ref/networking/v2/index.html#
+                              add-interface-to-router
         """
         uri = '/routers/%s/add_router_interface' % router_id
         return self.update_resource(uri, kwargs)
@@ -71,8 +72,8 @@ class RoutersClient(base.BaseNetworkClient):
         """Remove router interface.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#
-                              deleteRouterInterface
+                              api-ref/networking/v2/index.html#
+                              remove-interface-from-router
         """
         uri = '/routers/%s/remove_router_interface' % router_id
         return self.update_resource(uri, kwargs)

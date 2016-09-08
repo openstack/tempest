@@ -21,7 +21,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
         """Lists subnet pools to which the tenant has access.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#listSubnetPools
+                              api-ref/networking/v2/index.html#
+                              list-subnet-pools
         """
         uri = '/subnetpools'
         return self.list_resources(uri, **filters)
@@ -30,7 +31,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
         """Creates a subnet pool.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#createSubnetPool
+                              api-ref/networking/v2/index.html#
+                              create-subnet-pool
         """
         uri = '/subnetpools'
         post_data = {'subnetpool': kwargs}
@@ -40,7 +42,7 @@ class SubnetpoolsClient(base.BaseNetworkClient):
         """Shows information for a subnet pool.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#showSubnetPool
+                              api-ref/networking/v2/index.html#show-subnet-pool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         return self.show_resource(uri, **fields)
@@ -49,7 +51,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
         """Updates a subnet pool.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#updateSubnetPool
+                              api-ref/networking/v2/index.html#
+                              update-subnet-pool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         post_data = {'subnetpool': kwargs}

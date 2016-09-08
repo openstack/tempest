@@ -22,7 +22,8 @@ class FloatingIPsClient(base.BaseNetworkClient):
         internal port.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#createFloatingIp
+                              api-ref/networking/v2/index.html#
+                              create-floating-ip
         """
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
@@ -32,7 +33,8 @@ class FloatingIPsClient(base.BaseNetworkClient):
         """Updates a floating IP and its association with an internal port.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#updateFloatingIp
+                              api-ref/networking/v2/index.html#
+                              update-floating-ip
         """
         uri = '/floatingips/%s' % floatingip_id
         post_data = {'floatingip': kwargs}
@@ -42,7 +44,8 @@ class FloatingIPsClient(base.BaseNetworkClient):
         """Shows details for a floating IP.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#showFloatingIp
+                              api-ref/networking/v2/index.html#
+                              show-floating-ip-details
         """
         uri = '/floatingips/%s' % floatingip_id
         return self.show_resource(uri, **fields)
@@ -55,7 +58,8 @@ class FloatingIPsClient(base.BaseNetworkClient):
         """Lists floating IPs.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2-ext.html#listFloatingIps
+                              api-ref/networking/v2/index.html#
+                              list-floating-ips
         """
         uri = '/floatingips'
         return self.list_resources(uri, **filters)
