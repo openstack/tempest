@@ -370,7 +370,8 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enables returning of the instance password by the '
                      'relevant server API calls such as create, rebuild '
-                     'or rescue.'),
+                     'or rescue. This configuration value should be same as '
+                     'nova.conf: DEFAULT.enable_instance_password'),
     cfg.BoolOpt('interface_attach',
                 default=True,
                 help='Does the test environment support dynamic network '
