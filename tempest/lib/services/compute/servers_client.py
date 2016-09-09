@@ -47,8 +47,13 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def create_server(self, **kwargs):
         """Create server.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createServer
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/compute/#create-server
+
+        :param name: Server name
+        :param imageRef: Image reference (UUID)
+        :param flavorRef: Flavor reference (UUID or full URL)
 
         Most parameters except the following are passed to the API without
         any changes.
