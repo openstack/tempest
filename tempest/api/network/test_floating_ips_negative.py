@@ -19,6 +19,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -49,6 +50,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.port = cls.create_port(cls.network)
 
+    @decorators.skip_because(bug="1476935")
     @test.attr(type=['negative'])
     @test.idempotent_id('22996ea8-4a81-4b27-b6e1-fa5df92fa5e8')
     def test_create_floatingip_with_port_ext_net_unreachable(self):
@@ -68,6 +70,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
                           fixed_ip_address=self.port['fixed_ips'][0]
                                                     ['ip_address'])
 
+    @decorators.skip_because(bug="1476935")
     @test.attr(type=['negative'])
     @test.idempotent_id('6b3b8797-6d43-4191-985c-c48b773eb429')
     def test_associate_floatingip_port_ext_net_unreachable(self):

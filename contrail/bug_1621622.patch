@@ -1,0 +1,21 @@
+diff --git a/tempest/lib/services/network/security_groups_client.py b/tempest/lib/services/network/security_groups_client.py
+index 5c89a6f..294fe79 100755
+--- a/tempest/lib/services/network/security_groups_client.py
++++ b/tempest/lib/services/network/security_groups_client.py
+@@ -11,7 +11,7 @@
+ #    under the License.
+ 
+ from tempest.lib.services.network import base
+-
++import time
+ 
+ class SecurityGroupsClient(base.BaseNetworkClient):
+ 
+@@ -51,6 +51,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
+                               api-ref-networking-v2-ext.html#deleteSecGroup
+         """
+         uri = '/security-groups/%s' % security_group_id
++        time.sleep(5)
+         return self.delete_resource(uri)
+ 
+     def list_security_groups(self, **filters):
