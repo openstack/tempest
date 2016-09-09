@@ -28,7 +28,7 @@ class ExistsAllResponseHeaders(object):
     checked in each test code.
     """
 
-    def __init__(self, target, method):
+    def __init__(self, target, method, policies=None):
         """Initialization of ExistsAllResponseHeaders
 
         param: target Account/Container/Object
@@ -36,6 +36,7 @@ class ExistsAllResponseHeaders(object):
         """
         self.target = target
         self.method = method
+        self.policies = policies or []
 
     def _content_length_required(self, resp):
         # Verify whether given HTTP response must contain content-length.
@@ -84,11 +85,63 @@ class ExistsAllResponseHeaders(object):
                     return NonExistentHeader('x-account-container-count')
                 if 'x-account-object-count' not in actual:
                     return NonExistentHeader('x-account-object-count')
+                if actual['x-account-container-count'] > 0:
+                    acct_header = "x-account-storage-policy-"
+                    matched_policy_count = 0
+
+                    # Loop through the policies and look for account
+                    # usage data.  There should be at least 1 set
+                    for policy in self.policies:
+                        front_header = acct_header + policy['name'].lower()
+
+                        usage_policies = [
+                            front_header + '-bytes-used',
+                            front_header + '-object-count',
+                            front_header + '-container-count'
+                        ]
+
+                        # There should be 3 usage values for a give storage
+                        # policy in an account bytes, object count, and
+                        # container count
+                        policy_hdrs = sum(1 for use_hdr in usage_policies
+                                          if use_hdr in actual)
+
+                        # If there are less than 3 headers here then 1 is
+                        # missing, let's figure out which one and report
+                        if policy_hdrs == 3:
+                            matched_policy_count = matched_policy_count + 1
+                        else:
+                            if policy_hdrs > 0 and policy_hdrs < 3:
+                                for use_hdr in usage_policies:
+                                    if use_hdr not in actual:
+                                        return NonExistentHeader(use_hdr)
+
+                    # Only flag an error if actual policies have been read and
+                    # no usage has been found
+                    if self.policies and matched_policy_count == 0:
+                        return GenericError("No storage policy usage headers")
+
             elif self.target == 'Container':
                 if 'x-container-bytes-used' not in actual:
                     return NonExistentHeader('x-container-bytes-used')
                 if 'x-container-object-count' not in actual:
                     return NonExistentHeader('x-container-object-count')
+                if 'x-storage-policy' not in actual:
+                    return NonExistentHeader('x-storage-policy')
+                else:
+                    policy_name = actual['x-storage-policy']
+
+                    # loop through the policies and ensure that
+                    # the value in the container header matches
+                    # one of the storage policies
+                    for policy in self.policies:
+                        if policy['name'] == policy_name:
+                            break
+                    else:
+                        # Ensure that there are actual policies stored
+                        if self.policies:
+                            return InvalidHeaderValue('x-storage-policy',
+                                                      policy_name)
             elif self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
@@ -114,6 +167,19 @@ class ExistsAllResponseHeaders(object):
         return None
 
 
+class GenericError(object):
+    """Informs an error message of a generic error during header evaluation"""
+
+    def __init__(self, body):
+        self.body = body
+
+    def describe(self):
+        return "%s" % self.body
+
+    def get_details(self):
+        return {}
+
+
 class NonExistentHeader(object):
     """Informs an error message in the case of missing a certain header"""
 
@@ -122,6 +188,20 @@ class NonExistentHeader(object):
 
     def describe(self):
         return "%s header does not exist" % self.header
+
+    def get_details(self):
+        return {}
+
+
+class InvalidHeaderValue(object):
+    """Informs an error message when a header contains a bad value"""
+
+    def __init__(self, header, value):
+        self.header = header
+        self.value = value
+
+    def describe(self):
+        return "InvalidValue (%s, %s)" % (self.header, self.value)
 
     def get_details(self):
         return {}
