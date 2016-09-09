@@ -31,7 +31,7 @@ class ImagesClient(rest_client.RestClient):
         """Update an image.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#updateImage-v2
+                              api-ref/image/v2/index.html#update-an-image
         """
         data = json.dumps(patch)
         headers = {"Content-Type": "application/openstack-images-v2.0"
@@ -45,7 +45,7 @@ class ImagesClient(rest_client.RestClient):
         """Create an image.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#createImage-v2
+                              api-ref/image/v2/index.html#create-an-image
         """
         data = json.dumps(kwargs)
         resp, body = self.post('images', data)
@@ -57,7 +57,7 @@ class ImagesClient(rest_client.RestClient):
         """Deactivate image.
 
          Available params: see http://developer.openstack.org/
-                               api-ref-image-v2.html#deactivateImage-v2
+                               api-ref/image/v2/#deactivate-image
          """
         url = 'images/%s/actions/deactivate' % image_id
         resp, body = self.post(url, None)
@@ -68,7 +68,7 @@ class ImagesClient(rest_client.RestClient):
         """Reactivate image.
 
          Available params: see http://developer.openstack.org/
-                               api-ref-image-v2.html#reactivateImage-v2
+                               api-ref/image/v2/#reactivate-image
          """
         url = 'images/%s/actions/reactivate' % image_id
         resp, body = self.post(url, None)
@@ -79,7 +79,7 @@ class ImagesClient(rest_client.RestClient):
         """Delete image.
 
          Available params: see http://developer.openstack.org/
-                               api-ref-image-v2.html#deleteImage-v2
+                               /api-ref/image/v2/#delete-an-image
          """
         url = 'images/%s' % image_id
         resp, _ = self.delete(url)
@@ -90,7 +90,7 @@ class ImagesClient(rest_client.RestClient):
         """List images.
 
         Available params: see http://developer.openstack.org/
-                              api-ref-image-v2.html#listImages-v2
+                              api-ref/image/v2/#show-images
         """
         url = 'images'
 
@@ -106,7 +106,7 @@ class ImagesClient(rest_client.RestClient):
         """Show image details.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#showImage-v2
+                          api-ref/image/v2/#show-image-details
         """
         url = 'images/%s' % image_id
         resp, body = self.get(url)
@@ -130,7 +130,7 @@ class ImagesClient(rest_client.RestClient):
         """Upload binary image data.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#storeImageFile-v2
+                          api-ref/image/v2/#upload-binary-image-data
         """
         url = 'images/%s/file' % image_id
 
@@ -148,7 +148,7 @@ class ImagesClient(rest_client.RestClient):
         """Download binary image data.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#showImageFile-v2
+                          api-ref/image/v2/#download-binary-image-data
         """
         url = 'images/%s/file' % image_id
         resp, body = self.get(url)
@@ -159,7 +159,7 @@ class ImagesClient(rest_client.RestClient):
         """Add an image tag.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#addImageTag-v2
+                          api-ref/image/v2/#add-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
@@ -170,7 +170,7 @@ class ImagesClient(rest_client.RestClient):
         """Delete an image tag.
 
         Available params: http://developer.openstack.org/
-                          api-ref-image-v2.html#deleteImageTag-v2
+                          api-ref/image/v2/#delete-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)
