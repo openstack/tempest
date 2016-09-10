@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
+from oslo_serialization import base64
 
 from tempest.api.compute import base
 from tempest.common.utils.linux import remote_client
@@ -55,7 +55,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         file_contents = 'This is a test file.'
         file_path = '/test.txt'
         personality = [{'path': file_path,
-                        'contents': base64.b64encode(file_contents)}]
+                        'contents': base64.encode_as_text(file_contents)}]
         password = data_utils.rand_password()
         created_server = self.create_test_server(personality=personality,
                                                  adminPass=password,
@@ -79,7 +79,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         server_id = server['id']
         file_contents = 'Test server rebuild.'
         personality = [{'path': 'rebuild.txt',
-                        'contents': base64.b64encode(file_contents)}]
+                        'contents': base64.encode_as_text(file_contents)}]
         rebuilt_server = self.client.rebuild_server(server_id,
                                                     self.image_ref_alt,
                                                     personality=personality)
@@ -100,7 +100,8 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         for i in range(0, int(max_file_limit) + 1):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
-                                'contents': base64.b64encode(file_contents)})
+                                'contents': base64.encode_as_text(
+                                    file_contents)})
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised when out of quota
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
@@ -120,7 +121,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             path = '/etc/test' + str(i) + '.txt'
             person.append({
                 'path': path,
-                'contents': base64.b64encode(file_contents),
+                'contents': base64.encode_as_text(file_contents),
             })
         password = data_utils.rand_password()
         created_server = self.create_test_server(personality=person,

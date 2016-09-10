@@ -13,9 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-import six
-
+from oslo_serialization import base64
 from oslo_serialization import jsonutils as json
 
 from tempest.api.volume import base
@@ -46,13 +44,11 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         self.admin_backups_client.wait_for_resource_deletion(backup_id)
 
     def _decode_url(self, backup_url):
-        return json.loads(base64.decodestring(backup_url))
+        return json.loads(base64.decode_as_text(backup_url))
 
     def _encode_backup(self, backup):
         retval = json.dumps(backup)
-        if six.PY3:
-            retval = retval.encode('utf-8')
-        return base64.encodestring(retval)
+        return base64.encode_as_text(retval)
 
     def _modify_backup_url(self, backup_url, changes):
         backup = self._decode_url(backup_url)

@@ -71,7 +71,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         body = body['image'] if 'image' in body else body
         cls.image_id = body['id']
         cls.images.append(cls.image_id)
-        image_file = six.StringIO(('*' * 1024))
+        image_file = six.BytesIO((b'*' * 1024))
         if CONF.image_feature_enabled.api_v1:
             cls.glance_client.update_image(cls.image_id, data=image_file)
         else:

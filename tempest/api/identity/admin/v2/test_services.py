@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -84,7 +82,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         services = []
-        for _ in moves.xrange(3):
+        for _ in range(3):
             name = data_utils.rand_name('service')
             s_type = data_utils.rand_name('type')
             description = data_utils.rand_name('description')

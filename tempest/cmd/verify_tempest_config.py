@@ -46,7 +46,7 @@ def _get_config_file():
     conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
     conf_file = os.environ.get('TEMPEST_CONFIG', default_config_file)
     path = os.path.join(conf_dir, conf_file)
-    fd = open(path, 'rw')
+    fd = open(path, 'r+')
     return fd
 
 

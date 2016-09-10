@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest.lib import exceptions as lib_exc
@@ -38,7 +36,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # tearDownClass method of the super-class.
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
-        for x in moves.xrange(2):
+        for x in range(2):
             srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 

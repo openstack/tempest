@@ -91,7 +91,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
         # list users in group
         group_users = self.groups_client.list_group_users(group['id'])['users']
-        self.assertEqual(sorted(users), sorted(group_users))
+        self.assertEqual(sorted(users, key=lambda k: k['name']),
+                         sorted(group_users, key=lambda k: k['name']))
         # check and delete user in group
         for user in users:
             self.groups_client.check_group_user_existence(
@@ -118,7 +119,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.groups_client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
         user_groups = self.users_client.list_user_groups(user['id'])['groups']
-        self.assertEqual(sorted(groups), sorted(user_groups))
+        self.assertEqual(sorted(groups, key=lambda k: k['name']),
+                         sorted(user_groups, key=lambda k: k['name']))
         self.assertEqual(2, len(user_groups))
 
     @test.idempotent_id('cc9a57a5-a9ed-4f2d-a29f-4f979a06ec71')

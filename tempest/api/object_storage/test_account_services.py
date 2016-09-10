@@ -15,7 +15,6 @@
 
 import random
 
-from six import moves
 import testtools
 
 from tempest.api.object_storage import base
@@ -42,7 +41,7 @@ class AccountTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(AccountTest, cls).resource_setup()
-        for i in moves.xrange(ord('a'), ord('f') + 1):
+        for i in range(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)
             cls.containers.append(name)
@@ -140,7 +139,8 @@ class AccountTest(base.BaseObjectTest):
     @test.idempotent_id('5cfa4ab2-4373-48dd-a41f-a532b12b08b2')
     def test_list_containers_with_limit(self):
         # list containers one of them, half of them then all of them
-        for limit in (1, self.containers_count / 2, self.containers_count):
+        for limit in (1, self.containers_count // 2,
+                      self.containers_count):
             params = {'limit': limit}
             resp, container_list = \
                 self.account_client.list_account_containers(params=params)
@@ -161,12 +161,13 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertEqual(len(container_list), 0)
 
-        params = {'marker': self.containers[self.containers_count / 2]}
+        params = {'marker': self.containers[self.containers_count // 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
 
-        self.assertEqual(len(container_list), self.containers_count / 2 - 1)
+        self.assertEqual(len(container_list),
+                         self.containers_count // 2 - 1)
 
     @test.idempotent_id('5ca164e4-7bde-43fa-bafb-913b53b9e786')
     def test_list_containers_with_end_marker(self):
@@ -180,11 +181,11 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), 0)
 
-        params = {'end_marker': self.containers[self.containers_count / 2]}
+        params = {'end_marker': self.containers[self.containers_count // 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
-        self.assertEqual(len(container_list), self.containers_count / 2)
+        self.assertEqual(len(container_list), self.containers_count // 2)
 
     @test.idempotent_id('ac8502c2-d4e4-4f68-85a6-40befea2ef5e')
     def test_list_containers_with_marker_and_end_marker(self):
@@ -215,12 +216,12 @@ class AccountTest(base.BaseObjectTest):
         # list containers combining limit and end_marker param
         limit = random.randint(1, self.containers_count)
         params = {'limit': limit,
-                  'end_marker': self.containers[self.containers_count / 2]}
+                  'end_marker': self.containers[self.containers_count // 2]}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list),
-                         min(limit, self.containers_count / 2))
+                         min(limit, self.containers_count // 2))
 
     @test.idempotent_id('8cf98d9c-e3a0-4e44-971b-c87656fdddbd')
     def test_list_containers_with_limit_and_marker_and_end_marker(self):

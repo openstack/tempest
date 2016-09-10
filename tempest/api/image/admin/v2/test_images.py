@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
+import six
 import testtools
 
 from tempest.api.image import base
@@ -42,7 +42,7 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
         self.addCleanup(self.client.delete_image, image_id)
         # upload an image file
         content = data_utils.random_bytes()
-        image_file = moves.cStringIO(content)
+        image_file = six.BytesIO(content)
         self.client.store_image_file(image_id, image_file)
         # deactivate image
         self.admin_client.deactivate_image(image_id)

@@ -36,7 +36,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
         # Create 2 snapshots
-        for _ in xrange(2):
+        for _ in range(2):
             cls.create_snapshot(cls.volume_origin['id'])
 
     def _detach(self, volume_id):
