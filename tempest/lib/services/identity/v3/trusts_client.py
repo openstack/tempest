@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -38,16 +39,16 @@ class TrustsClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_trusts(self, trustor_user_id=None, trustee_user_id=None):
-        """GET trusts."""
-        if trustor_user_id:
-            resp, body = self.get("OS-TRUST/trusts?trustor_user_id=%s"
-                                  % trustor_user_id)
-        elif trustee_user_id:
-            resp, body = self.get("OS-TRUST/trusts?trustee_user_id=%s"
-                                  % trustee_user_id)
-        else:
-            resp, body = self.get("OS-TRUST/trusts")
+    def list_trusts(self, **params):
+        """Returns trusts
+
+        Available params: see http://developer.openstack.org/
+                              api-ref/identity/v3-ext/index.html#list-trusts
+        """
+        url = "OS-TRUST/trusts/"
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
