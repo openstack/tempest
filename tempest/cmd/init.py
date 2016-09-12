@@ -69,7 +69,10 @@ class TempestInit(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(TempestInit, self).get_parser(prog_name)
-        parser.add_argument('dir', nargs='?', default=os.getcwd())
+        parser.add_argument('dir', nargs='?', default=os.getcwd(),
+                            help="The path to the workspace directory. If you "
+                            "omit this argument, the workspace directory is "
+                            "your current directory")
         parser.add_argument('--config-dir', '-c', default=None)
         parser.add_argument('--show-global-config-dir', '-s',
                             action='store_true', dest='show_global_dir',
@@ -78,7 +81,7 @@ class TempestInit(command.Command):
         parser.add_argument('--name', help="The workspace name", default=None)
         parser.add_argument('--workspace-path', default=None,
                             help="The path to the workspace file, the default "
-                                 "is ~/.tempest/workspace")
+                                 "is ~/.tempest/workspace.yaml")
         return parser
 
     def generate_testr_conf(self, local_path):
