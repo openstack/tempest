@@ -23,7 +23,8 @@ CONF = config.CONF
 
 
 def not_existing_id():
-    if CONF.service_available.neutron:
+    if (CONF.service_available.neutron and
+        test.is_extension_enabled('security-group', 'network')):
         return data_utils.rand_uuid()
     else:
         return data_utils.rand_int_id(start=999)
