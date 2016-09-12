@@ -80,7 +80,6 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         server = self.create_server(
             name=server_name,
             wait_until='ACTIVE')
-        self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.attach_volume(
             server['id'], volumeId=self.volume_origin['id'],
             device='/dev/%s' % CONF.compute.volume_device_name)
