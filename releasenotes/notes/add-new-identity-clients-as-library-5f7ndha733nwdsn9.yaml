@@ -12,3 +12,4 @@ features:
       * identity_client(v3)
       * roles_client(v3)
       * inherited_roles_client(v3)
+      * credentials_client(v3)
