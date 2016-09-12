@@ -57,13 +57,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             waiters.wait_for_volume_status(self.volumes_client,
                                            volume_id, 'available')
 
-    def _delete_volume(self):
-        # Delete the created Volumes
-        if self.volume:
-            self.volumes_client.delete_volume(self.volume['id'])
-            self.volumes_client.wait_for_resource_deletion(self.volume['id'])
-            self.volume = None
-
     def _create_server(self):
         # Start a server and wait for it to become ready
         server = self.create_test_server(
@@ -78,28 +71,29 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     def _create_and_attach_volume(self, server):
         # Create a volume and wait for it to become ready
-        self.volume = self.volumes_client.create_volume(
+        volume = self.volumes_client.create_volume(
             size=CONF.volume.volume_size, display_name='test')['volume']
-        self.addCleanup(self._delete_volume)
+        self.addCleanup(self.delete_volume, volume['id'])
         waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume['id'], 'available')
+                                       volume['id'], 'available')
 
         # Attach the volume to the server
         self.attachment = self.servers_client.attach_volume(
             server['id'],
-            volumeId=self.volume['id'],
+            volumeId=volume['id'],
             device='/dev/%s' % self.device)['volumeAttachment']
         waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume['id'], 'in-use')
+                                       volume['id'], 'in-use')
 
-        self.addCleanup(self._detach, server['id'], self.volume['id'])
+        self.addCleanup(self._detach, server['id'], volume['id'])
+        return volume
 
     @test.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
         server = self._create_server()
-        self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server)
 
         self.servers_client.stop_server(server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
@@ -122,7 +116,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             device_name_to_match = ' ' + self.device + '\n'
             self.assertIn(device_name_to_match, partitions)
 
-        self._detach(server['id'], self.volume['id'])
+        self._detach(server['id'], volume['id'])
         self.attachment = None
         self.servers_client.stop_server(server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
@@ -148,7 +142,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def test_list_get_volume_attachments(self):
         # Create Server, Volume and attach that Volume to Server
         server = self._create_server()
-        self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server)
 
         # List Volume attachment of the server
         body = self.servers_client.list_volume_attachments(
@@ -161,7 +155,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             server['id'],
             self.attachment['id'])['volumeAttachment']
         self.assertEqual(server['id'], body['serverId'])
-        self.assertEqual(self.volume['id'], body['volumeId'])
+        self.assertEqual(volume['id'], body['volumeId'])
         self.assertEqual(self.attachment['id'], body['id'])
 
 
@@ -254,10 +248,10 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         server = self._create_server()
         num_vol = self._count_volumes(server)
         self._shelve_server(server)
-        self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server)
 
         # Detach the volume
-        self._detach(server['id'], self.volume['id'])
+        self._detach(server['id'], volume['id'])
         self.attachment = None
 
         # Unshelve the instance and check that we have the expected number of
