@@ -173,10 +173,10 @@ class TempestInit(command.Command):
         workspace_manager = workspace.WorkspaceManager(
             parsed_args.workspace_path)
         name = parsed_args.name or parsed_args.dir.split(os.path.sep)[-1]
-        workspace_manager.register_new_workspace(
-            name, parsed_args.dir, init=True)
         config_dir = parsed_args.config_dir or get_tempest_default_config_dir()
         if parsed_args.show_global_dir:
             print("Global config dir is located at: %s" % config_dir)
             sys.exit(0)
         self.create_working_dir(parsed_args.dir, config_dir)
+        workspace_manager.register_new_workspace(
+            name, parsed_args.dir, init=True)
