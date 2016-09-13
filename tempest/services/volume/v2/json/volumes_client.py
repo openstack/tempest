@@ -56,3 +56,16 @@ class VolumesClient(base_volumes_client.BaseVolumesClient):
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def show_backend_capabilities(self, host):
+        """Shows capabilities for a storage back end.
+
+         Output params: see http://developer.openstack.org/
+                            api-ref-blockstorage-v2.html
+                            #showBackendCapabilities
+        """
+        url = 'capabilities/%s' % host
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
