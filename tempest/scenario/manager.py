@@ -977,7 +977,7 @@ class NetworkScenarioTest(ScenarioTest):
     def _default_security_group(self, client=None, tenant_id=None):
         """Get default secgroup for given tenant_id.
 
-        :returns: DeletableSecurityGroup -- default secgroup for given tenant
+        :returns: default secgroup for given tenant
         """
         if client is None:
             client = self.security_groups_client
