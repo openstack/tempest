@@ -107,7 +107,7 @@ class BaseNegativeGenerator(object):
 
     def _validate_result(self, valid_schema, invalid_schema):
         for k, v in six.iteritems(valid_schema):
-            self.assertTrue(k in invalid_schema)
+            self.assertIn(k, invalid_schema)
 
     def test_generator_mandatory_functions(self):
         for data_type in self.types:
