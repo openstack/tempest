@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from tempest.services.identity import v2
+from tempest.lib.services.identity import v2
 from tempest.services.identity import v3
 
 __all__ = ['v2', 'v3']
