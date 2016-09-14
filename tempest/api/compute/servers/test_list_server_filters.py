@@ -119,8 +119,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @test.idempotent_id('ca78e20e-fddb-4ce6-b7f7-bcbf8605e66e')
-    def test_list_servers_filter_by_server_status(self):
-        # Filter the list of servers by server status
+    def test_list_servers_filter_by_active_status(self):
+        # Filter the list of servers by server active status
         params = {'status': 'active'}
         body = self.client.list_servers(**params)
         servers = body['servers']
