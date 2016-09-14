@@ -546,6 +546,15 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
+    # TODO(ylobankov): Delete this option once the Liberty release is EOL.
+    cfg.BoolOpt('dvr_extra_resources',
+                default=True,
+                help="Whether or not to create internal network, subnet, "
+                     "port and add network interface to distributed router "
+                     "in L3 agent scheduler test. Extra resources need to be "
+                     "provisioned in order to bind router to L3 agent in the "
+                     "Liberty release or older, and are not required since "
+                     "the Mitaka release.")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
