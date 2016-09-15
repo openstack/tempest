@@ -24,7 +24,7 @@ from tempest.lib.services.volume.v2.quotas_client import QuotasClient
 from tempest.lib.services.volume.v2.services_client import ServicesClient
 from tempest.lib.services.volume.v2.snapshots_client import SnapshotsClient
 from tempest.lib.services.volume.v2.types_client import TypesClient
-from tempest.services.volume.v2.json.volumes_client import VolumesClient
+from tempest.lib.services.volume.v2.volumes_client import VolumesClient
 
 __all__ = ['AvailabilityZoneClient', 'BackupsClient', 'EncryptionTypesClient',
            'ExtensionsClient', 'HostsClient', 'QosSpecsClient', 'QuotasClient',

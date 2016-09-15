@@ -21,10 +21,8 @@ from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class BaseVolumesClient(rest_client.RestClient):
+class VolumesClient(rest_client.RestClient):
     """Base client class to send CRUD Volume API requests"""
-
-    create_resp = 200
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
@@ -69,7 +67,7 @@ class BaseVolumesClient(rest_client.RestClient):
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
-        self.expected_success(self.create_resp, resp.status)
+        self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume(self, volume_id, **kwargs):
