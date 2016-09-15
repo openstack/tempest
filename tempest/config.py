@@ -571,6 +571,9 @@ NetworkFeaturesGroup = [
                 default=True,
                 help="Does the test environment support changing"
                      " port admin state"),
+    cfg.BoolOpt('port_security',
+                default=False,
+                help="Does the test environment support port security?"),
 ]
 
 validation_group = cfg.OptGroup(name='validation',
