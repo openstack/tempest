@@ -29,8 +29,9 @@ class RegionsClient(rest_client.RestClient):
     def create_region(self, region_id=None, **kwargs):
         """Create region.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#create-region
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#create-region
         """
         if region_id is not None:
             method = self.put
@@ -47,8 +48,9 @@ class RegionsClient(rest_client.RestClient):
     def update_region(self, region_id, **kwargs):
         """Updates a region.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#update-region
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#update-region
         """
         post_body = json.dumps({'region': kwargs})
         resp, body = self.patch('regions/%s' % region_id, post_body)

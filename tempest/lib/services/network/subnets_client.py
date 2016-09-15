@@ -18,8 +18,9 @@ class SubnetsClient(base.BaseNetworkClient):
     def create_subnet(self, **kwargs):
         """Creates a subnet on a network.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#create-subnet
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#create-subnet
         """
         uri = '/subnets'
         post_data = {'subnet': kwargs}
@@ -28,8 +29,9 @@ class SubnetsClient(base.BaseNetworkClient):
     def update_subnet(self, subnet_id, **kwargs):
         """Updates a subnet.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#update-subnet
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#update-subnet
         """
         uri = '/subnets/%s' % subnet_id
         post_data = {'subnet': kwargs}
@@ -38,8 +40,9 @@ class SubnetsClient(base.BaseNetworkClient):
     def show_subnet(self, subnet_id, **fields):
         """Shows details for a subnet.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#show-subnet-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#show-subnet-details
         """
         uri = '/subnets/%s' % subnet_id
         return self.show_resource(uri, **fields)
@@ -51,8 +54,9 @@ class SubnetsClient(base.BaseNetworkClient):
     def list_subnets(self, **filters):
         """Lists subnets to which the tenant has access.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#list-subnets
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#list-subnets
         """
         uri = '/subnets'
         return self.list_resources(uri, **filters)
@@ -60,8 +64,9 @@ class SubnetsClient(base.BaseNetworkClient):
     def create_bulk_subnets(self, **kwargs):
         """Create multiple subnets in a single request.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#bulk-create-subnet
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#bulk-create-subnet
         """
         uri = '/subnets'
         return self.create_resource(uri, kwargs)

@@ -24,8 +24,9 @@ class TrustsClient(rest_client.RestClient):
     def create_trust(self, **kwargs):
         """Creates a trust.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3-ext/index.html#create-trust
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3-ext/index.html#create-trust
         """
         post_body = json.dumps({'trust': kwargs})
         resp, body = self.post('OS-TRUST/trusts', post_body)
@@ -42,8 +43,9 @@ class TrustsClient(rest_client.RestClient):
     def list_trusts(self, **params):
         """Returns trusts
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3-ext/index.html#list-trusts
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3-ext/index.html#list-trusts
         """
         url = "OS-TRUST/trusts/"
         if params:

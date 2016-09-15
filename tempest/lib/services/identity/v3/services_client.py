@@ -29,8 +29,9 @@ class ServicesClient(rest_client.RestClient):
     def update_service(self, service_id, **kwargs):
         """Updates a service.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#update-service
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#update-service
         """
         patch_body = json.dumps({'service': kwargs})
         resp, body = self.patch('services/%s' % service_id, patch_body)
@@ -49,8 +50,9 @@ class ServicesClient(rest_client.RestClient):
     def create_service(self, **kwargs):
         """Creates a service.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#create-service
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#create-service
         """
         body = json.dumps({'service': kwargs})
         resp, body = self.post("services", body)
@@ -67,8 +69,9 @@ class ServicesClient(rest_client.RestClient):
     def list_services(self, **params):
         """List services.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#list-services
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-services
         """
         url = 'services'
         if params:

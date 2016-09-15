@@ -28,8 +28,9 @@ class PoliciesClient(rest_client.RestClient):
     def create_policy(self, **kwargs):
         """Creates a Policy.
 
-        Available params: see http://developer.openstack.org/
-                          api-ref/identity/v3/index.html#create-policy
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#create-policy
         """
         post_body = json.dumps({'policy': kwargs})
         resp, body = self.post('policies', post_body)
@@ -55,8 +56,9 @@ class PoliciesClient(rest_client.RestClient):
     def update_policy(self, policy_id, **kwargs):
         """Updates a policy.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#update-policy
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#update-policy
         """
         post_body = json.dumps({'policy': kwargs})
         url = 'policies/%s' % policy_id

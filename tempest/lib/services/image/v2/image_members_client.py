@@ -21,8 +21,9 @@ class ImageMembersClient(rest_client.RestClient):
     def list_image_members(self, image_id):
         """List image members.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#list-image-members
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#list-image-members
         """
         url = 'images/%s/members' % image_id
         resp, body = self.get(url)
@@ -33,8 +34,9 @@ class ImageMembersClient(rest_client.RestClient):
     def create_image_member(self, image_id, **kwargs):
         """Create an image member.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/#create-image-member
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#create-image-member
         """
         url = 'images/%s/members' % image_id
         data = json.dumps(kwargs)
@@ -46,8 +48,9 @@ class ImageMembersClient(rest_client.RestClient):
     def update_image_member(self, image_id, member_id, **kwargs):
         """Update an image member.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/#update-image-member
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#update-image-member
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         data = json.dumps(kwargs)
@@ -59,8 +62,9 @@ class ImageMembersClient(rest_client.RestClient):
     def show_image_member(self, image_id, member_id):
         """Show an image member.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#show-image-member-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#show-image-member-details
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
@@ -70,8 +74,9 @@ class ImageMembersClient(rest_client.RestClient):
     def delete_image_member(self, image_id, member_id):
         """Delete an image member.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#delete-image-member
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#delete-image-member
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
