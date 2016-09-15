@@ -106,10 +106,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.servers_client.show_server(server['id'])['server']
         self.assertEqual(flavor['id'], server['flavor']['id'])
 
-    @test.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')
-    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
-                          'Cold migration not available.')
-    def test_cold_migration(self):
+    def _test_cold_migrate_server(self, revert=False):
         if CONF.compute.min_compute_nodes < 2:
             msg = "Less than 2 compute nodes, skipping multinode tests."
             raise self.skipException(msg)
@@ -123,10 +120,27 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'VERIFY_RESIZE')
 
-        self.servers_client.confirm_resize_server(server['id'])
+        if revert:
+            self.servers_client.revert_resize_server(server['id'])
+            assert_func = self.assertEqual
+        else:
+            self.servers_client.confirm_resize_server(server['id'])
+            assert_func = self.assertNotEqual
+
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
         dst_host = self.admin_servers_client.show_server(
             server['id'])['server']['OS-EXT-SRV-ATTR:host']
+        assert_func(src_host, dst_host)
 
-        self.assertNotEqual(src_host, dst_host)
+    @test.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
+    def test_cold_migration(self):
+        self._test_cold_migrate_server(revert=False)
+
+    @test.idempotent_id('caa1aa8b-f4ef-4374-be0d-95f001c2ac2d')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
+    def test_revert_cold_migration(self):
+        self._test_cold_migrate_server(revert=True)
