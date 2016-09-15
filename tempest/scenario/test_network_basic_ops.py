@@ -183,7 +183,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def check_public_network_connectivity(
             self, should_connect=True, msg=None,
-            should_check_floating_ip_status=True):
+            should_check_floating_ip_status=True, mtu=None):
         """Verifies connectivty to a VM via public network and floating IP
 
         and verifies floating IP has resource status is correct.
@@ -195,6 +195,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         to indicate the context of the failure
         :param should_check_floating_ip_status: bool. should status of
         floating_ip be checked or not
+        :param mtu: int. MTU network to use for connectivity validation
         """
         ssh_login = CONF.validation.image_ssh_user
         floating_ip, server = self.floating_ip_tuple
@@ -210,7 +211,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # call the common method in the parent class
         super(TestNetworkBasicOps, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
-            self.servers)
+            self.servers, mtu=mtu)
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
@@ -409,6 +410,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(should_connect=True,
                                                msg="after re-associate "
                                                    "floating ip")
+
+    @test.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
+    @testtools.skipUnless(test.is_extension_enabled('net-mtu', 'network'),
+                          'No way to calculate MTU for networks')
+    @test.services('compute', 'network')
+    def test_mtu_sized_frames(self):
+        """Validate that network MTU sized frames fit through."""
+        self._setup_network_and_servers()
+        self.check_public_network_connectivity(
+            should_connect=True, mtu=self.network['mtu'])
 
     @test.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
     @testtools.skipIf(CONF.baremetal.driver_enabled,

@@ -26,6 +26,7 @@ from tempest.common import compute
 from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
+from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -495,9 +496,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                            server_id, 'ACTIVE')
 
     def ping_ip_address(self, ip_address, should_succeed=True,
-                        ping_timeout=None):
+                        ping_timeout=None, mtu=None):
         timeout = ping_timeout or CONF.validation.ping_timeout
-        cmd = ['ping', '-c1', '-w1', ip_address]
+        cmd = ['ping', '-c1', '-w1']
+
+        if mtu:
+            cmd += [
+                # don't fragment
+                '-M', 'do',
+                # ping receives just the size of ICMP payload
+                '-s', str(net_utils.get_ping_payload_size(mtu, 4))
+            ]
+        cmd.append(ip_address)
 
         def ping():
             proc = subprocess.Popen(cmd,
@@ -525,7 +535,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def check_vm_connectivity(self, ip_address,
                               username=None,
                               private_key=None,
-                              should_connect=True):
+                              should_connect=True,
+                              mtu=None):
         """Check server connectivity
 
         :param ip_address: server to test against
@@ -534,6 +545,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         :param should_connect: True/False indicates positive/negative test
             positive - attempt ping and ssh
             negative - attempt ping and fail if succeed
+        :param mtu: network MTU to use for connectivity validation
 
         :raises: AssertError if the result of the connectivity check does
             not match the value of the should_connect param
@@ -543,7 +555,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         else:
             msg = "ip address %s is reachable" % ip_address
         self.assertTrue(self.ping_ip_address(ip_address,
-                                             should_succeed=should_connect),
+                                             should_succeed=should_connect,
+                                             mtu=mtu),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
@@ -551,7 +564,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def check_public_network_connectivity(self, ip_address, username,
                                           private_key, should_connect=True,
-                                          msg=None, servers=None):
+                                          msg=None, servers=None, mtu=None):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         LOG.debug('checking network connections to IP %s with user: %s' %
@@ -560,7 +573,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             self.check_vm_connectivity(ip_address,
                                        username,
                                        private_key,
-                                       should_connect=should_connect)
+                                       should_connect=should_connect,
+                                       mtu=mtu)
         except Exception:
             ex_msg = 'Public network connectivity check failed'
             if msg:
