@@ -658,7 +658,8 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _create_network(self, networks_client=None,
                         routers_client=None, tenant_id=None,
-                        namestart='network-smoke-'):
+                        namestart='network-smoke-',
+                        port_security_enabled=True):
         if not networks_client:
             networks_client = self.networks_client
         if not routers_client:
@@ -666,7 +667,9 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
-        result = networks_client.create_network(name=name, tenant_id=tenant_id)
+        network_kwargs = dict(name=name, tenant_id=tenant_id,
+                              port_security_enabled=port_security_enabled)
+        result = networks_client.create_network(**network_kwargs)
         network = result['network']
 
         self.assertEqual(network['name'], name)
@@ -1141,7 +1144,8 @@ class NetworkScenarioTest(ScenarioTest):
 
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,
-                        tenant_id=None, dns_nameservers=None):
+                        tenant_id=None, dns_nameservers=None,
+                        port_security_enabled=True):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
@@ -1167,7 +1171,8 @@ class NetworkScenarioTest(ScenarioTest):
         else:
             network = self._create_network(
                 networks_client=networks_client,
-                tenant_id=tenant_id)
+                tenant_id=tenant_id,
+                port_security_enabled=port_security_enabled)
             router = self._get_router(client=routers_client,
                                       tenant_id=tenant_id)
             subnet_kwargs = dict(network=network,
