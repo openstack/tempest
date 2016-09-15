@@ -31,6 +31,8 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_adm.migrations_client
         cls.flavors_admin_client = cls.os_adm.flavors_client
+        cls.admin_hosts_client = cls.os_adm.hosts_client
+        cls.admin_servers_client = cls.os_adm.servers_client
 
     @test.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
@@ -103,3 +105,28 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         server = self.servers_client.show_server(server['id'])['server']
         self.assertEqual(flavor['id'], server['flavor']['id'])
+
+    @test.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
+    def test_cold_migration(self):
+        if CONF.compute.min_compute_nodes < 2:
+            msg = "Less than 2 compute nodes, skipping multinode tests."
+            raise self.skipException(msg)
+
+        server = self.create_test_server(wait_until="ACTIVE")
+        src_host = self.admin_servers_client.show_server(
+            server['id'])['server']['OS-EXT-SRV-ATTR:host']
+
+        self.admin_servers_client.migrate_server(server['id'])
+
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'VERIFY_RESIZE')
+
+        self.servers_client.confirm_resize_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+        dst_host = self.admin_servers_client.show_server(
+            server['id'])['server']['OS-EXT-SRV-ATTR:host']
+
+        self.assertNotEqual(src_host, dst_host)
