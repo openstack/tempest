@@ -69,7 +69,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.tenant_id)['quota_set']
         ram = int(quota_set['ram'])
         if ram == -1:
-            raise self.skipException("default ram quota set is -1,"
+            raise self.skipException("ram quota set is -1,"
                                      " cannot test overlimit")
         ram += 1
         vcpus = 8
@@ -98,7 +98,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.tenant_id)['quota_set']
         vcpus = int(quota_set['cores'])
         if vcpus == -1:
-            raise self.skipException("default cores quota set is -1,"
+            raise self.skipException("cores quota set is -1,"
                                      " cannot test overlimit")
         vcpus += 1
         disk = 10
