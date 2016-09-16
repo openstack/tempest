@@ -63,7 +63,8 @@ class ContainerTest(base.BaseObjectTest):
         # create container with metadata value
         container_name = data_utils.rand_name(name='TestContainer')
 
-        metadata = {'test-container-meta': 'Meta1'}
+        # metadata name using underscores should be converted to hyphens
+        metadata = {'test_container_meta': 'Meta1'}
         resp, _ = self.container_client.create_container(
             container_name,
             metadata=metadata)
@@ -74,7 +75,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertIn('x-container-meta-test-container-meta', resp)
         self.assertEqual(resp['x-container-meta-test-container-meta'],
-                         metadata['test-container-meta'])
+                         metadata['test_container_meta'])
 
     @test.idempotent_id('24d16451-1c0c-4e4f-b59c-9840a3aba40e')
     def test_create_container_with_remove_metadata_key(self):
