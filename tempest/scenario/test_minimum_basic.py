@@ -47,12 +47,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     10. Check SSH connection to instance after reboot
 
     """
-
-    def nova_list(self):
-        servers = self.servers_client.list_servers()
-        # The list servers in the compute client is inconsistent...
-        return servers['servers']
-
     def nova_show(self, server):
         got_server = (self.servers_client.show_server(server['id'])
                       ['server'])
@@ -105,7 +99,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         server = self.create_server(image_id=image,
                                     key_name=keypair['name'],
                                     wait_until='ACTIVE')
-        servers = self.nova_list()
+        servers = self.servers_client.list_servers()['servers']
         self.assertIn(server['id'], [x['id'] for x in servers])
 
         self.nova_show(server)
