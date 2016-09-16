@@ -24,8 +24,9 @@ class NamespacesClient(rest_client.RestClient):
     def create_namespace(self, **kwargs):
         """Create a namespace.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/metadefs-index.html#create-namespace
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-namespace
         """
         data = json.dumps(kwargs)
         resp, body = self.post('metadefs/namespaces', data)
@@ -36,8 +37,9 @@ class NamespacesClient(rest_client.RestClient):
     def show_namespace(self, namespace):
         """Show namespace details.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/metadefs-index.html#get-namespace-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#get-namespace-details
         """
         url = 'metadefs/namespaces/%s' % namespace
         resp, body = self.get(url)
@@ -48,8 +50,9 @@ class NamespacesClient(rest_client.RestClient):
     def update_namespace(self, namespace, **kwargs):
         """Update a namespace.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/metadefs-index.html#update-namespace
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#update-namespace
         """
         # NOTE: On Glance API, we need to pass namespace on both URI
         # and a request body.
@@ -65,8 +68,9 @@ class NamespacesClient(rest_client.RestClient):
     def delete_namespace(self, namespace):
         """Delete a namespace.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/metadefs-index.html#delete-namespace
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#delete-namespace
         """
         url = 'metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)

@@ -29,8 +29,9 @@ class GroupsClient(rest_client.RestClient):
     def create_group(self, **kwargs):
         """Creates a group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#create-group
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#create-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
@@ -48,8 +49,9 @@ class GroupsClient(rest_client.RestClient):
     def list_groups(self, **params):
         """Lists the groups.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#list-groups
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-groups
         """
         url = 'groups'
         if params:
@@ -62,8 +64,9 @@ class GroupsClient(rest_client.RestClient):
     def update_group(self, group_id, **kwargs):
         """Updates a group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#update-group
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#update-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.patch('groups/%s' % group_id, post_body)
@@ -87,8 +90,9 @@ class GroupsClient(rest_client.RestClient):
     def list_group_users(self, group_id, **params):
         """List users in group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#list-users-in-group
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-users-in-group
         """
         url = 'groups/%s/users' % group_id
         if params:

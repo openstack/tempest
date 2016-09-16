@@ -31,8 +31,9 @@ class InterfacesClient(base_compute_client.BaseComputeClient):
     def create_interface(self, server_id, **kwargs):
         """Create an interface.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createAttachInterface
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html#createAttachInterface
         """
         post_body = {'interfaceAttachment': kwargs}
         post_body = json.dumps(post_body)

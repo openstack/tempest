@@ -24,9 +24,9 @@ class TenantsClient(rest_client.RestClient):
     def create_tenant(self, **kwargs):
         """Create a tenant
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v2-admin/index.html#
-                              create-tenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#create-tenant
         """
         post_body = json.dumps({'tenant': kwargs})
         resp, body = self.post('tenants', post_body)
@@ -37,8 +37,9 @@ class TenantsClient(rest_client.RestClient):
     def delete_tenant(self, tenant_id):
         """Delete a tenant.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v2-ext.html#deleteTenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#deleteTenant
         """
         resp, body = self.delete('tenants/%s' % str(tenant_id))
         self.expected_success(204, resp.status)
@@ -47,9 +48,9 @@ class TenantsClient(rest_client.RestClient):
     def show_tenant(self, tenant_id):
         """Get tenant details.
 
-        Available params: see
-            http://developer.openstack.org/
-            api-ref-identity-v2-ext.html#admin-showTenantById
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#admin-showTenantById
         """
         resp, body = self.get('tenants/%s' % str(tenant_id))
         self.expected_success(200, resp.status)
@@ -59,9 +60,9 @@ class TenantsClient(rest_client.RestClient):
     def list_tenants(self, **params):
         """Returns tenants.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v2-admin/index.html#
-                              list-tenants-admin-endpoint
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#list-tenants-admin-endpoint
         """
         url = 'tenants'
         if params:
@@ -74,9 +75,9 @@ class TenantsClient(rest_client.RestClient):
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v2-admin/index.html#
-                              update-tenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#update-tenant
         """
         if 'id' not in kwargs:
             kwargs['id'] = tenant_id
@@ -89,9 +90,9 @@ class TenantsClient(rest_client.RestClient):
     def list_tenant_users(self, tenant_id, **params):
         """List users for a Tenant.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v2-admin/index.html#
-                              list-users-on-a-tenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#list-users-on-a-tenant
         """
         url = '/tenants/%s/users' % tenant_id
         if params:

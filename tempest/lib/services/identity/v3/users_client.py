@@ -24,8 +24,9 @@ class UsersClient(rest_client.RestClient):
     def create_user(self, **kwargs):
         """Creates a user.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#create-user
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#create-user
         """
         post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
@@ -36,8 +37,9 @@ class UsersClient(rest_client.RestClient):
     def update_user(self, user_id, **kwargs):
         """Updates a user.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#update-user
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#update-user
         """
         if 'id' not in kwargs:
             kwargs['id'] = user_id
@@ -50,9 +52,9 @@ class UsersClient(rest_client.RestClient):
     def update_user_password(self, user_id, **kwargs):
         """Update a user password
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/index.html#
-                              change-password-for-user
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#change-password-for-user
         """
         update_user = json.dumps({'user': kwargs})
         resp, _ = self.post('users/%s/password' % user_id, update_user)
@@ -62,8 +64,9 @@ class UsersClient(rest_client.RestClient):
     def list_user_projects(self, user_id, **params):
         """Lists the projects on which a user has roles assigned.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#list-projects-for-user
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-projects-for-user
         """
         url = 'users/%s/projects' % user_id
         if params:
@@ -76,8 +79,9 @@ class UsersClient(rest_client.RestClient):
     def list_users(self, **params):
         """Get the list of users.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/identity/v3/#list-users
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-users
         """
         url = 'users'
         if params:
@@ -103,8 +107,9 @@ class UsersClient(rest_client.RestClient):
     def list_user_groups(self, user_id, **params):
         """Lists groups which a user belongs to.
 
-        Available params: see http://developer.openstack.org/
-            api-ref/identity/v3/#list-groups-to-which-a-user-belongs
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-groups-to-which-a-user-belongs
         """
         url = 'users/%s/groups' % user_id
         if params:

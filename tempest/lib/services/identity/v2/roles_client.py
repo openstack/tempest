@@ -22,8 +22,9 @@ class RolesClient(rest_client.RestClient):
     def create_role(self, **kwargs):
         """Create a role.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v2-ext.html#createRole
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#createRole
         """
         post_body = json.dumps({'role': kwargs})
         resp, body = self.post('OS-KSADM/roles', post_body)
@@ -34,12 +35,11 @@ class RolesClient(rest_client.RestClient):
     def show_role(self, role_id_or_name):
         """Get a role by its id or name.
 
-        Available params: see
-            http://developer.openstack.org/
-            api-ref-identity-v2-ext.html#showRoleByID
-            OR
-            http://developer.openstack.org/
-            api-ref-identity-v2-ext.html#showRoleByName
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#showRoleByID
+        OR
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#showRoleByName
         """
         resp, body = self.get('OS-KSADM/roles/%s' % role_id_or_name)
         self.expected_success(200, resp.status)
@@ -49,8 +49,9 @@ class RolesClient(rest_client.RestClient):
     def list_roles(self, **params):
         """Returns roles.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v2-ext.html#listRoles
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#listRoles
         """
         url = 'OS-KSADM/roles'
         if params:
@@ -63,8 +64,9 @@ class RolesClient(rest_client.RestClient):
     def delete_role(self, role_id):
         """Delete a role.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v2-ext.html#deleteRole
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#deleteRole
         """
         resp, body = self.delete('OS-KSADM/roles/%s' % role_id)
         self.expected_success(204, resp.status)
@@ -73,9 +75,9 @@ class RolesClient(rest_client.RestClient):
     def create_user_role_on_project(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant.
 
-        Available params: see
-            http://developer.openstack.org/
-            api-ref-identity-v2-ext.html#grantRoleToUserOnTenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#grantRoleToUserOnTenant
         """
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), "")
@@ -97,9 +99,9 @@ class RolesClient(rest_client.RestClient):
     def delete_role_from_user_on_project(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant.
 
-        Available params: see
-            http://developer.openstack.org/
-            api-ref-identity-v2-ext.html#revokeRoleFromUserOnTenant
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-identity-v2-ext.html#revokeRoleFromUserOnTenant
         """
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))

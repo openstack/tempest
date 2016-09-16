@@ -18,8 +18,9 @@ class NetworksClient(base.BaseNetworkClient):
     def create_network(self, **kwargs):
         """Creates a network.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#create-network
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#create-network
         """
         uri = '/networks'
         post_data = {'network': kwargs}
@@ -28,8 +29,9 @@ class NetworksClient(base.BaseNetworkClient):
     def update_network(self, network_id, **kwargs):
         """Updates a network.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#update-network
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#update-network
         """
         uri = '/networks/%s' % network_id
         post_data = {'network': kwargs}
@@ -38,8 +40,9 @@ class NetworksClient(base.BaseNetworkClient):
     def show_network(self, network_id, **fields):
         """Shows details for a network.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#show-network-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#show-network-details
         """
         uri = '/networks/%s' % network_id
         return self.show_resource(uri, **fields)
@@ -51,8 +54,9 @@ class NetworksClient(base.BaseNetworkClient):
     def list_networks(self, **filters):
         """Lists networks to which the tenant has access.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#list-networks
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#list-networks
         """
         uri = '/networks'
         return self.list_resources(uri, **filters)
@@ -60,8 +64,9 @@ class NetworksClient(base.BaseNetworkClient):
     def create_bulk_networks(self, **kwargs):
         """Create multiple networks in a single request.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#bulk-create-networks
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#bulk-create-networks
         """
         uri = '/networks'
         return self.create_resource(uri, kwargs)

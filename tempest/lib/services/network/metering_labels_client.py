@@ -18,9 +18,9 @@ class MeteringLabelsClient(base.BaseNetworkClient):
     def create_metering_label(self, **kwargs):
         """Creates an L3 metering label.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              create-metering-label
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#create-metering-label
         """
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
@@ -29,9 +29,9 @@ class MeteringLabelsClient(base.BaseNetworkClient):
     def show_metering_label(self, metering_label_id, **fields):
         """Shows details for a metering label.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              show-metering-label-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#show-metering-label-details
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.show_resource(uri, **fields)
@@ -39,9 +39,9 @@ class MeteringLabelsClient(base.BaseNetworkClient):
     def delete_metering_label(self, metering_label_id):
         """Deletes an L3 metering label.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              delete-metering-label
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#delete-metering-label
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.delete_resource(uri)
@@ -49,9 +49,9 @@ class MeteringLabelsClient(base.BaseNetworkClient):
     def list_metering_labels(self, **filters):
         """Lists all L3 metering labels that belong to the tenant.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              list-metering-labels
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#list-metering-labels
         """
         uri = '/metering/metering-labels'
         return self.list_resources(uri, **filters)

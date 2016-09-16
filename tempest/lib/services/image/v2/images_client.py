@@ -30,8 +30,9 @@ class ImagesClient(rest_client.RestClient):
     def update_image(self, image_id, patch):
         """Update an image.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/index.html#update-an-image
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/index.html#update-an-image
         """
         data = json.dumps(patch)
         headers = {"Content-Type": "application/openstack-images-v2.0"
@@ -44,8 +45,9 @@ class ImagesClient(rest_client.RestClient):
     def create_image(self, **kwargs):
         """Create an image.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/index.html#create-an-image
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/index.html#create-an-image
         """
         data = json.dumps(kwargs)
         resp, body = self.post('images', data)
@@ -56,9 +58,10 @@ class ImagesClient(rest_client.RestClient):
     def deactivate_image(self, image_id):
         """Deactivate image.
 
-         Available params: see http://developer.openstack.org/
-                               api-ref/image/v2/#deactivate-image
-         """
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#deactivate-image
+        """
         url = 'images/%s/actions/deactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
@@ -67,9 +70,10 @@ class ImagesClient(rest_client.RestClient):
     def reactivate_image(self, image_id):
         """Reactivate image.
 
-         Available params: see http://developer.openstack.org/
-                               api-ref/image/v2/#reactivate-image
-         """
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#reactivate-image
+        """
         url = 'images/%s/actions/reactivate' % image_id
         resp, body = self.post(url, None)
         self.expected_success(204, resp.status)
@@ -78,8 +82,9 @@ class ImagesClient(rest_client.RestClient):
     def delete_image(self, image_id):
         """Delete image.
 
-         Available params: see http://developer.openstack.org/
-                               /api-ref/image/v2/#delete-an-image
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#delete-an-image
          """
         url = 'images/%s' % image_id
         resp, _ = self.delete(url)
@@ -89,8 +94,9 @@ class ImagesClient(rest_client.RestClient):
     def list_images(self, params=None):
         """List images.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/#show-images
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#show-images
         """
         url = 'images'
 
@@ -105,8 +111,9 @@ class ImagesClient(rest_client.RestClient):
     def show_image(self, image_id):
         """Show image details.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#show-image-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#show-image-details
         """
         url = 'images/%s' % image_id
         resp, body = self.get(url)
@@ -129,8 +136,9 @@ class ImagesClient(rest_client.RestClient):
     def store_image_file(self, image_id, data):
         """Upload binary image data.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#upload-binary-image-data
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#upload-binary-image-data
         """
         url = 'images/%s/file' % image_id
 
@@ -147,8 +155,9 @@ class ImagesClient(rest_client.RestClient):
     def show_image_file(self, image_id):
         """Download binary image data.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#download-binary-image-data
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#download-binary-image-data
         """
         url = 'images/%s/file' % image_id
         resp, body = self.get(url)
@@ -158,8 +167,9 @@ class ImagesClient(rest_client.RestClient):
     def add_image_tag(self, image_id, tag):
         """Add an image tag.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#add-image-tag
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#add-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
@@ -169,8 +179,9 @@ class ImagesClient(rest_client.RestClient):
     def delete_image_tag(self, image_id, tag):
         """Delete an image tag.
 
-        Available params: http://developer.openstack.org/
-                          api-ref/image/v2/#delete-image-tag
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/#delete-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)

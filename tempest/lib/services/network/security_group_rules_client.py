@@ -18,9 +18,9 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
     def create_security_group_rule(self, **kwargs):
         """Creates an OpenStack Networking security group rule.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              create-security-group-rule
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#create-security-group-rule
         """
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
@@ -29,9 +29,9 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
     def show_security_group_rule(self, security_group_rule_id, **fields):
         """Shows detailed information for a security group rule.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              show-security-group-rule
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#show-security-group-rule
         """
         uri = '/security-group-rules/%s' % security_group_rule_id
         return self.show_resource(uri, **fields)
@@ -43,9 +43,9 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
     def list_security_group_rules(self, **filters):
         """Lists a summary of all OpenStack Networking security group rules.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              list-security-group-rules
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#list-security-group-rules
         """
         uri = '/security-group-rules'
         return self.list_resources(uri, **filters)

@@ -21,9 +21,9 @@ class FloatingIPsClient(base.BaseNetworkClient):
         If you specify port information, associates the floating IP with an
         internal port.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              create-floating-ip
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#create-floating-ip
         """
         uri = '/floatingips'
         post_data = {'floatingip': kwargs}
@@ -32,9 +32,9 @@ class FloatingIPsClient(base.BaseNetworkClient):
     def update_floatingip(self, floatingip_id, **kwargs):
         """Updates a floating IP and its association with an internal port.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              update-floating-ip
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#update-floating-ip
         """
         uri = '/floatingips/%s' % floatingip_id
         post_data = {'floatingip': kwargs}
@@ -43,9 +43,9 @@ class FloatingIPsClient(base.BaseNetworkClient):
     def show_floatingip(self, floatingip_id, **fields):
         """Shows details for a floating IP.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              show-floating-ip-details
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#show-floating-ip-details
         """
         uri = '/floatingips/%s' % floatingip_id
         return self.show_resource(uri, **fields)
@@ -57,9 +57,9 @@ class FloatingIPsClient(base.BaseNetworkClient):
     def list_floatingips(self, **filters):
         """Lists floating IPs.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/networking/v2/index.html#
-                              list-floating-ips
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/networking/v2/index.html#list-floating-ips
         """
         uri = '/floatingips'
         return self.list_resources(uri, **filters)
