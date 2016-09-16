@@ -119,14 +119,13 @@ class TestServerBasicOps(manager.ScenarioTest):
     @test.services('compute', 'network')
     def test_server_basic_ops(self):
         keypair = self.create_keypair()
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
+        security_group = self._create_security_group()
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
             image_id=self.image_ref,
             flavor=self.flavor_ref,
             key_name=keypair['name'],
-            security_groups=security_groups,
+            security_groups=[{'name': security_group['name']}],
             config_drive=CONF.compute_feature_enabled.config_drive,
             metadata=self.md,
             wait_until='ACTIVE')
