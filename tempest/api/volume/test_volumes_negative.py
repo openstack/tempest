@@ -179,7 +179,6 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         srv_name = data_utils.rand_name(self.__class__.__name__ + '-Instance')
         server = self.create_server(
             name=srv_name,
-            wait_for_deletion=True,
             wait_until='ACTIVE')
 
         self.assertRaises(lib_exc.NotFound,
