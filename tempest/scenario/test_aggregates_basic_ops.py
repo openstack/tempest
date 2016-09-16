@@ -36,7 +36,6 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         super(TestAggregatesBasicOps, cls).setup_clients()
         # Use admin client by default
         cls.manager = cls.admin_manager
-        super(TestAggregatesBasicOps, cls).resource_setup()
         cls.aggregates_client = cls.manager.aggregates_client
         cls.hosts_client = cls.manager.hosts_client
 
