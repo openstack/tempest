@@ -667,8 +667,11 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
-        network_kwargs = dict(name=name, tenant_id=tenant_id,
-                              port_security_enabled=port_security_enabled)
+        network_kwargs = dict(name=name, tenant_id=tenant_id)
+        # Neutron disables port security by default so we have to check the
+        # config before trying to create the network with port_security_enabled
+        if CONF.network_feature_enabled.port_security:
+            network_kwargs['port_security_enabled'] = port_security_enabled
         result = networks_client.create_network(**network_kwargs)
         network = result['network']
 

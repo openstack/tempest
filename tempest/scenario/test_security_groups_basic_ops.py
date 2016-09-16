@@ -634,6 +634,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(
         CONF.compute_feature_enabled.allow_port_security_disabled,
         'Port security must be enabled.')
+    # TODO(mriedem): We shouldn't actually need to check this since neutron
+    # disables the port_security extension by default, but the problem is nova
+    # assumes port_security_enabled=True if it's not set on the network
+    # resource, which will mean nova may attempt to apply a security group on
+    # a port on that network which would fail. This is really a bug in nova.
+    @testtools.skipUnless(
+        CONF.network_feature_enabled.port_security,
+        'Port security must be enabled.')
     @test.services('compute', 'network')
     def test_boot_into_disabled_port_security_network_without_secgroup(self):
         tenant = self.primary_tenant
