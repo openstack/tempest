@@ -16,6 +16,7 @@
 import socket
 
 import netaddr
+import testtools
 
 from tempest.api.network import base
 from tempest.api.network import base_security_groups as sec_base
@@ -308,11 +309,17 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             self.assertIn(security_group, port_show['security_groups'])
 
     @test.idempotent_id('58091b66-4ff4-4cc1-a549-05d60c7acd1a')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_update_port_with_security_group_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup')])
 
     @test.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_update_port_with_two_security_groups_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup'),
@@ -337,6 +344,9 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_create_port_with_no_securitygroups(self):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
