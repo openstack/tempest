@@ -94,8 +94,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Create server and add the security group created
         # above to the server we just created
-        server_name = data_utils.rand_name('server')
-        server = self.create_test_server(name=server_name)
+        server = self.create_test_server()
         server_id = server['id']
         waiters.wait_for_server_status(self.servers_client, server_id,
                                        'ACTIVE')

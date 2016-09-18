@@ -219,6 +219,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param validatable: Whether the server will be pingable or sshable.
         :param volume_backed: Whether the instance is volume backed or not.
         """
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
         tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
             cls.os,
