@@ -69,7 +69,7 @@ def contains_version(prefix, versions):
 
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    _, versions = os.image_client.get_versions()
+    versions = _get_api_versions(os, 'glance')
     if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
         print_and_or_update('api_v1', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v1, update)
@@ -96,6 +96,7 @@ def _get_api_versions(os, service):
         'nova': os.servers_client,
         'keystone': os.identity_client,
         'cinder': os.volumes_client,
+        'glance': os.image_client,
     }
     if service != 'keystone':
         # Since keystone may be listening on a path, do not remove the path.
