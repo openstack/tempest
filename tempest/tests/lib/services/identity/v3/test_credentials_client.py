@@ -121,14 +121,14 @@ class TestCredentialsClient(base.BaseServiceTest):
             self.client.create_credential,
             'tempest.lib.common.rest_client.RestClient.post',
             self.FAKE_CREATE_CREDENTIAL,
-            bytes_body, status=201, cr_blob=True)
+            bytes_body, status=201)
 
     def _test_show_credential(self, bytes_body=False):
         self.check_service_client_function(
             self.client.show_credential,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_INFO_CREDENTIAL,
-            bytes_body, cr_blob=True,
+            bytes_body,
             credential_id="207e9b76935efc03804d3dd6ab52d22e9b22a0711e4ada4f")
 
     def _test_update_credential(self, bytes_body=False):
@@ -136,7 +136,7 @@ class TestCredentialsClient(base.BaseServiceTest):
             self.client.update_credential,
             'tempest.lib.common.rest_client.RestClient.patch',
             self.FAKE_INFO_CREDENTIAL,
-            bytes_body, cr_blob=True,
+            bytes_body,
             credential_id="207e9b76935efc03804d3dd6ab52d22e9b22a0711e4ada4f")
 
     def _test_list_credentials(self, bytes_body=False):

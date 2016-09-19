@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
 from oslo_serialization import jsonutils as json
 from oslotest import mockpatch
 
@@ -32,7 +31,7 @@ class BaseServiceTest(base.TestCase):
 
     def check_service_client_function(self, function, function2mock,
                                       body, to_utf=False, status=200,
-                                      headers=None, cr_blob=False, **kwargs):
+                                      headers=None, **kwargs):
         mocked_response = self.create_response(body, to_utf, status, headers)
         self.useFixture(mockpatch.Patch(
             function2mock, return_value=mocked_response))
@@ -40,11 +39,4 @@ class BaseServiceTest(base.TestCase):
             resp = function(**kwargs)
         else:
             resp = function()
-
-        if cr_blob:
-            evaluated_body = copy.deepcopy(body)
-            nested_json = json.loads(evaluated_body['credential']['blob'])
-            evaluated_body['credential']['blob'] = nested_json
-            self.assertEqual(evaluated_body, resp)
-        else:
-            self.assertEqual(body, resp)
+        self.assertEqual(body, resp)

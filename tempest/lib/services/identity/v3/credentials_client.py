@@ -37,7 +37,6 @@ class CredentialsClient(rest_client.RestClient):
         resp, body = self.post('credentials', post_body)
         self.expected_success(201, resp.status)
         body = json.loads(body)
-        body['credential']['blob'] = json.loads(body['credential']['blob'])
         return rest_client.ResponseBody(resp, body)
 
     def update_credential(self, credential_id, **kwargs):
@@ -51,7 +50,6 @@ class CredentialsClient(rest_client.RestClient):
         resp, body = self.patch('credentials/%s' % credential_id, post_body)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        body['credential']['blob'] = json.loads(body['credential']['blob'])
         return rest_client.ResponseBody(resp, body)
 
     def show_credential(self, credential_id):
@@ -64,7 +62,6 @@ class CredentialsClient(rest_client.RestClient):
         resp, body = self.get('credentials/%s' % credential_id)
         self.expected_success(200, resp.status)
         body = json.loads(body)
-        body['credential']['blob'] = json.loads(body['credential']['blob'])
         return rest_client.ResponseBody(resp, body)
 
     def list_credentials(self, **params):
