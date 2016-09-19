@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "WARNING: This script is deprecated and will be removed in the near future. Please migrate to tempest run or another method of launching a test runner"
+
 function usage {
   echo "Usage: $0 [OPTION]..."
   echo "Run Tempest test suite"
