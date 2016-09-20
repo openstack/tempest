@@ -137,6 +137,6 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                 server=server,
                 servers_client=self.client)
             for i in person:
-                self.assertEqual(base64.b64decode(i['contents']),
+                self.assertEqual(base64.decode_as_text(i['contents']),
                                  linux_client.exec_command(
                                      'sudo cat %s' % i['path']))
