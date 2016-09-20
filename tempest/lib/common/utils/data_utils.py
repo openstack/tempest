@@ -153,7 +153,7 @@ def arbitrary_string(size=4, base_text=None):
 
     This generates a string with an arbitrary number of characters, generated
     by looping the base_text string. If the size is smaller than the size of
-    base_text, returning string is shrinked to the size.
+    base_text, returning string is shrunk to the size.
     :param int size: a returning characters size
     :param str base_text: a string you want to repeat
     :return: size string
