@@ -17,6 +17,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
@@ -71,8 +72,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     def _create_and_attach_volume(self, server):
         # Create a volume and wait for it to become ready
+        vol_name = data_utils.rand_name(self.__class__.__name__ + '-volume')
         volume = self.volumes_client.create_volume(
-            size=CONF.volume.volume_size, display_name='test')['volume']
+            size=CONF.volume.volume_size, display_name=vol_name)['volume']
         self.addCleanup(self.delete_volume, volume['id'])
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
