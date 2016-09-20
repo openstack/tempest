@@ -264,8 +264,8 @@ class TempestRun(command.Command):
 
             run_thread = threading.Thread(target=run_argv_thread)
             run_thread.start()
-            returncodes['subunit-trace'] = subunit_trace.trace(subunit_r,
-                                                               sys.stdout)
+            returncodes['subunit-trace'] = subunit_trace.trace(
+                subunit_r, sys.stdout, post_fails=True, print_failures=True)
             run_thread.join()
             subunit_r.close()
             # python version of pipefail
