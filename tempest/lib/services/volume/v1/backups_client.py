@@ -19,8 +19,9 @@ from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
 
-class BaseBackupsClient(rest_client.RestClient):
-    """Client class to send CRUD Volume backup API requests"""
+class BackupsClient(rest_client.RestClient):
+    """Volume V1 Backups client"""
+    api_version = "v1"
 
     def create_backup(self, **kwargs):
         """Creates a backup of volume.
