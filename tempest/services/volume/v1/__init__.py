@@ -14,19 +14,19 @@
 
 from tempest.lib.services.volume.v1.availability_zone_client import \
     AvailabilityZoneClient
+from tempest.lib.services.volume.v1.encryption_types_client import \
+    EncryptionTypesClient
 from tempest.lib.services.volume.v1.extensions_client import ExtensionsClient
 from tempest.lib.services.volume.v1.hosts_client import HostsClient
 from tempest.lib.services.volume.v1.quotas_client import QuotasClient
 from tempest.lib.services.volume.v1.services_client import ServicesClient
 from tempest.lib.services.volume.v1.types_client import TypesClient
 from tempest.services.volume.v1.json.backups_client import BackupsClient
-from tempest.services.volume.v1.json.encryption_types_client import \
-    EncryptionTypesClient
 from tempest.services.volume.v1.json.qos_client import QosSpecsClient
 from tempest.services.volume.v1.json.snapshots_client import SnapshotsClient
 from tempest.services.volume.v1.json.volumes_client import VolumesClient
 
-__all__ = ['AvailabilityZoneClient', 'ExtensionsClient', 'HostsClient',
-           'QuotasClient', 'ServicesClient', 'TypesClient', 'BackupsClient',
-           'EncryptionTypesClient', 'QosSpecsClient', 'SnapshotsClient',
+__all__ = ['AvailabilityZoneClient', 'EncryptionTypesClient',
+           'ExtensionsClient', 'HostsClient', 'QuotasClient', 'ServicesClient',
+           'TypesClient', 'BackupsClient', 'QosSpecsClient', 'SnapshotsClient',
            'VolumesClient', ]
