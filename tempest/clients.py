@@ -14,7 +14,9 @@
 #    under the License.
 
 import copy
+
 from oslo_log import log as logging
+
 from tempest.common import negative_rest_client
 from tempest import config
 from tempest import exceptions
