@@ -19,6 +19,7 @@ import random
 import string
 import uuid
 
+from debtcollector import removals
 from oslo_utils import netutils
 import six.moves
 
@@ -175,6 +176,10 @@ def random_bytes(size=1024):
                     for i in range(size)])
 
 
+@removals.remove(
+    message="use get_ipv6_addr_by_EUI64 from oslo_utils.netutils",
+    version="Newton",
+    removal_version="Ocata")
 def get_ipv6_addr_by_EUI64(cidr, mac):
     """Generate a IPv6 addr by EUI-64 with CIDR and MAC
 
