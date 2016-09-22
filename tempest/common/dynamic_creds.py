@@ -136,8 +136,6 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         email = data_utils.rand_name(root) + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
-        if 'user' in user:
-            user = user['user']
         role_assigned = False
         if admin:
             self.creds_client.assign_user_role(user, project, self.admin_role)
