@@ -250,6 +250,16 @@ class ListImagesTest(base.BaseV2ImageTest):
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
 
+    @test.idempotent_id('e9a44b91-31c8-4b40-a332-e0a39ffb4dbb')
+    def test_list_image_param_owner(self):
+        # Test to get images by owner
+        image_id = self.created_images[0]
+        # Get image metadata
+        image = self.client.show_image(image_id)
+
+        params = {"owner": image['owner']}
+        self._list_by_param_value_and_assert(params)
+
     @test.idempotent_id('622b925c-479f-4736-860d-adeaf13bc371')
     def test_get_image_schema(self):
         # Test to get image schema
