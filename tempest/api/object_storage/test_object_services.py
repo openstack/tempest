@@ -954,10 +954,7 @@ class ObjectTest(base.BaseObjectTest):
         # When the file is not downloaded from Swift server, response does
         # not contain 'X-Timestamp' header. This is the special case, therefore
         # the existence of response headers is checked without custom matcher.
-        self.assertIn('content-type', resp)
-        self.assertIn('x-trans-id', resp)
         self.assertIn('date', resp)
-        self.assertIn('accept-ranges', resp)
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
