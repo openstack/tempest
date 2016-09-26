@@ -370,7 +370,6 @@ def main(opts=None):
     replace = opts.replace_ext
     global CONF_PARSER
 
-    outfile = sys.stdout
     if update:
         conf_file = _get_config_file()
         CONF_PARSER = moves.configparser.SafeConfigParser()
