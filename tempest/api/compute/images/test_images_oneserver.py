@@ -27,26 +27,6 @@ LOG = logging.getLogger(__name__)
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
-    def tearDown(self):
-        """Terminate test instances created after a test is executed."""
-        self.server_check_teardown()
-        super(ImagesOneServerTestJSON, self).tearDown()
-
-    def setUp(self):
-        # NOTE(afazekas): Normally we use the same server with all test cases,
-        # but if it has an issue, we build a new one
-        super(ImagesOneServerTestJSON, self).setUp()
-        # Check if the server is in a clean state after test
-        try:
-            waiters.wait_for_server_status(self.servers_client,
-                                           self.server_id, 'ACTIVE')
-        except Exception:
-            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
-                          % self.server_id)
-            # Rebuild server if cannot reach the ACTIVE state
-            # Usually it means the server had a serious accident
-            self.__class__.server_id = self.rebuild_server(self.server_id)
-
     @classmethod
     def skip_checks(cls):
         super(ImagesOneServerTestJSON, cls).skip_checks()
@@ -73,6 +53,18 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     def _get_default_flavor_disk_size(self, flavor_id):
         flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return flavor['disk']
+
+    @classmethod
+    def _rebuild_server_when_fails(cls, server_id):
+        try:
+            waiters.wait_for_server_status(cls.servers_client,
+                                           server_id, 'ACTIVE')
+        except Exception:
+            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
+                          % server_id)
+            # Rebuild server if cannot reach the ACTIVE state
+            # Usually it means the server had a serious accident
+            cls.server_id = cls.rebuild_server(server_id)
 
     @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
@@ -103,6 +95,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # Verify the image was deleted correctly
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
+        self.addCleanup(self._rebuild_server_when_fails, self.server_id)
 
     @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
@@ -116,3 +109,4 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         body = self.client.create_image(self.server_id, name=utf8_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
+        self.addCleanup(self._rebuild_server_when_fails, self.server_id)
