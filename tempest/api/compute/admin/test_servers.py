@@ -102,14 +102,18 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = {'tenant_id': tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        self.assertEqual([], servers)
+        servers_name = map(lambda x: x['name'], servers)
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
 
-        # List the admin tenant which has no servers
+        # List the admin tenant shouldn't get servers created by other tenants
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        self.assertEqual([], servers)
+        servers_name = map(lambda x: x['name'], servers)
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
 
     @test.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
