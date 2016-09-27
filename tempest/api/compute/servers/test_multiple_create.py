@@ -21,16 +21,10 @@ from tempest import test
 class MultipleCreateTestJSON(base.BaseV2ComputeTest):
     _name = 'multiple-create-test'
 
-    def _generate_name(self):
-        return data_utils.rand_name(self._name)
-
-    def _create_multiple_servers(self, name=None, wait_until=None, **kwargs):
-        # NOTE: This is the right way to create_multiple servers and manage to
-        # get the created servers into the servers list to be cleaned up after
-        # all.
-        kwargs['name'] = name if name else self._generate_name()
-        if wait_until:
-            kwargs['wait_until'] = wait_until
+    def _create_multiple_servers(self, **kwargs):
+        # This is the right way to create_multiple servers and manage to get
+        # the created servers into the servers list to be cleaned up after all.
+        kwargs['name'] = kwargs.get('name', data_utils.rand_name(self._name))
         body = self.create_test_server(**kwargs)
 
         return body
