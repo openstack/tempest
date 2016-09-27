@@ -149,10 +149,18 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
         # delete the floating IP, this should refresh the server addresses
         self.compute_floating_ips_client.delete_floating_ip(floating_ip['id'])
-        server = self.servers_client.show_server(server['id'])['server']
-        address = self._get_floating_ip_in_server_addresses(
-            floating_ip, server)
-        self.assertIsNone(
-            address,
-            "Floating IP '%s' should not be in server addresses: %s" %
-            (floating_ip['ip'], server['addresses']))
+
+        def is_floating_ip_detached_from_server():
+            server_info = self.servers_client.show_server(
+                server['id'])['server']
+            address = self._get_floating_ip_in_server_addresses(
+                floating_ip, server_info)
+            return (not address)
+
+        if not test_utils.call_until_true(
+            is_floating_ip_detached_from_server,
+            CONF.compute.build_timeout,
+            CONF.compute.build_interval):
+            msg = ("Floating IP '%s' should not be in server addresses: %s" %
+                   (floating_ip['ip'], server['addresses']))
+            raise exceptions.TimeoutException(msg)
