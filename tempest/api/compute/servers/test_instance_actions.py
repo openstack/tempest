@@ -28,17 +28,17 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(InstanceActionsTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.request_id = server.response['x-compute-request-id']
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
+        cls.request_id = cls.server.response['x-compute-request-id']
 
     @test.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
         # List actions of the provided server
-        self.client.reboot_server(self.server_id, type='HARD')
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.client.reboot_server(self.server['id'], type='HARD')
+        waiters.wait_for_server_status(self.client,
+                                       self.server['id'], 'ACTIVE')
 
-        body = (self.client.list_instance_actions(self.server_id)
+        body = (self.client.list_instance_actions(self.server['id'])
                 ['instanceActions'])
         self.assertTrue(len(body) == 2, str(body))
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
@@ -48,6 +48,6 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     def test_get_instance_action(self):
         # Get the action details of the provided server
         body = self.client.show_instance_action(
-            self.server_id, self.request_id)['instanceAction']
-        self.assertEqual(self.server_id, body['instance_uuid'])
+            self.server['id'], self.request_id)['instanceAction']
+        self.assertEqual(self.server['id'], body['instance_uuid'])
         self.assertEqual('create', body['action'])
