@@ -171,7 +171,20 @@ IdentityGroup = [
     cfg.BoolOpt('admin_domain_scope',
                 default=False,
                 help="Whether keystone identity v3 policy required "
-                     "a domain scoped token to use admin APIs")
+                     "a domain scoped token to use admin APIs"),
+    # Security Compliance (PCI-DSS)
+    cfg.IntOpt('user_lockout_failure_attempts',
+               default=2,
+               help="The number of unsuccessful login attempts the user is "
+                    "allowed before having the account locked."),
+    cfg.IntOpt('user_lockout_duration',
+               default=5,
+               help="The number of seconds a user account will remain "
+                    "locked."),
+    cfg.IntOpt('user_unique_last_password_count',
+               default=2,
+               help="The number of passwords for a user that must be unique "
+                    "before an old password can be reused."),
 ]
 
 service_clients_group = cfg.OptGroup(name='service-clients',
@@ -208,7 +221,11 @@ IdentityFeatureGroup = [
     # of life.
     cfg.BoolOpt('reseller',
                 default=False,
-                help='Does the environment support reseller?')
+                help='Does the environment support reseller?'),
+    cfg.BoolOpt('security_compliance',
+                default=False,
+                help='Does the environment have the security compliance '
+                     'settings enabled?')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
