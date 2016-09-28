@@ -40,9 +40,9 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
 
         body = (self.client.list_instance_actions(self.server_id)
                 ['instanceActions'])
-        self.assertTrue(len(body) == 2, str(body))
-        self.assertTrue(any([i for i in body if i['action'] == 'create']))
-        self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
+        self.assertEqual(len(body), 2, str(body))
+        self.assertEqual(sorted([i['action'] for i in body]),
+                         ['create', 'reboot'])
 
     @test.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
@@ -51,3 +51,27 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
             self.server_id, self.request_id)['instanceAction']
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])
+
+
+class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
+
+    min_microversion = '2.21'
+    max_microversion = 'latest'
+
+    @classmethod
+    def setup_clients(cls):
+        super(InstanceActionsV221TestJSON, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @test.idempotent_id('0a0f85d4-10fa-41f6-bf80-a54fb4aa2ae1')
+    def test_get_list_deleted_instance_actions(self):
+
+        # List actions of the deleted server
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.client, server['id'])
+        body = (self.client.list_instance_actions(server['id'])
+                ['instanceActions'])
+        self.assertEqual(len(body), 2, str(body))
+        self.assertEqual(sorted([i['action'] for i in body]),
+                         ['create', 'delete'])
