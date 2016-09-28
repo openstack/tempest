@@ -79,7 +79,7 @@ class AccountTest(base.BaseObjectTest):
         # headers is checked without custom matcher.
         #
         # As the expected response is 204 No Content, Content-Length presence
-        # is not checked here intensionally. According to RFC 7230 a server
+        # is not checked here intentionally. According to RFC 7230 a server
         # MUST NOT send the header in such responses. Thus, clients should not
         # depend on this header. However, the standard does not require them
         # to validate the server's behavior. We leverage that to not refuse

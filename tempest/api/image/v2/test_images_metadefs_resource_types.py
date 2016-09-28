@@ -18,7 +18,7 @@ from tempest import test
 
 
 class MetadataResourceTypesTest(base.BaseV2ImageTest):
-    """Test the Metadata definition ressource types basic functionality"""
+    """Test the Metadata definition resource types basic functionality"""
 
     @test.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')
     def test_basic_meta_def_resource_type_association(self):
@@ -34,7 +34,7 @@ class MetadataResourceTypesTest(base.BaseV2ImageTest):
         # NOTE(raiesmh08): Here intentionally I have not added addcleanup
         # method for resource type dissociation because its a metadata add and
         # being cleaned as soon as namespace is cleaned at test case level.
-        # When namespace cleans, resource type associaion will automatically
+        # When namespace cleans, resource type association will automatically
         # clean without any error or dependency.
 
         # List resource type associations and validate creation
