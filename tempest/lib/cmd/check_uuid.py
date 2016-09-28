@@ -69,7 +69,8 @@ class SourcePatcher(object):
         lines[line_no - 1] = ''.join(('{%s:s}' % patch_id, lines[line_no - 1]))
         self.source_files[filename] = self._quote('\n').join(lines)
 
-    def _save_changes(self, filename, source):
+    @staticmethod
+    def _save_changes(filename, source):
         print('%s fixed' % filename)
         with open(filename, 'w') as f:
             f.write(source)
