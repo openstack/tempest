@@ -93,7 +93,7 @@ class TempestInit(command.Command):
             testr_conf_file.write(testr_conf)
 
     def get_configparser(self, conf_path):
-        config_parse = moves.configparser.SafeConfigParser()
+        config_parse = moves.configparser.ConfigParser()
         config_parse.optionxform = str
         # get any existing values if a config file already exists
         if os.path.isfile(conf_path):

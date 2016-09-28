@@ -372,7 +372,7 @@ def main(opts=None):
 
     if update:
         conf_file = _get_config_file()
-        CONF_PARSER = moves.configparser.SafeConfigParser()
+        CONF_PARSER = moves.configparser.ConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
 
