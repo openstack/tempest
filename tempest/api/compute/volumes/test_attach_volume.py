@@ -165,7 +165,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
     """Testing volume with shelved instance.
 
     This test checks the attaching and detaching volumes from
-    a shelved or shelved ofload instance.
+    a shelved or shelved offload instance.
     """
 
     min_microversion = '2.20'
