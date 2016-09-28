@@ -339,6 +339,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('suspend',
                 default=True,
                 help="Does the test environment support suspend/resume?"),
+    cfg.BoolOpt('cold_migration',
+                default=True,
+                help="Does the test environment support cold migration "
+                     "available?"),
     cfg.BoolOpt('live_migration',
                 default=True,
                 help="Does the test environment support live migration "
