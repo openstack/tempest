@@ -213,7 +213,7 @@ Parameters:
 * **client_names**: Name of the classes that implement service clients in the
   service clients module.
 
-Example usage of the the service clients in tests::
+Example usage of the service clients in tests::
 
    # my_creds is instance of tempest.lib.auth.Credentials
    # identity_uri is v2 or v3 depending on the configuration

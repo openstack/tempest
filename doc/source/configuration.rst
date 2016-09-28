@@ -95,7 +95,7 @@ When the ``admin_domain_scope`` option is set to ``True``, provisioned admin
 accounts will be assigned a role on domain configured in
 ``default_credentials_domain_name``. This will make the accounts provisioned
 usable in a cloud where domain scoped tokens are required by keystone for
-admin operations. Note that the the initial pre-provision admin accounts,
+admin operations. Note that the initial pre-provision admin accounts,
 configured in tempest.conf, must have a role on the same domain as well, for
 Dynamic Credentials to work.
 
@@ -151,7 +151,7 @@ the role on the domain will be assigned automatically for you, as long as
 ``admin_domain_scope`` as ``default_credentials_domain_name`` are configured
 properly in tempest.conf.
 
-Pre-Provisioned Credentials are also know as accounts.yaml or accounts file.
+Pre-Provisioned Credentials are also known as accounts.yaml or accounts file.
 
 Compute
 -------
