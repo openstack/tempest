@@ -148,6 +148,18 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
 
+    def attach_volume(self, server_id, volume_id):
+        """Attachs a volume to a server"""
+        self.servers_client.attach_volume(
+            server_id, volumeId=volume_id,
+            device='/dev/%s' % CONF.compute.volume_device_name)
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume_id, 'in-use')
+        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
+                        volume_id, 'available')
+        self.addCleanup(self.servers_client.detach_volume, server_id,
+                        self.volume_origin['id'])
+
     @classmethod
     def clear_volumes(cls):
         for volume in cls.volumes:
