@@ -473,11 +473,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_hotplug_nic(self):
         """Test hotplug network interface
 
-        1. create a new network, with no gateway (to prevent overwriting VM's
-            gateway)
-        2. connect VM to new network
-        3. set static ip and bring new nic up
-        4. check VM can ping new network dhcp port
+        1. Create a network and a VM.
+        2. Check connectivity to the VM via a public network.
+        3. Create a new network, with no gateway.
+        4. Bring up a new interface
+        5. check the VM reach the new network
 
         """
         self._setup_network_and_servers()
