@@ -34,27 +34,26 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
     def test_admin_deactivate_reactivate_image(self):
         # Create image by non-admin tenant
         image_name = data_utils.rand_name('image')
-        body = self.client.create_image(name=image_name,
-                                        container_format='bare',
-                                        disk_format='raw',
-                                        visibility='private')
-        image_id = body['id']
-        self.addCleanup(self.client.delete_image, image_id)
+        image = self.client.create_image(name=image_name,
+                                         container_format='bare',
+                                         disk_format='raw',
+                                         visibility='private')
+        self.addCleanup(self.client.delete_image, image['id'])
         # upload an image file
         content = data_utils.random_bytes()
         image_file = six.BytesIO(content)
-        self.client.store_image_file(image_id, image_file)
+        self.client.store_image_file(image['id'], image_file)
         # deactivate image
-        self.admin_client.deactivate_image(image_id)
-        body = self.client.show_image(image_id)
+        self.admin_client.deactivate_image(image['id'])
+        body = self.client.show_image(image['id'])
         self.assertEqual("deactivated", body['status'])
         # non-admin user unable to download deactivated image
         self.assertRaises(lib_exc.Forbidden, self.client.show_image_file,
-                          image_id)
+                          image['id'])
         # reactivate image
-        self.admin_client.reactivate_image(image_id)
-        body = self.client.show_image(image_id)
+        self.admin_client.reactivate_image(image['id'])
+        body = self.client.show_image(image['id'])
         self.assertEqual("active", body['status'])
         # non-admin user able to download image after reactivation by admin
-        body = self.client.show_image_file(image_id)
+        body = self.client.show_image_file(image['id'])
         self.assertEqual(content, body.data)
