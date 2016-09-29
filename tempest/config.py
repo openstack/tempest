@@ -373,6 +373,11 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('live_migration',
                 default=True,
                 help="Does the test environment support live migration?"),
+    cfg.BoolOpt('live_migrate_back_and_forth',
+                default=False,
+                help="Does the test environment support live migrating "
+                     "VM back and forth between different versions of "
+                     "nova-compute?"),
     cfg.BoolOpt('metadata_service',
                 default=True,
                 help="Does the test environment support metadata service? "
