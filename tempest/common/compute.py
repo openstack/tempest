@@ -129,7 +129,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                                                 **kwargs)
 
     # handle the case of multiple servers
-    servers = []
     if multiple_create_request:
         # Get servers created which name match with name param.
         body_servers = clients.servers_client.list_servers()
