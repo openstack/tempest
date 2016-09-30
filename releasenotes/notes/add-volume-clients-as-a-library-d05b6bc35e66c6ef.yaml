@@ -7,6 +7,7 @@ features:
     any maintenance changes.
 
     * encryption_types_client (v1)
+    * encryption_types_client (v2)
     * qos_clients (v1)
     * qos_clients (v2)
     * snapshots_client (v1)
