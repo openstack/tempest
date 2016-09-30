@@ -30,7 +30,7 @@ CONF = config.CONF
 class NetworksTestDHCPv6(base.BaseNetworkTest):
     _ip_version = 6
 
-    """ Test DHCPv6 specific features using SLAAC, stateless and
+    """Test DHCPv6 specific features using SLAAC, stateless and
     stateful settings for subnets. Also it shall check dual-stack
     functionality (IPv4 + IPv6 together).
     The tests include:
