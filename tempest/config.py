@@ -886,34 +886,6 @@ OrchestrationGroup = [
                help="Value must match heat configuration of the same name."),
 ]
 
-data_processing_group = cfg.OptGroup(name="data-processing",
-                                     title="Data Processing options")
-
-DataProcessingGroup = [
-    cfg.StrOpt('catalog_type',
-               default='data-processing',
-               deprecated_group="data_processing",
-               help="Catalog type of the data processing service."),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               deprecated_group="data_processing",
-               help="The endpoint type to use for the data processing "
-                    "service."),
-]
-
-
-data_processing_feature_group = cfg.OptGroup(
-    name="data-processing-feature-enabled",
-    title="Enabled Data Processing features")
-
-DataProcessingFeaturesGroup = [
-    cfg.ListOpt('plugins',
-                default=["vanilla", "cdh"],
-                deprecated_group="data_processing-feature-enabled",
-                help="List of enabled data processing plugins")
-]
 
 stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
 
@@ -1160,8 +1132,6 @@ _opts = [
     (object_storage_group, ObjectStoreGroup),
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (orchestration_group, OrchestrationGroup),
-    (data_processing_group, DataProcessingGroup),
-    (data_processing_feature_group, DataProcessingFeaturesGroup),
     (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
@@ -1227,9 +1197,6 @@ class TempestConfigPrivate(object):
         self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
         self.orchestration = _CONF.orchestration
-        self.data_processing = _CONF['data-processing']
-        self.data_processing_feature_enabled = _CONF[
-            'data-processing-feature-enabled']
         self.stress = _CONF.stress
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
