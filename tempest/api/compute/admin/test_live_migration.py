@@ -82,14 +82,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             if host != target_host:
                 return target_host
 
-    def _volume_clean_up(self, server_id, volume_id):
-        body = self.volumes_client.show_volume(volume_id)['volume']
-        if body['status'] == 'in-use':
-            self.servers_client.detach_volume(server_id, volume_id)
-            waiters.wait_for_volume_status(self.volumes_client,
-                                           volume_id, 'available')
-        self.volumes_client.delete_volume(volume_id)
-
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
         """Tests live migration between two hosts.
 
@@ -151,22 +143,15 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
     def test_iscsi_volume(self):
-        server_id = self.create_test_server(wait_until="ACTIVE")['id']
+        server = self.create_test_server(wait_until="ACTIVE")
+        server_id = server['id']
         actual_host = self._get_host_for_server(server_id)
         target_host = self._get_host_other_than(actual_host)
 
-        volume = self.volumes_client.create_volume(
-            size=CONF.volume.volume_size, display_name='test')['volume']
-
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
-        self.addCleanup(self._volume_clean_up, server_id, volume['id'])
+        volume = self.create_volume()
 
         # Attach the volume to the server
-        self.servers_client.attach_volume(server_id, volumeId=volume['id'],
-                                          device='/dev/xvdb')
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'in-use')
+        self.attach_volume(server, volume, device='/dev/xvdb')
 
         self._migrate_server_to(server_id, target_host)
         waiters.wait_for_server_status(self.servers_client,
