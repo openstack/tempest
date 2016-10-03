@@ -15,7 +15,6 @@ to make this clear.
 | tempest/
 |    api/ - API tests
 |    scenario/ - complex scenario tests
-|    stress/ - stress tests
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
@@ -45,14 +44,6 @@ state requiring multiple services is set up exercised, and torn down.
 Scenario tests should not use the existing python clients for OpenStack,
 but should instead use the tempest implementations of clients.
 
-
-:ref:`stress_field_guide`
--------------------------
-
-Stress tests are designed to stress an OpenStack environment by running a high
-workload against it and seeing what breaks. The stress test framework runs
-several test jobs in parallel and can run any existing test in Tempest as a
-stress job.
 
 :ref:`unit_tests_field_guide`
 -----------------------------

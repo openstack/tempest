@@ -1,1 +1,0 @@
-../../../tempest/stress/README.rst
