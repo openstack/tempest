@@ -16,28 +16,21 @@
 import atexit
 import functools
 import os
-import re
 import sys
 
 import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
-from oslo_serialization import jsonutils as json
-from oslo_utils import importutils
 import six
-from six.moves import urllib
-import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common import cred_client
 from tempest.common import credentials_factory as credentials
 from tempest.common import fixed_network
-import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -647,224 +640,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     def assertNotEmpty(self, list, msg=None):
         self.assertTrue(len(list) > 0, msg)
-
-
-class NegativeAutoTest(BaseTestCase):
-
-    _resources = {}
-
-    @classmethod
-    def setUpClass(cls):
-        super(NegativeAutoTest, cls).setUpClass()
-        os = cls.get_client_manager(credential_type='primary')
-        cls.client = os.negative_client
-
-    @staticmethod
-    def load_tests(*args):
-        """Wrapper for testscenarios
-
-        To set the mandatory scenarios variable only in case a real test
-        loader is in place. Will be automatically called in case the variable
-        "load_tests" is set.
-        """
-        if getattr(args[0], 'suiteClass', None) is not None:
-            loader, standard_tests, pattern = args
-        else:
-            standard_tests, module, loader = args
-        for test in testtools.iterate_tests(standard_tests):
-            schema = getattr(test, '_schema', None)
-            if schema is not None:
-                setattr(test, 'scenarios',
-                        NegativeAutoTest.generate_scenario(schema))
-        return testscenarios.load_tests_apply_scenarios(*args)
-
-    @staticmethod
-    def generate_scenario(description):
-        """Generates the test scenario list for a given description.
-
-        :param description: A file or dictionary with the following entries:
-            name (required) name for the api
-            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
-            url (required) the url to be appended to the catalog url with '%s'
-                for each resource mentioned
-            resources: (optional) A list of resource names such as "server",
-                "flavor", etc. with an element for each '%s' in the url. This
-                method will call self.get_resource for each element when
-                constructing the positive test case template so negative
-                subclasses are expected to return valid resource ids when
-                appropriate.
-            json-schema (optional) A valid json schema that will be used to
-                create invalid data for the api calls. For "GET" and "HEAD",
-                the data is used to generate query strings appended to the url,
-                otherwise for the body of the http call.
-        """
-        LOG.debug(description)
-        generator = importutils.import_class(
-            CONF.negative.test_generator)()
-        generator.validate_schema(description)
-        schema = description.get("json-schema", None)
-        resources = description.get("resources", [])
-        scenario_list = []
-        expected_result = None
-        for resource in resources:
-            if isinstance(resource, dict):
-                expected_result = resource['expected_result']
-                resource = resource['name']
-            LOG.debug("Add resource to test %s" % resource)
-            scn_name = "inv_res_%s" % (resource)
-            scenario_list.append((scn_name, {
-                "resource": (resource, data_utils.rand_uuid()),
-                "expected_result": expected_result
-            }))
-        if schema is not None:
-            for scenario in generator.generate_scenarios(schema):
-                scenario_list.append((scenario['_negtest_name'],
-                                      scenario))
-        LOG.debug(scenario_list)
-        return scenario_list
-
-    def execute(self, description):
-        """Execute a http call
-
-        Execute a http call on an api that are expected to
-        result in client errors. First it uses invalid resources that are part
-        of the url, and then invalid data for queries and http request bodies.
-
-        :param description: A json file or dictionary with the following
-        entries:
-            name (required) name for the api
-            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
-            url (required) the url to be appended to the catalog url with '%s'
-                for each resource mentioned
-            resources: (optional) A list of resource names such as "server",
-                "flavor", etc. with an element for each '%s' in the url. This
-                method will call self.get_resource for each element when
-                constructing the positive test case template so negative
-                subclasses are expected to return valid resource ids when
-                appropriate.
-            json-schema (optional) A valid json schema that will be used to
-                create invalid data for the api calls. For "GET" and "HEAD",
-                the data is used to generate query strings appended to the url,
-                otherwise for the body of the http call.
-
-        """
-        LOG.info("Executing %s" % description["name"])
-        LOG.debug(description)
-        generator = importutils.import_class(
-            CONF.negative.test_generator)()
-        schema = description.get("json-schema", None)
-        method = description["http-method"]
-        url = description["url"]
-        expected_result = None
-        if "default_result_code" in description:
-            expected_result = description["default_result_code"]
-
-        resources = [self.get_resource(r) for
-                     r in description.get("resources", [])]
-
-        if hasattr(self, "resource"):
-            # Note(mkoderer): The resources list already contains an invalid
-            # entry (see get_resource).
-            # We just send a valid json-schema with it
-            valid_schema = None
-            if schema:
-                valid_schema = \
-                    valid.ValidTestGenerator().generate_valid(schema)
-            new_url, body = self._http_arguments(valid_schema, url, method)
-        elif hasattr(self, "_negtest_name"):
-            schema_under_test = \
-                valid.ValidTestGenerator().generate_valid(schema)
-            local_expected_result = \
-                generator.generate_payload(self, schema_under_test)
-            if local_expected_result is not None:
-                expected_result = local_expected_result
-            new_url, body = \
-                self._http_arguments(schema_under_test, url, method)
-        else:
-            raise Exception("testscenarios are not active. Please make sure "
-                            "that your test runner supports the load_tests "
-                            "mechanism")
-
-        if "admin_client" in description and description["admin_client"]:
-            if not credentials.is_admin_available(
-                    identity_version=self.get_identity_version()):
-                msg = ("Missing Identity Admin API credentials in"
-                       "configuration.")
-                raise self.skipException(msg)
-            creds = self.credentials_provider.get_admin_creds()
-            os_adm = clients.Manager(credentials=creds)
-            client = os_adm.negative_client
-        else:
-            client = self.client
-        resp, resp_body = client.send_request(method, new_url,
-                                              resources, body=body)
-        self._check_negative_response(expected_result, resp.status, resp_body)
-
-    def _http_arguments(self, json_dict, url, method):
-        LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
-        if not json_dict:
-            return url, None
-        elif method in ["GET", "HEAD", "PUT", "DELETE"]:
-            return "%s?%s" % (url, urllib.parse.urlencode(json_dict)), None
-        else:
-            return url, json.dumps(json_dict)
-
-    def _check_negative_response(self, expected_result, result, body):
-        self.assertTrue(result >= 400 and result < 500 and result != 413,
-                        "Expected client error, got %s:%s" %
-                        (result, body))
-        self.assertTrue(expected_result is None or expected_result == result,
-                        "Expected %s, got %s:%s" %
-                        (expected_result, result, body))
-
-    @classmethod
-    def set_resource(cls, name, resource):
-        """Register a resource for a test
-
-        This function can be used in setUpClass context to register a resource
-        for a test.
-
-        :param name: The name of the kind of resource such as "flavor", "role",
-            etc.
-        :resource: The id of the resource
-        """
-        cls._resources[name] = resource
-
-    def get_resource(self, name):
-        """Return a valid uuid for a type of resource.
-
-        If a real resource is needed as part of a url then this method should
-        return one. Otherwise it can return None.
-
-        :param name: The name of the kind of resource such as "flavor", "role",
-            etc.
-        """
-        if isinstance(name, dict):
-            name = name['name']
-        if hasattr(self, "resource") and self.resource[0] == name:
-            LOG.debug("Return invalid resource (%s) value: %s" %
-                      (self.resource[0], self.resource[1]))
-            return self.resource[1]
-        if name in self._resources:
-            return self._resources[name]
-        return None
-
-
-def SimpleNegativeAutoTest(klass):
-    """This decorator registers a test function on basis of the class name."""
-    @attr(type=['negative'])
-    def generic_test(self):
-        if hasattr(self, '_schema'):
-            self.execute(self._schema)
-
-    cn = klass.__name__
-    cn = cn.replace('JSON', '')
-    cn = cn.replace('Test', '')
-    # NOTE(mkoderer): replaces uppercase chars inside the class name with '_'
-    lower_cn = re.sub('(?<!^)(?=[A-Z])', '_', cn).lower()
-    func_name = 'test_%s' % lower_cn
-    setattr(klass, func_name, generic_test)
-    return klass
 
 
 call_until_true = debtcollector.moves.moved_function(
