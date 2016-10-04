@@ -123,8 +123,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
                                   disk_format='raw',
                                   is_public=False,
                                   data=image_file)
-        image_id = image['id']
-        return image_id
+        return image['id']
 
 
 class BaseV2ImageTest(BaseImageTest):
@@ -183,9 +182,8 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         image = self.client.create_image(name=name,
                                          container_format='bare',
                                          disk_format='raw')
-        image_id = image['id']
-        self.addCleanup(self.client.delete_image, image_id)
-        return image_id
+        self.addCleanup(self.client.delete_image, image['id'])
+        return image['id']
 
 
 class BaseV1ImageAdminTest(BaseImageTest):
