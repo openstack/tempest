@@ -239,3 +239,7 @@ class ServiceClientRegistrationException(TempestException):
 
 class PluginRegistrationException(TempestException):
     message = "Error registering plugin %(name)s: %(detailed_error)s"
+
+
+class VolumeBackupException(TempestException):
+    message = "Volume backup %(backup_id)s failed and is in ERROR status"

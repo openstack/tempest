@@ -53,10 +53,6 @@ class SnapshotBuildErrorException(exceptions.TempestException):
     message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
-class VolumeBackupException(exceptions.TempestException):
-    message = "Volume backup %(backup_id)s failed and is in ERROR status"
-
-
 class StackBuildErrorException(exceptions.TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
