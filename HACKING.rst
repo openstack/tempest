@@ -166,8 +166,33 @@ invalid or unexpected input. However, as a black box integration test
 suite, Tempest is not suitable for handling all negative test cases, as
 the wide variety and complexity of negative tests can lead to long test
 runs and knowledge of internal implementation details. The bulk of
-negative testing should be handled with project function tests. The
-exception to this rule is API tests used for interoperability testing.
+negative testing should be handled with project function tests.
+All negative tests should be based on `API-WG guideline`_ . Such negative
+tests can block any changes from accurate failure code to invalid one.
+
+.. _API-WG guideline: https://github.com/openstack/api-wg/blob/master/guidelines/http.rst#failure-code-clarifications
+
+If facing some gray area which is not clarified on the above guideline, propose
+a new guideline to the API-WG. With a proposal to the API-WG we will be able to
+build a consensus across all OpenStack projects and improve the quality and
+consistency of all the APIs.
+
+In addition, we have some guidelines for additional negative tests.
+
+- About BadRequest(HTTP400) case: We can add a single negative tests of
+  BadRequest for each resource and method(POST, PUT).
+  Please don't implement more negative tests on the same combination of
+  resource and method even if API request parameters are different from
+  the existing test.
+- About NotFound(HTTP404) case: We can add a single negative tests of
+  NotFound for each resource and method(GET, PUT, DELETE, HEAD).
+  Please don't implement more negative tests on the same combination
+  of resource and method.
+
+The above guidelines don't cover all cases and we will grow these guidelines
+organically over time. Patches outside of the above guidelines are left up to
+the reviewers' discretion and if we face some conflicts between reviewers, we
+will expand the guideline based on our discussion and experience.
 
 Test skips because of Known Bugs
 --------------------------------
