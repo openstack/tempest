@@ -414,7 +414,10 @@ ComputeFeaturesGroup = [
                      "list indicates all filters are disabled. The full "
                      "available list of filters is in nova.conf: "
                      "DEFAULT.scheduler_available_filters"),
-
+    cfg.BoolOpt('swap_volume',
+                default=False,
+                help='Does the test environment support in-place swapping of '
+                     'volumes attached to a server instance?'),
 ]
 
 
