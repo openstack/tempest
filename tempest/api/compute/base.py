@@ -404,10 +404,21 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 LOG.exception('Waiting for deletion of volume %s failed',
                               volume['id'])
 
-    def attach_volume(self, server, volume):
-        """Attaches volume to server and waits for 'in-use' volume status."""
+    def attach_volume(self, server, volume, device=None):
+        """Attaches volume to server and waits for 'in-use' volume status.
+
+        The volume will be detached when the test tears down.
+
+        :param server: The server to which the volume will be attached.
+        :param volume: The volume to attach.
+        :param device: Optional mountpoint for the attached volume. Note that
+            this is not guaranteed for all hypervisors and is not recommended.
+        """
+        attach_kwargs = dict(volumeId=volume['id'])
+        if device:
+            attach_kwargs['device'] = device
         self.servers_client.attach_volume(
-            server['id'], volumeId=volume['id'])
+            server['id'], **attach_kwargs)
         # On teardown detach the volume and wait for it to be available. This
         # is so we don't error out when trying to delete the volume during
         # teardown.
