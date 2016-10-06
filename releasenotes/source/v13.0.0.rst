@@ -1,0 +1,6 @@
+=====================
+v13.0.0 Release Notes
+=====================
+
+.. release-notes:: 13.0.0 Release Notes
+   :version: 13.0.0
