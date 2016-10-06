@@ -235,20 +235,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.services('volume')
     def test_rebuild_server_with_volume_attached(self):
         # create a new volume and attach it to the server
-        volume = self.volumes_client.create_volume(
-            size=CONF.volume.volume_size)
-        volume = volume['volume']
-        self.addCleanup(self.volumes_client.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'available')
+        volume = self.create_volume()
 
-        self.client.attach_volume(self.server_id, volumeId=volume['id'])
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        volume['id'], 'available')
-        self.addCleanup(self.client.detach_volume,
-                        self.server_id, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'in-use')
+        server = self.client.show_server(self.server_id)['server']
+        self.attach_volume(server, volume)
 
         # run general rebuild test
         self.test_rebuild_server()
