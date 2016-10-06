@@ -84,13 +84,6 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
                           size='0', display_name=v_name, metadata=metadata)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('f01904f2-e975-4915-98ce-cb5fa27bde4f')
-    def test_get_invalid_volume_id(self):
-        # Negative: Should not be able to get volume with invalid id
-        self.assertRaises(lib_exc.NotFound,
-                          self.client.show_volume, '#$%%&^&^')
-
-    @test.attr(type=['negative'])
     @test.idempotent_id('62bab09a-4c03-4617-8cca-8572bc94af9b')
     def test_get_volume_without_passing_volume_id(self):
         # Negative: Should not be able to get volume when empty ID is passed
