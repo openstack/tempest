@@ -80,6 +80,15 @@ def get_credentials_provider(name, network_resources=None,
             network_resources=network_resources,
             identity_version=identity_version,
             admin_creds=admin_creds,
+            identity_admin_domain_scope=CONF.identity.admin_domain_scope,
+            identity_admin_role=CONF.identity.admin_role,
+            extra_roles=CONF.auth.tempest_roles,
+            neutron_available=CONF.service_available.neutron,
+            project_network_cidr=CONF.network.project_network_cidr,
+            project_network_mask_bits=CONF.network.project_network_mask_bits,
+            public_network_id=CONF.network.public_network_id,
+            create_networks=(CONF.auth.create_isolated_networks and not
+                             CONF.baremetal.driver_enabled),
             **get_dynamic_provider_params())
     else:
         if CONF.auth.test_accounts_file:

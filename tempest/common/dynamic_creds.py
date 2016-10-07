@@ -20,18 +20,21 @@ from tempest import clients
 from tempest.common import cred_client
 from tempest.common import cred_provider
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import exceptions
 from tempest.lib import exceptions as lib_exc
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
 class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
     def __init__(self, identity_version, name=None, network_resources=None,
-                 credentials_domain=None, admin_role=None, admin_creds=None):
+                 credentials_domain=None, admin_role=None, admin_creds=None,
+                 identity_admin_domain_scope=False,
+                 identity_admin_role='admin', extra_roles=None,
+                 neutron_available=False, create_networks=True,
+                 project_network_cidr=None, project_network_mask_bits=None,
+                 public_network_id=None):
         """Creates credentials dynamically for tests
 
         A credential provider that, based on an initial set of
@@ -48,6 +51,23 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         :param dict network_resources: network resources to be created for
                                        the created credentials
         :param Credentials admin_creds: initial admin credentials
+        :param bool identity_admin_domain_scope: Set to true if admin should be
+                                                 scoped to the domain. By
+                                                 default this is False and the
+                                                 admin role is scoped to the
+                                                 project.
+        :param str identity_admin_role: The role name to use for admin
+        :param list extra_roles: A list of strings for extra roles that should
+                                 be assigned to all created users
+        :param bool neutron_available: Whether we are running in an environemnt
+                                       with neutron
+        :param bool create_networks: Whether dynamic project networks should be
+                                     created or not
+        :param project_network_cidr: The CIDR to use for created project
+                                     networks
+        :param project_network_mask_bits: The network mask bits to use for
+                                          created project networks
+        :param public_network_id: The id for the public network to use
         """
         super(DynamicCredentialProvider, self).__init__(
             identity_version=identity_version, admin_role=admin_role,
@@ -56,7 +76,15 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.network_resources = network_resources
         self._creds = {}
         self.ports = []
+        self.neutron_available = neutron_available
+        self.create_networks = create_networks
+        self.project_network_cidr = project_network_cidr
+        self.project_network_mask_bits = project_network_mask_bits
+        self.public_network_id = public_network_id
         self.default_admin_creds = admin_creds
+        self.identity_admin_domain_scope = identity_admin_domain_scope
+        self.identity_admin_role = identity_admin_role or 'admin'
+        self.extra_roles = extra_roles or []
         (self.identity_admin_client,
          self.tenants_admin_client,
          self.users_admin_client,
@@ -98,7 +126,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         else:
             # We use a dedicated client manager for identity client in case we
             # need a different token scope for them.
-            scope = 'domain' if CONF.identity.admin_domain_scope else 'project'
+            scope = 'domain' if self.identity_admin_domain_scope else 'project'
             identity_os = clients.Manager(self.default_admin_creds,
                                           scope=scope)
             return (identity_os.identity_v3_client,
@@ -141,11 +169,11 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.creds_client.assign_user_role(user, project, self.admin_role)
             role_assigned = True
             if (self.identity_version == 'v3' and
-                    CONF.identity.admin_domain_scope):
+                    self.identity_admin_domain_scope):
                 self.creds_client.assign_user_role_on_domain(
-                    user, CONF.identity.admin_role)
+                    user, self.identity_admin_role)
         # Add roles specified in config file
-        for conf_role in CONF.auth.tempest_roles:
+        for conf_role in self.extra_roles:
             self.creds_client.assign_user_role(user, project, conf_role)
             role_assigned = True
         # Add roles requested by caller
@@ -234,8 +262,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return resp_body['network']
 
     def _create_subnet(self, subnet_name, tenant_id, network_id):
-        base_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-        mask_bits = CONF.network.project_network_mask_bits
+        base_cidr = netaddr.IPNetwork(self.project_network_cidr)
+        mask_bits = self.project_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:
@@ -264,7 +292,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
-            network_id=CONF.network.public_network_id)
+            network_id=self.public_network_id)
         resp_body = self.routers_admin_client.create_router(
             name=router_name,
             external_gateway_info=external_net_id,
@@ -288,9 +316,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # Maintained until tests are ported
             LOG.info("Acquired dynamic creds:\n credentials: %s"
                      % credentials)
-            if (CONF.service_available.neutron and
-                not CONF.baremetal.driver_enabled and
-                CONF.auth.create_isolated_networks):
+            if (self.neutron_available and
+                self.create_networks):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
                 credentials.set_resources(network=network, subnet=subnet,
@@ -405,7 +432,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # "circular dependency". So here just use try...except to
             # ensure tenant deletion without big changes.
             try:
-                if CONF.service_available.neutron:
+                if self.neutron_available:
                     self._cleanup_default_secgroup(creds.tenant_id)
             except lib_exc.NotFound:
                 LOG.warning("failed to cleanup tenant %s's secgroup" %
