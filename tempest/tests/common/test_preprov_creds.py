@@ -23,10 +23,10 @@ from oslotest import mockpatch
 import shutil
 import six
 
-from tempest.common import cred_provider
 from tempest.common import preprov_creds
 from tempest import config
 from tempest.lib import auth
+from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 from tempest.tests import fake_config
