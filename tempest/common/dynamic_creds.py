@@ -18,7 +18,6 @@ import six
 
 from tempest import clients
 from tempest.common import cred_client
-from tempest import exceptions
 from tempest.lib.common import cred_provider
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -219,14 +218,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             if self.network_resources['router']:
                 if (not self.network_resources['subnet'] or
                     not self.network_resources['network']):
-                    raise exceptions.InvalidConfiguration(
+                    raise lib_exc.InvalidConfiguration(
                         'A router requires a subnet and network')
             elif self.network_resources['subnet']:
                 if not self.network_resources['network']:
-                    raise exceptions.InvalidConfiguration(
+                    raise lib_exc.InvalidConfiguration(
                         'A subnet requires a network')
             elif self.network_resources['dhcp']:
-                raise exceptions.InvalidConfiguration('DHCP requires a subnet')
+                raise lib_exc.InvalidConfiguration('DHCP requires a subnet')
 
         rand_name_root = data_utils.rand_name(
             self.name, prefix=self.resource_prefix)

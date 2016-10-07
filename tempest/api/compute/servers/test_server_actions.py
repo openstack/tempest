@@ -24,7 +24,6 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -331,7 +330,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         elif CONF.image_feature_enabled.api_v2:
             glance_client = self.os.image_client_v2
         else:
-            raise exceptions.InvalidConfiguration(
+            raise lib_exc.InvalidConfiguration(
                 'Either api_v1 or api_v2 must be True in '
                 '[image-feature-enabled].')
 

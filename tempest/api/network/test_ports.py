@@ -23,7 +23,7 @@ from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF

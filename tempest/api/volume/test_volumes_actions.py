@@ -18,8 +18,8 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF

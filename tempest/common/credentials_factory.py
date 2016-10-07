@@ -17,8 +17,8 @@ from tempest import clients
 from tempest.common import dynamic_creds
 from tempest.common import preprov_creds
 from tempest import config
-from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib import exceptions
 
 CONF = config.CONF
 

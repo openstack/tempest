@@ -35,7 +35,7 @@ def read_accounts_yaml(path):
         with open(path, 'r') as yaml_file:
             accounts = yaml.load(yaml_file)
     except IOError:
-        raise exceptions.InvalidConfiguration(
+        raise lib_exc.InvalidConfiguration(
             'The path for the test accounts file: %s '
             'could not be found' % path)
     return accounts

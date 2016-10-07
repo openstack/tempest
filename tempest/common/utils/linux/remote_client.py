@@ -19,7 +19,6 @@ import time
 from oslo_log import log as logging
 
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common import ssh
 from tempest.lib.common.utils import test_utils
 import tempest.lib.exceptions
@@ -218,8 +217,8 @@ class RemoteClient(object):
         supported_clients = ['udhcpc', 'dhclient']
         dhcp_client = CONF.scenario.dhcp_client
         if dhcp_client not in supported_clients:
-            raise exceptions.InvalidConfiguration('%s DHCP client unsupported'
-                                                  % dhcp_client)
+            raise tempest.lib.exceptions.InvalidConfiguration(
+                '%s DHCP client unsupported' % dhcp_client)
         if dhcp_client == 'udhcpc' and not fixed_ip:
             raise ValueError("need to set 'fixed_ip' for udhcpc client")
         return getattr(self, '_renew_lease_' + dhcp_client)(fixed_ip=fixed_ip)

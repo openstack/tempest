@@ -23,7 +23,7 @@ from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
