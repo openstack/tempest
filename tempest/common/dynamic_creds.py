@@ -18,9 +18,9 @@ import six
 
 from tempest import clients
 from tempest.common import cred_client
-from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.lib.common import cred_provider
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                  identity_admin_role='admin', extra_roles=None,
                  neutron_available=False, create_networks=True,
                  project_network_cidr=None, project_network_mask_bits=None,
-                 public_network_id=None):
+                 public_network_id=None, resource_prefix=None):
         """Creates credentials dynamically for tests
 
         A credential provider that, based on an initial set of
@@ -76,6 +76,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.network_resources = network_resources
         self._creds = {}
         self.ports = []
+        self.resource_prefix = resource_prefix or ''
         self.neutron_available = neutron_available
         self.create_networks = create_networks
         self.project_network_cidr = project_network_cidr
@@ -152,7 +153,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         """
         root = self.name
 
-        project_name = data_utils.rand_name(root)
+        project_name = data_utils.rand_name(root, prefix=self.resource_prefix)
         project_desc = project_name + "-desc"
         project = self.creds_client.create_project(
             name=project_name, description=project_desc)
@@ -161,7 +162,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         # having the same ID in both makes it easier to match them and debug.
         username = project_name
         user_password = data_utils.rand_password()
-        email = data_utils.rand_name(root) + "@example.com"
+        email = data_utils.rand_name(
+            root, prefix=self.resource_prefix) + "@example.com"
         user = self.creds_client.create_user(
             username, user_password, project, email)
         role_assigned = False
@@ -226,17 +228,18 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             elif self.network_resources['dhcp']:
                 raise exceptions.InvalidConfiguration('DHCP requires a subnet')
 
-        data_utils.rand_name_root = data_utils.rand_name(self.name)
+        rand_name_root = data_utils.rand_name(
+            self.name, prefix=self.resource_prefix)
         if not self.network_resources or self.network_resources['network']:
-            network_name = data_utils.rand_name_root + "-network"
+            network_name = rand_name_root + "-network"
             network = self._create_network(network_name, tenant_id)
         try:
             if not self.network_resources or self.network_resources['subnet']:
-                subnet_name = data_utils.rand_name_root + "-subnet"
+                subnet_name = rand_name_root + "-subnet"
                 subnet = self._create_subnet(subnet_name, tenant_id,
                                              network['id'])
             if not self.network_resources or self.network_resources['router']:
-                router_name = data_utils.rand_name_root + "-router"
+                router_name = rand_name_root + "-router"
                 router = self._create_router(router_name, tenant_id)
                 self._add_router_interface(router['id'], subnet['id'])
         except Exception:
