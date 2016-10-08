@@ -25,12 +25,12 @@ import six
 import testtools
 
 from tempest import clients
-from tempest.common import cred_client
 from tempest.common import credentials_factory as credentials
 from tempest.common import fixed_network
 import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import cred_client
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
