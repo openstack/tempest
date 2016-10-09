@@ -43,10 +43,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                        "vendor_name": vendor}
         # Create two volume_types
         for i in range(2):
-            vol_type_name = data_utils.rand_name(
-                self.__class__.__name__ + '-volume-type')
             vol_type = self.create_volume_type(
-                name=vol_type_name,
                 extra_specs=extra_specs)
             volume_types.append(vol_type)
         params = {self.name_field: vol_name,
@@ -124,8 +121,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         # Create/get/delete encryption type.
         provider = "LuksEncryptor"
         control_location = "front-end"
-        name = data_utils.rand_name(self.__class__.__name__ + '-volume-type')
-        body = self.create_volume_type(name=name)
+        body = self.create_volume_type()
         # Create encryption type
         encryption_type = \
             self.admin_encryption_types_client.create_encryption_type(
