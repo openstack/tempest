@@ -48,8 +48,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
-        waiters.wait_for_volume_status(cls.client,
-                                       cls.volume['id'], 'available')
 
     @test.idempotent_id('fff42874-7db5-4487-a8e1-ddda5fb5288d')
     @test.stresstest(class_setup_per='process')
