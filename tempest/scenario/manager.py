@@ -789,7 +789,7 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
         ports = self._list_ports(device_id=server['id'], fixed_ip=ip_addr)
-        # A port can have more then one IP address in some cases.
+        # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
         p_status = ['ACTIVE']
