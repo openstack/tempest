@@ -81,14 +81,19 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
     def test_change_server_password(self):
+        # Since this test messes with the password and makes the
+        # server unreachable, it should create its own server
+        newserver = self.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE')
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
-        self.client.change_password(self.server_id, adminPass=new_password)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.client.change_password(newserver['id'], adminPass=new_password)
+        waiters.wait_for_server_status(self.client, newserver['id'], 'ACTIVE')
 
         if CONF.validation.run_validation:
             # Verify that the user can authenticate with the new password
-            server = self.client.show_server(self.server_id)['server']
+            server = self.client.show_server(newserver['id'])['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user,
