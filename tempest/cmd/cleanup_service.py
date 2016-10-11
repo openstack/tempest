@@ -18,6 +18,7 @@ from oslo_log import log as logging
 
 from tempest.common import credentials_factory as credentials
 from tempest.common import identity
+from tempest.common.utils import net_info
 from tempest import config
 from tempest import test
 
@@ -463,7 +464,7 @@ class NetworkRouterService(NetworkService):
                 rid = router['id']
                 ports = [port for port
                          in ports_client.list_ports(device_id=rid)['ports']
-                         if port["device_owner"] == "network:router_interface"]
+                         if net_info.is_router_interface_port(port)]
                 for port in ports:
                     client.remove_router_interface(rid, port_id=port['id'])
                 client.delete_router(rid)

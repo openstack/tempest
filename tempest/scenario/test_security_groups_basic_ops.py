@@ -17,6 +17,7 @@ import testtools
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest.common.utils import net_info
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -247,15 +248,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         myport = (tenant.router['id'], tenant.subnet['id'])
         router_ports = [(i['device_id'], i['fixed_ips'][0]['subnet_id']) for i
                         in self._list_ports()
-                        if self._is_router_port(i)]
+                        if net_info.is_router_interface_port(i)]
 
         self.assertIn(myport, router_ports)
-
-    def _is_router_port(self, port):
-        """Return True if port is a router interface."""
-        # NOTE(armando-migliaccio): match device owner for both centralized
-        # and distributed routers; 'device_owner' is "" by default.
-        return port['device_owner'].startswith('network:router_interface')
 
     def _create_server(self, name, tenant, security_groups, **kwargs):
         """Creates a server and assigns it to security group.
