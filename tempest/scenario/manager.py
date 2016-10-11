@@ -80,12 +80,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_group_rules_client = (
             cls.manager.security_group_rules_client)
 
-        if CONF.volume_feature_enabled.api_v1:
-            cls.volumes_client = cls.manager.volumes_client
-            cls.snapshots_client = cls.manager.snapshots_client
-        else:
+        if CONF.volume_feature_enabled.api_v2:
             cls.volumes_client = cls.manager.volumes_v2_client
             cls.snapshots_client = cls.manager.snapshots_v2_client
+        else:
+            cls.volumes_client = cls.manager.volumes_client
+            cls.snapshots_client = cls.manager.snapshots_client
 
     # ## Test functions library
     #
@@ -1352,14 +1352,14 @@ class EncryptionScenarioTest(ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        if CONF.volume_feature_enabled.api_v1:
-            cls.admin_volume_types_client = cls.os_adm.volume_types_client
-            cls.admin_encryption_types_client =\
-                cls.os_adm.encryption_types_client
-        else:
+        if CONF.volume_feature_enabled.api_v2:
             cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
             cls.admin_encryption_types_client =\
                 cls.os_adm.encryption_types_v2_client
+        else:
+            cls.admin_volume_types_client = cls.os_adm.volume_types_client
+            cls.admin_encryption_types_client =\
+                cls.os_adm.encryption_types_client
 
     def create_volume_type(self, client=None, name=None):
         if not client:
