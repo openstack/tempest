@@ -24,7 +24,6 @@ from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
 from tempest.services import baremetal
-from tempest.services import data_processing
 from tempest.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
@@ -39,7 +38,7 @@ class Manager(clients.ServiceClients):
 
     default_params = config.service_client_config()
 
-    # TODO(andreaf) This is only used by data_processing and baremetal clients,
+    # TODO(andreaf) This is only used by baremetal clients,
     # and should be removed once they are out of Tempest
     default_params_with_timeout_values = {
         'build_interval': CONF.compute.build_interval,
@@ -84,12 +83,6 @@ class Manager(clients.ServiceClients):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
-        self.data_processing_client = data_processing.DataProcessingClient(
-            self.auth_provider,
-            CONF.data_processing.catalog_type,
-            CONF.identity.region,
-            endpoint_type=CONF.data_processing.endpoint_type,
-            **self.default_params_with_timeout_values)
         self.negative_client = negative_rest_client.NegativeRestClient(
             self.auth_provider, service, **self.default_params)
 
