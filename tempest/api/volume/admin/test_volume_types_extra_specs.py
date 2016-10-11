@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -66,12 +67,17 @@ class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(extra_specs, body,
                          "Volume type extra spec incorrectly created")
 
-        self.admin_volume_types_client.show_volume_type_extra_specs(
+        body = self.admin_volume_types_client.show_volume_type_extra_specs(
             self.volume_type['id'],
             spec_key)
         self.assertEqual(extra_specs, body,
                          "Volume type extra spec incorrectly fetched")
+
         self.admin_volume_types_client.delete_volume_type_extra_specs(
+            self.volume_type['id'], spec_key)
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.admin_volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], spec_key)
 
 
