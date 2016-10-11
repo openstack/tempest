@@ -100,8 +100,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                                              CONF.compute.volume_device_name)
         waiters.wait_for_volume_status(self.client,
                                        self.volume['id'], 'in-use')
-        # NOTE(gfidente): added in reverse order because functions will be
-        # called in reverse order to the order they are added (LIFO)
         self.addCleanup(waiters.wait_for_volume_status, self.client,
                         self.volume['id'],
                         'available')
