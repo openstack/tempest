@@ -24,7 +24,9 @@ Configuration options for Microversion
   * max_microversion
 
   Those should be defined under respective section of each service.
-  For example::
+  For example:
+
+  .. code-block:: ini
 
       [compute]
       min_microversion = None
@@ -42,7 +44,9 @@ range.
 api_version_utils.check_skip_with_microversion function can be used
 to automatically skip the tests which do not fall under configured
 Microversion range.
-For example::
+For example:
+
+.. code-block:: python
 
     class BaseTestCase1(api_version_utils.BaseMicroversionTest):
 
@@ -65,7 +69,9 @@ Select appropriate Microversion which needs to be used
 to send with API request.
 api_version_utils.select_request_microversion function can be used
 to select the appropriate Microversion which will be used for API request.
-For example::
+For example:
+
+.. code-block:: python
 
     @classmethod
     def resource_setup(cls):
@@ -87,7 +93,9 @@ can be set using fixture.
 Also Microversion header name needs to be defined on service clients which
 should be constant because it is not supposed to be changed by project
 as per API contract.
-For example::
+For example:
+
+.. code-block:: python
 
       COMPUTE_MICROVERSION = None
 
@@ -96,7 +104,9 @@ For example::
 
 Now test class can set the selected Microversion on required service clients
 using fixture which can take care of resetting the same once tests is completed.
-For example::
+For example:
+
+.. code-block:: python
 
     def setUp(self):
         super(BaseTestCase1, self).setUp()
@@ -105,7 +115,9 @@ For example::
 
 Service clients needs to add set Microversion in API request header which
 can be done by overriding the get_headers() method of rest_client.
-For example::
+For example:
+
+.. code-block:: python
 
       COMPUTE_MICROVERSION = None
 
@@ -136,7 +148,9 @@ will be skipped.
 
 For example:
 
-Below test is applicable for Microversion from 2.2 till 2.9::
+Below test is applicable for Microversion from 2.2 till 2.9:
+
+.. code-block:: python
 
     class BaseTestCase1(api_version_utils.BaseMicroversionTest,
                         tempest.test.BaseTestCase):
@@ -150,15 +164,15 @@ Below test is applicable for Microversion from 2.2 till 2.9::
 
         [..]
 
-Below test is applicable for Microversion from 2.10 till latest::
+Below test is applicable for Microversion from 2.10 till latest:
+
+.. code-block:: python
 
     class Test2(BaseTestCase1):
         min_microversion = '2.10'
         max_microversion = 'latest'
 
         [..]
-
-
 
 
 Notes about Compute Microversion Tests

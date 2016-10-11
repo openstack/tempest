@@ -61,7 +61,9 @@ project to enable tempest to find the plugin. The entry point must be added
 to the "tempest.test_plugins" namespace.
 
 If you are using pbr this is fairly straightforward, in the setup.cfg just add
-something like the following::
+something like the following:
+
+.. code-block:: ini
 
   [entry_points]
   tempest.test_plugins =
@@ -105,7 +107,9 @@ To provide tempest with all the required information it needs to be able to run
 your plugin you need to create a plugin class which tempest will load and call
 to get information when it needs. To simplify creating this tempest provides an
 abstract class that should be used as the parent for your plugin. To use this
-you would do something like the following::
+you would do something like the following:
+
+.. code-block:: python
 
   from tempest.test_discover import plugins
 
@@ -177,7 +181,9 @@ installed, all service clients from all plugins will be registered, making it
 easy to write tests which rely on multiple APIs whose service clients are in
 different plugins.
 
-Example implementation of ``get_service_clients``::
+Example implementation of ``get_service_clients``:
+
+.. code-block:: python
 
     def get_service_clients(self):
         # Example implementation with two service clients
@@ -213,7 +219,9 @@ Parameters:
 * **client_names**: Name of the classes that implement service clients in the
   service clients module.
 
-Example usage of the service clients in tests::
+Example usage of the service clients in tests:
+
+.. code-block:: python
 
    # my_creds is instance of tempest.lib.auth.Credentials
    # identity_uri is v2 or v3 depending on the configuration
@@ -249,7 +257,9 @@ as they do not necessarily apply to all service clients.
 Third the service client classes should inherit from ``RestClient``, should
 accept generic keyword arguments, and should pass those arguments to the
 ``__init__`` method of ``RestClient``. Extra arguments can be added. For
-instance::
+instance:
+
+.. code-block:: python
 
    class MyAPIClient(rest_client.RestClient):
 
@@ -273,7 +283,9 @@ API version::
         client_api_1.py
         client_api_2.py
 
-The content of __init__.py module should be::
+The content of __init__.py module should be:
+
+.. code-block:: python
 
    from client_api_1.py import API1Client
    from client_api_2.py import API2Client
@@ -294,7 +306,9 @@ API version::
            client_api_1.py
            client_api_2.py
 
-The content each of __init__.py module under vN should be::
+The content each of __init__.py module under vN should be:
+
+.. code-block:: python
 
    from client_api_1.py import API1Client
    from client_api_2.py import API2Client

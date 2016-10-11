@@ -19,11 +19,13 @@ the private key and user name for ssh to the cluster in the
 [stress] section of tempest.conf. You also need to provide the
 location of the log files:
 
-	target_logfiles = "regexp to all log files to be checked for errors"
-	target_private_key_path = "private ssh key for controller and log file nodes"
-	target_ssh_user = "username for controller and log file nodes"
-	target_controller = "hostname or ip of controller node (for nova-manage)
-	log_check_interval = "time between checking logs for errors (default 60s)"
+  .. code-block:: ini
+
+    target_logfiles = "regexp to all log files to be checked for errors"
+    target_private_key_path = "private ssh key for controller and log file nodes"
+    target_ssh_user = "username for controller and log file nodes"
+    target_controller = "hostname or ip of controller node (for nova-manage)
+    log_check_interval = "time between checking logs for errors (default 60s)"
 
 To activate logging on your console please make sure that you activate `use_stderr`
 in tempest.conf or use the default `logging.conf.sample` file.
@@ -36,14 +38,14 @@ test suite. All test flag with the `@stresstest` decorator will be executed.
 In order to use this discovery you have to install tempest CLI, be in the
 tempest root directory and execute the following:
 
-	tempest run-stress -a -d 30
+    tempest run-stress -a -d 30
 
 Running the sample test
 -----------------------
 
 To test installation, do the following:
 
-	tempest run-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
+    tempest run-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
 
 This sample test tries to create a few VMs and kill a few VMs.
 
