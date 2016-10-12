@@ -152,24 +152,15 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @test.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
-        # Update volume readonly true
-        readonly = True
-        self.client.update_volume_readonly(self.volume['id'],
-                                           readonly=readonly)
-        # Get Volume information
-        fetched_volume = self.client.show_volume(self.volume['id'])['volume']
-        bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
-        self.assertEqual(True, bool_flag)
-
-        # Update volume readonly false
-        readonly = False
-        self.client.update_volume_readonly(self.volume['id'],
-                                           readonly=readonly)
-
-        # Get Volume information
-        fetched_volume = self.client.show_volume(self.volume['id'])['volume']
-        bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
-        self.assertEqual(False, bool_flag)
+        for readonly in [True, False]:
+            # Update volume readonly
+            self.client.update_volume_readonly(self.volume['id'],
+                                               readonly=readonly)
+            # Get Volume information
+            fetched_volume = self.client.show_volume(
+                self.volume['id'])['volume']
+            bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
+            self.assertEqual(readonly, bool_flag)
 
 
 class VolumesV1ActionsTest(VolumesV2ActionsTest):
