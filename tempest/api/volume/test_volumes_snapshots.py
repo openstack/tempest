@@ -34,11 +34,11 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
 
-    def _detach(self, volume_id):
-        """Detach volume."""
-        self.volumes_client.detach_volume(volume_id)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume_id, 'available')
+    def cleanup_snapshot(self, snapshot):
+        # Delete the snapshot
+        self.snapshots_client.delete_snapshot(snapshot['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+        self.snapshots.remove(snapshot)
 
     @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
@@ -120,12 +120,6 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Should allow
         self.assertEqual(volume['snapshot_id'], src_snap['id'])
         self.assertEqual(int(volume['size']), src_size + 1)
-
-    def cleanup_snapshot(self, snapshot):
-        # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
 
 
 class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
