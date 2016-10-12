@@ -55,16 +55,6 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.associate_qos(
             self.created_qos['id'], vol_type_id)
 
-    def _test_get_association_qos(self):
-        body = self.admin_volume_qos_client.show_association_qos(
-            self.created_qos['id'])['qos_associations']
-
-        associations = []
-        for association in body:
-            associations.append(association['id'])
-
-        return associations
-
     @test.idempotent_id('7e15f883-4bef-49a9-95eb-f94209a1ced1')
     def test_create_delete_qos_with_front_end_consumer(self):
         """Tests the creation and deletion of QoS specs
@@ -147,8 +137,9 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
             self._test_associate_qos(vol_type[i]['id'])
 
         # get the association of the qos-specs
-        associations = self._test_get_association_qos()
-
+        body = self.admin_volume_qos_client.show_association_qos(
+            self.created_qos['id'])['qos_associations']
+        associations = [association['id'] for association in body]
         for i in range(0, 3):
             self.assertIn(vol_type[i]['id'], associations)
 
@@ -159,8 +150,6 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         waiters.wait_for_qos_operations(self.admin_volume_qos_client,
                                         self.created_qos['id'], operation,
                                         vol_type[0]['id'])
-        associations = self._test_get_association_qos()
-        self.assertNotIn(vol_type[0]['id'], associations)
 
         # disassociate all volume-types from qos-specs
         self.admin_volume_qos_client.disassociate_all_qos(
@@ -168,8 +157,6 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         operation = 'disassociate-all'
         waiters.wait_for_qos_operations(self.admin_volume_qos_client,
                                         self.created_qos['id'], operation)
-        associations = self._test_get_association_qos()
-        self.assertEmpty(associations)
 
 
 class QosSpecsV1TestJSON(QosSpecsV2TestJSON):
