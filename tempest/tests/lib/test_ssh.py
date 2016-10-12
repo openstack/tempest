@@ -69,6 +69,7 @@ class TestSshClient(base.TestCase):
             mock.sentinel.aa)
         expected_connect = [mock.call(
             'localhost',
+            port=22,
             username='root',
             pkey=None,
             key_filename=None,
