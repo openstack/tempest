@@ -40,6 +40,10 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
             protected=True)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self._cleanup_namespace, namespace_name)
+        # list namespaces
+        bodys = self.namespaces_client.list_namespaces()['namespaces']
+        body = [namespace['namespace'] for namespace in bodys]
+        self.assertIn(namespace_name, body)
         # get namespace details
         body = self.namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
