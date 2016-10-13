@@ -221,7 +221,7 @@ def wait_for_backup_status(client, backup_id, status):
         body = client.show_backup(backup_id)['backup']
         backup_status = body['status']
         if backup_status == 'error' and backup_status != status:
-            raise exceptions.VolumeBackupException(backup_id=backup_id)
+            raise lib_exc.VolumeBackupException(backup_id=backup_id)
 
         if int(time.time()) - start >= client.build_timeout:
             message = ('Volume backup %s failed to reach %s status '
