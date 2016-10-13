@@ -14,13 +14,13 @@
 
 import os
 import shutil
-import subprocess
 import sys
 
 from cliff import command
 from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
+from testrepository import commands
 
 from tempest.cmd import workspace
 
@@ -167,7 +167,8 @@ class TempestInit(command.Command):
         self.generate_testr_conf(local_dir)
         # setup local testr working dir
         if not os.path.isdir(testr_dir):
-            subprocess.call(['testr', 'init'], cwd=local_dir)
+            commands.run_argv(['testr', 'init', '-d', local_dir], sys.stdin,
+                              sys.stdout, sys.stderr)
 
     def take_action(self, parsed_args):
         workspace_manager = workspace.WorkspaceManager(
