@@ -14,8 +14,6 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils as utils
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -34,45 +32,20 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         super(VolumesActionsV2Test, cls).resource_setup()
 
         # Create a test shared volume for tests
-        vol_name = utils.rand_name(cls.__name__ + '-Volume')
-        cls.name_field = cls.special_fields['name_field']
-        params = {cls.name_field: vol_name, 'size': CONF.volume.volume_size}
-
-        cls.volume = cls.client.create_volume(**params)['volume']
-        waiters.wait_for_volume_status(cls.client,
-                                       cls.volume['id'], 'available')
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the test volume
-        cls.delete_volume(cls.client, cls.volume['id'])
-
-        super(VolumesActionsV2Test, cls).resource_cleanup()
+        cls.volume = cls.create_volume()
 
     def _reset_volume_status(self, volume_id, status):
         # Reset the volume status
-        body = self.admin_volume_client.reset_volume_status(volume_id,
-                                                            status=status)
-        return body
+        self.admin_volume_client.reset_volume_status(volume_id, status=status)
 
     def tearDown(self):
         # Set volume's status to available after test
         self._reset_volume_status(self.volume['id'], status='available')
         super(VolumesActionsV2Test, self).tearDown()
 
-    def _create_temp_volume(self):
-        # Create a temp volume for force delete tests
-        vol_name = utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: vol_name, 'size': CONF.volume.volume_size}
-        temp_volume = self.client.create_volume(**params)['volume']
-        waiters.wait_for_volume_status(self.client,
-                                       temp_volume['id'], 'available')
-
-        return temp_volume
-
     def _create_reset_and_force_delete_temp_volume(self, status=None):
         # Create volume, reset volume status, and force delete temp volume
-        temp_volume = self._create_temp_volume()
+        temp_volume = self.create_volume()
         if status:
             self._reset_volume_status(temp_volume['id'], status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
