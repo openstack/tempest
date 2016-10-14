@@ -190,11 +190,14 @@ class RoutersTest(base.BaseRouterTest):
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
         self.assertGreaterEqual(len(fixed_ips), 1)
+        # Assert that all of the IPs from the router gateway port
+        # are allocated from a valid public subnet.
         public_net_body = self.admin_networks_client.show_network(
             CONF.network.public_network_id)
-        public_subnet_id = public_net_body['network']['subnets'][0]
-        self.assertIn(public_subnet_id,
-                      map(lambda x: x['subnet_id'], fixed_ips))
+        public_subnet_ids = public_net_body['network']['subnets']
+        for fixed_ip in fixed_ips:
+            subnet_id = fixed_ip['subnet_id']
+            self.assertIn(subnet_id, public_subnet_ids)
 
     @test.idempotent_id('6cc285d8-46bf-4f36-9b1a-783e3008ba79')
     def test_update_router_set_gateway(self):
