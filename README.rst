@@ -196,18 +196,18 @@ on an earlier release with python 2.6 you can easily run Tempest against it
 from a remote system running python 2.7. (or deploy a cloud guest in your cloud
 that has python 2.7)
 
-Python 3.4
+Python 3.x
 ----------
 
 Starting during the Liberty release development cycle work began on enabling
 Tempest to run under both Python 2.7 and Python 3.4. Tempest strives to fully
-support running with Python 3.4. A gating unit test job was added to also run
-Tempest's unit tests under Python 3.4. This means that the Tempest code at
-least imports under Python 3.4 and things that have unit test coverage will
-work on Python 3.4. However, because large parts of Tempest are self-verifying
-there might be uncaught issues running on Python 3.4. So until there is a gating
-job which does a full Tempest run using Python 3.4 there isn't any guarantee
-that running Tempest under Python 3.4 is bug free.
+support running with Python 3.4 and newer. A gating unit test job was added to
+also run Tempest's unit tests under Python 3. This means that the Tempest
+code at least imports under Python 3.4 and things that have unit test coverage
+will work on Python 3.4. However, because large parts of Tempest are
+self-verifying there might be uncaught issues running on Python 3. So until
+there is a gating job which does a full Tempest run using Python 3 there
+isn't any guarantee that running Tempest under Python 3 is bug free.
 
 Legacy run method
 -----------------
