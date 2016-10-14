@@ -41,8 +41,8 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_cleanup(cls):
-        for i in range(3):
-            cls.client.delete_floating_ip(cls.floating_ip_id[i])
+        for f_id in cls.floating_ip_id:
+            cls.client.delete_floating_ip(f_id)
         super(FloatingIPDetailsTestJSON, cls).resource_cleanup()
 
     @test.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
