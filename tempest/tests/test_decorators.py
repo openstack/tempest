@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 from oslo_config import cfg
 from oslotest import mockpatch
 import testtools
@@ -230,22 +229,6 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                           self._test_requires_ext_helper,
                           extension='enabled_ext',
                           service='bad_service')
-
-
-class TestSimpleNegativeDecorator(BaseDecoratorsTest):
-    @test.SimpleNegativeAutoTest
-    class FakeNegativeJSONTest(test.NegativeAutoTest):
-        _schema = {}
-
-    def test_testfunc_exist(self):
-        self.assertIn("test_fake_negative", dir(self.FakeNegativeJSONTest))
-
-    @mock.patch('tempest.test.NegativeAutoTest.execute')
-    def test_testfunc_calls_execute(self, mock):
-        obj = self.FakeNegativeJSONTest("test_fake_negative")
-        self.assertIn("test_fake_negative", dir(obj))
-        obj.test_fake_negative()
-        mock.assert_called_once_with(self.FakeNegativeJSONTest._schema)
 
 
 class TestConfigDecorators(BaseDecoratorsTest):
