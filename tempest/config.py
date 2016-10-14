@@ -318,7 +318,13 @@ ComputeFeaturesGroup = [
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Each extension should be specified with alias name. '
-                     'Empty list indicates all extensions are disabled'),
+                     'Empty list indicates all extensions are disabled',
+                     deprecated_for_removal=True,
+                     deprecated_reason='The Nova extensions API and mechanism '
+                                       'is deprecated. This option will be '
+                                       'removed when all releases supported '
+                                       'by tempest no longer contain the Nova '
+                                       'extensions API and mechanism.'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
