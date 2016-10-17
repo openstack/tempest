@@ -296,7 +296,7 @@ class NetworksTest(base.BaseNetworkTest):
                           subnet_id)
 
         # Since create_subnet adds the subnet to the delete list, and it is
-        # is actually deleted here - this will create and issue, hence remove
+        # actually deleted here - this will create and issue, hence remove
         # it from the list.
         self.subnets.pop()
 
