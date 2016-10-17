@@ -13,6 +13,13 @@ that the first thing to check with any change is that a gate job actually runs
 it. Tests which aren't executed either because of configuration or skips should
 not be accepted.
 
+If a new test is added that depends on a new config option (like a feature
+flag), the commit message must reference a change in DevStack or DevStack-Gate
+that enables the execution of this newly introduced test. This reference could
+either be a `Cross-Repository Dependency <http://docs.openstack.org/infra/
+manual/developers.html#cross-repository-dependencies>`_ or a simple link
+to a Gerrit review.
+
 
 Unit Tests
 ----------
