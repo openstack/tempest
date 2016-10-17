@@ -245,7 +245,7 @@ ComputeGroup = [
                     "projects. If multiple networks are available for a "
                     "project, this is the network which will be used for "
                     "creating servers if tempest does not create a network or "
-                    "s network is not specified elsewhere. It may be used for "
+                    "a network is not specified elsewhere. It may be used for "
                     "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('catalog_type',
                default='compute',
@@ -347,12 +347,10 @@ ComputeFeaturesGroup = [
                 help="Does the test environment support suspend/resume?"),
     cfg.BoolOpt('cold_migration',
                 default=True,
-                help="Does the test environment support cold migration "
-                     "available?"),
+                help="Does the test environment support cold migration?"),
     cfg.BoolOpt('live_migration',
                 default=True,
-                help="Does the test environment support live migration "
-                     "available?"),
+                help="Does the test environment support live migration?"),
     cfg.BoolOpt('metadata_service',
                 default=True,
                 help="Does the test environment support metadata service? "
