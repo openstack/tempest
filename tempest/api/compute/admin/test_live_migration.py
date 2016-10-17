@@ -128,8 +128,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     def test_live_block_migration_paused(self):
         self._test_live_migration(state='PAUSED')
 
-    @decorators.skip_because(bug="1549511",
-                             condition=CONF.service_available.neutron)
+    @decorators.skip_because(bug="1524898")
     @test.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
     @test.services('volume')
     def test_volume_backed_live_migration(self):
