@@ -34,27 +34,26 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         # Create a test shared volume for tests
         cls.volume = cls.create_volume()
 
-    def _reset_volume_status(self, volume_id, status):
-        # Reset the volume status
-        self.admin_volume_client.reset_volume_status(volume_id, status=status)
-
     def tearDown(self):
         # Set volume's status to available after test
-        self._reset_volume_status(self.volume['id'], status='available')
+        self.admin_volume_client.reset_volume_status(
+            self.volume['id'], status='available')
         super(VolumesActionsV2Test, self).tearDown()
 
     def _create_reset_and_force_delete_temp_volume(self, status=None):
         # Create volume, reset volume status, and force delete temp volume
         temp_volume = self.create_volume()
         if status:
-            self._reset_volume_status(temp_volume['id'], status)
+            self.admin_volume_client.reset_volume_status(
+                temp_volume['id'], status=status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.client.wait_for_resource_deletion(temp_volume['id'])
 
     @test.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
-        self._reset_volume_status(self.volume['id'], 'error')
+        self.admin_volume_client.reset_volume_status(
+            self.volume['id'], status='error')
         volume_get = self.admin_volume_client.show_volume(
             self.volume['id'])['volume']
         self.assertEqual('error', volume_get['status'])
