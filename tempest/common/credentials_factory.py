@@ -89,6 +89,7 @@ def get_credentials_provider(name, network_resources=None,
             public_network_id=CONF.network.public_network_id,
             create_networks=(CONF.auth.create_isolated_networks and not
                              CONF.baremetal.driver_enabled),
+            resource_prefix=CONF.resources_prefix,
             **get_dynamic_provider_params())
     else:
         if CONF.auth.test_accounts_file:
