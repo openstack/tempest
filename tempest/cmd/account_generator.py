@@ -144,6 +144,13 @@ def get_credential_provider(opts):
         identity_version=identity_version,
         name=opts.tag,
         network_resources=network_resources,
+        neutron_available=CONF.service_available.neutron,
+        create_networks=CONF.auth.create_isolated_networks,
+        identity_admin_role=CONF.identity.admin_role,
+        identity_admin_domain_scope=CONF.identity.admin_domain_scope,
+        project_network_cidr=CONF.network.project_network_cidr,
+        project_network_mask_bits=CONF.network.project_network_mask_bits,
+        public_network_id=CONF.network.public_network_id,
         admin_creds=admin_creds,
         **credentials_factory.get_dynamic_provider_params())
 
