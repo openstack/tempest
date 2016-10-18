@@ -17,7 +17,7 @@ import netaddr
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF

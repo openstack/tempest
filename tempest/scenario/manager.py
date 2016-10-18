@@ -57,7 +57,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             elif CONF.image_feature_enabled.api_v2:
                 cls.image_client = cls.manager.image_client_v2
             else:
-                raise exceptions.InvalidConfiguration(
+                raise lib_exc.InvalidConfiguration(
                     'Either api_v1 or api_v2 must be True in '
                     '[image-feature-enabled].')
         # Compute image client
@@ -639,7 +639,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                     return address['addr']
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
-            raise exceptions.InvalidConfiguration()
+            raise lib_exc.InvalidConfiguration()
 
 
 class NetworkScenarioTest(ScenarioTest):
@@ -1177,7 +1177,7 @@ class NetworkScenarioTest(ScenarioTest):
             # https://blueprints.launchpad.net/tempest/+spec/test-accounts
             if not CONF.compute.fixed_network_name:
                 m = 'fixed_network_name must be specified in config'
-                raise exceptions.InvalidConfiguration(m)
+                raise lib_exc.InvalidConfiguration(m)
             network = self._get_network_by_name(
                 CONF.compute.fixed_network_name)
             router = None

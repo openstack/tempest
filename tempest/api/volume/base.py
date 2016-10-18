@@ -17,8 +17,8 @@ from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 import tempest.test
 
 CONF = config.CONF

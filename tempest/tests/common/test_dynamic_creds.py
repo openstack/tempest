@@ -19,7 +19,6 @@ from oslotest import mockpatch
 from tempest.common import credentials_factory as credentials
 from tempest.common import dynamic_creds
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.identity.v2 import identity_client as v2_iden_client
@@ -572,7 +571,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(lib_exc.InvalidConfiguration,
                           creds.get_primary_creds)
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
@@ -592,7 +591,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(lib_exc.InvalidConfiguration,
                           creds.get_primary_creds)
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
@@ -612,7 +611,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        self.assertRaises(exceptions.InvalidConfiguration,
+        self.assertRaises(lib_exc.InvalidConfiguration,
                           creds.get_primary_creds)
 
 

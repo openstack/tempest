@@ -267,14 +267,14 @@ class Manager(clients.ServiceClients):
                     CONF.identity.uri, **self.default_params)
             else:
                 msg = 'Identity v2 API enabled, but no identity.uri set'
-                raise exceptions.InvalidConfiguration(msg)
+                raise lib_exc.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
             if CONF.identity.uri_v3:
                 self.token_v3_client = identity.v3.V3TokenClient(
                     CONF.identity.uri_v3, **self.default_params)
             else:
                 msg = 'Identity v3 API enabled, but no identity.uri_v3 set'
-                raise exceptions.InvalidConfiguration(msg)
+                raise lib_exc.InvalidConfiguration(msg)
 
     def _set_volume_clients(self):
         # Mandatory parameters (always defined)
