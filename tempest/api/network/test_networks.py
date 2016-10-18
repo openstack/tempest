@@ -175,8 +175,7 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
     def test_create_update_delete_network_subnet(self):
         # Create a network
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         self.addCleanup(self._delete_network, network)
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
@@ -525,8 +524,7 @@ class NetworksIpV6Test(NetworksTest):
     def test_create_delete_subnet_with_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway = str(netaddr.IPAddress(net.first + 2))
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         subnet = self.create_subnet(network, gateway)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway)
@@ -535,16 +533,14 @@ class NetworksIpV6Test(NetworksTest):
     def test_create_delete_subnet_with_default_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway_ip)
 
     @test.idempotent_id('a9653883-b2a4-469b-8c3c-4518430a7e55')
     def test_create_list_subnet_with_no_gw64_one_network(self):
-        name = data_utils.rand_name('network-')
-        network = self.create_network(name)
+        network = self.create_network()
         ipv6_gateway = self.subnet_dict(['gateway'])['gateway']
         subnet1 = self.create_subnet(network,
                                      ip_version=6,

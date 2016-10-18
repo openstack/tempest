@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest.common.utils import net_utils
 from tempest import config
 from tempest import test
@@ -55,8 +54,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         # Create network, subnet, router and add interface
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network, enable_dhcp=False)
-        cls.router = cls.create_router(data_utils.rand_name('router-'),
-                                       external_network_id=cls.ext_net_id)
+        cls.router = cls.create_router(external_network_id=cls.ext_net_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         # Create two ports one each for Creation and Updating of floatingIP
         for i in range(2):
@@ -156,8 +154,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(created_floating_ip['router_id'], self.router['id'])
         network2 = self.create_network()
         subnet2 = self.create_subnet(network2)
-        router2 = self.create_router(data_utils.rand_name('router-'),
-                                     external_network_id=self.ext_net_id)
+        router2 = self.create_router(external_network_id=self.ext_net_id)
         self.create_router_interface(router2['id'], subnet2['id'])
         port_other_router = self.create_port(network2)
         # Associate floating IP to the other port on another router

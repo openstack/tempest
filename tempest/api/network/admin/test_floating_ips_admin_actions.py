@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -44,8 +43,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         cls.floating_ip = cls.create_floatingip(cls.ext_net_id)
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router(data_utils.rand_name('router-'),
-                                       external_network_id=cls.ext_net_id)
+        cls.router = cls.create_router(external_network_id=cls.ext_net_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.port = cls.create_port(cls.network)
 
