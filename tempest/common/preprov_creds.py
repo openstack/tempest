@@ -21,10 +21,10 @@ import six
 import yaml
 
 from tempest import clients
-from tempest.common import cred_provider
 from tempest.common import fixed_network
 from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)

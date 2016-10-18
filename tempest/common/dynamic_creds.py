@@ -18,9 +18,9 @@ import six
 
 from tempest import clients
 from tempest.common import cred_client
-from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import exceptions
+from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
