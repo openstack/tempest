@@ -157,9 +157,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         size = random.randint(1024, 4096)
         image_file = six.BytesIO(data_utils.random_bytes(size))
-        name = data_utils.rand_name('image')
-        image = cls.create_image(name=name,
-                                 container_format=container_format,
+        image = cls.create_image(container_format=container_format,
                                  disk_format=disk_format,
                                  visibility='private')
         cls.client.store_image_file(image['id'], data=image_file)
