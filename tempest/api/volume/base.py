@@ -172,7 +172,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             except Exception:
                 pass
 
-    def create_server(self, name, **kwargs):
+    def create_server(self, **kwargs):
+        name = kwargs.get(
+            'name',
+            data_utils.rand_name(self.__class__.__name__ + '-instance'))
+
         tenant_network = self.get_tenant_network()
         body, _ = compute.create_test_server(
             self.os,

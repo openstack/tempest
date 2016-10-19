@@ -45,11 +45,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
         # Create a test instance
-        server_name = data_utils.rand_name(
-            self.__class__.__name__ + '-instance')
-        server = self.create_server(
-            name=server_name,
-            wait_until='ACTIVE')
+        server = self.create_server(wait_until='ACTIVE')
         self.servers_client.attach_volume(
             server['id'], volumeId=self.volume_origin['id'],
             device='/dev/%s' % CONF.compute.volume_device_name)
