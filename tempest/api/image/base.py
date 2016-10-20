@@ -142,6 +142,7 @@ class BaseV2ImageTest(BaseImageTest):
         cls.namespaces_client = cls.os.namespaces_client
         cls.resource_types_client = cls.os.resource_types_client
         cls.namespace_properties_client = cls.os.namespace_properties_client
+        cls.namespace_objects_client = cls.os.namespace_objects_client
         cls.schemas_client = cls.os.schemas_client
 
     def create_namespace(cls, namespace_name=None, visibility='public',
