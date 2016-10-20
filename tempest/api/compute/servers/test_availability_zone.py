@@ -29,4 +29,4 @@ class AZV2TestJSON(base.BaseV2ComputeTest):
     def test_get_availability_zone_list_with_non_admin_user(self):
         # List of availability zone with non-administrator user
         availability_zone = self.client.list_availability_zones()
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertGreater(len(availability_zone['availabilityZoneInfo']), 0)
