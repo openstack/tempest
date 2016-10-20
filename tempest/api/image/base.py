@@ -60,7 +60,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         """Wrapper that returns a test image."""
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + "-instance")
+            name = data_utils.rand_name(cls.__name__ + "-image")
             kwargs['name'] = name
 
         params = cls._get_create_params(**kwargs)
