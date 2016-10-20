@@ -296,10 +296,6 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
                                             status=int(r_code),
                                             body=json.dumps(resp_body))
         data = {
-            "method": "fake_method",
-            "url": "fake_url",
-            "headers": "fake_headers",
-            "body": "fake_body",
             "resp": resp,
             "resp_body": json.dumps(resp_body)
         }
