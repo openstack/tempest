@@ -35,6 +35,7 @@ class NetworkVersionsClient(base.BaseNetworkClient):
         start = time.time()
         self._log_request_start('GET', version_url)
         response, body = self.raw_request(version_url, 'GET')
+        self._error_checker(response, body)
         end = time.time()
         self._log_request('GET', version_url, response,
                           secs=(end - start), resp_body=body)

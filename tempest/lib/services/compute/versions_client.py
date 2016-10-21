@@ -40,6 +40,7 @@ class VersionsClient(base_compute_client.BaseComputeClient):
     def list_versions(self):
         version_url = self._get_base_version_url()
         resp, body = self.raw_request(version_url, 'GET')
+        self._error_checker(resp, body)
         body = json.loads(body)
         self.validate_response(schema.list_versions, resp, body)
         return rest_client.ResponseBody(resp, body)
@@ -56,6 +57,7 @@ class VersionsClient(base_compute_client.BaseComputeClient):
         # we need a token for this request
         resp, body = self.raw_request(version_url, 'GET',
                                       {'X-Auth-Token': self.token})
+        self._error_checker(resp, body)
         body = json.loads(body)
         self.validate_response(schema.get_one_version, resp, body)
         return rest_client.ResponseBody(resp, body)
