@@ -47,7 +47,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('51e663d0-6b89-4817-a465-20aca0667d03')
     def test_show_hypervisor_with_non_admin_user(self):
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertGreater(len(hypers), 0)
 
         self.assertRaises(
             lib_exc.Forbidden,
@@ -58,7 +58,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('2a0a3938-832e-4859-95bf-1c57c236b924')
     def test_show_servers_with_non_admin_user(self):
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertGreater(len(hypers), 0)
 
         self.assertRaises(
             lib_exc.Forbidden,
@@ -96,7 +96,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('6c3461f9-c04c-4e2a-bebb-71dc9cb47df2')
     def test_get_hypervisor_uptime_with_non_admin_user(self):
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertGreater(len(hypers), 0)
 
         self.assertRaises(
             lib_exc.Forbidden,
@@ -133,7 +133,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.idempotent_id('5b6a6c79-5dc1-4fa5-9c58-9c8085948e74')
     def test_search_hypervisor_with_non_admin_user(self):
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertGreater(len(hypers), 0)
 
         self.assertRaises(
             lib_exc.Forbidden,

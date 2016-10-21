@@ -52,7 +52,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertHypervisors(hypers)
 
         details = self.client.show_hypervisor(hypers[0]['id'])['hypervisor']
-        self.assertTrue(len(details) > 0)
+        self.assertGreater(len(details), 0)
         self.assertEqual(details['hypervisor_hostname'],
                          hypers[0]['hypervisor_hostname'])
 
@@ -65,14 +65,14 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         hostname = hypers[0]['hypervisor_hostname']
         hypervisors = (self.client.list_servers_on_hypervisor(hostname)
                        ['hypervisors'])
-        self.assertTrue(len(hypervisors) > 0)
+        self.assertGreater(len(hypervisors), 0)
 
     @test.idempotent_id('797e4f28-b6e0-454d-a548-80cc77c00816')
     def test_get_hypervisor_stats(self):
         # Verify the stats of the all hypervisor
         stats = (self.client.show_hypervisor_statistics()
                  ['hypervisor_statistics'])
-        self.assertTrue(len(stats) > 0)
+        self.assertGreater(len(stats), 0)
 
     @test.idempotent_id('91a50d7d-1c2b-4f24-b55a-a1fe20efca70')
     def test_get_hypervisor_uptime(self):

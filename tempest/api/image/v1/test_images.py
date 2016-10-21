@@ -247,7 +247,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     def test_index_min_size(self):
         images_list = self.client.list_images(size_min=142)['images']
         for image in images_list:
-            self.assertTrue(image['size'] >= 142)
+            self.assertGreaterEqual(image['size'], 142)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size142_set <= result_set)
         self.assertFalse(self.size42_set <= result_set)
