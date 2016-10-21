@@ -32,6 +32,11 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     VOLUME_FIELDS = ('id', 'name')
 
     def assertVolumesIn(self, fetched_list, expected_list, fields=None):
+        """Check out the list.
+
+        This function is aim at check out whether all of the volumes in
+        expected_list are in fetched_list.
+        """
         if fields:
             fieldsgetter = operator.itemgetter(*fields)
             expected_list = map(fieldsgetter, expected_list)
@@ -58,7 +63,6 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesV2ListTestJSON, cls).resource_setup()
         cls.name = cls.VOLUME_FIELDS[1]
-
         # Create 3 test volumes
         cls.volume_list = []
         cls.metadata = {'Type': 'work'}
@@ -144,6 +148,28 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual('available', volume['status'])
+        self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @test.idempotent_id('2016a942-3020-40d7-95ce-7613bf8407ce')
+    def test_volumes_list_by_bootable(self):
+        """Check out volumes.
+
+        This test function is aim at check out whether all of the volumes
+        in volume_list are not a bootable volume.
+        """
+        params = {'bootable': 'false'}
+        fetched_list = self.client.list_volumes(params=params)['volumes']
+        self._list_by_param_value_and_assert(params)
+        self.assertVolumesIn(fetched_list, self.volume_list,
+                             fields=self.VOLUME_FIELDS)
+
+    @test.idempotent_id('2016a939-72ec-482a-bf49-d5ca06216b9f')
+    def test_volumes_list_details_by_bootable(self):
+        params = {'bootable': 'false'}
+        fetched_list = self.client.list_volumes(
+            detail=True, params=params)['volumes']
+        for volume in fetched_list:
+            self.assertEqual('false', volume['bootable'])
         self.assertVolumesIn(fetched_list, self.volume_list)
 
     @test.idempotent_id('c0cfa863-3020-40d7-b587-e35f597d5d87')
