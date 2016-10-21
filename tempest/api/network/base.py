@@ -26,7 +26,7 @@ CONF = config.CONF
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
-    """Base class for the Neutron tests
+    """Base class for the Neutron tests.
 
     Per the Neutron API Guide, API v1.x was removed from the source code tree
     (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)
@@ -137,7 +137,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_network(cls, network_name=None):
         """Wrapper utility that returns a test network."""
-        network_name = network_name or data_utils.rand_name('test-network-')
+        network_name = network_name or data_utils.rand_name(
+            cls.__name__ + "-network")
 
         body = cls.networks_client.create_network(name=network_name)
         network = body['network']
@@ -148,7 +149,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
                       ip_version=None, client=None, **kwargs):
         """Wrapper utility that returns a test subnet."""
-
         # allow tests to use admin client
         if not client:
             client = cls.subnets_client
@@ -208,6 +208,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_router(cls, router_name=None, admin_state_up=False,
                       external_network_id=None, enable_snat=None,
                       **kwargs):
+        router_name = router_name or data_utils.rand_name(
+            cls.__name__ + "-router")
+
         ext_gw_info = {}
         if external_network_id:
             ext_gw_info['network_id'] = external_network_id

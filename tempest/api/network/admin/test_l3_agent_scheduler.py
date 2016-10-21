@@ -13,7 +13,6 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import exceptions
 from tempest import test
@@ -66,7 +65,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         else:
             msg = "L3 Agent Scheduler enabled in conf, but L3 Agent not found"
             raise exceptions.InvalidConfiguration(msg)
-        cls.router = cls.create_router(data_utils.rand_name('router'))
+        cls.router = cls.create_router()
 
         if CONF.network.dvr_extra_resources:
             # NOTE(armax): If DVR is an available extension, and the created

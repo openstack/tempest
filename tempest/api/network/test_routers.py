@@ -106,9 +106,8 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_create_router_with_default_snat_value(self):
         # Create a router with default snat rule
-        name = data_utils.rand_name('router')
         router = self._create_router(
-            name, external_network_id=CONF.network.public_network_id)
+            external_network_id=CONF.network.public_network_id)
         self._verify_router_gateway(
             router['id'], {'network_id': CONF.network.public_network_id,
                            'enable_snat': True})
@@ -136,7 +135,7 @@ class RoutersTest(base.BaseRouterTest):
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
         subnet = self.create_subnet(network)
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         # Add router interface with subnet id
         interface = self.routers_client.add_router_interface(
             router['id'], subnet_id=subnet['id'])
@@ -155,7 +154,7 @@ class RoutersTest(base.BaseRouterTest):
     def test_add_remove_router_interface_with_port_id(self):
         network = self.create_network()
         self.create_subnet(network)
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         port_body = self.ports_client.create_port(
             network_id=network['id'])
         # add router interface to port created above
@@ -201,7 +200,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.idempotent_id('6cc285d8-46bf-4f36-9b1a-783e3008ba79')
     def test_update_router_set_gateway(self):
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         self.routers_client.update_router(
             router['id'],
             external_gateway_info={
@@ -215,7 +214,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('b386c111-3b21-466d-880c-5e72b01e1a33')
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_with_snat_explicit(self):
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
@@ -230,7 +229,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('96536bc7-8262-4fb2-9967-5c46940fa279')
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_set_gateway_without_snat(self):
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         self.admin_routers_client.update_router(
             router['id'],
             external_gateway_info={
@@ -245,7 +244,6 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('ad81b7ee-4f81-407b-a19c-17e623f763e8')
     def test_update_router_unset_gateway(self):
         router = self._create_router(
-            data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
         self.routers_client.update_router(router['id'],
                                           external_gateway_info={})
@@ -260,7 +258,6 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     def test_update_router_reset_gateway_without_snat(self):
         router = self._create_router(
-            data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
         self.admin_routers_client.update_router(
             router['id'],
@@ -283,8 +280,7 @@ class RoutersTest(base.BaseRouterTest):
         test_routes = []
         routes_num = 4
         # Create a router
-        router = self._create_router(
-            data_utils.rand_name('router-'), True)
+        router = self._create_router(admin_state_up=True)
         self.addCleanup(
             self._delete_extra_routes,
             router['id'])
@@ -338,7 +334,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.idempotent_id('a8902683-c788-4246-95c7-ad9c6d63a4d9')
     def test_update_router_admin_state(self):
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         self.assertFalse(router['admin_state_up'])
         # Update router admin state
         update_body = self.routers_client.update_router(router['id'],
@@ -357,7 +353,7 @@ class RoutersTest(base.BaseRouterTest):
         subnet01 = self.create_subnet(network01)
         sub02_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
                                                                 subnet01['id'])
         self._verify_router_interface(router['id'], subnet01['id'],
@@ -371,7 +367,7 @@ class RoutersTest(base.BaseRouterTest):
     def test_router_interface_port_update_with_fixed_ip(self):
         network = self.create_network()
         subnet = self.create_subnet(network)
-        router = self._create_router(data_utils.rand_name('router-'))
+        router = self._create_router()
         fixed_ip = [{'subnet_id': subnet['id']}]
         interface = self._add_router_interface_with_subnet_id(router['id'],
                                                               subnet['id'])
@@ -417,7 +413,7 @@ class DvrRoutersTest(base.BaseRouterTest):
 
     @test.idempotent_id('644d7a4a-01a1-4b68-bb8d-0c0042cb1729')
     def test_convert_centralized_router(self):
-        router = self._create_router(data_utils.rand_name('router'))
+        router = self._create_router()
         self.assertNotIn('distributed', router)
         update_body = self.admin_routers_client.update_router(router['id'],
                                                               distributed=True)
