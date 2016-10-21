@@ -19,6 +19,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest import test
 
 CONF = config.CONF
@@ -75,6 +76,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         body = self.client.create_image(self.server_id, name=name,
                                         metadata=meta)
         image_id = data_utils.parse_image_id(body.response['location'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_image, image_id)
         waiters.wait_for_image_status(self.client, image_id, 'ACTIVE')
 
         # Verify the image was created correctly
