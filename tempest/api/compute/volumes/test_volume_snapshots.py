@@ -40,13 +40,9 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('cd4ec87d-7825-450d-8040-6e2068f2da8f')
     def test_volume_snapshot_create_get_list_delete(self):
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        volume = self.volumes_client.create_volume(
-            size=CONF.volume.volume_size,
-            display_name=v_name)['volume']
+        volume = self.create_volume()
         self.addCleanup(self.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'available')
+
         s_name = data_utils.rand_name(self.__class__.__name__ + '-Snapshot')
         # Create snapshot
         snapshot = self.snapshots_client.create_snapshot(
