@@ -164,7 +164,7 @@ class ObjectClient(rest_client.RestClient):
             chunked=True
         )
 
-        self._error_checker('PUT', None, headers, contents, resp, body)
+        self._error_checker(resp, body)
         self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp
 

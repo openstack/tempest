@@ -661,8 +661,7 @@ class RestClient(object):
             time.sleep(delay)
             resp, resp_body = self._request(method, url,
                                             headers=headers, body=body)
-        self._error_checker(method, url, headers, body,
-                            resp, resp_body)
+        self._error_checker(resp, resp_body)
         return resp, resp_body
 
     def _get_retry_after_delay(self, resp):
@@ -710,8 +709,7 @@ class RestClient(object):
             raise ValueError("Failed to parse date %s" % val)
         return time.mktime(parts)
 
-    def _error_checker(self, method, url,
-                       headers, body, resp, resp_body):
+    def _error_checker(self, resp, resp_body):
 
         # NOTE(mtreinish): Check for httplib response from glance_http. The
         # object can't be used here because importing httplib breaks httplib2.
