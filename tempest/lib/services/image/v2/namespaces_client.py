@@ -37,8 +37,9 @@ class NamespacesClient(rest_client.RestClient):
     def list_namespaces(self):
         """List namespaces
 
-        Available params: see http://developer.openstack.org/
-                              api-ref/image/v2/metadefs-index.html#list-namespaces
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-namespaces
         """
         url = 'metadefs/namespaces'
         resp, body = self.get(url)
