@@ -15,7 +15,6 @@
 
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.scenario import manager
@@ -56,9 +55,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             security_group = self._create_security_group()
             security_groups = [{'name': security_group['name']}]
         network, subnet, router = self.create_networks()
-        server_name = data_utils.rand_name(self.__class__.__name__ + '-server')
         server = self.create_server(
-            name=server_name,
             networks=[{'uuid': network['id']}],
             key_name=keypair['name'],
             security_groups=security_groups,

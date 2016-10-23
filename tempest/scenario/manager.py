@@ -216,7 +216,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if size is None:
             size = CONF.volume.volume_size
         if name is None:
-            name = data_utils.rand_name(self.__class__.__name__)
+            name = data_utils.rand_name(self.__class__.__name__ + "-volume")
         kwargs = {'display_name': name,
                   'snapshot_id': snapshot_id,
                   'imageRef': imageRef,
@@ -417,7 +417,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Compute client
         _images_client = self.compute_images_client
         if name is None:
-            name = data_utils.rand_name('scenario-snapshot')
+            name = data_utils.rand_name(self.__class__.__name__ + 'snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
         image = _images_client.create_image(server['id'], name=name)
         image_id = image.response['location'].split('images/')[1]
