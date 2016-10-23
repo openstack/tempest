@@ -22,7 +22,7 @@ user for each tenant. The **accounts.yaml** file will be valid and contain
 credentials for created users, so each user will be in separate tenant and
 have the username, tenant_name, password and roles.
 
-**Usage:** ``tempest-account-generator [-h] [OPTIONS] accounts_file.yaml``.
+**Usage:** ``tempest account-generator [-h] [OPTIONS] accounts_file.yaml``.
 
 Positional Arguments
 --------------------
@@ -90,7 +90,7 @@ running in parallel.
 **-i VERSION**, **--identity-version VERSION** (Optional) Provisions accounts
 using the specified version of the identity API. (default: '3').
 
-To see help on specific argument, please do: ``tempest-account-generator
+To see help on specific argument, please do: ``tempest account-generator
 [OPTIONS] <accounts_file.yaml> -h``.
 """
 import argparse
@@ -262,9 +262,9 @@ def _parser_add_args(parser):
 
 
 def get_options():
-    usage_string = ('tempest-account-generator [-h] <ARG> ...\n\n'
+    usage_string = ('tempest account-generator [-h] <ARG> ...\n\n'
                     'To see help on specific argument, do:\n'
-                    'tempest-account-generator <ARG> -h')
+                    'tempest account-generator <ARG> -h')
     parser = argparse.ArgumentParser(
         description=DESCRIPTION,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
