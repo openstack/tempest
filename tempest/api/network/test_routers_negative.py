@@ -134,7 +134,5 @@ class DvrRoutersNegativeTest(base.BaseRouterTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
     def test_router_create_tenant_distributed_returns_forbidden(self):
-        self.assertRaises(lib_exc.Forbidden,
-                          self.create_router,
-                          data_utils.rand_name('router'),
+        self.assertRaises(lib_exc.Forbidden, self.create_router,
                           distributed=True)

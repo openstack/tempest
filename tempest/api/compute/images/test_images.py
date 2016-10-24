@@ -42,11 +42,9 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @test.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
     def test_delete_saving_image(self):
-        snapshot_name = data_utils.rand_name('test-snap')
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         image = self.create_image_from_server(server['id'],
-                                              name=snapshot_name,
                                               wait_until='SAVING')
         self.client.delete_image(image['id'])
         msg = ('The image with ID {image_id} failed to be deleted'
