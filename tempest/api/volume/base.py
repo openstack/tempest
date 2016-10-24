@@ -113,13 +113,12 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         if 'size' not in kwargs:
             kwargs['size'] = CONF.volume.volume_size
 
-        name = data_utils.rand_name(cls.__name__ + '-Volume')
-
         name_field = cls.special_fields['name_field']
+        if name_field not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + '-Volume')
+            kwargs[name_field] = name
 
-        kwargs[name_field] = name
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
-
         cls.volumes.append(volume)
         waiters.wait_for_volume_status(cls.volumes_client,
                                        volume['id'], 'available')
@@ -128,6 +127,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
+        name_field = cls.special_fields['name_field']
+        if name_field not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + '-Snapshot')
+            kwargs[name_field] = name
+
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
         cls.snapshots.append(snapshot)

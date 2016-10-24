@@ -64,9 +64,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
-        s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
-        params = {self.name_field: s_name}
-        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
+        snapshot = self.create_snapshot(self.volume_origin['id'])
 
         # Get the snap and check for some of its details
         snap_get = self.snapshots_client.show_snapshot(
