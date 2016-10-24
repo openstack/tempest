@@ -1,7 +1,0 @@
-[{"action": "tempest.stress.actions.volume_attach_delete.VolumeAttachDeleteTest",
-  "threads": 4,
-  "use_admin": true,
-  "use_isolated_tenants": true,
-  "kwargs": {}
-  }
-]

@@ -95,7 +95,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._check_network_connectivity(server, keypair, floating_ip)
 
     @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
-    @test.stresstest(class_setup_per='process')
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         keypair = self.create_keypair()

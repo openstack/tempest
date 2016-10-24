@@ -1,0 +1,4 @@
+---
+upgrade:
+  - The Stress tests framework and all the stress tests have been removed.
+
