@@ -140,6 +140,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if clients is None:
             clients = self.manager
 
+        if name is None:
+            name = data_utils.rand_name(self.__class__.__name__ + "-server")
+
         vnic_type = CONF.network.port_vnic_type
 
         # If vnic_type is configured create port for
