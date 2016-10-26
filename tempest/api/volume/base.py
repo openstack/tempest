@@ -173,7 +173,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 pass
 
     def create_server(self, **kwargs):
-        name = kwargs.get(
+        name = kwargs.pop(
             'name',
             data_utils.rand_name(self.__class__.__name__ + '-instance'))
 
