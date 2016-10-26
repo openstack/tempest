@@ -114,7 +114,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             object_client = cls.object_client
         for cont in cls.containers:
             try:
-                objlist = container_client.list_all_container_objects(cont)
+                params = {'limit': 9999, 'format': 'json'}
+                resp, objlist = container_client.list_container_contents(
+                    cont, params)
                 # delete every object in the container
                 for obj in objlist:
                     test_utils.call_and_ignore_notfound_exc(

@@ -129,10 +129,10 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # that doesn't exist.
         nonexistent_name = data_utils.rand_name(
             name="TestNonexistentContainer")
-
+        params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
-                          self.container_client.list_all_container_objects,
-                          nonexistent_name)
+                          self.container_client.list_container_contents,
+                          nonexistent_name, params)
 
     @test.attr(type=["negative"])
     @test.idempotent_id('86b2ab08-92d5-493d-acd2-85f0c848819e')
@@ -143,10 +143,10 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
         self.assertHeaders(resp, 'Container', 'DELETE')
-
+        params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
-                          self.container_client.list_all_container_objects,
-                          container_name)
+                          self.container_client.list_container_contents,
+                          container_name, params)
 
     @test.attr(type=["negative"])
     @test.idempotent_id('42da116e-1e8c-4c96-9e06-2f13884ed2b1')
