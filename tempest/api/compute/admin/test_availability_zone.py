@@ -35,4 +35,4 @@ class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         availability_zone = self.client.list_availability_zones(detail=True)
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertGreater(len(availability_zone['availabilityZoneInfo']), 0)

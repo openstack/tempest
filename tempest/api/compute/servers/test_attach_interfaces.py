@@ -215,7 +215,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
-        self.assertTrue(interface_count > 0)
+        self.assertGreater(interface_count, 0)
         self._check_interface(ifs[0])
 
         try:
@@ -253,7 +253,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
-        self.assertTrue(interface_count > 0)
+        self.assertGreater(interface_count, 0)
         self._check_interface(ifs[0])
         network_id = ifs[0]['net_id']
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
