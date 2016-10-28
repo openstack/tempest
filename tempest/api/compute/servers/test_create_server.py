@@ -144,14 +144,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
-        name = data_utils.rand_name('server_group')
-        policies = ['affinity']
-        body = self.server_groups_client.create_server_group(
-            name=name, policies=policies)['server_group']
-        group_id = body['id']
-        self.addCleanup(self.server_groups_client.delete_server_group,
-                        group_id)
-
+        group_id = self.create_test_server_group()['id']
         hints = {'group': group_id}
         server = self.create_test_server(scheduler_hints=hints,
                                          wait_until='ACTIVE')
