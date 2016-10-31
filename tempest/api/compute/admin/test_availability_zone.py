@@ -29,7 +29,7 @@ class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
     def test_get_availability_zone_list(self):
         # List of availability zone
         availability_zone = self.client.list_availability_zones()
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertGreater(len(availability_zone['availabilityZoneInfo']), 0)
 
     @test.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')
     def test_get_availability_zone_list_detail(self):
