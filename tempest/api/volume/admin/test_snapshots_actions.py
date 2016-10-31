@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -38,16 +37,10 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         super(SnapshotsActionsV2Test, cls).resource_setup()
 
         # Create a test shared volume for tests
-        vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
-        cls.name_field = cls.special_fields['name_field']
-        params = {cls.name_field: vol_name}
-        cls.volume = cls.create_volume(**params)
+        cls.volume = cls.create_volume()
 
         # Create a test shared snapshot for tests
-        snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
-        params = {cls.name_field: snap_name}
-        cls.snapshot = cls.create_snapshot(
-            volume_id=cls.volume['id'], **params)
+        cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
 
     def tearDown(self):
         # Set snapshot's status to available after test
