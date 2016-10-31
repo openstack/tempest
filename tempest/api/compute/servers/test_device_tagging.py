@@ -13,12 +13,14 @@
 #    under the License.
 
 import json
+import time
 
 from oslo_log import log as logging
 
 from tempest.api.compute import base
 from tempest.common import utils
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -31,18 +33,11 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class DeviceTaggingTest(base.BaseV2ComputeTest):
-
-    min_microversion = '2.32'
-    # NOTE(mriedem): max_version looks odd but it's actually correct. Due to a
-    # bug in the 2.32 microversion, tags on block devices only worked with the
-    # 2.32 microversion specifically. And tags on networks only worked between
-    # 2.32 and 2.36 inclusive; the 2.37 microversion broke tags for networks.
-    max_microversion = '2.32'
+class DeviceTaggingBase(base.BaseV2ComputeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(DeviceTaggingTest, cls).skip_checks()
+        super(DeviceTaggingBase, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
         if not CONF.validation.run_validation:
@@ -54,7 +49,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
 
     @classmethod
     def setup_clients(cls):
-        super(DeviceTaggingTest, cls).setup_clients()
+        super(DeviceTaggingBase, cls).setup_clients()
         cls.networks_client = cls.os_primary.networks_client
         cls.ports_client = cls.os_primary.ports_client
         cls.subnets_client = cls.os_primary.subnets_client
@@ -64,7 +59,55 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
     def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, router=True,
                                   dhcp=True)
-        super(DeviceTaggingTest, cls).setup_credentials()
+        super(DeviceTaggingBase, cls).setup_credentials()
+
+    def verify_metadata_from_api(self, server, ssh_client, verify_method):
+        md_url = 'http://169.254.169.254/openstack/latest/meta_data.json'
+        LOG.info('Attempting to verify tagged devices in server %s via '
+                 'the metadata service: %s', server['id'], md_url)
+
+        def get_and_verify_metadata():
+            try:
+                ssh_client.exec_command('curl -V')
+            except exceptions.SSHExecCommandFailed:
+                if not CONF.compute_feature_enabled.config_drive:
+                    raise self.skipException('curl not found in guest '
+                                             'and config drive is '
+                                             'disabled')
+                LOG.warning('curl was not found in the guest, device '
+                            'tagging metadata was not checked in the '
+                            'metadata API')
+                return True
+            cmd = 'curl %s' % md_url
+            md_json = ssh_client.exec_command(cmd)
+            verify_method(md_json)
+            return True
+
+        if not test_utils.call_until_true(get_and_verify_metadata,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
+            raise exceptions.TimeoutException('Timeout while verifying '
+                                              'metadata on server.')
+
+    def verify_metadata_on_config_drive(self, server, ssh_client,
+                                        verify_method):
+        LOG.info('Attempting to verify tagged devices in server %s via '
+                 'the config drive.', server['id'])
+        ssh_client.mount_config_drive()
+        cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
+        md_json = ssh_client.exec_command(cmd_md)
+        verify_method(md_json)
+        ssh_client.unmount_config_drive()
+
+
+class TaggedBootDevicesTest(DeviceTaggingBase):
+
+    min_microversion = '2.32'
+    # NOTE(mriedem): max_version looks odd but it's actually correct. Due to a
+    # bug in the 2.32 microversion, tags on block devices only worked with the
+    # 2.32 microversion specifically. And tags on networks only worked between
+    # 2.32 and 2.36 inclusive; the 2.37 microversion broke tags for networks.
+    max_microversion = '2.32'
 
     def verify_device_metadata(self, md_json):
         md_dict = json.loads(md_json)
@@ -92,7 +135,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @utils.services('network', 'volume', 'image')
-    def test_device_tagging(self):
+    def test_tagged_boot_devices(self):
         # Create volumes
         # The create_volume methods waits for the volumes to be available and
         # the base class will clean them up on tearDown.
@@ -207,7 +250,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.addCleanup(self.delete_server, server['id'])
 
         server = self.servers_client.show_server(server['id'])['server']
-        self.ssh_client = remote_client.RemoteClient(
+        ssh_client = remote_client.RemoteClient(
             self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
             pkey=validation_resources['keypair']['private_key'],
@@ -230,46 +273,104 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.assertTrue(self.net_2_100_mac)
         self.assertTrue(self.net_2_200_mac)
 
-        # Verify metadata from metadata service
+        # Verify metadata from metadata API
         if CONF.compute_feature_enabled.metadata_service:
-            md_url = 'http://169.254.169.254/openstack/latest/meta_data.json'
-            LOG.info('Attempting to verify tagged devices in server %s via '
-                     'the metadata service: %s', server['id'], md_url)
-
-            def get_and_verify_metadata():
-                try:
-                    self.ssh_client.exec_command('curl -V')
-                except exceptions.SSHExecCommandFailed:
-                    if not CONF.compute_feature_enabled.config_drive:
-                        raise self.skipException('curl not found in guest '
-                                                 'and config drive is '
-                                                 'disabled')
-                    LOG.warning('curl was not found in the guest, device '
-                                'tagging metadata was not checked in the '
-                                'metadata API')
-                    return True
-                cmd = 'curl %s' % md_url
-                md_json = self.ssh_client.exec_command(cmd)
-                self.verify_device_metadata(md_json)
-                return True
-
-            if not test_utils.call_until_true(get_and_verify_metadata,
-                                              CONF.compute.build_timeout,
-                                              CONF.compute.build_interval):
-                raise exceptions.TimeoutException('Timeout while verifying '
-                                                  'metadata on server.')
+            self.verify_metadata_from_api(server, ssh_client,
+                                          self.verify_device_metadata)
 
         # Verify metadata on config drive
         if CONF.compute_feature_enabled.config_drive:
-            LOG.info('Attempting to verify tagged devices in server %s via '
-                     'the config drive.', server['id'])
-            self.ssh_client.mount_config_drive()
-            cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
-            md_json = self.ssh_client.exec_command(cmd_md)
-            self.verify_device_metadata(md_json)
-            self.ssh_client.unmount_config_drive()
+            self.verify_metadata_on_config_drive(server, ssh_client,
+                                                 self.verify_device_metadata)
 
 
-class DeviceTaggingTestV2_42(DeviceTaggingTest):
+class TaggedBootDevicesTest_v242(TaggedBootDevicesTest):
     min_microversion = '2.42'
     max_microversion = 'latest'
+
+
+class TaggedAttachmentsTest(DeviceTaggingBase):
+
+    min_microversion = '2.49'
+    max_microversion = 'latest'
+
+    @classmethod
+    def skip_checks(cls):
+        super(TaggedAttachmentsTest, cls).skip_checks()
+        if not CONF.compute_feature_enabled.metadata_service:
+            raise cls.skipException('Metadata API must be enabled')
+
+    def verify_device_metadata(self, md_json):
+        md_dict = json.loads(md_json)
+        found_devices = [d['tags'][0] for d in md_dict['devices']]
+        self.assertItemsEqual(found_devices, ['nic-tag', 'volume-tag'])
+
+    def verify_empty_devices(self, md_json):
+        md_dict = json.loads(md_json)
+        self.assertEmpty(md_dict['devices'])
+
+    @decorators.idempotent_id('3e41c782-2a89-4922-a9d2-9a188c4e7c7c')
+    @utils.services('network', 'volume', 'image')
+    def test_tagged_attachment(self):
+        # Create network
+        net = self.networks_client.create_network(
+            name=data_utils.rand_name(
+                'tagged-attachments-test-net'))['network']
+        self.addCleanup(self.networks_client.delete_network, net['id'])
+
+        # Create subnet
+        subnet = self.subnets_client.create_subnet(
+            network_id=net['id'],
+            cidr='10.10.10.0/24',
+            ip_version=4)['subnet']
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+
+        # Create volume
+        volume = self.create_volume()
+
+        # Boot test server
+        config_drive_enabled = CONF.compute_feature_enabled.config_drive
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            config_drive=config_drive_enabled,
+            name=data_utils.rand_name('device-tagging-server'),
+            networks=[{'uuid': self.get_tenant_network()['id']}])
+        self.addCleanup(self.delete_server, server['id'])
+
+        # Attach tagged nic and volume
+        interface = self.interfaces_client.create_interface(
+            server['id'], net_id=net['id'],
+            tag='nic-tag')['interfaceAttachment']
+        self.attach_volume(server, volume, tag='volume-tag')
+
+        ssh_client = remote_client.RemoteClient(
+            self.get_server_ip(server, validation_resources),
+            CONF.validation.image_ssh_user,
+            pkey=validation_resources['keypair']['private_key'],
+            server=server,
+            servers_client=self.servers_client)
+
+        # NOTE(artom) The newly attached tagged nic won't appear in the
+        # metadata until the cache is refreshed. We wait 16 seconds since the
+        # default cache expiry is 15 seconds.
+        time.sleep(16)
+        self.verify_metadata_from_api(server, ssh_client,
+                                      self.verify_device_metadata)
+
+        # Detach tagged nic and volume
+        self.servers_client.detach_volume(server['id'], volume['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        self.interfaces_client.delete_interface(server['id'],
+                                                interface['port_id'])
+        waiters.wait_for_interface_detach(self.interfaces_client,
+                                          server['id'],
+                                          interface['port_id'])
+        # NOTE(artom) More waiting until metadata cache is refreshed.
+        time.sleep(16)
+        self.verify_metadata_from_api(server, ssh_client,
+                                      self.verify_empty_devices)
