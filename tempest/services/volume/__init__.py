@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from tempest.services.volume import v1
-from tempest.services.volume import v2
 from tempest.services.volume import v3
 
-__all__ = ['v1', 'v2', 'v3']
+__all__ = ['v3']
