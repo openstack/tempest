@@ -199,7 +199,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
         self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self.create_router()
         self.addCleanup(self.routers_client.delete_router, router['id'])
         port = self.ports_client.create_port(network_id=network['id'])
         # Add router interface to port created above

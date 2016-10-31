@@ -348,9 +348,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     def _create_subnet_router(self, kwargs):
         subnet = self.create_subnet(self.network, **kwargs)
-        router = self.create_router(
-            router_name=data_utils.rand_name("routerv6-"),
-            admin_state_up=True)
+        router = self.create_router(admin_state_up=True)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
         body = self.ports_client.show_port(port['port_id'])
