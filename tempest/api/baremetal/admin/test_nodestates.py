@@ -15,7 +15,7 @@
 from oslo_utils import timeutils
 
 from tempest.api.baremetal.admin import base
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 

@@ -92,7 +92,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
             caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
 
@@ -111,7 +111,7 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
             raise exceptions.BuildErrorException(server_id=server_id)
 
         if int(time.time()) - start_time >= client.build_timeout:
-            raise exceptions.TimeoutException
+            raise lib_exc.TimeoutException
 
         time.sleep(client.build_interval)
 
@@ -163,7 +163,7 @@ def wait_for_image_status(client, image_id, status):
     caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)
-    raise exceptions.TimeoutException(message)
+    raise lib_exc.TimeoutException(message)
 
 
 def wait_for_volume_status(client, volume_id, status):
@@ -186,7 +186,7 @@ def wait_for_volume_status(client, volume_id, status):
                        'within the required time (%s s).' %
                        (volume_id, status, volume_status,
                         client.build_timeout))
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
 
 
 def wait_for_snapshot_status(client, snapshot_id, status):
@@ -207,7 +207,7 @@ def wait_for_snapshot_status(client, snapshot_id, status):
                        'within the required time (%s s).' %
                        (snapshot_id, status, snapshot_status,
                         client.build_timeout))
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
 
 
 def wait_for_backup_status(client, backup_id, status):
@@ -228,7 +228,7 @@ def wait_for_backup_status(client, backup_id, status):
                        '(current %s) within the required time (%s s).' %
                        (backup_id, status, backup_status,
                         client.build_timeout))
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
 
 
 def wait_for_bm_node_status(client, node_id, attr, status):
@@ -257,7 +257,7 @@ def wait_for_bm_node_status(client, node_id, attr, status):
             caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
 
 
 def wait_for_qos_operations(client, qos_id, operation, args=None):
@@ -288,5 +288,5 @@ def wait_for_qos_operations(client, qos_id, operation, args=None):
             raise lib_exc.UnprocessableEntity(msg)
 
         if int(time.time()) - start_time >= client.build_timeout:
-            raise exceptions.TimeoutException
+            raise lib_exc.TimeoutException
         time.sleep(client.build_interval)
