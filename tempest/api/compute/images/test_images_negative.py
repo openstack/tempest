@@ -64,8 +64,6 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a new image with invalid server id
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        resp = {}
-        resp['status'] = None
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
                           '!@$^&*()', name=name, meta=meta)
 
