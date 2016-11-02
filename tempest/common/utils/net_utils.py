@@ -51,3 +51,23 @@ def get_unused_ip_addresses(ports_client, subnets_client,
                 return addrs
     msg = "Insufficient IP addresses available"
     raise lib_exc.BadRequest(message=msg)
+
+
+def get_ping_payload_size(mtu, ip_version):
+    """Return the maximum size of ping payload that will fit into MTU."""
+    if not mtu:
+        return None
+    if ip_version == 4:
+        ip_header = 20
+        icmp_header = 8
+    else:
+        ip_header = 40
+        icmp_header = 4
+    res = mtu - ip_header - icmp_header
+    if res < 0:
+        raise lib_exc.BadRequest(
+            message='MTU = %(mtu)d is too low for IPv%(ip_version)d' % {
+                'mtu': mtu,
+                'ip_version': ip_version,
+            })
+    return res
