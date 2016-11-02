@@ -95,9 +95,11 @@ class RoutersTestDVR(base.BaseRouterTest):
         """
         name = data_utils.rand_name('router')
         # router needs to be in admin state down in order to be upgraded to DVR
+        # l3ha routers are not upgradable to dvr, make it explicitly non ha
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False,
-                                                         admin_state_up=False)
+                                                         admin_state_up=False,
+                                                         ha=False)
         self.addCleanup(self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
