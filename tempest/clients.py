@@ -19,7 +19,6 @@ from oslo_log import log as logging
 
 from tempest.common import negative_rest_client
 from tempest import config
-from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
@@ -350,7 +349,7 @@ def get_auth_provider(credentials, pre_auth=False, scope='project'):
     # kwargs for auth provider match the common ones used by service clients
     default_params = config.service_client_config()
     if credentials is None:
-        raise exceptions.InvalidCredentials(
+        raise lib_exc.InvalidCredentials(
             'Credentials must be specified')
     auth_provider_class, auth_url = get_auth_provider_class(
         credentials)
