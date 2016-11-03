@@ -276,28 +276,21 @@ class NetworksTest(base.BaseNetworkTest):
     @test.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
     def test_delete_network_with_subnet(self):
         # Creates a network
-        name = data_utils.rand_name('network-')
-        body = self.networks_client.create_network(name=name)
-        network = body['network']
+        network = self.create_network()
         net_id = network['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.networks_client.delete_network, net_id)
+                        self._delete_network, network)
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)
         subnet_id = subnet['id']
 
         # Delete network while the subnet still exists
-        body = self.networks_client.delete_network(net_id)
+        self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
         self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
                           subnet_id)
-
-        # Since create_subnet adds the subnet to the delete list, and it is
-        # actually deleted here - this will create and issue, hence remove
-        # it from the list.
-        self.subnets.pop()
 
     @test.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
     def test_create_delete_subnet_without_gateway(self):
