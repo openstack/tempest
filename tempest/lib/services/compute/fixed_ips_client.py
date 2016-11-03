@@ -32,8 +32,9 @@ class FixedIPsClient(base_compute_client.BaseComputeClient):
     def reserve_fixed_ip(self, fixed_ip, **kwargs):
         """Reserve/Unreserve a fixed IP.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#reserveIP
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html#reserveIP
         """
         url = "os-fixed-ips/%s/action" % fixed_ip
         resp, body = self.post(url, json.dumps(kwargs))
