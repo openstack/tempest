@@ -279,52 +279,33 @@ class Manager(clients.ServiceClients):
         # Mandatory parameters (always defined)
         params = self.parameters['volume']
 
-        self.volume_qos_client = volume.v1.QosSpecsClient(self.auth_provider,
-                                                          **params)
-        self.volume_qos_v2_client = volume.v2.QosSpecsClient(
-            self.auth_provider, **params)
-        self.volume_services_client = volume.v1.ServicesClient(
-            self.auth_provider, **params)
-        self.volume_services_v2_client = volume.v2.ServicesClient(
-            self.auth_provider, **params)
-        self.backups_client = volume.v1.BackupsClient(self.auth_provider,
-                                                      **params)
-        self.backups_v2_client = volume.v2.BackupsClient(self.auth_provider,
-                                                         **params)
-        self.encryption_types_client = volume.v1.EncryptionTypesClient(
-            self.auth_provider, **params)
-        self.encryption_types_v2_client = volume.v2.EncryptionTypesClient(
-            self.auth_provider, **params)
-        self.snapshots_client = volume.v1.SnapshotsClient(self.auth_provider,
-                                                          **params)
-        self.snapshots_v2_client = volume.v2.SnapshotsClient(
-            self.auth_provider, **params)
-        self.volumes_client = volume.v1.VolumesClient(self.auth_provider,
-                                                      **params)
-        self.volumes_v2_client = volume.v2.VolumesClient(self.auth_provider,
-                                                         **params)
+        self.volume_qos_client = self.volume_v1.QosSpecsClient()
+        self.volume_qos_v2_client = self.volume_v2.QosSpecsClient()
+        self.volume_services_client = self.volume_v1.ServicesClient()
+        self.volume_services_v2_client = self.volume_v2.ServicesClient()
+        self.backups_client = self.volume_v1.BackupsClient()
+        self.backups_v2_client = self.volume_v2.BackupsClient()
+        self.encryption_types_client = self.volume_v1.EncryptionTypesClient()
+        self.encryption_types_v2_client = \
+            self.volume_v2.EncryptionTypesClient()
+        self.snapshots_client = self.volume_v1.SnapshotsClient()
+        self.snapshots_v2_client = self.volume_v2.SnapshotsClient()
+        self.volumes_client = self.volume_v1.VolumesClient()
+        self.volumes_v2_client = self.volume_v2.VolumesClient()
         self.volume_messages_client = volume.v3.MessagesClient(
             self.auth_provider, **params)
-        self.volume_types_client = volume.v1.TypesClient(self.auth_provider,
-                                                         **params)
-        self.volume_types_v2_client = volume.v2.TypesClient(self.auth_provider,
-                                                            **params)
-        self.volume_hosts_client = volume.v1.HostsClient(self.auth_provider,
-                                                         **params)
-        self.volume_hosts_v2_client = volume.v2.HostsClient(self.auth_provider,
-                                                            **params)
-        self.volume_quotas_client = volume.v1.QuotasClient(self.auth_provider,
-                                                           **params)
-        self.volume_quotas_v2_client = volume.v2.QuotasClient(
-            self.auth_provider, **params)
-        self.volumes_extension_client = volume.v1.ExtensionsClient(
-            self.auth_provider, **params)
-        self.volumes_v2_extension_client = volume.v2.ExtensionsClient(
-            self.auth_provider, **params)
+        self.volume_types_client = self.volume_v1.TypesClient()
+        self.volume_types_v2_client = self.volume_v2.TypesClient()
+        self.volume_hosts_client = self.volume_v1.HostsClient()
+        self.volume_hosts_v2_client = self.volume_v2.HostsClient()
+        self.volume_quotas_client = self.volume_v1.QuotasClient()
+        self.volume_quotas_v2_client = self.volume_v2.QuotasClient()
+        self.volumes_extension_client = self.volume_v1.ExtensionsClient()
+        self.volumes_v2_extension_client = self.volume_v2.ExtensionsClient()
         self.volume_availability_zone_client = \
-            volume.v1.AvailabilityZoneClient(self.auth_provider, **params)
+            self.volume_v1.AvailabilityZoneClient()
         self.volume_v2_availability_zone_client = \
-            volume.v2.AvailabilityZoneClient(self.auth_provider, **params)
+            self.volume_v2.AvailabilityZoneClient()
 
     def _set_object_storage_clients(self):
         # Mandatory parameters (always defined)
