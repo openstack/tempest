@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -80,6 +82,8 @@ class RoutersTestDVR(base.BaseRouterTest):
         self.assertFalse(router['router']['distributed'])
 
     @test.idempotent_id('acd43596-c1fb-439d-ada8-31ad48ae3c2e')
+    @testtools.skipUnless(test.is_extension_enabled('l3-ha', 'network'),
+                          'HA routers are not available.')
     def test_centralized_router_update_to_dvr(self):
         """Test centralized router update
 
