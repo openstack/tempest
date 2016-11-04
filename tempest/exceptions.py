@@ -21,10 +21,6 @@ class InvalidServiceTag(exceptions.TempestException):
     message = "Invalid service tag"
 
 
-class TimeoutException(exceptions.TempestException):
-    message = "Request timed out"
-
-
 class BuildErrorException(exceptions.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 

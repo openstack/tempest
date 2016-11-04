@@ -1287,7 +1287,7 @@ class BaremetalScenarioTest(ScenarioTest):
             check_state, timeout, interval):
             msg = ("Timed out waiting for node %s to reach %s state(s) %s" %
                    (node_id, state_attr, target_states))
-            raise exceptions.TimeoutException(msg)
+            raise lib_exc.TimeoutException(msg)
 
     def wait_provisioning_state(self, node_id, state, timeout):
         self._node_state_timeout(
@@ -1311,7 +1311,7 @@ class BaremetalScenarioTest(ScenarioTest):
             _get_node, CONF.baremetal.association_timeout, 1):
             msg = ('Timed out waiting to get Ironic node by instance id %s'
                    % instance_id)
-            raise exceptions.TimeoutException(msg)
+            raise lib_exc.TimeoutException(msg)
 
     def get_node(self, node_id=None, instance_id=None):
         if node_id:

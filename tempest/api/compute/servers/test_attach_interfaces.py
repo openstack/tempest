@@ -20,7 +20,6 @@ from tempest.common import compute
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -71,7 +70,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                            '(current %s) within the required time (%s s).' %
                            (port_id, status, interface_status,
                             self.build_timeout))
-                raise exceptions.TimeoutException(message)
+                raise lib_exc.TimeoutException(message)
 
         return body
 
@@ -99,7 +98,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                 message = ('Port %s failed to detach (device_id %s) within '
                            'the required time (%s s).' %
                            (port_id, device_id, self.build_timeout))
-                raise exceptions.TimeoutException(message)
+                raise lib_exc.TimeoutException(message)
 
         return port
 
@@ -197,7 +196,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             if len(ifs) == len(_ifs) and timed_out:
                 message = ('Failed to delete interface within '
                            'the required time: %s sec.' % self.build_timeout)
-                raise exceptions.TimeoutException(message)
+                raise lib_exc.TimeoutException(message)
 
         self.assertNotIn(iface['port_id'], [i['port_id'] for i in _ifs])
         return _ifs
