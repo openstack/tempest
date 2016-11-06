@@ -1,0 +1,7 @@
+features:
+  - |
+    Define the Volume v3 service clients as library interfaces,
+    allowing other projects to use these modules as stable
+    libraries without maintenance changes.
+
+    * messages_client(v3)

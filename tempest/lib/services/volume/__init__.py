@@ -14,5 +14,6 @@
 
 from tempest.lib.services.volume import v1
 from tempest.lib.services.volume import v2
+from tempest.lib.services.volume import v3
 
-__all__ = ['v1', 'v2']
+__all__ = ['v1', 'v2', 'v3']
