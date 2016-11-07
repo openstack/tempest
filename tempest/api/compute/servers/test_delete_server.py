@@ -115,8 +115,8 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
 
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):

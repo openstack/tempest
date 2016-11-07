@@ -65,9 +65,9 @@ class SnapshotManageAdminV2Test(base.BaseVolumeAdminTest):
                         self.admin_snapshots_client, new_snapshot['id'])
 
         # Wait for the snapshot to be available after manage operation
-        waiters.wait_for_snapshot_status(self.admin_snapshots_client,
-                                         new_snapshot['id'],
-                                         'available')
+        waiters.wait_for_volume_resource_status(self.admin_snapshots_client,
+                                                new_snapshot['id'],
+                                                'available')
 
         # Verify the managed snapshot has the expected parent volume
         self.assertEqual(new_snapshot['volume_id'], volume['id'])

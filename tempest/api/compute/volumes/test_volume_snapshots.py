@@ -54,9 +54,9 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
             display_name=s_name)['snapshot']
 
         def delete_snapshot(snapshot_id):
-            waiters.wait_for_snapshot_status(self.snapshots_client,
-                                             snapshot_id,
-                                             'available')
+            waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                    snapshot_id,
+                                                    'available')
             # Delete snapshot
             self.snapshots_client.delete_snapshot(snapshot_id)
             self.snapshots_client.wait_for_resource_deletion(snapshot_id)

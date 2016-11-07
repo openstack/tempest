@@ -37,16 +37,13 @@ class AddImageException(exceptions.TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class VolumeBuildErrorException(exceptions.TempestException):
-    message = "Volume %(volume_id)s failed to build and is in ERROR status"
+class VolumeResourceBuildErrorException(exceptions.TempestException):
+    message = ("%(resource_name)s %(resource_id)s failed to build and is in "
+               "ERROR status")
 
 
 class VolumeRestoreErrorException(exceptions.TempestException):
     message = "Volume %(volume_id)s failed to restore and is in ERROR status"
-
-
-class SnapshotBuildErrorException(exceptions.TempestException):
-    message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
 class StackBuildErrorException(exceptions.TempestException):

@@ -64,10 +64,10 @@ class TestStampPattern(manager.ScenarioTest):
         self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
                         snapshot['id'])
         self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
-        waiters.wait_for_snapshot_status(self.snapshots_client,
-                                         snapshot['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot['id'], 'available')
         if 'display_name' in snapshot:
             self.assertEqual(snapshot_name, snapshot['display_name'])
         else:

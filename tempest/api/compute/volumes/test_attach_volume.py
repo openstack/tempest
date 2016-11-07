@@ -64,8 +64,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def _detach_volume(self, server_id, volume_id):
         try:
             self.servers_client.detach_volume(server_id, volume_id)
-            waiters.wait_for_volume_status(self.volumes_client,
-                                           volume_id, 'available')
+            waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                    volume_id, 'available')
         except lib_exc.NotFound:
             LOG.warning("Unable to detach volume %s from server %s "
                         "possibly it was already detached", volume_id,
@@ -78,8 +78,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             kwargs.update({'device': '/dev/%s' % device})
         attachment = self.servers_client.attach_volume(
             server_id, **kwargs)['volumeAttachment']
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume_id, 'in-use')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'in-use')
         self.addCleanup(self._detach_volume, server_id,
                         volume_id)
 
