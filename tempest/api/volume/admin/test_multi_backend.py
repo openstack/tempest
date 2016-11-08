@@ -129,7 +129,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
                volume_id)
-        self.assertTrue(len(volume1_host.split("@")) > 1, msg)
+        self.assertGreater(len(volume1_host.split("@")), 1, msg)
 
     def _test_backend_name_distinction(self, volume_id_list):
         # this test checks that the volumes created at setUp don't

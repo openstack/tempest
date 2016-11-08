@@ -121,7 +121,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertIsNotNone(container_list)
         self.assertEqual(container_list.tag, 'account')
-        self.assertTrue('name' in container_list.keys())
+        self.assertIn('name', container_list.keys())
         self.assertEqual(container_list.find(".//container").tag, 'container')
         self.assertEqual(container_list.find(".//name").tag, 'name')
         self.assertEqual(container_list.find(".//count").tag, 'count')
@@ -209,7 +209,8 @@ class AccountTest(base.BaseObjectTest):
                 self.account_client.list_account_containers(params=params)
             self.assertHeaders(resp, 'Account', 'GET')
 
-            self.assertTrue(len(container_list) <= limit, str(container_list))
+            self.assertLessEqual(len(container_list), limit,
+                                 str(container_list))
 
     @test.idempotent_id('888a3f0e-7214-4806-8e50-5e0c9a69bb5e')
     def test_list_containers_with_limit_and_end_marker(self):

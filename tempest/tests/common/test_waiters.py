@@ -37,7 +37,7 @@ class TestImageWaiters(base.TestCase):
         waiters.wait_for_image_status(self.client, 'fake_image_id', 'active')
         end_time = int(time.time())
         # Ensure waiter returns before build_timeout
-        self.assertTrue((end_time - start_time) < 10)
+        self.assertLess((end_time - start_time), 10)
 
     def test_wait_for_image_status_timeout(self):
         time_mock = self.patch('time.time')

@@ -238,7 +238,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     def test_index_max_size(self):
         images_list = self.client.list_images(size_max=42)['images']
         for image in images_list:
-            self.assertTrue(image['size'] <= 42)
+            self.assertLessEqual(image['size'], 42)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size42_set <= result_set)
         self.assertFalse(self.created_set - self.size42_set <= result_set)
@@ -261,7 +261,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         top_size = images_list[0]['size']  # We have non-zero sized images
         for image in images_list:
             size = image['size']
-            self.assertTrue(size <= top_size)
+            self.assertLessEqual(size, top_size)
             top_size = size
             self.assertEqual(image['status'], 'active')
 

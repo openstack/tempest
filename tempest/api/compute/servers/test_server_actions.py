@@ -131,8 +131,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 server=server,
                 servers_client=self.client)
             new_boot_time = linux_client.get_boot_time()
-            self.assertTrue(new_boot_time > boot_time,
-                            '%s > %s' % (new_boot_time, boot_time))
+            self.assertGreater(new_boot_time, boot_time,
+                               '%s > %s' % (new_boot_time, boot_time))
 
     @test.attr(type='smoke')
     @test.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
@@ -458,8 +458,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
             # NOTE: This test tries to get full length console log, and the
             # length should be bigger than the one of test_get_console_output.
-            self.assertTrue(lines > 10, "Cannot get enough console log length."
-                                        " (lines: %s)" % lines)
+            self.assertGreater(lines, 10, "Cannot get enough console log "
+                                          "length. (lines: %s)" % lines)
 
         self.wait_for(_check_full_length_console_log)
 

@@ -54,8 +54,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.assertEqual(volume[self.name_field], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
-        self.assertTrue(volume['id'] is not None,
-                        "Field volume id is empty or not found.")
+        self.assertIsNotNone(volume['id'],
+                             "Field volume id is empty or not found.")
         # Get Volume information
         fetched_volume = self.client.show_volume(volume['id'])['volume']
         self.assertEqual(v_name,

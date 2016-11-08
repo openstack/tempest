@@ -610,10 +610,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cred_provider, networks_client, CONF.compute.fixed_network_name)
 
     def assertEmpty(self, list, msg=None):
-        self.assertTrue(len(list) == 0, msg)
+        self.assertEqual(0, len(list), msg)
 
     def assertNotEmpty(self, list, msg=None):
-        self.assertTrue(len(list) > 0, msg)
+        self.assertGreater(len(list), 0, msg)
 
 
 call_until_true = debtcollector.moves.moved_function(

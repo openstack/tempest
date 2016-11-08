@@ -38,7 +38,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         service_data = self.services_client.create_service(
             name=name, type=s_type,
             description=description)['OS-KSADM:service']
-        self.assertFalse(service_data['id'] is None)
+        self.assertIsNotNone(service_data['id'])
         self.addCleanup(self._del_service, service_data['id'])
         # Verifying response body of create service
         self.assertIn('id', service_data)

@@ -83,7 +83,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
                       output_map['KeyPairDontSavePrivate_PublicKey'])
         self.assertIn(u'KeyPairDontSavePrivate_PrivateKey', output_map)
         private_key = output_map['KeyPairDontSavePrivate_PrivateKey']
-        self.assertTrue(len(private_key) == 0)
+        self.assertEqual(0, len(private_key))
 
 
 class NovaKeyPairResourcesAWSTest(NovaKeyPairResourcesYAMLTest):
