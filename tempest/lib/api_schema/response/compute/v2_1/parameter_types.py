@@ -94,3 +94,14 @@ response_header = {
         'format': 'data-time'
     }
 }
+
+power_state = {
+    'type': 'integer',
+    # 0: NOSTATE
+    # 1: RUNNING
+    # 3: PAUSED
+    # 4: SHUTDOWN
+    # 6: CRASHED
+    # 7: SUSPENDED
+    'enum': [0, 1, 3, 4, 6, 7]
+}
