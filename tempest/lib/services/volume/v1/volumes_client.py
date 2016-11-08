@@ -22,7 +22,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class VolumesClient(rest_client.RestClient):
-    """Base client class to send CRUD Volume API requests"""
+    """Client class to send CRUD Volume V1 API requests"""
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
