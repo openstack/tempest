@@ -35,10 +35,7 @@ class TestNetworkVersionsClient(base.BaseServiceTest):
                     "type": "text/html"
                 }
             ],
-            "status": "CURRENT",
-            "updated": "2013-07-23T11:33:21Z",
-            "version": "2.0",
-            "min_version": "2.0"
+            "status": "CURRENT"
             }
         }
 
