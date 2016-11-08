@@ -292,7 +292,7 @@ class Manager(clients.ServiceClients):
         self.snapshots_v2_client = self.volume_v2.SnapshotsClient()
         self.volumes_client = self.volume_v1.VolumesClient()
         self.volumes_v2_client = self.volume_v2.VolumesClient()
-        self.volume_messages_client = volume.v3.MessagesClient(
+        self.volume_v3_messages_client = volume.v3.MessagesClient(
             self.auth_provider, **params)
         self.volume_types_client = self.volume_v1.TypesClient()
         self.volume_types_v2_client = self.volume_v2.TypesClient()
