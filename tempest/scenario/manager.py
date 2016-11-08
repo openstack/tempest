@@ -676,11 +676,6 @@ class NetworkScenarioTest(ScenarioTest):
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron not available')
 
-    @classmethod
-    def resource_setup(cls):
-        super(NetworkScenarioTest, cls).resource_setup()
-        cls.tenant_id = cls.manager.identity_client.tenant_id
-
     def _create_network(self, networks_client=None,
                         routers_client=None, tenant_id=None,
                         namestart='network-smoke-',

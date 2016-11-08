@@ -63,7 +63,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def setUp(self):
         super(TestGettingAddress, self).setUp()
         self.keypair = self.create_keypair()
-        self.sec_grp = self._create_security_group(tenant_id=self.tenant_id)
+        self.sec_grp = self._create_security_group()
 
     def prepare_network(self, address6_mode, n_subnets6=1, dualnet=False):
         """Prepare network
@@ -74,15 +74,15 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet - create IPv6 subnets on a different network
         :return: list of created networks
         """
-        self.network = self._create_network(tenant_id=self.tenant_id)
+        self.network = self._create_network()
         if dualnet:
-            self.network_v6 = self._create_network(tenant_id=self.tenant_id)
+            self.network_v6 = self._create_network()
 
         sub4 = self._create_subnet(network=self.network,
                                    namestart='sub4',
                                    ip_version=4)
 
-        router = self._get_router(tenant_id=self.tenant_id)
+        router = self._get_router()
         self.routers_client.add_router_interface(router['id'],
                                                  subnet_id=sub4['id'])
 

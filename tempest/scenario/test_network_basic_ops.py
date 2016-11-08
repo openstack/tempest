@@ -105,8 +105,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _setup_network_and_servers(self, **kwargs):
         boot_with_port = kwargs.pop('boot_with_port', False)
-        self.security_group = \
-            self._create_security_group(tenant_id=self.tenant_id)
+        self.security_group = self._create_security_group()
         self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
@@ -229,7 +228,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             floating_ip, server)
 
     def _create_new_network(self, create_gateway=False):
-        self.new_net = self._create_network(tenant_id=self.tenant_id)
+        self.new_net = self._create_network()
         if create_gateway:
             self.new_subnet = self._create_subnet(
                 network=self.new_net)
