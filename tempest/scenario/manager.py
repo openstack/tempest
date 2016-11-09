@@ -402,10 +402,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
             servers = self.servers_client.list_servers()
             servers = servers['servers']
         for server in servers:
-            console_output = self.servers_client.get_console_output(
-                server['id'])['output']
-            LOG.debug('Console output for %s\nbody=\n%s',
-                      server['id'], console_output)
+            try:
+                console_output = self.servers_client.get_console_output(
+                    server['id'])['output']
+                LOG.debug('Console output for %s\nbody=\n%s',
+                          server['id'], console_output)
+            except lib_exc.NotFound:
+                LOG.debug("Server %s disappeared(deleted) while looking"
+                          "for the console log", server['id'])
 
     def _log_net_info(self, exc):
         # network debug is called as part of ssh init
