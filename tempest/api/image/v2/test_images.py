@@ -83,10 +83,10 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         image_name = data_utils.rand_name('image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
-        image = self.client.create_image(name=image_name,
-                                         container_format=container_format,
-                                         disk_format=disk_format,
-                                         visibility='private')
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private')
         # Delete Image
         self.client.delete_image(image['id'])
         self.client.wait_for_resource_deletion(image['id'])
@@ -105,11 +105,10 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         image_name = data_utils.rand_name('image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
-        image = self.client.create_image(name=image_name,
-                                         container_format=container_format,
-                                         disk_format=disk_format,
-                                         visibility='private')
-        self.addCleanup(self.client.delete_image, image['id'])
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private')
         self.assertEqual('queued', image['status'])
 
         # Now try uploading an image file
