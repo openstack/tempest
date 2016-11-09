@@ -52,7 +52,8 @@ class VolumesV3Test(api_version_utils.BaseMicroversionTest,
             self.request_microversion))
 
 
-class VolumesV3AdminTest(VolumesV3Test):
+class VolumesV3AdminTest(VolumesV3Test,
+                         base.BaseVolumeAdminTest):
     """Base test case class for all v3 Volume Admin API tests."""
 
     credentials = ['primary', 'admin']

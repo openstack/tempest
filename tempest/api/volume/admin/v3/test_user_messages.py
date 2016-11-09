@@ -15,9 +15,7 @@
 
 from tempest.api.volume.v3 import base
 from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -47,21 +45,11 @@ class UserMessagesTest(base.VolumesV3AdminTest):
                        'vendor_name': bad_vendor}
         vol_type_name = data_utils.rand_name(
             self.__class__.__name__ + '-volume-type')
-        bogus_type = self.admin_volume_types_client.create_volume_type(
-            name=vol_type_name,
-            extra_specs=extra_specs)['volume_type']
-        self.addCleanup(self.admin_volume_types_client.delete_volume_type,
-                        bogus_type['id'])
+        bogus_type = self.create_volume_type(
+            name=vol_type_name, extra_specs=extra_specs)
         params = {'volume_type': bogus_type['id'],
                   'size': CONF.volume.volume_size}
-        volume = self.volumes_client.create_volume(**params)['volume']
-        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
-        try:
-            waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                           'error')
-        except exceptions.VolumeBuildErrorException:
-            # Error state is expected and desired
-            pass
+        volume = self.create_volume(wait_until="error", **params)
         messages = self.messages_client.list_messages()['messages']
         message_id = None
         for message in messages:
