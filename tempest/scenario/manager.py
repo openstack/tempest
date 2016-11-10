@@ -408,7 +408,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 LOG.debug('Console output for %s\nbody=\n%s',
                           server['id'], console_output)
             except lib_exc.NotFound:
-                LOG.debug("Server %s disappeared(deleted) while looking"
+                LOG.debug("Server %s disappeared(deleted) while looking "
                           "for the console log", server['id'])
 
     def _log_net_info(self, exc):
