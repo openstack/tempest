@@ -102,8 +102,8 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(description, body['description'],
                          "The created volume_type_description name is "
                          "not equal to the requested name")
-        self.assertTrue(body['id'] is not None,
-                        "Field volume_type id is empty or not found.")
+        self.assertIsNotNone(body['id'],
+                             "Field volume_type id is empty or not found.")
         fetched_volume_type = self.admin_volume_types_client.show_volume_type(
             body['id'])['volume_type']
         self.assertEqual(name, fetched_volume_type['name'],

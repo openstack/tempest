@@ -224,9 +224,10 @@ class ListImagesTest(base.BaseV2ImageTest):
         image_size_list = map(lambda x: x['size'], images_list)
 
         for image_size in image_size_list:
-            self.assertTrue(image_size >= params['size_min'] and
-                            image_size <= params['size_max'],
-                            "Failed to get images by size_min and size_max")
+            self.assertGreaterEqual(image_size, params['size_min'],
+                                    "Failed to get images by size_min")
+            self.assertLessEqual(image_size, params['size_max'],
+                                 "Failed to get images by size_max")
 
     @test.idempotent_id('7fc9e369-0f58-4d05-9aa5-0969e2d59d15')
     def test_list_images_param_status(self):

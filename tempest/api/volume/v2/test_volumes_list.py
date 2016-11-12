@@ -73,11 +73,9 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
             val0 = fetched_volume[0][sort_key]
             val1 = fetched_volume[1][sort_key]
             if sort_dir == 'asc':
-                self.assertTrue(val0 < val1,
-                                "%s < %s" % (val0, val1))
+                self.assertLess(val0, val1, "%s < %s" % (val0, val1))
             elif sort_dir == 'desc':
-                self.assertTrue(val0 > val1,
-                                "%s > %s" % (val0, val1))
+                self.assertGreater(val0, val1, "%s > %s" % (val0, val1))
 
         _list_details_with_multiple_params()
         _list_details_with_multiple_params(sort_dir='desc')

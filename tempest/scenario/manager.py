@@ -1018,7 +1018,7 @@ class NetworkScenarioTest(ScenarioTest):
             if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
         ]
         msg = "No default security group for tenant %s." % (tenant_id)
-        self.assertTrue(len(sgs) > 0, msg)
+        self.assertGreater(len(sgs), 0, msg)
         return sgs[0]
 
     def _create_security_group_rule(self, secgroup=None,

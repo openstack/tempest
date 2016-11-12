@@ -31,7 +31,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         return hypers
 
     def assertHypervisors(self, hypers):
-        self.assertTrue(len(hypers) > 0, "No hypervisors found: %s" % hypers)
+        self.assertGreater(len(hypers), 0, "No hypervisors found: %s" % hypers)
 
     @test.idempotent_id('7f0ceacd-c64d-4e96-b8ee-d02943142cc5')
     def test_get_hypervisor_list(self):

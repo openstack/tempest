@@ -205,7 +205,7 @@ class ContainerTest(base.BaseObjectTest):
 
         self.assertIsNotNone(object_list)
         self.assertEqual(object_list.tag, 'container')
-        self.assertTrue('name' in object_list.keys())
+        self.assertIn('name', object_list.keys())
         self.assertEqual(object_list.find(".//object").tag, 'object')
         self.assertEqual(object_list.find(".//name").tag, 'name')
         self.assertEqual(object_list.find(".//hash").tag, 'hash')
