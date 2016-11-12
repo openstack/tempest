@@ -390,35 +390,3 @@ class RoutersTest(base.BaseRouterTest):
 
 class RoutersIpV6Test(RoutersTest):
     _ip_version = 6
-
-
-class DvrRoutersTest(base.BaseRouterTest):
-
-    @classmethod
-    def skip_checks(cls):
-        super(DvrRoutersTest, cls).skip_checks()
-        if not test.is_extension_enabled('dvr', 'network'):
-            msg = "DVR extension not enabled."
-            raise cls.skipException(msg)
-
-    @test.idempotent_id('141297aa-3424-455d-aa8d-f2d95731e00a')
-    def test_create_distributed_router(self):
-        name = data_utils.rand_name('router')
-        create_body = self.admin_routers_client.create_router(
-            name=name, distributed=True)
-        self.addCleanup(self._delete_router,
-                        create_body['router']['id'],
-                        self.admin_routers_client)
-        self.assertTrue(create_body['router']['distributed'])
-
-    @test.idempotent_id('644d7a4a-01a1-4b68-bb8d-0c0042cb1729')
-    def test_convert_centralized_router(self):
-        router = self._create_router()
-        self.assertNotIn('distributed', router)
-        update_body = self.admin_routers_client.update_router(router['id'],
-                                                              distributed=True)
-        self.assertTrue(update_body['router']['distributed'])
-        show_body = self.admin_routers_client.show_router(router['id'])
-        self.assertTrue(show_body['router']['distributed'])
-        show_body = self.routers_client.show_router(router['id'])
-        self.assertNotIn('distributed', show_body['router'])

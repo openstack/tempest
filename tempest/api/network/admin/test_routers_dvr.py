@@ -98,15 +98,22 @@ class RoutersTestDVR(base.BaseRouterTest):
         attribute will be set to True
         """
         name = data_utils.rand_name('router')
+        tenant_id = self.routers_client.tenant_id
         # router needs to be in admin state down in order to be upgraded to DVR
         # l3ha routers are not upgradable to dvr, make it explicitly non ha
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False,
                                                          admin_state_up=False,
-                                                         ha=False)
+                                                         ha=False,
+                                                         tenant_id=tenant_id)
+        router_id = router['router']['id']
         self.addCleanup(self.admin_routers_client.delete_router,
-                        router['router']['id'])
+                        router_id)
         self.assertFalse(router['router']['distributed'])
         router = self.admin_routers_client.update_router(
-            router['router']['id'], distributed=True)
+            router_id, distributed=True)
         self.assertTrue(router['router']['distributed'])
+        show_body = self.admin_routers_client.show_router(router_id)
+        self.assertTrue(show_body['router']['distributed'])
+        show_body = self.routers_client.show_router(router_id)
+        self.assertNotIn('distributed', show_body['router'])
