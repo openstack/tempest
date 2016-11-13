@@ -748,7 +748,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=False,
             msg='after router unscheduling',
-            should_check_floating_ip_status=False
         )
 
         # schedule resource to new agent
