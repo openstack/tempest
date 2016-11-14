@@ -290,3 +290,28 @@ def wait_for_qos_operations(client, qos_id, operation, args=None):
         if int(time.time()) - start_time >= client.build_timeout:
             raise lib_exc.TimeoutException
         time.sleep(client.build_interval)
+
+
+def wait_for_interface_status(client, server, port_id, status):
+    """Waits for an interface to reach a given status."""
+    body = (client.show_interface(server, port_id)
+            ['interfaceAttachment'])
+    interface_status = body['port_state']
+    start = int(time.time())
+
+    while(interface_status != status):
+        time.sleep(client.build_interval)
+        body = (client.show_interface(server, port_id)
+                ['interfaceAttachment'])
+        interface_status = body['port_state']
+
+        timed_out = int(time.time()) - start >= client.build_timeout
+
+        if interface_status != status and timed_out:
+            message = ('Interface %s failed to reach %s status '
+                       '(current %s) within the required time (%s s).' %
+                       (port_id, status, interface_status,
+                        client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+
+    return body
