@@ -45,35 +45,18 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         super(ImagesOneServerTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
 
-    @classmethod
-    def resource_setup(cls):
-        super(ImagesOneServerTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
-
     def _get_default_flavor_disk_size(self, flavor_id):
         flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return flavor['disk']
 
-    @classmethod
-    def _rebuild_server_when_fails(cls, server_id):
-        try:
-            waiters.wait_for_server_status(cls.servers_client,
-                                           server_id, 'ACTIVE')
-        except Exception:
-            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
-                          % server_id)
-            # Rebuild server if cannot reach the ACTIVE state
-            # Usually it means the server had a serious accident
-            cls.server_id = cls.rebuild_server(server_id)
-
     @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
+        server_id = self.create_test_server(wait_until='ACTIVE')['id']
 
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        body = self.client.create_image(self.server_id, name=name,
+        body = self.client.create_image(server_id, name=name,
                                         metadata=meta)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -98,10 +81,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # Verify the image was deleted correctly
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
-        self.addCleanup(self._rebuild_server_when_fails, self.server_id)
 
     @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
+        server_id = self.create_test_server(wait_until='ACTIVE')['id']
+
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
 
@@ -109,7 +93,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # #1370954 in glance which will 500 if mysql is used as the
         # backend and it attempts to store a 4 byte utf-8 character
         utf8_name = data_utils.rand_name('\xe2\x82\xa1')
-        body = self.client.create_image(self.server_id, name=utf8_name)
+        body = self.client.create_image(server_id, name=utf8_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
-        self.addCleanup(self._rebuild_server_when_fails, self.server_id)
