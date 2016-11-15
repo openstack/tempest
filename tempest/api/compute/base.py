@@ -365,7 +365,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                     return address['addr']
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
-            raise exceptions.InvalidConfiguration()
+            raise lib_exc.InvalidConfiguration()
 
     def setUp(self):
         super(BaseV2ComputeTest, self).setUp()
