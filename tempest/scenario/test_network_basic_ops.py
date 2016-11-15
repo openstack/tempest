@@ -19,7 +19,6 @@ import re
 from oslo_log import log as logging
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
@@ -116,8 +115,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.port_id = self._create_port(self.network['id'])['id']
             self.ports.append({'port': self.port_id})
 
-        name = data_utils.rand_name('server-smoke')
-        server = self._create_server(name, self.network, self.port_id)
+        server = self._create_server(self.network, self.port_id)
         self._check_tenant_network_connectivity()
 
         floating_ip = self.create_floating_ip(server)
@@ -151,7 +149,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.assertIn(self.router['id'],
                           seen_router_ids)
 
-    def _create_server(self, name, network, port_id=None):
+    def _create_server(self, network, port_id=None):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
         security_groups = [{'name': self.security_group['name']}]
@@ -160,7 +158,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             network['port'] = port_id
 
         server = self.create_server(
-            name=name,
             networks=[network],
             key_name=keypair['name'],
             security_groups=security_groups,
@@ -220,9 +217,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
-        name = data_utils.rand_name('new_server-smoke')
         # create a new server for the floating ip
-        server = self._create_server(name, self.network)
+        server = self._create_server(self.network)
         self._associate_floating_ip(floating_ip, server)
         self.floating_ip_tuple = Floating_IP_tuple(
             floating_ip, server)
@@ -459,8 +455,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
         self._create_new_network(create_gateway=True)
-        name = data_utils.rand_name('server-smoke')
-        self._create_server(name, self.new_net)
+        self._create_server(self.new_net)
         self._check_network_internal_connectivity(network=self.new_net,
                                                   should_connect=False)
         router_id = self.router['id']
@@ -688,8 +683,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         # Boot another server with the same port to make sure nothing was
         # left around that could cause issues.
-        name = data_utils.rand_name('reuse-port')
-        server = self._create_server(name, self.network, port['id'])
+        server = self._create_server(self.network, port['id'])
         port_list = self._list_ports(device_id=server['id'],
                                      network_id=self.network['id'])
         self.assertEqual(1, len(port_list),
@@ -813,8 +807,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client = self.get_remote_client(fip['floating_ip_address'],
                                             private_key=private_key)
         spoof_nic = ssh_client.get_nic_name_by_mac(spoof_port["mac_address"])
-        name = data_utils.rand_name('peer')
-        peer = self._create_server(name, self.new_net)
+        peer = self._create_server(self.new_net)
         peer_address = peer['addresses'][self.new_net['name']][0]['addr']
         self._check_remote_connectivity(ssh_client, dest=peer_address,
                                         nic=spoof_nic, should_succeed=True)
