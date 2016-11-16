@@ -25,11 +25,11 @@ class TestMatchersInterface(object):
         matches = self.matches_matches
         mismatches = self.matches_mismatches
         for candidate in matches:
-            self.assertEqual(None, matcher.match(candidate))
+            self.assertIsNone(matcher.match(candidate))
         for candidate in mismatches:
             mismatch = matcher.match(candidate)
-            self.assertNotEqual(None, mismatch)
-            self.assertNotEqual(None, getattr(mismatch, 'describe', None))
+            self.assertIsNotNone(mismatch)
+            self.assertIsNotNone(getattr(mismatch, 'describe', None))
 
     def test__str__(self):
         # [(expected, object to __str__)].
