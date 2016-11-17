@@ -66,7 +66,6 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AutoAllocateNetworkTest, cls).setup_clients()
-        cls.servers_client = cls.servers_client
         cls.networks_client = cls.os.networks_client
         cls.routers_client = cls.os.routers_client
         cls.subnets_client = cls.os.subnets_client

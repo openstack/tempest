@@ -39,7 +39,6 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ImagesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
-        cls.servers_client = cls.servers_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6cd5a89d-5b47-46a7-93bc-3916f0d84973')
