@@ -23,7 +23,6 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServerMetadataTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.quotas = cls.quotas_client
 
     @classmethod
     def resource_setup(cls):
