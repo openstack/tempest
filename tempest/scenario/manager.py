@@ -219,6 +219,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
                       imageRef=None, volume_type=None):
         if size is None:
             size = CONF.volume.volume_size
+        if imageRef:
+            image = self.compute_images_client.show_image(imageRef)['image']
+            min_disk = image.get('minDisk')
+            size = max(size, min_disk)
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__ + "-volume")
         kwargs = {'display_name': name,

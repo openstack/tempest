@@ -113,6 +113,12 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         if 'size' not in kwargs:
             kwargs['size'] = CONF.volume.volume_size
 
+        if 'imageRef' in kwargs:
+            image = cls.compute_images_client.show_image(
+                kwargs['imageRef'])['image']
+            min_disk = image.get('minDisk')
+            kwargs['size'] = max(kwargs['size'], min_disk)
+
         name_field = cls.special_fields['name_field']
         if name_field not in kwargs:
             name = data_utils.rand_name(cls.__name__ + '-Volume')
