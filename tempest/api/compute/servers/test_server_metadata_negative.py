@@ -25,7 +25,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServerMetadataNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.quotas = cls.quotas_client
 
     @classmethod
     def resource_setup(cls):
@@ -134,7 +133,8 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        quota_set = self.quotas.show_quota_set(self.tenant_id)['quota_set']
+        quota_set = self.quotas_client.show_quota_set(
+            self.tenant_id)['quota_set']
         quota_metadata = quota_set['metadata_items']
         if quota_metadata == -1:
             raise self.skipException("No limit for metadata_items")
