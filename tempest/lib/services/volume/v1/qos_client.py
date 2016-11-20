@@ -41,8 +41,9 @@ class QosSpecsClient(rest_client.RestClient):
     def create_qos(self, **kwargs):
         """Create a QoS Specification.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#createQoSSpec
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-qos-specification
         """
         post_body = json.dumps({'qos_specs': kwargs})
         resp, body = self.post('qos-specs', post_body)
@@ -76,8 +77,9 @@ class QosSpecsClient(rest_client.RestClient):
     def set_qos_key(self, qos_id, **kwargs):
         """Set the specified keys/values of QoS specification.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#setQoSKey
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#set-keys-in-qos-specification
         """
         put_body = json.dumps({"qos_specs": kwargs})
         resp, body = self.put('qos-specs/%s' % qos_id, put_body)

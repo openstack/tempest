@@ -26,8 +26,9 @@ class BackupsClient(rest_client.RestClient):
     def create_backup(self, **kwargs):
         """Creates a backup of volume.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#createBackup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-backup
         """
         post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
@@ -38,8 +39,9 @@ class BackupsClient(rest_client.RestClient):
     def restore_backup(self, backup_id, **kwargs):
         """Restore volume from backup.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#restoreBackup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#restore-backup
         """
         post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
