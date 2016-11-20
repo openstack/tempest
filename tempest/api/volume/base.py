@@ -108,8 +108,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
-    def create_volume(cls, **kwargs):
-        """Wrapper utility that returns a test volume."""
+    def create_volume(cls, wait_until='available', **kwargs):
+        """Wrapper utility that returns a test volume.
+
+           :param wait_until: wait till volume status.
+        """
         if 'size' not in kwargs:
             kwargs['size'] = CONF.volume.volume_size
 
@@ -120,8 +123,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.volumes.append(volume)
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_status(cls.volumes_client, volume['id'],
+                                       wait_until)
         return volume
 
     @classmethod

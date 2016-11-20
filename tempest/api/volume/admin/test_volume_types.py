@@ -51,8 +51,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                   'size': CONF.volume.volume_size}
 
         # Create volume
-        volume = self.volumes_client.create_volume(**params)['volume']
-        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
+        volume = self.create_volume(**params)
         self.assertEqual(volume_types[0]['name'], volume["volume_type"])
         self.assertEqual(volume[self.name_field], vol_name,
                          "The created volume name is not equal "

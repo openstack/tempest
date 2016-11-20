@@ -176,7 +176,7 @@ def wait_for_volume_status(client, volume_id, status):
         time.sleep(client.build_interval)
         body = client.show_volume(volume_id)['volume']
         volume_status = body['status']
-        if volume_status == 'error':
+        if volume_status == 'error' and status != 'error':
             raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
         if volume_status == 'error_restoring':
             raise exceptions.VolumeRestoreErrorException(volume_id=volume_id)
