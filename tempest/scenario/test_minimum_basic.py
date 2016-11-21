@@ -66,10 +66,10 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
 
-    def check_partitions(self):
+    def check_disks(self):
         # NOTE(andreaf) The device name may be different on different guest OS
-        partitions = self.linux_client.get_partitions()
-        self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
+        disks = self.linux_client.get_disks()
+        self.assertEqual(1, disks.count(CONF.compute.volume_device_name))
 
     def create_and_add_security_group_to_server(self, server):
         secgroup = self._create_security_group()
@@ -145,7 +145,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.linux_client = self.get_remote_client(
             floating_ip['ip'], private_key=keypair['private_key'])
 
-        self.check_partitions()
+        self.check_disks()
 
         # delete the floating IP, this should refresh the server addresses
         self.compute_floating_ips_client.delete_floating_ip(floating_ip['id'])

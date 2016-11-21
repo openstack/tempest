@@ -109,9 +109,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                 server=server,
                 servers_client=self.servers_client)
 
-            partitions = linux_client.get_partitions()
-            device_name_to_match = ' ' + self.device + '\n'
-            self.assertIn(device_name_to_match, partitions)
+            disks = linux_client.get_disks()
+            device_name_to_match = '\n' + self.device + ' '
+            self.assertIn(device_name_to_match, disks)
 
         self._detach(server['id'], volume['id'])
         self.attachment = None
@@ -132,8 +132,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                 server=server,
                 servers_client=self.servers_client)
 
-            partitions = linux_client.get_partitions()
-            self.assertNotIn(device_name_to_match, partitions)
+            disks = linux_client.get_disks()
+            self.assertNotIn(device_name_to_match, disks)
 
     @test.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
