@@ -12,7 +12,6 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -46,20 +45,52 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Create a snapshot when volume status is in-use
         # Create a test instance
         server = self.create_server(wait_until='ACTIVE')
-        self.servers_client.attach_volume(
-            server['id'], volumeId=self.volume_origin['id'],
-            device='/dev/%s' % CONF.compute.volume_device_name)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume_origin['id'], 'in-use')
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        self.volume_origin['id'], 'available')
-        self.addCleanup(self.servers_client.detach_volume, server['id'],
-                        self.volume_origin['id'])
+        self.attach_volume(server['id'], self.volume_origin['id'])
+
         # Snapshot a volume even if it's attached to an instance
         snapshot = self.create_snapshot(self.volume_origin['id'],
                                         force=True)
         # Delete the snapshot
         self.cleanup_snapshot(snapshot)
+
+    @test.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
+    @test.services('compute')
+    def test_snapshot_delete_with_volume_in_use(self):
+        # Create a test instance
+        server = self.create_server(wait_until='ACTIVE')
+        self.attach_volume(server['id'], self.volume_origin['id'])
+
+        # Snapshot a volume attached to an instance
+        snapshot1 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
+
+        # Delete the snapshots. Some snapshot implementations can take
+        # different paths according to order they are deleted.
+        self.cleanup_snapshot(snapshot1)
+        self.cleanup_snapshot(snapshot3)
+        self.cleanup_snapshot(snapshot2)
+
+    @test.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
+    @test.services('compute')
+    def test_snapshot_create_offline_delete_online(self):
+
+        # Create a snapshot while it is not attached
+        snapshot1 = self.create_snapshot(self.volume_origin['id'])
+
+        # Create a server and attach it
+        server = self.create_server(wait_until='ACTIVE')
+        self.attach_volume(server['id'], self.volume_origin['id'])
+
+        # Now that the volume is attached, create another snapshots
+        snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
+
+        # Delete the snapshots. Some snapshot implementations can take
+        # different paths according to order they are deleted.
+        self.cleanup_snapshot(snapshot3)
+        self.cleanup_snapshot(snapshot1)
+        self.cleanup_snapshot(snapshot2)
 
     @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
