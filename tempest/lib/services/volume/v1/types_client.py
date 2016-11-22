@@ -38,8 +38,9 @@ class TypesClient(rest_client.RestClient):
     def list_volume_types(self, **params):
         """List all the volume_types created.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v1.html#listVolumeTypes
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v1.html#listVolumeTypes
         """
         url = 'types'
         if params:
@@ -53,8 +54,9 @@ class TypesClient(rest_client.RestClient):
     def show_volume_type(self, volume_type_id):
         """Returns the details of a single volume_type.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v1.html#showVolumeType
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v1.html#showVolumeType
         """
         url = "types/%s" % volume_type_id
         resp, body = self.get(url)
@@ -65,8 +67,9 @@ class TypesClient(rest_client.RestClient):
     def create_volume_type(self, **kwargs):
         """Create volume type.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v1.html#createVolumeType
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v1.html#createVolumeType
         """
         post_body = json.dumps({'volume_type': kwargs})
         resp, body = self.post('types', post_body)
@@ -77,8 +80,9 @@ class TypesClient(rest_client.RestClient):
     def delete_volume_type(self, volume_type_id):
         """Deletes the Specified Volume_type.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v1.html#deleteVolumeType
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v1.html#deleteVolumeType
         """
         resp, body = self.delete("types/%s" % volume_type_id)
         self.expected_success(202, resp.status)
@@ -131,8 +135,9 @@ class TypesClient(rest_client.RestClient):
     def update_volume_type(self, volume_type_id, **kwargs):
         """Updates volume type name, description, and/or is_public.
 
-        Available params: see http://developer.openstack.org/
-        api-ref-blockstorage-v2.html#updateVolumeType
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateVolumeType
         """
         put_body = json.dumps({'volume_type': kwargs})
         resp, body = self.put('types/%s' % volume_type_id, put_body)
@@ -148,9 +153,9 @@ class TypesClient(rest_client.RestClient):
         extra_spec_name: Name of the extra spec to be updated.
         extra_spec: A dictionary of with key as extra_spec_name and the
                      updated value.
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v2.html#
-                              updateVolumeTypeExtraSpecs
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateVolumeTypeExtraSpecs
         """
         url = "types/%s/extra_specs/%s" % (volume_type_id, extra_spec_name)
         put_body = json.dumps(extra_specs)
