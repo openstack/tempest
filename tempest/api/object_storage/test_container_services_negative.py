@@ -92,47 +92,39 @@ class ContainerNegativeTest(base.BaseObjectTest):
     def test_get_metadata_headers_with_invalid_container_name(self):
         # Attempts to retrieve metadata headers with an invalid
         # container name.
-        invalid_name = data_utils.rand_name(name="TestInvalidContainer")
-
         self.assertRaises(exceptions.NotFound,
                           self.container_client.list_container_metadata,
-                          invalid_name)
+                          'invalid_container_name')
 
     @test.attr(type=["negative"])
     @test.idempotent_id('125a24fa-90a7-4cfc-b604-44e49d788390')
     def test_update_metadata_with_nonexistent_container_name(self):
         # Attempts to update metadata using a nonexistent container name.
-        nonexistent_name = data_utils.rand_name(
-            name="TestNonexistentContainer")
         metadata = {'animal': 'penguin'}
 
         self.assertRaises(exceptions.NotFound,
                           self.container_client.update_container_metadata,
-                          nonexistent_name, metadata)
+                          'nonexistent_container_name', metadata)
 
     @test.attr(type=["negative"])
     @test.idempotent_id('65387dbf-a0e2-4aac-9ddc-16eb3f1f69ba')
     def test_delete_with_nonexistent_container_name(self):
         # Attempts to delete metadata using a nonexistent container name.
-        nonexistent_name = data_utils.rand_name(
-            name="TestNonexistentContainer")
         metadata = {'animal': 'penguin'}
 
         self.assertRaises(exceptions.NotFound,
                           self.container_client.delete_container_metadata,
-                          nonexistent_name, metadata)
+                          'nonexistent_container_name', metadata)
 
     @test.attr(type=["negative"])
     @test.idempotent_id('14331d21-1e81-420a-beea-19cb5e5207f5')
     def test_list_all_container_objects_with_nonexistent_container(self):
         # Attempts to get a listing of all objects on a container
         # that doesn't exist.
-        nonexistent_name = data_utils.rand_name(
-            name="TestNonexistentContainer")
         params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
                           self.container_client.list_container_contents,
-                          nonexistent_name, params)
+                          'nonexistent_container_name', params)
 
     @test.attr(type=["negative"])
     @test.idempotent_id('86b2ab08-92d5-493d-acd2-85f0c848819e')
