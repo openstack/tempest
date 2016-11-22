@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -39,6 +41,8 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
         cls.snapshots_client = cls.snapshots_extensions_client
 
     @test.idempotent_id('cd4ec87d-7825-450d-8040-6e2068f2da8f')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
     def test_volume_snapshot_create_get_list_delete(self):
         volume = self.create_volume()
         self.addCleanup(self.delete_volume, volume['id'])
