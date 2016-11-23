@@ -69,16 +69,17 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             server['id'])['addresses']
         return server
 
-    def _create_and_attach_volume(self, server):
+    def _create_and_attach_volume(self, server, device=None):
         # Create a volume and wait for it to become ready
         volume = self.create_volume()
         self.addCleanup(self.delete_volume, volume['id'])
 
         # Attach the volume to the server
+        kwargs = {'volumeId': volume['id']}
+        if device:
+            kwargs.update({'device': '/dev/%s' % device})
         self.attachment = self.servers_client.attach_volume(
-            server['id'],
-            volumeId=volume['id'],
-            device='/dev/%s' % self.device)['volumeAttachment']
+            server['id'], **kwargs)['volumeAttachment']
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'in-use')
 
@@ -90,7 +91,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
         server = self._create_server()
-        volume = self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server, device=self.device)
 
         self.servers_client.stop_server(server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
@@ -139,7 +140,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def test_list_get_volume_attachments(self):
         # Create Server, Volume and attach that Volume to Server
         server = self._create_server()
-        volume = self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server, device=self.device)
 
         # List Volume attachment of the server
         body = self.servers_client.list_volume_attachments(
@@ -221,7 +222,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         server = self._create_server()
         num_vol = self._count_volumes(server)
         self._shelve_server(server)
-        self._create_and_attach_volume(server)
+        self._create_and_attach_volume(server, device=self.device)
 
         # Unshelve the instance and check that attached volume exists
         self._unshelve_server_and_check_volumes(server, num_vol + 1)
@@ -245,7 +246,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         server = self._create_server()
         num_vol = self._count_volumes(server)
         self._shelve_server(server)
-        volume = self._create_and_attach_volume(server)
+        volume = self._create_and_attach_volume(server, device=self.device)
 
         # Detach the volume
         self._detach(server['id'], volume['id'])
