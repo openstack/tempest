@@ -50,30 +50,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
 
-    def wait_for_interface_status(self, server, port_id, status):
-        """Waits for an interface to reach a given status."""
-        body = (self.interfaces_client.show_interface(server, port_id)
-                ['interfaceAttachment'])
-        interface_status = body['port_state']
-        start = int(time.time())
-
-        while(interface_status != status):
-            time.sleep(self.build_interval)
-            body = (self.interfaces_client.show_interface(server, port_id)
-                    ['interfaceAttachment'])
-            interface_status = body['port_state']
-
-            timed_out = int(time.time()) - start >= self.build_timeout
-
-            if interface_status != status and timed_out:
-                message = ('Interface %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (port_id, status, interface_status,
-                            self.build_timeout))
-                raise lib_exc.TimeoutException(message)
-
-        return body
-
     # TODO(mriedem): move this into a common waiters utility module
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
@@ -118,16 +94,16 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
         ifs = (self.interfaces_client.list_interfaces(server['id'])
                ['interfaceAttachments'])
-        body = self.wait_for_interface_status(
-            server['id'], ifs[0]['port_id'], 'ACTIVE')
+        body = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
         ifs[0]['port_state'] = body['port_state']
         return server, ifs
 
     def _test_create_interface(self, server):
         iface = (self.interfaces_client.create_interface(server['id'])
                  ['interfaceAttachment'])
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface)
         return iface
 
@@ -135,8 +111,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         network_id = ifs[0]['net_id']
         iface = self.interfaces_client.create_interface(
             server['id'], net_id=network_id)['interfaceAttachment']
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, network_id=network_id)
         return iface
 
@@ -147,8 +123,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.ports_client.delete_port, port_id)
         iface = self.interfaces_client.create_interface(
             server['id'], port_id=port_id)['interfaceAttachment']
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, port_id=port_id)
         return iface
 
@@ -166,8 +142,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
         self.addCleanup(self.ports_client.delete_port, iface['port_id'])
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, fixed_ip=ip_list[0])
         return iface
 
