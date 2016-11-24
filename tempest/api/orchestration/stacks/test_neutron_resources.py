@@ -10,10 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import logging
-
 import netaddr
+from oslo_log import log as logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
