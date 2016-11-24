@@ -66,7 +66,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('131cb3a1-75cc-4d40-b4c3-1317f64719b0')
-    def test_create_volume_with_out_passing_size(self):
+    def test_create_volume_without_passing_size(self):
         # Negative: Should not be able to create volume without passing size
         # in request
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
