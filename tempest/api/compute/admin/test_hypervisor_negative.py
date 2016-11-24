@@ -122,12 +122,10 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('19a45cc1-1000-4055-b6d2-28e8b2ec4faa')
     def test_search_nonexistent_hypervisor(self):
-        nonexistent_hypervisor_name = data_utils.rand_name('test_hypervisor')
-
         self.assertRaises(
             lib_exc.NotFound,
             self.client.search_hypervisor,
-            nonexistent_hypervisor_name)
+            'nonexistent_hypervisor_name')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('5b6a6c79-5dc1-4fa5-9c58-9c8085948e74')

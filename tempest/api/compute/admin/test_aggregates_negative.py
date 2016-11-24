@@ -177,6 +177,5 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_remove_nonexistent_host(self):
         aggregate = self._create_test_aggregate()
 
-        non_exist_host = data_utils.rand_name('nonexist_host')
         self.assertRaises(lib_exc.NotFound, self.client.remove_host,
-                          aggregate['id'], host=non_exist_host)
+                          aggregate['id'], host='nonexist_host')
