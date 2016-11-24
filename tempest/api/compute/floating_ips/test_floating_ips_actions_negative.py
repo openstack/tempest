@@ -23,7 +23,6 @@ CONF = config.CONF
 
 
 class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
-    server_id = None
 
     @classmethod
     def setup_clients(cls):
@@ -38,15 +37,14 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         # Generating a nonexistent floatingIP id
-        cls.floating_ip_ids = []
         body = cls.client.list_floating_ips()['floating_ips']
-        for i in range(len(body)):
-            cls.floating_ip_ids.append(body[i]['id'])
+        floating_ip_ids = [floating_ip['id'] for floating_ip in body]
         while True:
-            cls.non_exist_id = data_utils.rand_int_id(start=999)
             if CONF.service_available.neutron:
                 cls.non_exist_id = data_utils.rand_uuid()
-            if cls.non_exist_id not in cls.floating_ip_ids:
+            else:
+                cls.non_exist_id = data_utils.rand_int_id(start=999)
+            if cls.non_exist_id not in floating_ip_ids:
                 break
 
     @test.attr(type=['negative'])
