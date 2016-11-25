@@ -63,7 +63,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createVolume
+        http://developer.openstack.org/api-ref/block-storage/v1/#create-volume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
@@ -76,7 +76,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateVolume
+        http://developer.openstack.org/api-ref/block-storage/v1/#update-volume
         """
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
@@ -104,7 +104,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#attachVolume
+        http://developer.openstack.org/api-ref/block-storage/v1/#attach-volume
         """
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -161,7 +161,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#extendVolume
+        http://developer.openstack.org/api-ref/block-storage/v1/#extend-volume
         """
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -174,7 +174,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#resetVolume
+        http://developer.openstack.org/api-ref/block-storage/v1/#reset-volume-status
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -186,7 +186,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createVolumeTransfer
+        http://developer.openstack.org/api-ref/block-storage/v1/#create-volume-transfer
         """
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post('os-volume-transfer', post_body)
@@ -207,7 +207,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#listVolumeTransfer
+        http://developer.openstack.org/api-ref/block-storage/v1/#list-volume-transfers
         """
         url = 'os-volume-transfer'
         if params:
@@ -228,7 +228,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#acceptVolumeTransfer
+        http://developer.openstack.org/api-ref/block-storage/v1/#accept-volume-transfer
         """
         url = 'os-volume-transfer/%s/accept' % transfer_id
         post_body = json.dumps({'accept': kwargs})

@@ -27,7 +27,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#listSnapshots
+        http://developer.openstack.org/api-ref/block-storage/v2/#list-snapshots-v2
         """
         url = 'snapshots'
         if detail:
@@ -45,7 +45,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#showSnapshot
+        http://developer.openstack.org/api-ref/block-storage/v2/#show-snapshot-v2
         """
         url = "snapshots/%s" % snapshot_id
         resp, body = self.get(url)
@@ -58,7 +58,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createSnapshot
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-snapshot
         """
         post_body = json.dumps({'snapshot': kwargs})
         resp, body = self.post('snapshots', post_body)
@@ -71,7 +71,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateSnapshot
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-snapshot-v2
         """
         put_body = json.dumps({'snapshot': kwargs})
         resp, body = self.put('snapshots/%s' % snapshot_id, put_body)
@@ -84,7 +84,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#deleteSnapshot
+        http://developer.openstack.org/api-ref/block-storage/v2/#delete-snapshot-v2
         """
         resp, body = self.delete("snapshots/%s" % snapshot_id)
         self.expected_success(202, resp.status)
@@ -136,7 +136,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#showSnapshotMetadata
+        http://developer.openstack.org/api-ref/block-storage/v2/#show-snapshot-metadata-v2
         """
         url = "snapshots/%s/metadata" % snapshot_id
         resp, body = self.get(url)
@@ -149,7 +149,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateSnapshotMetadata
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-snapshot-metadata-v2
         """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata" % snapshot_id

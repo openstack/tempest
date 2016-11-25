@@ -41,7 +41,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#showVolumeTypes
+        http://developer.openstack.org/api-ref/block-storage/v2/#list-volume-types-v2
         """
         url = 'types'
         if params:
@@ -57,7 +57,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#showVolumeType
+        http://developer.openstack.org/api-ref/block-storage/v2/#show-volume-type-v2
         """
         url = "types/%s" % volume_type_id
         resp, body = self.get(url)
@@ -70,7 +70,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createVolumeType
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-volume-type-v2
         """
         post_body = json.dumps({'volume_type': kwargs})
         resp, body = self.post('types', post_body)
@@ -83,7 +83,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#deleteVolumeType
+        http://developer.openstack.org/api-ref/block-storage/v2/#delete-volume-type-v2
         """
         resp, body = self.delete("types/%s" % volume_type_id)
         self.expected_success(202, resp.status)
@@ -138,7 +138,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateVolumeType
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-volume-type-v2
         """
         put_body = json.dumps({'volume_type': kwargs})
         resp, body = self.put('types/%s' % volume_type_id, put_body)
@@ -156,7 +156,7 @@ class TypesClient(rest_client.RestClient):
                      updated value.
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#updateVolumeTypeExtraSpecs
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-volume-type-extra-specs-v2
         """
         url = "types/%s/extra_specs/%s" % (volume_type_id, extra_spec_name)
         put_body = json.dumps(extra_specs)
@@ -170,7 +170,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createVolumeTypeAccessExt
+        http://developer.openstack.org/api-ref/block-storage/v2/#add-type-access-v2
         """
         post_body = json.dumps({'addProjectAccess': kwargs})
         url = 'types/%s/action' % volume_type_id
@@ -183,7 +183,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#removeVolumeTypeAccessExt
+        http://developer.openstack.org/api-ref/block-storage/v2/#remove-type-access-v2
         """
         post_body = json.dumps({'removeProjectAccess': kwargs})
         url = 'types/%s/action' % volume_type_id
@@ -196,7 +196,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#listVolumeTypeAccessExt
+        http://developer.openstack.org/api-ref/block-storage/v2/#list-type-access-v2
         """
         url = 'types/%s/os-volume-type-access' % volume_type_id
         resp, body = self.get(url)
