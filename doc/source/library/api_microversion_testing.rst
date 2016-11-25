@@ -1,6 +1,6 @@
 .. _api_microversion_testing:
 
-API Microversion Testing Support in Temepst
+API Microversion Testing Support in Tempest
 ===========================================
 
 ---------------------------------------------
