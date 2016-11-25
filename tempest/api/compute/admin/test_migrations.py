@@ -47,12 +47,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        self.servers_client.resize_server(server_id, self.flavor_ref_alt)
-        waiters.wait_for_server_status(self.servers_client,
-                                       server_id, 'VERIFY_RESIZE')
-        self.servers_client.confirm_resize_server(server_id)
-        waiters.wait_for_server_status(self.servers_client,
-                                       server_id, 'ACTIVE')
+        self.resize_server(server_id, self.flavor_ref_alt)
 
         body = self.client.list_migrations()['migrations']
 
