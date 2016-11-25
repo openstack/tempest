@@ -22,14 +22,14 @@ from tempest.lib.services.identity.v3.inherited_roles_client import \
 from tempest.lib.services.identity.v3.policies_client import PoliciesClient
 from tempest.lib.services.identity.v3.projects_client import ProjectsClient
 from tempest.lib.services.identity.v3.regions_client import RegionsClient
+from tempest.lib.services.identity.v3.role_assignments_client import \
+    RoleAssignmentsClient
 from tempest.lib.services.identity.v3.roles_client import RolesClient
 from tempest.lib.services.identity.v3.services_client import ServicesClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.identity.v3.trusts_client import TrustsClient
 from tempest.lib.services.identity.v3.users_client import UsersClient
 from tempest.services.identity.v3.json.domains_client import DomainsClient
-from tempest.services.identity.v3.json.role_assignments_client import \
-    RoleAssignmentsClient
 
 __all__ = ['CredentialsClient', 'EndPointsClient', 'GroupsClient',
            'IdentityClient', 'InheritedRolesClient', 'PoliciesClient',

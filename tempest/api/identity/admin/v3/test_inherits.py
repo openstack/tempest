@@ -168,15 +168,16 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             self.domain['id'], self.user['id'], src_role['id'])
 
         # List "effective" role assignments from user on the parent project
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                self.project['id'], self.user['id']))['role_assignments']
+        params = {'scope.project.id': self.project['id'],
+                  'user.id': self.user['id']}
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertNotEmpty(assignments)
 
         # List "effective" role assignments from user on the leaf project
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                leaf_project['id'], self.user['id']))['role_assignments']
+        params['scope.project.id'] = leaf_project['id']
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertNotEmpty(assignments)
 
         # Revoke role from domain
@@ -185,16 +186,16 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
 
         # List "effective" role assignments from user on the parent project
         # should return an empty list
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                self.project['id'], self.user['id']))['role_assignments']
+        params['scope.project.id'] = self.project['id']
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertEmpty(assignments)
 
         # List "effective" role assignments from user on the leaf project
         # should return an empty list
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                leaf_project['id'], self.user['id']))['role_assignments']
+        params['scope.project.id'] = leaf_project['id']
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertEmpty(assignments)
 
     @test.idempotent_id('9f02ccd9-9b57-46b4-8f77-dd5a736f3a06')
@@ -217,9 +218,10 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
             self.project['id'], self.user['id'], src_role['id'])
 
         # List "effective" role assignments from user on the leaf project
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                leaf_project['id'], self.user['id']))['role_assignments']
+        params = {'scope.project.id': leaf_project['id'],
+                  'user.id': self.user['id']}
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertNotEmpty(assignments)
 
         # Revoke role from parent project
@@ -228,7 +230,6 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
 
         # List "effective" role assignments from user on the leaf project
         # should return an empty list
-        assignments = (
-            self.role_assignments.list_user_project_effective_assignments(
-                leaf_project['id'], self.user['id']))['role_assignments']
+        assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
         self.assertEmpty(assignments)
