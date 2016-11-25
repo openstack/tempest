@@ -49,41 +49,31 @@ class RoutersTest(base.BaseRouterTest):
     @test.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
     def test_create_show_list_update_delete_router(self):
         # Create a router
-        # NOTE(salv-orlando): Do not invoke self.create_router
-        # as we need to check the response code
-        name = data_utils.rand_name('router-')
-        create_body = self.routers_client.create_router(
-            name=name, external_gateway_info={
-                "network_id": CONF.network.public_network_id},
-            admin_state_up=False)
-        self.addCleanup(self._delete_router, create_body['router']['id'])
-        self.assertEqual(create_body['router']['name'], name)
+        router = self._create_router(
+            admin_state_up=False,
+            external_network_id=CONF.network.public_network_id)
+        self.assertEqual(router['admin_state_up'], False)
         self.assertEqual(
-            create_body['router']['external_gateway_info']['network_id'],
+            router['external_gateway_info']['network_id'],
             CONF.network.public_network_id)
-        self.assertEqual(create_body['router']['admin_state_up'], False)
         # Show details of the created router
-        show_body = self.routers_client.show_router(
-            create_body['router']['id'])
-        self.assertEqual(show_body['router']['name'], name)
+        router_show = self.routers_client.show_router(
+            router['id'])['router']
+        self.assertEqual(router_show['name'], router['name'])
         self.assertEqual(
-            show_body['router']['external_gateway_info']['network_id'],
+            router_show['external_gateway_info']['network_id'],
             CONF.network.public_network_id)
-        self.assertEqual(show_body['router']['admin_state_up'], False)
         # List routers and verify if created router is there in response
-        list_body = self.routers_client.list_routers()
-        routers_list = list()
-        for router in list_body['routers']:
-            routers_list.append(router['id'])
-        self.assertIn(create_body['router']['id'], routers_list)
+        routers = self.routers_client.list_routers()['routers']
+        self.assertIn(router['id'], map(lambda x: x['id'], routers))
         # Update the name of router and verify if it is updated
-        updated_name = 'updated ' + name
-        update_body = self.routers_client.update_router(
-            create_body['router']['id'], name=updated_name)
-        self.assertEqual(update_body['router']['name'], updated_name)
-        show_body = self.routers_client.show_router(
-            create_body['router']['id'])
-        self.assertEqual(show_body['router']['name'], updated_name)
+        updated_name = 'updated' + router['name']
+        router_update = self.routers_client.update_router(
+            router['id'], name=updated_name)['router']
+        self.assertEqual(router_update['name'], updated_name)
+        router_show = self.routers_client.show_router(
+            router['id'])['router']
+        self.assertEqual(router_show['name'], updated_name)
 
     @test.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
     def test_create_router_setting_project_id(self):
