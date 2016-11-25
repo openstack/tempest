@@ -16,6 +16,7 @@
 import json
 import re
 
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import test_utils
@@ -134,3 +135,5 @@ class TestServerBasicOps(manager.ScenarioTest):
         self.verify_metadata_on_config_drive()
         self.verify_networkdata_on_config_drive()
         self.servers_client.delete_server(self.instance['id'])
+        waiters.wait_for_server_termination(
+            self.servers_client, self.instance['id'], ignore_error=False)
