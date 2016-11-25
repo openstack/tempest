@@ -15,10 +15,12 @@
 from tempest.lib.services.image.v2.image_members_client import \
     ImageMembersClient
 from tempest.lib.services.image.v2.images_client import ImagesClient
+from tempest.lib.services.image.v2.namespace_properties_client import \
+    NamespacePropertiesClient
 from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
 from tempest.lib.services.image.v2.resource_types_client import \
     ResourceTypesClient
 from tempest.lib.services.image.v2.schemas_client import SchemasClient
 
-__all__ = ['ImageMembersClient', 'ImagesClient', 'NamespacesClient',
-           'ResourceTypesClient', 'SchemasClient']
+__all__ = ['ImageMembersClient', 'ImagesClient', 'NamespacePropertiesClient',
+           'NamespacesClient', 'ResourceTypesClient', 'SchemasClient']
