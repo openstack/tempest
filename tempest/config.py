@@ -780,11 +780,6 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="Is the v3 volume API enabled"),
-    cfg.BoolOpt('bootable',
-                default=True,
-                help='Update bootable status of a volume '
-                     'Not implemented on icehouse ',
-                deprecated_for_removal=True),
     # TODO(ynesenenko): Remove volume_services once liberty-eol happens.
     cfg.BoolOpt('volume_services',
                 default=False,

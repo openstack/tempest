@@ -12,7 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import testtools
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
@@ -67,8 +66,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                                        self.volume['id'], 'available')
 
     @test.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
-    @testtools.skipUnless(CONF.volume_feature_enabled.bootable,
-                          'Update bootable status of a volume is not enabled.')
     def test_volume_bootable(self):
         # Verify that a volume bootable flag is retrieved
         for bool_bootable in [True, False]:
