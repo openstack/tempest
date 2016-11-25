@@ -73,6 +73,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             cls.volumes_extension_client = cls.os.volumes_extension_client
             cls.availability_zone_client = (
                 cls.os.volume_availability_zone_client)
+            cls.volume_limits_client = cls.os.volume_limits_client
         else:
             cls.snapshots_client = cls.os.snapshots_v2_client
             cls.volumes_client = cls.os.volumes_v2_client
@@ -80,6 +81,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             cls.volumes_extension_client = cls.os.volumes_v2_extension_client
             cls.availability_zone_client = (
                 cls.os.volume_v2_availability_zone_client)
+            cls.volume_limits_client = cls.os.volume_v2_limits_client
 
     @classmethod
     def resource_setup(cls):
@@ -238,6 +240,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_encryption_types_client = \
                 cls.os_adm.encryption_types_client
             cls.admin_quotas_client = cls.os_adm.volume_quotas_client
+            cls.admin_volume_limits_client = cls.os_adm.volume_limits_client
         elif cls._api_version == 2:
             cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
             cls.admin_volume_services_client = \
@@ -250,6 +253,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_encryption_types_client = \
                 cls.os_adm.encryption_types_v2_client
             cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
+            cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
 
     @classmethod
     def resource_setup(cls):
