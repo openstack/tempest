@@ -17,7 +17,6 @@ import copy
 
 from oslo_log import log as logging
 
-from tempest.common import negative_rest_client
 from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
@@ -82,8 +81,6 @@ class Manager(clients.ServiceClients):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
-        self.negative_client = negative_rest_client.NegativeRestClient(
-            self.auth_provider, service, **self.default_params)
 
     def _prepare_configuration(self):
         """Map values from CONF into Manager parameters
