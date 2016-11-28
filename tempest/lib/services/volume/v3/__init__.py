@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from tempest.services.volume import v3
+from tempest.lib.services.volume.v3.base_client import BaseClient
+from tempest.lib.services.volume.v3.messages_client import MessagesClient
 
-__all__ = ['v3']
+__all__ = ['MessagesClient', 'BaseClient']

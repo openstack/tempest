@@ -25,7 +25,6 @@ from tempest.services import baremetal
 from tempest.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
-from tempest.services import volume
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -275,8 +274,6 @@ class Manager(clients.ServiceClients):
                 raise lib_exc.InvalidConfiguration(msg)
 
     def _set_volume_clients(self):
-        # Mandatory parameters (always defined)
-        params = self.parameters['volume']
 
         self.volume_qos_client = self.volume_v1.QosSpecsClient()
         self.volume_qos_v2_client = self.volume_v2.QosSpecsClient()
@@ -291,8 +288,7 @@ class Manager(clients.ServiceClients):
         self.snapshots_v2_client = self.volume_v2.SnapshotsClient()
         self.volumes_client = self.volume_v1.VolumesClient()
         self.volumes_v2_client = self.volume_v2.VolumesClient()
-        self.volume_v3_messages_client = volume.v3.MessagesClient(
-            self.auth_provider, **params)
+        self.volume_v3_messages_client = self.volume_v3.MessagesClient()
         self.volume_types_client = self.volume_v1.TypesClient()
         self.volume_types_v2_client = self.volume_v2.TypesClient()
         self.volume_hosts_client = self.volume_v1.HostsClient()
