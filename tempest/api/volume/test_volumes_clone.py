@@ -45,6 +45,22 @@ class VolumesCloneTest(base.BaseVolumeTest):
         self.assertEqual(volume['source_volid'], src_vol['id'])
         self.assertEqual(int(volume['size']), src_size + 1)
 
+    @test.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
+    def test_create_from_bootable_volume(self):
+        # Create volume from image
+        img_uuid = CONF.compute.image_ref
+        src_vol = self.create_volume(imageRef=img_uuid)
+
+        # Create a volume from the bootable volume
+        cloned_vol = self.create_volume(source_volid=src_vol['id'])
+        cloned_vol_details = self.volumes_client.show_volume(
+            cloned_vol['id'])['volume']
+
+        # Verify cloned volume creation as expected
+        self.assertEqual('true', cloned_vol_details['bootable'])
+        self.assertEqual(src_vol['id'], cloned_vol_details['source_volid'])
+        self.assertEqual(src_vol['size'], cloned_vol_details['size'])
+
 
 class VolumesV1CloneTest(VolumesCloneTest):
     _api_version = 1
