@@ -29,7 +29,8 @@ class RoleAssignmentsClient(rest_client.RestClient):
         http://developer.openstack.org/api-ref/identity/v3/?expanded=list-effective-role-assignments-detail
 
         :param effective: If True, returns the effective assignments, including
-                          any assignments gained by virtue of group membership.
+                          any assignments gained by virtue of group membership
+                          or inherited roles.
         """
         url = 'role_assignments'
         if kwargs:
