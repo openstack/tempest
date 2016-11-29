@@ -18,8 +18,11 @@ import testtools
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest import test
+
+CONF = config.CONF
 
 
 class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -39,14 +42,22 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.host = None
         hypers = cls.os_adm.hypervisor_client.list_hypervisors(
             detail=True)['hypervisors']
+
+        if CONF.compute.hypervisor_type:
+            hypers = [hyper for hyper in hypers
+                      if (hyper['hypervisor_type'] ==
+                          CONF.compute.hypervisor_type)]
+
         hosts_available = [hyper['service']['host'] for hyper in hypers
                            if (hyper['state'] == 'up' and
                                hyper['status'] == 'enabled')]
         if hosts_available:
             cls.host = hosts_available[0]
         else:
-            raise testtools.TestCase.failureException(
-                "no available compute node found")
+            msg = "no available compute node found"
+            if CONF.compute.hypervisor_type:
+                msg += " for hypervisor_type %s" % CONF.compute.hypervisor_type
+            raise testtools.TestCase.failureException(msg)
 
     @test.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
