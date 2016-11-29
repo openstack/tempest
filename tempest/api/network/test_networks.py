@@ -209,12 +209,16 @@ class NetworksTest(BaseNetworkTestResources):
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
+        if test.is_extension_enabled('net-mtu', 'network'):
+            fields.append('mtu')
         body = self.networks_client.show_network(self.network['id'],
                                                  fields=fields)
         network = body['network']
         self.assertEqual(sorted(network.keys()), sorted(fields))
         for field_name in fields:
             self.assertEqual(network[field_name], self.network[field_name])
+        self.assertNotIn('tenant_id', network)
+        self.assertNotIn('project_id', network)
 
     @test.attr(type='smoke')
     @test.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
@@ -229,6 +233,8 @@ class NetworksTest(BaseNetworkTestResources):
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
+        if test.is_extension_enabled('net-mtu', 'network'):
+            fields.append('mtu')
         body = self.networks_client.list_networks(fields=fields)
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
@@ -384,6 +390,21 @@ class NetworksTest(BaseNetworkTestResources):
         body = self.subnets_client.list_subnets(
             network_id=CONF.network.public_network_id)
         self.assertEmpty(body['subnets'], "Public subnets visible")
+
+    @test.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
+    @test.requires_ext(extension="standard-attr-description",
+                       service="network")
+    def test_create_update_network_description(self):
+        body = self.create_network(description='d1')
+        self.assertEqual('d1', body['description'])
+        net_id = body['id']
+        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        self.assertEqual('d1', body['description'])
+        body = self.networks_client.update_network(body['id'],
+                                                   description='d2')
+        self.assertEqual('d2', body['network']['description'])
+        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        self.assertEqual('d2', body['description'])
 
 
 class BulkNetworkOpsTest(base.BaseNetworkTest):

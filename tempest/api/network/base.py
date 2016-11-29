@@ -135,12 +135,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).resource_cleanup()
 
     @classmethod
-    def create_network(cls, network_name=None):
+    def create_network(cls, network_name=None, **kwargs):
         """Wrapper utility that returns a test network."""
         network_name = network_name or data_utils.rand_name(
-            cls.__name__ + "-network")
+            cls.__name__ + '-test-network')
 
-        body = cls.networks_client.create_network(name=network_name)
+        body = cls.networks_client.create_network(name=network_name, **kwargs)
         network = body['network']
         cls.networks.append(network)
         return network
