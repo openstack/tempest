@@ -34,11 +34,10 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
     def test_admin_deactivate_reactivate_image(self):
         # Create image by non-admin tenant
         image_name = data_utils.rand_name('image')
-        image = self.client.create_image(name=image_name,
-                                         container_format='bare',
-                                         disk_format='raw',
-                                         visibility='private')
-        self.addCleanup(self.client.delete_image, image['id'])
+        image = self.create_image(name=image_name,
+                                  container_format='bare',
+                                  disk_format='raw',
+                                  visibility='private')
         # upload an image file
         content = data_utils.random_bytes()
         image_file = six.BytesIO(content)
