@@ -33,12 +33,6 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
-    @classmethod
-    def resource_setup(cls):
-        super(VolumesBackupsAdminV2Test, cls).resource_setup()
-
-        cls.volume = cls.create_volume()
-
     def _delete_backup(self, backup_id):
         self.admin_backups_client.delete_backup(backup_id)
         self.admin_backups_client.wait_for_resource_deletion(backup_id)
@@ -62,14 +56,13 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         Cinder allows exporting DB backup information through its API so it can
         be imported back in case of a DB loss.
         """
+        volume = self.create_volume()
         # Create backup
         backup_name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
-        backup = (self.admin_backups_client.create_backup(
-            volume_id=self.volume['id'], name=backup_name)['backup'])
-        self.addCleanup(self._delete_backup, backup['id'])
+        backup = (self.create_backup(backup_client=self.admin_backups_client,
+                                     volume_id=volume['id'],
+                                     name=backup_name))
         self.assertEqual(backup_name, backup['name'])
-        waiters.wait_for_backup_status(self.admin_backups_client,
-                                       backup['id'], 'available')
 
         # Export Backup
         export_backup = (self.admin_backups_client.export_backup(backup['id'])
@@ -126,16 +119,15 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
 
     @test.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
     def test_volume_backup_reset_status(self):
+        # Create a volume
+        volume = self.create_volume()
         # Create a backup
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        backup = self.admin_backups_client.create_backup(
-            volume_id=self.volume['id'], name=backup_name)['backup']
-        self.addCleanup(self.admin_backups_client.delete_backup,
-                        backup['id'])
+        backup = self.create_backup(backup_client=self.admin_backups_client,
+                                    volume_id=volume['id'],
+                                    name=backup_name)
         self.assertEqual(backup_name, backup['name'])
-        waiters.wait_for_backup_status(self.admin_backups_client,
-                                       backup['id'], 'available')
         # Reset backup status to error
         self.admin_backups_client.reset_backup_status(backup_id=backup['id'],
                                                       status="error")
