@@ -19,8 +19,8 @@ from tempest.common import compute
 from tempest.common import credentials_factory as credentials
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions as lib_excs
 from tempest import test
 
 CONF = config.CONF
@@ -82,14 +82,14 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found tenant networks: %s' % nets)
         # (2) Retrieve shared network list.
         search_opts = {'shared': True}
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found shared networks: %s' % nets)
 
     @classmethod
