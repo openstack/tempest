@@ -23,11 +23,6 @@ CONF = config.CONF
 class VolumesActionsV2Test(base.BaseVolumeAdminTest):
 
     @classmethod
-    def setup_clients(cls):
-        super(VolumesActionsV2Test, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @classmethod
     def resource_setup(cls):
         super(VolumesActionsV2Test, cls).resource_setup()
 
@@ -47,7 +42,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
             self.admin_volume_client.reset_volume_status(
                 temp_volume['id'], status=status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
-        self.client.wait_for_resource_deletion(temp_volume['id'])
+        self.volumes_client.wait_for_resource_deletion(temp_volume['id'])
 
     @test.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):

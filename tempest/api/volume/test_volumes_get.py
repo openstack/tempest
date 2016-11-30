@@ -28,11 +28,6 @@ CONF = config.CONF
 class VolumesV2GetTest(base.BaseVolumeTest):
 
     @classmethod
-    def setup_clients(cls):
-        super(VolumesV2GetTest, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @classmethod
     def resource_setup(cls):
         super(VolumesV2GetTest, cls).resource_setup()
 
@@ -46,10 +41,11 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Create a volume
         kwargs[self.name_field] = v_name
         kwargs['metadata'] = metadata
-        volume = self.client.create_volume(**kwargs)['volume']
+        volume = self.volumes_client.create_volume(**kwargs)['volume']
         self.assertIn('id', volume)
-        self.addCleanup(self.delete_volume, self.client, volume['id'])
-        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
+        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
+        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
+                                       'available')
         self.assertIn(self.name_field, volume)
         self.assertEqual(volume[self.name_field], v_name,
                          "The created volume name is not equal "
@@ -57,7 +53,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.assertIsNotNone(volume['id'],
                              "Field volume id is empty or not found.")
         # Get Volume information
-        fetched_volume = self.client.show_volume(volume['id'])['volume']
+        fetched_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
         self.assertEqual(v_name,
                          fetched_volume[self.name_field],
                          'The fetched Volume name is different '
@@ -79,20 +76,21 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Update Volume
         # Test volume update when display_name is same with original value
         params = {self.name_field: v_name}
-        self.client.update_volume(volume['id'], **params)
+        self.volumes_client.update_volume(volume['id'], **params)
         # Test volume update when display_name is new
         new_v_name = data_utils.rand_name(
             self.__class__.__name__ + '-new-Volume')
         new_desc = 'This is the new description of volume'
         params = {self.name_field: new_v_name,
                   self.descrip_field: new_desc}
-        update_volume = self.client.update_volume(
+        update_volume = self.volumes_client.update_volume(
             volume['id'], **params)['volume']
         # Assert response body for update_volume method
         self.assertEqual(new_v_name, update_volume[self.name_field])
         self.assertEqual(new_desc, update_volume[self.descrip_field])
         # Assert response body for show_volume method
-        updated_volume = self.client.show_volume(volume['id'])['volume']
+        updated_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
         self.assertEqual(volume['id'], updated_volume['id'])
         self.assertEqual(new_v_name, updated_volume[self.name_field])
         self.assertEqual(new_desc, updated_volume[self.descrip_field])
@@ -107,15 +105,16 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone'],
                   'size': CONF.volume.volume_size}
-        new_volume = self.client.create_volume(**params)['volume']
+        new_volume = self.volumes_client.create_volume(**params)['volume']
         self.assertIn('id', new_volume)
-        self.addCleanup(self.delete_volume, self.client, new_volume['id'])
-        waiters.wait_for_volume_status(self.client,
+        self.addCleanup(self.delete_volume, self.volumes_client,
+                        new_volume['id'])
+        waiters.wait_for_volume_status(self.volumes_client,
                                        new_volume['id'], 'available')
 
         params = {self.name_field: volume[self.name_field],
                   self.descrip_field: volume[self.descrip_field]}
-        self.client.update_volume(new_volume['id'], **params)
+        self.volumes_client.update_volume(new_volume['id'], **params)
 
         if 'imageRef' in kwargs:
             self.assertEqual('true', updated_volume['bootable'])

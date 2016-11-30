@@ -33,11 +33,6 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     """
 
     @classmethod
-    def setup_clients(cls):
-        super(VolumesV2ListTestJSON, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @classmethod
     def resource_setup(cls):
         super(VolumesV2ListTestJSON, cls).resource_setup()
 
@@ -45,7 +40,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         cls.metadata = {'Type': 'work'}
         # NOTE(zhufl): When using pre-provisioned credentials, the project
         # may have volumes other than those created below.
-        existing_volumes = cls.client.list_volumes()['volumes']
+        existing_volumes = cls.volumes_client.list_volumes()['volumes']
         cls.volume_id_list = [vol['id'] for vol in existing_volumes]
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
@@ -63,7 +58,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                       'sort_dir': sort_dir,
                       'sort_key': sort_key
                       }
-            fetched_volume = self.client.list_volumes(
+            fetched_volume = self.volumes_client.list_volumes(
                 detail=True, params=params)['volumes']
             self.assertEqual(limit, len(fetched_volume),
                              "The count of volumes is %s, expected:%s " %
@@ -192,8 +187,8 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         params = {'marker': random_volume}
 
         # Running volume list using marker parameter
-        vol_with_marker = self.client.list_volumes(detail=True,
-                                                   params=params)['volumes']
+        vol_with_marker = self.volumes_client.list_volumes(
+            detail=True, params=params)['volumes']
 
         # Fetching the index of the random volume from volume_id_list
         index_marker = self.volume_id_list.index(random_volume)
