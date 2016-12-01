@@ -55,6 +55,7 @@ ALT_IDENTITY_V2_RESPONSE = {
         },
         "user": {
             "id": "fake_alt_user_id",
+            "password_expires_at": None,
         },
         "serviceCatalog": CATALOG_V2,
     },
@@ -71,6 +72,7 @@ IDENTITY_V2_RESPONSE = {
         },
         "user": {
             "id": "fake_user_id",
+            "password_expires_at": None,
         },
         "serviceCatalog": CATALOG_V2,
     },
@@ -83,18 +85,21 @@ COMPUTE_ENDPOINTS_V3 = {
             "id": "first_compute_fake_service",
             "interface": "public",
             "region": "NoMatchRegion",
+            "region_id": "NoMatchRegion",
             "url": "http://fake_url/v3/first_endpoint/api"
         },
         {
             "id": "second_fake_service",
             "interface": "public",
             "region": "FakeRegion",
+            "region_id": "FakeRegion",
             "url": "http://fake_url/v3/second_endpoint/api"
         },
         {
             "id": "third_fake_service",
             "interface": "admin",
             "region": "MiddleEarthRegion",
+            "region_id": "MiddleEarthRegion",
             "url": "http://fake_url/v3/third_endpoint/api"
         }
 
@@ -108,6 +113,7 @@ CATALOG_V3 = [COMPUTE_ENDPOINTS_V3, ]
 
 IDENTITY_V3_RESPONSE = {
     "token": {
+        "audit_ids": ["ny5LA5YXToa_mAVO8Hnupw", "9NPTvsRDSkmsW61abP978Q"],
         "methods": [
             "token",
             "password"
@@ -127,7 +133,8 @@ IDENTITY_V3_RESPONSE = {
                 "name": "domain_name"
             },
             "id": "fake_user_id",
-            "name": "username"
+            "name": "username",
+            "password_expires_at": None,
         },
         "issued_at": "2013-05-29T16:55:21.468960Z",
         "catalog": CATALOG_V3
@@ -136,6 +143,7 @@ IDENTITY_V3_RESPONSE = {
 
 IDENTITY_V3_RESPONSE_DOMAIN_SCOPE = {
     "token": {
+        "audit_ids": ["ny5LA5YXToa_mAVO8Hnupw", "9NPTvsRDSkmsW61abP978Q"],
         "methods": [
             "token",
             "password"
@@ -151,7 +159,8 @@ IDENTITY_V3_RESPONSE_DOMAIN_SCOPE = {
                 "name": "domain_name"
             },
             "id": "fake_user_id",
-            "name": "username"
+            "name": "username",
+            "password_expires_at": None,
         },
         "issued_at": "2013-05-29T16:55:21.468960Z",
         "catalog": CATALOG_V3
@@ -160,6 +169,7 @@ IDENTITY_V3_RESPONSE_DOMAIN_SCOPE = {
 
 IDENTITY_V3_RESPONSE_NO_SCOPE = {
     "token": {
+        "audit_ids": ["ny5LA5YXToa_mAVO8Hnupw", "9NPTvsRDSkmsW61abP978Q"],
         "methods": [
             "token",
             "password"
@@ -171,7 +181,8 @@ IDENTITY_V3_RESPONSE_NO_SCOPE = {
                 "name": "domain_name"
             },
             "id": "fake_user_id",
-            "name": "username"
+            "name": "username",
+            "password_expires_at": None,
         },
         "issued_at": "2013-05-29T16:55:21.468960Z",
     }
