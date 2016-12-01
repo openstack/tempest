@@ -422,10 +422,16 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help="A list of enabled filters that nova will accept as hints"
                      " to the scheduler when creating a server. A special "
-                     "entry 'all' indicates all filters are enabled. Empty "
-                     "list indicates all filters are disabled. The full "
-                     "available list of filters is in nova.conf: "
-                     "DEFAULT.scheduler_available_filters"),
+                     "entry 'all' indicates all filters that are included "
+                     "with nova are enabled. Empty list indicates all filters "
+                     "are disabled. The full list of available filters is in "
+                     "nova.conf: DEFAULT.scheduler_available_filters. If the "
+                     "default value is overridden in nova.conf by the test "
+                     "environment (which means that a different set of "
+                     "filters is enabled than what is included in Nova by "
+                     "default) then, this option must be configured to "
+                     "contain the same filters that Nova uses in the test "
+                     "environment."),
     cfg.BoolOpt('swap_volume',
                 default=False,
                 help='Does the test environment support in-place swapping of '
