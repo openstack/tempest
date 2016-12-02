@@ -74,8 +74,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             fetched_volume = self.client.show_volume(
                 self.volume['id'])['volume']
             # Get Volume information
-            bool_flag = self._is_true(fetched_volume['bootable'])
-            self.assertEqual(bool_bootable, bool_flag)
+            # NOTE(masayukig): 'bootable' is "true" or "false" in the current
+            # cinder implementation. So we need to cast boolean values to str
+            # and make it lower to compare here.
+            self.assertEqual(str(bool_bootable).lower(),
+                             fetched_volume['bootable'])
 
     @test.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
     @test.services('compute')
@@ -136,9 +139,6 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         body = self.client.show_volume(self.volume['id'])['volume']
         self.assertIn('available', body['status'])
 
-    def _is_true(self, val):
-        return val in ['true', 'True', True]
-
     @test.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
         for readonly in [True, False]:
@@ -148,8 +148,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             # Get Volume information
             fetched_volume = self.client.show_volume(
                 self.volume['id'])['volume']
-            bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
-            self.assertEqual(readonly, bool_flag)
+            # NOTE(masayukig): 'readonly' is "True" or "False" in the current
+            # cinder implementation. So we need to cast boolean values to str
+            # to compare here.
+            self.assertEqual(str(readonly),
+                             fetched_volume['metadata']['readonly'])
 
 
 class VolumesV1ActionsTest(VolumesV2ActionsTest):
