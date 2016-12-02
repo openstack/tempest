@@ -345,6 +345,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             LOG.exception('Failed to delete server %s' % server_id)
 
     @classmethod
+    def resize_server(cls, server_id, new_flavor_id, **kwargs):
+        """resize and confirm_resize an server, waits for it to be ACTIVE."""
+        cls.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
+        waiters.wait_for_server_status(cls.servers_client, server_id,
+                                       'VERIFY_RESIZE')
+        cls.servers_client.confirm_resize_server(server_id)
+        waiters.wait_for_server_status(cls.servers_client, server_id, 'ACTIVE')
+
+    @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         cls._delete_volume(cls.volumes_extensions_client, volume_id)
