@@ -236,6 +236,10 @@ Microversion tests implemented in Tempest
 
  .. _2.25: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-mitaka
 
+ * `2.32`_
+
+ .. _2.32: http://docs.openstack.org/developer/nova/api_microversion_history.html#id29
+
  * `2.37`_
 
  .. _2.37: http://docs.openstack.org/developer/nova/api_microversion_history.html#id34
