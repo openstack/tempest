@@ -156,6 +156,36 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(volume['id'], body['volumeId'])
         self.assertEqual(attachment['id'], body['id'])
 
+    @test.idempotent_id('757d488b-a951-4bc7-b3cd-f417028da08a')
+    def test_list_get_two_volume_attachments(self):
+        # NOTE: This test is using the volume device auto-assignment
+        # without specifying the device ("/dev/sdb", etc). The feature
+        # is supported since Nova Liberty release or later. So this should
+        # be skipped on older clouds.
+        server = self._create_server()
+        volume_1st = self.create_volume()
+        volume_2nd = self.create_volume()
+        attachment_1st = self._attach_volume(server['id'], volume_1st['id'])
+        attachment_2nd = self._attach_volume(server['id'], volume_2nd['id'])
+
+        body = self.servers_client.list_volume_attachments(
+            server['id'])['volumeAttachments']
+        self.assertEqual(2, len(body))
+
+        body = self.servers_client.show_volume_attachment(
+            server['id'],
+            attachment_1st['id'])['volumeAttachment']
+        self.assertEqual(server['id'], body['serverId'])
+        self.assertEqual(attachment_1st['volumeId'], body['volumeId'])
+        self.assertEqual(attachment_1st['id'], body['id'])
+
+        body = self.servers_client.show_volume_attachment(
+            server['id'],
+            attachment_2nd['id'])['volumeAttachment']
+        self.assertEqual(server['id'], body['serverId'])
+        self.assertEqual(attachment_2nd['volumeId'], body['volumeId'])
+        self.assertEqual(attachment_2nd['id'], body['id'])
+
 
 class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
     """Testing volume with shelved instance.
