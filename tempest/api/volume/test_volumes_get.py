@@ -27,36 +27,31 @@ CONF = config.CONF
 
 class VolumesV2GetTest(base.BaseVolumeTest):
 
-    @classmethod
-    def resource_setup(cls):
-        super(VolumesV2GetTest, cls).resource_setup()
-
-        cls.name_field = cls.special_fields['name_field']
-        cls.descrip_field = cls.special_fields['descrip_field']
-
     def _volume_create_get_update_delete(self, **kwargs):
+        name_field = self.special_fields['name_field']
+        descrip_field = self.special_fields['descrip_field']
+
         # Create a volume, Get it's details and Delete the volume
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'Test'}
         # Create a volume
-        kwargs[self.name_field] = v_name
+        kwargs[name_field] = v_name
         kwargs['metadata'] = metadata
         volume = self.volumes_client.create_volume(**kwargs)['volume']
         self.assertIn('id', volume)
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         waiters.wait_for_volume_status(self.volumes_client, volume['id'],
                                        'available')
-        self.assertIn(self.name_field, volume)
-        self.assertEqual(volume[self.name_field], v_name,
+        self.assertIn(name_field, volume)
+        self.assertEqual(volume[name_field], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
-        self.assertIsNotNone(volume['id'],
-                             "Field volume id is empty or not found.")
+
         # Get Volume information
         fetched_volume = self.volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(v_name,
-                         fetched_volume[self.name_field],
+                         fetched_volume[name_field],
                          'The fetched Volume name is different '
                          'from the created Volume')
         self.assertEqual(volume['id'],
@@ -70,39 +65,40 @@ class VolumesV2GetTest(base.BaseVolumeTest):
 
         if 'imageRef' in kwargs:
             self.assertEqual('true', fetched_volume['bootable'])
-        if 'imageRef' not in kwargs:
+        else:
             self.assertEqual('false', fetched_volume['bootable'])
 
         # Update Volume
         # Test volume update when display_name is same with original value
-        params = {self.name_field: v_name}
+        params = {name_field: v_name}
         self.volumes_client.update_volume(volume['id'], **params)
         # Test volume update when display_name is new
         new_v_name = data_utils.rand_name(
             self.__class__.__name__ + '-new-Volume')
         new_desc = 'This is the new description of volume'
-        params = {self.name_field: new_v_name,
-                  self.descrip_field: new_desc}
+        params = {name_field: new_v_name,
+                  descrip_field: new_desc}
         update_volume = self.volumes_client.update_volume(
             volume['id'], **params)['volume']
         # Assert response body for update_volume method
-        self.assertEqual(new_v_name, update_volume[self.name_field])
-        self.assertEqual(new_desc, update_volume[self.descrip_field])
+        self.assertEqual(new_v_name, update_volume[name_field])
+        self.assertEqual(new_desc, update_volume[descrip_field])
         # Assert response body for show_volume method
         updated_volume = self.volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(volume['id'], updated_volume['id'])
-        self.assertEqual(new_v_name, updated_volume[self.name_field])
-        self.assertEqual(new_desc, updated_volume[self.descrip_field])
+        self.assertEqual(new_v_name, updated_volume[name_field])
+        self.assertEqual(new_desc, updated_volume[descrip_field])
         self.assertThat(updated_volume['metadata'].items(),
                         matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
+
         # Test volume create when display_name is none and display_description
         # contains specific characters,
         # then test volume update if display_name is duplicated
         new_v_desc = data_utils.rand_name('@#$%^* description')
-        params = {self.descrip_field: new_v_desc,
+        params = {descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone'],
                   'size': CONF.volume.volume_size}
         new_volume = self.volumes_client.create_volume(**params)['volume']
@@ -112,13 +108,13 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         waiters.wait_for_volume_status(self.volumes_client,
                                        new_volume['id'], 'available')
 
-        params = {self.name_field: volume[self.name_field],
-                  self.descrip_field: volume[self.descrip_field]}
+        params = {name_field: volume[name_field],
+                  descrip_field: volume[descrip_field]}
         self.volumes_client.update_volume(new_volume['id'], **params)
 
         if 'imageRef' in kwargs:
             self.assertEqual('true', updated_volume['bootable'])
-        if 'imageRef' not in kwargs:
+        else:
             self.assertEqual('false', updated_volume['bootable'])
 
     @test.attr(type='smoke')
