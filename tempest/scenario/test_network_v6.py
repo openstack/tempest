@@ -50,7 +50,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
-        if not CONF.network.shared_physical_network:
+        if CONF.network.shared_physical_network:
             msg = 'Deployment uses a shared physical network'
             raise cls.skipException(msg)
 
