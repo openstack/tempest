@@ -16,8 +16,8 @@
 from tempest.common import custom_matchers
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
 
