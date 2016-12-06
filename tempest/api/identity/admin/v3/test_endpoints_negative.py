@@ -25,7 +25,6 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def setup_clients(cls):
         super(EndpointsNegativeTestJSON, cls).setup_clients()
-        cls.identity_client = cls.client
         cls.client = cls.endpoints_client
 
     @classmethod

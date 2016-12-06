@@ -75,7 +75,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.os.compute_security_group_rules_client)
         cls.security_groups_client = cls.os.compute_security_groups_client
         cls.quotas_client = cls.os.quotas_client
-        cls.quota_classes_client = cls.os.quota_classes_client
         cls.compute_networks_client = cls.os.compute_networks_client
         cls.limits_client = cls.os.limits_client
         cls.volumes_extensions_client = cls.os.volumes_extensions_client
