@@ -21,6 +21,7 @@ import uuid
 
 from debtcollector import removals
 from oslo_utils import netutils
+from oslo_utils import uuidutils
 import six.moves
 
 
@@ -30,7 +31,7 @@ def rand_uuid():
     :return: a random UUID (e.g. '1dc12c7d-60eb-4b61-a7a2-17cf210155b6')
     :rtype: string
     """
-    return str(uuid.uuid4())
+    return uuidutils.generate_uuid()
 
 
 def rand_uuid_hex():
