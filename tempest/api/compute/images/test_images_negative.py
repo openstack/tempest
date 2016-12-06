@@ -96,7 +96,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_non_existent_image(self):
         # Return an error while trying to delete a non-existent image
 
-        non_existent_image_id = '11a22b9-12a9-5555-cc11-00ab112223fa'
+        non_existent_image_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           non_existent_image_id)
 
@@ -110,9 +110,9 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('924540c3-f1f1-444c-8f58-718958b6724e')
     def test_delete_image_non_hex_string_id(self):
         # Return an error while trying to delete an image with non hex id
-        image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
+        invalid_image_id = data_utils.rand_uuid()[:-1] + "j"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          image_id)
+                          invalid_image_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('68e2c175-bd26-4407-ac0f-4ea9ce2139ea')
@@ -122,7 +122,8 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('b340030d-82cd-4066-a314-c72fb7c59277')
-    def test_delete_image_id_is_over_35_character_limit(self):
+    def test_delete_image_with_id_over_character_limit(self):
         # Return an error while trying to delete image with id over limit
+        invalid_image_id = data_utils.rand_uuid() + "1"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
+                          invalid_image_id)
