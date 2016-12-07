@@ -87,7 +87,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         ironic_only = True
         hypers_without_ironic = []
         for hyper in hypers:
-            details = (self.client.show_hypervisor(hypers[0]['id'])
+            details = (self.client.show_hypervisor(hyper['id'])
                        ['hypervisor'])
             if details['hypervisor_type'] != 'ironic':
                 hypers_without_ironic.append(hyper)
