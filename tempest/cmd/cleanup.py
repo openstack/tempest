@@ -149,8 +149,8 @@ class TempestCleanup(command.Command):
 
     def _remove_admin_user_roles(self):
         tenant_ids = self.admin_role_added
-        LOG.debug("Removing admin user roles where needed for tenants: %s"
-                  % tenant_ids)
+        LOG.debug("Removing admin user roles where needed for tenants: %s",
+                  tenant_ids)
         for tenant_id in tenant_ids:
             self._remove_admin_role(tenant_id)
 
@@ -236,13 +236,13 @@ class TempestCleanup(command.Command):
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
-            LOG.debug("Adding admin privilege for : %s" % tenant_id)
+            LOG.debug("Adding admin privilege for : %s", tenant_id)
             rl_cl.create_user_role_on_project(tenant_id, self.admin_id,
                                               self.admin_role_id)
             self.admin_role_added.append(tenant_id)
 
     def _remove_admin_role(self, tenant_id):
-        LOG.debug("Remove admin user role for tenant: %s" % tenant_id)
+        LOG.debug("Remove admin user role for tenant: %s", tenant_id)
         # Must initialize AdminManager for each user role
         # Otherwise authentication exception is thrown, weird
         id_cl = credentials.AdminManager().identity_client
@@ -253,16 +253,16 @@ class TempestCleanup(command.Command):
                                                        self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"
-                              "exists, exception: %s" % ex)
+                              "exists, exception: %s", ex)
 
     def _tenant_exists(self, tenant_id):
         tn_cl = self.admin_mgr.tenants_client
         try:
             t = tn_cl.show_tenant(tenant_id)
-            LOG.debug("Tenant is: %s" % str(t))
+            LOG.debug("Tenant is: %s", str(t))
             return True
         except Exception as ex:
-            LOG.debug("Tenant no longer exists? %s" % ex)
+            LOG.debug("Tenant no longer exists? %s", ex)
             return False
 
     def _init_state(self):
@@ -290,8 +290,8 @@ class TempestCleanup(command.Command):
         except IOError as ex:
             LOG.exception("Failed loading saved state, please be sure you"
                           " have first run cleanup with --init-saved-state "
-                          "flag prior to running tempest. Exception: %s" % ex)
+                          "flag prior to running tempest. Exception: %s", ex)
             sys.exit(ex)
         except Exception as ex:
-            LOG.exception("Exception parsing saved state json : %s" % ex)
+            LOG.exception("Exception parsing saved state json : %s", ex)
             sys.exit(ex)

@@ -54,7 +54,7 @@ def execute(cmd, action, flags='', params='', fail_ok=False,
     cmd = ' '.join([prefix, os.path.join(cli_dir, cmd),
                     flags, action, params])
     cmd = cmd.strip()
-    LOG.info("running: '%s'" % cmd)
+    LOG.info("running: '%s'", cmd)
     if six.PY2:
         cmd = cmd.encode('utf-8')
     cmd = shlex.split(cmd)

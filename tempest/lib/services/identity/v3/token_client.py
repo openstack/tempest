@@ -179,8 +179,8 @@ class V3TokenClientJSON(V3TokenClient):
     LOG = logging.getLogger(__name__)
 
     def _warn(self):
-        self.LOG.warning("%s class was deprecated and renamed to %s" %
-                         (self.__class__.__name__, 'V3TokenClient'))
+        self.LOG.warning("%s class was deprecated and renamed to %s",
+                         self.__class__.__name__, 'V3TokenClient')
 
     def __init__(self, *args, **kwargs):
         self._warn()

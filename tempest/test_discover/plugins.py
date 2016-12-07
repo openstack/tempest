@@ -143,7 +143,7 @@ class TempestTestPluginManager(object):
                 plug.obj.register_opts(conf)
             except Exception:
                 LOG.exception('Plugin %s raised an exception trying to run '
-                              'register_opts' % plug.name)
+                              'register_opts', plug.name)
 
     def get_plugin_options_list(self):
         plugin_options = []
@@ -163,4 +163,4 @@ class TempestTestPluginManager(object):
                         plug.name, service_clients)
             except Exception:
                 LOG.exception('Plugin %s raised an exception trying to run '
-                              'get_service_clients' % plug.name)
+                              'get_service_clients', plug.name)

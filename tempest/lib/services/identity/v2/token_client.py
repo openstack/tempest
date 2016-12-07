@@ -117,8 +117,8 @@ class TokenClientJSON(TokenClient):
     LOG = logging.getLogger(__name__)
 
     def _warn(self):
-        self.LOG.warning("%s class was deprecated and renamed to %s" %
-                         (self.__class__.__name__, 'TokenClient'))
+        self.LOG.warning("%s class was deprecated and renamed to %s",
+                         self.__class__.__name__, 'TokenClient')
 
     def __init__(self, *args, **kwargs):
         self._warn()

@@ -42,7 +42,7 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
             raise self.skipException('There are not any extensions configured')
         # Log extensions list
         extension_list = map(lambda x: x['alias'], extensions)
-        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
+        LOG.debug("Nova extensions: %s", ','.join(extension_list))
 
     @test.idempotent_id('05762f39-bdfa-4cdb-9b46-b78f8e78e2fd')
     @test.requires_ext(extension='os-consoles', service='compute')

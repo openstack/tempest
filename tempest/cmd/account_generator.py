@@ -205,7 +205,7 @@ def dump_accounts(resources, identity_version, account_file):
         os.rename(account_file, '.'.join((account_file, 'bak')))
     with open(account_file, 'w') as f:
         yaml.safe_dump(accounts, f, default_flow_style=False)
-    LOG.info('%s generated successfully!' % account_file)
+    LOG.info('%s generated successfully!', account_file)
 
 
 def _parser_add_args(parser):

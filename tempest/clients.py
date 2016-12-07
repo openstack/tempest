@@ -91,7 +91,7 @@ class Manager(clients.ServiceClients):
                         config.service_client_config(service_for_config))
             except lib_exc.UnknownServiceClient:
                 LOG.warning(
-                    'Could not load configuration for service %s' % service)
+                    'Could not load configuration for service %s', service)
 
         return configuration
 

@@ -350,7 +350,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 else:
                     LOG.warning("Deletion of oldest backup %s should not have "
                                 "been successful as it should have been "
-                                "deleted during rotation." % oldest_backup)
+                                "deleted during rotation.", oldest_backup)
 
         image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)

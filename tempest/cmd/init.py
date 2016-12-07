@@ -120,7 +120,7 @@ class TempestInit(command.Command):
         if os.path.isdir(config_dir):
             shutil.copytree(config_dir, etc_dir)
         else:
-            LOG.warning("Global config dir %s can't be found" % config_dir)
+            LOG.warning("Global config dir %s can't be found", config_dir)
 
     def generate_sample_config(self, local_dir):
         conf_generator = os.path.join(os.path.dirname(__file__),
@@ -131,14 +131,14 @@ class TempestInit(command.Command):
                             output_file])
         else:
             LOG.warning("Skipping sample config generation because global "
-                        "config file %s can't be found" % conf_generator)
+                        "config file %s can't be found", conf_generator)
 
     def create_working_dir(self, local_dir, config_dir):
         # make sure we are working with abspath however tempest init is called
         local_dir = os.path.abspath(local_dir)
         # Create local dir if missing
         if not os.path.isdir(local_dir):
-            LOG.debug('Creating local working dir: %s' % local_dir)
+            LOG.debug('Creating local working dir: %s', local_dir)
             os.mkdir(local_dir)
         elif not os.listdir(local_dir) == []:
             raise OSError("Directory you are trying to initialize already "
@@ -151,11 +151,11 @@ class TempestInit(command.Command):
         testr_dir = os.path.join(local_dir, '.testrepository')
         # Create lock dir
         if not os.path.isdir(lock_dir):
-            LOG.debug('Creating lock dir: %s' % lock_dir)
+            LOG.debug('Creating lock dir: %s', lock_dir)
             os.mkdir(lock_dir)
         # Create log dir
         if not os.path.isdir(log_dir):
-            LOG.debug('Creating log dir: %s' % log_dir)
+            LOG.debug('Creating log dir: %s', log_dir)
             os.mkdir(log_dir)
         # Create and copy local etc dir
         self.copy_config(etc_dir, config_dir)

@@ -406,8 +406,8 @@ class RestClient(object):
     def _log_request_start(self, method, req_url):
         caller_name = test_utils.find_test_caller()
         if self.trace_requests and re.search(self.trace_requests, caller_name):
-            self.LOG.debug('Starting Request (%s): %s %s' %
-                           (caller_name, method, req_url))
+            self.LOG.debug('Starting Request (%s): %s %s', caller_name,
+                           method, req_url)
 
     def _log_request_full(self, resp, req_headers=None, req_body=None,
                           resp_body=None, extra=None):
@@ -423,11 +423,11 @@ class RestClient(object):
         Body: %s"""
 
         self.LOG.debug(
-            log_fmt % (
-                str(req_headers),
-                self._safe_body(req_body),
-                str(resp_log),
-                self._safe_body(resp_body)),
+            log_fmt,
+            str(req_headers),
+            self._safe_body(req_body),
+            str(resp_log),
+            self._safe_body(resp_body),
             extra=extra)
 
     def _log_request(self, method, req_url, resp,
@@ -445,12 +445,12 @@ class RestClient(object):
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
-            'Request (%s): %s %s %s%s' % (
-                caller_name,
-                resp['status'],
-                method,
-                req_url,
-                secs),
+            'Request (%s): %s %s %s%s',
+            caller_name,
+            resp['status'],
+            method,
+            req_url,
+            secs,
             extra=extra)
 
         # Also look everything at DEBUG if you want to filter this

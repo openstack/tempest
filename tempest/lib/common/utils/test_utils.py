@@ -74,7 +74,7 @@ def find_test_caller():
     # prevents frame leaks
     del frame
     if caller_name is None:
-        LOG.debug("Sane call name not found in %s" % names)
+        LOG.debug("Sane call name not found in %s", names)
     return caller_name
 
 

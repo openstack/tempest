@@ -118,36 +118,36 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         volume_origin = self._create_volume_from_image()
         instance_1st = self._boot_instance_from_volume(volume_origin['id'],
                                                        keypair, security_group)
-        LOG.info("Booted first instance: %s" % instance_1st)
+        LOG.info("Booted first instance: %s", instance_1st)
 
         # write content to volume on instance
-        LOG.info("Setting timestamp in instance %s" % instance_1st)
+        LOG.info("Setting timestamp in instance %s", instance_1st)
         ip_instance_1st = self.get_server_ip(instance_1st)
         timestamp = self.create_timestamp(ip_instance_1st,
                                           private_key=keypair['private_key'])
 
         # delete instance
-        LOG.info("Deleting first instance: %s" % instance_1st)
+        LOG.info("Deleting first instance: %s", instance_1st)
         self._delete_server(instance_1st)
 
         # create a 2nd instance from volume
         instance_2nd = self._boot_instance_from_volume(volume_origin['id'],
                                                        keypair, security_group)
-        LOG.info("Booted second instance %s" % instance_2nd)
+        LOG.info("Booted second instance %s", instance_2nd)
 
         # check the content of written file
-        LOG.info("Getting timestamp in instance %s" % instance_2nd)
+        LOG.info("Getting timestamp in instance %s", instance_2nd)
         ip_instance_2nd = self.get_server_ip(instance_2nd)
         timestamp2 = self.get_timestamp(ip_instance_2nd,
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
 
         # snapshot a volume
-        LOG.info("Creating snapshot from volume: %s" % volume_origin['id'])
+        LOG.info("Creating snapshot from volume: %s", volume_origin['id'])
         snapshot = self._create_snapshot_from_volume(volume_origin['id'])
 
         # create a 3rd instance from snapshot
-        LOG.info("Creating third instance from snapshot: %s" % snapshot['id'])
+        LOG.info("Creating third instance from snapshot: %s", snapshot['id'])
         volume = self.create_volume(snapshot_id=snapshot['id'],
                                     size=snapshot['size'])
         LOG.info("Booting third instance from snapshot")
@@ -157,7 +157,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         LOG.info("Booted third instance %s", server_from_snapshot)
 
         # check the content of written file
-        LOG.info("Logging into third instance to get timestamp: %s" %
+        LOG.info("Logging into third instance to get timestamp: %s",
                  server_from_snapshot)
         server_from_snapshot_ip = self.get_server_ip(server_from_snapshot)
         timestamp3 = self.get_timestamp(server_from_snapshot_ip,

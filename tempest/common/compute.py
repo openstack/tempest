@@ -163,8 +163,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                             clients.servers_client.delete_server(
                                 server['id'])
                         except Exception:
-                            LOG.exception('Deleting server %s failed'
-                                          % server['id'])
+                            LOG.exception('Deleting server %s failed',
+                                          server['id'])
 
     return body, servers
 

@@ -380,9 +380,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         img_disk_format = CONF.scenario.img_disk_format
         img_properties = CONF.scenario.img_properties
         LOG.debug("paths: img: %s, container_format: %s, disk_format: %s, "
-                  "properties: %s, ami: %s, ari: %s, aki: %s" %
-                  (img_path, img_container_format, img_disk_format,
-                   img_properties, ami_img_path, ari_img_path, aki_img_path))
+                  "properties: %s, ami: %s, ari: %s, aki: %s",
+                  img_path, img_container_format, img_disk_format,
+                  img_properties, ami_img_path, ari_img_path, aki_img_path)
         try:
             image = self._image_create('scenario-img',
                                        img_container_format,
@@ -397,7 +397,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             image = self._image_create('scenario-ami', 'ami',
                                        path=ami_img_path,
                                        properties=properties)
-        LOG.debug("image:%s" % image)
+        LOG.debug("image:%s", image)
 
         return image
 
@@ -530,14 +530,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         caller = test_utils.find_test_caller()
         LOG.debug('%(caller)s begins to ping %(ip)s in %(timeout)s sec and the'
-                  ' expected result is %(should_succeed)s' % {
+                  ' expected result is %(should_succeed)s', **{
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
                       'should_succeed':
                       'reachable' if should_succeed else 'unreachable'
                   })
         result = test_utils.call_until_true(ping, timeout, 1)
         LOG.debug('%(caller)s finishes ping %(ip)s in %(timeout)s sec and the '
-                  'ping result is %(result)s' % {
+                  'ping result is %(result)s', **{
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
                       'result': 'expected' if result else 'unexpected'
                   })
@@ -578,8 +578,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                           msg=None, servers=None, mtu=None):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
-        LOG.debug('checking network connections to IP %s with user: %s' %
-                  (ip_address, username))
+        LOG.debug('checking network connections to IP %s with user: %s',
+                  ip_address, username)
         try:
             self.check_vm_connectivity(ip_address,
                                        username,
@@ -948,7 +948,7 @@ class NetworkScenarioTest(ScenarioTest):
                 source.ping_host(dest, nic=nic)
             except lib_exc.SSHExecCommandFailed:
                 LOG.warning('Failed to ping IP: %s via a ssh connection '
-                            'from: %s.' % (dest, source.ssh_client.host))
+                            'from: %s.', dest, source.ssh_client.host)
                 return not should_succeed
             return should_succeed
 
@@ -1315,7 +1315,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
         self.container_client.create_container(name)
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
-        LOG.debug('Container %s created' % (name))
+        LOG.debug('Container %s created', name)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.container_client.delete_container,
                         name)
@@ -1323,7 +1323,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
 
     def delete_container(self, container_name):
         self.container_client.delete_container(container_name)
-        LOG.debug('Container %s deleted' % (container_name))
+        LOG.debug('Container %s deleted', container_name)
 
     def upload_object_to_container(self, container_name, obj_name=None):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')

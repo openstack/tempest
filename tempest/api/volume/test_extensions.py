@@ -35,7 +35,7 @@ class ExtensionsV2TestJSON(base.BaseVolumeTest):
         if len(CONF.volume_feature_enabled.api_extensions) == 0:
             raise self.skipException('There are not any extensions configured')
         extension_list = [extension.get('alias') for extension in extensions]
-        LOG.debug("Cinder extensions: %s" % ','.join(extension_list))
+        LOG.debug("Cinder extensions: %s", ','.join(extension_list))
         ext = CONF.volume_feature_enabled.api_extensions[0]
         if ext == 'all':
             self.assertIn('Hosts', map(lambda x: x['name'], extensions))

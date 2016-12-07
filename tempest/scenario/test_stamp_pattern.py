@@ -86,7 +86,7 @@ class TestStampPattern(manager.ScenarioTest):
 
         def _func():
             disks = ssh.get_disks()
-            LOG.debug("Disks: %s" % disks)
+            LOG.debug("Disks: %s", disks)
             return CONF.compute.volume_device_name in disks
 
         if not test_utils.call_until_true(_func,

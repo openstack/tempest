@@ -1166,7 +1166,7 @@ class TempestConfigPrivate(object):
 
         logging.setup(_CONF, 'tempest')
         LOG = logging.getLogger('tempest')
-        LOG.info("Using tempest config file %s" % path)
+        LOG.info("Using tempest config file %s", path)
         register_opts()
         self._set_attrs()
         if parse_conf:

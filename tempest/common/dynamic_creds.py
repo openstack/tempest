@@ -254,7 +254,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 msg = "There was an exception trying to setup network " \
                       "resources for tenant %s, and this error happened " \
                       "trying to clean them up: %s"
-                LOG.warning(msg % (tenant_id, cleanup_exception))
+                LOG.warning(msg, tenant_id, cleanup_exception)
             raise
         return network, subnet, router
 
@@ -316,8 +316,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 credentials = self._create_creds(roles=credential_type)
             self._creds[str(credential_type)] = credentials
             # Maintained until tests are ported
-            LOG.info("Acquired dynamic creds:\n credentials: %s"
-                     % credentials)
+            LOG.info("Acquired dynamic creds:\n credentials: %s", credentials)
             if (self.neutron_available and
                 self.create_networks):
                 network, subnet, router = self._create_network_resources(
@@ -325,7 +324,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 credentials.set_resources(network=network, subnet=subnet,
                                           router=router)
                 LOG.info("Created isolated network resources for : \n"
-                         + " credentials: %s" % credentials)
+                         + " credentials: %s", credentials)
         return credentials
 
     def get_primary_creds(self):
@@ -356,7 +355,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         try:
             client.delete_router(router_id)
         except lib_exc.NotFound:
-            LOG.warning('router with name: %s not found for delete' %
+            LOG.warning('router with name: %s not found for delete',
                         router_name)
 
     def _clear_isolated_subnet(self, subnet_id, subnet_name):
@@ -364,7 +363,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         try:
             client.delete_subnet(subnet_id)
         except lib_exc.NotFound:
-            LOG.warning('subnet with name: %s not found for delete' %
+            LOG.warning('subnet with name: %s not found for delete',
                         subnet_name)
 
     def _clear_isolated_network(self, network_id, network_name):
@@ -372,7 +371,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         try:
             net_client.delete_network(network_id)
         except lib_exc.NotFound:
-            LOG.warning('network with name: %s not found for delete' %
+            LOG.warning('network with name: %s not found for delete',
                         network_name)
 
     def _cleanup_default_secgroup(self, tenant):
@@ -384,8 +383,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             try:
                 nsg_client.delete_security_group(secgroup['id'])
             except lib_exc.NotFound:
-                LOG.warning('Security group %s, id %s not found for clean-up' %
-                            (secgroup['name'], secgroup['id']))
+                LOG.warning('Security group %s, id %s not found for clean-up',
+                            secgroup['name'], secgroup['id'])
 
     def _clear_isolated_net_resources(self):
         client = self.routers_admin_client
@@ -405,7 +404,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                         creds.router['id'],
                         subnet_id=creds.subnet['id'])
                 except lib_exc.NotFound:
-                    LOG.warning('router with name: %s not found for delete' %
+                    LOG.warning('router with name: %s not found for delete',
                                 creds.router['name'])
                 self._clear_isolated_router(creds.router['id'],
                                             creds.router['name'])
@@ -426,7 +425,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             try:
                 self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:
-                LOG.warning("user with name: %s not found for delete" %
+                LOG.warning("user with name: %s not found for delete",
                             creds.username)
             # NOTE(zhufl): Only when neutron's security_group ext is
             # enabled, _cleanup_default_secgroup will not raise error. But
@@ -437,12 +436,12 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 if self.neutron_available:
                     self._cleanup_default_secgroup(creds.tenant_id)
             except lib_exc.NotFound:
-                LOG.warning("failed to cleanup tenant %s's secgroup" %
+                LOG.warning("failed to cleanup tenant %s's secgroup",
                             creds.tenant_name)
             try:
                 self.creds_client.delete_project(creds.tenant_id)
             except lib_exc.NotFound:
-                LOG.warning("tenant with name: %s not found for delete" %
+                LOG.warning("tenant with name: %s not found for delete",
                             creds.tenant_name)
         self._creds = {}
 

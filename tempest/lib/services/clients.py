@@ -373,7 +373,7 @@ class ServiceClients(object):
                 except Exception:
                     LOG.exception(
                         'Failed to register service client from plugin %s '
-                        'with parameters %s' % (plugin, service_client))
+                        'with parameters %s', plugin, service_client)
                     raise
 
     def register_service_client_module(self, name, service_version,
