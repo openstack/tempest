@@ -21,7 +21,7 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 
