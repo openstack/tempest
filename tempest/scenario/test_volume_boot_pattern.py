@@ -148,10 +148,13 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
         # create a 3rd instance from snapshot
         LOG.info("Creating third instance from snapshot: %s" % snapshot['id'])
-        volume = self.create_volume(snapshot_id=snapshot['id'])
+        volume = self.create_volume(snapshot_id=snapshot['id'],
+                                    size=snapshot['size'])
+        LOG.info("Booting third instance from snapshot")
         server_from_snapshot = (
             self._boot_instance_from_volume(volume['id'],
                                             keypair, security_group))
+        LOG.info("Booted third instance %s", server_from_snapshot)
 
         # check the content of written file
         LOG.info("Logging into third instance to get timestamp: %s" %
