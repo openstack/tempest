@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -102,6 +104,10 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         The containers should be visible from the container_client given.
         Will not throw any error if the containers don't exist.
         Will not check that object and container deletions succeed.
+        After delete all the objects from a container, it will wait 2
+        seconds before delete the container itself, in order to deployments
+        using HA proxy sync the deletion properly, otherwise, the container
+        might fail to be deleted because it's not empty.
 
         :param container_client: if None, use cls.container_client, this means
             that the default testing user will be used (see 'username' in
@@ -121,6 +127,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 for obj in objlist:
                     test_utils.call_and_ignore_notfound_exc(
                         object_client.delete_object, cont, obj['name'])
+                # sleep 2 seconds to sync the deletion of the objects
+                # in HA deployment
+                time.sleep(2)
                 container_client.delete_container(cont)
             except lib_exc.NotFound:
                 pass
