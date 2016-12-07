@@ -123,7 +123,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             path = '/test' + str(i) + '.txt'
             person.append({
                 'path': path,
-                'contents': base64.encode_as_text(file_contents),
+                'contents': base64.encode_as_text(file_contents + str(i)),
             })
         password = data_utils.rand_password()
         created_server = self.create_test_server(personality=person,
