@@ -48,7 +48,8 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                                      'fixed_ips', 'key_pairs',
                                      'injected_file_path_bytes',
                                      'instances', 'security_group_rules',
-                                     'cores', 'security_groups'))
+                                     'cores', 'security_groups',
+                                     'server_group_members', 'server_groups'))
 
     @test.idempotent_id('f1ef0a97-dbbb-4cca-adc5-c9fbc4f76107')
     def test_get_quotas(self):
