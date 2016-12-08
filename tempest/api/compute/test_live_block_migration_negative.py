@@ -33,7 +33,6 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(LiveBlockMigrationNegativeTestJSON, cls).setup_clients()
-        cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
 
     def _migrate_server_to(self, server_id, dest_host):
