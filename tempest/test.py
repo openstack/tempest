@@ -532,18 +532,17 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if not CONF.validation.run_validation:
             return
+
         if keypair is None:
-            if CONF.validation.auth_method.lower() == "keypair":
-                keypair = True
-            else:
-                keypair = False
+            keypair = (CONF.validation.auth_method.lower() == "keypair")
+
         if floating_ip is None:
-            if CONF.validation.connect_method.lower() == "floating":
-                floating_ip = True
-            else:
-                floating_ip = False
+            floating_ip = (CONF.validation.connect_method.lower() ==
+                           "floating")
+
         if security_group is None:
             security_group = CONF.validation.security_group
+
         if security_group_rules is None:
             security_group_rules = CONF.validation.security_group_rules
 
