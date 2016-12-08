@@ -13,10 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.object_storage import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class ContainerNegativeTest(base.BaseObjectTest):
@@ -25,12 +30,16 @@ class ContainerNegativeTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(ContainerNegativeTest, cls).resource_setup()
 
-        # use /info to get default constraints
-        _, body = cls.account_client.list_extensions()
-        cls.constraints = body['swift']
+        if CONF.object_storage_feature_enabled.discoverability:
+            # use /info to get default constraints
+            _, body = cls.account_client.list_extensions()
+            cls.constraints = body['swift']
 
     @test.attr(type=["negative"])
     @test.idempotent_id('30686921-4bed-4764-a038-40d741ed4e78')
+    @testtools.skipUnless(
+        CONF.object_storage_feature_enabled.discoverability,
+        'Discoverability function is disabled')
     def test_create_container_name_exceeds_max_length(self):
         # Attempts to create a container name that is longer than max
         max_length = self.constraints['max_container_name_length']
@@ -44,6 +53,9 @@ class ContainerNegativeTest(base.BaseObjectTest):
 
     @test.attr(type=["negative"])
     @test.idempotent_id('41e645bf-2e68-4f84-bf7b-c71aa5cd76ce')
+    @testtools.skipUnless(
+        CONF.object_storage_feature_enabled.discoverability,
+        'Discoverability function is disabled')
     def test_create_container_metadata_name_exceeds_max_length(self):
         # Attempts to create container with metadata name
         # that is longer than max.
@@ -58,6 +70,9 @@ class ContainerNegativeTest(base.BaseObjectTest):
 
     @test.attr(type=["negative"])
     @test.idempotent_id('81e36922-326b-4b7c-8155-3bbceecd7a82')
+    @testtools.skipUnless(
+        CONF.object_storage_feature_enabled.discoverability,
+        'Discoverability function is disabled')
     def test_create_container_metadata_value_exceeds_max_length(self):
         # Attempts to create container with metadata value
         # that is longer than max.
@@ -72,6 +87,9 @@ class ContainerNegativeTest(base.BaseObjectTest):
 
     @test.attr(type=["negative"])
     @test.idempotent_id('ac666539-d566-4f02-8ceb-58e968dfb732')
+    @testtools.skipUnless(
+        CONF.object_storage_feature_enabled.discoverability,
+        'Discoverability function is disabled')
     def test_create_container_metadata_exceeds_overall_metadata_count(self):
         # Attempts to create container with metadata that exceeds the
         # default count
