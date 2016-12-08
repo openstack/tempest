@@ -357,6 +357,19 @@ ComputeGroup = [
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
                     "with format 'X.Y' or string 'latest'"),
+    cfg.StrOpt('compute_volume_common_az',
+               default=None,
+               help='AZ to be used for Cinder and Nova. Set this parameter '
+                    'when the cloud has nova.conf: cinder.cross_az_attach '
+                    'set to false. Which means volumes attached to an '
+                    'instance must be in the same availability zone in Cinder '
+                    'as the instance availability zone in Nova. Set the '
+                    'common availability zone in this config which will be '
+                    'used to boot an instance as well as creating a volume. '
+                    'NOTE: If that AZ is not in Cinder (or '
+                    'allow_availability_zone_fallback=False in cinder.conf), '
+                    'the volume create request will fail and the instance '
+                    'will fail the build request.'),
 ]
 
 placement_group = cfg.OptGroup(name='placement',

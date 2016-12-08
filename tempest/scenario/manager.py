@@ -274,6 +274,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         tenant_network = self.get_tenant_network()
 
+        if CONF.compute.compute_volume_common_az:
+            kwargs.setdefault('availability_zone',
+                              CONF.compute.compute_volume_common_az)
+
         body, _ = compute.create_test_server(
             clients,
             tenant_network=tenant_network,
@@ -307,6 +311,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   'imageRef': imageRef,
                   'volume_type': volume_type,
                   'size': size}
+
+        if CONF.compute.compute_volume_common_az:
+            kwargs.setdefault('availability_zone',
+                              CONF.compute.compute_volume_common_az)
+
         volume = self.volumes_client.create_volume(**kwargs)['volume']
 
         self.addCleanup(self.volumes_client.wait_for_resource_deletion,
