@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute.floating_ips import base
-from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
@@ -111,9 +110,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association
-        body = self.create_test_server()
-        waiters.wait_for_server_status(self.servers_client,
-                                       body['id'], 'ACTIVE')
+        body = self.create_test_server(wait_until='ACTIVE')
         self.new_server_id = body['id']
         self.addCleanup(self.servers_client.delete_server, self.new_server_id)
 
