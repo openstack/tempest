@@ -1075,14 +1075,6 @@ BaremetalGroup = [
                     "step in Node cleaning.")
 ]
 
-negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
-
-NegativeGroup = [
-    cfg.StrOpt('test_generator',
-               default='tempest.common.' +
-               'generator.negative_generator.NegativeTestGenerator',
-               help="Test generator class for all negative tests"),
-]
 
 DefaultGroup = [
     cfg.StrOpt('resources_prefix',
@@ -1115,7 +1107,6 @@ _opts = [
     (debug_group, DebugGroup),
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
-    (negative_group, NegativeGroup),
     (None, DefaultGroup)
 ]
 
@@ -1179,7 +1170,6 @@ class TempestConfigPrivate(object):
         self.debug = _CONF.debug
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
-        self.negative = _CONF.negative
         logging.tempest_set_log_file('tempest.log')
 
     def __init__(self, parse_conf=True, config_path=None):
