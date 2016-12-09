@@ -46,7 +46,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # An image should not be created if the server instance is removed
         server = self.create_test_server(wait_until='ACTIVE')
 
-        # Delete server before trying to create server
+        # Delete server before trying to create image
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Create a new image after server is deleted
