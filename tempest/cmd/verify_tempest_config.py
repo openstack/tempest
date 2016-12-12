@@ -169,7 +169,7 @@ def get_extension_client(os, service):
         'nova': os.extensions_client,
         'cinder': os.volumes_extension_client,
         'neutron': os.network_extensions_client,
-        'swift': os.account_client,
+        'swift': os.capabilities_client,
     }
     # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated
     if CONF.volume_feature_enabled.api_v2:
@@ -201,7 +201,7 @@ def verify_extensions(os, service, results):
     if service != 'swift':
         resp = extensions_client.list_extensions()
     else:
-        __, resp = extensions_client.list_extensions()
+        __, resp = extensions_client.list_capabilities()
     # For Nova, Cinder and Neutron we use the alias name rather than the
     # 'name' field because the alias is considered to be the canonical
     # name.

@@ -13,7 +13,10 @@
 # the License.
 
 from tempest.services.object_storage.account_client import AccountClient
+from tempest.services.object_storage.capabilities_client import \
+    CapabilitiesClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 
-__all__ = ['AccountClient', 'ContainerClient', 'ObjectClient']
+__all__ = ['AccountClient', 'CapabilitiesClient', 'ContainerClient',
+           'ObjectClient']

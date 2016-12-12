@@ -50,6 +50,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
+        cls.capabilities_client = cls.os.capabilities_client
 
     @classmethod
     def resource_setup(cls):
@@ -65,7 +66,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.policies = None
 
         if CONF.object_storage_feature_enabled.discoverability:
-            _, body = cls.account_client.list_extensions()
+            _, body = cls.capabilities_client.list_capabilities()
 
             if 'swift' in body and 'policies' in body['swift']:
                 cls.policies = body['swift']['policies']
