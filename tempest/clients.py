@@ -290,6 +290,8 @@ class Manager(clients.ServiceClients):
 
         self.account_client = object_storage.AccountClient(self.auth_provider,
                                                            **params)
+        self.bulk_client = object_storage.BulkMiddlewareClient(
+            self.auth_provider, **params)
         self.capabilities_client = object_storage.CapabilitiesClient(
             self.auth_provider, **params)
         self.container_client = object_storage.ContainerClient(

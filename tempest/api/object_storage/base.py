@@ -80,6 +80,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         super(BaseObjectTest, cls).setup_clients()
         cls.object_client = cls.os.object_client
+        cls.bulk_client = cls.os.bulk_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
         cls.capabilities_client = cls.os.capabilities_client
