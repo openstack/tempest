@@ -37,7 +37,8 @@ class ObjectFormPostTest(base.BaseObjectTest):
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
-        cls.account_client.create_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=cls.metadata)
 
     def setUp(self):
         super(ObjectFormPostTest, self).setUp()
@@ -53,7 +54,8 @@ class ObjectFormPostTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.account_client.delete_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            delete_metadata=cls.metadata)
         cls.delete_containers()
         super(ObjectFormPostTest, cls).resource_cleanup()
 

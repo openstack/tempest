@@ -23,52 +23,38 @@ from tempest.lib.common import rest_client
 
 class AccountClient(rest_client.RestClient):
 
+    def create_update_or_delete_account_metadata(
+            self,
+            create_update_metadata=None,
+            delete_metadata=None,
+            create_update_metadata_prefix='X-Account-Meta-',
+            delete_metadata_prefix='X-Remove-Account-Meta-'):
+        """Creates, Updates or deletes an account metadata entry.
+
+        Account Metadata can be created, updated or deleted based on
+        metadata header or value. For detailed info, please refer to the
+        official API reference:
+        http://developer.openstack.org/api-ref/object-storage/?expanded=create-update-or-delete-account-metadata-detail
+        """
+        headers = {}
+        if create_update_metadata:
+            for key in create_update_metadata:
+                metadata_header_name = create_update_metadata_prefix + key
+                headers[metadata_header_name] = create_update_metadata[key]
+        if delete_metadata:
+            for key in delete_metadata:
+                headers[delete_metadata_prefix + key] = delete_metadata[key]
+
+        resp, body = self.post('', headers=headers, body=None)
+        self.expected_success([200, 204], resp.status)
+        return resp, body
+
     def list_account_metadata(self):
         """HEAD on the storage URL
 
         Returns all account metadata headers
         """
         resp, body = self.head('')
-        self.expected_success(204, resp.status)
-        return resp, body
-
-    def create_account_metadata(self, metadata,
-                                metadata_prefix='X-Account-Meta-'):
-        """Creates an account metadata entry."""
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[metadata_prefix + key] = metadata[key]
-
-        resp, body = self.post('', headers=headers, body=None)
-        self.expected_success([200, 204], resp.status)
-        return resp, body
-
-    def delete_account_metadata(self, metadata,
-                                metadata_prefix='X-Remove-Account-Meta-'):
-        """Deletes an account metadata entry."""
-
-        headers = {}
-        for item in metadata:
-            headers[metadata_prefix + item] = metadata[item]
-        resp, body = self.post('', headers=headers, body=None)
-        self.expected_success(204, resp.status)
-        return resp, body
-
-    def create_and_delete_account_metadata(
-            self,
-            create_metadata=None,
-            delete_metadata=None,
-            create_metadata_prefix='X-Account-Meta-',
-            delete_metadata_prefix='X-Remove-Account-Meta-'):
-        """Creates and deletes an account metadata entry."""
-        headers = {}
-        for key in create_metadata:
-            headers[create_metadata_prefix + key] = create_metadata[key]
-        for key in delete_metadata:
-            headers[delete_metadata_prefix + key] = delete_metadata[key]
-
-        resp, body = self.post('', headers=headers, body=None)
         self.expected_success(204, resp.status)
         return resp, body
 

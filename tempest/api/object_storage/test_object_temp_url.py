@@ -37,7 +37,8 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         cls.metadatas = []
         metadata = {'Temp-URL-Key': cls.key}
         cls.metadatas.append(metadata)
-        cls.account_client.create_account_metadata(metadata=metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=metadata)
 
         # create an object
         cls.object_name, cls.content = cls.create_object(cls.container_name)
@@ -45,8 +46,8 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @classmethod
     def resource_cleanup(cls):
         for metadata in cls.metadatas:
-            cls.account_client.delete_account_metadata(
-                metadata=metadata)
+            cls.account_client.create_update_or_delete_account_metadata(
+                delete_metadata=metadata)
 
         cls.delete_containers()
 
@@ -110,7 +111,8 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     def test_get_object_using_temp_url_key_2(self):
         key2 = 'Meta2-'
         metadata = {'Temp-URL-Key-2': key2}
-        self.account_client.create_account_metadata(metadata=metadata)
+        self.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=metadata)
         self.metadatas.append(metadata)
 
         # make sure the metadata has been set

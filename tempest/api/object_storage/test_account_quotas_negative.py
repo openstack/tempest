@@ -82,11 +82,13 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         """Test that a user cannot modify or remove a quota on its account."""
 
         # Not able to remove quota
-        self.assertRaises(lib_exc.Forbidden,
-                          self.account_client.create_account_metadata,
-                          {"Quota-Bytes": ""})
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.account_client.create_update_or_delete_account_metadata,
+            create_update_metadata={"Quota-Bytes": ""})
 
         # Not able to modify quota
-        self.assertRaises(lib_exc.Forbidden,
-                          self.account_client.create_account_metadata,
-                          {"Quota-Bytes": "100"})
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.account_client.create_update_or_delete_account_metadata,
+            create_update_metadata={"Quota-Bytes": "100"})
