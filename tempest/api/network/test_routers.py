@@ -34,11 +34,6 @@ class RoutersTest(base.BaseRouterTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setup_clients(cls):
-        super(RoutersTest, cls).setup_clients()
-        cls.identity_admin_client = cls.os_adm.identity_client
-
-    @classmethod
     def resource_setup(cls):
         super(RoutersTest, cls).resource_setup()
         cls.tenant_cidr = (CONF.network.project_network_cidr

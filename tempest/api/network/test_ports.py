@@ -360,11 +360,6 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @classmethod
-    def setup_clients(cls):
-        super(PortsAdminExtendedAttrsTestJSON, cls).setup_clients()
-        cls.identity_client = cls.os_adm.identity_client
-
-    @classmethod
     def resource_setup(cls):
         super(PortsAdminExtendedAttrsTestJSON, cls).resource_setup()
         cls.network = cls.create_network()

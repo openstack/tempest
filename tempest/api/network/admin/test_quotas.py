@@ -43,11 +43,6 @@ class QuotasTest(base.BaseAdminNetworkTest):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 
-    @classmethod
-    def setup_clients(cls):
-        super(QuotasTest, cls).setup_clients()
-        cls.identity_admin_client = cls.os_adm.identity_client
-
     def _check_quotas(self, new_quotas):
         # Add a project to conduct the test
         project = data_utils.rand_name('test_project_')

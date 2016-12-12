@@ -46,7 +46,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AttachInterfacesTestJSON, cls).setup_clients()
-        cls.networks_client = cls.os.networks_client
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
 
