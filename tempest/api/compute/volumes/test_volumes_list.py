@@ -16,8 +16,6 @@
 from oslo_log import log as logging
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -51,34 +49,11 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = data_utils.rand_name(cls.__name__ + '-volume')
             metadata = {'Type': 'work'}
-            try:
-                volume = cls.client.create_volume(size=CONF.volume.volume_size,
-                                                  display_name=v_name,
-                                                  metadata=metadata)['volume']
-                waiters.wait_for_volume_status(cls.client,
-                                               volume['id'], 'available')
-                volume = cls.client.show_volume(volume['id'])['volume']
-                cls.volume_list.append(volume)
-                cls.volume_id_list.append(volume['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                if cls.volume_list:
-                    # We could not create all the volumes, though we were able
-                    # to create *some* of the volumes. This is typically
-                    # because the backing file size of the volume group is
-                    # too small.
-                    for volume in cls.volume_list:
-                        cls.delete_volume(volume['id'])
-                raise exc
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the created Volumes
-        for volume in cls.volume_list:
-            cls.delete_volume(volume['id'])
-        super(VolumesTestJSON, cls).resource_cleanup()
+            volume = cls.create_volume(metadata=metadata)
+            volume = cls.client.show_volume(volume['id'])['volume']
+            cls.volume_list.append(volume)
+            cls.volume_id_list.append(volume['id'])
 
     @test.idempotent_id('bc2dd1a0-15af-48e5-9990-f2e75a48325d')
     def test_volume_list(self):

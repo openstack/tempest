@@ -381,18 +381,21 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             self.request_microversion))
 
     @classmethod
-    def create_volume(cls, image_ref=None):
+    def create_volume(cls, image_ref=None, **kwargs):
         """Create a volume and wait for it to become 'available'.
 
         :param image_ref: Specify an image id to create a bootable volume.
+        :**kwargs: other parameters to create volume.
         :returns: The available volume.
         """
-        vol_name = data_utils.rand_name(cls.__name__ + '-volume')
-        create_params = dict(size=CONF.volume.volume_size,
-                             display_name=vol_name)
+        if 'size' not in kwargs:
+            kwargs['size'] = CONF.volume.volume_size
+        if 'display_name' not in kwargs:
+            vol_name = data_utils.rand_name(cls.__name__ + '-volume')
+            kwargs['display_name'] = vol_name
         if image_ref is not None:
-            create_params['imageRef'] = image_ref
-        volume = cls.volumes_client.create_volume(**create_params)['volume']
+            kwargs['imageRef'] = image_ref
+        volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.volumes.append(volume)
         waiters.wait_for_volume_status(cls.volumes_client,
                                        volume['id'], 'available')
