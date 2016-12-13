@@ -31,7 +31,7 @@ class BaseInheritsV3Test(base.BaseIdentityV3AdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_name('pass-')
         cls.domain = cls.domains_client.create_domain(
-            data_utils.rand_name('domain-'),
+            name=data_utils.rand_name('domain-'),
             description=data_utils.rand_name('domain-desc-'))['domain']
         cls.project = cls.projects_client.create_project(
             data_utils.rand_name('project-'),
