@@ -504,8 +504,12 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise lib_exc.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return cls.client_manager(credentials=creds.credentials,
-                                  service=cls._service)
+        manager = cls.client_manager(credentials=creds.credentials,
+                                     service=cls._service)
+        # NOTE(andreaf) Ensure credentials have user and project id fields.
+        # It may not be the case when using pre-provisioned credentials.
+        manager.auth_provider.set_auth()
+        return manager
 
     @classmethod
     def clear_credentials(cls):
