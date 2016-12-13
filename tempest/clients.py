@@ -21,7 +21,7 @@ from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
-from tempest.services import identity
+from tempest.lib.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
 
