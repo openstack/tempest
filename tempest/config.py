@@ -425,8 +425,8 @@ ImageGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the image service."),
     cfg.StrOpt('http_image',
-               default='http://download.cirros-cloud.net/0.3.1/'
-               'cirros-0.3.1-x86_64-uec.tar.gz',
+               default='http://gec-maven-nexus.walmart.com/nexus/content/repositories/thirdparty/com/walmart/strati/cirros/0.3.4-x86_64-disk/'
+               'cirros-0.3.4-x86_64-disk.img',
                help='http accessible image'),
     cfg.IntOpt('build_timeout',
                default=300,
