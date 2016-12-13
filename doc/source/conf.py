@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Tempest documentation build configuration file, created by
 # sphinx-quickstart on Tue May 21 17:43:32 2013.
 #
