@@ -29,7 +29,7 @@ class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
     def test_get_pools_without_details(self):
         volume_info = self.admin_volume_client. \
             show_volume(self.volume['id'])['volume']
-        cinder_pools = self.admin_volume_client.show_pools()['pools']
+        cinder_pools = self.admin_scheduler_stats_client.list_pools()['pools']
         self.assertIn(volume_info['os-vol-host-attr:host'],
                       [pool['name'] for pool in cinder_pools])
 
@@ -37,7 +37,7 @@ class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
     def test_get_pools_with_details(self):
         volume_info = self.admin_volume_client. \
             show_volume(self.volume['id'])['volume']
-        cinder_pools = self.admin_volume_client.\
-            show_pools(detail=True)['pools']
+        cinder_pools = self.admin_scheduler_stats_client.\
+            list_pools(detail=True)['pools']
         self.assertIn(volume_info['os-vol-host-attr:host'],
                       [pool['name'] for pool in cinder_pools])
