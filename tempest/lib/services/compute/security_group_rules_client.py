@@ -26,9 +26,8 @@ class SecurityGroupRulesClient(base_compute_client.BaseComputeClient):
     def create_security_group_rule(self, **kwargs):
         """Create a new security group rule.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createSecGroupRule
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createSecGroupRule
         """
         post_body = json.dumps({'security_group_rule': kwargs})
         url = 'os-security-group-rules'

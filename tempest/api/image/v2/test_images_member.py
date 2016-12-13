@@ -21,8 +21,6 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         image_id = self._create_image()
         member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
-        self.addCleanup(self.image_member_client.delete_image_member,
-                        image_id, self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -44,8 +42,6 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         image_id = self._create_image()
         member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
-        self.addCleanup(self.image_member_client.delete_image_member,
-                        image_id, self.alt_tenant_id)
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'pending')
@@ -60,8 +56,6 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         image_id = self._create_image()
         self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
-        self.addCleanup(self.image_member_client.delete_image_member,
-                        image_id, self.alt_tenant_id)
         self.alt_image_member_client.update_image_member(image_id,
                                                          self.alt_tenant_id,
                                                          status='accepted')

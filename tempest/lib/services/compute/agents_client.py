@@ -26,9 +26,8 @@ class AgentsClient(base_compute_client.BaseComputeClient):
     def list_agents(self, **params):
         """List all agent builds.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listbuilds
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listbuilds
         """
         url = 'os-agents'
         if params:
@@ -41,9 +40,8 @@ class AgentsClient(base_compute_client.BaseComputeClient):
     def create_agent(self, **kwargs):
         """Create an agent build.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#agentbuild
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#agentbuild
         """
         post_body = json.dumps({'agent': kwargs})
         resp, body = self.post('os-agents', post_body)
@@ -54,9 +52,8 @@ class AgentsClient(base_compute_client.BaseComputeClient):
     def delete_agent(self, agent_id):
         """Delete an existing agent build.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteBuild
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteBuild
         """
         resp, body = self.delete("os-agents/%s" % agent_id)
         self.validate_response(schema.delete_agent, resp, body)
@@ -65,9 +62,8 @@ class AgentsClient(base_compute_client.BaseComputeClient):
     def update_agent(self, agent_id, **kwargs):
         """Update an agent build.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updatebuild
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updatebuild
         """
         put_body = json.dumps({'para': kwargs})
         resp, body = self.put('os-agents/%s' % agent_id, put_body)

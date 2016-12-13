@@ -94,8 +94,12 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self._update_server_with_disk_config(server['id'],
                                              disk_config='MANUAL')
         # Resize with auto option
-        self.resize_server(server['id'], self.flavor_ref_alt,
-                           disk_config='AUTO')
+        self.client.resize_server(server['id'], self.flavor_ref_alt,
+                                  disk_config='AUTO')
+        waiters.wait_for_server_status(self.client, server['id'],
+                                       'VERIFY_RESIZE')
+        self.client.confirm_resize_server(server['id'])
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
@@ -110,8 +114,12 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         self._update_server_with_disk_config(server['id'],
                                              disk_config='AUTO')
         # Resize with manual option
-        self.resize_server(server['id'], self.flavor_ref_alt,
-                           disk_config='MANUAL')
+        self.client.resize_server(server['id'], self.flavor_ref_alt,
+                                  disk_config='MANUAL')
+        waiters.wait_for_server_status(self.client, server['id'],
+                                       'VERIFY_RESIZE')
+        self.client.confirm_resize_server(server['id'])
+        waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])

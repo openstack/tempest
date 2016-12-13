@@ -30,9 +30,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def list_flavors(self, detail=False, **params):
         """Lists flavors.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listFlavors
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listFlavors
         """
         url = 'flavors'
         _schema = schema.list_flavors
@@ -51,9 +50,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def show_flavor(self, flavor_id):
         """Shows details for a flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showFlavor
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showFlavor
         """
         resp, body = self.get("flavors/%s" % flavor_id)
         body = json.loads(body)
@@ -63,9 +61,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def create_flavor(self, **kwargs):
         """Create a new flavor or instance type.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createFlavor
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createFlavor
         """
         if kwargs.get('ephemeral'):
             kwargs['OS-FLV-EXT-DATA:ephemeral'] = kwargs.pop('ephemeral')
@@ -82,9 +79,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def delete_flavor(self, flavor_id):
         """Delete the given flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteFlavor
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteFlavor
         """
         resp, body = self.delete("flavors/{0}".format(flavor_id))
         self.validate_response(schema.delete_flavor, resp, body)
@@ -108,9 +104,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def set_flavor_extra_spec(self, flavor_id, **kwargs):
         """Set extra Specs to the mentioned flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createFlavorExtraSpec
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createFlavorExtraSpec
         """
         post_body = json.dumps({'extra_specs': kwargs})
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
@@ -123,9 +118,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def list_flavor_extra_specs(self, flavor_id):
         """Get extra Specs details of the mentioned flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listFlavorExtraSpecs
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listFlavorExtraSpecs
         """
         resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
         body = json.loads(body)
@@ -136,9 +130,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def show_flavor_extra_spec(self, flavor_id, key):
         """Get extra Specs key-value of the mentioned flavor and key.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showFlavorExtraSpec
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showFlavorExtraSpec
         """
         resp, body = self.get('flavors/%s/os-extra_specs/%s' % (flavor_id,
                               key))
@@ -151,9 +144,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
         """Update specified extra Specs of the mentioned flavor and key.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateFlavorExtraSpec
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateFlavorExtraSpec
         """
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
                               (flavor_id, key), json.dumps(kwargs))
@@ -168,9 +160,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         #       to keep backwards compatibility.
         """Unset extra Specs from the mentioned flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteFlavorExtraSpec
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteFlavorExtraSpec
         """
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
                                  (flavor_id, key))
@@ -180,9 +171,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def list_flavor_access(self, flavor_id):
         """Get flavor access information given the flavor id.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listFlavorAccess
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listFlavorAccess
         """
         resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id)
         body = json.loads(body)
@@ -193,9 +183,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addFlavorAccess
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#addFlavorAccess
         """
         post_body = {
             'addTenantAccess': {
@@ -212,9 +201,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#removeFlavorAccess
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#removeFlavorAccess
         """
         post_body = {
             'removeTenantAccess': {

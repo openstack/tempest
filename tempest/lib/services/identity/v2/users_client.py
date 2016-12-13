@@ -22,9 +22,8 @@ class UsersClient(rest_client.RestClient):
     def create_user(self, **kwargs):
         """Create a user.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#create-user-admin-endpoint
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-createUser
         """
         post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
@@ -35,9 +34,8 @@ class UsersClient(rest_client.RestClient):
     def update_user(self, user_id, **kwargs):
         """Updates a user.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#update-user-admin-endpoint
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-updateUser
         """
         put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s' % user_id, put_body)
@@ -48,9 +46,8 @@ class UsersClient(rest_client.RestClient):
     def show_user(self, user_id):
         """GET a user.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-identity-admin-v2.html#admin-showUser
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-showUser
         """
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
@@ -60,9 +57,8 @@ class UsersClient(rest_client.RestClient):
     def delete_user(self, user_id):
         """Delete a user.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-identity-admin-v2.html#admin-deleteUser
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-deleteUser
         """
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
@@ -71,9 +67,8 @@ class UsersClient(rest_client.RestClient):
     def list_users(self, **params):
         """Get the list of users.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#list-users-admin-endpoint
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-admin-v2.html#admin-listUsers
         """
         url = "users"
         if params:
@@ -86,9 +81,8 @@ class UsersClient(rest_client.RestClient):
     def update_user_enabled(self, user_id, **kwargs):
         """Enables or disables a user.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-identity-v2-ext.html#enableUser
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v2-ext.html#enableUser
         """
         # NOTE: The URL (users/<id>/enabled) is different from the api-site
         # one (users/<id>/OS-KSADM/enabled) , but they are the same API

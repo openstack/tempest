@@ -74,8 +74,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
                          'key_pairs': 200, 'injected_file_path_bytes': 512,
                          'instances': 20, 'security_group_rules': 20,
-                         'cores': 2, 'security_groups': 20,
-                         'server_groups': 20, 'server_group_members': 20}
+                         'cores': 2, 'security_groups': 20}
         # Update limits for all quota resources
         quota_set = self.adm_client.update_quota_set(
             self.demo_tenant_id,
@@ -83,6 +82,13 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
             **new_quota_set)['quota_set']
 
         default_quota_set.pop('id')
+        # NOTE(PhilDay) The following is safe as we're not updating these
+        # two quota values yet.  Once the Nova change to add these is merged
+        # and the client updated to support them this can be removed
+        if 'server_groups' in default_quota_set:
+            default_quota_set.pop('server_groups')
+        if 'server_group_members' in default_quota_set:
+            default_quota_set.pop('server_group_members')
         self.addCleanup(self.adm_client.update_quota_set,
                         self.demo_tenant_id, **default_quota_set)
         for quota in new_quota_set:
@@ -111,6 +117,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                password=password,
                                                project=project,
                                                email=email)
+        if 'user' in user:
+            user = user['user']
         user_id = user['id']
         self.addCleanup(self.identity_utils.delete_user, user_id)
 

@@ -157,10 +157,8 @@ class TempestTestPluginManager(object):
         registry = clients.ClientsRegistry()
         for plug in self.ext_plugins:
             try:
-                service_clients = plug.obj.get_service_clients()
-                if service_clients:
-                    registry.register_service_client(
-                        plug.name, service_clients)
+                registry.register_service_client(
+                    plug.name, plug.obj.get_service_clients())
             except Exception:
                 LOG.exception('Plugin %s raised an exception trying to run '
                               'get_service_clients' % plug.name)

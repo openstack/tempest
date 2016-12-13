@@ -102,10 +102,11 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('440b9f3f-3c7f-4293-a106-0ceda350f8de')
     def test_flavor_unset_nonexistent_key(self):
+        nonexistent_key = data_utils.rand_name('flavor_key')
         self.assertRaises(lib_exc.NotFound,
                           self.client.unset_flavor_extra_spec,
                           self.flavor['id'],
-                          'nonexistent_key')
+                          nonexistent_key)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('329a7be3-54b2-48be-8052-bf2ce4afd898')

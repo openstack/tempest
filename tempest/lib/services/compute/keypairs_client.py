@@ -30,9 +30,8 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
     def list_keypairs(self, **params):
         """Lists keypairs that are associated with the account.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listKeypairs
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listKeypairs
         """
         url = 'os-keypairs'
         if params:
@@ -46,9 +45,8 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
     def show_keypair(self, keypair_name, **params):
         """Shows details for a keypair that is associated with the account.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showKeypair
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showKeypair
         """
         url = "os-keypairs/%s" % keypair_name
         if params:
@@ -62,9 +60,8 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
     def create_keypair(self, **kwargs):
         """Create a keypair.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createKeypair
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createKeypair
         """
         post_body = json.dumps({'keypair': kwargs})
         resp, body = self.post("os-keypairs", body=post_body)
@@ -76,9 +73,8 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
     def delete_keypair(self, keypair_name, **params):
         """Deletes a keypair.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteKeypair
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteKeypair
         """
         url = "os-keypairs/%s" % keypair_name
         if params:

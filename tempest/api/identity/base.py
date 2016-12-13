@@ -13,20 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class BaseIdentityTest(tempest.test.BaseTestCase):
-
-    @classmethod
-    def setup_credentials(cls):
-        # Create no network resources for these test.
-        cls.set_network_resources()
-        super(BaseIdentityTest, cls).setup_credentials()
 
     @classmethod
     def disable_user(cls, user_name):
@@ -42,7 +39,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
     def get_user_by_name(cls, name, domain_id=None):
         if domain_id:
             params = {'domain_id': domain_id}
-            users = cls.users_client.list_users(**params)['users']
+            users = cls.users_client.list_users(params)['users']
         else:
             users = cls.users_client.list_users()['users']
         user = [u for u in users if u['name'] == name]
@@ -125,6 +122,10 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
         cls.projects_client = cls.tenants_client
 
+    @classmethod
+    def resource_cleanup(cls):
+        super(BaseIdentityV2AdminTest, cls).resource_cleanup()
+
     def setup_test_user(self, password=None):
         """Set up a test user."""
         tenant = self.setup_test_tenant()
@@ -173,7 +174,6 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.users_client = cls.os_adm.users_v3_client
         cls.trusts_client = cls.os_adm.trusts_client
         cls.roles_client = cls.os_adm.roles_v3_client
-        cls.inherited_roles_client = cls.os_adm.inherited_roles_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_v3_client
         cls.regions_client = cls.os_adm.regions_client
@@ -182,7 +182,6 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.creds_client = cls.os_adm.credentials_client
         cls.groups_client = cls.os_adm.groups_client
         cls.projects_client = cls.os_adm.projects_client
-        cls.role_assignments = cls.os_admin.role_assignments_client
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity
             # admin clients for these tests shall use 'domain' scoped tokens.
@@ -191,9 +190,17 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             cls.os_adm.auth_provider.scope = 'domain'
 
     @classmethod
+    def resource_setup(cls):
+        super(BaseIdentityV3AdminTest, cls).resource_setup()
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(BaseIdentityV3AdminTest, cls).resource_cleanup()
+
+    @classmethod
     def disable_user(cls, user_name, domain_id=None):
         user = cls.get_user_by_name(user_name, domain_id)
-        cls.users_client.update_user(user['id'], name=user_name, enabled=False)
+        cls.users_client.update_user(user['id'], user_name, enabled=False)
 
     @classmethod
     def create_domain(cls):
@@ -214,7 +221,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         project = self.setup_test_project()
         username = data_utils.rand_name('test_user')
         email = username + '@testmail.tm'
-        user = self._create_test_user(name=username, email=email,
+        user = self._create_test_user(user_name=username, email=email,
                                       project_id=project['id'],
                                       password=password)
         return user

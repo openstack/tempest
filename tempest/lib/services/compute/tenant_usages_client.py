@@ -24,12 +24,6 @@ from tempest.lib.services.compute import base_compute_client
 class TenantUsagesClient(base_compute_client.BaseComputeClient):
 
     def list_tenant_usages(self, **params):
-        """List Tenant Usage For All Tenants.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/compute/#list-tenant-usage-for-all-tenants
-        """
         url = 'os-simple-tenant-usage'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -40,12 +34,6 @@ class TenantUsagesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_tenant_usage(self, tenant_id, **params):
-        """Show Usage Details For Tenant.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/compute/#show-usage-details-for-tenant
-        """
         url = 'os-simple-tenant-usage/%s' % tenant_id
         if params:
             url += '?%s' % urllib.urlencode(params)

@@ -34,7 +34,6 @@ class TokensV3Test(base.BaseIdentityV3Test):
         # it to be 'default'
         token_id, resp = self.non_admin_token.get_token(
             user_id=user_id,
-            username=username,
             user_domain_id=user_domain_id,
             password=password,
             auth_data=True)
@@ -50,19 +49,9 @@ class TokensV3Test(base.BaseIdentityV3Test):
         self.assertGreater(expires_at, now)
 
         subject_id = resp['user']['id']
-        if user_id:
-            self.assertEqual(subject_id, user_id)
-        else:
-            # Expect a user ID, but don't know what it will be.
-            self.assertGreaterEqual(len(subject_id), 0,
-                                    'Expected user ID in token.')
+        self.assertEqual(subject_id, user_id)
 
         subject_name = resp['user']['name']
-        if username:
-            self.assertEqual(subject_name, username)
-        else:
-            # Expect a user name, but don't know what it will be.
-            self.assertGreaterEqual(len(subject_name), 0,
-                                    'Expected user name in token.')
+        self.assertEqual(subject_name, username)
 
         self.assertEqual(resp['methods'][0], 'password')

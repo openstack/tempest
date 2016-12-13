@@ -92,7 +92,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
             caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
-            raise lib_exc.TimeoutException(message)
+            raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
 
@@ -111,7 +111,7 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
             raise exceptions.BuildErrorException(server_id=server_id)
 
         if int(time.time()) - start_time >= client.build_timeout:
-            raise lib_exc.TimeoutException
+            raise exceptions.TimeoutException
 
         time.sleep(client.build_interval)
 
@@ -163,7 +163,7 @@ def wait_for_image_status(client, image_id, status):
     caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)
-    raise lib_exc.TimeoutException(message)
+    raise exceptions.TimeoutException(message)
 
 
 def wait_for_volume_status(client, volume_id, status):
@@ -176,7 +176,7 @@ def wait_for_volume_status(client, volume_id, status):
         time.sleep(client.build_interval)
         body = client.show_volume(volume_id)['volume']
         volume_status = body['status']
-        if volume_status == 'error' and status != 'error':
+        if volume_status == 'error':
             raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
         if volume_status == 'error_restoring':
             raise exceptions.VolumeRestoreErrorException(volume_id=volume_id)
@@ -186,7 +186,7 @@ def wait_for_volume_status(client, volume_id, status):
                        'within the required time (%s s).' %
                        (volume_id, status, volume_status,
                         client.build_timeout))
-            raise lib_exc.TimeoutException(message)
+            raise exceptions.TimeoutException(message)
 
 
 def wait_for_snapshot_status(client, snapshot_id, status):
@@ -207,28 +207,7 @@ def wait_for_snapshot_status(client, snapshot_id, status):
                        'within the required time (%s s).' %
                        (snapshot_id, status, snapshot_status,
                         client.build_timeout))
-            raise lib_exc.TimeoutException(message)
-
-
-def wait_for_backup_status(client, backup_id, status):
-    """Waits for a Backup to reach a given status."""
-    body = client.show_backup(backup_id)['backup']
-    backup_status = body['status']
-    start = int(time.time())
-
-    while backup_status != status:
-        time.sleep(client.build_interval)
-        body = client.show_backup(backup_id)['backup']
-        backup_status = body['status']
-        if backup_status == 'error' and backup_status != status:
-            raise lib_exc.VolumeBackupException(backup_id=backup_id)
-
-        if int(time.time()) - start >= client.build_timeout:
-            message = ('Volume backup %s failed to reach %s status '
-                       '(current %s) within the required time (%s s).' %
-                       (backup_id, status, backup_status,
-                        client.build_timeout))
-            raise lib_exc.TimeoutException(message)
+            raise exceptions.TimeoutException(message)
 
 
 def wait_for_bm_node_status(client, node_id, attr, status):
@@ -257,61 +236,4 @@ def wait_for_bm_node_status(client, node_id, attr, status):
             caller = test_utils.find_test_caller()
             if caller:
                 message = '(%s) %s' % (caller, message)
-            raise lib_exc.TimeoutException(message)
-
-
-def wait_for_qos_operations(client, qos_id, operation, args=None):
-    """Waits for a qos operations to be completed.
-
-    NOTE : operation value is required for  wait_for_qos_operations()
-    operation = 'qos-key' / 'disassociate' / 'disassociate-all'
-    args = keys[] when operation = 'qos-key'
-    args = volume-type-id disassociated when operation = 'disassociate'
-    args = None when operation = 'disassociate-all'
-    """
-    start_time = int(time.time())
-    while True:
-        if operation == 'qos-key-unset':
-            body = client.show_qos(qos_id)['qos_specs']
-            if not any(key in body['specs'] for key in args):
-                return
-        elif operation == 'disassociate':
-            body = client.show_association_qos(qos_id)['qos_associations']
-            if not any(args in body[i]['id'] for i in range(0, len(body))):
-                return
-        elif operation == 'disassociate-all':
-            body = client.show_association_qos(qos_id)['qos_associations']
-            if not body:
-                return
-        else:
-            msg = (" operation value is either not defined or incorrect.")
-            raise lib_exc.UnprocessableEntity(msg)
-
-        if int(time.time()) - start_time >= client.build_timeout:
-            raise lib_exc.TimeoutException
-        time.sleep(client.build_interval)
-
-
-def wait_for_interface_status(client, server, port_id, status):
-    """Waits for an interface to reach a given status."""
-    body = (client.show_interface(server, port_id)
-            ['interfaceAttachment'])
-    interface_status = body['port_state']
-    start = int(time.time())
-
-    while(interface_status != status):
-        time.sleep(client.build_interval)
-        body = (client.show_interface(server, port_id)
-                ['interfaceAttachment'])
-        interface_status = body['port_state']
-
-        timed_out = int(time.time()) - start >= client.build_timeout
-
-        if interface_status != status and timed_out:
-            message = ('Interface %s failed to reach %s status '
-                       '(current %s) within the required time (%s s).' %
-                       (port_id, status, interface_status,
-                        client.build_timeout))
-            raise lib_exc.TimeoutException(message)
-
-    return body
+            raise exceptions.TimeoutException(message)

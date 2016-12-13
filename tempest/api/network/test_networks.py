@@ -27,11 +27,39 @@ from tempest import test
 CONF = config.CONF
 
 
-class BaseNetworkTestResources(base.BaseNetworkTest):
+class NetworksTest(base.BaseNetworkTest):
+    """Tests the following operations in the Neutron API:
+
+        create a network for a project
+        list project's networks
+        show a project network details
+        create a subnet for a project
+        list project's subnets
+        show a project subnet details
+        network update
+        subnet update
+        delete a network also deletes its subnets
+        list external networks
+
+        All subnet tests are run once with ipv4 and once with ipv6.
+
+    v2.0 of the Neutron API is assumed. It is also assumed that the following
+    options are defined in the [network] section of etc/tempest.conf:
+
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project ipv4 subnets
+
+        project_network_v6_cidr is the equivalent for ipv6 subnets
+
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project_network_cidr
+
+        project_network_v6_mask_bits is the equivalent for ipv6 subnets
+    """
 
     @classmethod
     def resource_setup(cls):
-        super(BaseNetworkTestResources, cls).resource_setup()
+        super(NetworksTest, cls).resource_setup()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
@@ -143,42 +171,12 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
         self.networks.pop()
         self.subnets.pop()
 
-
-class NetworksTest(BaseNetworkTestResources):
-    """Tests the following operations in the Neutron API:
-
-        create a network for a project
-        list project's networks
-        show a project network details
-        create a subnet for a project
-        list project's subnets
-        show a project subnet details
-        network update
-        subnet update
-        delete a network also deletes its subnets
-        list external networks
-
-        All subnet tests are run once with ipv4 and once with ipv6.
-
-    v2.0 of the Neutron API is assumed. It is also assumed that the following
-    options are defined in the [network] section of etc/tempest.conf:
-
-        project_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for project ipv4 subnets
-
-        project_network_v6_cidr is the equivalent for ipv6 subnets
-
-        project_network_mask_bits with the mask bits to be used to partition
-        the block defined by project_network_cidr
-
-        project_network_v6_mask_bits is the equivalent for ipv6 subnets
-    """
-
     @test.attr(type='smoke')
     @test.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
     def test_create_update_delete_network_subnet(self):
         # Create a network
-        network = self.create_network()
+        name = data_utils.rand_name('network-')
+        network = self.create_network(network_name=name)
         self.addCleanup(self._delete_network, network)
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
@@ -209,16 +207,12 @@ class NetworksTest(BaseNetworkTestResources):
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
-            fields.append('mtu')
         body = self.networks_client.show_network(self.network['id'],
                                                  fields=fields)
         network = body['network']
         self.assertEqual(sorted(network.keys()), sorted(fields))
         for field_name in fields:
             self.assertEqual(network[field_name], self.network[field_name])
-        self.assertNotIn('tenant_id', network)
-        self.assertNotIn('project_id', network)
 
     @test.attr(type='smoke')
     @test.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
@@ -233,8 +227,6 @@ class NetworksTest(BaseNetworkTestResources):
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
-            fields.append('mtu')
         body = self.networks_client.list_networks(fields=fields)
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
@@ -285,21 +277,28 @@ class NetworksTest(BaseNetworkTestResources):
     @test.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
     def test_delete_network_with_subnet(self):
         # Creates a network
-        network = self.create_network()
+        name = data_utils.rand_name('network-')
+        body = self.networks_client.create_network(name=name)
+        network = body['network']
         net_id = network['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self._delete_network, network)
+                        self.networks_client.delete_network, net_id)
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)
         subnet_id = subnet['id']
 
         # Delete network while the subnet still exists
-        self.networks_client.delete_network(net_id)
+        body = self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
         self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
                           subnet_id)
+
+        # Since create_subnet adds the subnet to the delete list, and it is
+        # is actually deleted here - this will create and issue, hence remove
+        # it from the list.
+        self.subnets.pop()
 
     @test.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
     def test_create_delete_subnet_without_gateway(self):
@@ -390,21 +389,6 @@ class NetworksTest(BaseNetworkTestResources):
         body = self.subnets_client.list_subnets(
             network_id=CONF.network.public_network_id)
         self.assertEmpty(body['subnets'], "Public subnets visible")
-
-    @test.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
-    @test.requires_ext(extension="standard-attr-description",
-                       service="network")
-    def test_create_update_network_description(self):
-        body = self.create_network(description='d1')
-        self.assertEqual('d1', body['description'])
-        net_id = body['id']
-        body = self.networks_client.list_networks(id=net_id)['networks'][0]
-        self.assertEqual('d1', body['description'])
-        body = self.networks_client.update_network(body['id'],
-                                                   description='d2')
-        self.assertEqual('d2', body['network']['description'])
-        body = self.networks_client.list_networks(id=net_id)['networks'][0]
-        self.assertEqual('d2', body['description'])
 
 
 class BulkNetworkOpsTest(base.BaseNetworkTest):
@@ -541,7 +525,8 @@ class NetworksIpV6Test(NetworksTest):
     def test_create_delete_subnet_with_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway = str(netaddr.IPAddress(net.first + 2))
-        network = self.create_network()
+        name = data_utils.rand_name('network-')
+        network = self.create_network(network_name=name)
         subnet = self.create_subnet(network, gateway)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway)
@@ -550,14 +535,16 @@ class NetworksIpV6Test(NetworksTest):
     def test_create_delete_subnet_with_default_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
-        network = self.create_network()
+        name = data_utils.rand_name('network-')
+        network = self.create_network(network_name=name)
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway_ip)
 
     @test.idempotent_id('a9653883-b2a4-469b-8c3c-4518430a7e55')
     def test_create_list_subnet_with_no_gw64_one_network(self):
-        network = self.create_network()
+        name = data_utils.rand_name('network-')
+        network = self.create_network(name)
         ipv6_gateway = self.subnet_dict(['gateway'])['gateway']
         subnet1 = self.create_subnet(network,
                                      ip_version=6,
@@ -583,9 +570,7 @@ class NetworksIpV6Test(NetworksTest):
                              'Subnet are not in the same network')
 
 
-class NetworksIpV6TestAttrs(BaseNetworkTestResources):
-
-    _ip_version = 6
+class NetworksIpV6TestAttrs(NetworksIpV6Test):
 
     @classmethod
     def skip_checks(cls):

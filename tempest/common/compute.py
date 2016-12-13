@@ -101,14 +101,13 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 wait_until = 'ACTIVE'
 
     if volume_backed:
-        volume_name = data_utils.rand_name(__name__ + '-volume')
+        volume_name = data_utils.rand_name('volume')
         volumes_client = clients.volumes_v2_client
         if CONF.volume_feature_enabled.api_v1:
             volumes_client = clients.volumes_client
         volume = volumes_client.create_volume(
             display_name=volume_name,
-            imageRef=image_id,
-            size=CONF.volume.volume_size)
+            imageRef=image_id)
         waiters.wait_for_volume_status(volumes_client,
                                        volume['volume']['id'], 'available')
 
@@ -129,6 +128,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                                                 **kwargs)
 
     # handle the case of multiple servers
+    servers = []
     if multiple_create_request:
         # Get servers created which name match with name param.
         body_servers = clients.servers_client.list_servers()
@@ -169,28 +169,27 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     return body, servers
 
 
-def shelve_server(servers_client, server_id, force_shelve_offload=False):
+def shelve_server(client, server_id, force_shelve_offload=False):
     """Common wrapper utility to shelve server.
 
     This method is a common wrapper to make server in 'SHELVED'
     or 'SHELVED_OFFLOADED' state.
 
-    :param servers_clients: Compute servers client instance.
     :param server_id: Server to make in shelve state
     :param force_shelve_offload: Forcefully offload shelve server if it
                                  is configured not to offload server
                                  automatically after offload time.
     """
-    servers_client.shelve_server(server_id)
+    client.shelve_server(server_id)
 
     offload_time = CONF.compute.shelved_offload_time
     if offload_time >= 0:
-        waiters.wait_for_server_status(servers_client, server_id,
+        waiters.wait_for_server_status(client, server_id,
                                        'SHELVED_OFFLOADED',
                                        extra_timeout=offload_time)
     else:
-        waiters.wait_for_server_status(servers_client, server_id, 'SHELVED')
+        waiters.wait_for_server_status(client, server_id, 'SHELVED')
         if force_shelve_offload:
-            servers_client.shelve_offload_server(server_id)
-            waiters.wait_for_server_status(servers_client, server_id,
+            client.shelve_offload_server(server_id)
+            waiters.wait_for_server_status(client, server_id,
                                            'SHELVED_OFFLOADED')

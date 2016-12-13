@@ -24,6 +24,8 @@ from tempest import test
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Servers API using admin privileges"""
 
+    _host_key = 'OS-EXT-SRV-ATTR:host'
+
     @classmethod
     def setup_clients(cls):
         super(ServersAdminTestJSON, cls).setup_clients()
@@ -35,15 +37,22 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(ServersAdminTestJSON, cls).resource_setup()
 
-        cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
+        cls.s1_name = data_utils.rand_name('server')
         server = cls.create_test_server(name=cls.s1_name,
                                         wait_until='ACTIVE')
         cls.s1_id = server['id']
 
-        cls.s2_name = data_utils.rand_name(cls.__name__ + '-server')
+        cls.s2_name = data_utils.rand_name('server')
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
+
+    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
+    def test_list_servers_by_admin(self):
+        # Listing servers by admin user returns empty list by default
+        body = self.client.list_servers(detail=True)
+        servers = body['servers']
+        self.assertEqual([], servers)
 
     @test.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
@@ -60,26 +69,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Verify error server in list result
         self.assertIn(self.s1_id, map(lambda x: x['id'], servers))
         self.assertNotIn(self.s2_id, map(lambda x: x['id'], servers))
-
-    @test.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
-    def test_list_servers_detailed_filter_by_invalid_status(self):
-        params = {'status': 'invalid_status'}
-        body = self.client.list_servers(detail=True, **params)
-        servers = body['servers']
-        self.assertEqual([], servers)
-
-    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
-    def test_list_servers_by_admin(self):
-        # Listing servers by admin user returns a list which doesn't
-        # contain the other tenants' server by default
-        body = self.client.list_servers(detail=True)
-        servers = body['servers']
-
-        # This case is for the test environments which contain
-        # the existing servers before testing
-        servers_name = [server['name'] for server in servers]
-        self.assertNotIn(self.s1_name, servers_name)
-        self.assertNotIn(self.s2_name, servers_name)
 
     @test.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
@@ -102,31 +91,19 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = {'tenant_id': tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        servers_name = map(lambda x: x['name'], servers)
-        self.assertNotIn(self.s1_name, servers_name)
-        self.assertNotIn(self.s2_name, servers_name)
+        self.assertEqual([], servers)
 
-        # List the primary tenant with all_tenants is specified
-        params = {'all_tenants': '', 'tenant_id': tenant_id}
-        body = self.client.list_servers(detail=True, **params)
-        servers = body['servers']
-        servers_name = map(lambda x: x['name'], servers)
-        self.assertIn(self.s1_name, servers_name)
-        self.assertIn(self.s2_name, servers_name)
-
-        # List the admin tenant shouldn't get servers created by other tenants
+        # List the admin tenant which has no servers
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        servers_name = map(lambda x: x['name'], servers)
-        self.assertNotIn(self.s1_name, servers_name)
-        self.assertNotIn(self.s2_name, servers_name)
+        self.assertEqual([], servers)
 
     @test.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
-        name = data_utils.rand_name(self.__class__.__name__ + '-server')
+        name = data_utils.rand_name('server')
         network = self.get_tenant_network()
         network_kwargs = fixed_network.set_networks_kwarg(network)
         # We need to create the server as an admin, so we can't use
@@ -137,7 +114,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_server, test_server['id'])
         server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')
-        hostname = server['OS-EXT-SRV-ATTR:host']
+        hostname = server[self._host_key]
         params = {'host': hostname}
         body = self.client.list_servers(**params)
         servers = body['servers']

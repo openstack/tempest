@@ -28,7 +28,7 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         d_name = data_utils.rand_name('domain')
         d_desc = data_utils.rand_name('domain-desc')
         domain = self.domains_client.create_domain(
-            name=d_name,
+            d_name,
             description=d_desc)['domain']
         domain_id = domain['id']
 
@@ -51,8 +51,7 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         # Domain name length should not ne greater than 64 characters
         d_name = 'a' * 65
         self.assertRaises(lib_exc.BadRequest,
-                          self.domains_client.create_domain,
-                          name=d_name)
+                          self.domains_client.create_domain, d_name)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('43781c07-764f-4cf2-a405-953c1916f605')
@@ -65,10 +64,9 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @test.idempotent_id('e6f9e4a2-4f36-4be8-bdbc-4e199ae29427')
     def test_domain_create_duplicate(self):
         domain_name = data_utils.rand_name('domain-dup')
-        domain = self.domains_client.create_domain(name=domain_name)['domain']
+        domain = self.domains_client.create_domain(domain_name)['domain']
         domain_id = domain['id']
         self.addCleanup(self.delete_domain, domain_id)
         # Domain name should be unique
         self.assertRaises(
-            lib_exc.Conflict, self.domains_client.create_domain,
-            name=domain_name)
+            lib_exc.Conflict, self.domains_client.create_domain, domain_name)

@@ -23,7 +23,6 @@ import sys
 import unittest
 import uuid
 
-from oslo_utils import uuidutils
 import six.moves.urllib.parse as urlparse
 
 DECORATOR_MODULE = 'test'
@@ -62,7 +61,7 @@ class SourcePatcher(object):
         if filename not in self.source_files:
             with open(filename) as f:
                 self.source_files[filename] = self._quote(f.read())
-        patch_id = uuidutils.generate_uuid()
+        patch_id = str(uuid.uuid4())
         if not patch.endswith('\n'):
             patch += '\n'
         self.patches[patch_id] = self._quote(patch)
@@ -70,8 +69,7 @@ class SourcePatcher(object):
         lines[line_no - 1] = ''.join(('{%s:s}' % patch_id, lines[line_no - 1]))
         self.source_files[filename] = self._quote('\n').join(lines)
 
-    @staticmethod
-    def _save_changes(filename, source):
+    def _save_changes(self, filename, source):
         print('%s fixed' % filename)
         with open(filename, 'w') as f:
             f.write(source)

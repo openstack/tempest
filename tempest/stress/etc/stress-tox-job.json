@@ -1,0 +1,28 @@
+[{"action": "tempest.stress.actions.server_create_destroy.ServerCreateDestroyTest",
+  "threads": 8,
+  "use_admin": true,
+  "use_isolated_tenants": true,
+  "kwargs": {}
+  },
+  {"action": "tempest.stress.actions.volume_create_delete.VolumeCreateDeleteTest",
+  "threads": 4,
+  "use_admin": true,
+  "use_isolated_tenants": true,
+  "kwargs": {}
+  },
+  {"action": "tempest.stress.actions.volume_attach_delete.VolumeAttachDeleteTest",
+  "threads": 2,
+  "use_admin": true,
+  "use_isolated_tenants": true,
+  "kwargs": {}
+  },
+  {"action": "tempest.stress.actions.unit_test.UnitTest",
+  "threads": 4,
+  "use_admin": true,
+  "use_isolated_tenants": true,
+  "required_services": ["neutron"],
+  "kwargs": {"test_method": "tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_stop_start",
+             "class_setup_per": "process"}
+  }
+]
+

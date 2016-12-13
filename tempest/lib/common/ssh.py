@@ -36,11 +36,9 @@ LOG = logging.getLogger(__name__)
 class Client(object):
 
     def __init__(self, host, username, password=None, timeout=300, pkey=None,
-                 channel_timeout=10, look_for_keys=False, key_filename=None,
-                 port=22):
+                 channel_timeout=10, look_for_keys=False, key_filename=None):
         self.host = host
         self.username = username
-        self.port = port
         self.password = password
         if isinstance(pkey, six.string_types):
             pkey = paramiko.RSAKey.from_private_key(
@@ -60,17 +58,17 @@ class Client(object):
             paramiko.AutoAddPolicy())
         _start_time = time.time()
         if self.pkey is not None:
-            LOG.info("Creating ssh connection to '%s:%d' as '%s'"
+            LOG.info("Creating ssh connection to '%s' as '%s'"
                      " with public key authentication",
-                     self.host, self.port, self.username)
+                     self.host, self.username)
         else:
-            LOG.info("Creating ssh connection to '%s:%d' as '%s'"
+            LOG.info("Creating ssh connection to '%s' as '%s'"
                      " with password %s",
-                     self.host, self.port, self.username, str(self.password))
+                     self.host, self.username, str(self.password))
         attempts = 0
         while True:
             try:
-                ssh.connect(self.host, port=self.port, username=self.username,
+                ssh.connect(self.host, username=self.username,
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
@@ -79,7 +77,7 @@ class Client(object):
                          self.username, self.host)
                 return ssh
             except (EOFError,
-                    socket.error, socket.timeout,
+                    socket.error,
                     paramiko.SSHException) as e:
                 if self._is_timed_out(_start_time):
                     LOG.exception("Failed to establish authenticated ssh"
@@ -123,6 +121,7 @@ class Client(object):
             channel.fileno()  # Register event pipe
             channel.exec_command(cmd)
             channel.shutdown_write()
+            exit_status = channel.recv_exit_status()
 
             # If the executing host is linux-based, poll the channel
             if self._can_system_poll():
@@ -162,8 +161,6 @@ class Client(object):
             if encoding:
                 out_data = out_data.decode(encoding)
                 err_data = err_data.decode(encoding)
-
-            exit_status = channel.recv_exit_status()
 
             if 0 != exit_status:
                 raise exceptions.SSHExecCommandFailed(

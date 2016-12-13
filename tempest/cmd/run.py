@@ -23,7 +23,7 @@ Tempest run has several options:
                    any tests that match on re.match() with the regex
  * **--smoke**: Run all the tests tagged as smoke
 
-There are also the **--blacklist-file** and **--whitelist-file** options that
+There are also the **--blacklist_file** and **--whitelist_file** options that
 let you pass a filepath to tempest run with the file format being a line
 separated regex, with '#' used to signify the start of a comment on a line.
 For example::
@@ -135,12 +135,6 @@ class TempestRun(command.Command):
             workspace_mgr = workspace.WorkspaceManager(
                 parsed_args.workspace_path)
             path = workspace_mgr.get_workspace(parsed_args.workspace)
-            if not path:
-                sys.exit(
-                    "The %r workspace isn't registered in "
-                    "%r. Use 'tempest init' to "
-                    "register the workspace." %
-                    (parsed_args.workspace, workspace_mgr.path))
             os.chdir(path)
             # NOTE(mtreinish): tempest init should create a .testrepository dir
             # but since workspaces can be imported let's sanity check and
@@ -197,11 +191,11 @@ class TempestRun(command.Command):
                            help='A normal testr selection regex used to '
                                 'specify a subset of tests to run')
         list_selector = parser.add_mutually_exclusive_group()
-        list_selector.add_argument('--whitelist-file', '--whitelist_file',
+        list_selector.add_argument('--whitelist_file',
                                    help="Path to a whitelist file, this file "
                                         "contains a separate regex on each "
                                         "newline.")
-        list_selector.add_argument('--blacklist-file', '--blacklist_file',
+        list_selector.add_argument('--blacklist_file',
                                    help='Path to a blacklist file, this file '
                                         'contains a separate regex exclude on '
                                         'each newline')
@@ -270,8 +264,8 @@ class TempestRun(command.Command):
 
             run_thread = threading.Thread(target=run_argv_thread)
             run_thread.start()
-            returncodes['subunit-trace'] = subunit_trace.trace(
-                subunit_r, sys.stdout, post_fails=True, print_failures=True)
+            returncodes['subunit-trace'] = subunit_trace.trace(subunit_r,
+                                                               sys.stdout)
             run_thread.join()
             subunit_r.close()
             # python version of pipefail

@@ -19,9 +19,8 @@ class PortsClient(base.BaseNetworkClient):
     def create_port(self, **kwargs):
         """Creates a port on a network.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-port
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#createPort
         """
         uri = '/ports'
         post_data = {'port': kwargs}
@@ -30,9 +29,8 @@ class PortsClient(base.BaseNetworkClient):
     def update_port(self, port_id, **kwargs):
         """Updates a port.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-port
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#updatePort
         """
         uri = '/ports/%s' % port_id
         post_data = {'port': kwargs}
@@ -41,9 +39,8 @@ class PortsClient(base.BaseNetworkClient):
     def show_port(self, port_id, **fields):
         """Shows details for a port.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-port-details
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#showPort
         """
         uri = '/ports/%s' % port_id
         return self.show_resource(uri, **fields)
@@ -51,9 +48,8 @@ class PortsClient(base.BaseNetworkClient):
     def delete_port(self, port_id):
         """Deletes a port.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#delete-port
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#removePort
         """
         uri = '/ports/%s' % port_id
         return self.delete_resource(uri)
@@ -61,9 +57,8 @@ class PortsClient(base.BaseNetworkClient):
     def list_ports(self, **filters):
         """Lists ports to which the tenant has access.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-ports
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#listPorts
         """
         uri = '/ports'
         return self.list_resources(uri, **filters)
@@ -71,9 +66,8 @@ class PortsClient(base.BaseNetworkClient):
     def create_bulk_ports(self, **kwargs):
         """Create multiple ports in a single request.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html?expanded=#bulk-create-ports
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2.html#bulkCreatePorts
         """
         uri = '/ports'
         return self.create_resource(uri, kwargs)

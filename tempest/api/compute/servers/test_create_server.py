@@ -48,7 +48,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
-        cls.name = data_utils.rand_name(cls.__name__ + '-server')
+        cls.name = data_utils.rand_name('server')
         cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
         cls.server_initial = cls.create_test_server(
@@ -139,15 +139,19 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         hostname = linux_client.get_hostname()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
-        self.assertEqual(self.name.lower(), hostname, msg)
+        self.assertEqual(self.name, hostname, msg)
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
-    @testtools.skipUnless(
-        test.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
-        'ServerGroupAffinityFilter is not available.')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
-        group_id = self.create_test_server_group()['id']
+        name = data_utils.rand_name('server_group')
+        policies = ['affinity']
+        body = self.server_groups_client.create_server_group(
+            name=name, policies=policies)['server_group']
+        group_id = body['id']
+        self.addCleanup(self.server_groups_client.delete_server_group,
+                        group_id)
+
         hints = {'group': group_id}
         server = self.create_test_server(scheduler_hints=hints,
                                          wait_until='ACTIVE')
@@ -264,25 +268,37 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         flavor_base = self.flavors_client.show_flavor(
             self.flavor_ref)['flavor']
 
-        def create_flavor_with_ephemeral(ephem_disk):
+        def create_flavor_with_extra_specs():
+            flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
             flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
 
             ram = flavor_base['ram']
             vcpus = flavor_base['vcpus']
             disk = flavor_base['disk']
 
-            if ephem_disk > 0:
-                # Create a flavor with ephemeral disk
-                flavor_name = data_utils.rand_name('eph_flavor')
-                flavor = self.flavor_client.create_flavor(
-                    name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
-                    id=flavor_with_eph_disk_id, ephemeral=ephem_disk)['flavor']
-            else:
-                # Create a flavor without ephemeral disk
-                flavor_name = data_utils.rand_name('no_eph_flavor')
-                flavor = self.flavor_client.create_flavor(
-                    name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
-                    id=flavor_with_eph_disk_id)['flavor']
+            # Create a flavor with extra specs
+            flavor = (self.flavor_client.
+                      create_flavor(name=flavor_with_eph_disk_name,
+                                    ram=ram, vcpus=vcpus, disk=disk,
+                                    id=flavor_with_eph_disk_id,
+                                    ephemeral=1))['flavor']
+            self.addCleanup(flavor_clean_up, flavor['id'])
+
+            return flavor['id']
+
+        def create_flavor_without_extra_specs():
+            flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
+            flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
+
+            ram = flavor_base['ram']
+            vcpus = flavor_base['vcpus']
+            disk = flavor_base['disk']
+
+            # Create a flavor without extra specs
+            flavor = (self.flavor_client.
+                      create_flavor(name=flavor_no_eph_disk_name,
+                                    ram=ram, vcpus=vcpus, disk=disk,
+                                    id=flavor_no_eph_disk_id))['flavor']
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']
@@ -291,8 +307,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.flavor_client.delete_flavor(flavor_id)
             self.flavor_client.wait_for_resource_deletion(flavor_id)
 
-        flavor_with_eph_disk_id = create_flavor_with_ephemeral(ephem_disk=1)
-        flavor_no_eph_disk_id = create_flavor_with_ephemeral(ephem_disk=0)
+        flavor_with_eph_disk_id = create_flavor_with_extra_specs()
+        flavor_no_eph_disk_id = create_flavor_without_extra_specs()
 
         admin_pass = self.image_ssh_password
 
@@ -302,7 +318,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             adminPass=admin_pass,
             flavor=flavor_no_eph_disk_id)
 
-        # Get partition number of server without ephemeral disk.
+        # Get partition number of server without extra specs.
         server_no_eph_disk = self.client.show_server(
             server_no_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(

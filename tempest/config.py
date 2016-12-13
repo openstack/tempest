@@ -26,7 +26,6 @@ from oslo_log import log as logging
 import testtools
 
 from tempest.lib import exceptions
-from tempest.lib.services import clients
 from tempest.test_discover import plugins
 
 
@@ -245,7 +244,7 @@ ComputeGroup = [
                     "projects. If multiple networks are available for a "
                     "project, this is the network which will be used for "
                     "creating servers if tempest does not create a network or "
-                    "a network is not specified elsewhere. It may be used for "
+                    "s network is not specified elsewhere. It may be used for "
                     "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('catalog_type',
                default='compute',
@@ -278,11 +277,6 @@ ComputeGroup = [
                      'be utilized by some multinode specific tests to ensure '
                      'that requests match the expected size of the cluster '
                      'you are testing with.')),
-    cfg.StrOpt('hypervisor_type',
-               default=None,
-               help="Hypervisor type of the test target on heterogeneous "
-                    "compute environment. The value can be 'QEMU', 'xen' or "
-                    "something."),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
@@ -309,12 +303,6 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
-    # NOTE(mriedem): This is a feature toggle for bug 1175464 which is fixed in
-    # mitaka and newton. This option can be removed after liberty-eol.
-    cfg.BoolOpt('allow_port_security_disabled',
-                default=False,
-                help='Does the test environment support creating ports in a '
-                     'network where port security is disabled?'),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -323,13 +311,7 @@ ComputeFeaturesGroup = [
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Each extension should be specified with alias name. '
-                     'Empty list indicates all extensions are disabled',
-                     deprecated_for_removal=True,
-                     deprecated_reason='The Nova extensions API and mechanism '
-                                       'is deprecated. This option will be '
-                                       'removed when all releases supported '
-                                       'by tempest no longer contain the Nova '
-                                       'extensions API and mechanism.'),
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
@@ -350,12 +332,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('suspend',
                 default=True,
                 help="Does the test environment support suspend/resume?"),
-    cfg.BoolOpt('cold_migration',
-                default=True,
-                help="Does the test environment support cold migration?"),
     cfg.BoolOpt('live_migration',
                 default=True,
-                help="Does the test environment support live migration?"),
+                help="Does the test environment support live migration "
+                     "available?"),
     cfg.BoolOpt('metadata_service',
                 default=True,
                 help="Does the test environment support metadata service? "
@@ -389,8 +369,7 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enables returning of the instance password by the '
                      'relevant server API calls such as create, rebuild '
-                     'or rescue. This configuration value should be same as '
-                     'nova.conf: DEFAULT.enable_instance_password'),
+                     'or rescue.'),
     cfg.BoolOpt('interface_attach',
                 default=True,
                 help='Does the test environment support dynamic network '
@@ -402,10 +381,7 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('nova_cert',
                 default=False,
                 help='Does the test environment have the nova cert running?',
-                deprecated_for_removal=True,
-                deprecated_reason="On Nova side, the nova-cert service is "
-                                  "deprecated and the service will be removed "
-                                  "as early as Ocata."),
+                deprecated_for_removal=True),
     cfg.BoolOpt('personality',
                 default=False,
                 help='Does the test environment support server personality'),
@@ -426,10 +402,7 @@ ComputeFeaturesGroup = [
                      "list indicates all filters are disabled. The full "
                      "available list of filters is in nova.conf: "
                      "DEFAULT.scheduler_available_filters"),
-    cfg.BoolOpt('swap_volume',
-                default=False,
-                help='Does the test environment support in-place swapping of '
-                     'volumes attached to a server instance?'),
+
 ]
 
 
@@ -565,15 +538,6 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
-    # TODO(ylobankov): Delete this option once the Liberty release is EOL.
-    cfg.BoolOpt('dvr_extra_resources',
-                default=True,
-                help="Whether or not to create internal network, subnet, "
-                     "port and add network interface to distributed router "
-                     "in L3 agent scheduler test. Extra resources need to be "
-                     "provisioned in order to bind router to L3 agent in the "
-                     "Liberty release or older, and are not required since "
-                     "the Mitaka release.")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -599,9 +563,6 @@ NetworkFeaturesGroup = [
                 default=True,
                 help="Does the test environment support changing"
                      " port admin state"),
-    cfg.BoolOpt('port_security',
-                default=False,
-                help="Does the test environment support port security?"),
 ]
 
 validation_group = cfg.OptGroup(name='validation',
@@ -788,6 +749,11 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="Is the v3 volume API enabled"),
+    cfg.BoolOpt('bootable',
+                default=True,
+                help='Update bootable status of a volume '
+                     'Not implemented on icehouse ',
+                deprecated_for_removal=True),
     # TODO(ynesenenko): Remove volume_services once liberty-eol happens.
     cfg.BoolOpt('volume_services',
                 default=False,
@@ -900,6 +866,72 @@ OrchestrationGroup = [
     cfg.IntOpt('max_resources_per_stack',
                default=1000,
                help="Value must match heat configuration of the same name."),
+]
+
+data_processing_group = cfg.OptGroup(name="data-processing",
+                                     title="Data Processing options")
+
+DataProcessingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='data-processing',
+               deprecated_group="data_processing",
+               help="Catalog type of the data processing service."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               deprecated_group="data_processing",
+               help="The endpoint type to use for the data processing "
+                    "service."),
+]
+
+
+data_processing_feature_group = cfg.OptGroup(
+    name="data-processing-feature-enabled",
+    title="Enabled Data Processing features")
+
+DataProcessingFeaturesGroup = [
+    cfg.ListOpt('plugins',
+                default=["vanilla", "cdh"],
+                deprecated_group="data_processing-feature-enabled",
+                help="List of enabled data processing plugins")
+]
+
+stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
+
+StressGroup = [
+    cfg.StrOpt('nova_logdir',
+               help='Directory containing log files on the compute nodes'),
+    cfg.IntOpt('max_instances',
+               default=16,
+               help='Maximum number of instances to create during test.'),
+    cfg.StrOpt('controller',
+               help='Controller host.'),
+    # new stress options
+    cfg.StrOpt('target_controller',
+               help='Controller host.'),
+    cfg.StrOpt('target_ssh_user',
+               help='ssh user.'),
+    cfg.StrOpt('target_private_key_path',
+               help='Path to private key.'),
+    cfg.StrOpt('target_logfiles',
+               help='regexp for list of log files.'),
+    cfg.IntOpt('log_check_interval',
+               default=60,
+               help='time (in seconds) between log file error checks.'),
+    cfg.IntOpt('default_thread_number_per_action',
+               default=4,
+               help='The number of threads created while stress test.'),
+    cfg.BoolOpt('leave_dirty_stack',
+                default=False,
+                help='Prevent the cleaning (tearDownClass()) between'
+                     ' each stress test run if an exception occurs'
+                     ' during this run.'),
+    cfg.BoolOpt('full_clean_stack',
+                default=False,
+                help='Allows a full cleaning process after a stress test.'
+                     ' Caution : this cleanup will remove every objects of'
+                     ' every project.')
 ]
 
 
@@ -1075,6 +1107,14 @@ BaremetalGroup = [
                     "step in Node cleaning.")
 ]
 
+negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
+
+NegativeGroup = [
+    cfg.StrOpt('test_generator',
+               default='tempest.common.' +
+               'generator.negative_generator.NegativeTestGenerator',
+               help="Test generator class for all negative tests"),
+]
 
 DefaultGroup = [
     cfg.StrOpt('resources_prefix',
@@ -1102,11 +1142,15 @@ _opts = [
     (object_storage_group, ObjectStoreGroup),
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (orchestration_group, OrchestrationGroup),
+    (data_processing_group, DataProcessingGroup),
+    (data_processing_feature_group, DataProcessingFeaturesGroup),
+    (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
     (debug_group, DebugGroup),
     (baremetal_group, BaremetalGroup),
     (input_scenario_group, InputScenarioGroup),
+    (negative_group, NegativeGroup),
     (None, DefaultGroup)
 ]
 
@@ -1165,11 +1209,16 @@ class TempestConfigPrivate(object):
         self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
         self.orchestration = _CONF.orchestration
+        self.data_processing = _CONF['data-processing']
+        self.data_processing_feature_enabled = _CONF[
+            'data-processing-feature-enabled']
+        self.stress = _CONF.stress
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
         self.debug = _CONF.debug
         self.baremetal = _CONF.baremetal
         self.input_scenario = _CONF['input-scenario']
+        self.negative = _CONF.negative
         logging.tempest_set_log_file('tempest.log')
 
     def __init__(self, parse_conf=True, config_path=None):
@@ -1238,15 +1287,6 @@ class TempestConfigProxy(object):
             lock_dir = os.path.join(tempfile.gettempdir(), 'tempest-lock')
             lockutils.set_defaults(lock_dir)
             self._config = TempestConfigPrivate(config_path=self._path)
-
-            # Pushing tempest internal service client configuration to the
-            # service clients register. Doing this in the config module ensures
-            # that the configuration is available by the time we register the
-            # service clients.
-            # NOTE(andreaf) This has to be done at the time the first
-            # attribute is accessed, to ensure all plugins have been already
-            # loaded, options registered, and _config is set.
-            _register_tempest_service_clients()
 
         return getattr(self._config, attr)
 
@@ -1407,29 +1447,3 @@ def service_client_config(service_client_name=None):
     # Set service
     _parameters['service'] = getattr(options, 'catalog_type')
     return _parameters
-
-
-def _register_tempest_service_clients():
-    # Register tempest own service clients using the same mechanism used
-    # for external plugins.
-    # The configuration data is pushed to the registry so that automatic
-    # configuration of tempest own service clients is possible both for
-    # tempest as well as for the plugins.
-    service_clients = clients.tempest_modules()
-    registry = clients.ClientsRegistry()
-    all_clients = []
-    for service_client in service_clients:
-        module = service_clients[service_client]
-        configs = service_client.split('.')[0]
-        service_client_data = dict(
-            name=service_client.replace('.', '_'),
-            service_version=service_client,
-            module_path=module.__name__,
-            client_names=module.__all__,
-            **service_client_config(configs)
-        )
-        all_clients.append(service_client_data)
-    # NOTE(andreaf) Internal service clients do not actually belong
-    # to a plugin, so using '__tempest__' to indicate a virtual plugin
-    # which holds internal service clients.
-    registry.register_service_client('__tempest__', all_clients)

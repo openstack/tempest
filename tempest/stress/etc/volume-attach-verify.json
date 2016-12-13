@@ -1,0 +1,11 @@
+[{"action": "tempest.stress.actions.volume_attach_verify.VolumeVerifyStress",
+  "threads": 1,
+  "use_admin": true,
+  "use_isolated_tenants": true,
+  "kwargs": {"vm_extra_args": {},
+             "new_volume": true,
+             "new_server": false,
+             "ssh_test_before_attach": false,
+             "enable_ssh_verify": true}
+}
+]

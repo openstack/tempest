@@ -21,18 +21,19 @@ class ImagesTagsTest(base.BaseV2ImageTest):
 
     @test.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
     def test_update_delete_tags_for_image(self):
-        image = self.create_image(container_format='bare',
-                                  disk_format='raw',
-                                  visibility='private')
+        body = self.create_image(container_format='bare',
+                                 disk_format='raw',
+                                 visibility='private')
+        image_id = body['id']
         tag = data_utils.rand_name('tag')
-        self.addCleanup(self.client.delete_image, image['id'])
+        self.addCleanup(self.client.delete_image, image_id)
 
         # Creating image tag and verify it.
-        self.client.add_image_tag(image['id'], tag)
-        body = self.client.show_image(image['id'])
+        self.client.add_image_tag(image_id, tag)
+        body = self.client.show_image(image_id)
         self.assertIn(tag, body['tags'])
 
         # Deleting image tag and verify it.
-        self.client.delete_image_tag(image['id'], tag)
-        body = self.client.show_image(image['id'])
+        self.client.delete_image_tag(image_id, tag)
+        body = self.client.show_image(image_id)
         self.assertNotIn(tag, body['tags'])

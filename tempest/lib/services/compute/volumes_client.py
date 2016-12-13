@@ -27,9 +27,8 @@ class VolumesClient(base_compute_client.BaseComputeClient):
     def list_volumes(self, detail=False, **params):
         """List all the volumes created.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listVolumes
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listVolumes
         """
         url = 'os-volumes'
 
@@ -46,9 +45,8 @@ class VolumesClient(base_compute_client.BaseComputeClient):
     def show_volume(self, volume_id):
         """Return the details of a single volume.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showVolume
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showVolume
         """
         url = "os-volumes/%s" % volume_id
         resp, body = self.get(url)
@@ -59,9 +57,8 @@ class VolumesClient(base_compute_client.BaseComputeClient):
     def create_volume(self, **kwargs):
         """Create a new Volume.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createVolume
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createVolume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('os-volumes', post_body)
@@ -72,9 +69,8 @@ class VolumesClient(base_compute_client.BaseComputeClient):
     def delete_volume(self, volume_id):
         """Delete the Specified Volume.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteVolume
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteVolume
         """
         resp, body = self.delete("os-volumes/%s" % volume_id)
         self.validate_response(schema.delete_volume, resp, body)

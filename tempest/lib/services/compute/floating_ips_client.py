@@ -27,9 +27,8 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
     def list_floating_ips(self, **params):
         """Returns a list of all floating IPs filtered by any parameters.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listfloatingipsObject
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listfloatingipsObject
         """
         url = 'os-floating-ips'
         if params:
@@ -43,9 +42,8 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
     def show_floating_ip(self, floating_ip_id):
         """Get the details of a floating IP.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showFloatingIP
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showFloatingIP
         """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.get(url)
@@ -56,9 +54,8 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
     def create_floating_ip(self, **kwargs):
         """Allocate a floating IP to the project.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createFloatingIP
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createFloatingIP
         """
         url = 'os-floating-ips'
         post_body = json.dumps(kwargs)
@@ -70,9 +67,8 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteFloatingIP
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteFloatingIP
         """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.delete(url)

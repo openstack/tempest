@@ -33,11 +33,12 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     @test.idempotent_id('39c023a2-325a-433a-9eea-649bf1414b19')
     def test_delete_non_existing_tag(self):
         # Delete non existing tag.
-        image = self.create_image(container_format='bare',
-                                  disk_format='raw',
-                                  visibility='private'
-                                  )
+        body = self.create_image(container_format='bare',
+                                 disk_format='raw',
+                                 visibility='private'
+                                 )
+        image_id = body['id']
         tag = data_utils.rand_name('non-exist-tag')
-        self.addCleanup(self.client.delete_image, image['id'])
+        self.addCleanup(self.client.delete_image, image_id)
         self.assertRaises(lib_exc.NotFound, self.client.delete_image_tag,
-                          image['id'], tag)
+                          image_id, tag)

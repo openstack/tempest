@@ -12,7 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from oslo_serialization import jsonutils as json
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
@@ -38,7 +37,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             cls.projects.append(cls.project['id'])
 
         cls.user_body = cls.users_client.create_user(
-            name=u_name, description=u_desc, password=u_password,
+            u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])['user']
 
     @classmethod
@@ -71,7 +70,6 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         update_body = self.creds_client.update_credential(
             cred['id'], blob=blob, project_id=self.projects[1],
             type='ec2')['credential']
-        update_body['blob'] = json.loads(update_body['blob'])
         self.assertEqual(cred['id'], update_body['id'])
         self.assertEqual(self.projects[1], update_body['project_id'])
         self.assertEqual(self.user_body['id'], update_body['user_id'])
@@ -79,7 +77,6 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
 
         get_body = self.creds_client.show_credential(cred['id'])['credential']
-        get_body['blob'] = json.loads(get_body['blob'])
         for value1 in self.creds_list[0]:
             self.assertEqual(update_body[value1],
                              get_body[value1])

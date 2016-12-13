@@ -24,9 +24,8 @@ class NamespacesClient(rest_client.RestClient):
     def create_namespace(self, **kwargs):
         """Create a namespace.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-namespace
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#createNamespace-v2
         """
         data = json.dumps(kwargs)
         resp, body = self.post('metadefs/namespaces', data)
@@ -34,26 +33,7 @@ class NamespacesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_namespaces(self):
-        """List namespaces
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-namespaces
-        """
-        url = 'metadefs/namespaces'
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
     def show_namespace(self, namespace):
-        """Show namespace details.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#get-namespace-details
-        """
         url = 'metadefs/namespaces/%s' % namespace
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
@@ -63,9 +43,8 @@ class NamespacesClient(rest_client.RestClient):
     def update_namespace(self, namespace, **kwargs):
         """Update a namespace.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#update-namespace
+        Available params: see http://developer.openstack.org/
+                              api-ref-image-v2.html#updateNamespace-v2
         """
         # NOTE: On Glance API, we need to pass namespace on both URI
         # and a request body.
@@ -81,9 +60,8 @@ class NamespacesClient(rest_client.RestClient):
     def delete_namespace(self, namespace):
         """Delete a namespace.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#delete-namespace
+        Available params: http://developer.openstack.org/
+                          api-ref-image-v2.html#deleteNamespace-v2
         """
         url = 'metadefs/namespaces/%s' % namespace
         resp, _ = self.delete(url)

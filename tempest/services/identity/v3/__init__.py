@@ -12,27 +12,22 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from tempest.lib.services.identity.v3.credentials_client import \
-    CredentialsClient
 from tempest.lib.services.identity.v3.endpoints_client import EndPointsClient
-from tempest.lib.services.identity.v3.groups_client import GroupsClient
-from tempest.lib.services.identity.v3.identity_client import IdentityClient
-from tempest.lib.services.identity.v3.inherited_roles_client import \
-    InheritedRolesClient
 from tempest.lib.services.identity.v3.policies_client import PoliciesClient
-from tempest.lib.services.identity.v3.projects_client import ProjectsClient
-from tempest.lib.services.identity.v3.regions_client import RegionsClient
-from tempest.lib.services.identity.v3.role_assignments_client import \
-    RoleAssignmentsClient
-from tempest.lib.services.identity.v3.roles_client import RolesClient
-from tempest.lib.services.identity.v3.services_client import ServicesClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
-from tempest.lib.services.identity.v3.trusts_client import TrustsClient
-from tempest.lib.services.identity.v3.users_client import UsersClient
+from tempest.services.identity.v3.json.credentials_client import \
+    CredentialsClient
 from tempest.services.identity.v3.json.domains_client import DomainsClient
+from tempest.services.identity.v3.json.groups_client import GroupsClient
+from tempest.services.identity.v3.json.identity_client import IdentityClient
+from tempest.services.identity.v3.json.projects_client import ProjectsClient
+from tempest.services.identity.v3.json.regions_client import RegionsClient
+from tempest.services.identity.v3.json.roles_client import RolesClient
+from tempest.services.identity.v3.json.services_client import ServicesClient
+from tempest.services.identity.v3.json.trusts_client import TrustsClient
+from tempest.services.identity.v3.json.users_clients import UsersClient
 
-__all__ = ['CredentialsClient', 'EndPointsClient', 'GroupsClient',
-           'IdentityClient', 'InheritedRolesClient', 'PoliciesClient',
-           'ProjectsClient', 'RegionsClient', 'RoleAssignmentsClient',
-           'RolesClient', 'ServicesClient', 'V3TokenClient', 'TrustsClient',
-           'UsersClient', 'DomainsClient', ]
+__all__ = ['EndPointsClient', 'PoliciesClient', 'V3TokenClient',
+           'CredentialsClient', 'DomainsClient', 'GroupsClient',
+           'IdentityClient', 'ProjectsClient', 'RegionsClient', 'RolesClient',
+           'ServicesClient', 'TrustsClient', 'UsersClient', ]

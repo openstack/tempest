@@ -44,7 +44,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         body = self.admin_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
         agents = body['agents']
-        self.assertNotEmpty(agents, "no dhcp agent")
+        self.assertIsNotNone(agents)
         agent = agents[0]
         self.assertTrue(self._check_network_in_dhcp_agent(
             self.network['id'], agent))

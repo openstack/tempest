@@ -35,10 +35,9 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
                              'maxTotalFloatingIps', 'maxSecurityGroups',
                              'maxSecurityGroupRules', 'maxTotalInstances',
                              'maxTotalKeypairs', 'maxTotalRAMSize',
-                             'maxServerGroups', 'maxServerGroupMembers',
                              'totalCoresUsed', 'totalFloatingIpsUsed',
                              'totalSecurityGroupsUsed', 'totalInstancesUsed',
-                             'totalRAMUsed', 'totalServerGroupsUsed']
+                             'totalRAMUsed']
         # check whether all expected elements exist
         missing_elements =\
             [ele for ele in expected_elements if ele not in absolute_limits]

@@ -178,7 +178,7 @@ class OrchestrationClient(rest_client.RestClient):
                            'within the required time (%s s).' %
                            (stack_name, status, stack_status,
                             self.build_timeout))
-                raise lib_exc.TimeoutException(message)
+                raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
 
     def show_resource_metadata(self, stack_identifier, resource_name):

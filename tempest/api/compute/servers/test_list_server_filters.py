@@ -17,9 +17,12 @@ from tempest.api.compute import base
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
@@ -119,8 +122,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @test.idempotent_id('ca78e20e-fddb-4ce6-b7f7-bcbf8605e66e')
-    def test_list_servers_filter_by_active_status(self):
-        # Filter the list of servers by server active status
+    def test_list_servers_filter_by_server_status(self):
+        # Filter the list of servers by server status
         params = {'status': 'active'}
         body = self.client.list_servers(**params)
         servers = body['servers']
@@ -271,9 +274,14 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
         self.s1 = self.client.show_server(self.s1['id'])['server']
-        # Get first ip address inspite of v4 or v6
-        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
-        params = {'ip': addr_spec['addr']}
+        for addr_spec in self.s1['addresses'][self.fixed_network_name]:
+            ip = addr_spec['addr']
+            if addr_spec['version'] == 4:
+                params = {'ip': ip}
+                break
+        else:
+            msg = "Skipped until bug 1450859 is resolved"
+            raise self.skipException(msg)
         body = self.client.list_servers(**params)
         servers = body['servers']
 

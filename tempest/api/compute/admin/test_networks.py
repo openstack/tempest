@@ -42,12 +42,8 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
                              "{0} networks with label {1}".format(
                                  len(configured_network),
                                  CONF.compute.fixed_network_name))
-        elif CONF.network.public_network_id:
-            configured_network = [x for x in networks if x['id'] ==
-                                  CONF.network.public_network_id]
         else:
-            raise self.skipException(
-                "Environment has no known-for-sure existing network.")
+            configured_network = networks
         configured_network = configured_network[0]
         network = (self.client.show_network(configured_network['id'])
                    ['network'])

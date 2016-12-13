@@ -27,9 +27,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
     def list_services(self, **params):
         """Lists all running Compute services for a tenant.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listServices
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServices
         """
         url = 'os-services'
         if params:
@@ -43,9 +42,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
     def enable_service(self, **kwargs):
         """Enable service on a host.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#enableScheduling
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#enableScheduling
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/enable', post_body)
@@ -56,9 +54,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
     def disable_service(self, **kwargs):
         """Disable service on a host.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#disableScheduling
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#disableScheduling
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/disable', post_body)

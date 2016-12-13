@@ -19,13 +19,11 @@ from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
 image_links = copy.deepcopy(parameter_types.links)
 image_links['items']['properties'].update({'type': {'type': 'string'}})
 
-image_status_enums = ['ACTIVE', 'SAVING', 'DELETED', 'ERROR', 'UNKNOWN']
-
 common_image_schema = {
     'type': 'object',
     'properties': {
         'id': {'type': 'string'},
-        'status': {'enum': image_status_enums},
+        'status': {'type': 'string'},
         'updated': {'type': 'string'},
         'links': image_links,
         'name': {'type': ['string', 'null']},

@@ -42,6 +42,12 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success(201, resp.status)
         return resp, body
 
+    def update_object(self, container, object_name, data):
+        """Upload data to replace current storage object."""
+        resp, body = self.create_object(container, object_name, data)
+        self.expected_success(201, resp.status)
+        return resp, body
+
     def delete_object(self, container, object_name, params=None):
         """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
@@ -164,7 +170,7 @@ class ObjectClient(rest_client.RestClient):
             chunked=True
         )
 
-        self._error_checker(resp, body)
+        self._error_checker('PUT', None, headers, contents, resp, body)
         self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp
 
@@ -195,6 +201,7 @@ class ObjectClient(rest_client.RestClient):
 
         # Read the 100 status prior to sending the data
         response = conn.response_class(conn.sock,
+                                       strict=conn.strict,
                                        method=conn._method)
         _, status, _ = response._read_status()
 
@@ -228,5 +235,39 @@ def create_connection(parsed_url):
         conn = httplib.HTTPSConnection(parsed_url.netloc)
     else:
         conn = httplib.HTTPConnection(parsed_url.netloc)
+
+    return conn
+
+
+def put_object_connection(base_url, container, name, contents=None,
+                          chunk_size=65536, headers=None, query_string=None):
+    """Helper function to make connection to put object with httplib
+
+    :param base_url: base_url of an object client
+    :param container: container name that the object is in
+    :param name: object name to put
+    :param contents: a string or a file like object to read object data
+                     from; if None, a zero-byte put will be done
+    :param chunk_size: chunk size of data to write; it defaults to 65536;
+                       used only if the contents object has a 'read'
+                       method, eg. file-like objects, ignored otherwise
+    :param headers: additional headers to include in the request, if any
+    :param query_string: if set will be appended with '?' to generated path
+    """
+    parsed = urlparse.urlparse(base_url)
+
+    path = str(parsed.path) + "/"
+    path += "%s/%s" % (str(container), str(name))
+
+    conn = create_connection(parsed)
+
+    if query_string:
+        path += '?' + query_string
+    if headers:
+        headers = dict(headers)
+    else:
+        headers = {}
+
+    conn.request('PUT', path, contents, headers)
 
     return conn

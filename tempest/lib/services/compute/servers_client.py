@@ -22,7 +22,6 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
 from tempest.lib.api_schema.response.compute.v2_16 import servers as schemav216
 from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
-from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
 from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
@@ -35,8 +34,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.3', 'max': '2.8', 'schema': schemav23},
         {'min': '2.9', 'max': '2.15', 'schema': schemav29},
         {'min': '2.16', 'max': '2.18', 'schema': schemav216},
-        {'min': '2.19', 'max': '2.25', 'schema': schemav219},
-        {'min': '2.26', 'max': None, 'schema': schemav226}]
+        {'min': '2.19', 'max': None, 'schema': schemav219}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
@@ -47,13 +45,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def create_server(self, **kwargs):
         """Create server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/compute/#create-server
-
-        :param name: Server name
-        :param imageRef: Image reference (UUID)
-        :param flavorRef: Flavor reference (UUID or full URL)
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createServer
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -92,9 +85,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def update_server(self, server_id, **kwargs):
         """Update server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateServer
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateServer
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -113,9 +105,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def show_server(self, server_id):
         """Get server details.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showServer
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServer
         """
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
@@ -126,9 +117,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def delete_server(self, server_id):
         """Delete server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteServer
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServer
         """
         resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
@@ -137,10 +127,10 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def list_servers(self, detail=False, **params):
         """List servers.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listServers
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listDetailServers
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServers
+                          and http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listDetailServers
         """
 
         url = 'servers'
@@ -161,9 +151,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def list_addresses(self, server_id):
         """Lists all addresses for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#list-ips
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#list-ips
         """
         resp, body = self.get("servers/%s/ips" % server_id)
         body = json.loads(body)
@@ -192,18 +181,16 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def create_backup(self, server_id, **kwargs):
         """Backup a server instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createBackup
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createBackup
         """
         return self.action(server_id, "createBackup", **kwargs)
 
     def change_password(self, server_id, **kwargs):
         """Change the root password for the server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#changePassword
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#changePassword
         """
         return self.action(server_id, 'changePassword', **kwargs)
 
@@ -229,18 +216,16 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def reboot_server(self, server_id, **kwargs):
         """Reboot a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#reboot
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#reboot
         """
         return self.action(server_id, 'reboot', **kwargs)
 
     def rebuild_server(self, server_id, image_ref, **kwargs):
         """Rebuild a server with a new image.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#rebuild
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#rebuild
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -260,9 +245,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def resize_server(self, server_id, flavor_ref, **kwargs):
         """Change the flavor of a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#resize
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resize
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -276,9 +260,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def confirm_resize_server(self, server_id, **kwargs):
         """Confirm the flavor change for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#confirmResize
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#confirmResize
         """
         return self.action(server_id, 'confirmResize',
                            schema.server_actions_confirm_resize,
@@ -287,18 +270,16 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def revert_resize_server(self, server_id, **kwargs):
         """Revert a server back to its original flavor.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#revertResize
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#revertResize
         """
         return self.action(server_id, 'revertResize', **kwargs)
 
     def list_server_metadata(self, server_id):
         """Lists all metadata for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listServerMetadata
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listServerMetadata
         """
         resp, body = self.get("servers/%s/metadata" % server_id)
         body = json.loads(body)
@@ -308,9 +289,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
         """Sets one or more metadata items for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createServerMetadata
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createServerMetadata
         """
         if no_metadata_field:
             post_body = ""
@@ -325,9 +305,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def update_server_metadata(self, server_id, meta):
         """Updates one or more metadata items for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateServerMetadata
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateServerMetadata
         """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % server_id,
@@ -340,9 +319,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def show_server_metadata_item(self, server_id, key):
         """Shows details for a metadata item, by key, for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showServerMetadataItem
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#showServerMetadataItem
         """
         resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
@@ -353,9 +331,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def set_server_metadata_item(self, server_id, key, meta):
         """Sets a metadata item, by key, for a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#setServerMetadataItem
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#setServerMetadataItem
         """
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
@@ -368,9 +345,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def delete_server_metadata_item(self, server_id, key):
         """Deletes a metadata item, by key, from a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteServerMetadataItem
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteServerMetadataItem
         """
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (server_id, key))
@@ -381,27 +357,24 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def stop_server(self, server_id, **kwargs):
         """Stops a running server and changes its status to SHUTOFF.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#stop
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#stop
         """
         return self.action(server_id, 'os-stop', **kwargs)
 
     def start_server(self, server_id, **kwargs):
         """Starts a stopped server and changes its status to ACTIVE.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#start
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#start
         """
         return self.action(server_id, 'os-start', **kwargs)
 
     def attach_volume(self, server_id, **kwargs):
         """Attaches a volume to a server instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#attachVolume
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#attachVolume
         """
         post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
@@ -422,9 +395,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def detach_volume(self, server_id, volume_id):  # noqa
         """Detaches a volume from a server instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteVolumeAttachment
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#deleteVolumeAttachment
         """
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
@@ -434,9 +406,9 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def show_volume_attachment(self, server_id, volume_id):
         """Return details about the given volume attachment.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#getVolumeAttachmentDetails
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#
+                              getVolumeAttachmentDetails
         """
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
             server_id, volume_id))
@@ -447,9 +419,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def list_volume_attachments(self, server_id):
         """Returns the list of volume attachments for a given instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listVolumeAttachments
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#listVolumeAttachments
         """
         resp, body = self.get('servers/%s/os-volume_attachments' % (
             server_id))
@@ -460,9 +431,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def add_security_group(self, server_id, **kwargs):
         """Add a security group to the server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addSecurityGroup
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#addSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -473,9 +443,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def remove_security_group(self, server_id, **kwargs):
         """Remove a security group from the server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#removeSecurityGroup
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#removeSecurityGroup
         """
         # TODO(oomichi): The api-site doesn't contain this API description.
         # So the above should be changed to the api-site link after
@@ -486,117 +455,104 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def live_migrate_server(self, server_id, **kwargs):
         """This should be called with administrator privileges.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#migrateLive
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#migrateLive
         """
         return self.action(server_id, 'os-migrateLive', **kwargs)
 
     def migrate_server(self, server_id, **kwargs):
         """Migrate a server to a new host.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#migrate
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#migrate
         """
         return self.action(server_id, 'migrate', **kwargs)
 
     def lock_server(self, server_id, **kwargs):
         """Lock the given server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#lock
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#lock
         """
         return self.action(server_id, 'lock', **kwargs)
 
     def unlock_server(self, server_id, **kwargs):
         """UNlock the given server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#unlock
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unlock
         """
         return self.action(server_id, 'unlock', **kwargs)
 
     def suspend_server(self, server_id, **kwargs):
         """Suspend the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#suspend
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#suspend
         """
         return self.action(server_id, 'suspend', **kwargs)
 
     def resume_server(self, server_id, **kwargs):
         """Un-suspend the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#resume
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resume
         """
         return self.action(server_id, 'resume', **kwargs)
 
     def pause_server(self, server_id, **kwargs):
         """Pause the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#pause
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#pause
         """
         return self.action(server_id, 'pause', **kwargs)
 
     def unpause_server(self, server_id, **kwargs):
         """Un-pause the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#unpause
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unpause
         """
         return self.action(server_id, 'unpause', **kwargs)
 
     def reset_state(self, server_id, **kwargs):
         """Reset the state of a server to active/error.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#resetState
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resetState
         """
         return self.action(server_id, 'os-resetState', **kwargs)
 
     def shelve_server(self, server_id, **kwargs):
         """Shelve the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#shelve
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#shelve
         """
         return self.action(server_id, 'shelve', **kwargs)
 
     def unshelve_server(self, server_id, **kwargs):
         """Un-shelve the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#unshelve
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unshelve
         """
         return self.action(server_id, 'unshelve', **kwargs)
 
     def shelve_offload_server(self, server_id, **kwargs):
         """Shelve-offload the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#shelveOffload
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#shelveOffload
         """
         return self.action(server_id, 'shelveOffload', **kwargs)
 
     def get_console_output(self, server_id, **kwargs):
         """Get console output.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#getConsoleOutput
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#getConsoleOutput
         """
         return self.action(server_id, 'os-getConsoleOutput',
                            schema.get_console_output, **kwargs)
@@ -612,18 +568,16 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#rescue
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#rescue
         """
         return self.action(server_id, 'rescue', schema.rescue_server, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#unrescue
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#unrescue
         """
         return self.action(server_id, 'unrescue')
 
@@ -651,45 +605,40 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def force_delete_server(self, server_id, **kwargs):
         """Force delete a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#forceDelete
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#forceDelete
         """
         return self.action(server_id, 'forceDelete', **kwargs)
 
     def restore_soft_deleted_server(self, server_id, **kwargs):
         """Restore a soft-deleted server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#restore
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#restore
         """
         return self.action(server_id, 'restore', **kwargs)
 
     def reset_network(self, server_id, **kwargs):
         """Reset the Network of a server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#resetNetwork
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#resetNetwork
         """
         return self.action(server_id, 'resetNetwork', **kwargs)
 
     def inject_network_info(self, server_id, **kwargs):
         """Inject the Network Info into server.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#injectNetworkInfo
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#injectNetworkInfo
         """
         return self.action(server_id, 'injectNetworkInfo', **kwargs)
 
     def get_vnc_console(self, server_id, **kwargs):
         """Get URL of VNC console.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#getVNCConsole
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#getVNCConsole
         """
         return self.action(server_id, "os-getVNCConsole",
                            schema.get_vnc_console, **kwargs)
@@ -697,17 +646,15 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def add_fixed_ip(self, server_id, **kwargs):
         """Add a fixed IP to server instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addFixedIp
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#addFixedIp
         """
         return self.action(server_id, 'addFixedIp', **kwargs)
 
     def remove_fixed_ip(self, server_id, **kwargs):
         """Remove input fixed IP from input server instance.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#removeFixedIp
+        Available params: http://developer.openstack.org/
+                          api-ref-compute-v2.1.html#removeFixedIp
         """
         return self.action(server_id, 'removeFixedIp', **kwargs)

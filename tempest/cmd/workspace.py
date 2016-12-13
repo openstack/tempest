@@ -72,10 +72,7 @@ class WorkspaceManager(object):
 
     @lockutils.synchronized('workspaces', external=True)
     def get_workspace(self, name):
-        """Returns the workspace that has the given name
-
-        If the workspace isn't registered then `None` is returned.
-        """
+        """Returns the workspace that has the given name"""
         self._populate()
         return self.workspaces.get(name)
 

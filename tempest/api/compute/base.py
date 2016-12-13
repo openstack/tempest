@@ -75,6 +75,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.os.compute_security_group_rules_client)
         cls.security_groups_client = cls.os.compute_security_groups_client
         cls.quotas_client = cls.os.quotas_client
+        cls.quota_classes_client = cls.os.quota_classes_client
         cls.compute_networks_client = cls.os.compute_networks_client
         cls.limits_client = cls.os.limits_client
         cls.volumes_extensions_client = cls.os.volumes_extensions_client
@@ -119,7 +120,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.images = []
         cls.security_groups = []
         cls.server_groups = []
-        cls.volumes = []
 
     @classmethod
     def resource_cleanup(cls):
@@ -127,7 +127,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.clear_servers()
         cls.clear_security_groups()
         cls.clear_server_groups()
-        cls.clear_volumes()
         super(BaseV2ComputeTest, cls).resource_cleanup()
 
     @classmethod
@@ -220,8 +219,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param validatable: Whether the server will be pingable or sshable.
         :param volume_backed: Whether the instance is volume backed or not.
         """
-        if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
         tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
             cls.os,
@@ -344,15 +341,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             LOG.exception('Failed to delete server %s' % server_id)
 
     @classmethod
-    def resize_server(cls, server_id, new_flavor_id, **kwargs):
-        """resize and confirm_resize an server, waits for it to be ACTIVE."""
-        cls.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
-        waiters.wait_for_server_status(cls.servers_client, server_id,
-                                       'VERIFY_RESIZE')
-        cls.servers_client.confirm_resize_server(server_id)
-        waiters.wait_for_server_status(cls.servers_client, server_id, 'ACTIVE')
-
-    @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
         cls._delete_volume(cls.volumes_extensions_client, volume_id)
@@ -373,79 +361,12 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                     return address['addr']
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
-            raise lib_exc.InvalidConfiguration()
+            raise exceptions.InvalidConfiguration()
 
     def setUp(self):
         super(BaseV2ComputeTest, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture(
             self.request_microversion))
-
-    @classmethod
-    def create_volume(cls, image_ref=None, **kwargs):
-        """Create a volume and wait for it to become 'available'.
-
-        :param image_ref: Specify an image id to create a bootable volume.
-        :**kwargs: other parameters to create volume.
-        :returns: The available volume.
-        """
-        if 'size' not in kwargs:
-            kwargs['size'] = CONF.volume.volume_size
-        if 'display_name' not in kwargs:
-            vol_name = data_utils.rand_name(cls.__name__ + '-volume')
-            kwargs['display_name'] = vol_name
-        if image_ref is not None:
-            kwargs['imageRef'] = image_ref
-        volume = cls.volumes_client.create_volume(**kwargs)['volume']
-        cls.volumes.append(volume)
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       volume['id'], 'available')
-        return volume
-
-    @classmethod
-    def clear_volumes(cls):
-        LOG.debug('Clearing volumes: %s', ','.join(
-            volume['id'] for volume in cls.volumes))
-        for volume in cls.volumes:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.volumes_client.delete_volume, volume['id'])
-            except Exception:
-                LOG.exception('Deleting volume %s failed', volume['id'])
-
-        for volume in cls.volumes:
-            try:
-                cls.volumes_client.wait_for_resource_deletion(volume['id'])
-            except Exception:
-                LOG.exception('Waiting for deletion of volume %s failed',
-                              volume['id'])
-
-    def attach_volume(self, server, volume, device=None):
-        """Attaches volume to server and waits for 'in-use' volume status.
-
-        The volume will be detached when the test tears down.
-
-        :param server: The server to which the volume will be attached.
-        :param volume: The volume to attach.
-        :param device: Optional mountpoint for the attached volume. Note that
-            this is not guaranteed for all hypervisors and is not recommended.
-        """
-        attach_kwargs = dict(volumeId=volume['id'])
-        if device:
-            attach_kwargs['device'] = device
-        self.servers_client.attach_volume(
-            server['id'], **attach_kwargs)
-        # On teardown detach the volume and wait for it to be available. This
-        # is so we don't error out when trying to delete the volume during
-        # teardown.
-        self.addCleanup(waiters.wait_for_volume_status,
-                        self.volumes_client, volume['id'], 'available')
-        # Ignore 404s on detach in case the server is deleted or the volume
-        # is already detached.
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.servers_client.detach_volume,
-                        server['id'], volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'in-use')
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):

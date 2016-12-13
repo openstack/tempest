@@ -14,15 +14,15 @@
 
 import os
 import shutil
+import subprocess
 import sys
 
 from cliff import command
 from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
-from testrepository import commands
 
-from tempest.cmd import workspace
+from tempest.cmd.workspace import WorkspaceManager
 
 LOG = logging.getLogger(__name__)
 
@@ -69,10 +69,7 @@ class TempestInit(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(TempestInit, self).get_parser(prog_name)
-        parser.add_argument('dir', nargs='?', default=os.getcwd(),
-                            help="The path to the workspace directory. If you "
-                            "omit this argument, the workspace directory is "
-                            "your current directory")
+        parser.add_argument('dir', nargs='?', default=os.getcwd())
         parser.add_argument('--config-dir', '-c', default=None)
         parser.add_argument('--show-global-config-dir', '-s',
                             action='store_true', dest='show_global_dir',
@@ -81,7 +78,7 @@ class TempestInit(command.Command):
         parser.add_argument('--name', help="The workspace name", default=None)
         parser.add_argument('--workspace-path', default=None,
                             help="The path to the workspace file, the default "
-                                 "is ~/.tempest/workspace.yaml")
+                                 "is ~/.tempest/workspace")
         return parser
 
     def generate_testr_conf(self, local_path):
@@ -92,28 +89,18 @@ class TempestInit(command.Command):
         with open(testr_conf_path, 'w+') as testr_conf_file:
             testr_conf_file.write(testr_conf)
 
-    def get_configparser(self, conf_path):
-        config_parse = moves.configparser.ConfigParser()
-        config_parse.optionxform = str
-        # get any existing values if a config file already exists
-        if os.path.isfile(conf_path):
-            # use read() for Python 2 and 3 compatibility
-            config_parse.read(conf_path)
-        return config_parse
-
     def update_local_conf(self, conf_path, lock_dir, log_dir):
-        config_parse = self.get_configparser(conf_path)
-        # Set local lock_dir in tempest conf
-        if not config_parse.has_section('oslo_concurrency'):
-            config_parse.add_section('oslo_concurrency')
-        config_parse.set('oslo_concurrency', 'lock_path', lock_dir)
-        # Set local log_dir in tempest conf
-        config_parse.set('DEFAULT', 'log_dir', log_dir)
-        # Set default log filename to tempest.log
-        config_parse.set('DEFAULT', 'log_file', 'tempest.log')
-
-        # write out a new file with the updated configurations
-        with open(conf_path, 'w+') as conf_file:
+        config_parse = moves.configparser.SafeConfigParser()
+        config_parse.optionxform = str
+        with open(conf_path, 'a+') as conf_file:
+            # Set local lock_dir in tempest conf
+            if not config_parse.has_section('oslo_concurrency'):
+                config_parse.add_section('oslo_concurrency')
+            config_parse.set('oslo_concurrency', 'lock_path', lock_dir)
+            # Set local log_dir in tempest conf
+            config_parse.set('DEFAULT', 'log_dir', log_dir)
+            # Set default log filename to tempest.log
+            config_parse.set('DEFAULT', 'log_file', 'tempest.log')
             config_parse.write(conf_file)
 
     def copy_config(self, etc_dir, config_dir):
@@ -167,17 +154,15 @@ class TempestInit(command.Command):
         self.generate_testr_conf(local_dir)
         # setup local testr working dir
         if not os.path.isdir(testr_dir):
-            commands.run_argv(['testr', 'init', '-d', local_dir], sys.stdin,
-                              sys.stdout, sys.stderr)
+            subprocess.call(['testr', 'init'], cwd=local_dir)
 
     def take_action(self, parsed_args):
-        workspace_manager = workspace.WorkspaceManager(
-            parsed_args.workspace_path)
+        workspace_manager = WorkspaceManager(parsed_args.workspace_path)
         name = parsed_args.name or parsed_args.dir.split(os.path.sep)[-1]
+        workspace_manager.register_new_workspace(
+            name, parsed_args.dir, init=True)
         config_dir = parsed_args.config_dir or get_tempest_default_config_dir()
         if parsed_args.show_global_dir:
             print("Global config dir is located at: %s" % config_dir)
             sys.exit(0)
         self.create_working_dir(parsed_args.dir, config_dir)
-        workspace_manager.register_new_workspace(
-            name, parsed_args.dir, init=True)

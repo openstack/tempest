@@ -21,10 +21,10 @@ import six
 import yaml
 
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common import fixed_network
 from tempest import exceptions
 from tempest.lib import auth
-from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def read_accounts_yaml(path):
         with open(path, 'r') as yaml_file:
             accounts = yaml.load(yaml_file)
     except IOError:
-        raise lib_exc.InvalidConfiguration(
+        raise exceptions.InvalidConfiguration(
             'The path for the test accounts file: %s '
             'could not be found' % path)
     return accounts

@@ -15,7 +15,7 @@
 
 
 from tempest import config
-from tempest.lib import exceptions
+from tempest import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -42,22 +42,15 @@ class TestServerMultinode(manager.ScenarioTest):
         # this is needed so that we can use the availability_zone:host
         # scheduler hint, which is admin_only by default
         cls.servers_client = cls.admin_manager.servers_client
+        super(TestServerMultinode, cls).resource_setup()
 
     @test.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
-        available_zone = \
-            self.os_adm.availability_zone_client.list_availability_zones(
-                detail=True)['availabilityZoneInfo']
-        hosts = []
-        for zone in available_zone:
-            if zone['zoneState']['available']:
-                for host in zone['hosts']:
-                    if 'nova-compute' in zone['hosts'][host] and \
-                        zone['hosts'][host]['nova-compute']['available']:
-                        hosts.append({'zone': zone['zoneName'],
-                                      'host_name': host})
+        host_client = self.manager.hosts_client
+        hosts = host_client.list_hosts()['hosts']
+        hosts = [x for x in hosts if x['service'] == 'compute']
 
         # ensure we have at least as many compute hosts as we expect
         if len(hosts) < CONF.compute.min_compute_nodes:

@@ -35,9 +35,8 @@ class EndPointsClient(rest_client.RestClient):
     def create_endpoint(self, **kwargs):
         """Create endpoint.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-endpoint
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#createEndpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.post('endpoints', post_body)
@@ -48,9 +47,8 @@ class EndPointsClient(rest_client.RestClient):
     def update_endpoint(self, endpoint_id, **kwargs):
         """Updates an endpoint with given parameters.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-endpoint
+        Available params: see http://developer.openstack.org/
+                              api-ref-identity-v3.html#updateEndpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)

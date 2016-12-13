@@ -16,14 +16,13 @@
 import socket
 
 import netaddr
-import testtools
 
 from tempest.api.network import base
 from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.lib import exceptions
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -72,7 +71,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @test.idempotent_id('67f1b811-f8db-43e2-86bd-72c074d4a42c')
     def test_create_bulk_port(self):
         network1 = self.network
-        network2 = self.create_network()
+        name = data_utils.rand_name('network-')
+        network2 = self.create_network(network_name=name)
         network_list = [network1['id'], network2['id']]
         port_list = [{'network_id': net_id} for net_id in network_list]
         body = self.ports_client.create_bulk_ports(ports=port_list)
@@ -199,7 +199,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
         self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
-        router = self.create_router()
+        router = self.create_router(data_utils.rand_name('router-'))
         self.addCleanup(self.routers_client.delete_router, router['id'])
         port = self.ports_client.create_port(network_id=network['id'])
         # Add router interface to port created above
@@ -308,17 +308,11 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             self.assertIn(security_group, port_show['security_groups'])
 
     @test.idempotent_id('58091b66-4ff4-4cc1-a549-05d60c7acd1a')
-    @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
-        'security-group extension not enabled.')
     def test_update_port_with_security_group_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup')])
 
     @test.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
-    @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
-        'security-group extension not enabled.')
     def test_update_port_with_two_security_groups_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup'),
@@ -343,9 +337,6 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @test.attr(type='smoke')
     @test.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
-    @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
-        'security-group extension not enabled.')
     def test_create_port_with_no_securitygroups(self):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
@@ -358,6 +349,11 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
+
+    @classmethod
+    def setup_clients(cls):
+        super(PortsAdminExtendedAttrsTestJSON, cls).setup_clients()
+        cls.identity_client = cls.os_adm.identity_client
 
     @classmethod
     def resource_setup(cls):

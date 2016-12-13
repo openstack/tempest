@@ -16,10 +16,8 @@
 import json
 import re
 
-from tempest.common import waiters
 from tempest import config
-from tempest.lib.common.utils import test_utils
-from tempest.lib import exceptions
+from tempest import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -72,9 +70,9 @@ class TestServerBasicOps(manager.ScenarioTest):
                     self.assertEqual(self.fip, result, msg)
                     return 'Verification is successful!'
 
-            if not test_utils.call_until_true(exec_cmd_and_verify_output,
-                                              CONF.compute.build_timeout,
-                                              CONF.compute.build_interval):
+            if not test.call_until_true(exec_cmd_and_verify_output,
+                                        CONF.compute.build_timeout,
+                                        CONF.compute.build_interval):
                 raise exceptions.TimeoutException('Timed out while waiting to '
                                                   'verify metadata on server. '
                                                   '%s is empty.' % md_url)
@@ -120,13 +118,14 @@ class TestServerBasicOps(manager.ScenarioTest):
     @test.services('compute', 'network')
     def test_server_basic_ops(self):
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        self.security_group = self._create_security_group()
+        security_groups = [{'name': self.security_group['name']}]
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
             image_id=self.image_ref,
             flavor=self.flavor_ref,
             key_name=keypair['name'],
-            security_groups=[{'name': security_group['name']}],
+            security_groups=security_groups,
             config_drive=CONF.compute_feature_enabled.config_drive,
             metadata=self.md,
             wait_until='ACTIVE')
@@ -135,5 +134,3 @@ class TestServerBasicOps(manager.ScenarioTest):
         self.verify_metadata_on_config_drive()
         self.verify_networkdata_on_config_drive()
         self.servers_client.delete_server(self.instance['id'])
-        waiters.wait_for_server_termination(
-            self.servers_client, self.instance['id'], ignore_error=False)

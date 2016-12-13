@@ -45,9 +45,8 @@ class HostsClient(base_compute_client.BaseComputeClient):
     def update_host(self, hostname, **kwargs):
         """Update a host.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#enablehost
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#enablehost
         """
 
         request_body = {

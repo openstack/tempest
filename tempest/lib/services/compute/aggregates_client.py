@@ -40,9 +40,8 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
     def create_aggregate(self, **kwargs):
         """Create a new aggregate.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createAggregate
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#createAggregate
         """
         post_body = json.dumps({'aggregate': kwargs})
         resp, body = self.post('os-aggregates', post_body)
@@ -54,9 +53,8 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
     def update_aggregate(self, aggregate_id, **kwargs):
         """Update an aggregate.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateAggregate
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#updateAggregate
         """
         put_body = json.dumps({'aggregate': kwargs})
         resp, body = self.put('os-aggregates/%s' % aggregate_id, put_body)
@@ -86,9 +84,8 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
     def add_host(self, aggregate_id, **kwargs):
         """Add a host to the given aggregate.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addHost
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#addHost
         """
         post_body = json.dumps({'add_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
@@ -100,9 +97,8 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
     def remove_host(self, aggregate_id, **kwargs):
         """Remove a host from the given aggregate.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#removeAggregateHost
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#removeAggregateHost
         """
         post_body = json.dumps({'remove_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
@@ -114,9 +110,8 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
     def set_metadata(self, aggregate_id, **kwargs):
         """Replace the aggregate's existing metadata with new metadata.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addAggregateMetadata
+        Available params: see http://developer.openstack.org/
+                              api-ref-compute-v2.1.html#addAggregateMetadata
         """
         post_body = json.dumps({'set_metadata': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,

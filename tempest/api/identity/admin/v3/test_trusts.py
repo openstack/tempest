@@ -57,7 +57,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         u_email = self.trustor_username + '@testmail.xx'
         self.trustor_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            name=self.trustor_username,
+            self.trustor_username,
             description=u_desc,
             password=self.trustor_password,
             email=u_email,
@@ -77,11 +77,11 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
-        self.roles_client.create_user_role_on_project(
+        self.roles_client.assign_user_role_on_project(
             self.trustor_project_id,
             self.trustor_user_id,
             self.delegated_role_id)
-        self.roles_client.create_user_role_on_project(
+        self.roles_client.assign_user_role_on_project(
             self.trustor_project_id,
             self.trustor_user_id,
             self.not_delegated_role_id)

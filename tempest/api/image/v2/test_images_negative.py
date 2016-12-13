@@ -53,19 +53,19 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_delete_deleted_image(self):
         # get and delete the deleted image
         # create and delete image
-        image = self.client.create_image(name='test',
-                                         container_format='bare',
-                                         disk_format='raw')
-        self.client.delete_image(image['id'])
-        self.client.wait_for_resource_deletion(image['id'])
+        body = self.client.create_image(name='test',
+                                        container_format='bare',
+                                        disk_format='raw')
+        image_id = body['id']
+        self.client.delete_image(image_id)
+        self.client.wait_for_resource_deletion(image_id)
 
         # get the deleted image
-        self.assertRaises(lib_exc.NotFound,
-                          self.client.show_image, image['id'])
+        self.assertRaises(lib_exc.NotFound, self.client.show_image, image_id)
 
         # delete the deleted image
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          image['id'])
+                          image_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6fe40f1c-57bd-4918-89cc-8500f850f3de')

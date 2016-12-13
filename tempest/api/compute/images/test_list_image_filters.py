@@ -23,7 +23,7 @@ from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest.lib import exceptions
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -60,7 +60,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
         def _create_image():
             params = {
-                'name': data_utils.rand_name(cls.__name__ + '-image'),
+                'name': data_utils.rand_name('image'),
                 'container_format': 'bare',
                 'disk_format': 'raw'
             }
@@ -78,7 +78,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             # Wait 1 second between creation and upload to ensure a delta
             # between created_at and updated_at.
             time.sleep(1)
-            image_file = six.BytesIO((b'*' * 1024))
+            image_file = six.StringIO(('*' * 1024))
             if CONF.image_feature_enabled.api_v1:
                 cls.glance_client.update_image(image_id, data=image_file)
             else:

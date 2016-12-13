@@ -20,9 +20,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
     def list_subnetpools(self, **filters):
         """Lists subnet pools to which the tenant has access.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-subnet-pools
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#listSubnetPools
         """
         uri = '/subnetpools'
         return self.list_resources(uri, **filters)
@@ -30,9 +29,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
     def create_subnetpool(self, **kwargs):
         """Creates a subnet pool.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-subnet-pool
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#createSubnetPool
         """
         uri = '/subnetpools'
         post_data = {'subnetpool': kwargs}
@@ -41,9 +39,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
     def show_subnetpool(self, subnetpool_id, **fields):
         """Shows information for a subnet pool.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-subnet-pool
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#showSubnetPool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         return self.show_resource(uri, **fields)
@@ -51,9 +48,8 @@ class SubnetpoolsClient(base.BaseNetworkClient):
     def update_subnetpool(self, subnetpool_id, **kwargs):
         """Updates a subnet pool.
 
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-subnet-pool
+        Available params: see http://developer.openstack.org/
+                              api-ref-networking-v2-ext.html#updateSubnetPool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         post_data = {'subnetpool': kwargs}

@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 
 def execute(cmd, action, flags='', params='', fail_ok=False,
-            merge_stderr=False, cli_dir='/usr/bin', prefix=''):
+            merge_stderr=False, cli_dir='/usr/bin'):
     """Executes specified command for the given action.
 
     :param cmd: command to be executed
@@ -48,12 +48,9 @@ def execute(cmd, action, flags='', params='', fail_ok=False,
     :type merge_stderr: boolean
     :param cli_dir: The path where the cmd can be executed
     :type cli_dir: string
-    :param prefix: prefix to insert before command
-    :type prefix: string
     """
-    cmd = ' '.join([prefix, os.path.join(cli_dir, cmd),
+    cmd = ' '.join([os.path.join(cli_dir, cmd),
                     flags, action, params])
-    cmd = cmd.strip()
     LOG.info("running: '%s'" % cmd)
     if six.PY2:
         cmd = cmd.encode('utf-8')
@@ -91,12 +88,10 @@ class CLIClient(object):
     :type cli_dir: string
     :param insecure: if True, --insecure is passed to python client binaries.
     :type insecure: boolean
-    :param prefix: prefix to insert before commands
-    :type prefix: string
     """
 
     def __init__(self, username='', password='', tenant_name='', uri='',
-                 cli_dir='', insecure=False, prefix='', *args, **kwargs):
+                 cli_dir='', insecure=False, *args, **kwargs):
         """Initialize a new CLIClient object."""
         super(CLIClient, self).__init__()
         self.cli_dir = cli_dir if cli_dir else '/usr/bin'
@@ -105,7 +100,6 @@ class CLIClient(object):
         self.password = password
         self.uri = uri
         self.insecure = insecure
-        self.prefix = prefix
 
     def nova(self, action, flags='', params='', fail_ok=False,
              endpoint_type='publicURL', merge_stderr=False):
@@ -371,7 +365,7 @@ class CLIClient(object):
         else:
             flags = creds + ' ' + flags
         return execute(cmd, action, flags, params, fail_ok, merge_stderr,
-                       self.cli_dir, prefix=self.prefix)
+                       self.cli_dir)
 
 
 class ClientTestBase(base.BaseTestCase):

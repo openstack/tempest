@@ -75,5 +75,7 @@ class TestPluginDiscovery(base.TestCase):
         fake_obj = fake_plugin.FakeStevedoreObjNoServiceClients()
         manager.ext_plugins = [fake_obj]
         manager._register_service_clients()
+        expected_result = []
         registered_clients = registry.get_service_clients()
-        self.assertNotIn(fake_obj.name, registered_clients)
+        self.assertIn(fake_obj.name, registered_clients)
+        self.assertEqual(expected_result, registered_clients[fake_obj.name])

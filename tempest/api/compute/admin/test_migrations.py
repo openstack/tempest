@@ -31,8 +31,6 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_adm.migrations_client
         cls.flavors_admin_client = cls.os_adm.flavors_client
-        cls.admin_hosts_client = cls.os_adm.hosts_client
-        cls.admin_servers_client = cls.os_adm.servers_client
 
     @test.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
@@ -47,7 +45,12 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
-        self.resize_server(server_id, self.flavor_ref_alt)
+        self.servers_client.resize_server(server_id, self.flavor_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'VERIFY_RESIZE')
+        self.servers_client.confirm_resize_server(server_id)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server_id, 'ACTIVE')
 
         body = self.client.list_migrations()['migrations']
 
@@ -100,42 +103,3 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         server = self.servers_client.show_server(server['id'])['server']
         self.assertEqual(flavor['id'], server['flavor']['id'])
-
-    def _test_cold_migrate_server(self, revert=False):
-        if CONF.compute.min_compute_nodes < 2:
-            msg = "Less than 2 compute nodes, skipping multinode tests."
-            raise self.skipException(msg)
-
-        server = self.create_test_server(wait_until="ACTIVE")
-        src_host = self.admin_servers_client.show_server(
-            server['id'])['server']['OS-EXT-SRV-ATTR:host']
-
-        self.admin_servers_client.migrate_server(server['id'])
-
-        waiters.wait_for_server_status(self.servers_client,
-                                       server['id'], 'VERIFY_RESIZE')
-
-        if revert:
-            self.servers_client.revert_resize_server(server['id'])
-            assert_func = self.assertEqual
-        else:
-            self.servers_client.confirm_resize_server(server['id'])
-            assert_func = self.assertNotEqual
-
-        waiters.wait_for_server_status(self.servers_client,
-                                       server['id'], 'ACTIVE')
-        dst_host = self.admin_servers_client.show_server(
-            server['id'])['server']['OS-EXT-SRV-ATTR:host']
-        assert_func(src_host, dst_host)
-
-    @test.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')
-    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
-                          'Cold migration not available.')
-    def test_cold_migration(self):
-        self._test_cold_migrate_server(revert=False)
-
-    @test.idempotent_id('caa1aa8b-f4ef-4374-be0d-95f001c2ac2d')
-    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
-                          'Cold migration not available.')
-    def test_revert_cold_migration(self):
-        self._test_cold_migrate_server(revert=True)
