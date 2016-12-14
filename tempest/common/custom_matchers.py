@@ -85,7 +85,7 @@ class ExistsAllResponseHeaders(object):
                     return NonExistentHeader('x-account-container-count')
                 if 'x-account-object-count' not in actual:
                     return NonExistentHeader('x-account-object-count')
-                if actual['x-account-container-count'] > 0:
+                if int(actual['x-account-container-count']) > 0:
                     acct_header = "x-account-storage-policy-"
                     matched_policy_count = 0
 

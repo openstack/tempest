@@ -15,6 +15,7 @@
 
 import random
 
+import six
 import testtools
 
 from tempest.api.object_storage import base
@@ -60,8 +61,10 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
 
         self.assertIsNotNone(container_list)
+
         for container_name in self.containers:
-            self.assertIn(container_name, container_list)
+            self.assertIn(six.text_type(container_name).encode('utf-8'),
+                          container_list)
 
     @test.idempotent_id('884ec421-fbad-4fcc-916b-0580f2699565')
     def test_list_no_containers(self):
@@ -246,7 +249,8 @@ class AccountTest(base.BaseObjectTest):
             params=params)
         self.assertHeaders(resp, 'Account', 'GET')
         for container in container_list:
-            self.assertEqual(True, container.startswith(prefix))
+            self.assertEqual(True, container.decode(
+                'utf-8').startswith(prefix))
 
     @test.attr(type='smoke')
     @test.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')

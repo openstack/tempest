@@ -304,7 +304,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         if exist_creds and not force_new:
             return exist_creds
         elif exist_creds and force_new:
-            new_index = six.text_type(roles).encode('utf-8') + '-' + \
+            # NOTE(andreaf) In py3.x encode returns bytes, and b'' is bytes
+            # In py2.7 encode returns strings, and b'' is still string
+            new_index = six.text_type(roles).encode('utf-8') + b'-' + \
                 six.text_type(len(self._creds)).encode('utf-8')
             self._creds[new_index] = exist_creds
         net_creds = self._get_creds(roles=roles)
