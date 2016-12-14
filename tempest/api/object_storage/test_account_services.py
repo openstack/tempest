@@ -135,7 +135,7 @@ class AccountTest(base.BaseObjectTest):
         not CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_list_extensions(self):
-        resp, extensions = self.account_client.list_extensions()
+        resp, extensions = self.capabilities_client.list_capabilities()
 
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 

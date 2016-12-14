@@ -315,6 +315,8 @@ class Manager(clients.ServiceClients):
 
         self.account_client = object_storage.AccountClient(self.auth_provider,
                                                            **params)
+        self.capabilities_client = object_storage.CapabilitiesClient(
+            self.auth_provider, **params)
         self.container_client = object_storage.ContainerClient(
             self.auth_provider, **params)
         self.object_client = object_storage.ObjectClient(self.auth_provider,

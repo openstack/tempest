@@ -401,7 +401,7 @@ class TestDiscovery(base.TestCase):
                            'not_fake': 'metadata',
                            'swift': 'metadata'})
         fake_os = mock.MagicMock()
-        fake_os.account_client.list_extensions = fake_list_extensions
+        fake_os.capabilities_client.list_capabilities = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -423,7 +423,7 @@ class TestDiscovery(base.TestCase):
                            'not_fake': 'metadata',
                            'swift': 'metadata'})
         fake_os = mock.MagicMock()
-        fake_os.account_client.list_extensions = fake_list_extensions
+        fake_os.capabilities_client.list_capabilities = fake_list_extensions
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
