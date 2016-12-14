@@ -19,7 +19,6 @@ import testtools
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -178,12 +177,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # when trying to delete the subnet. The tear down in the base class
         # will try to delete the server and get a 404 but it's ignored so
         # we're OK.
-        def cleanup_server():
-            self.client.delete_server(server_multi_nics['id'])
-            waiters.wait_for_server_termination(self.client,
-                                                server_multi_nics['id'])
-
-        self.addCleanup(cleanup_server)
+        self.addCleanup(self.delete_server, server_multi_nics['id'])
 
         addresses = (self.client.list_addresses(server_multi_nics['id'])
                      ['addresses'])
@@ -215,13 +209,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         server_multi_nics = self.create_test_server(
             networks=networks, wait_until='ACTIVE')
-
-        def cleanup_server():
-            self.client.delete_server(server_multi_nics['id'])
-            waiters.wait_for_server_termination(self.client,
-                                                server_multi_nics['id'])
-
-        self.addCleanup(cleanup_server)
+        self.addCleanup(self.delete_server, server_multi_nics['id'])
 
         addresses = (self.client.list_addresses(server_multi_nics['id'])
                      ['addresses'])
