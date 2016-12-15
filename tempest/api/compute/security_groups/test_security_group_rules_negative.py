@@ -35,7 +35,6 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.security_groups_client
         cls.rules_client = cls.security_group_rules_client
 
     @test.attr(type=['negative'])
