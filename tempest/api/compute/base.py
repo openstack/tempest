@@ -318,12 +318,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def rebuild_server(cls, server_id, validatable=False, **kwargs):
         # Destroy an existing server and creates a new one
         if server_id:
-            try:
-                cls.servers_client.delete_server(server_id)
-                waiters.wait_for_server_termination(cls.servers_client,
-                                                    server_id)
-            except Exception:
-                LOG.exception('Failed to delete server %s' % server_id)
+            cls.delete_server(server_id)
 
         cls.password = data_utils.rand_password()
         server = cls.create_test_server(
