@@ -253,24 +253,18 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.flavor_ref)['flavor']
 
         def create_flavor_with_ephemeral(ephem_disk):
-            flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
+            flavor_id = data_utils.rand_int_id(start=1000)
+            name = 'flavor_with_ephemeral_%s' % ephem_disk
+            flavor_name = data_utils.rand_name(name)
 
             ram = flavor_base['ram']
             vcpus = flavor_base['vcpus']
             disk = flavor_base['disk']
 
-            if ephem_disk > 0:
-                # Create a flavor with ephemeral disk
-                flavor_name = data_utils.rand_name('eph_flavor')
-                flavor = self.flavor_client.create_flavor(
-                    name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
-                    id=flavor_with_eph_disk_id, ephemeral=ephem_disk)['flavor']
-            else:
-                # Create a flavor without ephemeral disk
-                flavor_name = data_utils.rand_name('no_eph_flavor')
-                flavor = self.flavor_client.create_flavor(
-                    name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
-                    id=flavor_with_eph_disk_id)['flavor']
+            # Create a flavor with ephemeral disk
+            flavor = self.flavor_client.create_flavor(
+                name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
+                id=flavor_id, ephemeral=ephem_disk)['flavor']
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']
