@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.network import base
 from tempest import test
 
@@ -17,6 +19,9 @@ from tempest import test
 class ServiceProvidersTest(base.BaseNetworkTest):
 
     @test.idempotent_id('2cbbeea9-f010-40f6-8df5-4eaa0c918ea6')
+    @testtools.skipUnless(
+        test.is_extension_enabled('service-type', 'network'),
+        'service-type extension not enabled.')
     def test_service_providers_list(self):
         body = self.service_providers_client.list_service_providers()
         self.assertIn('service_providers', body)
