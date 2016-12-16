@@ -40,14 +40,9 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
             srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
-        srv = cls.create_test_server()
+        srv = cls.create_test_server(wait_until='ACTIVE')
         cls.client.delete_server(srv['id'])
-        # We ignore errors on termination because the server may
-        # be put into ERROR status on a quick spawn, then delete,
-        # as the compute node expects the instance local status
-        # to be spawning, not deleted. See LP Bug#1061167
-        waiters.wait_for_server_termination(cls.client, srv['id'],
-                                            ignore_error=True)
+        waiters.wait_for_server_termination(cls.client, srv['id'])
         cls.deleted_fixtures.append(srv)
 
     @test.attr(type=['negative'])
