@@ -67,9 +67,9 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         API reference:
         http://developer.openstack.org/api-ref-compute-v2.1.html#createFlavor
         """
-        if kwargs.get('ephemeral'):
+        if 'ephemeral' in kwargs:
             kwargs['OS-FLV-EXT-DATA:ephemeral'] = kwargs.pop('ephemeral')
-        if kwargs.get('is_public'):
+        if 'is_public' in kwargs:
             kwargs['os-flavor-access:is_public'] = kwargs.pop('is_public')
 
         post_body = json.dumps({'flavor': kwargs})
