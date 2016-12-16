@@ -23,6 +23,9 @@ CONF = config.CONF
 
 class AbsoluteLimitsV2Tests(base.BaseVolumeTest):
 
+    # avoid existing volumes of pre-defined tenant
+    force_tenant_isolation = True
+
     @classmethod
     def resource_setup(cls):
         super(AbsoluteLimitsV2Tests, cls).resource_setup()
