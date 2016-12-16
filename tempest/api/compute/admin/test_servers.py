@@ -29,7 +29,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(ServersAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.servers_client
         cls.non_admin_client = cls.servers_client
-        cls.flavors_client = cls.os_adm.flavors_client
 
     @classmethod
     def resource_setup(cls):

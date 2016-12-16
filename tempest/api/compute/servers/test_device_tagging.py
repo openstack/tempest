@@ -52,9 +52,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         super(DeviceTaggingTest, cls).setup_clients()
         cls.networks_client = cls.os.networks_client
         cls.ports_client = cls.os.ports_client
-        cls.volumes_client = cls.os.volumes_client
         cls.subnets_client = cls.os.subnets_client
-        cls.routers_client = cls.os.routers_client
         cls.interfaces_client = cls.os.interfaces_client
 
     @classmethod
