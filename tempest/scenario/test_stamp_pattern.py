@@ -85,9 +85,9 @@ class TestStampPattern(manager.ScenarioTest):
         ssh = self.get_remote_client(ip_address, private_key=private_key)
 
         def _func():
-            part = ssh.get_partitions()
-            LOG.debug("Partitions:%s" % part)
-            return CONF.compute.volume_device_name in part
+            disks = ssh.get_disks()
+            LOG.debug("Disks: %s" % disks)
+            return CONF.compute.volume_device_name in disks
 
         if not test_utils.call_until_true(_func,
                                           CONF.compute.build_timeout,

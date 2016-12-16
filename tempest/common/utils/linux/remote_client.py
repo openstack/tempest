@@ -112,11 +112,22 @@ class RemoteClient(object):
         output = self.exec_command('grep -c ^processor /proc/cpuinfo')
         return int(output)
 
-    def get_partitions(self):
-        # Return the contents of /proc/partitions
-        command = 'cat /proc/partitions'
+    def get_disks(self):
+        # Select root disk devices as shown by lsblk
+        command = 'lsblk -lb --nodeps'
         output = self.exec_command(command)
-        return output
+        selected = []
+        pos = None
+        for l in output.splitlines():
+            if pos is None and l.find("TYPE") > 0:
+                pos = l.find("TYPE")
+                # Show header line too
+                selected.append(l)
+            # lsblk lists disk type in a column right-aligned with TYPE
+            elif pos > 0 and l[pos:pos + 4] == "disk":
+                selected.append(l)
+
+        return "\n".join(selected)
 
     def get_boot_time(self):
         cmd = 'cut -f1 -d. /proc/uptime'

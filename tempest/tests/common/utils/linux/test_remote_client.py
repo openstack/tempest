@@ -107,13 +107,20 @@ class TestRemoteClient(base.TestCase):
         self.assertEqual(self.conn.get_number_of_vcpus(), 16)
         self._assert_exec_called_with('grep -c ^processor /proc/cpuinfo')
 
-    def test_get_partitions(self):
-        proc_partitions = """major minor  #blocks  name
+    def test_get_disks(self):
+        output_lsblk = """\
+NAME       MAJ:MIN    RM          SIZE RO TYPE MOUNTPOINT
+sda          8:0       0  128035676160  0 disk
+sdb          8:16      0 1000204886016  0 disk
+sr0         11:0       1    1073741312  0 rom"""
+        result = """\
+NAME       MAJ:MIN    RM          SIZE RO TYPE MOUNTPOINT
+sda          8:0       0  128035676160  0 disk
+sdb          8:16      0 1000204886016  0 disk"""
 
-8        0  1048576 vda"""
-        self.ssh_mock.mock.exec_command.return_value = proc_partitions
-        self.assertEqual(self.conn.get_partitions(), proc_partitions)
-        self._assert_exec_called_with('cat /proc/partitions')
+        self.ssh_mock.mock.exec_command.return_value = output_lsblk
+        self.assertEqual(self.conn.get_disks(), result)
+        self._assert_exec_called_with('lsblk -lb --nodeps')
 
     def test_get_boot_time(self):
         booted_at = 10000

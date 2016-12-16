@@ -300,7 +300,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.validation_resources['keypair']['private_key'],
             server=server_no_eph_disk,
             servers_client=self.client)
-        partition_num = len(linux_client.get_partitions().split('\n'))
+        disks_num = len(linux_client.get_disks().split('\n'))
 
         # Explicit server deletion necessary for Juno compatibility
         self.client.delete_server(server_no_eph_disk['id'])
@@ -320,8 +320,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.validation_resources['keypair']['private_key'],
             server=server_with_eph_disk,
             servers_client=self.client)
-        partition_num_emph = len(linux_client.get_partitions().split('\n'))
-        self.assertEqual(partition_num + 1, partition_num_emph)
+        disks_num_eph = len(linux_client.get_disks().split('\n'))
+        self.assertEqual(disks_num + 1, disks_num_eph)
 
 
 class ServersTestManualDisk(ServersTestJSON):
