@@ -181,7 +181,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
                         volume_id, 'available')
         self.addCleanup(self.servers_client.detach_volume, server_id,
-                        self.volume_origin['id'])
+                        volume_id)
 
     @classmethod
     def clear_volumes(cls):
