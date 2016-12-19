@@ -105,6 +105,15 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
     credentials = ['primary', 'admin']
 
+    # NOTE(andreaf) Identity tests work with credentials, so it is safer
+    # for them to always use disposable credentials. Forcing dynamic creds
+    # on regular identity tests would be however to restrictive, since it
+    # would prevent any identity test from being executed against clouds where
+    # admin credentials are not available.
+    # Since All admin tests require admin credentials to be
+    # executed, so this will not impact the ability to execute tests.
+    force_tenant_isolation = True
+
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
@@ -164,6 +173,15 @@ class BaseIdentityV3Test(BaseIdentityTest):
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
     credentials = ['primary', 'admin']
+
+    # NOTE(andreaf) Identity tests work with credentials, so it is safer
+    # for them to always use disposable credentials. Forcing dynamic creds
+    # on regular identity tests would be however to restrictive, since it
+    # would prevent any identity test from being executed against clouds where
+    # admin credentials are not available.
+    # Since All admin tests require admin credentials to be
+    # executed, so this will not impact the ability to execute tests.
+    force_tenant_isolation = True
 
     @classmethod
     def setup_clients(cls):
