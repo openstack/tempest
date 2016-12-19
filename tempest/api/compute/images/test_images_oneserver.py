@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -23,7 +21,6 @@ from tempest.lib.common.utils import test_utils
 from tempest import test
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):

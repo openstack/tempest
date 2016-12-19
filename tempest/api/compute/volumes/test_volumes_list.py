@@ -13,14 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
-
 from tempest.api.compute import base
 from tempest import config
 from tempest import test
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class VolumesTestJSON(base.BaseV2ComputeTest):

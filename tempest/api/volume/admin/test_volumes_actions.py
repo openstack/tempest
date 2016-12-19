@@ -14,10 +14,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class VolumesActionsV2Test(base.BaseVolumeAdminTest):

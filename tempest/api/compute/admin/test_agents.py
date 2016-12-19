@@ -12,13 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log
-
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import test
-
-LOG = log.getLogger(__name__)
 
 
 class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
