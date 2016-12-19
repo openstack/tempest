@@ -130,9 +130,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(TestSecurityGroupsBasicOps, cls).skip_checks()
-        if CONF.baremetal.driver_enabled:
-            msg = ('Not currently supported by baremetal.')
-            raise cls.skipException(msg)
         if CONF.network.port_vnic_type in ['direct', 'macvtap']:
             msg = ('Not currently supported when using vnic_type'
                    ' direct or macvtap')
@@ -144,6 +141,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
+            raise cls.skipException(msg)
+        if not CONF.network.shared_physical_network:
+            msg = ('Deployment uses a shared physical network, security '
+                   'groups not supported')
             raise cls.skipException(msg)
 
     @classmethod

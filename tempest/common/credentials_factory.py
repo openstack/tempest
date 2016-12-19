@@ -88,7 +88,7 @@ def get_credentials_provider(name, network_resources=None,
             project_network_mask_bits=CONF.network.project_network_mask_bits,
             public_network_id=CONF.network.public_network_id,
             create_networks=(CONF.auth.create_isolated_networks and not
-                             CONF.baremetal.driver_enabled),
+                             CONF.network.shared_physical_network),
             resource_prefix=CONF.resources_prefix,
             **get_dynamic_provider_params())
     else:

@@ -25,7 +25,7 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(BaremetalNodesAdminTestJSON, cls).resource_setup()
-        if not CONF.service_available.ironic:
+        if not getattr(CONF.service_available, 'ironic', False):
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.client = cls.os_adm.baremetal_nodes_client
