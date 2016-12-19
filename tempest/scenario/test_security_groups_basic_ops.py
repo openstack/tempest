@@ -142,7 +142,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
-        if not CONF.network.shared_physical_network:
+        if CONF.network.shared_physical_network:
             msg = ('Deployment uses a shared physical network, security '
                    'groups not supported')
             raise cls.skipException(msg)
