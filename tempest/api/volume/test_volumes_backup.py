@@ -30,6 +30,22 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
+    def restore_backup(self, backup_id):
+        # Restore a backup
+        restored_volume = self.backups_client.restore_backup(
+            backup_id)['restore']
+
+        # Delete backup
+        self.addCleanup(self.volumes_client.delete_volume,
+                        restored_volume['volume_id'])
+        self.assertEqual(backup_id, restored_volume['backup_id'])
+        waiters.wait_for_backup_status(self.backups_client,
+                                       backup_id, 'available')
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       restored_volume['volume_id'],
+                                       'available')
+        return restored_volume
+
     @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup
@@ -57,18 +73,7 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
-        # Restore backup
-        restore = self.backups_client.restore_backup(
-            backup['id'])['restore']
-
-        # Delete backup
-        self.addCleanup(self.volumes_client.delete_volume,
-                        restore['volume_id'])
-        self.assertEqual(backup['id'], restore['backup_id'])
-        waiters.wait_for_backup_status(self.backups_client,
-                                       backup['id'], 'available')
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       restore['volume_id'], 'available')
+        self.restore_backup(backup['id'])
 
     @test.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
     @test.services('compute')
@@ -98,6 +103,28 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         backup = self.create_backup(volume_id=volume['id'],
                                     name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
+
+    @test.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
+    def test_bootable_volume_backup_and_restore(self):
+        # Create volume from image
+        img_uuid = CONF.compute.image_ref
+        volume = self.create_volume(imageRef=img_uuid)
+
+        volume_details = self.volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual('true', volume_details['bootable'])
+
+        # Create a backup
+        backup = self.create_backup(volume_id=volume['id'])
+
+        # Restore the backup
+        restored_volume_id = self.restore_backup(backup['id'])['volume_id']
+
+        # Verify the restored backup volume is bootable
+        restored_volume_info = self.volumes_client.show_volume(
+            restored_volume_id)['volume']
+
+        self.assertEqual('true', restored_volume_info['bootable'])
 
 
 class VolumesBackupsV1Test(VolumesBackupsV2Test):
