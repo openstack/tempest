@@ -173,5 +173,5 @@ class ContainerNegativeTest(base.BaseObjectTest):
         ex = self.assertRaises(exceptions.Conflict,
                                self.container_client.delete_container,
                                container_name)
-        self.assertIn('An object with that identifier already exists',
-                      str(ex))
+        self.assertIn('There was a conflict when trying to complete your '
+                      'request.', str(ex))
