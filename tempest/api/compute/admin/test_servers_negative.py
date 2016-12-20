@@ -72,8 +72,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             raise self.skipException("ram quota set is -1,"
                                      " cannot test overlimit")
         ram += 1
-        vcpus = 8
-        disk = 10
+        vcpus = 1
+        disk = 5
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
                                                        disk=disk,
@@ -93,7 +93,6 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
-        ram = 512
         quota_set = self.quotas_client.show_quota_set(
             self.tenant_id)['quota_set']
         vcpus = int(quota_set['cores'])
@@ -101,7 +100,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             raise self.skipException("cores quota set is -1,"
                                      " cannot test overlimit")
         vcpus += 1
-        disk = 10
+        ram = 512
+        disk = 5
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
                                                        disk=disk,
