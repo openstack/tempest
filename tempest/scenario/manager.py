@@ -1327,7 +1327,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
 
     def upload_object_to_container(self, container_name, obj_name=None):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
-        obj_data = data_utils.arbitrary_string()
+        obj_data = data_utils.random_bytes()
         self.object_client.create_object(container_name, obj_name, obj_data)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.object_client.delete_object,

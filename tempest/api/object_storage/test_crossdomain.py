@@ -40,6 +40,7 @@ class CrossdomainTest(base.BaseObjectTest):
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
         resp, body = self.account_client.get("crossdomain.xml", {})
+        body = body.decode()
 
         self.assertTrue(body.startswith(self.xml_start) and
                         body.endswith(self.xml_end))

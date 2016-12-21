@@ -89,7 +89,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         if object_name is None:
             object_name = data_utils.rand_name(name='TestObject')
         if data is None:
-            data = data_utils.arbitrary_string()
+            data = data_utils.random_bytes()
         cls.object_client.create_object(container_name,
                                         object_name,
                                         data,

@@ -56,7 +56,7 @@ class ObjectSloTest(base.BaseObjectTest):
         object_name_base_1 = object_name + '_01'
         object_name_base_2 = object_name + '_02'
         data_size = MIN_SEGMENT_SIZE
-        self.content = data_utils.arbitrary_string(data_size)
+        self.content = data_utils.random_bytes(data_size)
         self._create_object(self.container_name,
                             object_name_base_1,
                             self.content)

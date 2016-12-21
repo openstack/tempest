@@ -96,7 +96,7 @@ class StaticWebTest(base.BaseObjectTest):
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-        self.assertIn(self.object_name, body)
+        self.assertIn(self.object_name, body.decode())
 
         # clean up before exiting
         self.container_client.update_container_metadata(self.container_name,
@@ -126,9 +126,9 @@ class StaticWebTest(base.BaseObjectTest):
         resp, body = self.account_client.request("GET",
                                                  self.container_name,
                                                  headers={})
-        self.assertIn(self.object_name, body)
+        self.assertIn(self.object_name, body.decode())
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
-        self.assertIn(css, body)
+        self.assertIn(css, body.decode())
 
     @test.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
     @test.requires_ext(extension='staticweb', service='object')

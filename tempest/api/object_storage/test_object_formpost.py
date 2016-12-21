@@ -72,7 +72,9 @@ class ObjectFormPostTest(base.BaseObjectTest):
                                             max_file_count,
                                             expires)
 
-        signature = hmac.new(self.key, hmac_body, hashlib.sha1).hexdigest()
+        signature = hmac.new(
+            self.key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         fields = {'redirect': redirect,
                   'max_file_size': str(max_file_size),
@@ -119,4 +121,4 @@ class ObjectFormPostTest(base.BaseObjectTest):
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
         self.assertHeaders(resp, "Object", "GET")
-        self.assertEqual(body, "hello world")
+        self.assertEqual(body.decode(), "hello world")
