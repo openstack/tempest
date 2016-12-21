@@ -100,7 +100,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         any changes.
         :param disk_config: The name is changed to OS-DCF:diskConfig
         """
-        if kwargs.get('disk_config'):
+        if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs.pop('disk_config')
 
         post_body = json.dumps({'server': kwargs})

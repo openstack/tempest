@@ -115,7 +115,7 @@ class ImagesClient(rest_client.RestClient):
         if detail:
             url += '/detail'
 
-        if kwargs.get('changes_since'):
+        if 'changes_since' in kwargs:
             kwargs['changes-since'] = kwargs.pop('changes_since')
 
         if len(kwargs) > 0:
