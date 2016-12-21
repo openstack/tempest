@@ -140,6 +140,14 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Destination volume bigger than source snapshot
         dst_vol = self.create_volume(snapshot_id=src_snap['id'],
                                      size=src_size + 1)
+        # NOTE(zhufl): dst_vol is created based on snapshot, so dst_vol
+        # should be deleted before deleting snapshot, otherwise deleting
+        # snapshot will end with status 'error-deleting'. This depends on
+        # the implementation mechanism of vendors, generally speaking,
+        # some verdors will use "virtual disk clone" which will promote
+        # disk clone speed, and in this situation the "disk clone"
+        # is just a relationship between volume and snapshot.
+        self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
 
         volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
         # Should allow
