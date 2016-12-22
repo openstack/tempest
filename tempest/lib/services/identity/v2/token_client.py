@@ -23,7 +23,22 @@ class TokenClient(rest_client.RestClient):
 
     def __init__(self, auth_url, disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None, **kwargs):
+        """Initialises the Token client
+
+        :param auth_url: URL to which the token request is sent
+        :param disable_ssl_certificate_validation: pass-through to rest client
+        :param ca_certs: pass-through to rest client
+        :param trace_requests: pass-through to rest client
+        :param kwargs: any extra parameter to pass through the rest client.
+               region, service and auth_provider will be ignored, if passed,
+               as they are not meaningful for token client
+        """
         dscv = disable_ssl_certificate_validation
+        # NOTE(andreaf) region, service and auth_provider are passed
+        # positionally with None. Having them in kwargs would raise a
+        # "multiple values for keyword arguments" error
+        for unwanted_kwargs in ['region', 'service', 'auth_provider']:
+            kwargs.pop(unwanted_kwargs, None)
         super(TokenClient, self).__init__(
             None, None, None, disable_ssl_certificate_validation=dscv,
             ca_certs=ca_certs, trace_requests=trace_requests, **kwargs)

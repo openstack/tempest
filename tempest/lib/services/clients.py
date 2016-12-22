@@ -279,7 +279,7 @@ class ServiceClients(object):
         a dictionary ready to be injected in kwargs.
 
         Exceptions are:
-        - Token clients for 'identity' have a very different interface
+        - Token clients for 'identity' must be given an 'auth_url' parameter
         - Volume client for 'volume' accepts 'default_volume_size'
         - Servers client from 'compute' accepts 'enable_instance_password'
 
