@@ -337,17 +337,22 @@ class ListSharedImagesTest(ListImagesTest):
 
     @test.idempotent_id('3fa50be4-8e38-4c02-a8db-7811bb780122')
     def test_list_images_param_member_status(self):
-        # Share one of the images created with the alt user
+        # Create an image to be shared using default visibility
+        image_file = six.BytesIO(data_utils.random_bytes(2048))
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
+        image = self.create_image(container_format=container_format,
+                                  disk_format=disk_format)
+        self.client.store_image_file(image['id'], data=image_file)
+
+        # Share the image created with the alt user
         self.image_member_client.create_image_member(
-            image_id=self.test_data['id'],
-            member=self.alt_img_client.tenant_id)
-        # Update the info on the test data so it remains accurate
-        self.test_data['updated_at'] = self.client.show_image(
-            self.test_data['id'])['updated_at']
+            image_id=image['id'], member=self.alt_img_client.tenant_id)
+
         # As an image consumer you need to provide the member_status parameter
         # along with the visibility=shared parameter in order for it to show
         # results
         params = {'member_status': 'pending', 'visibility': 'shared'}
         fetched_images = self.alt_img_client.list_images(params)['images']
         self.assertEqual(1, len(fetched_images))
-        self.assertEqual(self.test_data['id'], fetched_images[0]['id'])
+        self.assertEqual(image['id'], fetched_images[0]['id'])
