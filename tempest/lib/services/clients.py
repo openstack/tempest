@@ -41,6 +41,7 @@ def tempest_modules():
     return {
         'compute': compute,
         'identity.v2': identity.v2,
+        'identity.v3': identity.v3,
         'image.v1': image.v1,
         'image.v2': image.v2,
         'network': network,
@@ -55,7 +56,7 @@ def _tempest_internal_modules():
     # NOTE(andreaf) This list will exists only as long the remain clients
     # are migrated to tempest.lib, and it will then be deleted without
     # deprecation or advance notice
-    return set(['identity.v3', 'object-storage'])
+    return set(['object-storage'])
 
 
 def available_modules():
