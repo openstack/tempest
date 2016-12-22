@@ -75,7 +75,7 @@ class MockHelpersMixin(object):
         fake_domain_list = {'domains': [{'id': 'fake_domain',
                                          'name': 'Fake_Domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
         self.useFixture(fixtures.MockPatch(
@@ -121,7 +121,7 @@ class TestAccountGeneratorV3(TestAccountGeneratorV2):
         super(TestAccountGeneratorV3, self).setUp()
         fake_domain_list = {'domains': [{'id': 'fake_domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
 
