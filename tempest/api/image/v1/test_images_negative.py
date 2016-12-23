@@ -15,6 +15,7 @@
 
 
 from tempest.api.image import base
+from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -44,7 +45,7 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     def test_delete_non_existent_image(self):
         # Return an error while trying to delete a non-existent image
 
-        non_existent_image_id = '11a22b9-12a9-5555-cc11-00ab112223fa'
+        non_existent_image_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           non_existent_image_id)
 
@@ -58,9 +59,9 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @test.idempotent_id('950e5054-a3c7-4dee-ada5-e576f1087abd')
     def test_delete_image_non_hex_string_id(self):
         # Return an error while trying to delete an image with non hex id
-        image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
+        invalid_image_id = data_utils.rand_uuid()[:-1] + "j"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          image_id)
+                          invalid_image_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4ed757cd-450c-44b1-9fd1-c819748c650d')
@@ -70,7 +71,8 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('a4a448ab-3db2-4d2d-b9b2-6a1271241dfe')
-    def test_delete_image_id_is_over_35_character_limit(self):
+    def test_delete_image_id_over_character_limit(self):
         # Return an error while trying to delete image with id over limit
+        overlimit_image_id = data_utils.rand_uuid() + "1"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
+                          overlimit_image_id)
