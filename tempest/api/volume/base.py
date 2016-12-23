@@ -200,16 +200,13 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def clear_snapshots(cls):
         for snapshot in cls.snapshots:
-            try:
-                cls.snapshots_client.delete_snapshot(snapshot['id'])
-            except Exception:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.snapshots_client.delete_snapshot, snapshot['id'])
 
         for snapshot in cls.snapshots:
-            try:
-                cls.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-            except Exception:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.snapshots_client.wait_for_resource_deletion,
+                snapshot['id'])
 
     def create_server(self, **kwargs):
         name = kwargs.pop(
