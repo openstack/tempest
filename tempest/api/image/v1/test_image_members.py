@@ -14,6 +14,7 @@
 
 
 from tempest.api.image import base
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -54,3 +55,5 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         body = self.image_member_client.list_image_members(image_id)
         members = body['members']
         self.assertEqual(0, len(members), str(members))
+        self.assertRaises(
+            lib_exc.NotFound, self.alt_img_cli.show_image, image_id)
