@@ -63,6 +63,37 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertIn(floating_ip_admin['floatingip']['id'],
                       floating_ip_ids_admin)
         self.assertIn(floating_ip_alt['id'], floating_ip_ids_admin)
+        # List floating ips from admin with tenant-id of alt
+        kwargs={}
+        kwargs['tenant_id']=floating_ip_alt['tenant_id']
+        body = self.admin_floating_ips_client.list_floatingips(**kwargs)
+        floating_ip_ids_alt = [f['id'] for f in body['floatingips']]
+        self.assertEqual(len(floating_ip_ids_alt), 1)
+        self.assertIn(floating_ip_alt['id'], floating_ip_ids_alt)
+        #create a port and associate to it
+        post_data = {}
+        uri = '/networks'
+        post_data['network']={'name': data_utils.rand_name('test-network-')}
+        alt_network = self.alt_floating_ips_client.create_resource(uri, post_data)
+        self.addCleanup(self.alt_floating_ips_client.delete_resource,
+            '/networks/'+alt_network['network']['id'])
+        post_data = {}
+        uri = '/ports'
+        post_data['port']={'network_id': alt_network['network']['id']}
+        alt_port = self.alt_floating_ips_client.create_resource(uri, post_data)
+        self.addCleanup(self.alt_floating_ips_client.delete_resource,
+            '/ports/'+alt_port['port']['id'])
+
+        #Associate a port and list the floatingip with filters like tenant and port-id
+        floating_ip = self.alt_floating_ips_client.update_floatingip(
+            floating_ip_alt['id'],
+            port_id=alt_port['port']['id'])
+        updated_floating_ip = floating_ip['floatingip']
+        kwargs['port_id']=alt_port['port']['id']
+        body = self.admin_floating_ips_client.list_floatingips(**kwargs)
+        floating_ip_ids_alt = [f['id'] for f in body['floatingips']]
+        self.assertEqual(len(floating_ip_ids_alt), 1)
+        self.assertIn(floating_ip_alt['id'], floating_ip_ids_alt)
         # List floating ips from nonadmin
         body = self.floating_ips_client.list_floatingips()
         floating_ip_ids = [f['id'] for f in body['floatingips']]
