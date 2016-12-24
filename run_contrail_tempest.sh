@@ -105,6 +105,7 @@ function apply_patches {
   git apply contrail/bug_1373245.patch
   git apply contrail/bug_1604923.patch
   git apply contrail/bug_1621622.patch
+  git apply contrail/bug_1647829.patch
 }
 
 echo "###### Ubuntu Main Repos
