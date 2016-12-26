@@ -198,12 +198,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @test.idempotent_id('a4858f6c-401e-4155-9a49-d5cd053d1a2f')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
+    @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
+                          'Less than 2 compute nodes, skipping multinode '
+                          'tests.')
     @test.services('compute', 'network')
     def test_server_connectivity_cold_migration(self):
-        if CONF.compute.min_compute_nodes < 2:
-            msg = "Less than 2 compute nodes, skipping multinode tests."
-            raise self.skipException(msg)
-
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
         floating_ip = self._setup_network(server, keypair)
@@ -220,3 +219,28 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         dst_host = self._get_host_for_server(server['id'])
 
         self.assertNotEqual(src_host, dst_host)
+
+    @test.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration is not available.')
+    @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
+                          'Less than 2 compute nodes, skipping multinode '
+                          'tests.')
+    @test.services('compute', 'network')
+    def test_server_connectivity_cold_migration_revert(self):
+        keypair = self.create_keypair()
+        server = self._setup_server(keypair)
+        floating_ip = self._setup_network(server, keypair)
+        src_host = self._get_host_for_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
+
+        self.admin_servers_client.migrate_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'VERIFY_RESIZE')
+        self.servers_client.revert_resize_server(server['id'])
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
+        dst_host = self._get_host_for_server(server['id'])
+
+        self.assertEqual(src_host, dst_host)
