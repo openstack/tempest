@@ -522,7 +522,6 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help="A list of enabled filters that nova will accept as hints"
                      " to the scheduler when creating a server. A special "
-<<<<<<< HEAD
                      "entry 'all' indicates all filters are enabled. Empty "
                      "list indicates all filters are disabled. The full "
                      "available list of filters is in nova.conf: "
@@ -732,7 +731,6 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
-<<<<<<< HEAD
     cfg.StrOpt('region2_public_network_id',
                default="",
                help="Id of the public network that provides external "
@@ -794,9 +792,6 @@ NetworkFeaturesGroup = [
                 ),
     cfg.BoolOpt('port_admin_state_change',
                 default=True,
-                help="Does the test environment support changing"
-                     " port admin state"),
-<<<<<<< HEAD
     cfg.BoolOpt('advertise_mtu',
                 default=False,
                 help="Allow the execution of MTU tests that use the extended "
@@ -1143,7 +1138,6 @@ OrchestrationGroup = [
                help="Value must match heat configuration of the same name."),
 ]
 
-<<<<<<< HEAD
 data_processing_group = cfg.OptGroup(name="data-processing",
                                      title="Data Processing options")
 
@@ -1386,8 +1380,6 @@ input_scenario_group = cfg.OptGroup(name="input-scenario",
 
 
 InputScenarioGroup = [
-    cfg.StrOpt('image_regex',
-               default='^cirros-0.3.1-x86_64-uec$',
                help="Matching images become parameters for scenario tests",
                deprecated_for_removal=True),
     cfg.StrOpt('flavor_regex',
@@ -1406,7 +1398,6 @@ InputScenarioGroup = [
                deprecated_for_removal=True),
 ]
 
-<<<<<<< HEAD
 
 baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options',
