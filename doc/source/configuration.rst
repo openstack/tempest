@@ -61,10 +61,9 @@ defined.
 Credential Provider Mechanisms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Tempest currently also has three different internal methods for providing
-authentication to tests: dynamic credentials, locking test accounts, and
-non-locking test accounts. Depending on which one is in use the configuration
-of Tempest is slightly different.
+Tempest currently has two different internal methods for providing authentication
+to tests: dynamic credentials and pre-provisioned credentials.
+Depending on which one is in use the configuration of Tempest is slightly different.
 
 Dynamic Credentials
 """""""""""""""""""
@@ -96,7 +95,7 @@ When the ``admin_domain_scope`` option is set to ``True``, provisioned admin
 accounts will be assigned a role on domain configured in
 ``default_credentials_domain_name``. This will make the accounts provisioned
 usable in a cloud where domain scoped tokens are required by keystone for
-admin operations. Note that the the initial pre-provision admin accounts,
+admin operations. Note that the initial pre-provision admin accounts,
 configured in tempest.conf, must have a role on the same domain as well, for
 Dynamic Credentials to work.
 
@@ -135,7 +134,10 @@ To enable and use locking test accounts you need do a few things:
 It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique project. This is required to provide proper isolation
 to the tests using the credentials, and failure to do this will likely cause
-unexpected failures in some tests.
+unexpected failures in some tests. Also, ensure that these projects and users
+used do not have any pre-existing resources created. Tempest assumes all
+tenants it's using are empty and may sporadically fail if there are unexpected
+resources present.
 
 When the keystone in the target cloud requires domain scoped tokens to
 perform admin actions, all pre-provisioned admin users must have a role
@@ -149,7 +151,7 @@ the role on the domain will be assigned automatically for you, as long as
 ``admin_domain_scope`` as ``default_credentials_domain_name`` are configured
 properly in tempest.conf.
 
-Pre-Provisioned Credentials are also know as accounts.yaml or accounts file.
+Pre-Provisioned Credentials are also known as accounts.yaml or accounts file.
 
 Compute
 -------

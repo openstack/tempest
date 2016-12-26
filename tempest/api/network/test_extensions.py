@@ -23,9 +23,9 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
 
         List all available extensions
 
-    v2.0 of the Neutron API is assumed. It is also assumed that the following
-    options are defined in the [network] section of etc/tempest.conf:
-
+    v2.0 of the Neutron API is assumed. It is also assumed that api-extensions
+    option is defined in the [network-feature-enabled] section of
+    etc/tempest.conf.
     """
 
     @test.attr(type='smoke')

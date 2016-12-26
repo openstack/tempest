@@ -71,52 +71,68 @@ class InvalidHttpSuccessCode(OtherRestClientException):
     message = "The success code is different than the expected one"
 
 
-class NotFound(ClientRestClientException):
-    message = "Object not found"
+class BadRequest(ClientRestClientException):
+    status_code = 400
+    message = "Bad request"
 
 
 class Unauthorized(ClientRestClientException):
+    status_code = 401
     message = 'Unauthorized'
 
 
 class Forbidden(ClientRestClientException):
+    status_code = 403
     message = "Forbidden"
 
 
-class TimeoutException(OtherRestClientException):
-    message = "Request timed out"
-
-
-class BadRequest(ClientRestClientException):
-    message = "Bad request"
-
-
-class UnprocessableEntity(ClientRestClientException):
-    message = "Unprocessable entity"
-
-
-class RateLimitExceeded(ClientRestClientException):
-    message = "Rate limit exceeded"
-
-
-class OverLimit(ClientRestClientException):
-    message = "Request entity is too large"
-
-
-class ServerFault(ServerRestClientException):
-    message = "Got server fault"
-
-
-class NotImplemented(ServerRestClientException):
-    message = "Got NotImplemented error"
+class NotFound(ClientRestClientException):
+    status_code = 404
+    message = "Object not found"
 
 
 class Conflict(ClientRestClientException):
+    status_code = 409
     message = "An object with that identifier already exists"
 
 
 class Gone(ClientRestClientException):
+    status_code = 410
     message = "The requested resource is no longer available"
+
+
+class RateLimitExceeded(ClientRestClientException):
+    status_code = 413
+    message = "Rate limit exceeded"
+
+
+class OverLimit(ClientRestClientException):
+    status_code = 413
+    message = "Request entity is too large"
+
+
+class InvalidContentType(ClientRestClientException):
+    status_code = 415
+    message = "Invalid content type provided"
+
+
+class UnprocessableEntity(ClientRestClientException):
+    status_code = 422
+    message = "Unprocessable entity"
+
+
+class ServerFault(ServerRestClientException):
+    status_code = 500
+    message = "Got server fault"
+
+
+class NotImplemented(ServerRestClientException):
+    status_code = 501
+    message = "Got NotImplemented error"
+
+
+class TimeoutException(OtherRestClientException):
+    message = "Request timed out"
 
 
 class ResponseWithNonEmptyBody(OtherRestClientException):
@@ -137,16 +153,16 @@ class InvalidHTTPResponseHeader(OtherRestClientException):
     message = "HTTP response header is invalid"
 
 
-class InvalidContentType(ClientRestClientException):
-    message = "Invalid content type provided"
-
-
 class UnexpectedContentType(OtherRestClientException):
     message = "Unexpected content type provided"
 
 
 class UnexpectedResponseCode(OtherRestClientException):
     message = "Unexpected response code received"
+
+
+class InvalidConfiguration(TempestException):
+    message = "Invalid Configuration"
 
 
 class InvalidIdentityVersion(TempestException):
@@ -239,3 +255,7 @@ class ServiceClientRegistrationException(TempestException):
 
 class PluginRegistrationException(TempestException):
     message = "Error registering plugin %(name)s: %(detailed_error)s"
+
+
+class VolumeBackupException(TempestException):
+    message = "Volume backup %(backup_id)s failed and is in ERROR status"

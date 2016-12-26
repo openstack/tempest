@@ -30,7 +30,7 @@ class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
         # List of availability zone
         availability_zone = (self.client.list_availability_zones()
                              ['availabilityZoneInfo'])
-        self.assertTrue(len(availability_zone) > 0)
+        self.assertGreater(len(availability_zone), 0)
 
 
 class AvailabilityZoneV1TestJSON(AvailabilityZoneV2TestJSON):

@@ -33,20 +33,17 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     """
 
     @classmethod
-    def setup_clients(cls):
-        super(VolumesV2ListTestJSON, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @classmethod
     def resource_setup(cls):
         super(VolumesV2ListTestJSON, cls).resource_setup()
 
         # Create 3 test volumes
-        cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
+        # NOTE(zhufl): When using pre-provisioned credentials, the project
+        # may have volumes other than those created below.
+        existing_volumes = cls.volumes_client.list_volumes()['volumes']
+        cls.volume_id_list = [vol['id'] for vol in existing_volumes]
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            volume = cls.client.show_volume(volume['id'])['volume']
             cls.volume_id_list.append(volume['id'])
 
     @test.idempotent_id('2a7064eb-b9c3-429b-b888-33928fc5edd3')
@@ -61,7 +58,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                       'sort_dir': sort_dir,
                       'sort_key': sort_key
                       }
-            fetched_volume = self.client.list_volumes(
+            fetched_volume = self.volumes_client.list_volumes(
                 detail=True, params=params)['volumes']
             self.assertEqual(limit, len(fetched_volume),
                              "The count of volumes is %s, expected:%s " %
@@ -71,11 +68,13 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
             val0 = fetched_volume[0][sort_key]
             val1 = fetched_volume[1][sort_key]
             if sort_dir == 'asc':
-                self.assertTrue(val0 < val1,
-                                "%s < %s" % (val0, val1))
+                self.assertLess(val0, val1,
+                                "list is not in asc order with sort_key: %s."
+                                " %s" % (sort_key, fetched_volume))
             elif sort_dir == 'desc':
-                self.assertTrue(val0 > val1,
-                                "%s > %s" % (val0, val1))
+                self.assertGreater(val0, val1,
+                                   "list is not in desc order with sort_key: "
+                                   "%s. %s" % (sort_key, fetched_volume))
 
         _list_details_with_multiple_params()
         _list_details_with_multiple_params(sort_dir='desc')
@@ -188,8 +187,8 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         params = {'marker': random_volume}
 
         # Running volume list using marker parameter
-        vol_with_marker = self.client.list_volumes(detail=True,
-                                                   params=params)['volumes']
+        vol_with_marker = self.volumes_client.list_volumes(
+            detail=True, params=params)['volumes']
 
         # Fetching the index of the random volume from volume_id_list
         index_marker = self.volume_id_list.index(random_volume)

@@ -69,11 +69,6 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
     @classmethod
-    def setup_credentials(cls):
-        cls.prepare_instance_network()
-        super(ImagesOneServerNegativeTestJSON, cls).setup_credentials()
-
-    @classmethod
     def setup_clients(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
@@ -98,9 +93,9 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('3d24d11f-5366-4536-bd28-cff32b748eca')
     def test_create_image_specify_metadata_over_limits(self):
-        # Return an error when creating image with meta data over 256 chars
+        # Return an error when creating image with meta data over 255 chars
         snapshot_name = data_utils.rand_name('test-snap')
-        meta = {'a' * 260: 'b' * 260}
+        meta = {'a' * 256: 'b' * 256}
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, name=snapshot_name, metadata=meta)
 
@@ -123,10 +118,10 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
-    def test_create_image_specify_name_over_256_chars(self):
-        # Return an error if snapshot name over 256 characters is passed
+    def test_create_image_specify_name_over_character_limit(self):
+        # Return an error if snapshot name over 255 characters is passed
 
-        snapshot_name = data_utils.rand_name('a' * 260)
+        snapshot_name = ('a' * 256)
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           self.server_id, name=snapshot_name)
 

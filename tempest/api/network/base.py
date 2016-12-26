@@ -26,7 +26,7 @@ CONF = config.CONF
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
-    """Base class for the Neutron tests
+    """Base class for the Neutron tests.
 
     Per the Neutron API Guide, API v1.x was removed from the source code tree
     (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)
@@ -81,6 +81,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.security_group_rules_client = (
             cls.os.security_group_rules_client)
         cls.network_versions_client = cls.os.network_versions_client
+        cls.service_providers_client = cls.os.service_providers_client
 
     @classmethod
     def resource_setup(cls):
@@ -135,11 +136,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).resource_cleanup()
 
     @classmethod
-    def create_network(cls, network_name=None):
+    def create_network(cls, network_name=None, **kwargs):
         """Wrapper utility that returns a test network."""
-        network_name = network_name or data_utils.rand_name('test-network-')
+        network_name = network_name or data_utils.rand_name(
+            cls.__name__ + '-test-network')
 
-        body = cls.networks_client.create_network(name=network_name)
+        body = cls.networks_client.create_network(name=network_name, **kwargs)
         network = body['network']
         cls.networks.append(network)
         return network
@@ -148,7 +150,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
                       ip_version=None, client=None, **kwargs):
         """Wrapper utility that returns a test subnet."""
-
         # allow tests to use admin client
         if not client:
             client = cls.subnets_client
@@ -208,6 +209,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_router(cls, router_name=None, admin_state_up=False,
                       external_network_id=None, enable_snat=None,
                       **kwargs):
+        router_name = router_name or data_utils.rand_name(
+            cls.__name__ + "-router")
+
         ext_gw_info = {}
         if external_network_id:
             ext_gw_info['network_id'] = external_network_id
@@ -270,7 +274,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         """Wrapper utility that returns a test metering label."""
         body = cls.admin_metering_labels_client.create_metering_label(
             description=description,
-            name=data_utils.rand_name("metering-label"))
+            name=name)
         metering_label = body['metering_label']
         cls.metering_labels.append(metering_label)
         return metering_label

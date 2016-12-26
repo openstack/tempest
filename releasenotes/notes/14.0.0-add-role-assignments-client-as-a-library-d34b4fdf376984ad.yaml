@@ -1,0 +1,6 @@
+---
+features:
+    - Define the identity service role_assignments_client as a library.
+      Add role_assignments_client to the library interface so the other
+      projects can use this module as a stable library without any
+      maintenance changes.

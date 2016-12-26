@@ -96,28 +96,6 @@ class ContainerClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return resp, body
 
-    def list_all_container_objects(self, container, params=None):
-        """Returns complete list of all objects in the container
-
-        even if item count is beyond 10,000 item listing limit.
-        Does not require any parameters aside from container name.
-        """
-        # TODO(dwalleck): Rewrite using json format to avoid newlines at end of
-        # obj names. Set limit to API limit - 1 (max returned items = 9999)
-        limit = 9999
-        if params is not None:
-            if 'limit' in params:
-                limit = params['limit']
-
-            if 'marker' in params:
-                limit = params['marker']
-
-        resp, objlist = self.list_container_contents(
-            container,
-            params={'limit': limit, 'format': 'json'})
-        self.expected_success(200, resp.status)
-        return objlist
-
     def list_container_contents(self, container, params=None):
         """List the objects in a container, given the container name
 

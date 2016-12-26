@@ -20,7 +20,7 @@ import six
 from tempest.lib import exceptions
 from tempest.services.object_storage import object_client
 from tempest.tests import base
-from tempest.tests import fake_auth_provider
+from tempest.tests.lib import fake_auth_provider
 
 
 class TestObjectClient(base.TestCase):

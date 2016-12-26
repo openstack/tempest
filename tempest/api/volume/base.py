@@ -17,8 +17,8 @@ from tempest.common import compute
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -73,6 +73,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             cls.volumes_extension_client = cls.os.volumes_extension_client
             cls.availability_zone_client = (
                 cls.os.volume_availability_zone_client)
+            cls.volume_limits_client = cls.os.volume_limits_client
         else:
             cls.snapshots_client = cls.os.snapshots_v2_client
             cls.volumes_client = cls.os.volumes_v2_client
@@ -80,6 +81,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             cls.volumes_extension_client = cls.os.volumes_v2_extension_client
             cls.availability_zone_client = (
                 cls.os.volume_v2_availability_zone_client)
+            cls.volume_limits_client = cls.os.volume_v2_limits_client
 
     @classmethod
     def resource_setup(cls):
@@ -108,29 +110,57 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         super(BaseVolumeTest, cls).resource_cleanup()
 
     @classmethod
-    def create_volume(cls, **kwargs):
-        """Wrapper utility that returns a test volume."""
-        name = data_utils.rand_name(cls.__name__ + '-Volume')
+    def create_volume(cls, wait_until='available', **kwargs):
+        """Wrapper utility that returns a test volume.
+
+           :param wait_until: wait till volume status.
+        """
+        if 'size' not in kwargs:
+            kwargs['size'] = CONF.volume.volume_size
+
+        if 'imageRef' in kwargs:
+            image = cls.compute_images_client.show_image(
+                kwargs['imageRef'])['image']
+            min_disk = image.get('minDisk')
+            kwargs['size'] = max(kwargs['size'], min_disk)
 
         name_field = cls.special_fields['name_field']
+        if name_field not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + '-Volume')
+            kwargs[name_field] = name
 
-        kwargs[name_field] = name
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
-
         cls.volumes.append(volume)
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_status(cls.volumes_client, volume['id'],
+                                       wait_until)
         return volume
 
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
+        name_field = cls.special_fields['name_field']
+        if name_field not in kwargs:
+            name = data_utils.rand_name(cls.__name__ + '-Snapshot')
+            kwargs[name_field] = name
+
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
         cls.snapshots.append(snapshot)
         waiters.wait_for_snapshot_status(cls.snapshots_client,
                                          snapshot['id'], 'available')
         return snapshot
+
+    def create_backup(self, volume_id, backup_client=None, **kwargs):
+        """Wrapper utility that returns a test backup."""
+        if backup_client is None:
+            backup_client = self.backups_client
+
+        backup = backup_client.create_backup(
+            volume_id=volume_id, **kwargs)['backup']
+        self.addCleanup(backup_client.delete_backup, backup['id'])
+        waiters.wait_for_backup_status(backup_client, backup['id'],
+                                       'available')
+        return backup
 
     # NOTE(afazekas): these create_* and clean_* could be defined
     # only in a single location in the source, and could be more general.
@@ -140,6 +170,18 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         """Delete volume by the given client"""
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
+
+    def attach_volume(self, server_id, volume_id):
+        """Attachs a volume to a server"""
+        self.servers_client.attach_volume(
+            server_id, volumeId=volume_id,
+            device='/dev/%s' % CONF.compute.volume_device_name)
+        waiters.wait_for_volume_status(self.volumes_client,
+                                       volume_id, 'in-use')
+        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
+                        volume_id, 'available')
+        self.addCleanup(self.servers_client.detach_volume, server_id,
+                        volume_id)
 
     @classmethod
     def clear_volumes(cls):
@@ -158,25 +200,31 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def clear_snapshots(cls):
         for snapshot in cls.snapshots:
-            try:
-                cls.snapshots_client.delete_snapshot(snapshot['id'])
-            except Exception:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.snapshots_client.delete_snapshot, snapshot['id'])
 
         for snapshot in cls.snapshots:
-            try:
-                cls.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-            except Exception:
-                pass
+            test_utils.call_and_ignore_notfound_exc(
+                cls.snapshots_client.wait_for_resource_deletion,
+                snapshot['id'])
 
-    @classmethod
-    def create_server(cls, name, **kwargs):
-        tenant_network = cls.get_tenant_network()
+    def create_server(self, **kwargs):
+        name = kwargs.pop(
+            'name',
+            data_utils.rand_name(self.__class__.__name__ + '-instance'))
+
+        tenant_network = self.get_tenant_network()
         body, _ = compute.create_test_server(
-            cls.os,
+            self.os,
             tenant_network=tenant_network,
             name=name,
             **kwargs)
+
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        waiters.wait_for_server_termination,
+                        self.servers_client, body['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.servers_client.delete_server, body['id'])
         return body
 
 
@@ -198,7 +246,10 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_hosts_client = cls.os_adm.volume_hosts_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_client
             cls.admin_backups_client = cls.os_adm.backups_client
+            cls.admin_encryption_types_client = \
+                cls.os_adm.encryption_types_client
             cls.admin_quotas_client = cls.os_adm.volume_quotas_client
+            cls.admin_volume_limits_client = cls.os_adm.volume_limits_client
         elif cls._api_version == 2:
             cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
             cls.admin_volume_services_client = \
@@ -208,7 +259,14 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
             cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
             cls.admin_backups_client = cls.os_adm.backups_v2_client
+            cls.admin_encryption_types_client = \
+                cls.os_adm.encryption_types_v2_client
             cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
+            cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
+            cls.admin_capabilities_client = \
+                cls.os_adm.volume_capabilities_v2_client
+            cls.admin_scheduler_stats_client = \
+                cls.os_adm.volume_scheduler_stats_v2_client
 
     @classmethod
     def resource_setup(cls):
@@ -259,9 +317,6 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                 cls.admin_volume_types_client.delete_volume_type, vol_type)
 
         for vol_type in cls.volume_types:
-            # Resource dictionary uses for is_resource_deleted method,
-            # to distinguish between volume-type to encryption-type.
-            resource = {'id': vol_type, 'type': 'volume-type'}
             test_utils.call_and_ignore_notfound_exc(
                 cls.admin_volume_types_client.wait_for_resource_deletion,
-                resource)
+                vol_type)

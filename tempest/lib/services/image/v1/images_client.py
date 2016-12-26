@@ -34,8 +34,7 @@ class ImagesClient(rest_client.RestClient):
         data = iter(functools.partial(data.read, CHUNKSIZE), b'')
         resp, body = self.request('POST', 'images',
                                   headers=headers, body=data, chunked=True)
-        self._error_checker('POST', 'images', headers, data, resp,
-                            body)
+        self._error_checker(resp, body)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
@@ -47,8 +46,7 @@ class ImagesClient(rest_client.RestClient):
         url = 'images/%s' % image_id
         resp, body = self.request('PUT', url, headers=headers,
                                   body=data, chunked=True)
-        self._error_checker('PUT', url, headers, data,
-                            resp, body)
+        self._error_checker(resp, body)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
@@ -61,8 +59,9 @@ class ImagesClient(rest_client.RestClient):
     def create_image(self, data=None, headers=None):
         """Create an image.
 
-        Available params: http://developer.openstack.org/
-                          api-ref-image-v1.html#createImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-image-v1.html#createImage-v1
         """
         if headers is None:
             headers = {}
@@ -78,8 +77,9 @@ class ImagesClient(rest_client.RestClient):
     def update_image(self, image_id, data=None, headers=None):
         """Update an image.
 
-        Available params: http://developer.openstack.org/
-                          api-ref-image-v1.html#updateImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-image-v1.html#updateImage-v1
         """
         if headers is None:
             headers = {}
@@ -102,8 +102,9 @@ class ImagesClient(rest_client.RestClient):
     def list_images(self, detail=False, **kwargs):
         """Return a list of all images filtered by input parameters.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-image-v1.html#listImage-v1
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/image/v1/#list-images
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -114,7 +115,7 @@ class ImagesClient(rest_client.RestClient):
         if detail:
             url += '/detail'
 
-        if kwargs.get('changes_since'):
+        if 'changes_since' in kwargs:
             kwargs['changes-since'] = kwargs.pop('changes_since')
 
         if len(kwargs) > 0:

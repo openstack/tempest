@@ -44,7 +44,7 @@ class AgentsClient(base.BaseNetworkClient):
         # link to api-site.
         # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526670
         uri = '/agents/%s/l3-routers' % agent_id
-        return self.create_resource(uri, kwargs)
+        return self.create_resource(uri, kwargs, expect_empty_body=True)
 
     def delete_router_from_l3_agent(self, agent_id, router_id):
         uri = '/agents/%s/l3-routers/%s' % (agent_id, router_id)
@@ -65,4 +65,4 @@ class AgentsClient(base.BaseNetworkClient):
         # link to api-site.
         # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526212
         uri = '/agents/%s/dhcp-networks' % agent_id
-        return self.create_resource(uri, kwargs)
+        return self.create_resource(uri, kwargs, expect_empty_body=True)

@@ -42,12 +42,6 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success(201, resp.status)
         return resp, body
 
-    def update_object(self, container, object_name, data):
-        """Upload data to replace current storage object."""
-        resp, body = self.create_object(container, object_name, data)
-        self.expected_success(201, resp.status)
-        return resp, body
-
     def delete_object(self, container, object_name, params=None):
         """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
@@ -170,7 +164,7 @@ class ObjectClient(rest_client.RestClient):
             chunked=True
         )
 
-        self._error_checker('PUT', None, headers, contents, resp, body)
+        self._error_checker(resp, body)
         self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp
 
@@ -201,7 +195,6 @@ class ObjectClient(rest_client.RestClient):
 
         # Read the 100 status prior to sending the data
         response = conn.response_class(conn.sock,
-                                       strict=conn.strict,
                                        method=conn._method)
         _, status, _ = response._read_status()
 

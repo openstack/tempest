@@ -21,10 +21,10 @@ import six
 import yaml
 
 from tempest import clients
-from tempest.common import cred_provider
 from tempest.common import fixed_network
 from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def read_accounts_yaml(path):
         with open(path, 'r') as yaml_file:
             accounts = yaml.load(yaml_file)
     except IOError:
-        raise exceptions.InvalidConfiguration(
+        raise lib_exc.InvalidConfiguration(
             'The path for the test accounts file: %s '
             'could not be found' % path)
     return accounts
@@ -304,7 +304,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         if exist_creds and not force_new:
             return exist_creds
         elif exist_creds and force_new:
-            new_index = six.text_type(roles).encode('utf-8') + '-' + \
+            # NOTE(andreaf) In py3.x encode returns bytes, and b'' is bytes
+            # In py2.7 encode returns strings, and b'' is still string
+            new_index = six.text_type(roles).encode('utf-8') + b'-' + \
                 six.text_type(len(self._creds)).encode('utf-8')
             self._creds[new_index] = exist_creds
         net_creds = self._get_creds(roles=roles)

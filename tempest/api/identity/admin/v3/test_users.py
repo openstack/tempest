@@ -15,9 +15,15 @@
 
 import time
 
+import testtools
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+
+CONF = config.CONF
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
@@ -130,7 +136,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(
                 self.projects_client.delete_project, project_body['id'])
             # Assigning roles to user on project
-            self.roles_client.assign_user_role_on_project(project['id'],
+            self.roles_client.create_user_role_on_project(project['id'],
                                                           user['id'],
                                                           role['id'])
             assigned_project_ids.append(project['id'])
@@ -152,3 +158,30 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         user = self.setup_test_user()
         fetched_user = self.users_client.show_user(user['id'])['user']
         self.assertEqual(user['id'], fetched_user['id'])
+
+    @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
+                          'Security compliance not available.')
+    @test.idempotent_id('568cd46c-ee6c-4ab4-a33a-d3791931979e')
+    def test_password_history_not_enforced_in_admin_reset(self):
+        old_password = self.os.credentials.password
+        user_id = self.os.credentials.user_id
+
+        new_password = data_utils.rand_password()
+        self.users_client.update_user(user_id, password=new_password)
+        # To be safe, we add this cleanup to restore the original password in
+        # case something goes wrong before it is restored later.
+        self.addCleanup(
+            self.users_client.update_user, user_id, password=old_password)
+
+        # Check authorization with new password
+        self.token.auth(user_id=user_id, password=new_password)
+
+        if CONF.identity.user_unique_last_password_count > 1:
+            # The password history is not enforced via the admin reset route.
+            # We can set the same password.
+            self.users_client.update_user(user_id, password=new_password)
+
+        # Restore original password
+        self.users_client.update_user(user_id, password=old_password)
+        # Check authorization with old password
+        self.token.auth(user_id=user_id, password=old_password)

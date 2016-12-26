@@ -46,7 +46,7 @@ def _get_config_file():
     conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
     conf_file = os.environ.get('TEMPEST_CONFIG', default_config_file)
     path = os.path.join(conf_dir, conf_file)
-    fd = open(path, 'rw')
+    fd = open(path, 'r+')
     return fd
 
 
@@ -169,7 +169,7 @@ def get_extension_client(os, service):
         'nova': os.extensions_client,
         'cinder': os.volumes_extension_client,
         'neutron': os.network_extensions_client,
-        'swift': os.account_client,
+        'swift': os.capabilities_client,
     }
     # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated
     if CONF.volume_feature_enabled.api_v2:
@@ -201,7 +201,7 @@ def verify_extensions(os, service, results):
     if service != 'swift':
         resp = extensions_client.list_extensions()
     else:
-        __, resp = extensions_client.list_extensions()
+        __, resp = extensions_client.list_capabilities()
     # For Nova, Cinder and Neutron we use the alias name rather than the
     # 'name' field because the alias is considered to be the canonical
     # name.
@@ -286,7 +286,6 @@ def check_service_availability(os, update):
         'object_storage': 'swift',
         'compute': 'nova',
         'orchestration': 'heat',
-        'data_processing': 'sahara',
         'baremetal': 'ironic',
         'identity': 'keystone',
     }
@@ -370,10 +369,9 @@ def main(opts=None):
     replace = opts.replace_ext
     global CONF_PARSER
 
-    outfile = sys.stdout
     if update:
         conf_file = _get_config_file()
-        CONF_PARSER = moves.configparser.SafeConfigParser()
+        CONF_PARSER = moves.configparser.ConfigParser()
         CONF_PARSER.optionxform = str
         CONF_PARSER.readfp(conf_file)
 

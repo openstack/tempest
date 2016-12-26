@@ -19,11 +19,11 @@ from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
-class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
+class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setup_clients(cls):
-        super(ImagesMetadataTestJSON, cls).setup_clients()
+        super(ImagesMetadataNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
 
     @test.attr(type=['negative'])

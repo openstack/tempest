@@ -19,7 +19,9 @@ import random
 import string
 import uuid
 
+from debtcollector import removals
 from oslo_utils import netutils
+from oslo_utils import uuidutils
 import six.moves
 
 
@@ -29,7 +31,7 @@ def rand_uuid():
     :return: a random UUID (e.g. '1dc12c7d-60eb-4b61-a7a2-17cf210155b6')
     :rtype: string
     """
-    return str(uuid.uuid4())
+    return uuidutils.generate_uuid()
 
 
 def rand_uuid_hex():
@@ -153,7 +155,7 @@ def arbitrary_string(size=4, base_text=None):
 
     This generates a string with an arbitrary number of characters, generated
     by looping the base_text string. If the size is smaller than the size of
-    base_text, returning string is shrinked to the size.
+    base_text, returning string is shrunk to the size.
     :param int size: a returning characters size
     :param str base_text: a string you want to repeat
     :return: size string
@@ -171,10 +173,14 @@ def random_bytes(size=1024):
     :return: size randomly bytes
     :rtype: string
     """
-    return ''.join([chr(random.randint(0, 255))
+    return b''.join([six.int2byte(random.randint(0, 255))
                     for i in range(size)])
 
 
+@removals.remove(
+    message="use get_ipv6_addr_by_EUI64 from oslo_utils.netutils",
+    version="Newton",
+    removal_version="Ocata")
 def get_ipv6_addr_by_EUI64(cidr, mac):
     """Generate a IPv6 addr by EUI-64 with CIDR and MAC
 
@@ -204,5 +210,5 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
 # Courtesy of http://stackoverflow.com/a/312464
 def chunkify(sequence, chunksize):
     """Yield successive chunks from `sequence`."""
-    for i in six.moves.xrange(0, len(sequence), chunksize):
+    for i in range(0, len(sequence), chunksize):
         yield sequence[i:i + chunksize]

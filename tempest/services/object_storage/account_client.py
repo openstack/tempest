@@ -144,13 +144,3 @@ class AccountClient(rest_client.RestClient):
             body = body.strip().splitlines()
         self.expected_success([200, 204], resp.status)
         return resp, body
-
-    def list_extensions(self):
-        self.skip_path()
-        try:
-            resp, body = self.get('info')
-        finally:
-            self.reset_path()
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return resp, body

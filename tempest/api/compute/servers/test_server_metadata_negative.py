@@ -25,15 +25,12 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServerMetadataNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.quotas = cls.quotas_client
 
     @classmethod
     def resource_setup(cls):
         super(ServerMetadataNegativeTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
-        server = cls.create_test_server(metadata={}, wait_until='ACTIVE')
-
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(metadata={}, wait_until='ACTIVE')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('fe114a8f-3a57-4eff-9ee2-4e14628df049')
@@ -87,7 +84,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'testkey': 'testvalue'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata_item,
-                          self.server_id, 'key', meta)
+                          self.server['id'], 'key', meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0df38c2a-3d4e-4db5-98d8-d4d9fa843a12')
@@ -118,7 +115,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.update_server_metadata,
-                          self.server_id, meta=meta)
+                          self.server['id'], meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6bbd88e1-f8b3-424d-ba10-ae21c45ada8d')
@@ -136,7 +133,8 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
-        quota_set = self.quotas.show_quota_set(self.tenant_id)['quota_set']
+        quota_set = self.quotas_client.show_quota_set(
+            self.tenant_id)['quota_set']
         quota_metadata = quota_set['metadata_items']
         if quota_metadata == -1:
             raise self.skipException("No limit for metadata_items")
@@ -146,14 +144,14 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
             req_metadata['key' + str(num)] = 'val' + str(num)
         self.assertRaises((lib_exc.OverLimit, lib_exc.Forbidden),
                           self.client.set_server_metadata,
-                          self.server_id, req_metadata)
+                          self.server['id'], req_metadata)
 
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
         # tenant.
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.update_server_metadata,
-                          self.server_id, req_metadata)
+                          self.server['id'], req_metadata)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('96100343-7fa9-40d8-80fa-d29ef588ce1c')
@@ -163,7 +161,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,
-                          self.server_id, meta=meta)
+                          self.server['id'], meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('64a91aee-9723-4863-be44-4c9d9f1e7d0e')
@@ -173,4 +171,4 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'meta1': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,
-                          self.server_id, meta=meta, no_metadata_field=True)
+                          self.server['id'], meta=meta, no_metadata_field=True)

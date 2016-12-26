@@ -17,7 +17,8 @@ import netaddr
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
+from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -54,12 +55,6 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
                 raise exceptions.InvalidConfiguration(msg)
         return
 
-    def _delete_floating_ips_bulk(self, ip_range):
-        try:
-            self.client.delete_floating_ips_bulk(ip_range)
-        except Exception:
-            pass
-
     @test.idempotent_id('2c8f145f-8012-4cb8-ac7e-95a587f0e4ab')
     @test.services('network')
     def test_create_list_delete_floating_ips_bulk(self):
@@ -73,7 +68,8 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                      pool,
                                                      interface)
                 ['floating_ips_bulk_create'])
-        self.addCleanup(self._delete_floating_ips_bulk, self.ip_range)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_floating_ips_bulk, self.ip_range)
         self.assertEqual(self.ip_range, body['ip_range'])
         ips_list = self.client.list_floating_ips_bulk()['floating_ip_info']
         self.assertNotEqual(0, len(ips_list))

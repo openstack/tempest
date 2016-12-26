@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
+import six
 
 from tempest.api.image import base
 from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -49,22 +49,21 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         # Register, then upload an image
         properties = {'prop1': 'val1'}
         container_format, disk_format = get_container_and_disk_format()
-        body = self.create_image(name='New Name',
-                                 container_format=container_format,
-                                 disk_format=disk_format,
-                                 is_public=False,
-                                 properties=properties)
-        self.assertIn('id', body)
-        image_id = body.get('id')
-        self.assertEqual('New Name', body.get('name'))
-        self.assertFalse(body.get('is_public'))
-        self.assertEqual('queued', body.get('status'))
+        image = self.create_image(name='New Name',
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  is_public=False,
+                                  properties=properties)
+        self.assertIn('id', image)
+        self.assertEqual('New Name', image.get('name'))
+        self.assertFalse(image.get('is_public'))
+        self.assertEqual('queued', image.get('status'))
         for key, val in properties.items():
-            self.assertEqual(val, body.get('properties')[key])
+            self.assertEqual(val, image.get('properties')[key])
 
         # Now try uploading an image file
-        image_file = moves.cStringIO(data_utils.random_bytes())
-        body = self.client.update_image(image_id, data=image_file)['image']
+        image_file = six.BytesIO(data_utils.random_bytes())
+        body = self.client.update_image(image['id'], data=image_file)['image']
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
 
@@ -89,16 +88,15 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
     @test.idempotent_id('6d0e13a7-515b-460c-b91f-9f4793f09816')
     def test_register_http_image(self):
         container_format, disk_format = get_container_and_disk_format()
-        body = self.create_image(name='New Http Image',
-                                 container_format=container_format,
-                                 disk_format=disk_format, is_public=False,
-                                 copy_from=CONF.image.http_image)
-        self.assertIn('id', body)
-        image_id = body.get('id')
-        self.assertEqual('New Http Image', body.get('name'))
-        self.assertFalse(body.get('is_public'))
-        waiters.wait_for_image_status(self.client, image_id, 'active')
-        self.client.show_image(image_id)
+        image = self.create_image(name='New Http Image',
+                                  container_format=container_format,
+                                  disk_format=disk_format, is_public=False,
+                                  copy_from=CONF.image.http_image)
+        self.assertIn('id', image)
+        self.assertEqual('New Http Image', image.get('name'))
+        self.assertFalse(image.get('is_public'))
+        waiters.wait_for_image_status(self.client, image['id'], 'active')
+        self.client.show_image(image['id'])
 
     @test.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
@@ -188,8 +186,7 @@ class ListImagesTest(base.BaseV1ImageTest):
                                  disk_format=disk_format,
                                  is_public=False,
                                  location=location)
-        image_id = image['id']
-        return image_id
+        return image['id']
 
     @classmethod
     def _create_standard_image(cls, name, container_format,
@@ -199,14 +196,13 @@ class ListImagesTest(base.BaseV1ImageTest):
         Note that the size of the new image is a random number between
         1024 and 4096
         """
-        image_file = moves.cStringIO(data_utils.random_bytes(size))
+        image_file = six.BytesIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,
                                  disk_format=disk_format,
                                  is_public=False, data=image_file)
-        image_id = image['id']
-        return image_id
+        return image['id']
 
     @test.idempotent_id('246178ab-3b33-4212-9a4b-a7fe8261794d')
     def test_index_no_params(self):
@@ -242,7 +238,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     def test_index_max_size(self):
         images_list = self.client.list_images(size_max=42)['images']
         for image in images_list:
-            self.assertTrue(image['size'] <= 42)
+            self.assertLessEqual(image['size'], 42)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size42_set <= result_set)
         self.assertFalse(self.created_set - self.size42_set <= result_set)
@@ -251,7 +247,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     def test_index_min_size(self):
         images_list = self.client.list_images(size_min=142)['images']
         for image in images_list:
-            self.assertTrue(image['size'] >= 142)
+            self.assertGreaterEqual(image['size'], 142)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.size142_set <= result_set)
         self.assertFalse(self.size42_set <= result_set)
@@ -265,7 +261,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         top_size = images_list[0]['size']  # We have non-zero sized images
         for image in images_list:
             size = image['size']
-            self.assertTrue(size <= top_size)
+            self.assertLessEqual(size, top_size)
             top_size = size
             self.assertEqual(image['status'], 'active')
 
@@ -294,15 +290,14 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
                                disk_format, size):
         """Create a new standard image and return newly-registered image-id"""
 
-        image_file = moves.cStringIO(data_utils.random_bytes(size))
+        image_file = six.BytesIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         image = cls.create_image(name=name,
                                  container_format=container_format,
                                  disk_format=disk_format,
                                  is_public=False, data=image_file,
                                  properties={'key1': 'value1'})
-        image_id = image['id']
-        return image_id
+        return image['id']
 
     @test.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Define the v1 and v2 types_client clients for the volume service as
+    library interfaces, allowing other projects to use these modules as
+    stable libraries without maintenance changes.

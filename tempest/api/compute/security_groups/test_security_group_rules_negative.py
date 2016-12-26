@@ -23,7 +23,8 @@ CONF = config.CONF
 
 
 def not_existing_id():
-    if CONF.service_available.neutron:
+    if (CONF.service_available.neutron and
+        test.is_extension_enabled('security-group', 'network')):
         return data_utils.rand_uuid()
     else:
         return data_utils.rand_int_id(start=999)
@@ -34,7 +35,6 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupRulesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.security_groups_client
         cls.rules_client = cls.security_group_rules_client
 
     @test.attr(type=['negative'])

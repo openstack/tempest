@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
+import six
 
 from tempest.common import image as common_image
 from tempest.common.utils import data_utils
@@ -60,7 +60,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         """Wrapper that returns a test image."""
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + "-instance")
+            name = data_utils.rand_name(cls.__name__ + "-image")
             kwargs['name'] = name
 
         params = cls._get_create_params(**kwargs)
@@ -118,13 +118,12 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         cls.alt_tenant_id = cls.alt_image_member_client.tenant_id
 
     def _create_image(self):
-        image_file = moves.cStringIO(data_utils.random_bytes())
+        image_file = six.BytesIO(data_utils.random_bytes())
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   is_public=False,
                                   data=image_file)
-        image_id = image['id']
-        return image_id
+        return image['id']
 
 
 class BaseV2ImageTest(BaseImageTest):
@@ -142,7 +141,20 @@ class BaseV2ImageTest(BaseImageTest):
         cls.client = cls.os.image_client_v2
         cls.namespaces_client = cls.os.namespaces_client
         cls.resource_types_client = cls.os.resource_types_client
+        cls.namespace_properties_client = cls.os.namespace_properties_client
         cls.schemas_client = cls.os.schemas_client
+
+    def create_namespace(cls, namespace_name=None, visibility='public',
+                         description='Tempest', protected=False,
+                         **kwargs):
+        if not namespace_name:
+            namespace_name = data_utils.rand_name('test-ns')
+        kwargs.setdefault('display_name', namespace_name)
+        namespace = cls.namespaces_client.create_namespace(
+            namespace=namespace_name, visibility=visibility,
+            description=description, protected=protected, **kwargs)
+        cls.addCleanup(cls.namespaces_client.delete_namespace, namespace_name)
+        return namespace
 
 
 class BaseV2MemberImageTest(BaseV2ImageTest):
@@ -171,9 +183,8 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         image = self.client.create_image(name=name,
                                          container_format='bare',
                                          disk_format='raw')
-        image_id = image['id']
-        self.addCleanup(self.client.delete_image, image_id)
-        return image_id
+        self.addCleanup(self.client.delete_image, image['id'])
+        return image['id']
 
 
 class BaseV1ImageAdminTest(BaseImageTest):

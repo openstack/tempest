@@ -48,6 +48,8 @@ def is_in_openstack_namespace(proj):
 
 
 def has_tempest_plugin(proj):
+    if proj.startswith('openstack/deb-'):
+        return False
     r = requests.get(
         "https://git.openstack.org/cgit/%s/plain/setup.cfg" % proj)
     p = re.compile('^tempest\.test_plugins', re.M)

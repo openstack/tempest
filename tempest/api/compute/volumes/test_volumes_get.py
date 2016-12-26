@@ -54,8 +54,8 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
-        self.assertTrue(volume['id'] is not None,
-                        "Field volume id is empty or not found.")
+        self.assertIsNotNone(volume['id'],
+                             "Field volume id is empty or not found.")
         # Wait for Volume status to become ACTIVE
         waiters.wait_for_volume_status(self.client, volume['id'], 'available')
         # GET Volume

@@ -17,8 +17,8 @@ from tempest import clients
 from tempest.common import dynamic_creds
 from tempest.common import preprov_creds
 from tempest import config
-from tempest import exceptions
 from tempest.lib import auth
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -80,6 +80,16 @@ def get_credentials_provider(name, network_resources=None,
             network_resources=network_resources,
             identity_version=identity_version,
             admin_creds=admin_creds,
+            identity_admin_domain_scope=CONF.identity.admin_domain_scope,
+            identity_admin_role=CONF.identity.admin_role,
+            extra_roles=CONF.auth.tempest_roles,
+            neutron_available=CONF.service_available.neutron,
+            project_network_cidr=CONF.network.project_network_cidr,
+            project_network_mask_bits=CONF.network.project_network_mask_bits,
+            public_network_id=CONF.network.public_network_id,
+            create_networks=(CONF.auth.create_isolated_networks and not
+                             CONF.network.shared_physical_network),
+            resource_prefix=CONF.resources_prefix,
             **get_dynamic_provider_params())
     else:
         if CONF.auth.test_accounts_file:

@@ -25,7 +25,7 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         self.delete_router(router)
         self.routers.remove(router)
 
-    def _create_router(self, name, admin_state_up=False,
+    def _create_router(self, name=None, admin_state_up=False,
                        external_network_id=None, enable_snat=None):
         # associate a cleanup with created routers to avoid quota limits
         router = self.create_router(name, admin_state_up,

@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
 
@@ -29,25 +28,14 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
             raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
-    def setup_clients(cls):
-        super(SnapshotsActionsV2Test, cls).setup_clients()
-        cls.client = cls.snapshots_client
-
-    @classmethod
     def resource_setup(cls):
         super(SnapshotsActionsV2Test, cls).resource_setup()
 
         # Create a test shared volume for tests
-        vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
-        cls.name_field = cls.special_fields['name_field']
-        params = {cls.name_field: vol_name}
-        cls.volume = cls.create_volume(**params)
+        cls.volume = cls.create_volume()
 
         # Create a test shared snapshot for tests
-        snap_name = data_utils.rand_name(cls.__name__ + '-Snapshot')
-        params = {cls.name_field: snap_name}
-        cls.snapshot = cls.create_snapshot(
-            volume_id=cls.volume['id'], **params)
+        cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
 
     def tearDown(self):
         # Set snapshot's status to available after test
@@ -66,7 +54,7 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
                 reset_snapshot_status(temp_snapshot['id'], status)
         self.admin_snapshots_client.\
             force_delete_snapshot(temp_snapshot['id'])
-        self.client.wait_for_resource_deletion(temp_snapshot['id'])
+        self.snapshots_client.wait_for_resource_deletion(temp_snapshot['id'])
 
     def _get_progress_alias(self):
         return 'os-extended-snapshot-attributes:progress'
@@ -92,8 +80,9 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
         progress = '80%'
         status = 'error'
         progress_alias = self._get_progress_alias()
-        self.client.update_snapshot_status(self.snapshot['id'],
-                                           status=status, progress=progress)
+        self.snapshots_client.update_snapshot_status(self.snapshot['id'],
+                                                     status=status,
+                                                     progress=progress)
         snapshot_get = self.admin_snapshots_client.show_snapshot(
             self.snapshot['id'])['snapshot']
         self.assertEqual(status, snapshot_get['status'])

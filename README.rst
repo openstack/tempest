@@ -1,3 +1,13 @@
+========================
+Team and repository tags
+========================
+
+.. image:: http://governance.openstack.org/badges/tempest.svg
+    :target: http://governance.openstack.org/reference/tags/index.html
+    :remote:
+
+.. Change things from this point on
+
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
@@ -92,18 +102,18 @@ as it is simpler, and quicker to work with.
    be done using the :ref:`tempest_run` command. This can be done by either
    running::
 
-     $ tempest run
+    $ tempest run
 
    from the Tempest workspace directory. Or you can use the ``--workspace``
    argument to run in the workspace you created regarless of your current
    working directory. For example::
 
-     $ tempest run --workspace cloud-01
+    $ tempest run --workspace cloud-01
 
    There is also the option to use testr directly, or any `testr`_ based test
    runner, like `ostestr`_. For example, from the workspace dir run::
 
-     $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
+    $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
 
    will run the same set of tests as the default gate jobs.
 
@@ -124,6 +134,9 @@ For more details refer to the library documentation here: :ref:`library`
 
 Release Versioning
 ------------------
+`Tempest Release Notes <http://docs.openstack.org/releasenotes/tempest>`_
+shows what changes have been released on each version.
+
 Tempest's released versions are broken into 2 sets of information. Depending on
 how you intend to consume tempest you might need
 
@@ -158,9 +171,9 @@ Tempest. The etc/tempest.conf.sample attempts to be a self-documenting version
 of the configuration.
 
 You can generate a new sample tempest.conf file, run the following
-command from the top level of the Tempest directory:
+command from the top level of the Tempest directory::
 
-  tox -egenconfig
+    $ tox -egenconfig
 
 The most important pieces that are needed are the user ids, openstack
 endpoint, and basic flavors and images needed to run tests.
@@ -193,18 +206,18 @@ on an earlier release with python 2.6 you can easily run Tempest against it
 from a remote system running python 2.7. (or deploy a cloud guest in your cloud
 that has python 2.7)
 
-Python 3.4
+Python 3.x
 ----------
 
 Starting during the Liberty release development cycle work began on enabling
 Tempest to run under both Python 2.7 and Python 3.4. Tempest strives to fully
-support running with Python 3.4. A gating unit test job was added to also run
-Tempest's unit tests under Python 3.4. This means that the Tempest code at
-least imports under Python 3.4 and things that have unit test coverage will
-work on Python 3.4. However, because large parts of Tempest are self-verifying
-there might be uncaught issues running on Python 3.4. So until there is a gating
-job which does a full Tempest run using Python 3.4 there isn't any guarantee
-that running Tempest under Python 3.4 is bug free.
+support running with Python 3.4 and newer. A gating unit test job was added to
+also run Tempest's unit tests under Python 3. This means that the Tempest
+code at least imports under Python 3.4 and things that have unit test coverage
+will work on Python 3.4. However, because large parts of Tempest are
+self-verifying there might be uncaught issues running on Python 3. So until
+there is a gating job which does a full Tempest run using Python 3 there
+isn't any guarantee that running Tempest under Python 3 is bug free.
 
 Legacy run method
 -----------------
@@ -254,11 +267,11 @@ Alternatively, you can use the run_tempest.sh script which will create a venv
 and run the tests or use tox to do the same. Tox also contains several existing
 job configurations. For example::
 
-   $ tox -efull
+    $ tox -efull
 
 which will run the same set of tests as the OpenStack gate. (it's exactly how
 the gate invokes Tempest) Or::
 
-  $ tox -esmoke
+    $ tox -esmoke
 
 to run the tests tagged as smoke.

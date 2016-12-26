@@ -2,6 +2,7 @@ AUTHORS
 ChangeLog
 *.pyc
 __pycache__/
+etc/accounts.yaml
 etc/tempest.conf
 etc/tempest.conf.sample
 etc/logging.conf

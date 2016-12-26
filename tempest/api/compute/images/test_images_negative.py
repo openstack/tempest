@@ -39,7 +39,6 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ImagesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
-        cls.servers_client = cls.servers_client
 
     @test.attr(type=['negative'])
     @test.idempotent_id('6cd5a89d-5b47-46a7-93bc-3916f0d84973')
@@ -47,7 +46,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # An image should not be created if the server instance is removed
         server = self.create_test_server(wait_until='ACTIVE')
 
-        # Delete server before trying to create server
+        # Delete server before trying to create image
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Create a new image after server is deleted
@@ -64,8 +63,6 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a new image with invalid server id
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        resp = {}
-        resp['status'] = None
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
                           '!@$^&*()', name=name, meta=meta)
 
@@ -99,7 +96,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_non_existent_image(self):
         # Return an error while trying to delete a non-existent image
 
-        non_existent_image_id = '11a22b9-12a9-5555-cc11-00ab112223fa'
+        non_existent_image_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           non_existent_image_id)
 
@@ -113,9 +110,9 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('924540c3-f1f1-444c-8f58-718958b6724e')
     def test_delete_image_non_hex_string_id(self):
         # Return an error while trying to delete an image with non hex id
-        image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
+        invalid_image_id = data_utils.rand_uuid()[:-1] + "j"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          image_id)
+                          invalid_image_id)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('68e2c175-bd26-4407-ac0f-4ea9ce2139ea')
@@ -125,7 +122,8 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.idempotent_id('b340030d-82cd-4066-a314-c72fb7c59277')
-    def test_delete_image_id_is_over_35_character_limit(self):
+    def test_delete_image_with_id_over_character_limit(self):
         # Return an error while trying to delete image with id over limit
+        invalid_image_id = data_utils.rand_uuid() + "1"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
+                          invalid_image_id)

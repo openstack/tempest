@@ -1,0 +1,6 @@
+---
+deprecations:
+  - The *bootable* config option in the *volume_feature_enabled* group is
+    removed because the corresponding feature os-set_bootable has been
+    implemented 2.5 years ago and all OpenStack versions which are supported
+    by Tempest should support the feature.

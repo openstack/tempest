@@ -15,7 +15,6 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -45,7 +44,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
         # Create a network with a subnet connected to a router.
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router(data_utils.rand_name('router'))
+        cls.router = cls.create_router()
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.port = cls.create_port(cls.network)
 

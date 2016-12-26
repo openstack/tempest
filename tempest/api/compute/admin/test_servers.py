@@ -24,14 +24,11 @@ from tempest import test
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Servers API using admin privileges"""
 
-    _host_key = 'OS-EXT-SRV-ATTR:host'
-
     @classmethod
     def setup_clients(cls):
         super(ServersAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.servers_client
         cls.non_admin_client = cls.servers_client
-        cls.flavors_client = cls.os_adm.flavors_client
 
     @classmethod
     def resource_setup(cls):
@@ -46,13 +43,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
-
-    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
-    def test_list_servers_by_admin(self):
-        # Listing servers by admin user returns empty list by default
-        body = self.client.list_servers(detail=True)
-        servers = body['servers']
-        self.assertEqual([], servers)
 
     @test.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
@@ -77,6 +67,19 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         servers = body['servers']
         self.assertEqual([], servers)
 
+    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
+    def test_list_servers_by_admin(self):
+        # Listing servers by admin user returns a list which doesn't
+        # contain the other tenants' server by default
+        body = self.client.list_servers(detail=True)
+        servers = body['servers']
+
+        # This case is for the test environments which contain
+        # the existing servers before testing
+        servers_name = [server['name'] for server in servers]
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
+
     @test.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
@@ -98,14 +101,26 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = {'tenant_id': tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        self.assertEqual([], servers)
+        servers_name = map(lambda x: x['name'], servers)
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
 
-        # List the admin tenant which has no servers
+        # List the primary tenant with all_tenants is specified
+        params = {'all_tenants': '', 'tenant_id': tenant_id}
+        body = self.client.list_servers(detail=True, **params)
+        servers = body['servers']
+        servers_name = map(lambda x: x['name'], servers)
+        self.assertIn(self.s1_name, servers_name)
+        self.assertIn(self.s2_name, servers_name)
+
+        # List the admin tenant shouldn't get servers created by other tenants
         admin_tenant_id = self.client.tenant_id
         params = {'all_tenants': '', 'tenant_id': admin_tenant_id}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        self.assertEqual([], servers)
+        servers_name = map(lambda x: x['name'], servers)
+        self.assertNotIn(self.s1_name, servers_name)
+        self.assertNotIn(self.s2_name, servers_name)
 
     @test.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
@@ -121,7 +136,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.client.delete_server, test_server['id'])
         server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')
-        hostname = server[self._host_key]
+        hostname = server['OS-EXT-SRV-ATTR:host']
         params = {'host': hostname}
         body = self.client.list_servers(**params)
         servers = body['servers']

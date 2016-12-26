@@ -44,7 +44,7 @@ class VolumesV3Test(api_version_utils.BaseMicroversionTest,
     @classmethod
     def setup_clients(cls):
         super(VolumesV3Test, cls).setup_clients()
-        cls.messages_client = cls.os.volume_messages_client
+        cls.messages_client = cls.os.volume_v3_messages_client
 
     def setUp(self):
         super(VolumesV3Test, self).setUp()
@@ -52,7 +52,8 @@ class VolumesV3Test(api_version_utils.BaseMicroversionTest,
             self.request_microversion))
 
 
-class VolumesV3AdminTest(VolumesV3Test):
+class VolumesV3AdminTest(VolumesV3Test,
+                         base.BaseVolumeAdminTest):
     """Base test case class for all v3 Volume Admin API tests."""
 
     credentials = ['primary', 'admin']
@@ -60,5 +61,5 @@ class VolumesV3AdminTest(VolumesV3Test):
     @classmethod
     def setup_clients(cls):
         super(VolumesV3AdminTest, cls).setup_clients()
-        cls.admin_messages_client = cls.os_adm.volume_messages_client
+        cls.admin_messages_client = cls.os_adm.volume_v3_messages_client
         cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client

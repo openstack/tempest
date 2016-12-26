@@ -19,7 +19,6 @@ import time
 from oslo_log import log as logging
 
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common import ssh
 from tempest.lib.common.utils import test_utils
 import tempest.lib.exceptions
@@ -245,11 +244,22 @@ class RemoteClient(object):
         output = self.exec_command('grep -c ^processor /proc/cpuinfo')
         return int(output)
 
-    def get_partitions(self):
-        # Return the contents of /proc/partitions
-        command = 'cat /proc/partitions'
+    def get_disks(self):
+        # Select root disk devices as shown by lsblk
+        command = 'lsblk -lb --nodeps'
         output = self.exec_command(command)
-        return output
+        selected = []
+        pos = None
+        for l in output.splitlines():
+            if pos is None and l.find("TYPE") > 0:
+                pos = l.find("TYPE")
+                # Show header line too
+                selected.append(l)
+            # lsblk lists disk type in a column right-aligned with TYPE
+            elif pos > 0 and l[pos:pos + 4] == "disk":
+                selected.append(l)
+
+        return "\n".join(selected)
 
     def get_boot_time(self):
         cmd = 'cut -f1 -d. /proc/uptime'
@@ -349,8 +359,8 @@ class RemoteClient(object):
         supported_clients = ['udhcpc', 'dhclient']
         dhcp_client = CONF.scenario.dhcp_client
         if dhcp_client not in supported_clients:
-            raise exceptions.InvalidConfiguration('%s DHCP client unsupported'
-                                                  % dhcp_client)
+            raise tempest.lib.exceptions.InvalidConfiguration(
+                '%s DHCP client unsupported' % dhcp_client)
         if dhcp_client == 'udhcpc' and not fixed_ip:
             raise ValueError("need to set 'fixed_ip' for udhcpc client")
         return getattr(self, '_renew_lease_' + dhcp_client)(fixed_ip=fixed_ip)

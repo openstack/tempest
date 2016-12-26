@@ -40,13 +40,6 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
                                    'x-image-meta-disk_format': 'wrong'})
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('bb016f15-0820-4f27-a92d-09b2f67d2488')
-    def test_delete_image_with_invalid_image_id(self):
-        # An image should not be deleted with invalid image id
-        self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '!@$%^&*()')
-
-    @test.attr(type=['negative'])
     @test.idempotent_id('ec652588-7e3c-4b67-a2f2-0fa96f57c8fc')
     def test_delete_non_existent_image(self):
         # Return an error while trying to delete a non-existent image

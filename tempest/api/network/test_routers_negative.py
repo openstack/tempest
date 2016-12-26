@@ -36,7 +36,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @classmethod
     def resource_setup(cls):
         super(RoutersNegativeTest, cls).resource_setup()
-        cls.router = cls.create_router(data_utils.rand_name('router-'))
+        cls.router = cls.create_router()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.tenant_cidr = (CONF.network.project_network_cidr
@@ -55,8 +55,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('11836a18-0b15-4327-a50b-f0d9dc66bddd')
     def test_router_add_gateway_net_not_external_returns_400(self):
-        alt_network = self.create_network(
-            network_name=data_utils.rand_name('router-negative-'))
+        alt_network = self.create_network()
         sub_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
         self.create_subnet(alt_network, cidr=sub_cidr)
         self.assertRaises(lib_exc.BadRequest,
@@ -128,14 +127,12 @@ class DvrRoutersNegativeTest(base.BaseRouterTest):
     @classmethod
     def resource_setup(cls):
         super(DvrRoutersNegativeTest, cls).resource_setup()
-        cls.router = cls.create_router(data_utils.rand_name('router'))
+        cls.router = cls.create_router()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
     def test_router_create_tenant_distributed_returns_forbidden(self):
-        self.assertRaises(lib_exc.Forbidden,
-                          self.create_router,
-                          data_utils.rand_name('router'),
+        self.assertRaises(lib_exc.Forbidden, self.create_router,
                           distributed=True)

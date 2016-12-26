@@ -71,7 +71,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @test.attr(type='smoke')
     @test.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
-        # Verify the that security group belonging to project exist in list
+        # Verify the security group belonging to project exist in list
         body = self.security_groups_client.list_security_groups()
         security_groups = body['security_groups']
         found = None

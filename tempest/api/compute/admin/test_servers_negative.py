@@ -34,6 +34,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.servers_client
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
+        cls.quotas_client = cls.os_adm.quotas_client
 
     @classmethod
     def resource_setup(cls):
@@ -64,15 +65,15 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
-        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
-                     ['quota_set'])
+        quota_set = self.quotas_client.show_quota_set(
+            self.tenant_id)['quota_set']
         ram = int(quota_set['ram'])
         if ram == -1:
-            raise self.skipException("default ram quota set is -1,"
+            raise self.skipException("ram quota set is -1,"
                                      " cannot test overlimit")
         ram += 1
-        vcpus = 8
-        disk = 10
+        vcpus = 1
+        disk = 5
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
                                                        disk=disk,
@@ -92,15 +93,15 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         flavor_name = data_utils.rand_name("flavor")
         flavor_id = self._get_unused_flavor_id()
-        ram = 512
-        quota_set = (self.quotas_client.show_default_quota_set(self.tenant_id)
-                     ['quota_set'])
+        quota_set = self.quotas_client.show_quota_set(
+            self.tenant_id)['quota_set']
         vcpus = int(quota_set['cores'])
         if vcpus == -1:
-            raise self.skipException("default cores quota set is -1,"
+            raise self.skipException("cores quota set is -1,"
                                      " cannot test overlimit")
         vcpus += 1
-        disk = 10
+        ram = 512
+        disk = 5
         flavor_ref = self.flavors_client.create_flavor(name=flavor_name,
                                                        ram=ram, vcpus=vcpus,
                                                        disk=disk,

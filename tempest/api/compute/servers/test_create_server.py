@@ -19,7 +19,6 @@ import testtools
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
-from tempest.common import waiters
 from tempest import config
 from tempest import test
 
@@ -139,19 +138,15 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         hostname = linux_client.get_hostname()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
-        self.assertEqual(self.name, hostname, msg)
+        self.assertEqual(self.name.lower(), hostname, msg)
 
     @test.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
+    @testtools.skipUnless(
+        test.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
+        'ServerGroupAffinityFilter is not available.')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
-        name = data_utils.rand_name('server_group')
-        policies = ['affinity']
-        body = self.server_groups_client.create_server_group(
-            name=name, policies=policies)['server_group']
-        group_id = body['id']
-        self.addCleanup(self.server_groups_client.delete_server_group,
-                        group_id)
-
+        group_id = self.create_test_server_group()['id']
         hints = {'group': group_id}
         server = self.create_test_server(scheduler_hints=hints,
                                          wait_until='ACTIVE')
@@ -182,12 +177,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # when trying to delete the subnet. The tear down in the base class
         # will try to delete the server and get a 404 but it's ignored so
         # we're OK.
-        def cleanup_server():
-            self.client.delete_server(server_multi_nics['id'])
-            waiters.wait_for_server_termination(self.client,
-                                                server_multi_nics['id'])
-
-        self.addCleanup(cleanup_server)
+        self.addCleanup(self.delete_server, server_multi_nics['id'])
 
         addresses = (self.client.list_addresses(server_multi_nics['id'])
                      ['addresses'])
@@ -219,13 +209,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         server_multi_nics = self.create_test_server(
             networks=networks, wait_until='ACTIVE')
-
-        def cleanup_server():
-            self.client.delete_server(server_multi_nics['id'])
-            waiters.wait_for_server_termination(self.client,
-                                                server_multi_nics['id'])
-
-        self.addCleanup(cleanup_server)
+        self.addCleanup(self.delete_server, server_multi_nics['id'])
 
         addresses = (self.client.list_addresses(server_multi_nics['id'])
                      ['addresses'])
@@ -268,37 +252,19 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         flavor_base = self.flavors_client.show_flavor(
             self.flavor_ref)['flavor']
 
-        def create_flavor_with_extra_specs():
-            flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
-            flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
+        def create_flavor_with_ephemeral(ephem_disk):
+            flavor_id = data_utils.rand_int_id(start=1000)
+            name = 'flavor_with_ephemeral_%s' % ephem_disk
+            flavor_name = data_utils.rand_name(name)
 
             ram = flavor_base['ram']
             vcpus = flavor_base['vcpus']
             disk = flavor_base['disk']
 
-            # Create a flavor with extra specs
-            flavor = (self.flavor_client.
-                      create_flavor(name=flavor_with_eph_disk_name,
-                                    ram=ram, vcpus=vcpus, disk=disk,
-                                    id=flavor_with_eph_disk_id,
-                                    ephemeral=1))['flavor']
-            self.addCleanup(flavor_clean_up, flavor['id'])
-
-            return flavor['id']
-
-        def create_flavor_without_extra_specs():
-            flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
-            flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
-
-            ram = flavor_base['ram']
-            vcpus = flavor_base['vcpus']
-            disk = flavor_base['disk']
-
-            # Create a flavor without extra specs
-            flavor = (self.flavor_client.
-                      create_flavor(name=flavor_no_eph_disk_name,
-                                    ram=ram, vcpus=vcpus, disk=disk,
-                                    id=flavor_no_eph_disk_id))['flavor']
+            # Create a flavor with ephemeral disk
+            flavor = self.flavor_client.create_flavor(
+                name=flavor_name, ram=ram, vcpus=vcpus, disk=disk,
+                id=flavor_id, ephemeral=ephem_disk)['flavor']
             self.addCleanup(flavor_clean_up, flavor['id'])
 
             return flavor['id']
@@ -307,8 +273,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.flavor_client.delete_flavor(flavor_id)
             self.flavor_client.wait_for_resource_deletion(flavor_id)
 
-        flavor_with_eph_disk_id = create_flavor_with_extra_specs()
-        flavor_no_eph_disk_id = create_flavor_without_extra_specs()
+        flavor_with_eph_disk_id = create_flavor_with_ephemeral(ephem_disk=1)
+        flavor_no_eph_disk_id = create_flavor_with_ephemeral(ephem_disk=0)
 
         admin_pass = self.image_ssh_password
 
@@ -318,7 +284,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             adminPass=admin_pass,
             flavor=flavor_no_eph_disk_id)
 
-        # Get partition number of server without extra specs.
+        # Get partition number of server without ephemeral disk.
         server_no_eph_disk = self.client.show_server(
             server_no_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
@@ -328,7 +294,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.validation_resources['keypair']['private_key'],
             server=server_no_eph_disk,
             servers_client=self.client)
-        partition_num = len(linux_client.get_partitions().split('\n'))
+        disks_num = len(linux_client.get_disks().split('\n'))
 
         # Explicit server deletion necessary for Juno compatibility
         self.client.delete_server(server_no_eph_disk['id'])
@@ -348,8 +314,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             self.validation_resources['keypair']['private_key'],
             server=server_with_eph_disk,
             servers_client=self.client)
-        partition_num_emph = len(linux_client.get_partitions().split('\n'))
-        self.assertEqual(partition_num + 1, partition_num_emph)
+        disks_num_eph = len(linux_client.get_disks().split('\n'))
+        self.assertEqual(disks_num + 1, disks_num_eph)
 
 
 class ServersTestManualDisk(ServersTestJSON):

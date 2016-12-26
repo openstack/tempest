@@ -1,0 +1,6 @@
+---
+upgrade:
+  - Add an error translation to list_versions() of versions_client of both
+    compute and network. This can affect users who are expecting that these
+    clients return error status code instead of the exception. It is needed
+    to change the code for handling the exception like the other clients code.

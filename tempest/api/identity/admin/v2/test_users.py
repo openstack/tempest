@@ -234,4 +234,4 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Validate the updated password through getting a token.
         body = self.token_client.auth(user['name'], new_pass,
                                       tenant['name'])
-        self.assertTrue('id' in body['token'])
+        self.assertIn('id', body['token'])

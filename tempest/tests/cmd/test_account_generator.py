@@ -75,7 +75,7 @@ class MockHelpersMixin(object):
         fake_domain_list = {'domains': [{'id': 'fake_domain',
                                          'name': 'Fake_Domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
         self.useFixture(fixtures.MockPatch(
@@ -121,7 +121,7 @@ class TestAccountGeneratorV3(TestAccountGeneratorV2):
         super(TestAccountGeneratorV3, self).setUp()
         fake_domain_list = {'domains': [{'id': 'fake_domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
 
@@ -146,7 +146,7 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
     identity_response = fake_identity._fake_v2_response
-    cred_client = 'tempest.common.cred_client.V2CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
     dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
 
     def setUp(self):
@@ -245,7 +245,7 @@ class TestGenerateResourcesV3(TestGenerateResourcesV2):
 
     identity_version = 3
     identity_response = fake_identity._fake_v3_response
-    cred_client = 'tempest.common.cred_client.V3CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
 
     def setUp(self):
         self.mock_domains()
@@ -256,7 +256,7 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
     identity_response = fake_identity._fake_v2_response
-    cred_client = 'tempest.common.cred_client.V2CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
     dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
     domain_is_in = False
 
@@ -338,7 +338,7 @@ class TestDumpAccountsV3(TestDumpAccountsV2):
 
     identity_version = 3
     identity_response = fake_identity._fake_v3_response
-    cred_client = 'tempest.common.cred_client.V3CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
     domain_is_in = True
 
     def setUp(self):

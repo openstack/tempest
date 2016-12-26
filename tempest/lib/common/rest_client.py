@@ -235,8 +235,8 @@ class RestClient(object):
             raise TypeError("'read_code' must be an int instead of (%s)"
                             % type(read_code))
 
-        assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 7231 & 4918."
+        assert_msg = ("This function only allowed to use for HTTP status "
+                      "codes which explicitly defined in the RFC 7231 & 4918. "
                       "{0} is not a defined Success Code!"
                       ).format(expected_code)
         if isinstance(expected_code, list):
@@ -661,8 +661,7 @@ class RestClient(object):
             time.sleep(delay)
             resp, resp_body = self._request(method, url,
                                             headers=headers, body=body)
-        self._error_checker(method, url, headers, body,
-                            resp, resp_body)
+        self._error_checker(resp, resp_body)
         return resp, resp_body
 
     def _get_retry_after_delay(self, resp):
@@ -710,8 +709,7 @@ class RestClient(object):
             raise ValueError("Failed to parse date %s" % val)
         return time.mktime(parts)
 
-    def _error_checker(self, method, url,
-                       headers, body, resp, resp_body):
+    def _error_checker(self, resp, resp_body):
 
         # NOTE(mtreinish): Check for httplib response from glance_http. The
         # object can't be used here because importing httplib breaks httplib2.
@@ -893,11 +891,11 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response body is invalid (%s)") % ex
+                    msg = ("HTTP response body is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseBody(msg)
             else:
                 if body:
-                    msg = ("HTTP response body should not exist (%s)") % body
+                    msg = ("HTTP response body should not exist (%s)" % body)
                     raise exceptions.InvalidHTTPResponseBody(msg)
 
             # Check the header of a response
@@ -908,7 +906,7 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response header is invalid (%s)") % ex
+                    msg = ("HTTP response header is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseHeader(msg)
 
 

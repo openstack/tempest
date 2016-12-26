@@ -66,8 +66,8 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         cls.type = cls.create_volume_type(name=type_name,
                                           extra_specs=extra_specs)
 
-        params = {cls.name_field: vol_name, 'volume_type': type_name}
-
+        params = {cls.name_field: vol_name, 'volume_type': type_name,
+                  'size': CONF.volume.volume_size}
         cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']
         if with_prefix:
@@ -129,7 +129,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
                volume_id)
-        self.assertTrue(len(volume1_host.split("@")) > 1, msg)
+        self.assertGreater(len(volume1_host.split("@")), 1, msg)
 
     def _test_backend_name_distinction(self, volume_id_list):
         # this test checks that the volumes created at setUp don't

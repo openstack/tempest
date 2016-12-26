@@ -1,0 +1,3 @@
+---
+features:
+  - The volume_limits client was added to tempest.lib.

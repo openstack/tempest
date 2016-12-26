@@ -94,11 +94,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
         # Create server and add the security group created
         # above to the server we just created
-        server_name = data_utils.rand_name('server')
-        server = self.create_test_server(name=server_name)
+        server = self.create_test_server(wait_until='ACTIVE')
         server_id = server['id']
-        waiters.wait_for_server_status(self.servers_client, server_id,
-                                       'ACTIVE')
         self.servers_client.add_security_group(server_id, name=sg['name'])
 
         # Check that we are not able to delete the security

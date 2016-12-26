@@ -1,0 +1,5 @@
+---
+features:
+  - The cred_client module was added to tempest.lib. This module provides a
+    wrapper to the keystone services client which provides a uniform
+    interface that abstracts out the differences between keystone api versions.

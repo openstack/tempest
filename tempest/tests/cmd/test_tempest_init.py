@@ -137,3 +137,18 @@ class TestTempestInit(base.TestCase):
         self.assertTrue(os.path.isfile(fake_file_moved))
         self.assertTrue(os.path.isfile(local_conf_file))
         self.assertTrue(os.path.isfile(local_testr_conf))
+
+    def test_take_action_fails(self):
+        class ParsedArgs(object):
+            workspace_dir = self.useFixture(fixtures.TempDir()).path
+            workspace_path = os.path.join(workspace_dir, 'workspace.yaml')
+            name = 'test'
+            dir_base = self.useFixture(fixtures.TempDir()).path
+            dir = os.path.join(dir_base, 'foo', 'bar')
+            config_dir = self.useFixture(fixtures.TempDir()).path
+            show_global_dir = False
+        pa = ParsedArgs()
+        init_cmd = init.TempestInit(None, None)
+        self.assertRaises(OSError, init_cmd.take_action, pa)
+        # one more trying should be a same error not "workspace already exists"
+        self.assertRaises(OSError, init_cmd.take_action, pa)

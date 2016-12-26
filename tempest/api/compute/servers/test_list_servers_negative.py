@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest.lib import exceptions as lib_exc
@@ -38,18 +36,13 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # tearDownClass method of the super-class.
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
-        for x in moves.xrange(2):
+        for x in range(2):
             srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
-        srv = cls.create_test_server()
+        srv = cls.create_test_server(wait_until='ACTIVE')
         cls.client.delete_server(srv['id'])
-        # We ignore errors on termination because the server may
-        # be put into ERROR status on a quick spawn, then delete,
-        # as the compute node expects the instance local status
-        # to be spawning, not deleted. See LP Bug#1061167
-        waiters.wait_for_server_termination(cls.client, srv['id'],
-                                            ignore_error=True)
+        waiters.wait_for_server_termination(cls.client, srv['id'])
         cls.deleted_fixtures.append(srv)
 
     @test.attr(type=['negative'])
@@ -68,8 +61,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('ff01387d-c7ad-47b4-ae9e-64fa214638fe')
     def test_list_servers_by_non_existing_image(self):
         # Listing servers for a non existing image returns empty list
-        non_existing_image = '1234abcd-zzz0-aaa9-ppp3-0987654abcde'
-        body = self.client.list_servers(image=non_existing_image)
+        body = self.client.list_servers(image='non_existing_image')
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -77,8 +69,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('5913660b-223b-44d4-a651-a0fbfd44ca75')
     def test_list_servers_by_non_existing_flavor(self):
         # Listing servers by non existing flavor returns empty list
-        non_existing_flavor = 1234
-        body = self.client.list_servers(flavor=non_existing_flavor)
+        body = self.client.list_servers(flavor='non_existing_flavor')
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -86,8 +77,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('e2c77c4a-000a-4af3-a0bd-629a328bde7c')
     def test_list_servers_by_non_existing_server_name(self):
         # Listing servers for a non existent server name returns empty list
-        non_existing_name = 'junk_server_1234'
-        body = self.client.list_servers(name=non_existing_name)
+        body = self.client.list_servers(name='non_existing_server_name')
         servers = body['servers']
         self.assertEqual([], servers)
 
@@ -95,8 +85,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.idempotent_id('fcdf192d-0f74-4d89-911f-1ec002b822c4')
     def test_list_servers_status_non_existing(self):
         # Return an empty list when invalid status is specified
-        non_existing_status = 'BALONEY'
-        body = self.client.list_servers(status=non_existing_status)
+        body = self.client.list_servers(status='non_existing_status')
         servers = body['servers']
         self.assertEqual([], servers)
 

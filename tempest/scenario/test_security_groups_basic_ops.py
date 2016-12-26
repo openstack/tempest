@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from oslo_log import log
+import testtools
 
-from tempest import clients
 from tempest.common.utils import data_utils
+from tempest.common.utils import net_info
 from tempest import config
 from tempest.scenario import manager
 from tempest import test
@@ -111,9 +112,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             access point
         """
 
-        def __init__(self, credentials):
-            self.manager = clients.Manager(credentials)
+        def __init__(self, clients):
             # Credentials from manager are filled with both names and IDs
+            self.manager = clients
             self.creds = self.manager.credentials
             self.network = None
             self.subnet = None
@@ -129,9 +130,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(TestSecurityGroupsBasicOps, cls).skip_checks()
-        if CONF.baremetal.driver_enabled:
-            msg = ('Not currently supported by baremetal.')
-            raise cls.skipException(msg)
         if CONF.network.port_vnic_type in ['direct', 'macvtap']:
             msg = ('Not currently supported when using vnic_type'
                    ' direct or macvtap')
@@ -144,17 +142,16 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if not test.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
+        if CONF.network.shared_physical_network:
+            msg = ('Deployment uses a shared physical network, security '
+                   'groups not supported')
+            raise cls.skipException(msg)
 
     @classmethod
     def setup_credentials(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
         super(TestSecurityGroupsBasicOps, cls).setup_credentials()
-        # TODO(mnewby) Consider looking up entities as needed instead
-        # of storing them as collections on the class.
-
-        # Credentials from the manager are filled with both IDs and Names
-        cls.alt_creds = cls.alt_manager.credentials
 
     @classmethod
     def resource_setup(cls):
@@ -169,9 +166,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         cls.floating_ips = {}
         cls.tenants = {}
-        creds = cls.manager.credentials
-        cls.primary_tenant = cls.TenantProperties(creds)
-        cls.alt_tenant = cls.TenantProperties(cls.alt_creds)
+        cls.primary_tenant = cls.TenantProperties(cls.os)
+        cls.alt_tenant = cls.TenantProperties(cls.os_alt)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
             cls.tenants[tenant.creds.tenant_id] = tenant
 
@@ -246,17 +242,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         myport = (tenant.router['id'], tenant.subnet['id'])
         router_ports = [(i['device_id'], i['fixed_ips'][0]['subnet_id']) for i
                         in self._list_ports()
-                        if self._is_router_port(i)]
+                        if net_info.is_router_interface_port(i)]
 
         self.assertIn(myport, router_ports)
 
-    def _is_router_port(self, port):
-        """Return True if port is a router interface."""
-        # NOTE(armando-migliaccio): match device owner for both centralized
-        # and distributed routers; 'device_owner' is "" by default.
-        return port['device_owner'].startswith('network:router_interface')
-
-    def _create_server(self, name, tenant, security_groups=None, **kwargs):
+    def _create_server(self, name, tenant, security_groups, **kwargs):
         """Creates a server and assigns it to security group.
 
         If multi-host is enabled, Ensures servers are created on different
@@ -264,8 +254,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         as scheduler_hints on creation.
         Validates servers are created as requested, using admin client.
         """
-        if security_groups is None:
-            security_groups = [tenant.security_groups['default']]
         security_groups_names = [{'name': s['name']} for s in security_groups]
         if self.multi_node:
             kwargs["scheduler_hints"] = {'different_host': self.servers}
@@ -277,9 +265,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             wait_until='ACTIVE',
             clients=tenant.manager,
             **kwargs)
-        self.assertEqual(
-            sorted([s['name'] for s in security_groups]),
-            sorted([s['name'] for s in server['security_groups']]))
+        if 'security_groups' in server:
+            self.assertEqual(
+                sorted([s['name'] for s in security_groups]),
+                sorted([s['name'] for s in server['security_groups']]))
 
         # Verify servers are on different compute nodes
         if self.multi_node:
@@ -303,7 +292,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                    num=i
             )
             name = data_utils.rand_name(name)
-            server = self._create_server(name, tenant)
+            server = self._create_server(name, tenant,
+                                         [tenant.security_groups['default']])
             tenant.servers.append(server)
 
     def _set_access_point(self, tenant):
@@ -326,11 +316,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             client=tenant.manager.floating_ips_client)
         self.floating_ips.setdefault(server['id'], floating_ip)
 
-    def _create_tenant_network(self, tenant):
+    def _create_tenant_network(self, tenant, port_security_enabled=True):
         network, subnet, router = self.create_networks(
             networks_client=tenant.manager.networks_client,
             routers_client=tenant.manager.routers_client,
-            subnets_client=tenant.manager.subnets_client)
+            subnets_client=tenant.manager.subnets_client,
+            port_security_enabled=port_security_enabled)
         tenant.set_network(network, subnet, router)
 
     def _deploy_tenant(self, tenant_or_id):
@@ -533,7 +524,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                tenant=new_tenant.creds.tenant_name
         )
         name = data_utils.rand_name(name)
-        server = self._create_server(name, new_tenant)
+        server = self._create_server(name, new_tenant,
+                                     [new_tenant.security_groups['default']])
 
         # Check connectivity failure with default security group
         try:
@@ -599,7 +591,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                tenant=new_tenant.creds.tenant_name
         )
         name = data_utils.rand_name(name)
-        server = self._create_server(name, new_tenant)
+        server = self._create_server(name, new_tenant,
+                                     [new_tenant.security_groups['default']])
 
         access_point_ssh = self._connect_to_access_point(new_tenant)
         server_id = server['id']
@@ -624,3 +617,32 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)
             raise
+
+    @test.requires_ext(service='network', extension='port-security')
+    @test.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.allow_port_security_disabled,
+        'Port security must be enabled.')
+    # TODO(mriedem): We shouldn't actually need to check this since neutron
+    # disables the port_security extension by default, but the problem is nova
+    # assumes port_security_enabled=True if it's not set on the network
+    # resource, which will mean nova may attempt to apply a security group on
+    # a port on that network which would fail. This is really a bug in nova.
+    @testtools.skipUnless(
+        CONF.network_feature_enabled.port_security,
+        'Port security must be enabled.')
+    @test.services('compute', 'network')
+    def test_boot_into_disabled_port_security_network_without_secgroup(self):
+        tenant = self.primary_tenant
+        self._create_tenant_network(tenant, port_security_enabled=False)
+        self.assertFalse(tenant.network['port_security_enabled'])
+        name = data_utils.rand_name('server-smoke')
+        sec_groups = []
+        server = self._create_server(name, tenant, sec_groups)
+        server_id = server['id']
+        ports = self._list_ports(device_id=server_id)
+        self.assertEqual(1, len(ports))
+        for port in ports:
+            self.assertEmpty(port['security_groups'],
+                             "Neutron shouldn't even use it's default sec "
+                             "group.")

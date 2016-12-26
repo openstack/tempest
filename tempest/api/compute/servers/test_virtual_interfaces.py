@@ -40,8 +40,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(VirtualInterfacesTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
     @test.services('network')
@@ -53,9 +52,9 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
             # TODO(mriedem): After a microversion implements the API for
             # neutron, a 400 should be a failure for nova-network and neutron.
             with testtools.ExpectedException(exceptions.BadRequest):
-                self.client.list_virtual_interfaces(self.server_id)
+                self.client.list_virtual_interfaces(self.server['id'])
         else:
-            output = self.client.list_virtual_interfaces(self.server_id)
+            output = self.client.list_virtual_interfaces(self.server['id'])
             self.assertIsNotNone(output)
             virt_ifaces = output
             self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),

@@ -83,11 +83,11 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.roles_client.delete_role, role['id'])
 
         # Grant the user the role on both projects.
-        self.roles_client.assign_user_role_on_project(project1['id'],
+        self.roles_client.create_user_role_on_project(project1['id'],
                                                       user['id'],
                                                       role['id'])
 
-        self.roles_client.assign_user_role_on_project(project2['id'],
+        self.roles_client.create_user_role_on_project(project2['id'],
                                                       user['id'],
                                                       role['id'])
 

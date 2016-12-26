@@ -32,7 +32,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         cls.setup_domains = list()
         for i in range(3):
             domain = cls.domains_client.create_domain(
-                data_utils.rand_name('domain'),
+                name=data_utils.rand_name('domain'),
                 description=data_utils.rand_name('domain-desc'),
                 enabled=i < 2)['domain']
             cls.setup_domains.append(domain)
@@ -67,7 +67,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # List domains filtering by name
         params = {'name': self.setup_domains[0]['name']}
         fetched_domains = self.domains_client.list_domains(
-            params=params)['domains']
+            **params)['domains']
         # Verify the filtered list is correct, domain names are unique
         # so exactly one domain should be found with the provided name
         self.assertEqual(1, len(fetched_domains))
@@ -79,7 +79,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # List domains filtering by enabled domains
         params = {'enabled': True}
         fetched_domains = self.domains_client.list_domains(
-            params=params)['domains']
+            **params)['domains']
         # Verify the filtered list is correct
         self.assertIn(self.setup_domains[0], fetched_domains)
         self.assertIn(self.setup_domains[1], fetched_domains)
@@ -93,7 +93,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         d_name = data_utils.rand_name('domain')
         d_desc = data_utils.rand_name('domain-desc')
         domain = self.domains_client.create_domain(
-            d_name, description=d_desc)['domain']
+            name=d_name, description=d_desc)['domain']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self._delete_domain, domain['id'])
         self.assertIn('id', domain)
@@ -138,7 +138,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         d_name = data_utils.rand_name('domain')
         d_desc = data_utils.rand_name('domain-desc')
         domain = self.domains_client.create_domain(
-            d_name, description=d_desc, enabled=False)['domain']
+            name=d_name, description=d_desc, enabled=False)['domain']
         self.addCleanup(self.domains_client.delete_domain, domain['id'])
         self.assertEqual(d_name, domain['name'])
         self.assertFalse(domain['enabled'])
@@ -148,11 +148,15 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_domain_without_description(self):
         # Create domain only with name
         d_name = data_utils.rand_name('domain')
-        domain = self.domains_client.create_domain(d_name)['domain']
+        domain = self.domains_client.create_domain(name=d_name)['domain']
         self.addCleanup(self._delete_domain, domain['id'])
         self.assertIn('id', domain)
         expected_data = {'name': d_name, 'enabled': True}
-        self.assertIsNone(domain['description'])
+        # TODO(gmann): there is bug in keystone liberty version where
+        # description is not being returned if it is not being passed in
+        # request. Bug#1649245. Once bug is fixed then we can enable the below
+        # check.
+        # self.assertEqual('', domain['description'])
         self.assertDictContainsSubset(expected_data, domain)
 
 

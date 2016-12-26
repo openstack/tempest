@@ -1,0 +1,4 @@
+---
+features:
+  - A Neutron Service Providers client is added to deal with resources
+    of the '/service-providers' route.

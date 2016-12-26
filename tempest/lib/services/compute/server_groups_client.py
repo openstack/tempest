@@ -26,8 +26,9 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
     def create_server_group(self, **kwargs):
         """Create the server group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createServerGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html#createServerGroup
         """
         post_body = json.dumps({'server_group': kwargs})
         resp, body = self.post('os-server-groups', post_body)

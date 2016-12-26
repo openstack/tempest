@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
-
+from oslo_log import log as logging
 from six.moves.urllib import parse as urlparse
 import testtools
 
@@ -24,7 +23,6 @@ from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -81,14 +79,19 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
     def test_change_server_password(self):
+        # Since this test messes with the password and makes the
+        # server unreachable, it should create its own server
+        newserver = self.create_test_server(
+            validatable=True,
+            wait_until='ACTIVE')
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
-        self.client.change_password(self.server_id, adminPass=new_password)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.client.change_password(newserver['id'], adminPass=new_password)
+        waiters.wait_for_server_status(self.client, newserver['id'], 'ACTIVE')
 
         if CONF.validation.run_validation:
             # Verify that the user can authenticate with the new password
-            server = self.client.show_server(self.server_id)['server']
+            server = self.client.show_server(newserver['id'])['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server),
                 self.ssh_user,
@@ -127,8 +130,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 server=server,
                 servers_client=self.client)
             new_boot_time = linux_client.get_boot_time()
-            self.assertTrue(new_boot_time > boot_time,
-                            '%s > %s' % (new_boot_time, boot_time))
+            self.assertGreater(new_boot_time, boot_time,
+                               '%s > %s' % (new_boot_time, boot_time))
 
     @test.attr(type='smoke')
     @test.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
@@ -235,20 +238,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @test.services('volume')
     def test_rebuild_server_with_volume_attached(self):
         # create a new volume and attach it to the server
-        volume = self.volumes_client.create_volume(
-            size=CONF.volume.volume_size)
-        volume = volume['volume']
-        self.addCleanup(self.volumes_client.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'available')
+        volume = self.create_volume()
 
-        self.client.attach_volume(self.server_id, volumeId=volume['id'])
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        volume['id'], 'available')
-        self.addCleanup(self.client.detach_volume,
-                        self.server_id, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'in-use')
+        server = self.client.show_server(self.server_id)['server']
+        self.attach_volume(server, volume)
 
         # run general rebuild test
         self.test_rebuild_server()
@@ -270,6 +263,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                            'SHUTOFF')
 
         self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # NOTE(jlk): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
@@ -284,10 +280,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start_server(self.server_id)
-
-        # NOTE(jlk): Explicitly delete the server to get a new one for later
-        # tests. Avoids resize down race issues.
-        self.addCleanup(self.delete_server, self.server_id)
 
     @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -309,6 +301,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # values after a resize is reverted
 
         self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # NOTE(zhufl): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'VERIFY_RESIZE')
 
@@ -334,7 +329,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         elif CONF.image_feature_enabled.api_v2:
             glance_client = self.os.image_client_v2
         else:
-            raise exceptions.InvalidConfiguration(
+            raise lib_exc.InvalidConfiguration(
                 'Either api_v1 or api_v2 must be True in '
                 '[image-feature-enabled].')
 
@@ -462,8 +457,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
             # NOTE: This test tries to get full length console log, and the
             # length should be bigger than the one of test_get_console_output.
-            self.assertTrue(lines > 10, "Cannot get enough console log length."
-                                        " (lines: %s)" % lines)
+            self.assertGreater(lines, 10, "Cannot get enough console log "
+                                          "length. (lines: %s)" % lines)
 
         self.wait_for(_check_full_length_console_log)
 

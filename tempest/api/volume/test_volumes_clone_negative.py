@@ -22,7 +22,13 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesCloneTest(base.BaseVolumeTest):
+class VolumesV2CloneNegativeTest(base.BaseVolumeTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesV2CloneNegativeTest, cls).skip_checks()
+        if not CONF.volume_feature_enabled.clone:
+            raise cls.skipException("Cinder volume clones are disabled")
 
     @test.idempotent_id('9adae371-a257-43a5-459a-dc7c88e66e0e')
     def test_create_from_volume_decreasing_size(self):
@@ -38,5 +44,5 @@ class VolumesCloneTest(base.BaseVolumeTest):
                           source_volid=src_vol['id'])
 
 
-class VolumesV1CloneTest(VolumesCloneTest):
+class VolumesV1CloneNegativeTest(VolumesV2CloneNegativeTest):
     _api_version = 1

@@ -161,6 +161,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Check if flavor is present in list
+        flag = False
         flavors = self.user_client.list_flavors(detail=True)['flavors']
         for flavor in flavors:
             if flavor['name'] == flavor_name:

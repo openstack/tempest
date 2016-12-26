@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    Define volume service clients as libraries.
+    The following volume service clients are defined as library interface,
+    so the other projects can use these modules as stable libraries without
+    any maintenance changes.
+
+    * backups_client
+    * encryption_types_client (v1)
+    * encryption_types_client (v2)
+    * qos_clients (v1)
+    * qos_clients (v2)
+    * snapshots_client (v1)
+    * snapshots_client (v2)
+

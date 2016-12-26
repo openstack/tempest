@@ -23,8 +23,10 @@ from tempest.lib import auth
 from tempest.lib.common.utils import misc
 from tempest.lib import exceptions
 from tempest.lib.services import compute
+from tempest.lib.services import identity
 from tempest.lib.services import image
 from tempest.lib.services import network
+from tempest.lib.services import volume
 
 
 LOG = logging.getLogger(__name__)
@@ -38,9 +40,14 @@ def tempest_modules():
     """
     return {
         'compute': compute,
+        'identity.v2': identity.v2,
+        'identity.v3': identity.v3,
         'image.v1': image.v1,
         'image.v2': image.v2,
-        'network': network
+        'network': network,
+        'volume.v1': volume.v1,
+        'volume.v2': volume.v2,
+        'volume.v3': volume.v3
     }
 
 
@@ -49,8 +56,7 @@ def _tempest_internal_modules():
     # NOTE(andreaf) This list will exists only as long the remain clients
     # are migrated to tempest.lib, and it will then be deleted without
     # deprecation or advance notice
-    return set(['identity.v2', 'identity.v3', 'object-storage', 'volume.v1',
-                'volume.v2', 'volume.v3'])
+    return set(['object-storage'])
 
 
 def available_modules():

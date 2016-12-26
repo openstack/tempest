@@ -16,10 +16,11 @@ from oslo_log import log
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import credentials_factory as credentials
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions as lib_excs
 from tempest import test
 
 CONF = config.CONF
@@ -45,6 +46,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(AutoAllocateNetworkTest, cls).skip_checks()
+        identity_version = cls.get_identity_version()
+        if not credentials.is_admin_available(
+                identity_version=identity_version):
+            msg = "Missing Identity Admin API credentials in configuration."
+            raise cls.skipException(msg)
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
         if not test.is_extension_enabled('auto-allocated-topology', 'network'):
@@ -60,7 +66,6 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AutoAllocateNetworkTest, cls).setup_clients()
-        cls.servers_client = cls.servers_client
         cls.networks_client = cls.os.networks_client
         cls.routers_client = cls.os.routers_client
         cls.subnets_client = cls.os.subnets_client
@@ -77,14 +82,14 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found tenant networks: %s' % nets)
         # (2) Retrieve shared network list.
         search_opts = {'shared': True}
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found shared networks: %s' % nets)
 
     @classmethod

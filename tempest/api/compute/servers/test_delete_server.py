@@ -106,24 +106,15 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     @test.services('volume')
     def test_delete_server_while_in_attached_volume(self):
         # Delete a server while a volume is attached to it
-        volumes_client = self.volumes_extensions_client
         device = '/dev/%s' % CONF.compute.volume_device_name
         server = self.create_test_server(wait_until='ACTIVE')
 
-        volume = (volumes_client.create_volume(size=CONF.volume.volume_size)
-                  ['volume'])
-        self.addCleanup(volumes_client.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['id'], 'available')
-        self.client.attach_volume(server['id'],
-                                  volumeId=volume['id'],
-                                  device=device)
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['id'], 'in-use')
+        volume = self.create_volume()
+        self.attach_volume(server, volume, device=device)
 
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
-        waiters.wait_for_volume_status(volumes_client,
+        waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
 
 

@@ -23,6 +23,12 @@ CONF = config.CONF
 class BaseIdentityTest(tempest.test.BaseTestCase):
 
     @classmethod
+    def setup_credentials(cls):
+        # Create no network resources for these test.
+        cls.set_network_resources()
+        super(BaseIdentityTest, cls).setup_credentials()
+
+    @classmethod
     def disable_user(cls, user_name):
         user = cls.get_user_by_name(user_name)
         cls.users_client.update_user_enabled(user['id'], enabled=False)
@@ -119,10 +125,6 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
         cls.projects_client = cls.tenants_client
 
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV2AdminTest, cls).resource_cleanup()
-
     def setup_test_user(self, password=None):
         """Set up a test user."""
         tenant = self.setup_test_tenant()
@@ -171,6 +173,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.users_client = cls.os_adm.users_v3_client
         cls.trusts_client = cls.os_adm.trusts_client
         cls.roles_client = cls.os_adm.roles_v3_client
+        cls.inherited_roles_client = cls.os_adm.inherited_roles_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_v3_client
         cls.regions_client = cls.os_adm.regions_client
@@ -179,20 +182,13 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.creds_client = cls.os_adm.credentials_client
         cls.groups_client = cls.os_adm.groups_client
         cls.projects_client = cls.os_adm.projects_client
+        cls.role_assignments = cls.os_admin.role_assignments_client
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity
             # admin clients for these tests shall use 'domain' scoped tokens.
             # As the client manager is already created by the base class,
             # we set the scope for the inner auth provider.
             cls.os_adm.auth_provider.scope = 'domain'
-
-    @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_setup()
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_cleanup()
 
     @classmethod
     def disable_user(cls, user_name, domain_id=None):

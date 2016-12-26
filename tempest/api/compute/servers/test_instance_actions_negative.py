@@ -29,8 +29,7 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(InstanceActionsNegativeTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @test.attr(type=['negative'])
     @test.idempotent_id('67e1fce6-7ec2-45c6-92d4-0a8f1a632910')
@@ -46,4 +45,4 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     def test_get_instance_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
         self.assertRaises(lib_exc.NotFound, self.client.show_instance_action,
-                          self.server_id, '999')
+                          self.server['id'], '999')

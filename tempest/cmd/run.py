@@ -135,6 +135,12 @@ class TempestRun(command.Command):
             workspace_mgr = workspace.WorkspaceManager(
                 parsed_args.workspace_path)
             path = workspace_mgr.get_workspace(parsed_args.workspace)
+            if not path:
+                sys.exit(
+                    "The %r workspace isn't registered in "
+                    "%r. Use 'tempest init' to "
+                    "register the workspace." %
+                    (parsed_args.workspace, workspace_mgr.path))
             os.chdir(path)
             # NOTE(mtreinish): tempest init should create a .testrepository dir
             # but since workspaces can be imported let's sanity check and
@@ -264,8 +270,8 @@ class TempestRun(command.Command):
 
             run_thread = threading.Thread(target=run_argv_thread)
             run_thread.start()
-            returncodes['subunit-trace'] = subunit_trace.trace(subunit_r,
-                                                               sys.stdout)
+            returncodes['subunit-trace'] = subunit_trace.trace(
+                subunit_r, sys.stdout, post_fails=True, print_failures=True)
             run_thread.join()
             subunit_r.close()
             # python version of pipefail

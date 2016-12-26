@@ -1,0 +1,6 @@
+---
+features:
+  - The cred_provider abstract class which serves as the basis for both
+    of tempest's cred providers, pre-provisioned credentials and dynamic
+    credentials, is now a library interface. This provides the common signature
+    required for building a credential provider.

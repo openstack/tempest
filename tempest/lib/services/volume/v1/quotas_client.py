@@ -45,8 +45,9 @@ class QuotasClient(rest_client.RestClient):
     def update_quota_set(self, tenant_id, **kwargs):
         """Updates quota set
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-blockstorage-v1.html#updateQuota
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-blockstorage-v1.html#updateQuota
         """
         put_body = jsonutils.dumps({'quota_set': kwargs})
         resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)

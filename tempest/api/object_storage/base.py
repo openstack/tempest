@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -21,6 +23,38 @@ from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
+
+
+def delete_containers(containers, container_client, object_client):
+    """Remove containers and all objects in them.
+
+    The containers should be visible from the container_client given.
+    Will not throw any error if the containers don't exist.
+    Will not check that object and container deletions succeed.
+    After delete all the objects from a container, it will wait 2
+    seconds before delete the container itself, in order to deployments
+    using HA proxy sync the deletion properly, otherwise, the container
+    might fail to be deleted because it's not empty.
+
+    :param containers: List of containers to be deleted
+    :param container_client: Client to be used to delete containers
+    :param object_client: Client to be used to delete objects
+    """
+    for cont in containers:
+        try:
+            params = {'limit': 9999, 'format': 'json'}
+            resp, objlist = container_client.list_container_contents(
+                cont, params)
+            # delete every object in the container
+            for obj in objlist:
+                test_utils.call_and_ignore_notfound_exc(
+                    object_client.delete_object, cont, obj['name'])
+            # sleep 2 seconds to sync the deletion of the objects
+            # in HA deployment
+            time.sleep(2)
+            container_client.delete_container(cont)
+        except lib_exc.NotFound:
+            pass
 
 
 class BaseObjectTest(tempest.test.BaseTestCase):
@@ -48,6 +82,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
+        cls.capabilities_client = cls.os.capabilities_client
 
     @classmethod
     def resource_setup(cls):
@@ -57,6 +92,16 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client.auth_provider.clear_auth()
         cls.container_client.auth_provider.clear_auth()
         cls.account_client.auth_provider.clear_auth()
+
+        # make sure that discoverability is enabled and that the sections
+        # have not been disallowed by Swift
+        cls.policies = None
+
+        if CONF.object_storage_feature_enabled.discoverability:
+            _, body = cls.capabilities_client.list_capabilities()
+
+            if 'swift' in body and 'policies' in body['swift']:
+                cls.policies = body['swift']['policies']
 
         cls.containers = []
 
@@ -85,37 +130,16 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         return object_name, data
 
     @classmethod
-    def delete_containers(cls, container_client=None,
-                          object_client=None):
-        """Remove containers and all objects in them.
-
-        The containers should be visible from the container_client given.
-        Will not throw any error if the containers don't exist.
-        Will not check that object and container deletions succeed.
-
-        :param container_client: if None, use cls.container_client, this means
-            that the default testing user will be used (see 'username' in
-            'etc/tempest.conf')
-        :param object_client: if None, use cls.object_client
-        """
+    def delete_containers(cls, container_client=None, object_client=None):
         if container_client is None:
             container_client = cls.container_client
         if object_client is None:
             object_client = cls.object_client
-        for cont in cls.containers:
-            try:
-                objlist = container_client.list_all_container_objects(cont)
-                # delete every object in the container
-                for obj in objlist:
-                    test_utils.call_and_ignore_notfound_exc(
-                        object_client.delete_object, cont, obj['name'])
-                container_client.delete_container(cont)
-            except lib_exc.NotFound:
-                pass
+        delete_containers(cls.containers, container_client, object_client)
 
     def assertHeaders(self, resp, target, method):
         """Check the existence and the format of response headers"""
 
         self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
-                        target, method))
+                        target, method, self.policies))
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())

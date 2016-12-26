@@ -19,12 +19,13 @@ from tempest import test
 
 
 class ServerGroupTestJSON(base.BaseV2ComputeTest):
-    """These tests check for the server-group APIs
+    """These tests check for the server-group APIs.
 
     They create/delete server-groups with different policies.
     policies = affinity/anti-affinity
     It also adds the tests for list and get details of server-groups
     """
+
     @classmethod
     def skip_checks(cls):
         super(ServerGroupTestJSON, cls).skip_checks()
@@ -40,12 +41,10 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ServerGroupTestJSON, cls).resource_setup()
-        server_group_name = data_utils.rand_name('server-group')
         cls.policy = ['affinity']
 
         cls.created_server_group = cls.create_test_server_group(
-            server_group_name,
-            cls.policy)
+            policy=cls.policy)
 
     def _create_server_group(self, name, policy):
         # create the test server-group with given policy

@@ -27,8 +27,9 @@ class SnapshotsClient(base_compute_client.BaseComputeClient):
     def create_snapshot(self, volume_id, **kwargs):
         """Create a snapshot.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createSnapshot
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html#createSnapshot
         """
         post_body = {
             'volume_id': volume_id
