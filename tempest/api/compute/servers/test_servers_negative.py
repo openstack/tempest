@@ -217,6 +217,26 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           name=server_name)
 
     @test.attr(type=['negative'])
+    @test.related_bug('1651064', status_code=500)
+    @test.idempotent_id('12146ac1-d7df-4928-ad25-b1f99e5286cd')
+    def test_create_server_invalid_bdm_in_2nd_dict(self):
+        volume = self.create_volume()
+        bdm_1st = {"source_type": "image",
+                   "delete_on_termination": True,
+                   "boot_index": 0,
+                   "uuid": self.image_ref,
+                   "destination_type": "local"}
+        bdm_2nd = {"source_type": "volume",
+                   "uuid": volume["id"],
+                   "destination_type": "invalid"}
+        bdm = [bdm_1st, bdm_2nd]
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_test_server,
+                          image_id=self.image_ref,
+                          block_device_mapping_v2=bdm)
+
+    @test.attr(type=['negative'])
     @test.idempotent_id('4e72dc2d-44c5-4336-9667-f7972e95c402')
     def test_create_with_invalid_network_uuid(self):
         # Pass invalid network uuid while creating a server
