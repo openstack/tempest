@@ -51,7 +51,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 raise cls.skipException(msg)
         else:
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
-            raise exceptions.InvalidConfiguration(message=msg)
+            raise exceptions.InvalidConfiguration(msg)
 
     @classmethod
     def setup_credentials(cls):
