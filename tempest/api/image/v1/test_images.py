@@ -36,7 +36,7 @@ def get_container_and_disk_format():
         msg = ("The container format and the disk format don't match. "
                "Container format: %(container)s, Disk format: %(disk)s." %
                {'container': container_format, 'disk': disk_format})
-        raise exceptions.InvalidConfiguration(message=msg)
+        raise exceptions.InvalidConfiguration(msg)
 
     return container_format, disk_format
 
