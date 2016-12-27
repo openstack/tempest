@@ -30,13 +30,23 @@ def get_container_and_disk_format():
     a_formats = ['ami', 'ari', 'aki']
 
     container_format = CONF.image.container_formats[0]
-    disk_format = CONF.image.disk_formats[0]
 
-    if container_format in a_formats and container_format != disk_format:
-        msg = ("The container format and the disk format don't match. "
-               "Container format: %(container)s, Disk format: %(disk)s." %
-               {'container': container_format, 'disk': disk_format})
-        raise exceptions.InvalidConfiguration(msg)
+    # In v1, If container_format is one of ['ami', 'ari', 'aki'], then
+    # disk_format must be same with container_format.
+    # If they are of different item sequence in tempest.conf, such as:
+    #     container_formats = ami,ari,aki,bare
+    #     disk_formats = ari,ami,aki,vhd
+    # we can select one in disk_format list that is same with container_format.
+    if container_format in a_formats:
+        if container_format in CONF.image.disk_formats:
+            disk_format = container_format
+        else:
+            msg = ("The container format and the disk format don't match. "
+                   "Container format: %(container)s, Disk format: %(disk)s." %
+                   {'container': container_format, 'disk': disk_format})
+            raise exceptions.InvalidConfiguration(msg)
+    else:
+        disk_format = CONF.image.disk_formats[0]
 
     return container_format, disk_format
 
