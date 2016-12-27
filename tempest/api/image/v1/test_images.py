@@ -54,7 +54,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                   disk_format=disk_format,
                                   is_public=False,
                                   properties=properties)
-        self.assertIn('id', image)
         self.assertEqual('New Name', image.get('name'))
         self.assertFalse(image.get('is_public'))
         self.assertEqual('queued', image.get('status'))
@@ -77,7 +76,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                  location=CONF.image.http_image,
                                  properties={'key1': 'value1',
                                              'key2': 'value2'})
-        self.assertIn('id', body)
         self.assertEqual('New Remote Image', body.get('name'))
         self.assertFalse(body.get('is_public'))
         self.assertEqual('active', body.get('status'))
@@ -92,7 +90,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                   container_format=container_format,
                                   disk_format=disk_format, is_public=False,
                                   copy_from=CONF.image.http_image)
-        self.assertIn('id', image)
         self.assertEqual('New Http Image', image.get('name'))
         self.assertFalse(image.get('is_public'))
         waiters.wait_for_image_status(self.client, image['id'], 'active')
@@ -109,7 +106,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                  is_public=False,
                                  min_ram=40,
                                  properties=properties)
-        self.assertIn('id', body)
         self.assertEqual('New_image_with_min_ram', body.get('name'))
         self.assertFalse(body.get('is_public'))
         self.assertEqual('queued', body.get('status'))

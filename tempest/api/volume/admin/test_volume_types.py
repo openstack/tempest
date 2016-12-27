@@ -93,7 +93,6 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                        "vendor_name": vendor}
         body = self.create_volume_type(description=description, name=name,
                                        extra_specs=extra_specs)
-        self.assertIn('id', body)
         self.assertIn('name', body)
         self.assertEqual(name, body['name'],
                          "The created volume_type name is not equal "

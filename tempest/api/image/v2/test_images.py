@@ -49,7 +49,6 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
                                   disk_format=disk_format,
                                   visibility='private',
                                   ramdisk_id=uuid)
-        self.assertIn('id', image)
         self.assertIn('name', image)
         self.assertEqual(image_name, image['name'])
         self.assertIn('visibility', image)
