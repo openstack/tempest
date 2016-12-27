@@ -49,6 +49,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
                           self.server['id'], nonexistent_volume,
                           volumeId=volume['id'])
 
+    @test.related_bug('1629110', status_code=400)
     @test.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
     def test_update_attached_volume_with_nonexistent_volume_in_body(self):
         volume = self.create_volume()
