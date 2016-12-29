@@ -266,6 +266,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     def _create_subnet(self, subnet_name, tenant_id, network_id):
         base_cidr = netaddr.IPNetwork(self.project_network_cidr)
         mask_bits = self.project_network_mask_bits
+        if 'ip_version' not in globals():
+           ip_version = 4
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.network_resources:
