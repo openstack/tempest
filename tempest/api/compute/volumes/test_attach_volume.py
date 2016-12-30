@@ -68,8 +68,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                            volume_id, 'available')
         except lib_exc.NotFound:
             LOG.warning("Unable to detach volume %s from server %s "
-                        "possibly it was already detached" % (volume_id,
-                                                              server_id))
+                        "possibly it was already detached", volume_id,
+                        server_id)
 
     def _attach_volume(self, server_id, volume_id, device=None):
         # Attach the volume to the server

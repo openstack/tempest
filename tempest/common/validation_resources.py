@@ -60,8 +60,7 @@ def create_ssh_security_group(os, add_rule=False):
                 parent_group_id=security_group['id'], ip_protocol='icmp',
                 from_port=-1, to_port=-1)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
-              "rules %s created"
-              % sg_name)
+              "rules %s created", sg_name)
     return security_group
 
 
@@ -73,7 +72,7 @@ def create_validation_resources(os, validation_resources=None):
             keypair_name = data_utils.rand_name('keypair')
             validation_data.update(os.keypairs_client.create_keypair(
                 name=keypair_name))
-            LOG.debug("Validation resource key %s created" % keypair_name)
+            LOG.debug("Validation resource key %s created", keypair_name)
         add_rule = False
         if validation_resources['security_group']:
             if validation_resources['security_group_rules']:
@@ -98,11 +97,13 @@ def clear_validation_resources(os, validation_data=None):
             try:
                 keypair_client.delete_keypair(keypair_name)
             except lib_exc.NotFound:
-                LOG.warning("Keypair %s is not found when attempting to delete"
-                            % keypair_name)
+                LOG.warning(
+                    "Keypair %s is not found when attempting to delete",
+                    keypair_name
+                )
             except Exception as exc:
-                LOG.exception('Exception raised while deleting key %s'
-                              % keypair_name)
+                LOG.exception('Exception raised while deleting key %s',
+                              keypair_name)
                 if not has_exception:
                     has_exception = exc
         if 'security_group' in validation_data:
@@ -113,15 +114,15 @@ def clear_validation_resources(os, validation_data=None):
                 security_group_client.wait_for_resource_deletion(sec_id)
             except lib_exc.NotFound:
                 LOG.warning("Security group %s is not found when attempting "
-                            "to delete" % sec_id)
+                            "to delete", sec_id)
             except lib_exc.Conflict as exc:
                 LOG.exception('Conflict while deleting security '
-                              'group %s VM might not be deleted ' % sec_id)
+                              'group %s VM might not be deleted', sec_id)
                 if not has_exception:
                     has_exception = exc
             except Exception as exc:
                 LOG.exception('Exception raised while deleting security '
-                              'group %s ' % sec_id)
+                              'group %s', sec_id)
                 if not has_exception:
                     has_exception = exc
         if 'floating_ip' in validation_data:
@@ -131,10 +132,9 @@ def clear_validation_resources(os, validation_data=None):
                 floating_client.delete_floating_ip(fip_id)
             except lib_exc.NotFound:
                 LOG.warning('Floating ip %s not found while attempting to '
-                            'delete' % fip_id)
+                            'delete', fip_id)
             except Exception as exc:
-                LOG.exception('Exception raised while deleting ip %s '
-                              % fip_id)
+                LOG.exception('Exception raised while deleting ip %s', fip_id)
                 if not has_exception:
                     has_exception = exc
     if has_exception:

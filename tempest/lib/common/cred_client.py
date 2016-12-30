@@ -78,8 +78,8 @@ class CredsClient(object):
                                                           user['id'],
                                                           role['id'])
         except lib_exc.Conflict:
-            LOG.debug("Role %s already assigned on project %s for user %s" % (
-                role['id'], project['id'], user['id']))
+            LOG.debug("Role %s already assigned on project %s for user %s",
+                      role['id'], project['id'], user['id'])
 
     @abc.abstractmethod
     def get_credentials(self, user, project, password):

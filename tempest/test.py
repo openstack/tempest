@@ -156,7 +156,7 @@ def related_bug(bug, status_code=None):
                 if status_code is None or status_code == exc_status_code:
                     LOG.error('Hints: This test was made for the bug %s. '
                               'The failure could be related to '
-                              'https://launchpad.net/bugs/%s' % (bug, bug))
+                              'https://launchpad.net/bugs/%s', bug, bug)
                 raise exc
         return wrapper
     return decorator
@@ -263,8 +263,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls.resource_setup()
         except Exception:
             etype, value, trace = sys.exc_info()
-            LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass." % (
-                     etype, cls.__name__))
+            LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass.",
+                     etype, cls.__name__)
             cls.tearDownClass()
             try:
                 six.reraise(etype, value, trace)
@@ -296,9 +296,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 # resources that were successfully setup in resource_cleanup,
                 # log AttributeError as info instead of exception.
                 if tetype is AttributeError and name == 'resources':
-                    LOG.info("tearDownClass of %s failed: %s" % (name, te))
+                    LOG.info("tearDownClass of %s failed: %s", name, te)
                 else:
-                    LOG.exception("teardown of %s failed: %s" % (name, te))
+                    LOG.exception("teardown of %s failed: %s", name, te)
                 if not etype:
                     etype, value, trace = sys_exec_info
         # If exceptions were raised during teardown, and not before, re-raise

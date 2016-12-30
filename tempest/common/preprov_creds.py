@@ -158,8 +158,10 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                 if resource == 'network':
                     hash_dict['networks'][temp_hash_key] = resources[resource]
                 else:
-                    LOG.warning('Unknown resource type %s, ignoring this field'
-                                % resource)
+                    LOG.warning(
+                        'Unknown resource type %s, ignoring this field',
+                        resource
+                    )
         return hash_dict
 
     def is_multi_user(self):
@@ -245,7 +247,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         free_hash = self._get_free_hash(useable_hashes)
         clean_creds = self._sanitize_creds(
             self.hash_dict['creds'][free_hash])
-        LOG.info('%s allocated creds:\n%s' % (self.name, clean_creds))
+        LOG.info('%s allocated creds:\n%s', self.name, clean_creds)
         return self._wrap_creds_with_network(free_hash)
 
     @lockutils.synchronized('test_accounts_io', external=True)
@@ -253,7 +255,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         hash_path = os.path.join(self.accounts_dir, hash_string)
         if not os.path.isfile(hash_path):
             LOG.warning('Expected an account lock file %s to remove, but '
-                        'one did not exist' % hash_path)
+                        'one did not exist', hash_path)
         else:
             os.remove(hash_path)
             if not os.listdir(self.accounts_dir):
@@ -278,7 +280,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         _hash = self.get_hash(creds)
         clean_creds = self._sanitize_creds(self.hash_dict['creds'][_hash])
         self.remove_hash(_hash)
-        LOG.info("%s returned allocated creds:\n%s" % (self.name, clean_creds))
+        LOG.info("%s returned allocated creds:\n%s", self.name, clean_creds)
 
     def get_primary_creds(self):
         if self._creds.get('primary'):

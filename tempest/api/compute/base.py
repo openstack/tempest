@@ -139,15 +139,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 test_utils.call_and_ignore_notfound_exc(
                     cls.servers_client.delete_server, server['id'])
             except Exception:
-                LOG.exception('Deleting server %s failed' % server['id'])
+                LOG.exception('Deleting server %s failed', server['id'])
 
         for server in cls.servers:
             try:
                 waiters.wait_for_server_termination(cls.servers_client,
                                                     server['id'])
             except Exception:
-                LOG.exception('Waiting for deletion of server %s failed'
-                              % server['id'])
+                LOG.exception('Waiting for deletion of server %s failed',
+                              server['id'])
 
     @classmethod
     def server_check_teardown(cls):
@@ -179,7 +179,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 test_utils.call_and_ignore_notfound_exc(
                     cls.compute_images_client.delete_image, image_id)
             except Exception:
-                LOG.exception('Exception raised deleting image %s' % image_id)
+                LOG.exception('Exception raised deleting image %s', image_id)
 
     @classmethod
     def clear_security_groups(cls):
@@ -283,7 +283,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             volumes_client.wait_for_resource_deletion(volume_id)
         except lib_exc.NotFound:
             LOG.warning("Unable to delete volume '%s' since it was not found. "
-                        "Maybe it was already deleted?" % volume_id)
+                        "Maybe it was already deleted?", volume_id)
 
     @classmethod
     def prepare_instance_network(cls):
@@ -336,7 +336,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             waiters.wait_for_server_termination(cls.servers_client,
                                                 server_id)
         except Exception:
-            LOG.exception('Failed to delete server %s' % server_id)
+            LOG.exception('Failed to delete server %s', server_id)
 
     @classmethod
     def resize_server(cls, server_id, new_flavor_id, **kwargs):

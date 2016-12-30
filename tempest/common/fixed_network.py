@@ -122,5 +122,5 @@ def set_networks_kwarg(network, kwargs=None):
             params.update({"networks": [{'uuid': network['id']}]})
         else:
             LOG.warning('The provided network dict: %s was invalid and did '
-                        'not contain an id' % network)
+                        'not contain an id', network)
     return params
