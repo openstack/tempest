@@ -338,7 +338,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                              {'subnet_id': subnet['id'],
                               'ip_address': ip}])
         self.assertRaisesRegex(lib_exc.Conflict,
-                               "object with that identifier already exists",
+                               "IpAddressAlreadyAllocated|IpAddressInUse",
                                self.create_port,
                                self.network,
                                fixed_ips=[{'subnet_id': subnet['id'],
