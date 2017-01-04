@@ -40,12 +40,11 @@ class Manager(clients.ServiceClients):
     }
     default_params_with_timeout_values.update(default_params)
 
-    def __init__(self, credentials, service=None, scope='project'):
+    def __init__(self, credentials, scope='project'):
         """Initialization of Manager class.
 
         Setup all services clients and make them available for tests cases.
         :param credentials: type Credentials or TestResources
-        :param service: Service name
         :param scope: default scope for tokens produced by the auth provider
         """
         _, identity_uri = get_auth_provider_class(credentials)

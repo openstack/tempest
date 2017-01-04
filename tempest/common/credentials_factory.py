@@ -233,7 +233,6 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
 class AdminManager(clients.Manager):
     """Manager that uses admin credentials for its managed client objects"""
 
-    def __init__(self, service=None):
+    def __init__(self):
         super(AdminManager, self).__init__(
-            credentials=get_configured_admin_credentials(),
-            service=service)
+            credentials=get_configured_admin_credentials())
