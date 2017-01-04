@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.compute import base
 from tempest import test
 
@@ -50,7 +48,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
         self.assertGreaterEqual(len(addresses), 1)
-        for network_name, network_addresses in six.iteritems(addresses):
+        for network_name, network_addresses in addresses.items():
             self.assertGreaterEqual(len(network_addresses), 1)
             for address in network_addresses:
                 self.assertTrue(address['addr'])

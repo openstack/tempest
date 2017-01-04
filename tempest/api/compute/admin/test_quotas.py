@@ -14,7 +14,6 @@
 #    under the License.
 
 from oslo_log import log as logging
-import six
 from testtools import matchers
 
 from tempest.api.compute import base
@@ -175,7 +174,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         # restore the defaults when the test is done
         self.addCleanup(self._restore_default_quotas, body.copy())
         # increment all of the values for updating the default quota class
-        for quota, default in six.iteritems(body):
+        for quota, default in body.items():
             # NOTE(sdague): we need to increment a lot, otherwise
             # there is a real chance that we go from -1 (unlimited)
             # to a very small number which causes issues.

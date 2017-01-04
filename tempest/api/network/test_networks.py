@@ -130,7 +130,7 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
                                     **kwargs)
         compare_args_full = dict(gateway_ip=gateway, cidr=cidr,
                                  mask_bits=mask_bits, **kwargs)
-        compare_args = dict((k, v) for k, v in six.iteritems(compare_args_full)
+        compare_args = dict((k, v) for k, v in compare_args_full.items()
                             if v is not None)
 
         if 'dns_nameservers' in set(subnet).intersection(compare_args):

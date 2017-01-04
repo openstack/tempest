@@ -19,8 +19,6 @@ import re
 import time
 import zlib
 
-import six
-
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
@@ -865,7 +863,7 @@ class ObjectTest(base.BaseObjectTest):
         expected = {'x-object-meta-test': '',
                     'x-object-meta-src': 'src_value',
                     'x-copied-from': self.container_name + "/" + src_obj_name}
-        for key, value in six.iteritems(expected):
+        for key, value in expected.items():
             self.assertIn(key, resp)
             self.assertEqual(value, resp[key])
 
@@ -888,7 +886,7 @@ class ObjectTest(base.BaseObjectTest):
         expected = {'x-object-meta-test': 'value',
                     'x-object-meta-src': 'src_value',
                     'x-copied-from': self.container_name + "/" + src_obj_name}
-        for key, value in six.iteritems(expected):
+        for key, value in expected.items():
             self.assertIn(key, resp)
             self.assertEqual(value, resp[key])
 

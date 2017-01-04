@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.network import base_security_groups as base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -62,7 +60,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                     'port_range_max': port_range_max,
                     'remote_group_id': remote_group_id,
                     'remote_ip_prefix': remote_ip_prefix}
-        for key, value in six.iteritems(expected):
+        for key, value in expected.items():
             self.assertEqual(value, sec_group_rule[key],
                              "Field %s of the created security group "
                              "rule does not match with %s." %
@@ -131,7 +129,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                 rule_create_body['security_group_rule']['id']
             )
             create_dict = rule_create_body['security_group_rule']
-            for key, value in six.iteritems(create_dict):
+            for key, value in create_dict.items():
                 self.assertEqual(value,
                                  show_rule_body['security_group_rule'][key],
                                  "%s does not match." % key)

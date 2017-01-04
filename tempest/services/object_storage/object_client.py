@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
 
@@ -189,7 +188,7 @@ class ObjectClient(rest_client.RestClient):
         # Send the PUT request and the headers including the "Expect" header
         conn.putrequest('PUT', path)
 
-        for header, value in six.iteritems(headers):
+        for header, value in headers.items():
             conn.putheader(header, value)
         conn.endheaders()
 

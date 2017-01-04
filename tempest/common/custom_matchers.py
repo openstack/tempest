@@ -14,7 +14,6 @@
 
 import re
 
-import six
 from testtools import helpers
 
 
@@ -217,7 +216,7 @@ class AreAllWellFormatted(object):
     """
 
     def match(self, actual):
-        for key, value in six.iteritems(actual):
+        for key, value in actual.items():
             if key in ('content-length', 'x-account-bytes-used',
                        'x-account-container-count', 'x-account-object-count',
                        'x-container-bytes-used', 'x-container-object-count')\
