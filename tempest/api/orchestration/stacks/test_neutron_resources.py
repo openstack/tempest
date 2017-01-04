@@ -28,8 +28,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
     def skip_checks(cls):
-        msg = "Skipped until Bug: 1547261 is resolved."
-        raise cls.skipException(msg)
         super(NeutronResourcesTestJSON, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
@@ -44,6 +42,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         super(NeutronResourcesTestJSON, cls).setup_clients()
         cls.subnets_client = cls.os.subnets_client
         cls.ports_client = cls.os.ports_client
+        cls.routers_client = cls.os.routers_client
 
     @classmethod
     def resource_setup(cls):
