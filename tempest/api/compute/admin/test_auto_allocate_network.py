@@ -17,7 +17,6 @@ from oslo_log import log
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import credentials_factory as credentials
-from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_excs
@@ -152,9 +151,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # create the server with no networking
         server, _ = compute.create_test_server(
             self.os, networks='none', wait_until='ACTIVE')
-        self.addCleanup(waiters.wait_for_server_termination,
-                        self.servers_client, server['id'])
-        self.addCleanup(self.servers_client.delete_server, server['id'])
+        self.addCleanup(self.delete_server, server['id'])
         # get the server ips
         addresses = self.servers_client.list_addresses(
             server['id'])['addresses']
@@ -182,9 +179,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             min_count=3)
         server_nets = set()
         for server in servers:
-            self.addCleanup(waiters.wait_for_server_termination,
-                            self.servers_client, server['id'])
-            self.addCleanup(self.servers_client.delete_server, server['id'])
+            self.addCleanup(self.delete_server, server['id'])
             # get the server ips
             addresses = self.servers_client.list_addresses(
                 server['id'])['addresses']
