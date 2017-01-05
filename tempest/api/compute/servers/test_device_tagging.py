@@ -19,7 +19,6 @@ from oslo_log import log as logging
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
-from tempest.common import waiters
 from tempest import config
 from tempest.lib import exceptions
 from tempest import test
@@ -196,9 +195,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                 }
             ])
 
-        self.addCleanup(waiters.wait_for_server_termination,
-                        self.servers_client, server['id'])
-        self.addCleanup(self.servers_client.delete_server, server['id'])
+        self.addCleanup(self.delete_server, server['id'])
 
         self.ssh_client = remote_client.RemoteClient(
             self.get_server_ip(server),
