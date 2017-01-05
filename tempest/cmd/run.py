@@ -88,6 +88,7 @@ import threading
 from cliff import command
 from os_testr import regex_builder
 from os_testr import subunit_trace
+import six
 from testrepository.commands import run_argv
 
 from tempest.cmd import init
@@ -109,6 +110,12 @@ class TempestRun(command.Command):
             return
         else:
             os.environ["TESTR_PDB"] = ""
+        # NOTE(dims): most of our .testr.conf try to test for PYTHON
+        # environment variable and fall back to "python", under python3
+        # if it does not exist. we should set it to the python3 executable
+        # to deal with this situation better for now.
+        if six.PY3 and 'PYTHON' not in os.environ:
+            os.environ['PYTHON'] = sys.executable
 
     def _create_testrepository(self):
         if not os.path.isdir('.testrepository'):
