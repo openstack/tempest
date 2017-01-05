@@ -157,4 +157,4 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
 
         # If we wait the required time, the user account will be unlocked
         time.sleep(CONF.identity.user_lockout_duration + 1)
-        self.token.auth(user_id=self.user_id, password=password)
+        self.non_admin_token.auth(user_id=self.user_id, password=password)
