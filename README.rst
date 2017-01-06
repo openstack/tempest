@@ -4,7 +4,6 @@ Team and repository tags
 
 .. image:: http://governance.openstack.org/badges/tempest.svg
     :target: http://governance.openstack.org/reference/tags/index.html
-    :remote:
 
 .. Change things from this point on
 
