@@ -220,8 +220,11 @@ IdentityFeatureGroup = [
     # TODO(rodrigods): Remove the reseller flag when Kilo and Liberty is end
     # of life.
     cfg.BoolOpt('reseller',
-                default=False,
-                help='Does the environment support reseller?'),
+                default=True,
+                help='Does the environment support reseller?',
+                deprecated_for_removal=True,
+                deprecated_reason="All supported version of OpenStack now "
+                                  "supports the 'reseller' feature"),
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
