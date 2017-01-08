@@ -43,7 +43,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         group = {}
         ip_range = {}
         cls.expected = {
-            'id': None,
             'parent_group_id': None,
             'ip_protocol': cls.ip_protocol,
             'from_port': from_port,
@@ -54,8 +53,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     def _check_expected_response(self, actual_rule):
         for key in self.expected:
-            if key == 'id':
-                continue
             self.assertEqual(self.expected[key], actual_rule[key],
                              "Miss-matched key is %s" % key)
 
