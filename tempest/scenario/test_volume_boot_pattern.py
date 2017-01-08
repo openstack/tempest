@@ -40,20 +40,23 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             self.__class__.__name__ + '-volume-origin')
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
-    def _get_bdm(self, vol_id, delete_on_termination=False):
+    def _get_bdm(self, source_id, source_type, delete_on_termination=False):
         # NOTE(gfidente): the syntax for block_device_mapping is
         # dev_name=id:type:size:delete_on_terminate
         # where type needs to be "snap" if the server is booted
         # from a snapshot, size instead can be safely left empty
+
         bd_map = [{
             'device_name': 'vda',
-            'volume_id': vol_id,
+            '{}_id'.format(source_type): source_id,
             'delete_on_termination': str(int(delete_on_termination))}]
         return {'block_device_mapping': bd_map}
 
-    def _boot_instance_from_volume(self, vol_id, keypair=None,
-                                   security_group=None,
-                                   delete_on_termination=False):
+    def _boot_instance_from_resource(self, source_id,
+                                     source_type,
+                                     keypair=None,
+                                     security_group=None,
+                                     delete_on_termination=False):
         create_kwargs = dict()
         if keypair:
             create_kwargs['key_name'] = keypair['name']
@@ -61,7 +64,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             create_kwargs['security_groups'] = [
                 {'name': security_group['name']}]
         create_kwargs.update(self._get_bdm(
-            vol_id, delete_on_termination=delete_on_termination))
+            source_id,
+            source_type,
+            delete_on_termination=delete_on_termination))
+
         return self.create_server(
             image_id='',
             wait_until='ACTIVE',
@@ -116,8 +122,11 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         # create an instance from volume
         LOG.info("Booting instance 1 from volume")
         volume_origin = self._create_volume_from_image()
-        instance_1st = self._boot_instance_from_volume(volume_origin['id'],
-                                                       keypair, security_group)
+        instance_1st = self._boot_instance_from_resource(
+            source_id=volume_origin['id'],
+            source_type='volume',
+            keypair=keypair,
+            security_group=security_group)
         LOG.info("Booted first instance: %s", instance_1st)
 
         # write content to volume on instance
@@ -131,8 +140,11 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self._delete_server(instance_1st)
 
         # create a 2nd instance from volume
-        instance_2nd = self._boot_instance_from_volume(volume_origin['id'],
-                                                       keypair, security_group)
+        instance_2nd = self._boot_instance_from_resource(
+            source_id=volume_origin['id'],
+            source_type='volume',
+            keypair=keypair,
+            security_group=security_group)
         LOG.info("Booted second instance %s", instance_2nd)
 
         # check the content of written file
@@ -152,8 +164,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                     size=snapshot['size'])
         LOG.info("Booting third instance from snapshot")
         server_from_snapshot = (
-            self._boot_instance_from_volume(volume['id'],
-                                            keypair, security_group))
+            self._boot_instance_from_resource(source_id=volume['id'],
+                                              source_type='volume',
+                                              keypair=keypair,
+                                              security_group=security_group))
         LOG.info("Booted third instance %s", server_from_snapshot)
 
         # check the content of written file
@@ -164,13 +178,49 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp3)
 
+    @test.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
+    @test.services('compute', 'image', 'volume')
+    def test_create_server_from_volume_snapshot(self):
+        # Create a volume from an image
+        boot_volume = self._create_volume_from_image()
+
+        # Create a snapshot
+        boot_snapshot = self._create_snapshot_from_volume(boot_volume['id'])
+
+        # Create a server from a volume snapshot
+        server = self._boot_instance_from_resource(
+            source_id=boot_snapshot['id'],
+            source_type='snapshot',
+            delete_on_termination=True)
+
+        server_info = self.servers_client.show_server(server['id'])['server']
+
+        # The created volume when creating a server from a snapshot
+        created_volume = server_info['os-extended-volumes:volumes_attached']
+
+        created_volume_info = self.volumes_client.show_volume(
+            created_volume[0]['id'])['volume']
+
+        # Verify the server was created from the snapshot
+        self.assertEqual(
+            boot_volume['volume_image_metadata']['image_id'],
+            created_volume_info['volume_image_metadata']['image_id'])
+        self.assertEqual(boot_snapshot['id'],
+                         created_volume_info['snapshot_id'])
+        self.assertEqual(server['id'],
+                         created_volume_info['attachments'][0]['server_id'])
+        self.assertEqual(created_volume[0]['id'],
+                         created_volume_info['attachments'][0]['volume_id'])
+
     @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
     @test.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
         # create an instance from volume
         volume_origin = self._create_volume_from_image()
-        instance = self._boot_instance_from_volume(volume_origin['id'],
-                                                   delete_on_termination=True)
+        instance = self._boot_instance_from_resource(
+            source_id=volume_origin['id'],
+            source_type='volume',
+            delete_on_termination=True)
         # create EBS image
         image = self.create_server_snapshot(instance)
 
@@ -187,10 +237,10 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
 
 class TestVolumeBootPatternV2(TestVolumeBootPattern):
-    def _get_bdm(self, vol_id, delete_on_termination=False):
+    def _get_bdm(self, source_id, source_type, delete_on_termination=False):
         bd_map_v2 = [{
-            'uuid': vol_id,
-            'source_type': 'volume',
+            'uuid': source_id,
+            'source_type': source_type,
             'destination_type': 'volume',
             'boot_index': 0,
             'delete_on_termination': delete_on_termination}]
