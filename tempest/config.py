@@ -817,8 +817,11 @@ VolumeFeaturesGroup = [
                 help="Is the v3 volume API enabled"),
     # TODO(ynesenenko): Remove volume_services once liberty-eol happens.
     cfg.BoolOpt('volume_services',
-                default=False,
-                help='Extract correct host info from host@backend')
+                default=True,
+                help='Extract correct host info from host@backend',
+                deprecated_for_removal=True,
+                deprecated_reason='This config switch was added for Liberty '
+                                  'which is not supported anymore.')
 ]
 
 
