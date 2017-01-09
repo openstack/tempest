@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import random
 import time
 import types
 
@@ -40,13 +39,21 @@ class UCSMTestMixin(object):
     virtual_functions_amount=4
     """
 
-    ucsm_ip = CONF.ucsm.ucsm_ip
-    ucsm_username = CONF.ucsm.ucsm_username
-    ucsm_password = CONF.ucsm.ucsm_password
-    compute_host_dict = CONF.ucsm.compute_host_dict
-    controller_host_dict = CONF.ucsm.controller_host_dict
-    eth_names = CONF.ucsm.eth_names
-    virtual_functions = CONF.ucsm.virtual_functions_amount
+    @property
+    def compute_host_dict(self):
+        return CONF.ucsm.compute_host_dict
+
+    @property
+    def controller_host_dict(self):
+        return CONF.ucsm.controller_host_dict
+
+    @property
+    def eth_names(self):
+        return CONF.ucsm.eth_names
+
+    @property
+    def virtual_functions(self):
+        return CONF.ucsm.virtual_functions_amount
 
     def timed_assert(self, assert_func, *args):
         new_args = list()
@@ -69,8 +76,8 @@ class UCSMTestMixin(object):
         cls.multi_ucsm_clients = {uc['ucsm_ip']: utils.UCSMClient(uc['ucsm_ip'], uc['ucsm_username'], uc['ucsm_password'])
                                   for uc in cls.multi_ucsm_conf.values()}
 
-        cls.ucsm = utils.UCSMClient(cls.ucsm_ip, cls.ucsm_username,
-                                    cls.ucsm_password)
+        cls.ucsm = utils.UCSMClient(CONF.ucsm.ucsm_ip, CONF.ucsm.ucsm_username,
+                                    CONF.ucsm.ucsm_password)
 
     def ucsm_setup(self):
         self.ucsm.login()
