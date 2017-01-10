@@ -37,29 +37,13 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupsNegativeTestJSON, cls).resource_setup()
         cls.neutron_available = CONF.service_available.neutron
 
-    def _generate_a_non_existent_security_group_id(self):
-        security_group_id = []
-        body = self.client.list_security_groups()['security_groups']
-        for i in range(len(body)):
-            security_group_id.append(body[i]['id'])
-        # Generate a non-existent security group id
-        while True:
-            if (self.neutron_available and
-                test.is_extension_enabled('security-group', 'network')):
-                non_exist_id = data_utils.rand_uuid()
-            else:
-                non_exist_id = data_utils.rand_int_id(start=999)
-            if non_exist_id not in security_group_id:
-                break
-        return non_exist_id
-
     @test.attr(type=['negative'])
     @test.idempotent_id('673eaec1-9b3e-48ed-bdf1-2786c1b9661c')
     @test.services('network')
     def test_security_group_get_nonexistent_group(self):
         # Negative test:Should not be able to GET the details
         # of non-existent Security Group
-        non_exist_id = self._generate_a_non_existent_security_group_id()
+        non_exist_id = self.generate_random_security_group_id()
         self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
                           non_exist_id)
 
@@ -139,7 +123,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.services('network')
     def test_delete_nonexistent_security_group(self):
         # Negative test:Deletion of a non-existent Security Group should fail
-        non_exist_id = self._generate_a_non_existent_security_group_id()
+        non_exist_id = self.generate_random_security_group_id()
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, non_exist_id)
 
@@ -204,7 +188,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.services('network')
     def test_update_non_existent_security_group(self):
         # Update a non-existent Security Group should Fail
-        non_exist_id = self._generate_a_non_existent_security_group_id()
+        non_exist_id = self.generate_random_security_group_id()
         s_name = data_utils.rand_name('sg')
         s_description = data_utils.rand_name('description')
         self.assertRaises(lib_exc.NotFound,

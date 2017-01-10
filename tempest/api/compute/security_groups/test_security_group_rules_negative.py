@@ -15,19 +15,8 @@
 
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest.lib import exceptions as lib_exc
 from tempest import test
-
-CONF = config.CONF
-
-
-def not_existing_id():
-    if (CONF.service_available.neutron and
-        test.is_extension_enabled('security-group', 'network')):
-        return data_utils.rand_uuid()
-    else:
-        return data_utils.rand_int_id(start=999)
 
 
 class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
@@ -44,7 +33,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with non existent Parent group id
         # Adding rules to the non existent Security Group id
-        parent_group_id = not_existing_id()
+        parent_group_id = self.generate_random_security_group_id()
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
@@ -179,7 +168,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_security_group_rule_with_non_existent_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with non existent id
-        non_existent_rule_id = not_existing_id()
+        non_existent_rule_id = self.generate_random_security_group_id()
         self.assertRaises(lib_exc.NotFound,
                           self.rules_client.delete_security_group_rule,
                           non_existent_rule_id)
