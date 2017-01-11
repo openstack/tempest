@@ -32,9 +32,8 @@ class SnapshotManageAdminV2Test(base.BaseVolumeAdminTest):
     """
 
     @test.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
-    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
-                      'Currently, Ceph does not support '
-                      'unmanage/manage snapshot')
+    @testtools.skipUnless(CONF.volume_feature_enabled.manage_snapshot,
+                          "Manage snapshot tests are disabled")
     def test_unmanage_manage_snapshot(self):
         # Create a volume
         volume = self.create_volume()

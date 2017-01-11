@@ -804,6 +804,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('clone',
                 default=True,
                 help='Runs Cinder volume clone test'),
+    cfg.BoolOpt('manage_snapshot',
+                default=False,
+                help='Runs Cinder manage snapshot tests'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '
