@@ -165,8 +165,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     # NOTE(afazekas): these create_* and clean_* could be defined
     # only in a single location in the source, and could be more general.
 
-    @classmethod
-    def delete_volume(cls, client, volume_id):
+    @staticmethod
+    def delete_volume(client, volume_id):
         """Delete volume by the given client"""
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
