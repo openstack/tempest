@@ -261,6 +261,7 @@ class Manager(clients.ServiceClients):
         self.encryption_types_client = self.volume_v1.EncryptionTypesClient()
         self.encryption_types_v2_client = \
             self.volume_v2.EncryptionTypesClient()
+        self.snapshot_manage_v2_client = self.volume_v2.SnapshotManageClient()
         self.snapshots_client = self.volume_v1.SnapshotsClient()
         self.snapshots_v2_client = self.volume_v2.SnapshotsClient()
         self.volumes_client = self.volume_v1.VolumesClient()

@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Define v2 snapshot_manage_client client for the volume service as
+    library interfaces, allowing other projects to use this module as
+    stable libraries without maintenance changes.
+
+    * snapshot_manage_client(v2)
