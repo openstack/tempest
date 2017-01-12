@@ -50,21 +50,19 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
         # Create a new image after server is deleted
-        name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         self.assertRaises(lib_exc.NotFound,
                           self.create_image_from_server,
-                          server['id'], name=name, meta=meta)
+                          server['id'], meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('82c5b0c4-9dbd-463c-872b-20c4755aae7f')
     def test_create_image_from_invalid_server(self):
         # An image should not be created with invalid server id
         # Create a new image with invalid server id
-        name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          '!@$^&*()', name=name, meta=meta)
+                          '!@$^&*()', meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
