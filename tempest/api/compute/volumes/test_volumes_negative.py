@@ -95,7 +95,8 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         # Negative: Should not be able to delete volume when invalid ID is
         # passed
         self.assertRaises(lib_exc.NotFound,
-                          self.client.delete_volume, '!@#$%^&*()')
+                          self.client.delete_volume,
+                          data_utils.rand_name('invalid'))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('0d1417c5-4ae8-4c2c-adc5-5f0b864253e5')

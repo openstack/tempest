@@ -133,7 +133,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
-                          volume_id='#$%%&^&^', display_name=v_name,
+                          volume_id=data_utils.rand_name('invalid'),
+                          display_name=v_name,
                           metadata=metadata)
 
     @test.attr(type=['negative'])
@@ -150,7 +151,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
         self.assertRaises(lib_exc.NotFound, self.volumes_client.show_volume,
-                          '#$%%&^&^')
+                          data_utils.rand_name('invalid'))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('c6c3db06-29ad-4e91-beb0-2ab195fe49e3')
@@ -164,7 +165,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_delete_invalid_volume_id(self):
         # Should not be able to delete volume when invalid ID is passed
         self.assertRaises(lib_exc.NotFound, self.volumes_client.delete_volume,
-                          '!@#$%^&*()')
+                          data_utils.rand_name('invalid'))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('441a1550-5d44-4b30-af0f-a6d402f52026')
