@@ -177,7 +177,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         client.wait_for_resource_deletion(snapshot_id)
 
     def attach_volume(self, server_id, volume_id):
-        """Attachs a volume to a server"""
+        """Attach a volume to a server"""
         self.servers_client.attach_volume(
             server_id, volumeId=volume_id,
             device='/dev/%s' % CONF.compute.volume_device_name)
