@@ -21,7 +21,7 @@ Tempest run has several options:
 
  * **--regex/-r**: This is a selection regex like what testr uses. It will run
                    any tests that match on re.match() with the regex
- * **--smoke**: Run all the tests tagged as smoke
+ * **--smoke/-s**: Run all the tests tagged as smoke
 
 There are also the **--blacklist-file** and **--whitelist-file** options that
 let you pass a filepath to tempest run with the file format being a line
@@ -52,7 +52,7 @@ Test Execution
 There are several options to control how the tests are executed. By default
 tempest will run in parallel with a worker for each CPU present on the machine.
 If you want to adjust the number of workers use the **--concurrency** option
-and if you want to run tests serially use **--serial**
+and if you want to run tests serially use **--serial/-t**
 
 Running with Workspaces
 -----------------------
@@ -198,7 +198,7 @@ class TempestRun(command.Command):
                             help='Configuration file to run tempest with')
         # test selection args
         regex = parser.add_mutually_exclusive_group()
-        regex.add_argument('--smoke', action='store_true',
+        regex.add_argument('--smoke', '-s', action='store_true',
                            help="Run the smoke tests only")
         regex.add_argument('--regex', '-r', default='',
                            help='A normal testr selection regex used to '
@@ -225,7 +225,7 @@ class TempestRun(command.Command):
                               action='store_true',
                               help='Run tests in parallel (this is the'
                                    ' default)')
-        parallel.add_argument('--serial', dest='parallel',
+        parallel.add_argument('--serial', '-t', dest='parallel',
                               action='store_false',
                               help='Run tests serially')
         # output args
