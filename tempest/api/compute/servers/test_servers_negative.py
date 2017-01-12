@@ -209,7 +209,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @test.attr(type=['negative'])
     @test.idempotent_id('c3e0fb12-07fc-4d76-a22e-37409887afe8')
     def test_create_server_name_length_exceeds_256(self):
-        # Create a server with name length exceeding 256 characters
+        # Create a server with name length exceeding 255 characters
 
         server_name = 'a' * 256
         self.assertRaises(lib_exc.BadRequest,
