@@ -27,8 +27,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         # Create 3 keypairs
         key_list = list()
         for i in range(3):
-            k_name = data_utils.rand_name('keypair')
-            keypair = self._create_keypair(k_name)
+            keypair = self.create_keypair()
             # Need to pop these keys so that our compare doesn't fail later,
             # as the keypair dicts from list API doesn't have them.
             keypair.pop('private_key')
@@ -51,7 +50,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
     def test_keypair_create_delete(self):
         # Keypair should be created, verified and deleted
         k_name = data_utils.rand_name('keypair')
-        keypair = self._create_keypair(k_name)
+        keypair = self.create_keypair(k_name)
         private_key = keypair['private_key']
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
@@ -64,7 +63,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair')
-        self._create_keypair(k_name)
+        self.create_keypair(k_name)
         keypair_detail = self.client.show_keypair(k_name)['keypair']
         self.assertIn('name', keypair_detail)
         self.assertIn('public_key', keypair_detail)
@@ -88,7 +87,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
                    "LOeB1kYMOBaiUPLQTWXR3JpckqFIQwhIH0zoHlJvZE8hh90"
                    "XcPojYN56tI0OlrGqojbediJYD0rUsJu4weZpbn8vilb3JuDY+jws"
                    "snSA8wzBx3A/8y9Pp1B nova@ubuntu")
-        keypair = self._create_keypair(k_name, pub_key)
+        keypair = self.create_keypair(k_name, pub_key)
         self.assertNotIn('private_key', keypair,
                          "Field private_key is not empty!")
         key_name = keypair['name']
