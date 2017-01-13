@@ -13,8 +13,8 @@
 # under the License.
 
 import abc
-import logging
 
+from oslo_log import log as logging
 import six
 import stevedore
 

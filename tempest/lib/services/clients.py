@@ -17,7 +17,8 @@
 import copy
 import importlib
 import inspect
-import logging
+
+from oslo_log import log as logging
 
 from tempest.lib import auth
 from tempest.lib.common.utils import misc

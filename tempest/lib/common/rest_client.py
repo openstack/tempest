@@ -16,7 +16,6 @@
 
 import collections
 import email.utils
-import logging as real_logging
 import re
 import time
 
@@ -455,7 +454,7 @@ class RestClient(object):
 
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
-        if self.LOG.isEnabledFor(real_logging.DEBUG):
+        if self.LOG.isEnabledFor(logging.DEBUG):
             self._log_request_full(resp, req_headers, req_body,
                                    resp_body, extra)
 
