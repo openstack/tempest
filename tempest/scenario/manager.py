@@ -529,14 +529,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         caller = test_utils.find_test_caller()
         LOG.debug('%(caller)s begins to ping %(ip)s in %(timeout)s sec and the'
-                  ' expected result is %(should_succeed)s', **{
+                  ' expected result is %(should_succeed)s', {
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
                       'should_succeed':
                       'reachable' if should_succeed else 'unreachable'
                   })
         result = test_utils.call_until_true(ping, timeout, 1)
         LOG.debug('%(caller)s finishes ping %(ip)s in %(timeout)s sec and the '
-                  'ping result is %(result)s', **{
+                  'ping result is %(result)s', {
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
                       'result': 'expected' if result else 'unexpected'
                   })
