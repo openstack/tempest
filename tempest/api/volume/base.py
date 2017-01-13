@@ -171,7 +171,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
 
-    def delete_snapshot(self, client, snapshot_id):
+    @staticmethod
+    def delete_snapshot(client, snapshot_id):
         """Delete snapshot by the given client"""
         client.delete_snapshot(snapshot_id)
         client.wait_for_resource_deletion(snapshot_id)
