@@ -332,9 +332,12 @@ ComputeFeaturesGroup = [
     # NOTE(mriedem): This is a feature toggle for bug 1175464 which is fixed in
     # mitaka and newton. This option can be removed after liberty-eol.
     cfg.BoolOpt('allow_port_security_disabled',
-                default=False,
+                default=True,
                 help='Does the test environment support creating ports in a '
-                     'network where port security is disabled?'),
+                     'network where port security is disabled?',
+                deprecated_for_removal=True,
+                deprecated_reason='This config switch was added for Liberty '
+                                  'which is not supported anymore.'),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),

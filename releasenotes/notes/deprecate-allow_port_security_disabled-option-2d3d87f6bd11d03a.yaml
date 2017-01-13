@@ -1,0 +1,8 @@
+---
+upgrade:
+  - The default value for the ``allow_port_security_disabled`` option in the
+    ``compute-feature-enabled`` section has been changed from ``False``
+    to ``True``.
+deprecations:
+  - The ``allow_port_security_disabled`` option in the
+   ``compute-feature-enabled`` section is now deprecated.
