@@ -28,7 +28,7 @@ class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
 
     def _test_keypairs_create_list_show(self, keypair_type=None):
         k_name = data_utils.rand_name('keypair')
-        keypair = self._create_keypair(k_name, keypair_type=keypair_type)
+        keypair = self.create_keypair(k_name, keypair_type=keypair_type)
         # Verify whether 'type' is present in keypair create response of
         # version 2.2 and it is with default value 'ssh'.
         self._check_keypair_type(keypair, keypair_type)
