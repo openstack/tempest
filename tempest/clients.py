@@ -19,7 +19,6 @@ from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
-from tempest.lib.services import identity
 from tempest.services import object_storage
 from tempest.services import orchestration
 
@@ -237,15 +236,15 @@ class Manager(clients.ServiceClients):
         # API version is marked as enabled
         if CONF.identity_feature_enabled.api_v2:
             if CONF.identity.uri:
-                self.token_client = identity.v2.TokenClient(
-                    CONF.identity.uri, **self.default_params)
+                self.token_client = self.identity_v2.TokenClient(
+                    auth_url=CONF.identity.uri)
             else:
                 msg = 'Identity v2 API enabled, but no identity.uri set'
                 raise lib_exc.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
             if CONF.identity.uri_v3:
-                self.token_v3_client = identity.v3.V3TokenClient(
-                    CONF.identity.uri_v3, **self.default_params)
+                self.token_v3_client = self.identity_v3.V3TokenClient(
+                    auth_url=CONF.identity.uri_v3)
             else:
                 msg = 'Identity v3 API enabled, but no identity.uri_v3 set'
                 raise lib_exc.InvalidConfiguration(msg)
