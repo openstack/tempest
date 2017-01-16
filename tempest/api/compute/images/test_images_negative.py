@@ -62,7 +62,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a new image with invalid server id
         meta = {'image_type': 'test'}
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          '!@$^&*()', meta=meta)
+                          data_utils.rand_name('invalid'), meta=meta)
 
     @test.attr(type=['negative'])
     @test.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
@@ -87,7 +87,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_image_with_invalid_image_id(self):
         # An image should not be deleted with invalid image id
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          '!@$^&*()')
+                          data_utils.rand_name('invalid'))
 
     @test.attr(type=['negative'])
     @test.idempotent_id('137aef61-39f7-44a1-8ddf-0adf82511701')
