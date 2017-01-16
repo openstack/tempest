@@ -151,7 +151,7 @@ class WorkspaceManager(object):
         if not os.path.isfile(self.path):
             return
         with open(self.path, 'r') as f:
-            self.workspaces = yaml.load(f) or {}
+            self.workspaces = yaml.safe_load(f) or {}
 
 
 class TempestWorkspace(command.Command):
