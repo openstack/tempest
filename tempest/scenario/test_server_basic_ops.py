@@ -18,6 +18,7 @@ import re
 
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 from tempest.scenario import manager
@@ -78,6 +79,14 @@ class TestServerBasicOps(manager.ScenarioTest):
                 raise exceptions.TimeoutException('Timed out while waiting to '
                                                   'verify metadata on server. '
                                                   '%s is empty.' % md_url)
+
+            # Also, test a POST
+            md_url = 'http://169.254.169.254/openstack/2013-10-17/password'
+            data = data_utils.arbitrary_string(100)
+            cmd = 'curl -X POST -d ' + data + ' ' + md_url
+            self.ssh_client.exec_command(cmd)
+            result = self.servers_client.show_password(self.instance['id'])
+            self.assertEqual(data, result['password'])
 
     def _mount_config_drive(self):
         cmd_blkid = 'blkid | grep -i config-2'
