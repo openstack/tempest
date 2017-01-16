@@ -15,8 +15,9 @@
 
 """Collection of utilities for parsing CLI clients output."""
 
-import logging
 import re
+
+from oslo_log import log as logging
 
 from tempest.lib import exceptions
 
