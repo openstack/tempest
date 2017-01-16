@@ -163,6 +163,7 @@ class Manager(clients.ServiceClients):
         self.aggregates_client = self.compute.AggregatesClient()
         self.services_client = self.compute.ServicesClient()
         self.tenant_usages_client = self.compute.TenantUsagesClient()
+        self.baremetal_nodes_client = self.compute.BaremetalNodesClient()
         self.hosts_client = self.compute.HostsClient()
         self.hypervisor_client = self.compute.HypervisorClient()
         self.instance_usages_audit_log_client = (
