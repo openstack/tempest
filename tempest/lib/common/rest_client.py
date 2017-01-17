@@ -248,8 +248,8 @@ class RestClient(object):
         # NOTE(afazekas): the http status code above 400 is processed by
         # the _error_checker method
         if read_code < 400:
-            pattern = """Unexpected http success status code {0},
-                         The expected status code is {1}"""
+            pattern = ("Unexpected http success status code {0}, "
+                       "The expected status code is {1}")
             if ((not isinstance(expected_code, list) and
                  (read_code != expected_code)) or
                 (isinstance(expected_code, list) and
