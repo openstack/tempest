@@ -14,6 +14,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
 class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
@@ -23,3 +28,11 @@ class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
         # A network and a subnet will be created for these tests
         cls.set_network_resources(network=True, subnet=True)
         super(BaseSecurityGroupsTest, cls).setup_credentials()
+
+    @staticmethod
+    def generate_random_security_group_id():
+        if (CONF.service_available.neutron and
+            test.is_extension_enabled('security-group', 'network')):
+            return data_utils.rand_uuid()
+        else:
+            return data_utils.rand_int_id(start=999)
