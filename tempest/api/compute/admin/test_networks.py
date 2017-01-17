@@ -61,5 +61,5 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
             configured_network = CONF.compute.fixed_network_name
             self.assertIn(configured_network, [x['label'] for x in networks])
         else:
-            network_name = map(lambda x: x['label'], networks)
-            self.assertGreaterEqual(len(network_name), 1)
+            network_labels = [x['label'] for x in networks]
+            self.assertGreaterEqual(len(network_labels), 1)

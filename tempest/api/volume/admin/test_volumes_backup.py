@@ -32,6 +32,9 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         super(VolumesBackupsAdminV2Test, cls).skip_checks()
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
+        if not CONF.service_available.swift:
+            skip_msg = ("%s skipped as swift is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     def _delete_backup(self, backup_id):
         self.admin_backups_client.delete_backup(backup_id)

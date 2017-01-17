@@ -89,7 +89,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # We use a string with 3 byte utf-8 character due to bug
         # #1370954 in glance which will 500 if mysql is used as the
         # backend and it attempts to store a 4 byte utf-8 character
-        utf8_name = data_utils.rand_name('\xe2\x82\xa1')
+        utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
         body = self.client.create_image(server_id, name=utf8_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
