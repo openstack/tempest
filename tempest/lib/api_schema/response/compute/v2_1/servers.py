@@ -238,13 +238,16 @@ rescue_server = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
-        'properties': {
-            'adminPass': {'type': 'string'}
-        },
         'additionalProperties': False,
-        'required': ['adminPass']
     }
 }
+
+rescue_server_with_admin_pass = copy.deepcopy(rescue_server)
+rescue_server_with_admin_pass['response_body'].update(
+    {'properties': {'adminPass': {'type': 'string'}}})
+rescue_server_with_admin_pass['response_body'].update(
+    {'required': ['adminPass']})
+
 
 list_virtual_interfaces = {
     'status_code': [200],

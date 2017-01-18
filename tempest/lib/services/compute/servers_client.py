@@ -616,7 +616,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         API reference:
         http://developer.openstack.org/api-ref-compute-v2.1.html#rescue
         """
-        return self.action(server_id, 'rescue', schema.rescue_server, **kwargs)
+        if self.enable_instance_password:
+            rescue_schema = schema.rescue_server_with_admin_pass
+        else:
+            rescue_schema = schema.rescue_server
+        return self.action(server_id, 'rescue', rescue_schema, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server.
