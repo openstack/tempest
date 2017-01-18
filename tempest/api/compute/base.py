@@ -453,3 +453,17 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         super(BaseV2ComputeAdminTest, cls).setup_clients()
         cls.availability_zone_admin_client = (
             cls.os_adm.availability_zone_client)
+        cls.admin_flavors_client = cls.os_adm.flavors_client
+
+    def create_flavor(self, ram, vcpus, disk, name=None,
+                      is_public='True', **kwargs):
+        if name is None:
+            name = data_utils.rand_name(self.__class__.__name__ + "-flavor")
+        id = kwargs.pop('id', data_utils.rand_int_id(start=1000))
+        client = self.admin_flavors_client
+        flavor = client.create_flavor(
+            ram=ram, vcpus=vcpus, disk=disk, name=name,
+            id=id, is_public=is_public, **kwargs)['flavor']
+        self.addCleanup(client.wait_for_resource_deletion, flavor['id'])
+        self.addCleanup(client.delete_flavor, flavor['id'])
+        return flavor
