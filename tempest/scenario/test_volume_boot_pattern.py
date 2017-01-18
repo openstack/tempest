@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_log import log as logging
+import testtools
 
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -98,6 +99,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
     @test.attr(type='smoke')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
 

@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -85,6 +87,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
                                        'ACTIVE')
 
     @decorators.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(

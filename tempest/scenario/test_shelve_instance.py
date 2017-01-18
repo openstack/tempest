@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
@@ -73,11 +75,15 @@ class TestShelveInstance(manager.ScenarioTest):
         self.assertEqual(timestamp, timestamp2)
 
     @decorators.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     @test.services('compute', 'network', 'image')
     def test_shelve_instance(self):
         self._create_server_then_shelve_and_unshelve()
 
     @decorators.idempotent_id('c1b6318c-b9da-490b-9c67-9339b627271f')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     @test.services('compute', 'volume', 'network', 'image')
     def test_shelve_volume_backed_instance(self):
         self._create_server_then_shelve_and_unshelve(boot_from_volume=True)

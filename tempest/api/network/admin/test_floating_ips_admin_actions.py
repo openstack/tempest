@@ -31,6 +31,9 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+        if not CONF.network.public_network_id:
+            msg = "The public_network_id option must be specified."
+            raise cls.skipException(msg)
 
     @classmethod
     def setup_clients(cls):

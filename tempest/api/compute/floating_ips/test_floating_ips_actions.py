@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute.floating_ips import base
 from tempest import config
 from tempest.lib.common.utils import test_utils
@@ -86,6 +88,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('307efa27-dc6f-48a0-8cd2-162ce3ef0b52')
     @test.services('network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_associate_disassociate_floating_ip(self):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
@@ -107,6 +111,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('6edef4b2-aaf1-4abc-bbe3-993e2561e0fe')
     @test.services('network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
