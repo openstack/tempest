@@ -6,4 +6,5 @@ features:
     there are some apis are not included, add them.
 
       * namespace_objects_client(v2)
+      * namespace_tags_client(v2)
 
