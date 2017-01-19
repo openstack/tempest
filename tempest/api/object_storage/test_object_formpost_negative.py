@@ -73,7 +73,9 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
                                             max_file_count,
                                             expires)
 
-        signature = hmac.new(self.key, hmac_body, hashlib.sha1).hexdigest()
+        signature = hmac.new(
+            self.key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         fields = {'redirect': redirect,
                   'max_file_size': str(max_file_size),

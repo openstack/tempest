@@ -133,7 +133,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.idempotent_id('4646ac2d-9bfb-4c7d-a3c5-0f527402b3df')
     def test_list_container_contents_with_no_object(self):
@@ -143,7 +143,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual('', object_list.strip('\n'))
+        self.assertEmpty(object_list)
 
     @test.idempotent_id('fe323a32-57b9-4704-a996-2e68f83b09bc')
     def test_list_container_contents_with_delimiter(self):
@@ -157,7 +157,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name.split('/')[0], object_list.strip('/\n'))
+        self.assertEqual([object_name.split('/')[0] + '/'], object_list)
 
     @test.idempotent_id('55b4fa5c-e12e-4ca9-8fcf-a79afe118522')
     def test_list_container_contents_with_end_marker(self):
@@ -170,7 +170,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.idempotent_id('196f5034-6ab0-4032-9da9-a937bbb9fba9')
     def test_list_container_contents_with_format_json(self):
@@ -226,7 +226,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.idempotent_id('c31ddc63-2a58-4f6b-b25c-94d2937e6867')
     def test_list_container_contents_with_marker(self):
@@ -239,7 +239,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.idempotent_id('58ca6cc9-6af0-408d-aaec-2a6a7b2f0df9')
     def test_list_container_contents_with_path(self):
@@ -253,7 +253,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.idempotent_id('77e742c7-caf2-4ec9-8aa4-f7d509a3344c')
     def test_list_container_contents_with_prefix(self):
@@ -267,7 +267,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
-        self.assertEqual(object_name, object_list.strip('\n'))
+        self.assertEqual([object_name], object_list)
 
     @test.attr(type='smoke')
     @test.idempotent_id('96e68f0e-19ec-4aa2-86f3-adc6a45e14dd')

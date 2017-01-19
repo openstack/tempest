@@ -75,7 +75,9 @@ class ObjectTempUrlTest(base.BaseObjectTest):
             container, object_name)
 
         hmac_body = '%s\n%s\n%s' % (method, expires, path)
-        sig = hmac.new(key, hmac_body, hashlib.sha1).hexdigest()
+        sig = hmac.new(
+            key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
                                                              object_name,
@@ -129,9 +131,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @test.idempotent_id('9b08dade-3571-4152-8a4f-a4f2a873a735')
     @test.requires_ext(extension='tempurl', service='object')
     def test_put_object_using_temp_url(self):
-        new_data = data_utils.arbitrary_string(
-            size=len(self.object_name),
-            base_text=data_utils.rand_name(name="random"))
+        new_data = data_utils.random_bytes(size=len(self.object_name))
 
         expires = self._get_expiry_date()
         url = self._get_temp_url(self.container_name,

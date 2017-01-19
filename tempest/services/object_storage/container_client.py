@@ -140,5 +140,11 @@ class ContainerClient(rest_client.RestClient):
             body = json.loads(body)
         elif params and params.get('format') == 'xml':
             body = etree.fromstring(body)
+        # Else the content-type is plain/text
+        else:
+            body = [
+                obj_name for obj_name in body.decode().split('\n') if obj_name
+            ]
+
         self.expected_success([200, 204], resp.status)
         return resp, body

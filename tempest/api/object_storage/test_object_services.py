@@ -79,12 +79,12 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # create another object
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -98,7 +98,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_content_disposition(self):
         # create object with content_disposition
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata = {}
         metadata['content-disposition'] = 'inline'
         resp, _ = self.object_client.create_object(
@@ -122,7 +122,7 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='TestObject')
 
         # put compressed string
-        data_before = 'x' * 2000
+        data_before = b'x' * 2000
         data = zlib.compress(data_before)
         metadata = {}
         metadata['content-encoding'] = 'deflate'
@@ -147,7 +147,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_etag(self):
         # create object with etag
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         md5 = hashlib.md5(data).hexdigest()
         metadata = {'Etag': md5}
         resp, _ = self.object_client.create_object(
@@ -167,7 +167,7 @@ class ObjectTest(base.BaseObjectTest):
         # create object with expect_continue
 
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
 
         status, _ = self.object_client.create_object_continue(
             self.container_name, object_name, data)
@@ -183,7 +183,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_transfer_encoding(self):
         # create object with transfer_encoding
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string(1024)
+        data = data_utils.random_bytes(1024)
         status, _, resp_headers = self.object_client.put_object_with_chunk(
             container=self.container_name,
             name=object_name,
@@ -200,7 +200,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_x_fresh_metadata(self):
         # create object with x_fresh_metadata
         object_name_base = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata_1 = {'X-Object-Meta-test-meta': 'Meta'}
         self.object_client.create_object(self.container_name,
                                          object_name_base,
@@ -226,7 +226,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_x_object_meta(self):
         # create object with object_meta
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata = {'X-Object-Meta-test-meta': 'Meta'}
         resp, _ = self.object_client.create_object(
             self.container_name,
@@ -245,7 +245,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_x_object_metakey(self):
         # create object with the blank value of metadata
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata = {'X-Object-Meta-test-meta': ''}
         resp, _ = self.object_client.create_object(
             self.container_name,
@@ -264,7 +264,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_x_remove_object_meta(self):
         # create object with x_remove_object_meta
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata_add = {'X-Object-Meta-test-meta': 'Meta'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -287,7 +287,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_create_object_with_x_remove_object_metakey(self):
         # create object with the blank value of remove metadata
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata_add = {'X-Object-Meta-test-meta': 'Meta'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -310,7 +310,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_delete_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # delete object
@@ -342,7 +342,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_update_object_metadata_with_remove_metadata(self):
         # update object metadata with remove metadata
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         create_metadata = {'X-Object-Meta-test-meta1': 'Meta1'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -366,7 +366,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_update_object_metadata_with_create_and_remove_metadata(self):
         # creation and deletion of metadata with one request
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         create_metadata = {'X-Object-Meta-test-meta1': 'Meta1'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -464,7 +464,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_list_object_metadata(self):
         # get object metadata
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata = {'X-Object-Meta-test-meta': 'Meta'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -547,7 +547,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_get_object_with_metadata(self):
         # get object with metadata
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         metadata = {'X-Object-Meta-test-meta': 'Meta'}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -566,7 +566,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_get_object_with_range(self):
         # get object with range
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string(100)
+        data = data_utils.random_bytes(100)
         self.object_client.create_object(self.container_name,
                                          object_name,
                                          data,
@@ -621,13 +621,13 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s' % (self.container_name, object_name))
 
-        self.assertEqual(''.join(data_segments), body)
+        self.assertEqual(''.join(data_segments), body.decode())
 
     @test.idempotent_id('c05b4013-e4de-47af-be84-e598062b16fc')
     def test_get_object_with_if_match(self):
         # get object with if_match
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string(10)
+        data = data_utils.random_bytes(10)
         create_md5 = hashlib.md5(data).hexdigest()
         create_metadata = {'Etag': create_md5}
         self.object_client.create_object(self.container_name,
@@ -647,7 +647,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_get_object_with_if_modified_since(self):
         # get object with if_modified_since
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
+        data = data_utils.random_bytes()
         time_now = time.time()
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -667,7 +667,7 @@ class ObjectTest(base.BaseObjectTest):
     def test_get_object_with_if_none_match(self):
         # get object with if_none_match
         object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string(10)
+        data = data_utils.random_bytes()
         create_md5 = hashlib.md5(data).hexdigest()
         create_metadata = {'Etag': create_md5}
         self.object_client.create_object(self.container_name,
@@ -675,7 +675,7 @@ class ObjectTest(base.BaseObjectTest):
                                          data,
                                          metadata=create_metadata)
 
-        list_data = data_utils.arbitrary_string(15)
+        list_data = data_utils.random_bytes()
         list_md5 = hashlib.md5(list_data).hexdigest()
         list_metadata = {'If-None-Match': list_md5}
         resp, body = self.object_client.get_object(
@@ -717,15 +717,13 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_in_same_container(self):
         # create source object
         src_object_name = data_utils.rand_name(name='SrcObject')
-        src_data = data_utils.arbitrary_string(size=len(src_object_name) * 2,
-                                               base_text=src_object_name)
+        src_data = data_utils.random_bytes(size=len(src_object_name) * 2)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name,
                                                    src_data)
         # create destination object
         dst_object_name = data_utils.rand_name(name='DstObject')
-        dst_data = data_utils.arbitrary_string(size=len(dst_object_name) * 3,
-                                               base_text=dst_object_name)
+        dst_data = data_utils.random_bytes(size=len(dst_object_name) * 3)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    dst_object_name,
                                                    dst_data)
@@ -764,14 +762,12 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_2d_way(self):
         # create source object
         src_object_name = data_utils.rand_name(name='SrcObject')
-        src_data = data_utils.arbitrary_string(size=len(src_object_name) * 2,
-                                               base_text=src_object_name)
+        src_data = data_utils.random_bytes(size=len(src_object_name) * 2)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name, src_data)
         # create destination object
         dst_object_name = data_utils.rand_name(name='DstObject')
-        dst_data = data_utils.arbitrary_string(size=len(dst_object_name) * 3,
-                                               base_text=dst_object_name)
+        dst_data = data_utils.random_bytes(size=len(dst_object_name) * 3)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    dst_object_name, dst_data)
         # copy source object to destination
@@ -799,8 +795,7 @@ class ObjectTest(base.BaseObjectTest):
         self.containers.append(dst_container_name)
         # create object in source container
         object_name = data_utils.rand_name(name='Object')
-        data = data_utils.arbitrary_string(size=len(object_name) * 2,
-                                           base_text=object_name)
+        data = data_utils.random_bytes(size=len(object_name) * 2)
         resp, _ = self.object_client.create_object(src_container_name,
                                                    object_name, data)
         # set object metadata
@@ -933,7 +928,7 @@ class ObjectTest(base.BaseObjectTest):
         # downloading the object
         resp, body = self.object_client.get_object(
             self.container_name, object_name)
-        self.assertEqual(''.join(data_segments), body)
+        self.assertEqual(''.join(data_segments), body.decode())
 
     @test.idempotent_id('50d01f12-526f-4360-9ac2-75dd508d7b68')
     def test_get_object_if_different(self):
@@ -958,7 +953,7 @@ class ObjectTest(base.BaseObjectTest):
 
         # local copy is different, download
         local_data = "something different"
-        md5 = hashlib.md5(local_data).hexdigest()
+        md5 = hashlib.md5(local_data.encode()).hexdigest()
         headers = {'If-None-Match': md5}
         resp, body = self.object_client.get(url, headers=headers)
         self.assertHeaders(resp, 'Object', 'GET')
@@ -1002,8 +997,7 @@ class PublicObjectTest(base.BaseObjectTest):
 
         # create object
         object_name = data_utils.rand_name(name='Object')
-        data = data_utils.arbitrary_string(size=len(object_name),
-                                           base_text=object_name)
+        data = data_utils.random_bytes(size=len(object_name))
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -1039,8 +1033,7 @@ class PublicObjectTest(base.BaseObjectTest):
 
         # create object
         object_name = data_utils.rand_name(name='Object')
-        data = data_utils.arbitrary_string(size=len(object_name) * 1,
-                                           base_text=object_name)
+        data = data_utils.random_bytes(size=len(object_name))
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertHeaders(resp, 'Object', 'PUT')
