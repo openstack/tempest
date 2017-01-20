@@ -679,7 +679,7 @@ ValidationGroup = [
                help='Timeout in seconds to wait for the TCP connection to be '
                     'successful.'),
     cfg.IntOpt('ssh_timeout',
-               default=300,
+               default=60, # ssh_timeout value is too big. 300s seems to be too much incase the ssh_timout occurs
                help='Timeout in seconds to wait for the ssh banner.'),
     cfg.StrOpt('image_ssh_user',
                default="root",
@@ -852,7 +852,7 @@ ObjectStoreGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the object-store service."),
     cfg.IntOpt('container_sync_timeout',
-               default=600,
+               default=60, # Default value of container_sync_timeout value is too big (600s). Incase the test fails due to timeout one has to wait 600s. Is 600s realistic timeout value?
                help="Number of seconds to time on waiting for a container "
                     "to container synchronization complete."),
     cfg.IntOpt('container_sync_interval',
