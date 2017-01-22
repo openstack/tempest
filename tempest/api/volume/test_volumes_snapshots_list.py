@@ -105,12 +105,6 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         # List returns zero elements
         self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
 
-    def cleanup_snapshot(self, snapshot):
-        # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
-
 
 class VolumesV1SnapshotLimitTestJSON(VolumesV2SnapshotListTestJSON):
     _api_version = 1
