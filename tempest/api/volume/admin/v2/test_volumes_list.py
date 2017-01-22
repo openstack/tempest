@@ -32,7 +32,7 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
         # NOTE(zhufl): When using pre-provisioned credentials, the project
         # may have volumes other than those created below.
         cls.volume_list = cls.volumes_client.list_volumes()['volumes']
-        for i in range(3):
+        for _ in range(3):
             volume = cls.create_volume()
             # Fetch volume details
             volume_details = cls.volumes_client.show_volume(

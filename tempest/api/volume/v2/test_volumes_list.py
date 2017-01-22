@@ -42,7 +42,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         # may have volumes other than those created below.
         existing_volumes = cls.volumes_client.list_volumes()['volumes']
         cls.volume_id_list = [vol['id'] for vol in existing_volumes]
-        for i in range(3):
+        for _ in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
             cls.volume_id_list.append(volume['id'])
 

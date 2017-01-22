@@ -42,7 +42,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         # Create two volume_types
-        for i in range(2):
+        for _ in range(2):
             vol_type = self.create_volume_type(
                 extra_specs=extra_specs)
             volume_types.append(vol_type)
