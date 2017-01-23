@@ -111,6 +111,9 @@ update_host = {
             'status': {'enum': ['enabled', 'disabled']}
         },
         'additionalProperties': False,
-        'required': ['host', 'maintenance_mode', 'status']
+        'anyOf': [
+            {'required': ['host', 'status']},
+            {'required': ['host', 'maintenance_mode']}
+        ]
     }
 }
