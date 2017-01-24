@@ -20,23 +20,25 @@ Track test skips via launchpadlib API and raise alerts if a bug
 is fixed but a skip is still in the Tempest test code
 """
 
-import logging
 import os
 import re
 
 from launchpadlib import launchpad
+from oslo_log import log as logging
 
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 TESTDIR = os.path.join(BASEDIR, 'tempest')
 LPCACHEDIR = os.path.expanduser('~/.launchpadlib/cache')
 
+LOG = logging.getLogger(__name__)
+
 
 def info(msg, *args, **kwargs):
-    logging.info(msg, *args, **kwargs)
+    LOG.info(msg, *args, **kwargs)
 
 
 def debug(msg, *args, **kwargs):
-    logging.debug(msg, *args, **kwargs)
+    LOG.debug(msg, *args, **kwargs)
 
 
 def find_skips(start=TESTDIR):
@@ -102,8 +104,6 @@ def get_results(result_dict):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s: %(message)s',
-                        level=logging.INFO)
     results = find_skips()
     unique_bugs = sorted(set([bug for (method, bug) in get_results(results)]))
     unskips = []
