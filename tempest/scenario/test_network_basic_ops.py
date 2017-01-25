@@ -347,20 +347,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             ip_address, private_key=private_key)
 
         for remote_ip in address_list:
-            if should_connect:
-                msg = ("Timed out waiting for %s to become "
-                       "reachable") % remote_ip
-            else:
-                msg = "ip address %s is reachable" % remote_ip
-            try:
-                self.assertTrue(self._check_remote_connectivity
-                                (ssh_source, remote_ip, should_connect),
-                                msg)
-            except Exception:
-                LOG.exception("Unable to access {dest} via ssh to "
-                              "floating-ip {src}".format(dest=remote_ip,
-                                                         src=floating_ip))
-                raise
+            self.check_remote_connectivity(ssh_source, remote_ip,
+                                           should_connect)
 
     @test.attr(type='smoke')
     @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
@@ -648,21 +636,21 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True, msg="before updating "
             "admin_state_up of instance port to False")
-        self._check_remote_connectivity(ssh_client, dest=server_pip,
-                                        should_succeed=True)
+        self.check_remote_connectivity(ssh_client, dest=server_pip,
+                                       should_succeed=True)
         self.ports_client.update_port(port_id, admin_state_up=False)
         self.check_public_network_connectivity(
             should_connect=False, msg="after updating "
             "admin_state_up of instance port to False",
             should_check_floating_ip_status=False)
-        self._check_remote_connectivity(ssh_client, dest=server_pip,
-                                        should_succeed=False)
+        self.check_remote_connectivity(ssh_client, dest=server_pip,
+                                       should_succeed=False)
         self.ports_client.update_port(port_id, admin_state_up=True)
         self.check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of instance port to True")
-        self._check_remote_connectivity(ssh_client, dest=server_pip,
-                                        should_succeed=True)
+        self.check_remote_connectivity(ssh_client, dest=server_pip,
+                                       should_succeed=True)
 
     @decorators.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
     @test.services('compute', 'network')
@@ -833,15 +821,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         spoof_nic = ssh_client.get_nic_name_by_mac(spoof_port["mac_address"])
         peer = self._create_server(self.new_net)
         peer_address = peer['addresses'][self.new_net['name']][0]['addr']
-        self._check_remote_connectivity(ssh_client, dest=peer_address,
-                                        nic=spoof_nic, should_succeed=True)
+        self.check_remote_connectivity(ssh_client, dest=peer_address,
+                                       nic=spoof_nic, should_succeed=True)
         ssh_client.set_mac_address(spoof_nic, spoof_mac)
         new_mac = ssh_client.get_mac_address(nic=spoof_nic)
         self.assertEqual(spoof_mac, new_mac)
-        self._check_remote_connectivity(ssh_client, dest=peer_address,
-                                        nic=spoof_nic, should_succeed=False)
+        self.check_remote_connectivity(ssh_client, dest=peer_address,
+                                       nic=spoof_nic, should_succeed=False)
         self.ports_client.update_port(spoof_port["id"],
                                       port_security_enabled=False,
                                       security_groups=[])
-        self._check_remote_connectivity(ssh_client, dest=peer_address,
-                                        nic=spoof_nic, should_succeed=True)
+        self.check_remote_connectivity(ssh_client, dest=peer_address,
+                                       nic=spoof_nic, should_succeed=True)

@@ -368,20 +368,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             access_point_ssh, private_key=private_key)
         return access_point_ssh
 
-    def _check_connectivity(self, access_point, ip, should_succeed=True):
-        if should_succeed:
-            msg = "Timed out waiting for %s to become reachable" % ip
-        else:
-            msg = "%s is reachable" % ip
-        self.assertTrue(self._check_remote_connectivity(access_point, ip,
-                                                        should_succeed), msg)
-
     def _test_in_tenant_block(self, tenant):
         access_point_ssh = self._connect_to_access_point(tenant)
         for server in tenant.servers:
-            self._check_connectivity(access_point=access_point_ssh,
-                                     ip=self._get_server_ip(server),
-                                     should_succeed=False)
+            self.check_remote_connectivity(source=access_point_ssh,
+                                           dest=self._get_server_ip(server),
+                                           should_succeed=False)
 
     def _test_in_tenant_allow(self, tenant):
         ruleset = dict(
@@ -396,8 +388,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         )
         access_point_ssh = self._connect_to_access_point(tenant)
         for server in tenant.servers:
-            self._check_connectivity(access_point=access_point_ssh,
-                                     ip=self._get_server_ip(server))
+            self.check_remote_connectivity(source=access_point_ssh,
+                                           dest=self._get_server_ip(server))
 
     def _test_cross_tenant_block(self, source_tenant, dest_tenant):
         # if public router isn't defined, then dest_tenant access is via
@@ -405,8 +397,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         access_point_ssh = self._connect_to_access_point(source_tenant)
         ip = self._get_server_ip(dest_tenant.access_point,
                                  floating=self.floating_ip_access)
-        self._check_connectivity(access_point=access_point_ssh, ip=ip,
-                                 should_succeed=False)
+        self.check_remote_connectivity(source=access_point_ssh, dest=ip,
+                                       should_succeed=False)
 
     def _test_cross_tenant_allow(self, source_tenant, dest_tenant):
         """check for each direction:
@@ -427,7 +419,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         access_point_ssh = self._connect_to_access_point(source_tenant)
         ip = self._get_server_ip(dest_tenant.access_point,
                                  floating=self.floating_ip_access)
-        self._check_connectivity(access_point_ssh, ip)
+        self.check_remote_connectivity(access_point_ssh, ip)
 
         # test that reverse traffic is still blocked
         self._test_cross_tenant_block(dest_tenant, source_tenant)
@@ -444,7 +436,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         access_point_ssh_2 = self._connect_to_access_point(dest_tenant)
         ip = self._get_server_ip(source_tenant.access_point,
                                  floating=self.floating_ip_access)
-        self._check_connectivity(access_point_ssh_2, ip)
+        self.check_remote_connectivity(access_point_ssh_2, ip)
 
     def _verify_mac_addr(self, tenant):
         """Verify that VM has the same ip, mac as listed in port"""
@@ -537,9 +529,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # Check connectivity failure with default security group
         try:
             access_point_ssh = self._connect_to_access_point(new_tenant)
-            self._check_connectivity(access_point=access_point_ssh,
-                                     ip=self._get_server_ip(server),
-                                     should_succeed=False)
+            self.check_remote_connectivity(source=access_point_ssh,
+                                           dest=self._get_server_ip(server),
+                                           should_succeed=False)
             server_id = server['id']
             port_id = self.admin_manager.ports_client.list_ports(
                 device_id=server_id)['ports'][0]['id']
@@ -547,9 +539,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             # update port with new security group and check connectivity
             self.ports_client.update_port(port_id, security_groups=[
                 new_tenant.security_groups['new_sg']['id']])
-            self._check_connectivity(
-                access_point=access_point_ssh,
-                ip=self._get_server_ip(server))
+            self.check_remote_connectivity(
+                source=access_point_ssh,
+                dest=self._get_server_ip(server))
         except Exception:
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)
@@ -612,16 +604,16 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.ports_client.update_port(port_id,
                                           port_security_enabled=True,
                                           security_groups=[])
-            self._check_connectivity(access_point=access_point_ssh,
-                                     ip=self._get_server_ip(server),
-                                     should_succeed=False)
+            self.check_remote_connectivity(source=access_point_ssh,
+                                           dest=self._get_server_ip(server),
+                                           should_succeed=False)
 
             self.ports_client.update_port(port_id,
                                           port_security_enabled=False,
                                           security_groups=[])
-            self._check_connectivity(
-                access_point=access_point_ssh,
-                ip=self._get_server_ip(server))
+            self.check_remote_connectivity(
+                source=access_point_ssh,
+                dest=self._get_server_ip(server))
         except Exception:
             for tenant in self.tenants.values():
                 self._log_console_output(servers=tenant.servers)

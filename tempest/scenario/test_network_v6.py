@@ -191,25 +191,18 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             self.assertTrue(test_utils.call_until_true(srv2_v6_addr_assigned,
                             CONF.validation.ping_timeout, 1))
 
-        self._check_connectivity(sshv4_1, ips_from_api_2['4'])
-        self._check_connectivity(sshv4_2, ips_from_api_1['4'])
+        self.check_remote_connectivity(sshv4_1, ips_from_api_2['4'])
+        self.check_remote_connectivity(sshv4_2, ips_from_api_1['4'])
 
         for i in range(n_subnets6):
-            self._check_connectivity(sshv4_1,
-                                     ips_from_api_2['6'][i])
-            self._check_connectivity(sshv4_1,
-                                     self.subnets_v6[i]['gateway_ip'])
-            self._check_connectivity(sshv4_2,
-                                     ips_from_api_1['6'][i])
-            self._check_connectivity(sshv4_2,
-                                     self.subnets_v6[i]['gateway_ip'])
-
-    def _check_connectivity(self, source, dest):
-        self.assertTrue(
-            self._check_remote_connectivity(source, dest),
-            "Timed out waiting for %s to become reachable from %s" %
-            (dest, source.ssh_client.host)
-        )
+            self.check_remote_connectivity(sshv4_1,
+                                           ips_from_api_2['6'][i])
+            self.check_remote_connectivity(sshv4_1,
+                                           self.subnets_v6[i]['gateway_ip'])
+            self.check_remote_connectivity(sshv4_2,
+                                           ips_from_api_1['6'][i])
+            self.check_remote_connectivity(sshv4_2,
+                                           self.subnets_v6[i]['gateway_ip'])
 
     @test.attr(type='slow')
     @decorators.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
