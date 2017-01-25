@@ -190,3 +190,40 @@ class RolesClient(rest_client.RestClient):
                                (domain_id, group_id, role_id))
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
+
+    def create_role_inference_rule(self, prior_role, implies_role):
+        """Create a role inference rule."""
+        resp, body = self.put('roles/%s/implies/%s' %
+                              (prior_role, implies_role), None)
+        self.expected_success(201, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_role_inference_rule(self, prior_role, implies_role):
+        """Get a role inference rule."""
+        resp, body = self.get('roles/%s/implies/%s' %
+                              (prior_role, implies_role))
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_role_inferences_rules(self, prior_role):
+        """List the inferences rules from a role."""
+        resp, body = self.get('roles/%s/implies' % prior_role)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def check_role_inference_rule(self, prior_role, implies_role):
+        """Check a role inference rule."""
+        resp, body = self.head('roles/%s/implies/%s' %
+                               (prior_role, implies_role))
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp)
+
+    def delete_role_inference_rule(self, prior_role, implies_role):
+        """Delete a role inference rule."""
+        resp, body = self.delete('roles/%s/implies/%s' %
+                                 (prior_role, implies_role))
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp)
