@@ -37,7 +37,30 @@ class Client(object):
 
     def __init__(self, host, username, password=None, timeout=300, pkey=None,
                  channel_timeout=10, look_for_keys=False, key_filename=None,
-                 port=22):
+                 port=22, proxy_client=None):
+        """SSH client.
+
+        Many of parameters are just passed to the underlying implementation
+        as it is.  See the paramiko documentation for more details.
+        http://docs.paramiko.org/en/2.1/api/client.html#paramiko.client.SSHClient.connect
+
+        :param host: Host to login.
+        :param username: SSH username.
+        :param password: SSH password, or a password to unlock private key.
+        :param timeout: Timeout in seconds, including retries.
+            Default is 300 seconds.
+        :param pkey: Private key.
+        :param channel_timeout: Channel timeout in seconds, passed to the
+            paramiko.  Default is 10 seconds.
+        :param look_for_keys: Whether or not to search for private keys
+            in ``~/.ssh``.  Default is False.
+        :param key_filename: Filename for private key to use.
+        :param port: SSH port number.
+        :param proxy_client: Another SSH client to provide a transport
+            for ssh-over-ssh.  The default is None, which means
+            not to use ssh-over-ssh.
+        :type proxy_client: ``tempest.lib.common.ssh.Client`` object
+        """
         self.host = host
         self.username = username
         self.port = port
@@ -51,6 +74,8 @@ class Client(object):
         self.timeout = int(timeout)
         self.channel_timeout = float(channel_timeout)
         self.buf_size = 1024
+        self.proxy_client = proxy_client
+        self._proxy_conn = None
 
     def _get_ssh_connection(self, sleep=1.5, backoff=1):
         """Returns an ssh connection to the specified host."""
@@ -59,6 +84,10 @@ class Client(object):
         ssh.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())
         _start_time = time.time()
+        if self.proxy_client is not None:
+            proxy_chan = self._get_proxy_channel()
+        else:
+            proxy_chan = None
         if self.pkey is not None:
             LOG.info("Creating ssh connection to '%s:%d' as '%s'"
                      " with public key authentication",
@@ -74,7 +103,8 @@ class Client(object):
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
-                            timeout=self.channel_timeout, pkey=self.pkey)
+                            timeout=self.channel_timeout, pkey=self.pkey,
+                            sock=proxy_chan)
                 LOG.info("ssh connection to %s@%s successfully created",
                          self.username, self.host)
                 return ssh
@@ -175,3 +205,14 @@ class Client(object):
         """Raises an exception when we can not connect to server via ssh."""
         connection = self._get_ssh_connection()
         connection.close()
+
+    def _get_proxy_channel(self):
+        conn = self.proxy_client._get_ssh_connection()
+        # Keep a reference to avoid g/c
+        # https://github.com/paramiko/paramiko/issues/440
+        self._proxy_conn = conn
+        transport = conn.get_transport()
+        chan = transport.open_session()
+        cmd = 'nc %s %s' % (self.host, self.port)
+        chan.exec_command(cmd)
+        return chan
