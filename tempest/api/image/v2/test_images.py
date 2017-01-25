@@ -126,11 +126,12 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(new_image_name, body['name'])
 
 
-class ListImagesTest(base.BaseV2ImageTest):
+class ListUserImagesTest(base.BaseV2ImageTest):
+    """Here we test the listing of image information"""
 
     @classmethod
     def resource_setup(cls):
-        super(ListImagesTest, cls).resource_setup()
+        super(ListUserImagesTest, cls).resource_setup()
         # We add a few images here to test the listing functionality of
         # the images API
         container_fmts = CONF.image.container_formats
@@ -165,10 +166,6 @@ class ListImagesTest(base.BaseV2ImageTest):
         cls.test_data['size'] = size
 
         return image['id']
-
-
-class ListUserImagesTest(ListImagesTest):
-    """Here we test the listing of image information"""
 
     def _list_by_param_value_and_assert(self, params):
         """Perform list action with given params and validates result."""
@@ -323,7 +320,7 @@ class ListUserImagesTest(ListImagesTest):
         self.assertEqual("images", body['name'])
 
 
-class ListSharedImagesTest(ListImagesTest):
+class ListSharedImagesTest(base.BaseV2ImageTest):
     """Here we test the listing of a shared image information"""
 
     credentials = ['primary', 'alt']
