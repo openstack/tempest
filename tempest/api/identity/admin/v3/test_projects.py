@@ -88,6 +88,30 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project_name, project['name'])
         self.assertEqual(root_project_id, parent_id)
 
+    @decorators.idempotent_id('a7eb9416-6f9b-4dbb-b71b-7f73aaef59d5')
+    @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
+                          'Reseller not available.')
+    def test_create_is_domain_project(self):
+        project_name = data_utils.rand_name('is_domain_project')
+        project = self.projects_client.create_project(
+            project_name, domain_id=None, is_domain=True)['project']
+        # To delete a domain, we need to disable it first
+        self.addCleanup(self.projects_client.delete_project, project['id'])
+        self.addCleanup(self.projects_client.update_project, project['id'],
+                        enabled=False)
+
+        # Check if the is_domain project is correctly returned by both
+        # project and domain APIs
+        projects_list = self.projects_client.list_projects(
+            params={'is_domain': True})['projects']
+        self.assertIn(project, projects_list)
+
+        # The domains API return different attributes for the entity, so we
+        # compare the entities IDs
+        domains_ids = [d['id'] for d in self.domains_client.list_domains()[
+            'domains']]
+        self.assertIn(project['id'], domains_ids)
+
     @decorators.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
         # Create a project that is enabled
