@@ -30,7 +30,7 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
 
     def _create_and_check_keypairs(self, user_id):
         key_list = list()
-        for i in range(2):
+        for _ in range(2):
             k_name = data_utils.rand_name('keypair')
             keypair = self.create_keypair(k_name,
                                           keypair_type='ssh',

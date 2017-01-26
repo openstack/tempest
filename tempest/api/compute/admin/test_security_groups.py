@@ -39,7 +39,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         # List of all security groups created
         security_group_list = []
         # Create two security groups for a non-admin tenant
-        for i in range(2):
+        for _ in range(2):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
             securitygroup = self.client.create_security_group(
@@ -50,7 +50,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
         client_tenant_id = securitygroup['tenant_id']
         # Create two security groups for admin tenant
-        for i in range(2):
+        for _ in range(2):
             name = data_utils.rand_name('securitygroup')
             description = data_utils.rand_name('description')
             adm_securitygroup = self.adm_client.create_security_group(

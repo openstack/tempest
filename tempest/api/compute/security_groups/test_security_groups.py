@@ -34,7 +34,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Positive test:Should return the list of Security Groups
         # Create 3 Security Groups
         security_group_list = []
-        for i in range(3):
+        for _ in range(3):
             body = self.create_security_group()
             security_group_list.append(body)
         # Fetch all Security Groups and verify the list

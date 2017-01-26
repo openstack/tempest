@@ -33,7 +33,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         super(FloatingIPDetailsTestJSON, cls).resource_setup()
         cls.floating_ip = []
         cls.floating_ip_id = []
-        for i in range(3):
+        for _ in range(3):
             body = cls.client.create_floating_ip(
                 pool=CONF.network.floating_network_name)['floating_ip']
             cls.floating_ip.append(body)

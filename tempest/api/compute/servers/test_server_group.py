@@ -83,7 +83,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         # Create and Delete the server-groups with same name and same policy
         server_groups = []
         server_group_name = data_utils.rand_name('server-group')
-        for i in range(0, 2):
+        for _ in range(0, 2):
             server_groups.append(self._create_server_group(server_group_name,
                                                            self.policy))
         for key in ['name', 'policies']:
