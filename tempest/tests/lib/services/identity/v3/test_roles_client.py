@@ -18,31 +18,39 @@ from tempest.tests.lib.services import base
 
 
 class TestRolesClient(base.BaseServiceTest):
+
+    FAKE_ROLE_ID = "1"
+    FAKE_ROLE_NAME = "test"
+    FAKE_DOMAIN_ID = "1"
+
+    FAKE_ROLE_ID_2 = "2"
+    FAKE_ROLE_NAME_2 = "test2"
+
     FAKE_ROLE_INFO = {
         "role": {
-            "domain_id": "1",
-            "id": "1",
-            "name": "test",
-            "links": "example.com"
+            "domain_id": FAKE_DOMAIN_ID,
+            "id": FAKE_ROLE_ID,
+            "name": FAKE_ROLE_NAME,
+            "links": {
+                "self": "http://example.com/identity/v3/roles/%s" % (
+                    FAKE_ROLE_ID)
+            }
         }
     }
 
-    FAKE_LIST_ROLES = {
-        "roles": [
-            {
-                "domain_id": "1",
-                "id": "1",
-                "name": "test",
-                "links": "example.com"
-            },
-            {
-                "domain_id": "2",
-                "id": "2",
-                "name": "test2",
-                "links": "example.com"
+    FAKE_ROLE_INFO_2 = {
+        "role": {
+            "domain_id": FAKE_DOMAIN_ID,
+            "id": FAKE_ROLE_ID_2,
+            "name": FAKE_ROLE_NAME_2,
+            "links": {
+                "self": "http://example.com/identity/v3/roles/%s" % (
+                    FAKE_ROLE_ID_2)
             }
-        ]
+        }
     }
+
+    FAKE_LIST_ROLES = {"roles": [FAKE_ROLE_INFO, FAKE_ROLE_INFO_2]}
 
     def setUp(self):
         super(TestRolesClient, self).setUp()
@@ -56,8 +64,8 @@ class TestRolesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.post',
             self.FAKE_ROLE_INFO,
             bytes_body,
-            domain_id="1",
-            name="test",
+            domain_id=self.FAKE_DOMAIN_ID,
+            name=self.FAKE_ROLE_NAME,
             status=201)
 
     def _test_show_role(self, bytes_body=False):
@@ -66,7 +74,7 @@ class TestRolesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_ROLE_INFO,
             bytes_body,
-            role_id="1")
+            role_id=self.FAKE_ROLE_ID)
 
     def _test_list_roles(self, bytes_body=False):
         self.check_service_client_function(
@@ -81,8 +89,8 @@ class TestRolesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.patch',
             self.FAKE_ROLE_INFO,
             bytes_body,
-            role_id="1",
-            name="test")
+            role_id=self.FAKE_ROLE_ID,
+            name=self.FAKE_ROLE_NAME)
 
     def _test_create_user_role_on_project(self, bytes_body=False):
         self.check_service_client_function(
@@ -193,7 +201,7 @@ class TestRolesClient(base.BaseServiceTest):
             self.client.delete_role,
             'tempest.lib.common.rest_client.RestClient.delete',
             {},
-            role_id="1",
+            role_id=self.FAKE_ROLE_ID,
             status=204)
 
     def test_create_user_role_on_project_with_str_body(self):
