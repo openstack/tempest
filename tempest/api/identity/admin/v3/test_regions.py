@@ -30,7 +30,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(RegionsTestJSON, cls).resource_setup()
         cls.setup_regions = list()
-        for i in range(2):
+        for _ in range(2):
             r_description = data_utils.rand_name('description')
             region = cls.client.create_region(
                 description=r_description)['region']

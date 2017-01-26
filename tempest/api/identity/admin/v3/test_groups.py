@@ -80,7 +80,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.groups_client.delete_group, group['id'])
         # add user into group
         users = []
-        for i in range(3):
+        for _ in range(3):
             name = data_utils.rand_name('User')
             password = data_utils.rand_password()
             user = self.users_client.create_user(name=name,
@@ -110,7 +110,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.users_client.delete_user, user['id'])
         # create two groups, and add user into them
         groups = []
-        for i in range(2):
+        for _ in range(2):
             name = data_utils.rand_name('Group')
             group = self.groups_client.create_group(
                 name=name, domain_id=self.domain['id'])['group']

@@ -125,7 +125,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
         user = self.users_client.show_user(user_body['id'])['user']
         role = self.roles_client.show_role(role_body['id'])['role']
-        for i in range(2):
+        for _ in range(2):
             # Creating project so as to assign role
             project_body = self.projects_client.create_project(
                 data_utils.rand_name('project'),

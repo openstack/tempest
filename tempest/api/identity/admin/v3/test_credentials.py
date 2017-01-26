@@ -31,7 +31,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_password()
-        for i in range(2):
+        for _ in range(2):
             cls.project = cls.projects_client.create_project(
                 data_utils.rand_name('project'),
                 description=data_utils.rand_name('project-desc'))['project']
@@ -92,7 +92,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         created_cred_ids = list()
         fetched_cred_ids = list()
 
-        for i in range(2):
+        for _ in range(2):
             blob = '{"access": "%s", "secret": "%s"}' % (
                 data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
             cred = self.creds_client.create_credential(

@@ -40,7 +40,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
-        for i in range(2):
+        for _ in range(2):
             region = data_utils.rand_name('region')
             url = data_utils.rand_url()
             interface = 'public'
