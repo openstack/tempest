@@ -26,7 +26,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         # Keypairs created should be available in the response list
         # Create 3 keypairs
         key_list = list()
-        for i in range(3):
+        for _ in range(3):
             keypair = self.create_keypair()
             # Need to pop these keys so that our compare doesn't fail later,
             # as the keypair dicts from list API doesn't have them.

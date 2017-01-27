@@ -36,7 +36,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # tearDownClass method of the super-class.
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
-        for x in range(2):
+        for _ in range(2):
             srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 

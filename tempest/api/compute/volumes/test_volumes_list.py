@@ -45,7 +45,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         # Create 3 Volumes
         cls.volume_list = []
         cls.volume_id_list = []
-        for i in range(3):
+        for _ in range(3):
             metadata = {'Type': 'work'}
             volume = cls.create_volume(metadata=metadata)
             volume = cls.client.show_volume(volume['id'])['volume']

@@ -36,7 +36,7 @@ class BaremetalNodesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_list_get_baremetal_nodes(self):
         # Create some test nodes in Ironic directly
         test_nodes = []
-        for i in range(0, 3):
+        for _ in range(0, 3):
             _, node = self.ironic_client.create_node()
             test_nodes.append(node)
             self.addCleanup(self.ironic_client.delete_node, node['uuid'])
