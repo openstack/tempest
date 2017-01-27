@@ -75,10 +75,13 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         self.addCleanup(self.users_client.delete_user, user['id'])
         return user
 
-    def setup_test_role(self):
+    def setup_test_role(self, domain_id=None):
         """Set up a test role."""
-        role = self.roles_client.create_role(
-            name=data_utils.rand_name('test_role'))['role']
+        params = {'name': data_utils.rand_name('test_role')}
+        if domain_id:
+            params['domain_id'] = domain_id
+
+        role = self.roles_client.create_role(**params)['role']
         # Delete the role at the end of the test
         self.addCleanup(self.roles_client.delete_role, role['id'])
         return role
