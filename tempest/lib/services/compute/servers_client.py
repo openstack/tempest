@@ -30,6 +30,8 @@ from tempest.lib.services.compute import base_compute_client
 
 
 class ServersClient(base_compute_client.BaseComputeClient):
+    """Service client for the resource /servers"""
+
     schema_versions_info = [
         {'min': None, 'max': '2.2', 'schema': schema},
         {'min': '2.3', 'max': '2.8', 'schema': schemav23},
