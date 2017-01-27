@@ -60,7 +60,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         if CONF.identity_feature_enabled.security_compliance:
             # First we need to clear the password history
             unique_count = CONF.identity.user_unique_last_password_count
-            for i in range(unique_count):
+            for _ in range(unique_count):
                 random_pass = data_utils.rand_password()
                 self._update_password(
                     original_password=new_pass, password=random_pass)
@@ -142,7 +142,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
 
         # Lock user account by using the wrong password to login
         bad_password = data_utils.rand_password()
-        for i in range(CONF.identity.user_lockout_failure_attempts):
+        for _ in range(CONF.identity.user_lockout_failure_attempts):
             self.assertRaises(exceptions.Unauthorized,
                               self.non_admin_token.auth,
                               user_id=self.user_id,

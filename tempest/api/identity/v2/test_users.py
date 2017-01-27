@@ -58,7 +58,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         if CONF.identity_feature_enabled.security_compliance:
             # First we need to clear the password history
             unique_count = CONF.identity.user_unique_last_password_count
-            for i in range(unique_count):
+            for _ in range(unique_count):
                 random_pass = data_utils.rand_password()
                 self._update_password(
                     user_id, original_password=new_pass, password=random_pass)
