@@ -15,7 +15,7 @@
 
 from tempest.api.compute.keypairs import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class KeyPairsV210TestJSON(base.BaseKeypairTest):
@@ -45,7 +45,7 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
             key_list.append(keypair)
         return key_list
 
-    @test.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
+    @decorators.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
     def test_admin_manage_keypairs_for_other_users(self):
         user_id = self.non_admin_client.user_id
         key_list = self._create_and_check_keypairs(user_id)

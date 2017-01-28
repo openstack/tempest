@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -33,19 +33,19 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     def assertHypervisors(self, hypers):
         self.assertGreater(len(hypers), 0, "No hypervisors found: %s" % hypers)
 
-    @test.idempotent_id('7f0ceacd-c64d-4e96-b8ee-d02943142cc5')
+    @decorators.idempotent_id('7f0ceacd-c64d-4e96-b8ee-d02943142cc5')
     def test_get_hypervisor_list(self):
         # List of hypervisor and available hypervisors hostname
         hypers = self._list_hypervisors()
         self.assertHypervisors(hypers)
 
-    @test.idempotent_id('1e7fdac2-b672-4ad1-97a4-bad0e3030118')
+    @decorators.idempotent_id('1e7fdac2-b672-4ad1-97a4-bad0e3030118')
     def test_get_hypervisor_list_details(self):
         # Display the details of the all hypervisor
         hypers = self.client.list_hypervisors(detail=True)['hypervisors']
         self.assertHypervisors(hypers)
 
-    @test.idempotent_id('94ff9eae-a183-428e-9cdb-79fde71211cc')
+    @decorators.idempotent_id('94ff9eae-a183-428e-9cdb-79fde71211cc')
     def test_get_hypervisor_show_details(self):
         # Display the details of the specified hypervisor
         hypers = self._list_hypervisors()
@@ -56,7 +56,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(details['hypervisor_hostname'],
                          hypers[0]['hypervisor_hostname'])
 
-    @test.idempotent_id('e81bba3f-6215-4e39-a286-d52d2f906862')
+    @decorators.idempotent_id('e81bba3f-6215-4e39-a286-d52d2f906862')
     def test_get_hypervisor_show_servers(self):
         # Show instances about the specific hypervisors
         hypers = self._list_hypervisors()
@@ -67,14 +67,14 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
                        ['hypervisors'])
         self.assertGreater(len(hypervisors), 0)
 
-    @test.idempotent_id('797e4f28-b6e0-454d-a548-80cc77c00816')
+    @decorators.idempotent_id('797e4f28-b6e0-454d-a548-80cc77c00816')
     def test_get_hypervisor_stats(self):
         # Verify the stats of the all hypervisor
         stats = (self.client.show_hypervisor_statistics()
                  ['hypervisor_statistics'])
         self.assertGreater(len(stats), 0)
 
-    @test.idempotent_id('91a50d7d-1c2b-4f24-b55a-a1fe20efca70')
+    @decorators.idempotent_id('91a50d7d-1c2b-4f24-b55a-a1fe20efca70')
     def test_get_hypervisor_uptime(self):
         # Verify that GET shows the specified hypervisor uptime
         hypers = self._list_hypervisors()
@@ -113,7 +113,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
             has_valid_uptime,
             "None of the hypervisors had a valid uptime: %s" % hypers)
 
-    @test.idempotent_id('d7e1805b-3b14-4a3b-b6fd-50ec6d9f361f')
+    @decorators.idempotent_id('d7e1805b-3b14-4a3b-b6fd-50ec6d9f361f')
     def test_search_hypervisor(self):
         hypers = self._list_hypervisors()
         self.assertHypervisors(hypers)

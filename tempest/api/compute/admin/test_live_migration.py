@@ -117,23 +117,23 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(target_host, self._get_host_for_server(server_id),
                          msg)
 
-    @test.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
+    @decorators.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     def test_live_block_migration(self):
         self._test_live_migration()
 
-    @test.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
+    @decorators.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_live_block_migration_paused(self):
         self._test_live_migration(state='PAUSED')
 
     @decorators.skip_because(bug="1524898")
-    @test.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
+    @decorators.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
     @test.services('volume')
     def test_volume_backed_live_migration(self):
         self._test_live_migration(volume_backed=True)
 
-    @test.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
+    @decorators.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
                       'Block Live migration not available')

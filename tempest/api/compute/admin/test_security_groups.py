@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -32,7 +33,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         else:
             self.client.delete_security_group(securitygroup_id)
 
-    @test.idempotent_id('49667619-5af9-4c63-ab5d-2cfdd1c8f7f1')
+    @decorators.idempotent_id('49667619-5af9-4c63-ab5d-2cfdd1c8f7f1')
     @test.services('network')
     def test_list_security_groups_list_all_tenants_filter(self):
         # Admin can list security groups of all tenants

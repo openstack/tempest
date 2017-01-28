@@ -13,6 +13,7 @@
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -43,7 +44,7 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
         # We need the admin client for performing the update (swap) volume call
         cls.servers_admin_client = cls.os_adm.servers_client
 
-    @test.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
+    @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
     @test.services('volume')
     def test_volume_swap(self):
         # Create two volumes.

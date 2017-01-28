@@ -16,6 +16,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -35,7 +36,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         return self.os_adm.servers_client.show_server(
             server_id)['server']['OS-EXT-SRV-ATTR:host']
 
-    @test.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')
+    @decorators.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')
     @testtools.skipUnless(
         test.is_scheduler_filter_enabled("SameHostFilter"),
         'SameHostFilter is not available.')
@@ -49,7 +50,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         host02 = self._get_host(server02)
         self.assertEqual(host01, host02)
 
-    @test.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
+    @decorators.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
     @testtools.skipUnless(
         test.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
@@ -63,7 +64,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         host02 = self._get_host(server02)
         self.assertNotEqual(host01, host02)
 
-    @test.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
+    @decorators.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
     @testtools.skipUnless(
         test.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')

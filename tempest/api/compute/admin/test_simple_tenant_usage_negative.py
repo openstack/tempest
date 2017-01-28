@@ -16,6 +16,7 @@
 import datetime
 
 from tempest.api.compute import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -41,7 +42,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('8b21e135-d94b-4991-b6e9-87059609c8ed')
+    @decorators.idempotent_id('8b21e135-d94b-4991-b6e9-87059609c8ed')
     def test_get_usage_tenant_with_empty_tenant_id(self):
         # Get usage for a specific tenant empty
         params = {'start': self.start,
@@ -51,7 +52,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           '', **params)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('4079dd2a-9e8d-479f-869d-6fa985ce45b6')
+    @decorators.idempotent_id('4079dd2a-9e8d-479f-869d-6fa985ce45b6')
     def test_get_usage_tenant_with_invalid_date(self):
         # Get usage for tenant with invalid date
         params = {'start': self.end,
@@ -61,7 +62,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.tenant_id, **params)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('bbe6fe2c-15d8-404c-a0a2-44fad0ad5cc7')
+    @decorators.idempotent_id('bbe6fe2c-15d8-404c-a0a2-44fad0ad5cc7')
     def test_list_usage_all_tenants_with_non_admin_user(self):
         # Get usage for all tenants with non admin user
         params = {'start': self.start,

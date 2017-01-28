@@ -19,6 +19,7 @@ from tempest.common import compute
 from tempest.common import credentials_factory as credentials
 from tempest import config
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_excs
 from tempest import test
 
@@ -145,7 +146,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             test_utils.call_and_ignore_notfound_exc(
                 cls.networks_client.delete_network, network['id'])
 
-    @test.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
+    @decorators.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
     def test_server_create_no_allocate(self):
         """Tests that no networking is allocated for the server."""
         # create the server with no networking
@@ -158,7 +159,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # assert that there is no networking
         self.assertEqual({}, addresses)
 
-    @test.idempotent_id('2e6cf129-9e28-4e8a-aaaa-045ea826b2a6')
+    @decorators.idempotent_id('2e6cf129-9e28-4e8a-aaaa-045ea826b2a6')
     def test_server_multi_create_auto_allocate(self):
         """Tests that networking is auto-allocated for multiple servers."""
 

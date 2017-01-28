@@ -15,6 +15,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -40,7 +41,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
         super(VolumesAdminNegativeTest, cls).resource_setup()
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @test.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
+    @decorators.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
     def test_update_attached_volume_with_nonexistent_volume_in_uri(self):
         volume = self.create_volume()
         nonexistent_volume = data_utils.rand_uuid()
@@ -50,7 +51,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
                           volumeId=volume['id'])
 
     @test.related_bug('1629110', status_code=400)
-    @test.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
+    @decorators.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
     def test_update_attached_volume_with_nonexistent_volume_in_body(self):
         volume = self.create_volume()
         self.attach_volume(self.server, volume)

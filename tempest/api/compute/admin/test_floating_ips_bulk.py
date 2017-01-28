@@ -18,6 +18,7 @@ import netaddr
 from tempest.api.compute import base
 from tempest import config
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
 
@@ -55,7 +56,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
                 raise exceptions.InvalidConfiguration(msg)
         return
 
-    @test.idempotent_id('2c8f145f-8012-4cb8-ac7e-95a587f0e4ab')
+    @decorators.idempotent_id('2c8f145f-8012-4cb8-ac7e-95a587f0e4ab')
     @test.services('network')
     def test_create_list_delete_floating_ips_bulk(self):
         # Create, List  and delete the Floating IPs Bulk
