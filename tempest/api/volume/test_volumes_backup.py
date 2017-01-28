@@ -17,6 +17,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -46,7 +47,7 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
                                        'available')
         return restored_volume
 
-    @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
+    @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create backup
         volume = self.create_volume()
@@ -75,7 +76,7 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
 
         self.restore_backup(backup['id'])
 
-    @test.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
+    @decorators.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
     @test.services('compute')
     def test_backup_create_attached_volume(self):
         """Test backup create using force flag.
@@ -97,7 +98,7 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
                                     name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
 
-    @test.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
+    @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
     def test_bootable_volume_backup_and_restore(self):
         # Create volume from image
         img_uuid = CONF.compute.image_ref

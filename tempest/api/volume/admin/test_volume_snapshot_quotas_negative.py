@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -54,14 +55,14 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
 
     @test.attr(type='negative')
-    @test.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
+    @decorators.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
     def test_quota_volume_snapshots(self):
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           volume_id=self.volume['id'])
 
     @test.attr(type='negative')
-    @test.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
+    @decorators.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
     def test_quota_volume_gigabytes_snapshots(self):
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,

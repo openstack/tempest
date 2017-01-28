@@ -17,7 +17,7 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -43,7 +43,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
             self.snapshot['id'], metadata={})
         super(SnapshotV2MetadataTestJSON, self).tearDown()
 
-    @test.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
+    @decorators.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
     def test_crud_snapshot_metadata(self):
         # Create metadata for the snapshot
         metadata = {"key1": "value1",
@@ -78,7 +78,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
                         'Delete one item metadata of the snapshot failed')
         self.assertNotIn("key3", body)
 
-    @test.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
+    @decorators.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
     def test_update_snapshot_metadata_item(self):
         # Update metadata item for the snapshot
         metadata = {"key1": "value1",

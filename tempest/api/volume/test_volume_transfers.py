@@ -17,7 +17,7 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumesV2TransfersTest(base.BaseVolumeTest):
@@ -33,7 +33,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         cls.alt_tenant_id = cls.alt_client.tenant_id
         cls.adm_client = cls.os_adm.volumes_client
 
-    @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
+    @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
@@ -62,7 +62,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         waiters.wait_for_volume_status(self.alt_client,
                                        volume['id'], 'available')
 
-    @test.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
+    @decorators.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()

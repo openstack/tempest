@@ -15,7 +15,7 @@
 
 from tempest.api.volume import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 
 CONF = config.CONF
@@ -32,7 +32,7 @@ class AbsoluteLimitsV2Tests(base.BaseVolumeTest):
         # Create a shared volume for tests
         cls.volume = cls.create_volume()
 
-    @test.idempotent_id('8e943f53-e9d6-4272-b2e9-adcf2f7c29ad')
+    @decorators.idempotent_id('8e943f53-e9d6-4272-b2e9-adcf2f7c29ad')
     def test_get_volume_absolute_limits(self):
         # get volume limit for a tenant
         absolute_limits = \

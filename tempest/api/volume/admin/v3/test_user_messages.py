@@ -16,7 +16,7 @@
 from tempest.api.volume.v3 import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -60,7 +60,7 @@ class UserMessagesTest(base.VolumesV3AdminTest):
                                          'volume %s' % volume['id'])
         return message_id
 
-    @test.idempotent_id('50f29e6e-f363-42e1-8ad1-f67ae7fd4d5a')
+    @decorators.idempotent_id('50f29e6e-f363-42e1-8ad1-f67ae7fd4d5a')
     def test_list_messages(self):
         self._create_user_message()
         messages = self.messages_client.list_messages()['messages']
@@ -70,7 +70,7 @@ class UserMessagesTest(base.VolumesV3AdminTest):
                 self.assertIn(key, message.keys(),
                               'Missing expected key %s' % key)
 
-    @test.idempotent_id('55a4a61e-c7b2-4ba0-a05d-b914bdef3070')
+    @decorators.idempotent_id('55a4a61e-c7b2-4ba0-a05d-b914bdef3070')
     def test_show_message(self):
         message_id = self._create_user_message()
         self.addCleanup(self.messages_client.delete_message, message_id)
@@ -80,7 +80,7 @@ class UserMessagesTest(base.VolumesV3AdminTest):
         for key in MESSAGE_KEYS:
             self.assertIn(key, message.keys(), 'Missing expected key %s' % key)
 
-    @test.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
+    @decorators.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
     def test_delete_message(self):
         message_id = self._create_user_message()
         self.messages_client.delete_message(message_id)

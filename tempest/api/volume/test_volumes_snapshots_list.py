@@ -13,7 +13,6 @@
 from tempest.api.volume import base
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -56,7 +55,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         # Validating filtered snapshots length equals to expected_elements
         self.assertEqual(expected_elements, len(fetched_snap_list))
 
-    @test.idempotent_id('59f41f43-aebf-48a9-ab5d-d76340fab32b')
+    @decorators.idempotent_id('59f41f43-aebf-48a9-ab5d-d76340fab32b')
     def test_snapshots_list_with_params(self):
         """list snapshots with params."""
         # Verify list snapshots by display_name filter
@@ -72,7 +71,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
                   self.name_field: self.snapshot[self.name_field]}
         self._list_by_param_values_and_assert(**params)
 
-    @test.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
+    @decorators.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Verify list snapshot details by display_name filter
@@ -86,12 +85,12 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
                   self.name_field: self.snapshot[self.name_field]}
         self._list_by_param_values_and_assert(with_detail=True, **params)
 
-    @test.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
+    @decorators.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
     def test_snapshot_list_param_limit(self):
         # List returns limited elements
         self._list_snapshots_by_param_limit(limit=1, expected_elements=1)
 
-    @test.idempotent_id('a1427f61-420e-48a5-b6e3-0b394fa95400')
+    @decorators.idempotent_id('a1427f61-420e-48a5-b6e3-0b394fa95400')
     def test_snapshot_list_param_limit_equals_infinite(self):
         # List returns all elements when request limit exceeded
         # snapshots number
@@ -100,7 +99,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
                                             expected_elements=len(snap_list))
 
     @decorators.skip_because(bug='1540893')
-    @test.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
+    @decorators.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
     def test_snapshot_list_param_limit_equals_zero(self):
         # List returns zero elements
         self._list_snapshots_by_param_limit(limit=0, expected_elements=0)

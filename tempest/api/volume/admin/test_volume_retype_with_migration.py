@@ -16,7 +16,7 @@ from oslo_log import log as logging
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -75,7 +75,7 @@ class VolumeRetypeWithMigrationV2Test(base.BaseVolumeAdminTest):
 
         super(VolumeRetypeWithMigrationV2Test, cls).resource_cleanup()
 
-    @test.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
+    @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
     def test_available_volume_retype_with_migration(self):
 
         keys_with_no_change = ('id', 'size', 'description', 'name', 'user_id',

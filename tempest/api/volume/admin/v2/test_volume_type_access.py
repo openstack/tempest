@@ -17,8 +17,8 @@ import operator
 
 from tempest.api.volume import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -32,7 +32,7 @@ class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
         super(VolumeTypesAccessV2Test, cls).setup_clients()
         cls.alt_client = cls.os_alt.volumes_client
 
-    @test.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')
+    @decorators.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')
     def test_volume_type_access_add(self):
         # Creating a NON public volume type
         params = {'os-volume-type-access:is_public': False}
@@ -55,7 +55,7 @@ class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
         # Validating the created volume is based on the volume type
         self.assertEqual(volume_type['name'], volume['volume_type'])
 
-    @test.idempotent_id('5220eb28-a435-43ce-baaf-ed46f0e95159')
+    @decorators.idempotent_id('5220eb28-a435-43ce-baaf-ed46f0e95159')
     def test_volume_type_access_list(self):
         # Creating a NON public volume type
         params = {'os-volume-type-access:is_public': False}
