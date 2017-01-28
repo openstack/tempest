@@ -13,6 +13,7 @@
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -58,7 +59,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.assertEqual(template['resources']['volume']['properties'][
             'name'], self.get_stack_output(stack_identifier, 'display_name'))
 
-    @test.idempotent_id('c3243329-7bdd-4730-b402-4d19d50c41d8')
+    @decorators.idempotent_id('c3243329-7bdd-4730-b402-4d19d50c41d8')
     @test.services('volume')
     def test_cinder_volume_create_delete(self):
         """Create and delete a volume via OS::Cinder::Volume."""
@@ -92,7 +93,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.volumes_client.delete_volume(volume_id)
         self.volumes_client.wait_for_resource_deletion(volume_id)
 
-    @test.idempotent_id('ea8b3a46-b932-4c18-907a-fe23f00b33f8')
+    @decorators.idempotent_id('ea8b3a46-b932-4c18-907a-fe23f00b33f8')
     @test.services('volume')
     def test_cinder_volume_create_delete_retain(self):
         """Ensure the 'Retain' deletion policy is respected."""

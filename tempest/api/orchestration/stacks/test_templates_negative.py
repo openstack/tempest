@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.api.orchestration import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -35,7 +36,7 @@ Resources:
         cls.parameters = {}
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('5586cbca-ddc4-4152-9db8-fa1ce5fc1876')
+    @decorators.idempotent_id('5586cbca-ddc4-4152-9db8-fa1ce5fc1876')
     def test_validate_template_url(self):
         """Validating template passing url to it."""
         self.assertRaises(lib_exc.BadRequest,
