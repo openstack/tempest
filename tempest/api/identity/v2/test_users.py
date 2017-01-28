@@ -18,8 +18,8 @@ import time
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 
 CONF = config.CONF
@@ -77,7 +77,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         time.sleep(1)
         self.non_admin_users_client.auth_provider.set_auth()
 
-    @test.idempotent_id('165859c9-277f-4124-9479-a7d1627b0ca7')
+    @decorators.idempotent_id('165859c9-277f-4124-9479-a7d1627b0ca7')
     def test_user_update_own_password(self):
         old_pass = self.creds.password
         old_token = self.non_admin_users_client.token

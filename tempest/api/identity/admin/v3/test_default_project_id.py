@@ -14,7 +14,7 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import auth
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -32,7 +32,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.domains_client.update_domain(domain_id, enabled=False)
         self.domains_client.delete_domain(domain_id)
 
-    @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
+    @decorators.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')

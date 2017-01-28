@@ -16,6 +16,7 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -42,7 +43,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
             cls.client.delete_region(r['id'])
         super(RegionsTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
+    @decorators.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
         # Create region
         r_description = data_utils.rand_name('description')
@@ -79,7 +80,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn(region['id'], regions_list)
 
     @test.attr(type='smoke')
-    @test.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
+    @decorators.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
     def test_create_region_with_specific_id(self):
         # Create a region with a specific id
         r_region_id = data_utils.rand_uuid()
@@ -91,7 +92,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(r_region_id, region['id'])
         self.assertEqual(r_description, region['description'])
 
-    @test.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
+    @decorators.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
     def test_list_regions(self):
         # Get a list of regions
         fetched_regions = self.client.list_regions()['regions']
@@ -102,7 +103,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
                          "Failed to find region %s in fetched list" %
                          ', '.join(str(e) for e in missing_regions))
 
-    @test.idempotent_id('2d1057cb-bbde-413a-acdf-e2d265284542')
+    @decorators.idempotent_id('2d1057cb-bbde-413a-acdf-e2d265284542')
     def test_list_regions_filter_by_parent_region_id(self):
         # Add a sub-region to one of the existing test regions
         r_description = data_utils.rand_name('description')

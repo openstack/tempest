@@ -15,7 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
@@ -56,7 +56,7 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         cls.domains_client.delete_domain(cls.domain['id'])
         super(ListProjectsTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
+    @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_list_projects(self):
         # List projects
         list_projects = self.projects_client.list_projects()['projects']
@@ -65,23 +65,23 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
             show_project = self.projects_client.show_project(p)['project']
             self.assertIn(show_project, list_projects)
 
-    @test.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
+    @decorators.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):
         # List projects with domain
         self._list_projects_with_params(
             {'domain_id': self.domain['id']}, 'domain_id')
 
-    @test.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
+    @decorators.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
         # List the projects with enabled
         self._list_projects_with_params({'enabled': False}, 'enabled')
 
-    @test.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
+    @decorators.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
     def test_list_projects_with_name(self):
         # List projects with name
         self._list_projects_with_params({'name': self.p1_name}, 'name')
 
-    @test.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
+    @decorators.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
     def test_list_projects_with_parent(self):
         # List projects with parent
         params = {'parent_id': self.p3['parent_id']}

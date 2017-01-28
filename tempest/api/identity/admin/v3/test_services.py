@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -29,7 +30,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
                           service_id)
 
     @test.attr(type='smoke')
-    @test.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
+    @decorators.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
         # Creating a Service
         name = data_utils.rand_name('service')
@@ -61,7 +62,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_desc, resp3_desc)
         self.assertDictContainsSubset(update_service, fetched_service)
 
-    @test.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
+    @decorators.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
@@ -73,7 +74,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         expected_data = {'name': name, 'type': serv_type}
         self.assertDictContainsSubset(expected_data, service)
 
-    @test.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
+    @decorators.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         service_ids = list()

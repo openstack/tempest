@@ -15,7 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
@@ -55,7 +55,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
             cls.services_client.delete_service(s)
         super(EndPointsTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
+    @decorators.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
     def test_list_endpoints(self):
         # Get a list of endpoints
         fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
@@ -66,7 +66,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @test.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
+    @decorators.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()

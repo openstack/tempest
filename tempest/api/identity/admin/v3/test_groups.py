@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -32,7 +33,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.domains_client.delete_domain(cls.domain['id'])
         super(GroupsV3TestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
+    @decorators.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
@@ -55,7 +56,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_name, new_group['name'])
         self.assertEqual(new_desc, new_group['description'])
 
-    @test.idempotent_id('b66eb441-b08a-4a6d-81ab-fef71baeb26c')
+    @decorators.idempotent_id('b66eb441-b08a-4a6d-81ab-fef71baeb26c')
     def test_group_update_with_few_fields(self):
         name = data_utils.rand_name('Group')
         old_description = data_utils.rand_name('Description')
@@ -72,7 +73,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(old_description, updated_group['description'])
 
     @test.attr(type='smoke')
-    @test.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
+    @decorators.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
     def test_group_users_add_list_delete(self):
         name = data_utils.rand_name('Group')
         group = self.groups_client.create_group(
@@ -101,7 +102,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         group_users = self.groups_client.list_group_users(group['id'])['users']
         self.assertEqual(len(group_users), 0)
 
-    @test.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
+    @decorators.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
     def test_list_user_groups(self):
         # create a user
         user = self.users_client.create_user(
@@ -123,7 +124,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
                          sorted(user_groups, key=lambda k: k['name']))
         self.assertEqual(2, len(user_groups))
 
-    @test.idempotent_id('cc9a57a5-a9ed-4f2d-a29f-4f979a06ec71')
+    @decorators.idempotent_id('cc9a57a5-a9ed-4f2d-a29f-4f979a06ec71')
     def test_list_groups(self):
         # Test to list groups
         group_ids = list()

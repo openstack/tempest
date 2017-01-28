@@ -16,7 +16,7 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class RolesTestJSON(base.BaseIdentityV2AdminTest):
@@ -49,7 +49,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
                 found = True
         self.assertTrue(found, "assigned role was not in list")
 
-    @test.idempotent_id('75d9593f-50b7-4fcf-bd64-e3fb4a278e23')
+    @decorators.idempotent_id('75d9593f-50b7-4fcf-bd64-e3fb4a278e23')
     def test_list_roles(self):
         """Return a list of all roles."""
         body = self.roles_client.list_roles()['roles']
@@ -57,7 +57,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertTrue(any(found))
         self.assertEqual(len(found), len(self.roles))
 
-    @test.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
+    @decorators.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
     def test_role_create_delete(self):
         """Role should be created, verified, and deleted."""
         role_name = data_utils.rand_name(name='role-test')
@@ -76,7 +76,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
-    @test.idempotent_id('db6870bd-a6ed-43be-a9b1-2f10a5c9994f')
+    @decorators.idempotent_id('db6870bd-a6ed-43be-a9b1-2f10a5c9994f')
     def test_get_role_by_id(self):
         """Get a role by its id."""
         role = self.setup_test_role()
@@ -86,7 +86,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(role_id, body['id'])
         self.assertEqual(role_name, body['name'])
 
-    @test.idempotent_id('0146f675-ffbd-4208-b3a4-60eb628dbc5e')
+    @decorators.idempotent_id('0146f675-ffbd-4208-b3a4-60eb628dbc5e')
     def test_assign_user_role(self):
         """Assign a role to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
@@ -97,7 +97,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
             tenant['id'], user['id'])['roles']
         self.assert_role_in_role_list(role, roles)
 
-    @test.idempotent_id('f0b9292c-d3ba-4082-aa6c-440489beef69')
+    @decorators.idempotent_id('f0b9292c-d3ba-4082-aa6c-440489beef69')
     def test_remove_user_role(self):
         """Remove a role assigned to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
@@ -107,7 +107,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
                                                            user['id'],
                                                            user_role['id'])
 
-    @test.idempotent_id('262e1e3e-ed71-4edd-a0e5-d64e83d66d05')
+    @decorators.idempotent_id('262e1e3e-ed71-4edd-a0e5-d64e83d66d05')
     def test_list_user_roles(self):
         """List roles assigned to a user on tenant."""
         (user, tenant, role) = self._get_role_params()

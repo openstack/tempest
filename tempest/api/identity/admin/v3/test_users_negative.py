@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -22,7 +23,7 @@ from tempest import test
 class UsersNegativeTest(base.BaseIdentityV3AdminTest):
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('e75f006c-89cc-477b-874d-588e4eab4b17')
+    @decorators.idempotent_id('e75f006c-89cc-477b-874d-588e4eab4b17')
     def test_create_user_for_non_existent_domain(self):
         # Attempt to create a user in a non-existent domain should fail
         u_name = data_utils.rand_name('user')
@@ -34,7 +35,7 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
                           domain_id=data_utils.rand_uuid_hex())
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('b3c9fccc-4134-46f5-b600-1da6fb0a3b1f')
+    @decorators.idempotent_id('b3c9fccc-4134-46f5-b600-1da6fb0a3b1f')
     def test_authentication_for_disabled_user(self):
         # Attempt to authenticate for disabled user should fail
         password = data_utils.rand_password()

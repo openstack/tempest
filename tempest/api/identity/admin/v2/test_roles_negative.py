@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -28,14 +29,14 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         return (user, tenant, role)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('d5d5f1df-f8ca-4de0-b2ef-259c1cc67025')
+    @decorators.idempotent_id('d5d5f1df-f8ca-4de0-b2ef-259c1cc67025')
     def test_list_roles_by_unauthorized_user(self):
         # Non-administrator user should not be able to list roles
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_roles_client.list_roles)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('11a3c7da-df6c-40c2-abc2-badd682edf9f')
+    @decorators.idempotent_id('11a3c7da-df6c-40c2-abc2-badd682edf9f')
     def test_list_roles_request_without_token(self):
         # Request to list roles without a valid token should fail
         token = self.client.auth_provider.get_token()
@@ -44,14 +45,14 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('c0b89e56-accc-4c73-85f8-9c0f866104c1')
+    @decorators.idempotent_id('c0b89e56-accc-4c73-85f8-9c0f866104c1')
     def test_role_create_blank_name(self):
         # Should not be able to create a role with a blank name
         self.assertRaises(lib_exc.BadRequest, self.roles_client.create_role,
                           name='')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('585c8998-a8a4-4641-a5dd-abef7a8ced00')
+    @decorators.idempotent_id('585c8998-a8a4-4641-a5dd-abef7a8ced00')
     def test_create_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to create role
         role_name = data_utils.rand_name(name='role')
@@ -60,7 +61,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           name=role_name)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('a7edd17a-e34a-4aab-8bb7-fa6f498645b8')
+    @decorators.idempotent_id('a7edd17a-e34a-4aab-8bb7-fa6f498645b8')
     def test_create_role_request_without_token(self):
         # Request to create role without a valid token should fail
         token = self.client.auth_provider.get_token()
@@ -71,7 +72,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('c0cde2c8-81c1-4bb0-8fe2-cf615a3547a8')
+    @decorators.idempotent_id('c0cde2c8-81c1-4bb0-8fe2-cf615a3547a8')
     def test_role_create_duplicate(self):
         # Role names should be unique
         role_name = data_utils.rand_name(name='role-dup')
@@ -82,7 +83,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           name=role_name)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('15347635-b5b1-4a87-a280-deb2bd6d865e')
+    @decorators.idempotent_id('15347635-b5b1-4a87-a280-deb2bd6d865e')
     def test_delete_role_by_unauthorized_user(self):
         # Non-administrator user should not be able to delete role
         role_name = data_utils.rand_name(name='role')
@@ -93,7 +94,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           self.non_admin_roles_client.delete_role, role_id)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('44b60b20-70de-4dac-beaf-a3fc2650a16b')
+    @decorators.idempotent_id('44b60b20-70de-4dac-beaf-a3fc2650a16b')
     def test_delete_role_request_without_token(self):
         # Request to delete role without a valid token should fail
         role_name = data_utils.rand_name(name='role')
@@ -108,7 +109,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('38373691-8551-453a-b074-4260ad8298ef')
+    @decorators.idempotent_id('38373691-8551-453a-b074-4260ad8298ef')
     def test_delete_role_non_existent(self):
         # Attempt to delete a non existent role should fail
         non_existent_role = data_utils.rand_uuid_hex()
@@ -116,7 +117,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           non_existent_role)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('391df5cf-3ec3-46c9-bbe5-5cb58dd4dc41')
+    @decorators.idempotent_id('391df5cf-3ec3-46c9-bbe5-5cb58dd4dc41')
     def test_assign_user_role_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to
         # assign a role to user
@@ -127,7 +128,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
             tenant['id'], user['id'], role['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('f0d2683c-5603-4aee-95d7-21420e87cfd8')
+    @decorators.idempotent_id('f0d2683c-5603-4aee-95d7-21420e87cfd8')
     def test_assign_user_role_request_without_token(self):
         # Request to assign a role to a user without a valid token
         (user, tenant, role) = self._get_role_params()
@@ -140,7 +141,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('99b297f6-2b5d-47c7-97a9-8b6bb4f91042')
+    @decorators.idempotent_id('99b297f6-2b5d-47c7-97a9-8b6bb4f91042')
     def test_assign_user_role_for_non_existent_role(self):
         # Attempt to assign a non existent role to user should fail
         (user, tenant, role) = self._get_role_params()
@@ -150,7 +151,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           tenant['id'], user['id'], non_existent_role)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('b2285aaa-9e76-4704-93a9-7a8acd0a6c8f')
+    @decorators.idempotent_id('b2285aaa-9e76-4704-93a9-7a8acd0a6c8f')
     def test_assign_user_role_for_non_existent_tenant(self):
         # Attempt to assign a role on a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
@@ -160,7 +161,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           non_existent_tenant, user['id'], role['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('5c3132cd-c4c8-4402-b5ea-71eb44e97793')
+    @decorators.idempotent_id('5c3132cd-c4c8-4402-b5ea-71eb44e97793')
     def test_assign_duplicate_user_role(self):
         # Duplicate user role should not get assigned
         (user, tenant, role) = self._get_role_params()
@@ -172,7 +173,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           tenant['id'], user['id'], role['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('d0537987-0977-448f-a435-904c15de7298')
+    @decorators.idempotent_id('d0537987-0977-448f-a435-904c15de7298')
     def test_remove_user_role_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to
         # remove a user's role
@@ -186,7 +187,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
             tenant['id'], user['id'], role['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('cac81cf4-c1d2-47dc-90d3-f2b7eb572286')
+    @decorators.idempotent_id('cac81cf4-c1d2-47dc-90d3-f2b7eb572286')
     def test_remove_user_role_request_without_token(self):
         # Request to remove a user's role without a valid token
         (user, tenant, role) = self._get_role_params()
@@ -201,7 +202,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         self.client.auth_provider.clear_auth()
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('ab32d759-cd16-41f1-a86e-44405fa9f6d2')
+    @decorators.idempotent_id('ab32d759-cd16-41f1-a86e-44405fa9f6d2')
     def test_remove_user_role_non_existent_role(self):
         # Attempt to delete a non existent role from a user should fail
         (user, tenant, role) = self._get_role_params()
@@ -214,7 +215,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           tenant['id'], user['id'], non_existent_role)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('67a679ec-03dd-4551-bbfc-d1c93284f023')
+    @decorators.idempotent_id('67a679ec-03dd-4551-bbfc-d1c93284f023')
     def test_remove_user_role_non_existent_tenant(self):
         # Attempt to remove a role from a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
@@ -227,7 +228,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
                           non_existent_tenant, user['id'], role['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('7391ab4c-06f3-477a-a64a-c8e55ce89837')
+    @decorators.idempotent_id('7391ab4c-06f3-477a-a64a-c8e55ce89837')
     def test_list_user_roles_by_unauthorized_user(self):
         # Non-administrator user should not be authorized to list
         # a user's roles
@@ -241,7 +242,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
             tenant['id'], user['id'])
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('682adfb2-fd5f-4b0a-a9ca-322e9bebb907')
+    @decorators.idempotent_id('682adfb2-fd5f-4b0a-a9ca-322e9bebb907')
     def test_list_user_roles_request_without_token(self):
         # Request to list user's roles without a valid token should fail
         (user, tenant, role) = self._get_role_params()
