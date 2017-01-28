@@ -17,6 +17,7 @@ import testtools
 
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -104,7 +105,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         body = self.admin_servers_client.show_server(server_id)['server']
         return body['OS-EXT-SRV-ATTR:host']
 
-    @test.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
+    @decorators.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         keypair = self.create_keypair()
@@ -119,7 +120,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
+    @decorators.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         keypair = self.create_keypair()
@@ -129,7 +130,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
+    @decorators.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
     @test.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
         keypair = self.create_keypair()
@@ -141,7 +142,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
+    @decorators.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @test.services('compute', 'network')
@@ -158,7 +159,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('5cdf9499-541d-4923-804e-b9a60620a7f0')
+    @decorators.idempotent_id('5cdf9499-541d-4923-804e-b9a60620a7f0')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute', 'network')
@@ -175,7 +176,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('719eb59d-2f42-4b66-b8b1-bb1254473967')
+    @decorators.idempotent_id('719eb59d-2f42-4b66-b8b1-bb1254473967')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute', 'network')
@@ -195,7 +196,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @test.idempotent_id('a4858f6c-401e-4155-9a49-d5cd053d1a2f')
+    @decorators.idempotent_id('a4858f6c-401e-4155-9a49-d5cd053d1a2f')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
     @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
@@ -220,7 +221,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         self.assertNotEqual(src_host, dst_host)
 
-    @test.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
+    @decorators.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
     @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,

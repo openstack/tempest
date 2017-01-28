@@ -18,6 +18,7 @@ import testtools
 
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -47,7 +48,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         cls.set_network_resources()
         super(TestServerAdvancedOps, cls).setup_credentials()
 
-    @test.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
+    @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @test.services('compute', 'volume')
@@ -68,7 +69,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
         waiters.wait_for_server_status(self.servers_client, instance_id,
                                        'ACTIVE')
 
-    @test.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
+    @decorators.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.services('compute')

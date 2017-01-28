@@ -13,12 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
 
 class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
-    @test.idempotent_id('b920faf1-7b8a-4657-b9fe-9c4512bfb381')
+    @decorators.idempotent_id('b920faf1-7b8a-4657-b9fe-9c4512bfb381')
     @test.services('object_storage')
     def test_swift_basic_ops(self):
         """Test swift basic ops.
@@ -44,7 +45,7 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
                                               not_present_obj=[obj_name])
         self.delete_container(container_name)
 
-    @test.idempotent_id('916c7111-cb1f-44b2-816d-8f760e4ea910')
+    @decorators.idempotent_id('916c7111-cb1f-44b2-816d-8f760e4ea910')
     @test.services('object_storage')
     def test_swift_acl_anonymous_download(self):
         """This test will cover below steps:

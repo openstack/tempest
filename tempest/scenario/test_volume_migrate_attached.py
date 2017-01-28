@@ -14,6 +14,7 @@ from oslo_log import log as logging
 
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -90,7 +91,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         waiters.wait_for_volume_retype(self.volumes_client,
                                        volume_id, new_volume_type)
 
-    @test.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
+    @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
     @test.services('compute', 'volume')
     def test_volume_migrate_attached(self):
         LOG.info("Creating keypair and security group")

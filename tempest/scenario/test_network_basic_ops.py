@@ -354,7 +354,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 raise
 
     @test.attr(type='smoke')
-    @test.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
+    @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
         """Basic network operation test
@@ -406,7 +406,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                msg="after re-associate "
                                                    "floating ip")
 
-    @test.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
+    @decorators.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
     @testtools.skipUnless(test.is_extension_enabled('net-mtu', 'network'),
                           'No way to calculate MTU for networks')
     @test.services('compute', 'network')
@@ -416,7 +416,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_public_network_connectivity(
             should_connect=True, mtu=self.network['mtu'])
 
-    @test.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
+    @decorators.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'Connectivity can only be tested when in a '
                       'multitenant network environment')
@@ -469,7 +469,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_network_internal_connectivity(network=self.new_net,
                                                   should_connect=True)
 
-    @test.idempotent_id('c5adff73-e961-41f1-b4a9-343614f18cfa')
+    @decorators.idempotent_id('c5adff73-e961-41f1-b4a9-343614f18cfa')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
     @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
@@ -492,7 +492,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
 
-    @test.idempotent_id('04b9fe4e-85e8-4aea-b937-ea93885ac59f')
+    @decorators.idempotent_id('04b9fe4e-85e8-4aea-b937-ea93885ac59f')
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'Router state can be altered only with multitenant '
                       'networks capabilities')
@@ -524,7 +524,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
-    @test.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
+    @decorators.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'network isolation not available')
     @testtools.skipUnless(CONF.scenario.dhcp_client,
@@ -607,7 +607,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                         msg="DHCP renewal failed to fetch "
                             "new DNS nameservers")
 
-    @test.idempotent_id('f5dfcc22-45fd-409f-954c-5bd500d7890b')
+    @decorators.idempotent_id('f5dfcc22-45fd-409f-954c-5bd500d7890b')
     @testtools.skipUnless(CONF.network_feature_enabled.port_admin_state_change,
                           "Changing a port's admin state is not supported "
                           "by the test environment")
@@ -654,7 +654,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_remote_connectivity(ssh_client, dest=server_pip,
                                         should_succeed=True)
 
-    @test.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
+    @decorators.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
     @test.services('compute', 'network')
     def test_preserve_preexisting_port(self):
         """Test preserve pre-existing port
@@ -705,7 +705,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.assertEqual(port['id'], port_list[0]['id'])
 
     @test.requires_ext(service='network', extension='l3_agent_scheduler')
-    @test.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
+    @decorators.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
     @test.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
@@ -782,7 +782,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @test.requires_ext(service='network', extension='port-security')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
-    @test.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
+    @decorators.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
     @test.services('compute', 'network')
     def test_port_security_macspoofing_port(self):
         """Tests port_security extension enforces mac spoofing
