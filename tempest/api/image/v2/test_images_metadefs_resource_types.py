@@ -14,13 +14,13 @@
 #    under the License.
 
 from tempest.api.image import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class MetadataResourceTypesTest(base.BaseV2ImageTest):
     """Test the Metadata definition resource types basic functionality"""
 
-    @test.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')
+    @decorators.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')
     def test_basic_meta_def_resource_type_association(self):
         # Get the available resource types and use one resource_type
         body = self.resource_types_client.list_resource_types()

@@ -13,7 +13,7 @@
 from tempest.api.image import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
@@ -41,7 +41,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
                         namespace['namespace'])
         return namespace_tags
 
-    @test.idempotent_id('a2a3765e-3a6d-4f6d-a3a7-3cc3476aa876')
+    @decorators.idempotent_id('a2a3765e-3a6d-4f6d-a3a7-3cc3476aa876')
     def test_create_list_delete_namespace_tags(self):
         # Create a namespace
         namespace = self.create_namespace()
@@ -60,7 +60,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
             namespace['namespace'])
         self.assertEqual([], body['tags'])
 
-    @test.idempotent_id('a2a3765e-1a2c-3f6d-a3a7-3cc3466ab875')
+    @decorators.idempotent_id('a2a3765e-1a2c-3f6d-a3a7-3cc3466ab875')
     def test_create_update_delete_tag(self):
         # Create a namespace
         namespace = self.create_namespace()

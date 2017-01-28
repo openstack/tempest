@@ -13,7 +13,7 @@
 from tempest.api.image import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
@@ -28,7 +28,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
                         namespace['namespace'], object_name)
         return namespace_object
 
-    @test.idempotent_id('b1a3775e-3b5c-4f6a-a3b4-1ba3574ae718')
+    @decorators.idempotent_id('b1a3775e-3b5c-4f6a-a3b4-1ba3574ae718')
     def test_create_update_delete_meta_namespace_objects(self):
         # Create a namespace
         namespace = self.create_namespace()
@@ -50,7 +50,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
                 namespace['namespace'])['objects']]
         self.assertNotIn(up_object_name, namespace_objects)
 
-    @test.idempotent_id('a2a3615e-3b5c-3f6a-a2b1-1ba3574ae738')
+    @decorators.idempotent_id('a2a3615e-3b5c-3f6a-a2b1-1ba3574ae738')
     def test_list_meta_namespace_objects(self):
         # Create a namespace object
         namespace = self.create_namespace()
@@ -62,7 +62,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
                 namespace['namespace'])['objects']]
         self.assertIn(meta_namespace_object['name'], namespace_objects)
 
-    @test.idempotent_id('b1a3674e-3b4c-3f6a-a3b4-1ba3573ca768')
+    @decorators.idempotent_id('b1a3674e-3b4c-3f6a-a3b4-1ba3573ca768')
     def test_show_meta_namespace_objects(self):
         # Create a namespace object
         namespace = self.create_namespace()

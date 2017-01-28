@@ -14,12 +14,12 @@
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class ImagesTagsTest(base.BaseV2ImageTest):
 
-    @test.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
+    @decorators.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
     def test_update_delete_tags_for_image(self):
         image = self.create_image(container_format='bare',
                                   disk_format='raw',

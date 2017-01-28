@@ -19,8 +19,8 @@ import testtools
 from tempest.api.image import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -30,7 +30,7 @@ class BasicAdminOperationsImagesTest(base.BaseV2ImageAdminTest):
 
     @testtools.skipUnless(CONF.image_feature_enabled.deactivate_image,
                           'deactivate-image is not available.')
-    @test.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')
+    @decorators.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')
     def test_admin_deactivate_reactivate_image(self):
         # Create image by non-admin tenant
         image_name = data_utils.rand_name('image')

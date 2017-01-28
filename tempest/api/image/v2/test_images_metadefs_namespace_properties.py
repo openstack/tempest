@@ -12,13 +12,13 @@
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class MetadataNamespacePropertiesTest(base.BaseV2ImageTest):
     """Test the Metadata definition namespace property basic functionality"""
 
-    @test.idempotent_id('b1a3765e-3a5d-4f6d-a3a7-3ca3476ae768')
+    @decorators.idempotent_id('b1a3765e-3a5d-4f6d-a3a7-3ca3476ae768')
     def test_basic_meta_def_namespace_property(self):
         # Get the available resource types and use one resource_type
         body = self.resource_types_client.list_resource_types()
