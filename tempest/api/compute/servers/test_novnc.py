@@ -22,7 +22,7 @@ import urllib3
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -137,7 +137,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         # Turn the Socket into a WebSocket to do the communication
         return _WebSocket(client_socket, url)
 
-    @test.idempotent_id('c640fdff-8ab4-45a4-a5d8-7e6146cbd0dc')
+    @decorators.idempotent_id('c640fdff-8ab4-45a4-a5d8-7e6146cbd0dc')
     def test_novnc(self):
         body = self.client.get_vnc_console(self.server['id'],
                                            type='novnc')['console']
@@ -151,7 +151,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         # Validate the RFB Negotiation to determine if a valid VNC session
         self._validate_rfb_negotiation()
 
-    @test.idempotent_id('f9c79937-addc-4aaa-9e0e-841eef02aeb7')
+    @decorators.idempotent_id('f9c79937-addc-4aaa-9e0e-841eef02aeb7')
     def test_novnc_bad_token(self):
         body = self.client.get_vnc_console(self.server['id'],
                                            type='novnc')['console']
