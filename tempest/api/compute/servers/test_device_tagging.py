@@ -20,6 +20,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
 
@@ -83,7 +84,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                                               'net-2-100', 'net-2-200',
                                               'boot', 'other'])
 
-    @test.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
+    @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @test.services('network', 'volume', 'image')
     def test_device_tagging(self):
         # Create volumes

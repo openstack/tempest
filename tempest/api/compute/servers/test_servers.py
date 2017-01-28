@@ -19,7 +19,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -35,7 +35,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.clear_servers()
         super(ServersTestJSON, self).tearDown()
 
-    @test.idempotent_id('b92d5ec7-b1dd-44a2-87e4-45e888c46ef0')
+    @decorators.idempotent_id('b92d5ec7-b1dd-44a2-87e4-45e888c46ef0')
     @testtools.skipUnless(CONF.compute_feature_enabled.
                           enable_instance_password,
                           'Instance password not available.')
@@ -47,7 +47,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify the password is set correctly in the response
         self.assertEqual('testpassword', server['adminPass'])
 
-    @test.idempotent_id('8fea6be7-065e-47cf-89b8-496e6f96c699')
+    @decorators.idempotent_id('8fea6be7-065e-47cf-89b8-496e6f96c699')
     def test_create_with_existing_server_name(self):
         # Creating a server with a name that already exists is allowed
 
@@ -67,7 +67,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         name2 = server['name']
         self.assertEqual(name1, name2)
 
-    @test.idempotent_id('f9e15296-d7f9-4e62-b53f-a04e89160833')
+    @decorators.idempotent_id('f9e15296-d7f9-4e62-b53f-a04e89160833')
     def test_create_specify_keypair(self):
         # Specify a keypair while creating a server
 
@@ -94,7 +94,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(new_name, server['name'])
         return server
 
-    @test.idempotent_id('5e6ccff8-349d-4852-a8b3-055df7988dd2')
+    @decorators.idempotent_id('5e6ccff8-349d-4852-a8b3-055df7988dd2')
     def test_update_server_name(self):
         # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
@@ -102,7 +102,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
         self._update_server_name(server['id'], 'ACTIVE', prefix_name)
 
-    @test.idempotent_id('6ac19cb1-27a3-40ec-b350-810bdc04c08e')
+    @decorators.idempotent_id('6ac19cb1-27a3-40ec-b350-810bdc04c08e')
     def test_update_server_name_in_stop_state(self):
         # The server name should be changed to the provided value
         server = self.create_test_server(wait_until='ACTIVE')
@@ -115,7 +115,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                   prefix_name)
         self.assertNotIn('progress', updated_server)
 
-    @test.idempotent_id('89b90870-bc13-4b73-96af-f9d4f2b70077')
+    @decorators.idempotent_id('89b90870-bc13-4b73-96af-f9d4f2b70077')
     def test_update_access_server_address(self):
         # The server's access addresses should reflect the provided values
         server = self.create_test_server(wait_until='ACTIVE')
@@ -131,7 +131,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('1.1.1.1', server['accessIPv4'])
         self.assertEqual('::babe:202:202', server['accessIPv6'])
 
-    @test.idempotent_id('38fb1d02-c3c5-41de-91d3-9bc2025a75eb')
+    @decorators.idempotent_id('38fb1d02-c3c5-41de-91d3-9bc2025a75eb')
     def test_create_server_with_ipv6_addr_only(self):
         # Create a server without an IPv4 address(only IPv6 address).
         server = self.create_test_server(accessIPv6='2001:2001::3')

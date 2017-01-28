@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
-from tempest import test
+from tempest.lib import decorators
 
 
 class InstanceActionsTestJSON(base.BaseV2ComputeTest):
@@ -31,7 +31,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until='ACTIVE')
         cls.request_id = cls.server.response['x-compute-request-id']
 
-    @test.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
+    @decorators.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
         # List actions of the provided server
         self.client.reboot_server(self.server['id'], type='HARD')
@@ -44,7 +44,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(sorted([i['action'] for i in body]),
                          ['create', 'reboot'])
 
-    @test.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
+    @decorators.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
         # Get the action details of the provided server
         body = self.client.show_instance_action(
@@ -63,7 +63,7 @@ class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
         super(InstanceActionsV221TestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-    @test.idempotent_id('0a0f85d4-10fa-41f6-bf80-a54fb4aa2ae1')
+    @decorators.idempotent_id('0a0f85d4-10fa-41f6-bf80-a54fb4aa2ae1')
     def test_get_list_deleted_instance_actions(self):
 
         # List actions of the deleted server

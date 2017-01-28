@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
-    @test.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
+    @decorators.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
         body = self.create_test_server(wait_until='ACTIVE',
                                        min_count=1,
@@ -29,7 +29,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         # contains return_reservation_id=False
         self.assertNotIn('reservation_id', body)
 
-    @test.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
+    @decorators.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
     def test_multiple_create_with_reservation_return(self):
         body = self.create_test_server(wait_until='ACTIVE',
                                        min_count=1,

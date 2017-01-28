@@ -75,7 +75,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         super(ServerActionsTestJSON, cls).resource_setup()
         cls.server_id = cls.rebuild_server(None, validatable=True)
 
-    @test.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
+    @decorators.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
     def test_change_server_password(self):
@@ -134,13 +134,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                '%s > %s' % (new_boot_time, boot_time))
 
     @test.attr(type='smoke')
-    @test.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
+    @decorators.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
     def test_reboot_server_hard(self):
         # The server should be power cycled
         self._test_reboot_server('HARD')
 
     @decorators.skip_because(bug="1014647")
-    @test.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
+    @decorators.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         self._test_reboot_server('SOFT')
@@ -154,7 +154,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                .format(image_ref, rebuilt_server['image']['id']))
         self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
 
-    @test.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
+    @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
@@ -202,7 +202,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             linux_client.validate_authentication()
 
-    @test.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
+    @decorators.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
         # image and remain in SHUTOFF state
@@ -234,7 +234,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         self.client.start_server(self.server_id)
 
-    @test.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
+    @decorators.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
     @test.services('volume')
     def test_rebuild_server_with_volume_attached(self):
         # create a new volume and attach it to the server
@@ -281,19 +281,19 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start_server(self.server_id)
 
-    @test.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
+    @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm(self):
         self._test_resize_server_confirm(stop=False)
 
-    @test.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
+    @decorators.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm_from_stopped(self):
         self._test_resize_server_confirm(stop=True)
 
-    @test.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
+    @decorators.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_revert(self):
@@ -313,7 +313,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(self.server_id)['server']
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
 
-    @test.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
+    @decorators.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
     @test.services('image')
@@ -428,7 +428,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 
-    @test.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
+    @decorators.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output(self):
@@ -444,7 +444,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         self.wait_for(self._get_output)
 
-    @test.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')
+    @decorators.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output_with_unlimited_size(self):
@@ -462,7 +462,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         self.wait_for(_check_full_length_console_log)
 
-    @test.idempotent_id('5b65d4e7-4ecd-437c-83c0-d6b79d927568')
+    @decorators.idempotent_id('5b65d4e7-4ecd-437c-83c0-d6b79d927568')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output_server_id_in_shutoff_status(self):
@@ -479,7 +479,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
         self.wait_for(self._get_output)
 
-    @test.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
+    @decorators.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_pause_unpause_server(self):
@@ -488,7 +488,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.unpause_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-    @test.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
+    @decorators.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     def test_suspend_resume_server(self):
@@ -498,7 +498,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.resume_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-    @test.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
+    @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     def test_shelve_unshelve_server(self):
@@ -515,14 +515,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.unshelve_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-    @test.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
+    @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
         self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
         self.client.start_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
-    @test.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
+    @decorators.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
         self.client.lock_server(self.server_id)
@@ -545,7 +545,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertNotEqual('None', parsed_url.hostname)
         self.assertIn(parsed_url.scheme, valid_scheme)
 
-    @test.idempotent_id('c6bc11bf-592e-4015-9319-1c98dc64daf5')
+    @decorators.idempotent_id('c6bc11bf-592e-4015-9319-1c98dc64daf5')
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled.')
     def test_get_vnc_console(self):
