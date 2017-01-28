@@ -16,7 +16,7 @@
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -34,7 +34,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.delete_containers()
         super(ObjectTestACLs, self).tearDown()
 
-    @test.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
+    @decorators.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
@@ -61,7 +61,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertHeaders(resp, 'Object', 'GET')
 
-    @test.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
+    @decorators.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL

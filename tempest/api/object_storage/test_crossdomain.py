@@ -14,6 +14,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -36,7 +37,7 @@ class CrossdomainTest(base.BaseObjectTest):
         # Turning http://.../v1/foobar into http://.../
         self.account_client.skip_path()
 
-    @test.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
+    @decorators.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
         resp, body = self.account_client.get("crossdomain.xml", {})

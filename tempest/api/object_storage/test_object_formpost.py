@@ -20,6 +20,7 @@ from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -104,7 +105,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @test.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
+    @decorators.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @test.requires_ext(extension='formpost', service='object')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
