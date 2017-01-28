@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -46,7 +46,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
         return flavor['disk']
 
-    @test.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
+    @decorators.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
 
@@ -79,7 +79,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 
-    @test.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
+    @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
 

@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -29,7 +30,7 @@ class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
         cls.set_network_resources(network=True)
         super(ComputeTenantNetworksTest, cls).setup_credentials()
 
-    @test.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')
+    @decorators.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')
     @test.services('network')
     def test_list_show_tenant_networks(self):
         # Fetch all networks that are visible to the tenant: this may include
