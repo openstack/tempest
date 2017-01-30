@@ -17,6 +17,7 @@ import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -83,19 +84,19 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         return flavor['id']
 
-    @test.idempotent_id('8b4330e1-12c4-4554-9390-e6639971f086')
+    @decorators.idempotent_id('8b4330e1-12c4-4554-9390-e6639971f086')
     def test_create_flavor_with_int_id(self):
         flavor_id = data_utils.rand_int_id(start=1000)
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, str(flavor_id))
 
-    @test.idempotent_id('94c9bb4e-2c2a-4f3c-bb1f-5f0daf918e6d')
+    @decorators.idempotent_id('94c9bb4e-2c2a-4f3c-bb1f-5f0daf918e6d')
     def test_create_flavor_with_uuid_id(self):
         flavor_id = data_utils.rand_uuid()
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, flavor_id)
 
-    @test.idempotent_id('f83fe669-6758-448a-a85e-32d351f36fe0')
+    @decorators.idempotent_id('f83fe669-6758-448a-a85e-32d351f36fe0')
     def test_create_flavor_with_none_id(self):
         # If nova receives a request with None as flavor_id,
         # nova generates flavor_id of uuid.
@@ -103,7 +104,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, str(uuid.UUID(new_flavor_id)))
 
-    @test.idempotent_id('8261d7b0-be58-43ec-a2e5-300573c3f6c5')
+    @decorators.idempotent_id('8261d7b0-be58-43ec-a2e5-300573c3f6c5')
     def test_create_flavor_verify_entry_in_list_details(self):
         # Create a flavor and ensure it's details are listed
         # This operation requires the user to have 'admin' role
@@ -127,7 +128,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @test.idempotent_id('63dc64e6-2e79-4fdf-868f-85500d308d66')
+    @decorators.idempotent_id('63dc64e6-2e79-4fdf-868f-85500d308d66')
     def test_create_list_flavor_without_extra_data(self):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
@@ -169,7 +170,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @test.idempotent_id('be6cc18c-7c5d-48c0-ac16-17eaf03c54eb')
+    @decorators.idempotent_id('be6cc18c-7c5d-48c0-ac16-17eaf03c54eb')
     def test_list_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false.
         # The flavor should not be present in list_details as the
@@ -201,7 +202,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertFalse(flag)
 
-    @test.idempotent_id('bcc418ef-799b-47cc-baa1-ce01368b8987')
+    @decorators.idempotent_id('bcc418ef-799b-47cc-baa1-ce01368b8987')
     def test_create_server_with_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -221,7 +222,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                           name='test', imageRef=self.image_ref,
                           flavorRef=flavor['id'])
 
-    @test.idempotent_id('b345b196-bfbd-4231-8ac1-6d7fe15ff3a3')
+    @decorators.idempotent_id('b345b196-bfbd-4231-8ac1-6d7fe15ff3a3')
     def test_list_public_flavor_with_other_user(self):
         # Create a Flavor with public access.
         # Try to List/Get flavor with another user
@@ -244,7 +245,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @test.idempotent_id('fb9cbde6-3a0e-41f2-a983-bdb0a823c44e')
+    @decorators.idempotent_id('fb9cbde6-3a0e-41f2-a983-bdb0a823c44e')
     def test_is_public_string_variations(self):
         flavor_id_not_public = data_utils.rand_int_id(start=1000)
         flavor_name_not_public = data_utils.rand_name(self.flavor_name_prefix)
@@ -287,7 +288,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         _test_string_variations(['t', 'true', 'yes', '1'],
                                 flavor_name_public)
 
-    @test.idempotent_id('3b541a2e-2ac2-4b42-8b8d-ba6e22fcd4da')
+    @decorators.idempotent_id('3b541a2e-2ac2-4b42-8b8d-ba6e22fcd4da')
     def test_create_flavor_using_string_ram(self):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)

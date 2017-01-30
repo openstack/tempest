@@ -14,7 +14,7 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest import test
+from tempest.lib import decorators
 
 
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -25,12 +25,12 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(HostsAdminTestJSON, cls).setup_clients()
         cls.client = cls.os_adm.hosts_client
 
-    @test.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
+    @decorators.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
     def test_list_hosts(self):
         hosts = self.client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2, str(hosts))
 
-    @test.idempotent_id('5dc06f5b-d887-47a2-bb2a-67762ef3c6de')
+    @decorators.idempotent_id('5dc06f5b-d887-47a2-bb2a-67762ef3c6de')
     def test_list_hosts_with_zone(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         hosts = self.client.list_hosts()['hosts']
@@ -39,21 +39,21 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertGreaterEqual(len(hosts), 1)
         self.assertIn(host, hosts)
 
-    @test.idempotent_id('9af3c171-fbf4-4150-a624-22109733c2a6')
+    @decorators.idempotent_id('9af3c171-fbf4-4150-a624-22109733c2a6')
     def test_list_hosts_with_a_blank_zone(self):
         # If send the request with a blank zone, the request will be successful
         # and it will return all the hosts list
         hosts = self.client.list_hosts(zone='')['hosts']
         self.assertNotEqual(0, len(hosts))
 
-    @test.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
+    @decorators.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
         # successful and no hosts will be returned
         hosts = self.client.list_hosts(zone='xxx')['hosts']
         self.assertEqual(0, len(hosts))
 
-    @test.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
+    @decorators.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
     def test_show_host_detail(self):
         hosts = self.client.list_hosts()['hosts']
 

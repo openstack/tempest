@@ -17,8 +17,8 @@ import datetime
 
 from tempest.api.compute import base
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as e
-from tempest import test
 
 # Time that waits for until returning valid response
 # TODO(takmatsu): Ideally this value would come from configuration.
@@ -65,7 +65,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
                              func.__name__, duration))
         return self.resp
 
-    @test.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
+    @decorators.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         tenant_usage = self.call_until_valid(
@@ -73,7 +73,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
             start=self.start, end=self.end, detailed="1")['tenant_usages'][0]
         self.assertEqual(len(tenant_usage), 8)
 
-    @test.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
+    @decorators.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
         tenant_usage = self.call_until_valid(
@@ -82,7 +82,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertEqual(len(tenant_usage), 8)
 
-    @test.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
+    @decorators.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
         tenant_usage = self.call_until_valid(

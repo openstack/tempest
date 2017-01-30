@@ -18,7 +18,6 @@ from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest.lib import decorators
-from tempest import test
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -44,7 +43,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
 
-    @test.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
+    @decorators.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
         # Filter the list of servers by server error status
         params = {'status': 'error'}
@@ -60,14 +59,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_id, map(lambda x: x['id'], servers))
         self.assertNotIn(self.s2_id, map(lambda x: x['id'], servers))
 
-    @test.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
+    @decorators.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
     def test_list_servers_detailed_filter_by_invalid_status(self):
         params = {'status': 'invalid_status'}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
         self.assertEqual([], servers)
 
-    @test.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
+    @decorators.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):
         # Listing servers by admin user returns a list which doesn't
         # contain the other tenants' server by default
@@ -80,7 +79,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(self.s1_name, servers_name)
         self.assertNotIn(self.s2_name, servers_name)
 
-    @test.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
+    @decorators.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
         # Here should be listed all servers
@@ -92,7 +91,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
 
-    @test.idempotent_id('7e5d6b8f-454a-4ba1-8ae2-da857af8338b')
+    @decorators.idempotent_id('7e5d6b8f-454a-4ba1-8ae2-da857af8338b')
     def test_list_servers_by_admin_with_specified_tenant(self):
         # In nova v2, tenant_id is ignored unless all_tenants is specified
 
@@ -122,7 +121,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(self.s1_name, servers_name)
         self.assertNotIn(self.s2_name, servers_name)
 
-    @test.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
+    @decorators.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
         # Filter the list of servers by existent host
         name = data_utils.rand_name(self.__class__.__name__ + '-server')
@@ -147,7 +146,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(test_server['id'],
                          map(lambda x: x['id'], nonexistent_servers))
 
-    @test.idempotent_id('ee8ae470-db70-474d-b752-690b7892cab1')
+    @decorators.idempotent_id('ee8ae470-db70-474d-b752-690b7892cab1')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
         self.client.reset_state(self.s1_id, state='error')
@@ -164,7 +163,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ACTIVE')
 
     @decorators.skip_because(bug="1240043")
-    @test.idempotent_id('31ff3486-b8a0-4f56-a6c0-aab460531db3')
+    @decorators.idempotent_id('31ff3486-b8a0-4f56-a6c0-aab460531db3')
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
         diagnostic = self.client.show_server_diagnostics(self.s1_id)
@@ -174,7 +173,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         for key in basic_attrs:
             self.assertIn(key, str(diagnostic.keys()))
 
-    @test.idempotent_id('682cb127-e5bb-4f53-87ce-cb9003604442')
+    @decorators.idempotent_id('682cb127-e5bb-4f53-87ce-cb9003604442')
     def test_rebuild_server_in_error_state(self):
         # The server in error state should be rebuilt using the provided
         # image and changed to ACTIVE state
@@ -202,7 +201,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
-    @test.idempotent_id('7a1323b4-a6a2-497a-96cb-76c07b945c71')
+    @decorators.idempotent_id('7a1323b4-a6a2-497a-96cb-76c07b945c71')
     def test_reset_network_inject_network_info(self):
         # Reset Network of a Server
         server = self.create_test_server(wait_until='ACTIVE')
@@ -210,7 +209,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Inject the Network Info into Server
         self.client.inject_network_info(server['id'])
 
-    @test.idempotent_id('fdcd9b33-0903-4e00-a1f7-b5f6543068d6')
+    @decorators.idempotent_id('fdcd9b33-0903-4e00-a1f7-b5f6543068d6')
     def test_create_server_with_scheduling_hint(self):
         # Create a server with scheduler hints.
         hints = {
