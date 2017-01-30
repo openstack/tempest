@@ -51,6 +51,14 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
                           self.admin_volume_types_client.delete_volume_type,
                           data_utils.rand_uuid())
 
+    @test.idempotent_id('8c09f849-f225-4d78-ba87-bffd9a5e0c6f')
+    def test_create_volume_with_private_volume_type(self):
+        # Should not be able to create volume with private volume type.
+        params = {'os-volume-type-access:is_public': False}
+        volume_type = self.create_volume_type(**params)
+        self.assertRaises(lib_exc.NotFound,
+                          self.create_volume, volume_type=volume_type['id'])
+
 
 class VolumeTypesNegativeV1Test(VolumeTypesNegativeV2Test):
     _api_version = 1
