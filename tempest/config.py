@@ -224,6 +224,13 @@ IdentityFeatureGroup = [
                 deprecated_for_removal=True,
                 deprecated_reason="All supported version of OpenStack now "
                                   "supports the 'reseller' feature"),
+    # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
+    # in Newton and Ocata. This option can be removed after Mitaka is end of
+    # life.
+    cfg.BoolOpt('forbid_global_implied_dsr',
+                default=False,
+                help='Does the environment forbid global roles implying '
+                     'domain specific ones?'),
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
