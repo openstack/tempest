@@ -16,6 +16,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -30,7 +31,7 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.floating_ips_client
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
+    @decorators.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
     @test.services('network')
     def test_get_nonexistent_floating_ip_details(self):
         # Negative test:Should not be able to GET the details

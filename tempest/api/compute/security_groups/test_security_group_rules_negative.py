@@ -15,6 +15,7 @@
 
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -27,7 +28,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         cls.rules_client = cls.security_group_rules_client
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('1d507e98-7951-469b-82c3-23f1e6b8c254')
+    @decorators.idempotent_id('1d507e98-7951-469b-82c3-23f1e6b8c254')
     @test.services('network')
     def test_create_security_group_rule_with_non_existent_id(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -44,7 +45,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('2244d7e4-adb7-4ecb-9930-2d77e123ce4f')
+    @decorators.idempotent_id('2244d7e4-adb7-4ecb-9930-2d77e123ce4f')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -61,7 +62,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('8bd56d02-3ffa-4d67-9933-b6b9a01d6089')
+    @decorators.idempotent_id('8bd56d02-3ffa-4d67-9933-b6b9a01d6089')
     @test.services('network')
     def test_create_security_group_rule_duplicate(self):
         # Negative test: Create Security Group rule duplicate should fail
@@ -86,7 +87,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('84c81249-9f6e-439c-9bbf-cbb0d2cddbdf')
+    @decorators.idempotent_id('84c81249-9f6e-439c-9bbf-cbb0d2cddbdf')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_ip_protocol(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -106,7 +107,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('12bbc875-1045-4f7a-be46-751277baedb9')
+    @decorators.idempotent_id('12bbc875-1045-4f7a-be46-751277baedb9')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_from_port(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -125,7 +126,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('ff88804d-144f-45d1-bf59-dd155838a43a')
+    @decorators.idempotent_id('ff88804d-144f-45d1-bf59-dd155838a43a')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -144,7 +145,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('00296fa9-0576-496a-ae15-fbab843189e0')
+    @decorators.idempotent_id('00296fa9-0576-496a-ae15-fbab843189e0')
     @test.services('network')
     def test_create_security_group_rule_with_invalid_port_range(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -163,7 +164,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           to_port=to_port)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('56fddcca-dbb8-4494-a0db-96e9f869527c')
+    @decorators.idempotent_id('56fddcca-dbb8-4494-a0db-96e9f869527c')
     @test.services('network')
     def test_delete_security_group_rule_with_non_existent_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL

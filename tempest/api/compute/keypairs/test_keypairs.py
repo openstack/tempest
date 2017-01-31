@@ -15,13 +15,13 @@
 
 from tempest.api.compute.keypairs import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class KeyPairsV2TestJSON(base.BaseKeypairTest):
     max_microversion = '2.1'
 
-    @test.idempotent_id('1d1dbedb-d7a0-432a-9d09-83f543c3c19b')
+    @decorators.idempotent_id('1d1dbedb-d7a0-432a-9d09-83f543c3c19b')
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
         # Create 3 keypairs
@@ -46,7 +46,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
                          "Failed to find keypairs %s in fetched list"
                          % ', '.join(m_key['name'] for m_key in missing_kps))
 
-    @test.idempotent_id('6c1d3123-4519-4742-9194-622cb1714b7d')
+    @decorators.idempotent_id('6c1d3123-4519-4742-9194-622cb1714b7d')
     def test_keypair_create_delete(self):
         # Keypair should be created, verified and deleted
         k_name = data_utils.rand_name('keypair')
@@ -59,7 +59,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         self.assertIsNotNone(private_key,
                              "Field private_key is empty or not found.")
 
-    @test.idempotent_id('a4233d5d-52d8-47cc-9a25-e1864527e3df')
+    @decorators.idempotent_id('a4233d5d-52d8-47cc-9a25-e1864527e3df')
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair')
@@ -74,7 +74,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         self.assertIsNotNone(public_key,
                              "Field public_key is empty or not found.")
 
-    @test.idempotent_id('39c90c6a-304a-49dd-95ec-2366129def05')
+    @decorators.idempotent_id('39c90c6a-304a-49dd-95ec-2366129def05')
     def test_keypair_create_with_pub_key(self):
         # Keypair should be created with a given public key
         k_name = data_utils.rand_name('keypair')

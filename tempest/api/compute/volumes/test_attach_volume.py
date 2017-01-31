@@ -21,8 +21,8 @@ from tempest.common import compute
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -85,7 +85,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
         return attachment
 
-    @test.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
+    @decorators.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
@@ -136,7 +136,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             disks = linux_client.get_disks()
             self.assertNotIn(device_name_to_match, disks)
 
-    @test.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
+    @decorators.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
         # List volume attachment of the server
         server = self._create_server()
@@ -156,7 +156,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(volume['id'], body['volumeId'])
         self.assertEqual(attachment['id'], body['id'])
 
-    @test.idempotent_id('757d488b-a951-4bc7-b3cd-f417028da08a')
+    @decorators.idempotent_id('757d488b-a951-4bc7-b3cd-f417028da08a')
     def test_list_get_two_volume_attachments(self):
         # NOTE: This test is using the volume device auto-assignment
         # without specifying the device ("/dev/sdb", etc). The feature
@@ -243,7 +243,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
             counted_volumes = self._count_volumes(server)
             self.assertEqual(number_of_volumes, counted_volumes)
 
-    @test.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
+    @decorators.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     def test_attach_volume_shelved_or_offload_server(self):
@@ -269,7 +269,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         # case of shelved_offloaded.
         self.assertIsNotNone(volume_attachment['device'])
 
-    @test.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
+    @decorators.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     def test_detach_volume_shelved_or_offload_server(self):

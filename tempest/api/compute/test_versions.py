@@ -13,12 +13,12 @@
 # under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class TestVersions(base.BaseV2ComputeTest):
 
-    @test.idempotent_id('6c0a0990-43b6-4529-9b61-5fd8daf7c55c')
+    @decorators.idempotent_id('6c0a0990-43b6-4529-9b61-5fd8daf7c55c')
     def test_list_api_versions(self):
         """Test that a get of the unversioned url returns the choices doc.
 
@@ -36,7 +36,7 @@ class TestVersions(base.BaseV2ComputeTest):
         self.assertEqual(versions[0]['id'], 'v2.0',
                          "The first listed version should be v2.0")
 
-    @test.idempotent_id('b953a29e-929c-4a8e-81be-ec3a7e03cb76')
+    @decorators.idempotent_id('b953a29e-929c-4a8e-81be-ec3a7e03cb76')
     def test_get_version_details(self):
         """Test individual version endpoints info works.
 

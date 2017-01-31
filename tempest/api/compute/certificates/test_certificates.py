@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -28,14 +28,14 @@ class CertificatesV2TestJSON(base.BaseV2ComputeTest):
         if not CONF.compute_feature_enabled.nova_cert:
             raise cls.skipException("Nova cert is not available")
 
-    @test.idempotent_id('c070a441-b08e-447e-a733-905909535b1b')
+    @decorators.idempotent_id('c070a441-b08e-447e-a733-905909535b1b')
     def test_create_root_certificate(self):
         # create certificates
         body = self.certificates_client.create_certificate()['certificate']
         self.assertIn('data', body)
         self.assertIn('private_key', body)
 
-    @test.idempotent_id('3ac273d0-92d2-4632-bdfc-afbc21d4606c')
+    @decorators.idempotent_id('3ac273d0-92d2-4632-bdfc-afbc21d4606c')
     def test_get_root_certificate(self):
         # get the root certificate
         body = (self.certificates_client.show_certificate('root')

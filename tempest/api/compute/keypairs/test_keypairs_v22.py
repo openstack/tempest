@@ -14,7 +14,7 @@
 
 from tempest.api.compute.keypairs import test_keypairs
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
@@ -41,11 +41,11 @@ class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
             if keypair['keypair']['name'] == k_name:
                 self._check_keypair_type(keypair['keypair'], keypair_type)
 
-    @test.idempotent_id('8726fa85-7f98-4b20-af9e-f710a4f3391c')
+    @decorators.idempotent_id('8726fa85-7f98-4b20-af9e-f710a4f3391c')
     def test_keypairsv22_create_list_show(self):
         self._test_keypairs_create_list_show()
 
-    @test.idempotent_id('89d59d43-f735-441a-abcf-0601727f47b6')
+    @decorators.idempotent_id('89d59d43-f735-441a-abcf-0601727f47b6')
     def test_keypairsv22_create_list_show_with_type(self):
         keypair_type = 'x509'
         self._test_keypairs_create_list_show(keypair_type=keypair_type)
