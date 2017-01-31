@@ -20,8 +20,8 @@ from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -50,7 +50,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
-    @test.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
+    @decorators.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
     def test_create_server_with_personality(self):
         file_contents = 'This is a test file.'
         file_path = '/test.txt'
@@ -73,7 +73,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                              linux_client.exec_command(
                                  'sudo cat %s' % file_path))
 
-    @test.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
+    @decorators.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
     def test_rebuild_server_with_personality(self):
         server = self.create_test_server(wait_until='ACTIVE', validatable=True)
         server_id = server['id']
@@ -87,7 +87,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.image_ref_alt,
                          rebuilt_server['server']['image']['id'])
 
-    @test.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
+    @decorators.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
@@ -107,7 +107,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server, personality=personality)
 
-    @test.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
+    @decorators.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.

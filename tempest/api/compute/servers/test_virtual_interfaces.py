@@ -18,6 +18,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
 
@@ -42,7 +43,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         super(VirtualInterfacesTestJSON, cls).resource_setup()
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @test.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
+    @decorators.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
     @test.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list

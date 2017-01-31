@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -33,7 +34,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(metadata={}, wait_until='ACTIVE')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('fe114a8f-3a57-4eff-9ee2-4e14628df049')
+    @decorators.idempotent_id('fe114a8f-3a57-4eff-9ee2-4e14628df049')
     def test_server_create_metadata_key_too_long(self):
         # Attempt to start a server with a meta-data key that is > 255
         # characters
@@ -49,7 +50,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # no teardown - all creates should fail
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('92431555-4d8b-467c-b95b-b17daa5e57ff')
+    @decorators.idempotent_id('92431555-4d8b-467c-b95b-b17daa5e57ff')
     def test_create_server_metadata_blank_key(self):
         # Blank key should trigger an error.
         meta = {'': 'data1'}
@@ -58,7 +59,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           metadata=meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('4d9cd7a3-2010-4b41-b8fe-3bbf0b169466')
+    @decorators.idempotent_id('4d9cd7a3-2010-4b41-b8fe-3bbf0b169466')
     def test_server_metadata_non_existent_server(self):
         # GET on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
@@ -68,7 +69,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           'test2')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('f408e78e-3066-4097-9299-3b0182da812e')
+    @decorators.idempotent_id('f408e78e-3066-4097-9299-3b0182da812e')
     def test_list_server_metadata_non_existent_server(self):
         # List metadata on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
@@ -77,7 +78,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           non_existent_server_id)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('0025fbd6-a4ba-4cde-b8c2-96805dcfdabc')
+    @decorators.idempotent_id('0025fbd6-a4ba-4cde-b8c2-96805dcfdabc')
     def test_wrong_key_passed_in_body(self):
         # Raise BadRequest if key in uri does not match
         # the key passed in body.
@@ -87,7 +88,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server['id'], 'key', meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('0df38c2a-3d4e-4db5-98d8-d4d9fa843a12')
+    @decorators.idempotent_id('0df38c2a-3d4e-4db5-98d8-d4d9fa843a12')
     def test_set_metadata_non_existent_server(self):
         # Set metadata on a non-existent server should not succeed
         non_existent_server_id = data_utils.rand_uuid()
@@ -98,7 +99,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('904b13dc-0ef2-4e4c-91cd-3b4a0f2f49d8')
+    @decorators.idempotent_id('904b13dc-0ef2-4e4c-91cd-3b4a0f2f49d8')
     def test_update_metadata_non_existent_server(self):
         # An update should not happen for a non-existent server
         non_existent_server_id = data_utils.rand_uuid()
@@ -109,7 +110,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('a452f38c-05c2-4b47-bd44-a4f0bf5a5e48')
+    @decorators.idempotent_id('a452f38c-05c2-4b47-bd44-a4f0bf5a5e48')
     def test_update_metadata_with_blank_key(self):
         # Blank key should trigger an error
         meta = {'': 'data1'}
@@ -118,7 +119,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server['id'], meta=meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('6bbd88e1-f8b3-424d-ba10-ae21c45ada8d')
+    @decorators.idempotent_id('6bbd88e1-f8b3-424d-ba10-ae21c45ada8d')
     def test_delete_metadata_non_existent_server(self):
         # Should not be able to delete metadata item from a non-existent server
         non_existent_server_id = data_utils.rand_uuid()
@@ -128,7 +129,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           'd')
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('d8c0a210-a5c3-4664-be04-69d96746b547')
+    @decorators.idempotent_id('d8c0a210-a5c3-4664-be04-69d96746b547')
     def test_metadata_items_limit(self):
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
         # will be raised while exceeding metadata items limit for
@@ -154,7 +155,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server['id'], req_metadata)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('96100343-7fa9-40d8-80fa-d29ef588ce1c')
+    @decorators.idempotent_id('96100343-7fa9-40d8-80fa-d29ef588ce1c')
     def test_set_server_metadata_blank_key(self):
         # Raise a bad request error for blank key.
         # set_server_metadata will replace all metadata with new value
@@ -164,7 +165,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server['id'], meta=meta)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('64a91aee-9723-4863-be44-4c9d9f1e7d0e')
+    @decorators.idempotent_id('64a91aee-9723-4863-be44-4c9d9f1e7d0e')
     def test_set_server_metadata_missing_metadata(self):
         # Raise a bad request error for a missing metadata field
         # set_server_metadata will replace all metadata with new value

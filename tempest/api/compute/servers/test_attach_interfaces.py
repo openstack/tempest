@@ -184,7 +184,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
-    @test.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
+    @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @test.services('network')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
@@ -221,7 +221,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
     @test.attr(type='smoke')
-    @test.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
+    @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @test.services('network')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
@@ -246,7 +246,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
 
     @decorators.skip_because(bug='1607714')
-    @test.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
+    @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
         """Tests the following:
 

@@ -18,7 +18,7 @@ import testtools
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -46,7 +46,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
             server = self.client.show_server(server['id'])['server']
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
+    @decorators.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
         server = self.create_test_server(wait_until='ACTIVE')
@@ -65,7 +65,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
+    @decorators.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
         server = self.create_test_server(wait_until='ACTIVE')
@@ -84,7 +84,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('414e7e93-45b5-44bc-8e03-55159c6bfc97')
+    @decorators.idempotent_id('414e7e93-45b5-44bc-8e03-55159c6bfc97')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
@@ -100,7 +100,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('693d16f3-556c-489a-8bac-3d0ca2490bad')
+    @decorators.idempotent_id('693d16f3-556c-489a-8bac-3d0ca2490bad')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
@@ -116,7 +116,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-    @test.idempotent_id('5ef18867-358d-4de9-b3c9-94d4ba35742f')
+    @decorators.idempotent_id('5ef18867-358d-4de9-b3c9-94d4ba35742f')
     def test_update_server_from_auto_to_manual(self):
         # A server should be updated from auto to manual disk config
         server = self.create_test_server(wait_until='ACTIVE')
