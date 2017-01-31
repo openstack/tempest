@@ -32,7 +32,11 @@ LOG = logging.getLogger(__name__)
 class DeviceTaggingTest(base.BaseV2ComputeTest):
 
     min_microversion = '2.32'
-    max_microversion = 'latest'
+    # NOTE(mriedem): max_version looks odd but it's actually correct. Due to a
+    # bug in the 2.32 microversion, tags on block devices only worked with the
+    # 2.32 microversion specifically. And tags on networks only worked between
+    # 2.32 and 2.36 inclusive; the 2.37 microversion broke tags for networks.
+    max_microversion = '2.32'
 
     @classmethod
     def skip_checks(cls):
@@ -261,3 +265,8 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
             cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
             md_json = self.ssh_client.exec_command(cmd_md)
             self.verify_device_metadata(md_json)
+
+
+class DeviceTaggingTestV2_42(DeviceTaggingTest):
+    min_microversion = '2.42'
+    max_microversion = 'latest'
