@@ -8,9 +8,9 @@ export OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 export OS_NO_CACHE=1
 
 export TEMPEST_DIR=${TEMPEST_DIR:-$(pwd)}
-export KEYSTONE_SERVICE_PROTOCOL=${KEYSTONE_SERVICE_PROTOCOL:-http}
+export KEYSTONE_SERVICE_PROTOCOL=${AUTH_PROTOCOL:-http}
 export KEYSTONE_SERVICE_HOST=${KEYSTONE_SERVICE_HOST:-127.0.0.1}
-export OS_AUTH_URL=http://${KEYSTONE_SERVICE_HOST}:5000/v2.0/
+export OS_AUTH_URL=${KEYSTONE_SERVICE_PROTOCOL}://${KEYSTONE_SERVICE_HOST}:5000/v2.0/
 export PUBLIC_NETWORK_NAME=${PUBLIC_NETWORK_NAME:-public_net}
 export PUBLIC_NETWORK_RI_FQ_NAME=${PUBLIC_NETWORK_RI_FQ_NAME:-"default-domain:$OS_TENANT_NAME:$PUBLIC_NETWORK_NAME:$PUBLIC_NETWORK_NAME"}
 export PUBLIC_NETWORK_RT=${PUBLIC_NETWORK_RT:-10003}
@@ -66,6 +66,9 @@ iniset $TEMPEST_CONFIG identity uri_v3 "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_S
 iniset $TEMPEST_CONFIG identity username $USERNAME
 iniset $TEMPEST_CONFIG identity password $PASSWORD
 iniset $TEMPEST_CONFIG identity tenant_name $TENANT_NAME
+if [[ $KEYSTONE_SERVICE_PROTOCOL -eq 'https' ]]; then
+    iniset $TEMPEST_CONFIG identity disable_ssl_certificate_validation False
+fi
 
 iniset $TEMPEST_CONFIG identity alt_username $ALT_USERNAME
 iniset $TEMPEST_CONFIG identity alt_password $password
@@ -80,7 +83,12 @@ iniset $TEMPEST_CONFIG auth use_dynamic_credentials True
 iniset $TEMPEST_CONFIG image http_image $HTTP_IMAGE_PATH
 
 #COMPUTE 
-public_network_id=$(${with_venv} neutron net-list | grep $PUBLIC_NETWORK_NAME | \
+if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+neutron="neutron --insecure"
+else
+neutron="neutron"
+fi
+public_network_id=$(${with_venv} ${neutron} net-list | grep $PUBLIC_NETWORK_NAME | \
             awk '{print $2}')
 
 iniset $TEMPEST_CONFIG compute ssh_user ${DEFAULT_INSTANCE_USER:-cirros}

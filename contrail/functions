@@ -61,9 +61,14 @@ function get_image_id() {
 
 function create_project() {
     local project_name=$1
-    id=`${with_venv} keystone tenant-list | grep ' '$project_name' ' | awk '{print $2;}'`
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        keystone='keystone --insecure'
+    else
+        keystone='keystone'
+    fi
+    id=`${with_venv} ${keystone} tenant-list | grep ' '$project_name' ' | awk '{print $2;}'`
     if [ -z "$id" ]; then
-        ${with_venv} keystone tenant-create --name $project_name --enabled True
+        ${with_venv} ${keystone} tenant-create --name $project_name --enabled True
     fi
 }
 
@@ -72,30 +77,45 @@ function create_user() {
     local password=$2
     local project_name=$3
     local role=$4
-    id=$(${with_venv} keystone user-list | grep $username | awk '{print $2;}')
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        keystone='keystone --insecure'
+    else
+        keystone='keystone'
+    fi
+    id=$(${with_venv} ${keystone} user-list | grep $username | awk '{print $2;}')
     if [ -z $id ]; then
-        ${with_venv} keystone user-create --name $username --tenant $project_name --pass $password --email $username@example.com
-        ${with_venv} keystone user-role-add --user $username --role $role --tenant $project_name
+        ${with_venv} ${keystone} user-create --name $username --tenant $project_name --pass $password --email $username@example.com
+        ${with_venv} ${keystone} user-role-add --user $username --role $role --tenant $project_name
     fi
 }    
 
 function create_network() {
     local vn_name=$1
     local subnet=$2
-    if ${with_venv} neutron net-show $vn_name >/dev/null 2>&1 ; then
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        neutron='neutron --insecure'
+    else
+        neutron='neutron'
+    fi
+    if ${with_venv} ${neutron} net-show $vn_name >/dev/null 2>&1 ; then
         echo "$vn_name already present, not creating"
     else 
-        ${with_venv} neutron net-create $vn_name
-        vn_id=`${with_venv} neutron net-show $vn_name | grep " id " | awk {'print $4'}`
-        ${with_venv} neutron subnet-create $vn_id $subnet
+        ${with_venv} ${neutron} net-create $vn_name
+        vn_id=`${with_venv} ${neutron} net-show $vn_name | grep " id " | awk {'print $4'}`
+        ${with_venv} ${neutron} subnet-create $vn_id $subnet
     fi
 }
 
 function create_public_network() {
     local vn_name=$1
     local subnet=$2
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        neutron='neutron --insecure'
+    else
+        neutron='neutron'
+    fi
     create_network $vn_name $subnet 
-    ${with_venv} neutron net-update $vn_name --router:external True
+    ${with_venv} ${neutron} net-update $vn_name --router:external True
     sshpass -p $API_SERVER_HOST_PASSWORD ssh $SSHOPT ${API_SERVER_HOST_USER}@${API_SERVER_IP} "python /opt/contrail/utils/add_route_target.py --routing_instance_name $PUBLIC_NETWORK_RI_FQ_NAME --route_target_number $PUBLIC_NETWORK_RT --router_asn $ROUTER_ASN --api_server_ip $API_SERVER_IP --api_server_port 8082 --admin_user $OS_USERNAME --admin_password $OS_PASSWORD --admin_tenant_name $OS_TENANT_NAME" || echo "Unable to set route target on the public vn!!"
 }
 
@@ -105,10 +125,15 @@ function create_flavor() {
     local ram=512
     local disk=1
     local vCPU=1
-    if ${with_venv} nova flavor-show $id >/dev/null 2>&1 ; then
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        nova='nova --insecure'
+    else
+        nova='nova'
+    fi
+    if ${with_venv} ${nova} flavor-show $id >/dev/null 2>&1 ; then
         echo "flavor $id already present, not creating"
     else
-        ${with_venv} nova flavor-create $name $id $ram $disk $vCPU
+        ${with_venv} ${nova} flavor-create $name $id $ram $disk $vCPU
     fi
 }
 
