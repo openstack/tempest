@@ -30,6 +30,9 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
     5. Swap volume from "volume1" to "volume2" as admin.
     6. Check the swap volume is successful and "volume2"
        is attached to "instance1" and "volume1" is in available state.
+    7. Swap volume from "volume2" to "volume1" as admin.
+    8. Check the swap volume is successful and "volume1"
+       is attached to "instance1" and "volume2" is in available state.
     """
 
     @classmethod
@@ -58,13 +61,21 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
                                                 volume1['id'], 'available')
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume2['id'], 'in-use')
-        self.addCleanup(self.servers_client.detach_volume,
-                        server['id'], volume2['id'])
         # Verify "volume2" is attached to the server
         vol_attachments = self.servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(1, len(vol_attachments))
         self.assertIn(volume2['id'], vol_attachments[0]['volumeId'])
 
-        # TODO(mriedem): Test swapping back from volume2 to volume1 after
-        # nova bug 1490236 is fixed.
+        # Swap volume from "volume2" to "volume1"
+        self.admin_servers_client.update_attached_volume(
+            server['id'], volume2['id'], volumeId=volume1['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume2['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume1['id'], 'in-use')
+        # Verify "volume1" is attached to the server
+        vol_attachments = self.servers_client.list_volume_attachments(
+            server['id'])['volumeAttachments']
+        self.assertEqual(1, len(vol_attachments))
+        self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])
