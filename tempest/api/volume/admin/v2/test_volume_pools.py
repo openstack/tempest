@@ -14,29 +14,26 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
-
-    @classmethod
-    def resource_setup(cls):
-        super(VolumePoolsAdminV2TestsJSON, cls).resource_setup()
-        # Create a test shared volume for tests
-        cls.volume = cls.create_volume()
-
-    def _assert_host_volume_in_pools(self, with_detail=False):
-        volume_info = self.admin_volume_client.show_volume(
-            self.volume['id'])['volume']
+    def _assert_pools(self, with_detail=False):
         cinder_pools = self.admin_volume_client.show_pools(
             detail=with_detail)['pools']
-        self.assertIn(volume_info['os-vol-host-attr:host'],
-                      [pool['name'] for pool in cinder_pools])
+        self.assertIn('name', cinder_pools[0])
+        if with_detail:
+            self.assertIn(CONF.volume.vendor_name,
+                          [pool['capabilities']['vendor_name']
+                           for pool in cinder_pools])
 
     @decorators.idempotent_id('0248a46c-e226-4933-be10-ad6fca8227e7')
     def test_get_pools_without_details(self):
-        self._assert_host_volume_in_pools()
+        self._assert_pools()
 
     @decorators.idempotent_id('d4bb61f7-762d-4437-b8a4-5785759a0ced')
     def test_get_pools_with_details(self):
-        self._assert_host_volume_in_pools(with_detail=True)
+        self._assert_pools(with_detail=True)
