@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 create_get_volume = {
     'status_code': [200],
     'response_body': {
@@ -24,7 +26,7 @@ create_get_volume = {
                     'status': {'type': 'string'},
                     'displayName': {'type': ['string', 'null']},
                     'availabilityZone': {'type': 'string'},
-                    'createdAt': {'type': 'string'},
+                    'createdAt': parameter_types.date_time,
                     'displayDescription': {'type': ['string', 'null']},
                     'volumeType': {'type': ['string', 'null']},
                     'snapshotId': {'type': ['string', 'null']},
@@ -75,7 +77,7 @@ list_volumes = {
                         'status': {'type': 'string'},
                         'displayName': {'type': ['string', 'null']},
                         'availabilityZone': {'type': 'string'},
-                        'createdAt': {'type': 'string'},
+                        'createdAt': parameter_types.date_time,
                         'displayDescription': {'type': ['string', 'null']},
                         'volumeType': {'type': ['string', 'null']},
                         'snapshotId': {'type': ['string', 'null']},

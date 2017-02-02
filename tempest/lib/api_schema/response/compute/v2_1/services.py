@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 list_services = {
     'status_code': [200],
     'response_body': {
@@ -29,7 +31,7 @@ list_services = {
                         'state': {'type': 'string'},
                         'binary': {'type': 'string'},
                         'status': {'type': 'string'},
-                        'updated_at': {'type': ['string', 'null']},
+                        'updated_at': parameter_types.date_time_or_null,
                         'disabled_reason': {'type': ['string', 'null']}
                     },
                     'additionalProperties': False,

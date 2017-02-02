@@ -14,6 +14,8 @@
 
 import copy
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 
 _version = {
     'type': 'object',
@@ -33,7 +35,7 @@ _version = {
             }
         },
         'status': {'type': 'string'},
-        'updated': {'type': 'string', 'format': 'date-time'},
+        'updated': parameter_types.date_time,
         'version': {'type': 'string'},
         'min_version': {'type': 'string'},
         'media-types': {

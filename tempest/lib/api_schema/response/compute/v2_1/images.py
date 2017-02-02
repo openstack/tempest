@@ -26,10 +26,10 @@ common_image_schema = {
     'properties': {
         'id': {'type': 'string'},
         'status': {'enum': image_status_enums},
-        'updated': {'type': 'string'},
+        'updated': parameter_types.date_time,
         'links': image_links,
         'name': {'type': ['string', 'null']},
-        'created': {'type': 'string'},
+        'created': parameter_types.date_time,
         'minDisk': {'type': 'integer'},
         'minRam': {'type': 'integer'},
         'progress': {'type': 'integer'},

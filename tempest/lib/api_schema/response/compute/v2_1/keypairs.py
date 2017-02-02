@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 get_keypair = {
     'status_code': [200],
     'response_body': {
@@ -25,9 +27,9 @@ get_keypair = {
                     'fingerprint': {'type': 'string'},
                     'user_id': {'type': 'string'},
                     'deleted': {'type': 'boolean'},
-                    'created_at': {'type': 'string'},
-                    'updated_at': {'type': ['string', 'null']},
-                    'deleted_at': {'type': ['string', 'null']},
+                    'created_at': parameter_types.date_time,
+                    'updated_at': parameter_types.date_time_or_null,
+                    'deleted_at': parameter_types.date_time_or_null,
                     'id': {'type': 'integer'}
 
                 },
