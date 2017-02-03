@@ -30,8 +30,7 @@ LOG = logging.getLogger(__name__)
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
-                       image_id=None, delete_vol_on_termination=True,
-                       **kwargs):
+                       image_id=None, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -44,16 +43,30 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param tenant_network: Tenant network to be used for creating a server.
     :param wait_until: Server status to wait for the server to reach after
         its creation.
-    :param volume_backed: Whether the instance is volume backed or not.
+    :param volume_backed: Whether the server is volume backed or not.
+                          If this is true, a volume will be created and
+                          create server will be requested with
+                          'block_device_mapping_v2' populated with below
+                          values:
+                          --------------------------------------------
+                          bd_map_v2 = [{
+                              'uuid': volume['volume']['id'],
+                              'source_type': 'volume',
+                              'destination_type': 'volume',
+                              'boot_index': 0,
+                              'delete_on_termination': True}]
+                          kwargs['block_device_mapping_v2'] = bd_map_v2
+                          ---------------------------------------------
+                          If server needs to be booted from volume with other
+                          combination of bdm inputs than mentioned above, then
+                          pass the bdm inputs explicitly as kwargs and image_id
+                          as empty string ('').
     :param name: Name of the server to be provisioned. If not defined a random
         string ending with '-instance' will be generated.
     :param flavor: Flavor of the server to be provisioned. If not defined,
         CONF.compute.flavor_ref will be used instead.
     :param image_id: ID of the image to be used to provision the server. If not
         defined, CONF.compute.image_ref will be used instead.
-    :param delete_vol_on_termination: Controls whether the backing volume
-        should be deleted when the server is deleted. Only applies to volume
-        backed servers.
     :returns: a tuple
     """
 
@@ -103,12 +116,14 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     if volume_backed:
         volume_name = data_utils.rand_name(__name__ + '-volume')
         volumes_client = clients.volumes_v2_client
-        if CONF.volume_feature_enabled.api_v1:
+        name_field = 'name'
+        if not CONF.volume_feature_enabled.api_v2:
             volumes_client = clients.volumes_client
-        volume = volumes_client.create_volume(
-            display_name=volume_name,
-            imageRef=image_id,
-            size=CONF.volume.volume_size)
+            name_field = 'display_name'
+        params = {name_field: volume_name,
+                  'imageRef': image_id,
+                  'size': CONF.volume.volume_size}
+        volume = volumes_client.create_volume(**params)
         waiters.wait_for_volume_status(volumes_client,
                                        volume['volume']['id'], 'available')
 
@@ -117,7 +132,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             'source_type': 'volume',
             'destination_type': 'volume',
             'boot_index': 0,
-            'delete_on_termination': delete_vol_on_termination}]
+            'delete_on_termination': True}]
         kwargs['block_device_mapping_v2'] = bd_map_v2
 
         # Since this is boot from volume an image does not need
