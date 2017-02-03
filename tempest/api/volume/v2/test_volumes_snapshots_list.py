@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import operator
-
 from tempest.api.volume import base
 from tempest import config
 from tempest import test
@@ -89,7 +87,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         # The list of snapshots should end before the provided marker
         params = {'marker': self.snapshot_id_list[1]}
         snap_list = self.snapshots_client.list_snapshots(**params)['snapshots']
-        fetched_list_id = map(operator.itemgetter('id'), snap_list)
+        fetched_list_id = [snap['id'] for snap in snap_list]
         # Verify the list of snapshots ends before the provided
         # marker(second snapshot), therefore only the first snapshot
         # should displayed.
