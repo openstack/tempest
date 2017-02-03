@@ -178,6 +178,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.rebuild_server,
                           server['id'], self.image_ref_alt)
 
+    @test.related_bug('1660878', status_code=409)
     @test.attr(type=['negative'])
     @decorators.idempotent_id('581a397d-5eab-486f-9cf9-1014bbd4c984')
     def test_reboot_deleted_server(self):
