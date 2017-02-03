@@ -108,14 +108,6 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.reset_state, '999', state='error')
 
     @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('e84e2234-60d2-42fa-8b30-e2d3049724ac')
-    def test_get_server_diagnostics_by_non_admin(self):
-        # Non-admin user can not view server diagnostics according to policy
-        self.assertRaises(lib_exc.Forbidden,
-                          self.non_adm_client.show_server_diagnostics,
-                          self.s1_id)
-
-    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('46a4e1ca-87ae-4d28-987a-1b6b136a0221')
     def test_migrate_non_existent_server(self):
         # migrate a non existent server

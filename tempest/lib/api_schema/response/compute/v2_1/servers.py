@@ -582,3 +582,10 @@ evacuate_server_with_admin_pass = {
         'required': ['adminPass']
     }
 }
+
+show_server_diagnostics = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object'
+    }
+}

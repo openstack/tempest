@@ -28,6 +28,7 @@ from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
 from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
 from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
 from tempest.lib.api_schema.response.compute.v2_47 import servers as schemav247
+from tempest.lib.api_schema.response.compute.v2_48 import servers as schemav248
 from tempest.lib.api_schema.response.compute.v2_6 import servers as schemav26
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
@@ -45,7 +46,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.16', 'max': '2.18', 'schema': schemav216},
         {'min': '2.19', 'max': '2.25', 'schema': schemav219},
         {'min': '2.26', 'max': '2.46', 'schema': schemav226},
-        {'min': '2.47', 'max': None, 'schema': schemav247}]
+        {'min': '2.47', 'max': '2.47', 'schema': schemav247},
+        {'min': '2.48', 'max': None, 'schema': schemav248}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
@@ -658,7 +660,10 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def show_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
         resp, body = self.get("servers/%s/diagnostics" % server_id)
-        return rest_client.ResponseBody(resp, json.loads(body))
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.show_server_diagnostics, resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_instance_actions(self, server_id):
         """List the provided server action."""

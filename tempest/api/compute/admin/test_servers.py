@@ -164,17 +164,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = self.client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
 
-    @decorators.skip_because(bug="1240043")
-    @decorators.idempotent_id('31ff3486-b8a0-4f56-a6c0-aab460531db3')
-    def test_get_server_diagnostics_by_admin(self):
-        # Retrieve server diagnostics by admin user
-        diagnostic = self.client.show_server_diagnostics(self.s1_id)
-        basic_attrs = ['rx_packets', 'rx_errors', 'rx_drop',
-                       'tx_packets', 'tx_errors', 'tx_drop',
-                       'read_req', 'write_req', 'cpu', 'memory']
-        for key in basic_attrs:
-            self.assertIn(key, str(diagnostic.keys()))
-
     @decorators.idempotent_id('682cb127-e5bb-4f53-87ce-cb9003604442')
     def test_rebuild_server_in_error_state(self):
         # The server in error state should be rebuilt using the provided
