@@ -31,14 +31,6 @@ class Manager(clients.ServiceClients):
 
     default_params = config.service_client_config()
 
-    # TODO(jordanP): remove this once no Tempest plugin use that class
-    # variable.
-    default_params_with_timeout_values = {
-        'build_interval': CONF.compute.build_interval,
-        'build_timeout': CONF.compute.build_timeout
-    }
-    default_params_with_timeout_values.update(default_params)
-
     def __init__(self, credentials, scope='project'):
         """Initialization of Manager class.
 
