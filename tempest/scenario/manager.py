@@ -707,7 +707,7 @@ class NetworkScenarioTest(ScenarioTest):
 
         self.assertEqual(network['name'], name)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.networks_client.delete_network,
+                        networks_client.delete_network,
                         network['id'])
         return network
 
@@ -860,7 +860,7 @@ class NetworkScenarioTest(ScenarioTest):
         )
         floating_ip = result['floatingip']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.floating_ips_client.delete_floatingip,
+                        client.delete_floatingip,
                         floating_ip['id'])
         return floating_ip
 
