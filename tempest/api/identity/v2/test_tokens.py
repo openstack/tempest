@@ -16,12 +16,12 @@
 from oslo_utils import timeutils
 import six
 from tempest.api.identity import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class TokensTest(base.BaseIdentityV2Test):
 
-    @test.idempotent_id('65ae3b78-91ff-467b-a705-f6678863b8ec')
+    @decorators.idempotent_id('65ae3b78-91ff-467b-a705-f6678863b8ec')
     def test_create_token(self):
 
         token_client = self.non_admin_token_client

@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class ExtensionTestJSON(base.BaseIdentityV2AdminTest):
 
-    @test.idempotent_id('85f3f661-f54c-4d48-b563-72ae952b9383')
+    @decorators.idempotent_id('85f3f661-f54c-4d48-b563-72ae952b9383')
     def test_list_extensions(self):
         # List all the extensions
         body = self.non_admin_client.list_extensions()['extensions']['values']

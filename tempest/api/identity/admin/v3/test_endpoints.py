@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -58,7 +59,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             cls.services_client.delete_service(s)
         super(EndPointsTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
+    @decorators.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
     def test_list_endpoints(self):
         # Get a list of endpoints
         fetched_endpoints = self.client.list_endpoints()['endpoints']
@@ -69,7 +70,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @test.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
+    @decorators.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
     def test_create_list_show_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
@@ -110,7 +111,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
     @test.attr(type='smoke')
-    @test.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
+    @decorators.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint
         # with new values

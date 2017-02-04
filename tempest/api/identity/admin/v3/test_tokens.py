@@ -17,13 +17,13 @@ import six
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
-    @test.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
+    @decorators.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
@@ -49,7 +49,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.NotFound, self.client.show_token,
                           subject_token)
 
-    @test.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
+    @decorators.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
     def test_rescope_token(self):
         """Rescope a token.
 

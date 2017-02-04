@@ -15,12 +15,12 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
-    @test.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
+    @decorators.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
     def test_create_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user')
@@ -54,7 +54,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         # then delete the token
         self.client.delete_token(token_id)
 
-    @test.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
+    @decorators.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
     def test_rescope_token(self):
         """An unscoped token can be requested
 

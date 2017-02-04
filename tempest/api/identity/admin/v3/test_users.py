@@ -20,7 +20,7 @@ import testtools
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 
 CONF = config.CONF
@@ -28,7 +28,7 @@ CONF = config.CONF
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
-    @test.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
+    @decorators.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
         # Creating first user
@@ -71,7 +71,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, new_user_get['email'])
         self.assertEqual(False, new_user_get['enabled'])
 
-    @test.idempotent_id('2d223a0e-e457-4a70-9fb1-febe027a0ff9')
+    @decorators.idempotent_id('2d223a0e-e457-4a70-9fb1-febe027a0ff9')
     def test_update_user_password(self):
         # Creating User to check password updation
         u_name = data_utils.rand_name('user')
@@ -97,7 +97,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)
 
-    @test.idempotent_id('a831e70c-e35b-430b-92ed-81ebbc5437b8')
+    @decorators.idempotent_id('a831e70c-e35b-430b-92ed-81ebbc5437b8')
     def test_list_user_projects(self):
         # List the projects that a user has access upon
         assigned_project_ids = list()
@@ -152,7 +152,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(m_project for m_project
                                    in missing_projects))
 
-    @test.idempotent_id('c10dcd90-461d-4b16-8e23-4eb836c00644')
+    @decorators.idempotent_id('c10dcd90-461d-4b16-8e23-4eb836c00644')
     def test_get_user(self):
         # Get a user detail
         user = self.setup_test_user()
@@ -161,7 +161,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
                           'Security compliance not available.')
-    @test.idempotent_id('568cd46c-ee6c-4ab4-a33a-d3791931979e')
+    @decorators.idempotent_id('568cd46c-ee6c-4ab4-a33a-d3791931979e')
     def test_password_history_not_enforced_in_admin_reset(self):
         old_password = self.os.credentials.password
         user_id = self.os.credentials.user_id

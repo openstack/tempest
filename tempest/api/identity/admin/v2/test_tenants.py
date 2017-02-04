@@ -16,12 +16,12 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
 
 
 class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
-    @test.idempotent_id('16c6e05c-6112-4b0e-b83f-5e43f221b6b0')
+    @decorators.idempotent_id('16c6e05c-6112-4b0e-b83f-5e43f221b6b0')
     def test_tenant_list_delete(self):
         # Create several tenants and delete them
         tenants = []
@@ -45,7 +45,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertFalse(any(found), 'Tenants failed to delete')
 
-    @test.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
+    @decorators.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
         tenant_name = data_utils.rand_name(name='tenant')
@@ -66,7 +66,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
                          'to be set')
         self.tenants_client.delete_tenant(tenant_id)
 
-    @test.idempotent_id('670bdddc-1cd7-41c7-b8e2-751cfb67df50')
+    @decorators.idempotent_id('670bdddc-1cd7-41c7-b8e2-751cfb67df50')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = data_utils.rand_name(name='tenant')
@@ -84,7 +84,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.assertTrue(en2, 'Enable should be True in lookup')
         self.tenants_client.delete_tenant(tenant_id)
 
-    @test.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
+    @decorators.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = data_utils.rand_name(name='tenant')
@@ -104,7 +104,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
                          'Enable should be False in lookup')
         self.tenants_client.delete_tenant(tenant_id)
 
-    @test.idempotent_id('781f2266-d128-47f3-8bdb-f70970add238')
+    @decorators.idempotent_id('781f2266-d128-47f3-8bdb-f70970add238')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = data_utils.rand_name(name='tenant')
@@ -131,7 +131,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         self.tenants_client.delete_tenant(t_id)
 
-    @test.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
+    @decorators.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
         t_name = data_utils.rand_name(name='tenant')
@@ -161,7 +161,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         self.tenants_client.delete_tenant(t_id)
 
-    @test.idempotent_id('8fc8981f-f12d-4c66-9972-2bdcf2bc2e1a')
+    @decorators.idempotent_id('8fc8981f-f12d-4c66-9972-2bdcf2bc2e1a')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
         t_name = data_utils.rand_name(name='tenant')

@@ -14,15 +14,15 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class IdentityTenantsTest(base.BaseIdentityV2Test):
 
     credentials = ['primary', 'alt']
 
-    @test.idempotent_id('ecae2459-243d-4ba1-ad02-65f15dc82b78')
+    @decorators.idempotent_id('ecae2459-243d-4ba1-ad02-65f15dc82b78')
     def test_list_tenants_returns_only_authorized_tenants(self):
         alt_tenant_name = self.alt_manager.credentials.tenant_name
         resp = self.non_admin_tenants_client.list_tenants()
