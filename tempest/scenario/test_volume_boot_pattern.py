@@ -198,6 +198,8 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         # The created volume when creating a server from a snapshot
         created_volume = server_info['os-extended-volumes:volumes_attached']
 
+        self.assertNotEmpty(created_volume, "No volume attachment found.")
+
         created_volume_info = self.volumes_client.show_volume(
             created_volume[0]['id'])['volume']
 
