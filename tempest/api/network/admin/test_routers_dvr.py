@@ -17,6 +17,7 @@ import testtools
 
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -42,7 +43,7 @@ class RoutersTestDVR(base.BaseRouterTest):
             msg = "'distributed' flag not found. DVR Possibly not enabled"
             raise cls.skipException(msg)
 
-    @test.idempotent_id('08a2a0a8-f1e4-4b34-8e30-e522e836c44e')
+    @decorators.idempotent_id('08a2a0a8-f1e4-4b34-8e30-e522e836c44e')
     def test_distributed_router_creation(self):
         """Test distributed router creation
 
@@ -61,7 +62,7 @@ class RoutersTestDVR(base.BaseRouterTest):
                         router['router']['id'])
         self.assertTrue(router['router']['distributed'])
 
-    @test.idempotent_id('8a0a72b4-7290-4677-afeb-b4ffe37bc352')
+    @decorators.idempotent_id('8a0a72b4-7290-4677-afeb-b4ffe37bc352')
     def test_centralized_router_creation(self):
         """Test centralized router creation
 
@@ -81,7 +82,7 @@ class RoutersTestDVR(base.BaseRouterTest):
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
 
-    @test.idempotent_id('acd43596-c1fb-439d-ada8-31ad48ae3c2e')
+    @decorators.idempotent_id('acd43596-c1fb-439d-ada8-31ad48ae3c2e')
     @testtools.skipUnless(test.is_extension_enabled('l3-ha', 'network'),
                           'HA routers are not available.')
     def test_centralized_router_update_to_dvr(self):

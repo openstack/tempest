@@ -13,12 +13,13 @@
 # under the License.
 
 from tempest.api.network import base
+from tempest.lib import decorators
 from tempest import test
 
 
 class NetworksApiDiscovery(base.BaseNetworkTest):
     @test.attr(type='smoke')
-    @test.idempotent_id('cac8a836-c2e0-4304-b556-cd299c7281d1')
+    @decorators.idempotent_id('cac8a836-c2e0-4304-b556-cd299c7281d1')
     def test_api_version_resources(self):
         """Test that GET / returns expected resources.
 

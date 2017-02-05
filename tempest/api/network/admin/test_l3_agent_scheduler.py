@@ -14,6 +14,7 @@
 
 from tempest.api.network import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
 
@@ -103,11 +104,11 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                                                        port_id=cls.port['id'])
         super(L3AgentSchedulerTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
+    @decorators.idempotent_id('b7ce6e89-e837-4ded-9b78-9ed3c9c6a45a')
     def test_list_routers_on_l3_agent(self):
         self.admin_agents_client.list_routers_on_l3_agent(self.agent['id'])
 
-    @test.idempotent_id('9464e5e7-8625-49c3-8fd1-89c52be59d66')
+    @decorators.idempotent_id('9464e5e7-8625-49c3-8fd1-89c52be59d66')
     def test_add_list_remove_router_on_l3_agent(self):
         l3_agent_ids = list()
         self.admin_agents_client.create_router_on_l3_agent(

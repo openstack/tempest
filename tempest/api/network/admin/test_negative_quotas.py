@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -38,7 +39,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 
-    @test.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
+    @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
     def test_network_quota_exceeding(self):
         # Set the network quota to two
         self.admin_quotas_client.update_quotas(self.networks_client.tenant_id,

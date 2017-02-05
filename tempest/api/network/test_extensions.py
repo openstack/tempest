@@ -15,6 +15,7 @@
 
 
 from tempest.api.network import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -29,7 +30,7 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     """
 
     @test.attr(type='smoke')
-    @test.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
+    @decorators.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
     def test_list_show_extensions(self):
         # List available extensions for the project
         expected_alias = ['security-group', 'l3_agent_scheduler',
