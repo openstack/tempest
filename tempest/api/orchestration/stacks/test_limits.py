@@ -13,15 +13,15 @@
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
 class TestServerStackLimits(base.BaseOrchestrationTest):
 
-    @test.idempotent_id('ec9bed71-c460-45c9-ab98-295caa9fd76b')
+    @decorators.idempotent_id('ec9bed71-c460-45c9-ab98-295caa9fd76b')
     def test_exceed_max_template_size_fails(self):
         stack_name = data_utils.rand_name('heat')
         fill = 'A' * CONF.orchestration.max_template_size
@@ -34,7 +34,7 @@ Outputs:
                                stack_name, template)
         self.assertIn('exceeds maximum allowed size', str(ex))
 
-    @test.idempotent_id('d1b83e73-7cad-4a22-9839-036548c5387c')
+    @decorators.idempotent_id('d1b83e73-7cad-4a22-9839-036548c5387c')
     def test_exceed_max_resources_per_stack(self):
         stack_name = data_utils.rand_name('heat')
         # Create a big template, one resource more than the limit

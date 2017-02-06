@@ -13,7 +13,7 @@
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -49,14 +49,14 @@ class StacksTestJSON(base.BaseOrchestrationTest):
             self.assertEqual(expected_num, len(stacks))
         return stacks
 
-    @test.idempotent_id('065c652a-720d-4760-9132-06aedeb8e3ab')
+    @decorators.idempotent_id('065c652a-720d-4760-9132-06aedeb8e3ab')
     def test_stack_list(self):
         """Created stack should be in the list of existing stacks."""
         stacks = self._list_stacks()
         stacks_names = map(lambda stack: stack['stack_name'], stacks)
         self.assertIn(self.stack_name, stacks_names)
 
-    @test.idempotent_id('992f96e3-41ee-4ff6-91c7-bcfb670c0919')
+    @decorators.idempotent_id('992f96e3-41ee-4ff6-91c7-bcfb670c0919')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
         stack = self.client.show_stack(self.stack_name)['stack']
@@ -75,7 +75,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.stack_id, stack['id'])
         self.assertEqual('fluffy', stack['outputs'][0]['output_key'])
 
-    @test.idempotent_id('fe719f7a-305a-44d8-bbb5-c91e93d9da17')
+    @decorators.idempotent_id('fe719f7a-305a-44d8-bbb5-c91e93d9da17')
     def test_suspend_resume_stack(self):
         """Suspend and resume a stack."""
         self.client.suspend_stack(self.stack_identifier)
@@ -85,13 +85,13 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(self.stack_identifier,
                                           'RESUME_COMPLETE')
 
-    @test.idempotent_id('c951d55e-7cce-4c1f-83a0-bad735437fa6')
+    @decorators.idempotent_id('c951d55e-7cce-4c1f-83a0-bad735437fa6')
     def test_list_resources(self):
         """Get list of created resources for the stack should be possible."""
         resources = self.list_resources(self.stack_identifier)
         self.assertEqual({self.resource_name: self.resource_type}, resources)
 
-    @test.idempotent_id('2aba03b3-392f-4237-900b-1f5a5e9bd962')
+    @decorators.idempotent_id('2aba03b3-392f-4237-900b-1f5a5e9bd962')
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
         resource = self.client.show_resource(self.stack_identifier,
@@ -105,7 +105,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.resource_name, resource['logical_resource_id'])
         self.assertEqual(self.resource_type, resource['resource_type'])
 
-    @test.idempotent_id('898070a9-eba5-4fae-b7d6-cf3ffa03090f')
+    @decorators.idempotent_id('898070a9-eba5-4fae-b7d6-cf3ffa03090f')
     def test_resource_metadata(self):
         """Getting metadata for created resources should be possible."""
         metadata = self.client.show_resource_metadata(
@@ -114,7 +114,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIsInstance(metadata, dict)
         self.assertEqual(['Tom', 'Stinky'], metadata.get('kittens', None))
 
-    @test.idempotent_id('46567533-0a7f-483b-8942-fa19e0f17839')
+    @decorators.idempotent_id('46567533-0a7f-483b-8942-fa19e0f17839')
     def test_list_events(self):
         """Getting list of created events for the stack should be possible."""
         events = self.client.list_events(self.stack_identifier)['events']
@@ -129,7 +129,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIn('CREATE_IN_PROGRESS', resource_statuses)
         self.assertIn('CREATE_COMPLETE', resource_statuses)
 
-    @test.idempotent_id('92465723-1673-400a-909d-4773757a3f21')
+    @decorators.idempotent_id('92465723-1673-400a-909d-4773757a3f21')
     def test_show_event(self):
         """Getting details about an event should be possible."""
         events = self.client.list_resource_events(self.stack_identifier,
