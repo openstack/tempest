@@ -26,13 +26,14 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
+def _get_task_state(body):
+    return body.get('OS-EXT-STS:task_state', None)
+
+
 # NOTE(afazekas): This function needs to know a token and a subject.
 def wait_for_server_status(client, server_id, status, ready_wait=True,
                            extra_timeout=0, raise_on_error=True):
     """Waits for a server to reach a given status."""
-
-    def _get_task_state(body):
-        return body.get('OS-EXT-STS:task_state', None)
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
     # or in a very early stage.
@@ -99,21 +100,33 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
 
 def wait_for_server_termination(client, server_id, ignore_error=False):
     """Waits for server to reach termination."""
+    try:
+        body = client.show_server(server_id)['server']
+    except lib_exc.NotFound:
+        return
+    old_status = server_status = body['status']
+    old_task_state = task_state = _get_task_state(body)
     start_time = int(time.time())
     while True:
+        time.sleep(client.build_interval)
         try:
             body = client.show_server(server_id)['server']
         except lib_exc.NotFound:
             return
-
         server_status = body['status']
+        task_state = _get_task_state(body)
+        if (server_status != old_status) or (task_state != old_task_state):
+            LOG.info('State transition "%s" ==> "%s" after %d second wait',
+                     '/'.join((old_status, str(old_task_state))),
+                     '/'.join((server_status, str(task_state))),
+                     time.time() - start_time)
         if server_status == 'ERROR' and not ignore_error:
             raise exceptions.BuildErrorException(server_id=server_id)
 
         if int(time.time()) - start_time >= client.build_timeout:
             raise lib_exc.TimeoutException
-
-        time.sleep(client.build_interval)
+        old_status = server_status
+        old_task_state = task_state
 
 
 def wait_for_image_status(client, image_id, status):
