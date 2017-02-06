@@ -30,6 +30,7 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @test.attr(type=['negative'])
     @test.related_bug('1630783', status_code=500)
     @decorators.idempotent_id('a313b5cd-fbd0-49cc-94de-870e99f763c7')
     def test_delete_attached_volume(self):
