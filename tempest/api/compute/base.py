@@ -308,10 +308,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                                           image_id, kwargs['wait_until'])
             image = cls.compute_images_client.show_image(image_id)['image']
 
-            if kwargs['wait_until'] == 'ACTIVE':
-                if kwargs.get('wait_for_server', True):
-                    waiters.wait_for_server_status(cls.servers_client,
-                                                   server_id, 'ACTIVE')
         return image
 
     @classmethod
