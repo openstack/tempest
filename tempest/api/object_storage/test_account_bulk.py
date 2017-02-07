@@ -17,6 +17,7 @@ import tempfile
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -68,7 +69,7 @@ class BulkTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertNotIn(container_name, body)
 
-    @test.idempotent_id('a407de51-1983-47cc-9f14-47c2b059413c')
+    @decorators.idempotent_id('a407de51-1983-47cc-9f14-47c2b059413c')
     @test.requires_ext(extension='bulk_upload', service='object')
     def test_extract_archive(self):
         # Test bulk operation of file upload with an archived file
@@ -104,7 +105,7 @@ class BulkTest(base.BaseObjectTest):
 
         self.assertIn(object_name, [c['name'] for c in contents_list])
 
-    @test.idempotent_id('c075e682-0d2a-43b2-808d-4116200d736d')
+    @decorators.idempotent_id('c075e682-0d2a-43b2-808d-4116200d736d')
     @test.requires_ext(extension='bulk_delete', service='object')
     def test_bulk_delete(self):
         # Test bulk operation of deleting multiple files
@@ -131,7 +132,7 @@ class BulkTest(base.BaseObjectTest):
         # Check if uploaded contents are completely deleted
         self._check_contents_deleted(container_name)
 
-    @test.idempotent_id('dbea2bcb-efbb-4674-ac8a-a5a0e33d1d79')
+    @decorators.idempotent_id('dbea2bcb-efbb-4674-ac8a-a5a0e33d1d79')
     @test.requires_ext(extension='bulk_delete', service='object')
     def test_bulk_delete_by_POST(self):
         # Test bulk operation of deleting multiple files
