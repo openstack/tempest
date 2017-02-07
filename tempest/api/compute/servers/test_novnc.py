@@ -1,4 +1,4 @@
-# Copyright 2016 OpenStack Foundation
+# Copyright 2016-2017 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -25,6 +25,11 @@ from tempest import config
 from tempest import test
 
 CONF = config.CONF
+
+if six.PY2:
+    ord_func = ord
+else:
+    ord_func = int
 
 
 class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
@@ -60,14 +65,19 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         resp = urllib3.PoolManager().request('GET', vnc_url)
         # Make sure that the GET request was accepted by the novncproxy
         self.assertEqual(resp.status, 200, 'Got a Bad HTTP Response on the '
-                         'initial call: ' + str(resp.status))
+                         'initial call: ' + six.text_type(resp.status))
         # Do some basic validation to make sure it is an expected HTML document
-        self.assertTrue('<html>' in resp.data and '</html>' in resp.data,
-                        'Not a valid html document in the response.')
+        resp_data = resp.data.decode()
+        self.assertIn('<html>', resp_data,
+                      'Not a valid html document in the response.')
+        self.assertIn('</html>', resp_data,
+                      'Not a valid html document in the response.')
         # Just try to make sure we got JavaScript back for noVNC, since we
         # won't actually use it since not inside of a browser
-        self.assertTrue('noVNC' in resp.data and '<script' in resp.data,
-                        'Not a valid noVNC javascript html document.')
+        self.assertIn('noVNC', resp_data,
+                      'Not a valid noVNC javascript html document.')
+        self.assertIn('<script', resp_data,
+                      'Not a valid noVNC javascript html document.')
 
     def _validate_rfb_negotiation(self):
         """Verify we can connect to novnc and do the websocket connection."""
@@ -82,14 +92,14 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                                    int(data[8:11], base=10)))
         self.assertTrue(version >= 3.3, 'Bad RFB Version: ' + str(version))
         # Send our RFB version to the server, which we will just go with 3.3
-        self._websocket.send_frame(str(data))
+        self._websocket.send_frame(data)
         # Get the sever authentication type and make sure None is supported
         data = self._websocket.receive_frame()
         self.assertIsNotNone(data, 'Expected authentication type None.')
         self.assertGreaterEqual(
             len(data), 2, 'Expected authentication type None.')
         self.assertIn(
-            1, [ord(data[i + 1]) for i in range(ord(data[0]))],
+            1, [ord_func(data[i + 1]) for i in range(ord_func(data[0]))],
             'Expected authentication type None.')
         # Send to the server that we only support authentication type None
         self._websocket.send_frame(six.int2byte(1))
@@ -98,7 +108,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(
             len(data), 4, 'Server did not think security was successful.')
         self.assertEqual(
-            [ord(i) for i in data], [0, 0, 0, 0],
+            [ord_func(i) for i in data], [0, 0, 0, 0],
             'Server did not think security was successful.')
         # Say to leave the desktop as shared as part of client initialization
         self._websocket.send_frame(six.int2byte(1))
@@ -121,12 +131,12 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
 
     def _validate_websocket_upgrade(self):
         self.assertTrue(
-            self._websocket.response.startswith('HTTP/1.1 101 Switching '
-                                                'Protocols\r\n'),
+            self._websocket.response.startswith(b'HTTP/1.1 101 Switching '
+                                                b'Protocols\r\n'),
             'Did not get the expected 101 on the websockify call: '
-            + str(len(self._websocket.response)))
+            + six.text_type(self._websocket.response))
         self.assertTrue(
-            self._websocket.response.find('Server: WebSockify') > 0,
+            self._websocket.response.find(b'Server: WebSockify') > 0,
             'Did not get the expected WebSocket HTTP Response.')
 
     def _create_websocket(self, url):
@@ -187,8 +197,8 @@ class _WebSocket(object):
             # frames less than 125 bytes here (for the negotiation) and
             # that only the 2nd byte contains the length, and since the
             # server doesn't do masking, we can just read the data length
-            if ord(header[1]) & 127 > 0:
-                return self._socket.recv(ord(header[1]) & 127)
+            if ord_func(header[1]) & 127 > 0:
+                return self._socket.recv(ord_func(header[1]) & 127)
 
     def send_frame(self, data):
         """Wrapper for sending data to add in the WebSocket frame format."""
@@ -205,7 +215,7 @@ class _WebSocket(object):
             frame_bytes.append(mask[i])
         # Mask each of the actual data bytes that we are going to send
         for i in range(len(data)):
-            frame_bytes.append(ord(data[i]) ^ mask[i % 4])
+            frame_bytes.append(ord_func(data[i]) ^ mask[i % 4])
         # Convert our integer list to a binary array of bytes
         frame_bytes = struct.pack('!%iB' % len(frame_bytes), * frame_bytes)
         self._socket.sendall(frame_bytes)
@@ -233,9 +243,9 @@ class _WebSocket(object):
         # We are choosing to use binary even though browser may do Base64
         reqdata += 'Sec-WebSocket-Protocol: binary\r\n\r\n'
         # Send the HTTP GET request and get the response back
-        self._socket.sendall(reqdata)
+        self._socket.sendall(reqdata.encode('utf8'))
         self.response = data = self._socket.recv(4096)
         # Loop through & concatenate all of the data in the response body
-        while len(data) > 0 and self.response.find('\r\n\r\n') < 0:
+        while len(data) > 0 and self.response.find(b'\r\n\r\n') < 0:
             data = self._socket.recv(4096)
             self.response += data
