@@ -62,8 +62,8 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
             self.assertIn(quota, quota_set.keys())
 
         # get the quota set using user id
-        quota_set = self.client.show_quota_set(self.tenant_id,
-                                               self.user_id)['quota_set']
+        quota_set = self.client.show_quota_set(
+            self.tenant_id, user_id=self.user_id)['quota_set']
         self.assertEqual(quota_set['id'], self.tenant_id)
         for quota in expected_quota_set:
             self.assertIn(quota, quota_set.keys())

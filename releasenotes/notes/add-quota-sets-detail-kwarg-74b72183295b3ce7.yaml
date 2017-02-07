@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Interface show_quota_set of compute quotas_client has been extended to include the
+    argument "detail", which allows for detailed quota set information for a project to be
+    retrieved, if set to True.
