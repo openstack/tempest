@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
 
-    @test.idempotent_id('d5f3efa2-6684-4190-9ced-1c2f526352ad')
+    @decorators.idempotent_id('d5f3efa2-6684-4190-9ced-1c2f526352ad')
     def test_list_hosts(self):
         hosts = self.admin_hosts_client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2, "No. of hosts are < 2,"

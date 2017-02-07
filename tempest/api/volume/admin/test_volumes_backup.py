@@ -20,7 +20,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -49,7 +49,7 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         backup.update(changes)
         return self._encode_backup(backup)
 
-    @test.idempotent_id('a99c54a1-dd80-4724-8a13-13bf58d4068d')
+    @decorators.idempotent_id('a99c54a1-dd80-4724-8a13-13bf58d4068d')
     def test_volume_backup_export_import(self):
         """Test backup export import functionality.
 
@@ -117,7 +117,7 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
         waiters.wait_for_backup_status(self.admin_backups_client,
                                        import_backup['id'], 'available')
 
-    @test.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
+    @decorators.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
     def test_volume_backup_reset_status(self):
         # Create a volume
         volume = self.create_volume()

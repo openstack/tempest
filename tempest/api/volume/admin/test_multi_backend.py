@@ -15,7 +15,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -93,24 +93,24 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
 
         super(VolumeMultiBackendV2Test, cls).resource_cleanup()
 
-    @test.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
+    @decorators.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):
         # get volume id which created by type without prefix
         for volume_id in self.volume_id_list_without_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
-    @test.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
+    @decorators.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
     def test_backend_name_reporting_with_prefix(self):
         # get volume id which created by type with prefix
         for volume_id in self.volume_id_list_with_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
-    @test.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
+    @decorators.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
     def test_backend_name_distinction(self):
         # get volume ids which created by type without prefix
         self._test_backend_name_distinction(self.volume_id_list_without_prefix)
 
-    @test.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
+    @decorators.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
     def test_backend_name_distinction_with_prefix(self):
         # get volume ids which created by type without prefix
         self._test_backend_name_distinction(self.volume_id_list_with_prefix)

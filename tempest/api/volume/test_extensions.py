@@ -17,7 +17,7 @@ from oslo_log import log as logging
 
 from tempest.api.volume import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 class ExtensionsV2TestJSON(base.BaseVolumeTest):
 
-    @test.idempotent_id('94607eb0-43a5-47ca-82aa-736b41bd2e2c')
+    @decorators.idempotent_id('94607eb0-43a5-47ca-82aa-736b41bd2e2c')
     def test_list_extensions(self):
         # List of all extensions
         extensions = (self.volumes_extension_client.list_extensions()

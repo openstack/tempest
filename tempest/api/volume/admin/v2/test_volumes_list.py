@@ -18,7 +18,7 @@ import operator
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -39,7 +39,7 @@ class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
                 volume['id'])['volume']
             cls.volume_list.append(volume_details)
 
-    @test.idempotent_id('5866286f-3290-4cfd-a414-088aa6cdc469')
+    @decorators.idempotent_id('5866286f-3290-4cfd-a414-088aa6cdc469')
     def test_volume_list_param_tenant(self):
         # Test to list volumes from single tenant
         # Create a volume in admin tenant

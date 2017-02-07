@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumesActionsV2Test(base.BaseVolumeAdminTest):
@@ -28,7 +28,7 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.volumes_client.wait_for_resource_deletion(temp_volume['id'])
 
-    @test.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
+    @decorators.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
         volume = self.create_volume()
@@ -39,17 +39,17 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
                 volume['id'])['volume']
             self.assertEqual(status, volume_get['status'])
 
-    @test.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
+    @decorators.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
     def test_volume_force_delete_when_volume_is_creating(self):
         # test force delete when status of volume is creating
         self._create_reset_and_force_delete_temp_volume('creating')
 
-    @test.idempotent_id('db8d607a-aa2e-4beb-b51d-d4005c232011')
+    @decorators.idempotent_id('db8d607a-aa2e-4beb-b51d-d4005c232011')
     def test_volume_force_delete_when_volume_is_attaching(self):
         # test force delete when status of volume is attaching
         self._create_reset_and_force_delete_temp_volume('attaching')
 
-    @test.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
+    @decorators.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error
         self._create_reset_and_force_delete_temp_volume('error')

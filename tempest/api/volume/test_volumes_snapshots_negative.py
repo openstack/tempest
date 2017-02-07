@@ -13,6 +13,7 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -28,7 +29,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('e3e466af-70ab-4f4b-a967-ab04e3532ea7')
+    @decorators.idempotent_id('e3e466af-70ab-4f4b-a967-ab04e3532ea7')
     def test_create_snapshot_with_nonexistent_volume_id(self):
         # Create a snapshot with nonexistent volume id
         s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
@@ -38,7 +39,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           display_name=s_name)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')
+    @decorators.idempotent_id('bb9da53e-d335-4309-9c15-7e76fd5e4d6d')
     def test_create_snapshot_without_passing_volume_id(self):
         # Create a snapshot without passing volume id
         s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
@@ -46,7 +47,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           self.snapshots_client.create_snapshot,
                           volume_id=None, display_name=s_name)
 
-    @test.idempotent_id('677863d1-34f9-456d-b6ac-9924f667a7f4')
+    @decorators.idempotent_id('677863d1-34f9-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot_decreasing_size(self):
         # Creates a volume a snapshot passing a size different from the source
         src_size = CONF.volume.volume_size + 1

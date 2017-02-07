@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -46,14 +47,14 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         cls.volume = cls.create_volume()
 
     @test.attr(type='negative')
-    @test.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
+    @decorators.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=CONF.volume.volume_size)
 
     @test.attr(type='negative')
-    @test.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
+    @decorators.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
         # NOTE(gfidente): quota set needs to be changed for this test
         # or we may be limited by the volumes or snaps quota number, not by

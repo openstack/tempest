@@ -16,7 +16,7 @@
 from testtools import matchers
 
 from tempest.api.volume import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumesV2MetadataTest(base.BaseVolumeTest):
@@ -32,7 +32,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         self.volumes_client.update_volume_metadata(self.volume['id'], {})
         super(VolumesV2MetadataTest, self).tearDown()
 
-    @test.idempotent_id('6f5b125b-f664-44bf-910f-751591fe5769')
+    @decorators.idempotent_id('6f5b125b-f664-44bf-910f-751591fe5769')
     def test_crud_volume_metadata(self):
         # Create metadata for the volume
         metadata = {"key1": "value1",
@@ -67,7 +67,7 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(expected.items()),
                         'Delete one item metadata of the volume failed')
 
-    @test.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
+    @decorators.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
     def test_update_volume_metadata_item(self):
         # Update metadata item for the volume
         metadata = {"key1": "value1",

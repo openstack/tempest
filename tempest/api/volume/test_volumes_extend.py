@@ -15,12 +15,12 @@
 
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumesV2ExtendTest(base.BaseVolumeTest):
 
-    @test.idempotent_id('9a36df71-a257-43a5-9555-dc7c88e66e0e')
+    @decorators.idempotent_id('9a36df71-a257-43a5-9555-dc7c88e66e0e')
     def test_volume_extend(self):
         # Extend Volume Test.
         self.volume = self.create_volume()

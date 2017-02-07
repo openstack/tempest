@@ -13,6 +13,7 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -39,7 +40,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
 
-    @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
+    @decorators.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
@@ -53,7 +54,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Delete the snapshot
         self.cleanup_snapshot(snapshot)
 
-    @test.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
+    @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @test.services('compute')
     def test_snapshot_delete_with_volume_in_use(self):
         # Create a test instance
@@ -71,7 +72,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.cleanup_snapshot(snapshot3)
         self.cleanup_snapshot(snapshot2)
 
-    @test.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
+    @decorators.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
     @test.services('compute')
     def test_snapshot_create_offline_delete_online(self):
 
@@ -92,7 +93,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.cleanup_snapshot(snapshot1)
         self.cleanup_snapshot(snapshot2)
 
-    @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
+    @decorators.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
         snapshot = self.create_snapshot(self.volume_origin['id'])
@@ -130,7 +131,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Delete the snapshot
         self.cleanup_snapshot(snapshot)
 
-    @test.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
+    @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
         # Creates a volume a snapshot passing a size different from the source
         src_size = CONF.volume.volume_size

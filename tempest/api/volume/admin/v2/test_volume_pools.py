@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
@@ -33,10 +33,10 @@ class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
         self.assertIn(volume_info['os-vol-host-attr:host'],
                       [pool['name'] for pool in cinder_pools])
 
-    @test.idempotent_id('0248a46c-e226-4933-be10-ad6fca8227e7')
+    @decorators.idempotent_id('0248a46c-e226-4933-be10-ad6fca8227e7')
     def test_get_pools_without_details(self):
         self._assert_host_volume_in_pools()
 
-    @test.idempotent_id('d4bb61f7-762d-4437-b8a4-5785759a0ced')
+    @decorators.idempotent_id('d4bb61f7-762d-4437-b8a4-5785759a0ced')
     def test_get_pools_with_details(self):
         self._assert_host_volume_in_pools(with_detail=True)

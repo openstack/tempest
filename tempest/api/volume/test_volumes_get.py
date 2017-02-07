@@ -20,6 +20,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -118,12 +119,12 @@ class VolumesV2GetTest(base.BaseVolumeTest):
             self.assertEqual('false', updated_volume['bootable'])
 
     @test.attr(type='smoke')
-    @test.idempotent_id('27fb0e9f-fb64-41dd-8bdb-1ffa762f0d51')
+    @decorators.idempotent_id('27fb0e9f-fb64-41dd-8bdb-1ffa762f0d51')
     def test_volume_create_get_update_delete(self):
         self._volume_create_get_update_delete(size=CONF.volume.volume_size)
 
     @test.attr(type='smoke')
-    @test.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
+    @decorators.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
     @test.services('image')
     def test_volume_create_get_update_delete_from_image(self):
         image = self.compute_images_client.show_image(
@@ -133,7 +134,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self._volume_create_get_update_delete(
             imageRef=CONF.compute.image_ref, size=disk_size)
 
-    @test.idempotent_id('3f591b4a-7dc6-444c-bd51-77469506b3a1')
+    @decorators.idempotent_id('3f591b4a-7dc6-444c-bd51-77469506b3a1')
     @testtools.skipUnless(CONF.volume_feature_enabled.clone,
                           'Cinder volume clones are disabled')
     def test_volume_create_get_update_delete_as_clone(self):

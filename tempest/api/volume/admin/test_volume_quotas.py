@@ -15,7 +15,7 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
-from tempest import test
+from tempest.lib import decorators
 
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups']
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
@@ -32,21 +32,21 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         cls.demo_tenant_id = cls.os.credentials.tenant_id
         cls.alt_client = cls.os_alt.volumes_client
 
-    @test.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
+    @decorators.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
         quotas = (self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
                   ['quota_set'])
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
+    @decorators.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
         quotas = self.admin_quotas_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quotas)
 
-    @test.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
+    @decorators.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
         default_quota_set = self.admin_quotas_client.show_default_quota_set(
@@ -71,7 +71,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         # would be no other values in there.
         self.assertDictContainsSubset(new_quota_set, quota_set)
 
-    @test.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
+    @decorators.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
         quota_usage = self.admin_quotas_client.show_quota_set(
             self.os_adm.credentials.tenant_id,
@@ -81,7 +81,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             for usage_key in QUOTA_USAGE_KEYS:
                 self.assertIn(usage_key, quota_usage[key])
 
-    @test.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
+    @decorators.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
         quota_usage = self.admin_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
@@ -100,7 +100,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                          volume["size"],
                          new_quota_usage['gigabytes']['in_use'])
 
-    @test.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
+    @decorators.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
         # Admin can delete the resource quota set for a project
         project_name = data_utils.rand_name('quota_tenant')
@@ -121,7 +121,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
                          ['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
 
-    @test.idempotent_id('8911036f-9d54-4720-80cc-a1c9796a8805')
+    @decorators.idempotent_id('8911036f-9d54-4720-80cc-a1c9796a8805')
     def test_quota_usage_after_volume_transfer(self):
         # Create a volume for transfer
         volume = self.create_volume()

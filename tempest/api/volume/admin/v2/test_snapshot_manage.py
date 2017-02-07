@@ -18,7 +18,7 @@ import testtools
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -31,7 +31,7 @@ class SnapshotManageAdminV2Test(base.BaseVolumeAdminTest):
      managed by Cinder from a storage back end to Cinder
     """
 
-    @test.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
+    @decorators.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
     @testtools.skipUnless(CONF.volume_feature_enabled.manage_snapshot,
                           "Manage snapshot tests are disabled")
     def test_unmanage_manage_snapshot(self):
