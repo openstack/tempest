@@ -259,3 +259,8 @@ class PluginRegistrationException(TempestException):
 
 class VolumeBackupException(TempestException):
     message = "Volume backup %(backup_id)s failed and is in ERROR status"
+
+
+class DeleteErrorException(TempestException):
+    message = ("Resource %(resource_id)s failed to delete "
+               "and is in ERROR status")
