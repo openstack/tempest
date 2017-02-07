@@ -708,13 +708,11 @@ class NetworkScenarioTest(ScenarioTest):
             raise cls.skipException('Neutron not available')
 
     def _create_network(self, networks_client=None,
-                        routers_client=None, tenant_id=None,
+                        tenant_id=None,
                         namestart='network-smoke-',
                         port_security_enabled=True):
         if not networks_client:
             networks_client = self.networks_client
-        if not routers_client:
-            routers_client = self.routers_client
         if not tenant_id:
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
