@@ -18,6 +18,7 @@ import testtools
 from tempest.common.utils import data_utils
 from tempest.common.utils import net_info
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -459,7 +460,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         subnet_id = tenant.subnet['id']
         self.assertIn((subnet_id, server_ip, mac_addr), port_detail_list)
 
-    @test.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
+    @decorators.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
     @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
         if not self.credentials_provider.is_multi_tenant():
@@ -480,7 +481,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 self._log_console_output(servers=tenant.servers)
             raise
 
-    @test.idempotent_id('63163892-bbf6-4249-aa12-d5ea1f8f421b')
+    @decorators.idempotent_id('63163892-bbf6-4249-aa12-d5ea1f8f421b')
     @test.services('compute', 'network')
     def test_in_tenant_traffic(self):
         try:
@@ -494,7 +495,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 self._log_console_output(servers=tenant.servers)
             raise
 
-    @test.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
+    @decorators.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
     @test.services('compute', 'network')
     def test_port_update_new_security_group(self):
         """Verifies the traffic after updating the vm port
@@ -547,7 +548,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 self._log_console_output(servers=tenant.servers)
             raise
 
-    @test.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
+    @decorators.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
     @test.services('compute', 'network')
     def test_multiple_security_groups(self):
         """Verify multiple security groups and checks that rules
@@ -580,7 +581,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                    should_connect=True)
 
     @test.requires_ext(service='network', extension='port-security')
-    @test.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
+    @decorators.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
     @test.services('compute', 'network')
     def test_port_security_disable_security_group(self):
         """Verify the default security group rules is disabled."""
@@ -619,7 +620,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @test.requires_ext(service='network', extension='port-security')
-    @test.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
+    @decorators.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
     @testtools.skipUnless(
         CONF.compute_feature_enabled.allow_port_security_disabled,
         'Port security must be enabled.')

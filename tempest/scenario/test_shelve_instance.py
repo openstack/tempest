@@ -16,6 +16,7 @@
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -73,12 +74,12 @@ class TestShelveInstance(manager.ScenarioTest):
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp2)
 
-    @test.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
+    @decorators.idempotent_id('1164e700-0af0-4a4c-8792-35909a88743c')
     @test.services('compute', 'network', 'image')
     def test_shelve_instance(self):
         self._create_server_then_shelve_and_unshelve()
 
-    @test.idempotent_id('c1b6318c-b9da-490b-9c67-9339b627271f')
+    @decorators.idempotent_id('c1b6318c-b9da-490b-9c67-9339b627271f')
     @test.services('compute', 'volume', 'network', 'image')
     def test_shelve_volume_backed_instance(self):
         self._create_server_then_shelve_and_unshelve(boot_from_volume=True)

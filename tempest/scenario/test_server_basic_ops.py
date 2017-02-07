@@ -20,6 +20,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
@@ -124,7 +125,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             # TODO(clarkb) construct network_data from known network
             # instance info and do direct comparison.
 
-    @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
+    @decorators.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_server_basic_ops(self):

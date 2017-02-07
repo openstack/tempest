@@ -15,6 +15,7 @@ from oslo_log import log as logging
 from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -98,7 +99,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
 
-    @test.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
+    @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
     @test.attr(type='smoke')
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
@@ -178,7 +179,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
                                         private_key=keypair['private_key'])
         self.assertEqual(timestamp, timestamp3)
 
-    @test.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
+    @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
     @test.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image
@@ -212,7 +213,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.assertEqual(created_volume[0]['id'],
                          created_volume_info['attachments'][0]['volume_id'])
 
-    @test.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
+    @decorators.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
     @test.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
         # create an instance from volume

@@ -17,6 +17,7 @@ from tempest.common import custom_matchers
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
@@ -97,7 +98,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                         address['addr'] == floating_ip['ip']):
                     return address
 
-    @test.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
+    @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         image = self.glance_image_create()

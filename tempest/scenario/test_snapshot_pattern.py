@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -37,7 +38,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
         if not CONF.compute_feature_enabled.snapshot:
             raise cls.skipException("Snapshotting is not available.")
 
-    @test.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
+    @decorators.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting an instance
