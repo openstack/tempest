@@ -51,7 +51,7 @@ base = {
 }
 
 detail = {
-    'type': 'object',
+    'type': ['object', 'null'],
     'patternProperties': {
         # NOTE: Here is for a hostname
         '^[a-zA-Z0-9-_.]+$': {
