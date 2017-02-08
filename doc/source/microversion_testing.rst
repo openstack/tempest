@@ -246,4 +246,4 @@ Microversion tests implemented in Tempest
 
  * `2.42`_
 
- .. _2.42: http://docs.openstack.org/developer/nova/api_microversion_history.html#id38
+ .. _2.42: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-ocata
