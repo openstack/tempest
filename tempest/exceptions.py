@@ -25,6 +25,10 @@ class BuildErrorException(exceptions.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
+class SnapshotNotFoundException(exceptions.TempestException):
+    message = "Server snapshot image %(image_id)s not found."
+
+
 class ImageKilledException(exceptions.TempestException):
     message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
 

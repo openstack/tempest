@@ -304,8 +304,26 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
-            waiters.wait_for_image_status(cls.compute_images_client,
-                                          image_id, kwargs['wait_until'])
+            try:
+                waiters.wait_for_image_status(cls.compute_images_client,
+                                              image_id, kwargs['wait_until'])
+            except lib_exc.NotFound:
+                if kwargs['wait_until'].upper() == 'ACTIVE':
+                    # If the image is not found after create_image returned
+                    # that means the snapshot failed in nova-compute and nova
+                    # deleted the image. There should be a compute fault
+                    # recorded with the server in that case, so get the server
+                    # and dump some details.
+                    server = (
+                        cls.servers_client.show_server(server_id)['server'])
+                    if 'fault' in server:
+                        raise exceptions.SnapshotNotFoundException(
+                            server['fault'], image_id=image_id)
+                    else:
+                        raise exceptions.SnapshotNotFoundException(
+                            image_id=image_id)
+                else:
+                    raise
             image = cls.compute_images_client.show_image(image_id)['image']
 
         return image

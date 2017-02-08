@@ -15,9 +15,12 @@
 import mock
 
 from oslo_utils import uuidutils
+import six
 
 from tempest.api.compute import base as compute_base
 from tempest.common import waiters
+from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 
 
@@ -65,3 +68,73 @@ class TestBaseV2ComputeTest(base.TestCase):
         wait_for_image_status.assert_called_once_with(
             compute_images_client, image_id, 'ACTIVE')
         compute_images_client.show_image.assert_called_once_with(image_id)
+
+    @mock.patch.multiple(compute_base.BaseV2ComputeTest,
+                         compute_images_client=mock.DEFAULT,
+                         servers_client=mock.DEFAULT,
+                         images=[], create=True)
+    @mock.patch.object(waiters, 'wait_for_image_status',
+                       side_effect=lib_exc.NotFound)
+    def _test_create_image_from_server_wait_until_active_not_found(
+            self, wait_for_image_status, compute_images_client,
+            servers_client, fault=None):
+        # setup mocks
+        image_id = uuidutils.generate_uuid()
+        fake_image = mock.Mock(response={'location': image_id})
+        compute_images_client.create_image.return_value = fake_image
+        fake_server = {'id': mock.sentinel.server_id}
+        if fault:
+            fake_server['fault'] = fault
+        servers_client.show_server.return_value = {'server': fake_server}
+        # call the utility method
+        ex = self.assertRaises(
+            exceptions.SnapshotNotFoundException,
+            compute_base.BaseV2ComputeTest.create_image_from_server,
+            mock.sentinel.server_id, wait_until='active')
+        # make our assertions
+        if fault:
+            self.assertIn(fault, six.text_type(ex))
+        else:
+            self.assertNotIn(fault, six.text_type(ex))
+        wait_for_image_status.assert_called_once_with(
+            compute_images_client, image_id, 'active')
+        servers_client.show_server.assert_called_once_with(
+            mock.sentinel.server_id)
+
+    def test_create_image_from_server_wait_until_active_not_found_no_fault(
+            self):
+        # Tests create_image_from_server with wait_until='active' kwarg and
+        # the a 404 is raised while waiting for the image status to change. In
+        # this test the server does not have a fault associated with it.
+        self._test_create_image_from_server_wait_until_active_not_found()
+
+    def test_create_image_from_server_wait_until_active_not_found_with_fault(
+            self):
+        # Tests create_image_from_server with wait_until='active' kwarg and
+        # the a 404 is raised while waiting for the image status to change. In
+        # this test the server has a fault associated with it.
+        self._test_create_image_from_server_wait_until_active_not_found(
+            fault='Lost connection to hypervisor!')
+
+    @mock.patch.multiple(compute_base.BaseV2ComputeTest,
+                         compute_images_client=mock.DEFAULT,
+                         images=[], create=True)
+    @mock.patch.object(waiters, 'wait_for_image_status',
+                       side_effect=lib_exc.NotFound)
+    def test_create_image_from_server_wait_until_saving_not_found(
+            self, wait_for_image_status, compute_images_client):
+        # Tests create_image_from_server with wait_until='SAVING' kwarg and
+        # the a 404 is raised while waiting for the image status to change. In
+        # this case we do not get the server details and just re-raise the 404.
+        # setup mocks
+        image_id = uuidutils.generate_uuid()
+        fake_image = mock.Mock(response={'location': image_id})
+        compute_images_client.create_image.return_value = fake_image
+        # call the utility method
+        self.assertRaises(
+            lib_exc.NotFound,
+            compute_base.BaseV2ComputeTest.create_image_from_server,
+            mock.sentinel.server_id, wait_until='SAVING')
+        # make our assertions
+        wait_for_image_status.assert_called_once_with(
+            compute_images_client, image_id, 'SAVING')
