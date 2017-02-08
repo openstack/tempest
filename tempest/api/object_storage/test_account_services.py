@@ -253,6 +253,18 @@ class AccountTest(base.BaseObjectTest):
             self.assertEqual(True, container.decode(
                 'utf-8').startswith(prefix))
 
+    @decorators.idempotent_id('b1811cff-d1ed-4c15-a52e-efd8de41cf34')
+    def test_list_containers_reverse_order(self):
+        # list containers in reverse order
+        _, orig_container_list = self.account_client.list_account_containers()
+
+        params = {'reverse': True}
+        resp, container_list = self.account_client.list_account_containers(
+            params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
+        self.assertEqual(sorted(orig_container_list, reverse=True),
+                         container_list)
+
     @test.attr(type='smoke')
     @decorators.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')
     def test_list_account_metadata(self):
@@ -291,7 +303,7 @@ class AccountTest(base.BaseObjectTest):
         self.account_client.delete_account_metadata(metadata)
 
     @decorators.idempotent_id('9f60348d-c46f-4465-ae06-d51dbd470953')
-    def test_update_account_metadata_with_delete_matadata(self):
+    def test_update_account_metadata_with_delete_metadata(self):
         # delete metadata from account
         metadata = {'test-account-meta1': 'Meta1'}
         self.account_client.create_account_metadata(metadata)
@@ -302,7 +314,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
     @decorators.idempotent_id('64fd53f3-adbd-4639-af54-436e4982dbfb')
-    def test_update_account_metadata_with_create_matadata_key(self):
+    def test_update_account_metadata_with_create_metadata_key(self):
         # if the value of metadata is not set, the metadata is not
         # registered at a server
         metadata = {'test-account-meta1': ''}
@@ -313,7 +325,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertNotIn('x-account-meta-test-account-meta1', resp)
 
     @decorators.idempotent_id('d4d884d3-4696-4b85-bc98-4f57c4dd2bf1')
-    def test_update_account_metadata_with_delete_matadata_key(self):
+    def test_update_account_metadata_with_delete_metadata_key(self):
         # Although the value of metadata is not set, the feature of
         # deleting metadata is valid
         metadata_1 = {'test-account-meta1': 'Meta1'}
