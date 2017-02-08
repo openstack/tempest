@@ -293,6 +293,23 @@ class ServersClient(base_compute_client.BaseComputeClient):
         """
         return self.action(server_id, 'revertResize', **kwargs)
 
+    def create_image(self, server_id, name, meta=None):
+        """Creates an image of the original server."""
+
+        post_body = {
+            'createImage': {
+                'name': name,
+            }
+        }
+
+        if meta is not None:
+            post_body['createImage']['metadata'] = meta
+
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        return resp, body
+
     def list_server_metadata(self, server_id):
         """Lists all metadata for a server.
 
