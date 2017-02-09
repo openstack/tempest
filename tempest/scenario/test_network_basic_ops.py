@@ -321,11 +321,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # We ping the external IP from the instance using its floating IP
         # which is always IPv4, so we must only test connectivity to
         # external IPv4 IPs if the external network is dualstack.
-        ext_ips = self.router['external_gateway_info']['external_fixed_ips']
-        subnet_ids = [sub['subnet_id'] for sub in ext_ips]
         v4_subnets = [s for s in self._list_subnets(
-            network_id=CONF.network.public_network_id)
-            if s['ip_version'] == 4 and s['id'] in subnet_ids]
+            network_id=CONF.network.public_network_id) if s['ip_version'] == 4]
         self.assertEqual(1, len(v4_subnets),
                          "Found %d IPv4 subnets" % len(v4_subnets))
 
