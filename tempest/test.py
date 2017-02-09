@@ -31,7 +31,6 @@ import tempest.common.validation_resources as vresources
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common import cred_client
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -644,8 +643,3 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     def assertNotEmpty(self, list, msg=None):
         self.assertGreater(len(list), 0, msg)
-
-
-call_until_true = debtcollector.moves.moved_function(
-    test_utils.call_until_true, 'call_until_true', __name__,
-    version='Newton', removal_version='Ocata')
