@@ -19,6 +19,8 @@ import copy
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.compute.v2_1 import \
+    security_groups as security_groups_schema
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
 from tempest.lib.api_schema.response.compute.v2_16 import servers as schemav216
 from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
@@ -715,3 +717,16 @@ class ServersClient(base_compute_client.BaseComputeClient):
         http://developer.openstack.org/api-ref-compute-v2.1.html#removeFixedIp
         """
         return self.action(server_id, 'removeFixedIp', **kwargs)
+
+    def list_security_groups_by_server(self, server_id):
+        """Lists security groups for a server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html#listSecurityGroupsByServer
+        """
+        resp, body = self.get("servers/%s/os-security-groups" % server_id)
+        body = json.loads(body)
+        self.validate_response(security_groups_schema.list_security_groups,
+                               resp, body)
+        return rest_client.ResponseBody(resp, body)

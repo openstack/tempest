@@ -144,3 +144,31 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                          ['security_group'])
         self.assertEqual(s_new_name, fetched_group['name'])
         self.assertEqual(s_new_des, fetched_group['description'])
+
+    @test.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
+    @test.services('network')
+    def test_list_security_groups_by_server(self):
+        # Create a couple security groups that we will use
+        # for the server resource this test creates
+        sg = self.create_security_group()
+        sg2 = self.create_security_group()
+        assigned_security_groups_ids = [sg['id'], sg2['id']]
+        # Create server and add the security group created
+        # above to the server we just created
+        server_id = self.create_test_server(wait_until='ACTIVE')['id']
+        # add security groups to server
+        self.servers_client.add_security_group(server_id, name=sg['name'])
+        self.servers_client.add_security_group(server_id, name=sg2['name'])
+
+        # list security groups for a server
+        fetched_groups = (
+            self.servers_client.list_security_groups_by_server(
+                server_id)['security_groups'])
+        fetched_security_groups_ids = [i['id'] for i in fetched_groups]
+        # verifying the security groups ids in list
+        missing_security_groups =\
+            [p for p in assigned_security_groups_ids
+             if p not in fetched_security_groups_ids]
+        self.assertEmpty(missing_security_groups,
+                         "Failed to find security_groups %s in fetched list" %
+                         ', '.join(missing_security_groups))

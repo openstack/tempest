@@ -172,6 +172,14 @@ class TestServersClient(base.BaseServiceTest):
         "traceback": "fake-trace-back"
     }
 
+    FAKE_SECURITY_GROUPS = [{
+        "description": "default",
+        "id": "3fb26eb3-581b-4420-9963-b0879a026506",
+        "name": "default",
+        "rules": [],
+        "tenant_id": "openstack"
+    }]
+
     FAKE_INSTANCE_WITH_EVENTS = copy.deepcopy(FAKE_INSTANCE_ACTIONS)
     FAKE_INSTANCE_WITH_EVENTS['events'] = [FAKE_INSTANCE_ACTION_EVENTS]
 
@@ -1008,4 +1016,18 @@ class TestServersClient(base.BaseServiceTest):
             {'console': self.FAKE_VNC_CONSOLE},
             server_id=self.server_id,
             type='fake-console-type'
+            )
+
+    def test_list_security_groups_by_server_with_str_body(self):
+        self._test_list_security_groups_by_server()
+
+    def test_list_security_groups_by_server_with_bytes_body(self):
+        self._test_list_security_groups_by_server(True)
+
+    def _test_list_security_groups_by_server(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_security_groups_by_server,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {'security_groups': self.FAKE_SECURITY_GROUPS},
+            server_id=self.server_id,
             )
