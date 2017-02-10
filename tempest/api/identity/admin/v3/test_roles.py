@@ -15,7 +15,9 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
@@ -195,3 +197,112 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role in self.roles]
         self.assertEqual(len(found), len(self.roles))
+
+    def _create_implied_role(self, prior_role_id, implies_role_id,
+                             ignore_not_found=False):
+        self.roles_client.create_role_inference_rule(
+            prior_role_id, implies_role_id)
+        if ignore_not_found:
+            self.addCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                self.roles_client.delete_role_inference_rule,
+                prior_role_id,
+                implies_role_id)
+        else:
+            self.addCleanup(
+                self.roles_client.delete_role_inference_rule,
+                prior_role_id,
+                implies_role_id)
+
+    @decorators.idempotent_id('c90c316c-d706-4728-bcba-eb1912081b69')
+    def test_implied_roles_create_delete(self):
+        prior_role_id = self.roles[0]['id']
+        implies_role_id = self.roles[1]['id']
+
+        # Create an inference rule from prior_role to implies_role
+        self._create_implied_role(prior_role_id, implies_role_id,
+                                  ignore_not_found=True)
+
+        # Check if the inference rule exists
+        self.roles_client.show_role_inference_rule(
+            prior_role_id, implies_role_id)
+
+        # Delete the inference rule
+        self.roles_client.delete_role_inference_rule(
+            prior_role_id, implies_role_id)
+        # Check if the inference rule no longer exists
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.roles_client.show_role_inference_rule,
+            prior_role_id,
+            implies_role_id)
+
+    @decorators.idempotent_id('dc6f5959-b74d-4e30-a9e5-a8255494ff00')
+    def test_roles_hierarchy(self):
+        # Create inference rule from "roles[0]" to "role[1]"
+        self._create_implied_role(
+            self.roles[0]['id'], self.roles[1]['id'])
+
+        # Create inference rule from "roles[0]" to "role[2]"
+        self._create_implied_role(
+            self.roles[0]['id'], self.roles[2]['id'])
+
+        # Create inference rule from "roles[2]" to "role"
+        self._create_implied_role(
+            self.roles[2]['id'], self.role['id'])
+
+        # Listing inferences rules from "roles[2]" should only return "role"
+        rules = self.roles_client.list_role_inferences_rules(
+            self.roles[2]['id'])['role_inference']
+        self.assertEqual(1, len(rules['implies']))
+        self.assertEqual(self.role['id'], rules['implies'][0]['id'])
+
+        # Listing inferences rules from "roles[0]" should return "roles[1]" and
+        # "roles[2]" (only direct rules are listed)
+        rules = self.roles_client.list_role_inferences_rules(
+            self.roles[0]['id'])['role_inference']
+        implies_ids = [role['id'] for role in rules['implies']]
+        self.assertEqual(2, len(implies_ids))
+        self.assertIn(self.roles[1]['id'], implies_ids)
+        self.assertIn(self.roles[2]['id'], implies_ids)
+
+    @decorators.idempotent_id('c8828027-df48-4021-95df-b65b92c7429e')
+    def test_assignments_for_implied_roles_create_delete(self):
+        # Create a grant using "roles[0]"
+        self.roles_client.create_user_role_on_project(
+            self.project['id'], self.user_body['id'], self.roles[0]['id'])
+        self.addCleanup(
+            self.roles_client.delete_role_from_user_on_project,
+            self.project['id'], self.user_body['id'], self.roles[0]['id'])
+
+        # Create an inference rule from "roles[0]" to "roles[1]"
+        self._create_implied_role(self.roles[0]['id'], self.roles[1]['id'],
+                                  ignore_not_found=True)
+
+        # In the effective list of role assignments, both prior role and
+        # implied role should be present. This means that a user can
+        # authenticate using both roles (both roles will be present
+        # in the token).
+        params = {'scope.project.id': self.project['id'],
+                  'user.id': self.user_body['id']}
+        role_assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
+        self.assertEqual(2, len(role_assignments))
+
+        roles_ids = [assignment['role']['id']
+                     for assignment in role_assignments]
+        self.assertIn(self.roles[0]['id'], roles_ids)
+        self.assertIn(self.roles[1]['id'], roles_ids)
+
+        # After deleting the implied role, only the assignment with "roles[0]"
+        # should be present.
+        self.roles_client.delete_role_inference_rule(
+            self.roles[0]['id'], self.roles[1]['id'])
+
+        role_assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
+        self.assertEqual(1, len(role_assignments))
+
+        roles_ids = [assignment['role']['id']
+                     for assignment in role_assignments]
+        self.assertIn(self.roles[0]['id'], roles_ids)
