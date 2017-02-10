@@ -14,8 +14,9 @@
 
 import os
 import re
-import six
 import subprocess
+
+import six
 
 from tempest.tests import base
 

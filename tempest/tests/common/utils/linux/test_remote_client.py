@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import fixtures
 import time
 
+import fixtures
 from oslo_config import cfg
 from oslotest import mockpatch
 

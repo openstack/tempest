@@ -10,11 +10,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import re
-import six
 import sys
 import time
+
+import netaddr
+import six
 
 from oslo_log import log as logging
 

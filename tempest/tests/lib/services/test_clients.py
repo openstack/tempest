@@ -12,10 +12,11 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+import types
+
 import fixtures
 import mock
 import testtools
-import types
 
 from tempest.lib import auth
 from tempest.lib import exceptions

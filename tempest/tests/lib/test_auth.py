@@ -15,9 +15,9 @@
 
 import copy
 import datetime
-import testtools
 
 from oslotest import mockpatch
+import testtools
 
 from tempest.lib import auth
 from tempest.lib import exceptions

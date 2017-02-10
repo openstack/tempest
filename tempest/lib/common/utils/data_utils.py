@@ -14,12 +14,12 @@
 #    under the License.
 
 import itertools
-import netaddr
 import random
 import string
 import uuid
 
 from debtcollector import removals
+import netaddr
 from oslo_utils import netutils
 from oslo_utils import uuidutils
 import six.moves

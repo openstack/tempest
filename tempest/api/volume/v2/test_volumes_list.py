@@ -15,6 +15,7 @@
 #    under the License.
 
 import random
+
 from six.moves.urllib import parse
 
 from tempest.api.volume import base
