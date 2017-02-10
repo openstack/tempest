@@ -138,8 +138,7 @@ class TestServerBasicOps(manager.ScenarioTest):
             key_name=keypair['name'],
             security_groups=[{'name': security_group['name']}],
             config_drive=CONF.compute_feature_enabled.config_drive,
-            metadata=self.md,
-            wait_until='ACTIVE')
+            metadata=self.md)
         self.verify_ssh(keypair)
         self.verify_metadata()
         self.verify_metadata_on_config_drive()

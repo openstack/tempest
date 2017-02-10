@@ -75,8 +75,7 @@ class TestServerMultinode(manager.ScenarioTest):
             # by getting to active state here, this means this has
             # landed on the host in question.
             inst = self.create_server(
-                availability_zone='%(zone)s:%(host_name)s' % host,
-                wait_until='ACTIVE')
+                availability_zone='%(zone)s:%(host_name)s' % host)
             server = self.servers_client.show_server(inst['id'])['server']
             servers.append(server)
 

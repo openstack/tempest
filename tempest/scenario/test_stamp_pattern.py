@@ -109,8 +109,7 @@ class TestStampPattern(manager.ScenarioTest):
         server = self.create_server(
             image_id=CONF.compute.image_ref,
             key_name=keypair['name'],
-            security_groups=security_group,
-            wait_until='ACTIVE')
+            security_groups=security_group)
 
         # create and add floating IP to server1
         ip_for_server = self.get_server_ip(server)

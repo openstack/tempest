@@ -62,7 +62,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         block_device_mapping = [{'device_name': 'vda', 'volume_id': vol_id,
                                  'delete_on_termination': False}]
 
-        return self.create_server(image_id='', wait_until='ACTIVE',
+        return self.create_server(image_id='',
                                   key_name=key_name,
                                   security_groups=security_groups,
                                   block_device_mapping=block_device_mapping)

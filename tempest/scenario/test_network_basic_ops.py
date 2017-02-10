@@ -160,8 +160,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         server = self.create_server(
             networks=[network],
             key_name=keypair['name'],
-            security_groups=security_groups,
-            wait_until='ACTIVE')
+            security_groups=security_groups)
         self.servers.append(server)
         return server
 

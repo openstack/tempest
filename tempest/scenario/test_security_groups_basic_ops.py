@@ -263,7 +263,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             networks=[{'uuid': tenant.network["id"]}],
             key_name=tenant.keypair['name'],
             security_groups=security_groups_names,
-            wait_until='ACTIVE',
             clients=tenant.manager,
             **kwargs)
         if 'security_groups' in server:

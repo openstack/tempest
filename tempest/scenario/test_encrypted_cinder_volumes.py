@@ -46,9 +46,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         image = self.glance_image_create()
         keypair = self.create_keypair()
 
-        return self.create_server(image_id=image,
-                                  key_name=keypair['name'],
-                                  wait_until='ACTIVE')
+        return self.create_server(image_id=image, key_name=keypair['name'])
 
     def create_encrypted_volume(self, encryption_provider, volume_type):
         volume_type = self.create_volume_type(name=volume_type)
