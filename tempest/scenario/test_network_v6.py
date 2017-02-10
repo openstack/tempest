@@ -126,8 +126,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         srv = self.create_server(
             key_name=self.keypair['name'],
             security_groups=[{'name': self.sec_grp['name']}],
-            networks=[{'uuid': n['id']} for n in networks],
-            wait_until='ACTIVE')
+            networks=[{'uuid': n['id']} for n in networks])
         fip = self.create_floating_ip(thing=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(

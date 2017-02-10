@@ -58,7 +58,6 @@ class TestShelveInstance(manager.ScenarioTest):
             image_id=CONF.compute.image_ref,
             key_name=keypair['name'],
             security_groups=security_groups,
-            wait_until='ACTIVE',
             volume_backed=boot_from_volume)
 
         instance_ip = self.get_server_ip(server)

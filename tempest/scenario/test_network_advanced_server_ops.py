@@ -65,8 +65,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         server = self.create_server(
             networks=[{'uuid': network['id']}],
             key_name=keypair['name'],
-            security_groups=security_groups,
-            wait_until='ACTIVE')
+            security_groups=security_groups)
         return server
 
     def _setup_network(self, server, keypair):
