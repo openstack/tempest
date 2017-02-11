@@ -115,5 +115,11 @@ class NamespaceTagsClient(rest_client.RestClient):
         """
         url = 'metadefs/namespaces/%s/tags' % namespace
         resp, _ = self.delete(url)
-        self.expected_success(200, resp.status)
+
+        # NOTE(rosmaita): Bug 1656183 fixed the success response code for
+        # this call to make it consistent with the other metadefs delete
+        # calls.  Accept both codes in case tempest is being run against
+        # an old Glance.
+        self.expected_success([200, 204], resp.status)
+
         return rest_client.ResponseBody(resp)
