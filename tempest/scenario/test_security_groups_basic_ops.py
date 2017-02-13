@@ -241,9 +241,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self.assertIn(tenant.router['id'], seen_router_ids)
 
         myport = (tenant.router['id'], tenant.subnet['id'])
-        router_ports = [(i['device_id'], i['fixed_ips'][0]['subnet_id']) for i
-                        in self._list_ports()
-                        if net_info.is_router_interface_port(i)]
+        router_ports = [
+            (i['device_id'], f['subnet_id'])
+            for i in self._list_ports(device_id=tenant.router['id'])
+            if net_info.is_router_interface_port(i)
+            for f in i['fixed_ips']]
 
         self.assertIn(myport, router_ports)
 
