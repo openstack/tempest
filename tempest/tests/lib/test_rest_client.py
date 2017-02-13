@@ -337,6 +337,10 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
     def test_response_410(self):
         self._test_error_checker(exceptions.Gone, self.set_data("410"))
 
+    def test_response_412(self):
+        self._test_error_checker(exceptions.PreconditionFailed,
+                                 self.set_data("412"))
+
     def test_response_413(self):
         self._test_error_checker(exceptions.OverLimit, self.set_data("413"))
 
@@ -460,7 +464,7 @@ class TestRestClientErrorCheckerJSON(base.TestCase):
 
     def test_response_bigger_than_400(self):
         # Any response code, that bigger than 400, and not in
-        # (401, 403, 404, 409, 413, 422, 500, 501)
+        # (401, 403, 404, 409, 412, 413, 422, 500, 501)
         self._test_error_checker(exceptions.UnexpectedResponseCode,
                                  self.set_data("402"))
 

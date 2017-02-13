@@ -101,6 +101,11 @@ class Gone(ClientRestClientException):
     message = "The requested resource is no longer available"
 
 
+class PreconditionFailed(ClientRestClientException):
+    status_code = 412
+    message = "Precondition Failed"
+
+
 class RateLimitExceeded(ClientRestClientException):
     status_code = 413
     message = "Rate limit exceeded"
