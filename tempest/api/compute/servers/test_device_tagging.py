@@ -20,6 +20,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
@@ -249,9 +250,9 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                 self.verify_device_metadata(md_json)
                 return True
 
-            if not test.call_until_true(get_and_verify_metadata,
-                                        CONF.compute.build_timeout,
-                                        CONF.compute.build_interval):
+            if not test_utils.call_until_true(get_and_verify_metadata,
+                                              CONF.compute.build_timeout,
+                                              CONF.compute.build_interval):
                 raise exceptions.TimeoutException('Timeout while verifying '
                                                   'metadata on server.')
 
