@@ -176,7 +176,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild_server,
-                          server['id'], self.image_ref_alt)
+                          server['id'], self.image_ref)
 
     @test.related_bug('1660878', status_code=409)
     @test.attr(type=['negative'])
@@ -198,7 +198,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild_server,
                           nonexistent_server,
-                          self.image_ref_alt)
+                          self.image_ref)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('fd57f159-68d6-4c2a-902b-03070828a87e')
