@@ -77,6 +77,8 @@ class TestServerMultinode(manager.ScenarioTest):
             inst = self.create_server(
                 availability_zone='%(zone)s:%(host_name)s' % host)
             server = self.servers_client.show_server(inst['id'])['server']
+            # ensure server is located on the requested host
+            self.assertEqual(host['host_name'], server['OS-EXT-SRV-ATTR:host'])
             servers.append(server)
 
         # make sure we really have the number of servers we think we should
