@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest.lib.common.utils import data_utils
+from tempest.common.utils import data_utils
 from tempest.lib import decorators
 from tempest import test
 
@@ -166,7 +166,7 @@ class ContainerTest(base.BaseObjectTest):
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
-        params = {'end_marker': 'ZzzzObject1234567890'}
+        params = {'end_marker': object_name + 'zzzz'}
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
@@ -246,7 +246,8 @@ class ContainerTest(base.BaseObjectTest):
     def test_list_container_contents_with_path(self):
         # get container contents list using path param
         container_name = self.create_container()
-        object_name = data_utils.rand_name(name='Swift/TestObject')
+        object_name = data_utils.rand_name(name='TestObject')
+        object_name = 'Swift/' + object_name
         self.create_object(container_name, object_name)
 
         params = {'path': 'Swift'}
