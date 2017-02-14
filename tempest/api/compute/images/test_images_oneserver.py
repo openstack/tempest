@@ -14,10 +14,8 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -53,15 +51,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        body = self.client.create_image(server_id, name=name,
-                                        metadata=meta)
-        image_id = data_utils.parse_image_id(body.response['location'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.client.delete_image, image_id)
-        waiters.wait_for_image_status(self.client, image_id, 'ACTIVE')
+        image = self.create_image_from_server(server_id, name=name,
+                                              metadata=meta,
+                                              wait_until='ACTIVE')
 
         # Verify the image was created correctly
-        image = self.client.show_image(image_id)['image']
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
@@ -76,8 +70,9 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
                       (str(original_image['minDisk']), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
-        self.client.delete_image(image_id)
-        self.client.wait_for_resource_deletion(image_id)
+        self.client.delete_image(image['id'])
+        self.images.remove(image['id'])
+        self.client.wait_for_resource_deletion(image['id'])
 
     @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):

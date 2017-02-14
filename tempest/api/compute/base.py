@@ -295,20 +295,22 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
         """Wrapper utility that returns an image created from the server."""
-        name = data_utils.rand_name(cls.__name__ + "-image")
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
+        name = kwargs.pop('name',
+                          data_utils.rand_name(cls.__name__ + "-image"))
+        wait_until = kwargs.pop('wait_until', None)
+        wait_for_server = kwargs.pop('wait_for_server', True)
 
-        image = cls.compute_images_client.create_image(server_id, name=name)
+        image = cls.compute_images_client.create_image(server_id, name=name,
+                                                       **kwargs)
         image_id = data_utils.parse_image_id(image.response['location'])
         cls.images.append(image_id)
 
-        if 'wait_until' in kwargs:
+        if wait_until is not None:
             try:
                 waiters.wait_for_image_status(cls.compute_images_client,
-                                              image_id, kwargs['wait_until'])
+                                              image_id, wait_until)
             except lib_exc.NotFound:
-                if kwargs['wait_until'].upper() == 'ACTIVE':
+                if wait_until.upper() == 'ACTIVE':
                     # If the image is not found after create_image returned
                     # that means the snapshot failed in nova-compute and nova
                     # deleted the image. There should be a compute fault
@@ -326,8 +328,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                     raise
             image = cls.compute_images_client.show_image(image_id)['image']
 
-            if kwargs['wait_until'] == 'ACTIVE':
-                if kwargs.get('wait_for_server', True):
+            if wait_until.upper() == 'ACTIVE':
+                if wait_for_server:
                     waiters.wait_for_server_status(cls.servers_client,
                                                    server_id, 'ACTIVE')
         return image
