@@ -35,11 +35,6 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setup_clients(cls):
-        super(FlavorsExtraSpecsNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.flavors_client
-
-    @classmethod
     def resource_setup(cls):
         super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_setup()
 
@@ -52,18 +47,19 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         swap = 1024
         rxtx = 1
         # Create a flavor
-        cls.flavor = cls.client.create_flavor(name=flavor_name,
-                                              ram=ram, vcpus=vcpus,
-                                              disk=disk,
-                                              id=cls.new_flavor_id,
-                                              ephemeral=ephemeral,
-                                              swap=swap,
-                                              rxtx_factor=rxtx)['flavor']
+        cls.flavor = cls.admin_flavors_client.create_flavor(
+            name=flavor_name,
+            ram=ram, vcpus=vcpus,
+            disk=disk,
+            id=cls.new_flavor_id,
+            ephemeral=ephemeral,
+            swap=swap,
+            rxtx_factor=rxtx)['flavor']
 
     @classmethod
     def resource_cleanup(cls):
-        cls.client.delete_flavor(cls.flavor['id'])
-        cls.client.wait_for_resource_deletion(cls.flavor['id'])
+        cls.admin_flavors_client.delete_flavor(cls.flavor['id'])
+        cls.admin_flavors_client.wait_for_resource_deletion(cls.flavor['id'])
         super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_cleanup()
 
     @test.attr(type=['negative'])
@@ -79,7 +75,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('1ebf4ef8-759e-48fe-a801-d451d80476fb')
     def test_flavor_non_admin_update_specific_key(self):
         # non admin user is not allowed to update flavor extra spec
-        body = self.client.set_flavor_extra_spec(
+        body = self.admin_flavors_client.set_flavor_extra_spec(
             self.flavor['id'], key1="value1", key2="value2")['extra_specs']
         self.assertEqual(body['key1'], 'value1')
         self.assertRaises(lib_exc.Forbidden,
@@ -92,8 +88,8 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type=['negative'])
     @decorators.idempotent_id('28f12249-27c7-44c1-8810-1f382f316b11')
     def test_flavor_non_admin_unset_keys(self):
-        self.client.set_flavor_extra_spec(self.flavor['id'],
-                                          key1="value1", key2="value2")
+        self.admin_flavors_client.set_flavor_extra_spec(
+            self.flavor['id'], key1="value1", key2="value2")
 
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.unset_flavor_extra_spec,
@@ -104,7 +100,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('440b9f3f-3c7f-4293-a106-0ceda350f8de')
     def test_flavor_unset_nonexistent_key(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.unset_flavor_extra_spec,
+                          self.admin_flavors_client.unset_flavor_extra_spec,
                           self.flavor['id'],
                           'nonexistent_key')
 
@@ -121,7 +117,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_update_mismatch_key(self):
         # the key will be updated should be match the key in the body
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.update_flavor_extra_spec,
+                          self.admin_flavors_client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key2",
                           key1="value")
@@ -131,7 +127,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_update_more_key(self):
         # there should be just one item in the request body
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.update_flavor_extra_spec,
+                          self.admin_flavors_client.update_flavor_extra_spec,
                           self.flavor['id'],
                           "key1",
                           key1="value",
