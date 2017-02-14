@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    Below deprecated network config options have been removed.
+    Those config options already been renamed to below meaningful names.
+
+    - ``tenant_network_cidr`` (removed) -> ``project_network_cidr``
+    - ``tenant_network_mask_bits`` (removed) -> ``project_network_mask_bits``
+    - ``tenant_network_v6_cidr`` (removed) -> ``project_network_v6_cidr``
+    - ``tenant_network_v6_mask_bits`` (removed) -> ``project_network_v6_mask_bits``
+    - ``tenant_networks_reachable`` (removed) -> ``project_networks_reachable``
