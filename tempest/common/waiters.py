@@ -218,7 +218,7 @@ def wait_for_volume_retype(client, volume_id, new_volume_type):
                        'within the required time (%s s).' %
                        (volume_id, new_volume_type, current_volume_type,
                         client.build_timeout))
-            raise exceptions.TimeoutException(message)
+            raise lib_exc.TimeoutException(message)
 
 
 def wait_for_snapshot_status(client, snapshot_id, status):
