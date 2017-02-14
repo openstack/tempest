@@ -45,8 +45,6 @@ class TestServerBasicOps(manager.ScenarioTest):
 
     def setUp(self):
         super(TestServerBasicOps, self).setUp()
-        self.image_ref = CONF.compute.image_ref
-        self.flavor_ref = CONF.compute.flavor_ref
         self.run_ssh = CONF.validation.run_validation
         self.ssh_user = CONF.validation.image_ssh_user
 
@@ -133,8 +131,6 @@ class TestServerBasicOps(manager.ScenarioTest):
         security_group = self._create_security_group()
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
-            image_id=self.image_ref,
-            flavor=self.flavor_ref,
             key_name=keypair['name'],
             security_groups=[{'name': security_group['name']}],
             config_drive=CONF.compute_feature_enabled.config_drive,

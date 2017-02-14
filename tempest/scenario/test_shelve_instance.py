@@ -55,7 +55,6 @@ class TestShelveInstance(manager.ScenarioTest):
         security_groups = [{'name': security_group['name']}]
 
         server = self.create_server(
-            image_id=CONF.compute.image_ref,
             key_name=keypair['name'],
             security_groups=security_groups,
             volume_backed=boot_from_volume)
