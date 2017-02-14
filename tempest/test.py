@@ -39,7 +39,11 @@ LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
 
-idempotent_id = decorators.idempotent_id
+# TODO(oomichi): This test.idempotent_id should be removed after all projects
+# switch to use decorators.idempotent_id.
+idempotent_id = debtcollector.moves.moved_function(
+    decorators.idempotent_id, 'idempotent_id', __name__,
+    version='Mitaka', removal_version='?')
 
 
 def attr(**kwargs):

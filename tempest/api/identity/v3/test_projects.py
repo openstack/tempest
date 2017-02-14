@@ -14,15 +14,15 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
 
     credentials = ['primary', 'alt']
 
-    @test.idempotent_id('86128d46-e170-4644-866a-cc487f699e1d')
+    @decorators.idempotent_id('86128d46-e170-4644-866a-cc487f699e1d')
     def test_list_projects_returns_only_authorized_projects(self):
         alt_project_name =\
             self.alt_manager.credentials.project_name

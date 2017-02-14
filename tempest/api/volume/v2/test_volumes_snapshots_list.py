@@ -15,7 +15,7 @@
 
 from tempest.api.volume import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -56,33 +56,33 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         self.assertEqual(sorted(sorted_list, reverse=(sort_dir == 'desc')),
                          sorted_list, msg)
 
-    @test.idempotent_id('c5513ada-64c1-4d28-83b9-af3307ec1388')
+    @decorators.idempotent_id('c5513ada-64c1-4d28-83b9-af3307ec1388')
     def test_snapshot_list_param_sort_id_asc(self):
         self._list_snapshots_param_sort(sort_key='id', sort_dir='asc')
 
-    @test.idempotent_id('8a7fe058-0b41-402a-8afd-2dbc5a4a718b')
+    @decorators.idempotent_id('8a7fe058-0b41-402a-8afd-2dbc5a4a718b')
     def test_snapshot_list_param_sort_id_desc(self):
         self._list_snapshots_param_sort(sort_key='id', sort_dir='desc')
 
-    @test.idempotent_id('4052c3a0-2415-440a-a8cc-305a875331b0')
+    @decorators.idempotent_id('4052c3a0-2415-440a-a8cc-305a875331b0')
     def test_snapshot_list_param_sort_created_at_asc(self):
         self._list_snapshots_param_sort(sort_key='created_at', sort_dir='asc')
 
-    @test.idempotent_id('dcbbe24a-f3c0-4ec8-9274-55d48db8d1cf')
+    @decorators.idempotent_id('dcbbe24a-f3c0-4ec8-9274-55d48db8d1cf')
     def test_snapshot_list_param_sort_created_at_desc(self):
         self._list_snapshots_param_sort(sort_key='created_at', sort_dir='desc')
 
-    @test.idempotent_id('d58b5fed-0c37-42d3-8c5d-39014ac13c00')
+    @decorators.idempotent_id('d58b5fed-0c37-42d3-8c5d-39014ac13c00')
     def test_snapshot_list_param_sort_name_asc(self):
         self._list_snapshots_param_sort(sort_key='display_name',
                                         sort_dir='asc')
 
-    @test.idempotent_id('96ba6f4d-1f18-47e1-b4bc-76edc6c21250')
+    @decorators.idempotent_id('96ba6f4d-1f18-47e1-b4bc-76edc6c21250')
     def test_snapshot_list_param_sort_name_desc(self):
         self._list_snapshots_param_sort(sort_key='display_name',
                                         sort_dir='desc')
 
-    @test.idempotent_id('05489dde-44bc-4961-a1f5-3ce7ee7824f7')
+    @decorators.idempotent_id('05489dde-44bc-4961-a1f5-3ce7ee7824f7')
     def test_snapshot_list_param_marker(self):
         # The list of snapshots should end before the provided marker
         params = {'marker': self.snapshot_id_list[1]}
