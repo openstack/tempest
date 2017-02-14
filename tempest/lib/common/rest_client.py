@@ -617,6 +617,7 @@ class RestClient(object):
         :raises BadRequest: If a 400 response code is received
         :raises Gone: If a 410 response code is received
         :raises Conflict: If a 409 response code is received
+        :raises PreconditionFailed: If a 412 response code is received
         :raises OverLimit: If a 413 response code is received and over_limit is
                           not in the response body
         :raises RateLimitExceeded: If a 413 response code is received and
@@ -774,6 +775,11 @@ class RestClient(object):
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
             raise exceptions.Conflict(resp_body, resp=resp)
+
+        if resp.status == 412:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+            raise exceptions.PreconditionFailed(resp_body, resp=resp)
 
         if resp.status == 413:
             if parse_resp:
