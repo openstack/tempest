@@ -100,7 +100,6 @@ class TestStampPattern(manager.ScenarioTest):
         # boot an instance and create a timestamp file in it
         volume = self.create_volume()
         server = self.create_server(
-            image_id=CONF.compute.image_ref,
             key_name=keypair['name'],
             security_groups=[{'name': security_group['name']}])
 
