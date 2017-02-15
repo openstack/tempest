@@ -468,6 +468,7 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         cls.availability_zone_admin_client = (
             cls.os_adm.availability_zone_client)
         cls.admin_flavors_client = cls.os_adm.flavors_client
+        cls.admin_servers_client = cls.os_adm.servers_client
 
     def create_flavor(self, ram, vcpus, disk, name=None,
                       is_public='True', **kwargs):

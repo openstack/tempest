@@ -32,11 +32,6 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
             raise cls.skipException(skip_msg)
 
     @classmethod
-    def setup_clients(cls):
-        super(VolumesAdminNegativeTest, cls).setup_clients()
-        cls.servers_admin_client = cls.os_adm.servers_client
-
-    @classmethod
     def resource_setup(cls):
         super(VolumesAdminNegativeTest, cls).resource_setup()
         cls.server = cls.create_test_server(wait_until='ACTIVE')
@@ -46,7 +41,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
         volume = self.create_volume()
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.servers_admin_client.update_attached_volume,
+                          self.admin_servers_client.update_attached_volume,
                           self.server['id'], nonexistent_volume,
                           volumeId=volume['id'])
 
@@ -58,6 +53,6 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
 
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.BadRequest,
-                          self.servers_admin_client.update_attached_volume,
+                          self.admin_servers_client.update_attached_volume,
                           self.server['id'], volume['id'],
                           volumeId=nonexistent_volume)
