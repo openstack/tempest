@@ -11,6 +11,7 @@
 #    under the License.
 
 import copy
+
 from oslo_log import log as logging
 
 from tempest import exceptions

@@ -13,6 +13,7 @@
 #    under the License.
 
 import copy
+
 from oslotest import mockpatch
 
 from tempest.lib.services.compute import versions_client

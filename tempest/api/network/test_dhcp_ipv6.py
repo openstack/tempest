@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import random
+
+import netaddr
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils

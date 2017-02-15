@@ -18,9 +18,10 @@
 import gzip
 import pprint
 import re
+import sys
+
 import six
 import six.moves.urllib.request as urlreq
-import sys
 
 
 pp = pprint.PrettyPrinter()

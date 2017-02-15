@@ -25,6 +25,7 @@
 
 import json
 import re
+
 import requests
 
 url = 'https://review.openstack.org/projects/'

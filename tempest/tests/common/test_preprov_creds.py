@@ -14,14 +14,15 @@
 
 import hashlib
 import os
-import testtools
+import shutil
 
 import mock
+import six
+import testtools
+
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_config import cfg
 from oslotest import mockpatch
-import shutil
-import six
 
 from tempest.common import preprov_creds
 from tempest import config

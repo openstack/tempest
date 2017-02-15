@@ -19,10 +19,10 @@ import argparse
 import gzip
 import os
 import re
-import six
-import six.moves.urllib.request as urlreq
 import sys
 
+import six
+import six.moves.urllib.request as urlreq
 import yaml
 
 
