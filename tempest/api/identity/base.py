@@ -67,7 +67,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
             return role[0]
 
     def _create_test_user(self, **kwargs):
-        if kwargs['password'] is None:
+        if kwargs.get('password', None) is None:
             user_password = data_utils.rand_password()
             kwargs['password'] = user_password
         user = self.users_client.create_user(**kwargs)['user']
