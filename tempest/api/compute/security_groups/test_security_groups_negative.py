@@ -32,11 +32,6 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.security_groups_client
 
-    @classmethod
-    def resource_setup(cls):
-        super(SecurityGroupsNegativeTestJSON, cls).resource_setup()
-        cls.neutron_available = CONF.service_available.neutron
-
     @test.attr(type=['negative'])
     @decorators.idempotent_id('673eaec1-9b3e-48ed-bdf1-2786c1b9661c')
     @test.services('network')
