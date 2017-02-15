@@ -1,0 +1,6 @@
+---
+upgrade:
+  - The deprecated input-scenario config options and group
+    have been removed.
+    The input scenarios functionality already being removed from tempest
+    and from this release, their corresponding config options too.
