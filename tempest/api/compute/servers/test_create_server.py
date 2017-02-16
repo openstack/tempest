@@ -51,7 +51,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.name = data_utils.rand_name(cls.__name__ + '-server')
         cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
-        cls.server_initial = cls.create_test_server(
+        server_initial = cls.create_test_server(
             validatable=True,
             wait_until='ACTIVE',
             name=cls.name,
@@ -60,7 +60,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             accessIPv6=cls.accessIPv6,
             disk_config=disk_config,
             adminPass=cls.password)
-        cls.server = (cls.client.show_server(cls.server_initial['id'])
+        cls.server = (cls.client.show_server(server_initial['id'])
                       ['server'])
 
     def _create_net_subnet_ret_net_from_cidr(self, cidr):

@@ -28,11 +28,11 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
     @classmethod
     def resource_setup(cls):
         super(VolumesV2SnapshotListTestJSON, cls).resource_setup()
-        cls.volume_origin = cls.create_volume()
+        volume_origin = cls.create_volume()
         cls.name_field = cls.special_fields['name_field']
         # Create snapshots with params
         for _ in range(2):
-            cls.snapshot = cls.create_snapshot(cls.volume_origin['id'])
+            cls.snapshot = cls.create_snapshot(volume_origin['id'])
 
     def _list_by_param_values_and_assert(self, with_detail=False, **params):
         """list or list_details with given params and validates result."""

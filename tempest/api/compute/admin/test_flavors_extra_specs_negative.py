@@ -43,7 +43,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         vcpus = 1
         disk = 10
         ephemeral = 10
-        cls.new_flavor_id = data_utils.rand_int_id(start=1000)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         swap = 1024
         rxtx = 1
         # Create a flavor
@@ -51,7 +51,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
             name=flavor_name,
             ram=ram, vcpus=vcpus,
             disk=disk,
-            id=cls.new_flavor_id,
+            id=new_flavor_id,
             ephemeral=ephemeral,
             swap=swap,
             rxtx_factor=rxtx)['flavor']

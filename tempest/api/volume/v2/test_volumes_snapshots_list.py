@@ -33,10 +33,10 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         super(VolumesV2SnapshotListTestJSON, cls).resource_setup()
         cls.snapshot_id_list = []
         # Create a volume
-        cls.volume_origin = cls.create_volume()
+        volume_origin = cls.create_volume()
         # Create 3 snapshots
         for _ in range(3):
-            snapshot = cls.create_snapshot(cls.volume_origin['id'])
+            snapshot = cls.create_snapshot(volume_origin['id'])
             cls.snapshot_id_list.append(snapshot['id'])
 
     def _list_snapshots_param_sort(self, sort_key, sort_dir):
