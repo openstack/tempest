@@ -44,9 +44,9 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
         cls.ext_net_id = CONF.network.public_network_id
         # Create a network with a subnet connected to a router.
         cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router()
-        cls.create_router_interface(cls.router['id'], cls.subnet['id'])
+        subnet = cls.create_subnet(cls.network)
+        router = cls.create_router()
+        cls.create_router_interface(router['id'], subnet['id'])
         cls.port = cls.create_port(cls.network)
 
     @test.attr(type=['negative'])

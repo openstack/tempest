@@ -43,9 +43,9 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         cls.ext_net_id = CONF.network.public_network_id
         cls.floating_ip = cls.create_floatingip(cls.ext_net_id)
         cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router(external_network_id=cls.ext_net_id)
-        cls.create_router_interface(cls.router['id'], cls.subnet['id'])
+        subnet = cls.create_subnet(cls.network)
+        router = cls.create_router(external_network_id=cls.ext_net_id)
+        cls.create_router_interface(router['id'], subnet['id'])
         cls.port = cls.create_port(cls.network)
 
     @decorators.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')

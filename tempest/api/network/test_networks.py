@@ -34,7 +34,6 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
     def resource_setup(cls):
         super(BaseNetworkTestResources, cls).resource_setup()
         cls.network = cls.create_network()
-        cls.name = cls.network['name']
         cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
                                                                cls._ip_version)
         cls._subnet_data = {6: {'gateway':
