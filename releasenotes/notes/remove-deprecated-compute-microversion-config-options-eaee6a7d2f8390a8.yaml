@@ -1,0 +1,9 @@
+---
+upgrade:
+  - The deprecated compute microversion config options from
+    'compute-feature-enabled' group have been removed. Those config options
+    are available under 'compute' group to configure the min and max
+    microversion for compute service.
+
+    * CONF.compute.min_microversion
+    * CONF.compute.max_microversion

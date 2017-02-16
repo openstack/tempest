@@ -310,8 +310,7 @@ ComputeGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'",
-                    deprecated_group='compute-feature-enabled'),
+                    "with format 'X.Y' or string 'latest'"),
     cfg.StrOpt('max_microversion',
                default=None,
                help="Upper version of the test target microversion range. "
@@ -320,8 +319,7 @@ ComputeGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'",
-                    deprecated_group='compute-feature-enabled'),
+                    "with format 'X.Y' or string 'latest'"),
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
