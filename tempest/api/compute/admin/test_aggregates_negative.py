@@ -34,7 +34,6 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate'
-        cls.az_name_prefix = 'test_az'
 
         hosts_all = cls.os_adm.hosts_client.list_hosts()['hosts']
         hosts = ([host['host_name']

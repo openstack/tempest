@@ -30,7 +30,6 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
 
         cls.client = cls.volumes_client
         cls.alt_client = cls.os_alt.volumes_client
-        cls.alt_tenant_id = cls.alt_client.tenant_id
         cls.adm_client = cls.os_adm.volumes_client
 
     @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
