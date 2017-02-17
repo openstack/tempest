@@ -145,24 +145,24 @@ class ListImagesTest(base.BaseV1ImageTest):
         a_formats = ['ami', 'ari', 'aki']
 
         (cls.container_format,
-         cls.container_format_alt) = CONF.image.container_formats[:2]
+         container_format_alt) = CONF.image.container_formats[:2]
         cls.disk_format, cls.disk_format_alt = CONF.image.disk_formats[:2]
         if cls.container_format in a_formats:
             cls.disk_format = cls.container_format
-        if cls.container_format_alt in a_formats:
-            cls.disk_format_alt = cls.container_format_alt
+        if container_format_alt in a_formats:
+            cls.disk_format_alt = container_format_alt
 
         img1 = cls._create_remote_image('one', cls.container_format,
                                         cls.disk_format)
-        img2 = cls._create_remote_image('two', cls.container_format_alt,
+        img2 = cls._create_remote_image('two', container_format_alt,
                                         cls.disk_format_alt)
         img3 = cls._create_remote_image('dup', cls.container_format,
                                         cls.disk_format)
         img4 = cls._create_remote_image('dup', cls.container_format,
                                         cls.disk_format)
-        img5 = cls._create_standard_image('1', cls.container_format_alt,
+        img5 = cls._create_standard_image('1', container_format_alt,
                                           cls.disk_format_alt, 42)
-        img6 = cls._create_standard_image('2', cls.container_format_alt,
+        img6 = cls._create_standard_image('2', container_format_alt,
                                           cls.disk_format_alt, 142)
         img7 = cls._create_standard_image('33', cls.container_format,
                                           cls.disk_format, 142)

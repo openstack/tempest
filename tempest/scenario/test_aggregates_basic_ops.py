@@ -36,9 +36,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     def setup_clients(cls):
         super(TestAggregatesBasicOps, cls).setup_clients()
         # Use admin client by default
-        cls.manager = cls.admin_manager
-        cls.aggregates_client = cls.manager.aggregates_client
-        cls.hosts_client = cls.manager.hosts_client
+        cls.aggregates_client = cls.admin_manager.aggregates_client
+        cls.hosts_client = cls.admin_manager.hosts_client
 
     def _create_aggregate(self, **kwargs):
         aggregate = (self.aggregates_client.create_aggregate(**kwargs)

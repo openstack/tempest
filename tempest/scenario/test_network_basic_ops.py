@@ -109,13 +109,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_networks()
 
         self.ports = []
-        self.port_id = None
+        port_id = None
         if boot_with_port:
             # create a port on the network and boot with that
-            self.port_id = self._create_port(self.network['id'])['id']
-            self.ports.append({'port': self.port_id})
+            port_id = self._create_port(self.network['id'])['id']
+            self.ports.append({'port': port_id})
 
-        server = self._create_server(self.network, self.port_id)
+        server = self._create_server(self.network, port_id)
         self._check_tenant_network_connectivity()
 
         floating_ip = self.create_floating_ip(server)
