@@ -80,20 +80,17 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
 
         # Create the flavor
-        flavor = self.create_flavor(name=flavor_name,
-                                    ram=self.ram, vcpus=self.vcpus,
-                                    disk=self.disk,
-                                    ephemeral=self.ephemeral,
-                                    swap=self.swap,
-                                    rxtx_factor=self.rxtx)
-        flag = False
-        # Verify flavor is retrieved
-        flavors = self.admin_flavors_client.list_flavors(
+        self.create_flavor(name=flavor_name,
+                           ram=self.ram, vcpus=self.vcpus,
+                           disk=self.disk,
+                           ephemeral=self.ephemeral,
+                           swap=self.swap,
+                           rxtx_factor=self.rxtx)
+
+        # Check if flavor is present in list
+        flavors_list = self.admin_flavors_client.list_flavors(
             detail=True)['flavors']
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                flag = True
-        self.assertTrue(flag)
+        self.assertIn(flavor_name, [f['name'] for f in flavors_list])
 
     @decorators.idempotent_id('63dc64e6-2e79-4fdf-868f-85500d308d66')
     def test_create_list_flavor_without_extra_data(self):
@@ -128,13 +125,12 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Check if flavor is present in list
-        flag = False
-        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                verify_flavor_response_extension(flavor)
-                flag = True
-        self.assertTrue(flag)
+        flavors_list = [
+            f for f in self.flavors_client.list_flavors(detail=True)['flavors']
+            if f['name'] == flavor_name
+        ]
+        self.assertNotEmpty(flavors_list)
+        verify_flavor_response_extension(flavors_list[0])
 
     @decorators.idempotent_id('be6cc18c-7c5d-48c0-ac16-17eaf03c54eb')
     def test_list_non_public_flavor(self):
@@ -145,26 +141,18 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
 
         # Create the flavor
-        flavor = self.create_flavor(name=flavor_name,
-                                    ram=self.ram, vcpus=self.vcpus,
-                                    disk=self.disk,
-                                    is_public="False")
-        # Verify flavor is retrieved
-        flag = False
-        flavors = self.admin_flavors_client.list_flavors(
+        self.create_flavor(name=flavor_name,
+                           ram=self.ram, vcpus=self.vcpus,
+                           disk=self.disk,
+                           is_public="False")
+        # Verify flavor is not retrieved
+        flavors_list = self.admin_flavors_client.list_flavors(
             detail=True)['flavors']
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                flag = True
-        self.assertFalse(flag)
+        self.assertNotIn(flavor_name, [f['name'] for f in flavors_list])
 
         # Verify flavor is not retrieved with other user
-        flag = False
-        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                flag = True
-        self.assertFalse(flag)
+        flavors_list = self.flavors_client.list_flavors(detail=True)['flavors']
+        self.assertNotIn(flavor_name, [f['name'] for f in flavors_list])
 
     @decorators.idempotent_id('bcc418ef-799b-47cc-baa1-ce01368b8987')
     def test_create_server_with_non_public_flavor(self):
@@ -186,17 +174,13 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
 
         # Create the flavor
-        flavor = self.create_flavor(name=flavor_name,
-                                    ram=self.ram, vcpus=self.vcpus,
-                                    disk=self.disk,
-                                    is_public="True")
-        flag = False
+        self.create_flavor(name=flavor_name,
+                           ram=self.ram, vcpus=self.vcpus,
+                           disk=self.disk,
+                           is_public="True")
         # Verify flavor is retrieved with new user
-        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                flag = True
-        self.assertTrue(flag)
+        flavors_list = self.flavors_client.list_flavors(detail=True)['flavors']
+        self.assertIn(flavor_name, [f['name'] for f in flavors_list])
 
     @decorators.idempotent_id('fb9cbde6-3a0e-41f2-a983-bdb0a823c44e')
     def test_is_public_string_variations(self):
@@ -215,20 +199,13 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                            disk=self.disk,
                            is_public="True")
 
-        def _flavor_lookup(flavors, flavor_name):
-            for flavor in flavors:
-                if flavor['name'] == flavor_name:
-                    return flavor
-            return None
-
         def _test_string_variations(variations, flavor_name):
             for string in variations:
                 params = {'is_public': string}
                 flavors = (self.admin_flavors_client.list_flavors(detail=True,
                                                                   **params)
                            ['flavors'])
-                flavor = _flavor_lookup(flavors, flavor_name)
-                self.assertIsNotNone(flavor)
+                self.assertIn(flavor_name, [f['name'] for f in flavors])
 
         _test_string_variations(['f', 'false', 'no', '0'],
                                 flavor_name_not_public)
