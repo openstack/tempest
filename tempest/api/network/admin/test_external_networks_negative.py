@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.network import base
 from tempest import config
@@ -27,6 +28,8 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('d402ae6c-0be0-4d8e-833b-a738895d98d0')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     def test_create_port_with_precreated_floatingip_as_fixed_ip(self):
         # NOTE: External networks can be used to create both floating-ip as
         # well as instance-ip. So, creating an instance-ip with a value of a

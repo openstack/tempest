@@ -91,6 +91,8 @@ class TestStampPattern(manager.ScenarioTest):
     @decorators.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     @test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting an instance

@@ -293,12 +293,12 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         return resp_body['subnet']
 
     def _create_router(self, router_name, tenant_id):
-        external_net_id = dict(
-            network_id=self.public_network_id)
-        resp_body = self.routers_admin_client.create_router(
-            name=router_name,
-            external_gateway_info=external_net_id,
-            tenant_id=tenant_id)
+        kwargs = {'name': router_name,
+                  'tenant_id': tenant_id}
+        if self.public_network_id:
+            kwargs['external_gateway_info'] = dict(
+                network_id=self.public_network_id)
+        resp_body = self.routers_admin_client.create_router(**kwargs)
         return resp_body['router']
 
     def _add_router_interface(self, router_id, subnet_id):
