@@ -1168,3 +1168,34 @@ class TestServersClient(base.BaseServiceTest):
             tag=self.FAKE_TAGS[0],
             status=204,
             to_utf=bytes_body)
+
+
+class TestServersClientMinV26(base.BaseServiceTest):
+
+    def setUp(self):
+        super(TestServersClientMinV26, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = servers_client.ServersClient(fake_auth, 'compute',
+                                                   'regionOne')
+        base_compute_client.COMPUTE_MICROVERSION = '2.6'
+        self.server_id = "920eaac8-a284-4fd1-9c2c-b30f0181b125"
+
+    def tearDown(self):
+        super(TestServersClientMinV26, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
+
+    def test_get_remote_consoles(self):
+        self.check_service_client_function(
+            self.client.get_remote_console,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {
+                'remote_console': {
+                    'protocol': 'serial',
+                    'type': 'serial',
+                    'url': 'ws://127.0.0.1:6083/?token=IllAllowIt'
+                    }
+            },
+            server_id=self.server_id,
+            console_type='serial',
+            protocol='serial',
+            )

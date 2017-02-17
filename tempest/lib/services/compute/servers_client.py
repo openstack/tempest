@@ -27,6 +27,7 @@ from tempest.lib.api_schema.response.compute.v2_16 import servers as schemav216
 from tempest.lib.api_schema.response.compute.v2_19 import servers as schemav219
 from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
 from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
+from tempest.lib.api_schema.response.compute.v2_6 import servers as schemav26
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
@@ -37,7 +38,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [
         {'min': None, 'max': '2.2', 'schema': schema},
-        {'min': '2.3', 'max': '2.8', 'schema': schemav23},
+        {'min': '2.3', 'max': '2.5', 'schema': schemav23},
+        {'min': '2.6', 'max': '2.8', 'schema': schemav26},
         {'min': '2.9', 'max': '2.15', 'schema': schemav29},
         {'min': '2.16', 'max': '2.18', 'schema': schemav216},
         {'min': '2.19', 'max': '2.25', 'schema': schemav219},
@@ -597,6 +599,29 @@ class ServersClient(base_compute_client.BaseComputeClient):
         """
         return self.action(server_id, 'os-getConsoleOutput',
                            schema.get_console_output, **kwargs)
+
+    def get_remote_console(self, server_id, console_type, protocol, **kwargs):
+        """Get a remote console.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        TODO (markus_z) The api-ref for that isn't yet available, update this
+        here when the docs in Nova are updated. The old API is at
+        http://developer.openstack.org/api-ref/compute/#get-serial-console-os-getserialconsole-action
+        """
+        param = {
+            'remote_console': {
+                'type': console_type,
+                'protocol': protocol,
+            }
+        }
+        post_body = json.dumps(param)
+        resp, body = self.post("servers/%s/remote-consoles" % server_id,
+                               post_body)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.get_remote_consoles, resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def list_virtual_interfaces(self, server_id):
         """List the virtual interfaces used in an instance."""

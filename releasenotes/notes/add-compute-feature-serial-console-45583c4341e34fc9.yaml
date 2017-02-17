@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new boolean config option ``serial_console`` is added to the section
+    ``compute-feature-enabled``. If enabled, tests, which validate the
+    behavior of Nova's *serial console* feature (an alternative to VNC,
+    RDP, SPICE) can be executed.
