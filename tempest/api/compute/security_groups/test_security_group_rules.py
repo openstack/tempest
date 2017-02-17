@@ -31,7 +31,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     @classmethod
     def resource_setup(cls):
         super(SecurityGroupRulesTestJSON, cls).resource_setup()
-        cls.neutron_available = CONF.service_available.neutron
         cls.ip_protocol = 'tcp'
         cls.from_port = 22
         cls.to_port = 22
