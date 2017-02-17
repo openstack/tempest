@@ -121,7 +121,7 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
         if server_status == 'ERROR' and not ignore_error:
-            raise exceptions.BuildErrorException(server_id=server_id)
+            raise lib_exc.DeleteErrorException(resource_id=server_id)
 
         if int(time.time()) - start_time >= client.build_timeout:
             raise lib_exc.TimeoutException
