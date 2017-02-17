@@ -44,13 +44,11 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         super(VolumesTestJSON, cls).resource_setup()
         # Create 3 Volumes
         cls.volume_list = []
-        cls.volume_id_list = []
         for _ in range(3):
             metadata = {'Type': 'work'}
             volume = cls.create_volume(metadata=metadata)
             volume = cls.client.show_volume(volume['id'])['volume']
             cls.volume_list.append(volume)
-            cls.volume_id_list.append(volume['id'])
 
     @decorators.idempotent_id('bc2dd1a0-15af-48e5-9990-f2e75a48325d')
     def test_volume_list(self):

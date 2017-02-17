@@ -34,7 +34,6 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         cls.snapshot_id_list = []
         # Create a volume
         cls.volume_origin = cls.create_volume()
-        cls.name_field = cls.special_fields['name_field']
         # Create 3 snapshots
         for _ in range(3):
             snapshot = cls.create_snapshot(cls.volume_origin['id'])
