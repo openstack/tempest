@@ -79,7 +79,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                     cls.router['id'])['router'].get('distributed', False)
                 if cls.is_dvr_router:
                     cls.network = cls.create_network()
-                    cls.subnet = cls.create_subnet(cls.network)
+                    cls.create_subnet(cls.network)
                     cls.port = cls.create_port(cls.network)
                     cls.routers_client.add_router_interface(
                         cls.router['id'], port_id=cls.port['id'])

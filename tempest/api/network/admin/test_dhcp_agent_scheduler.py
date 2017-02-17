@@ -32,7 +32,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         # Create a network and make sure it will be hosted by a
         # dhcp agent: this is done by creating a regular port
         cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
+        cls.create_subnet(cls.network)
         cls.port = cls.create_port(cls.network)
 
     @decorators.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
