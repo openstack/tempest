@@ -128,6 +128,13 @@ class AccountClient(rest_client.RestClient):
             than the specified marker.
             DEFAULT: No Marker
 
+        prefix=[string value Y]
+            Given string value Y, return object names starting with that prefix
+
+        reverse=[boolean value Z]
+            Reverse the result order based on the boolean value Z
+            DEFAULT: False
+
         format=[string value, either 'json' or 'xml']
             Specify either json or xml to return the respective serialized
             response.
