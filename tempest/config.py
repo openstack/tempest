@@ -648,17 +648,13 @@ ValidationGroup = [
                choices=['fixed', 'floating'],
                help='Default IP type used for validation: '
                     '-fixed: uses the first IP belonging to the fixed network '
-                    '-floating: creates and uses a floating IP',
-               deprecated_opts=[cfg.DeprecatedOpt('use_floatingip_for_ssh',
-                                                  group='compute')]),
+                    '-floating: creates and uses a floating IP'),
     cfg.StrOpt('auth_method',
                default='keypair',
                choices=['keypair'],
                help='Default authentication method to the instance. '
                     'Only ssh via keypair is supported for now. '
-                    'Additional methods will be handled in a separate spec.',
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_auth_method',
-                                                  group='compute')]),
+                    'Additional methods will be handled in a separate spec.'),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
                help='Default IP version for ssh connections.'),
@@ -685,35 +681,25 @@ ValidationGroup = [
                                                   group='scenario')]),
     cfg.StrOpt('image_ssh_password',
                default="password",
-               help="Password used to authenticate to an instance.",
-               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_password',
-                                                  group='compute')]),
+               help="Password used to authenticate to an instance."),
     cfg.StrOpt('ssh_shell_prologue',
                default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
                help="Shell fragments to use before executing a command "
-                    "when sshing to a guest.",
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_shell_prologue',
-                                                  group='compute')]),
+                    "when sshing to a guest."),
     cfg.IntOpt('ping_size',
                default=56,
                help="The packet size for ping packets originating "
-                    "from remote linux hosts",
-               deprecated_opts=[cfg.DeprecatedOpt('ping_size',
-                                                  group='compute')]),
+                    "from remote linux hosts"),
     cfg.IntOpt('ping_count',
                default=1,
                help="The number of ping packets originating from remote "
-                    "linux hosts",
-               deprecated_opts=[cfg.DeprecatedOpt('ping_count',
-                                                  group='compute')]),
+                    "linux hosts"),
     cfg.StrOpt('floating_ip_range',
                default='10.0.0.0/29',
                help='Unallocated floating IP range, which will be used to '
                     'test the floating IP bulk feature for CRUD operation. '
                     'This block must not overlap an existing floating IP '
-                    'pool.',
-               deprecated_opts=[cfg.DeprecatedOpt('floating_ip_range',
-                                                  group='compute')]),
+                    'pool.'),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
