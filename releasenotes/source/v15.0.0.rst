@@ -1,0 +1,6 @@
+=====================
+v15.0.0 Release Notes
+=====================
+
+.. release-notes:: 15.0.0 Release Notes
+   :version: 15.0.0

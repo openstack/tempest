@@ -6,6 +6,7 @@
     :maxdepth: 1
 
     unreleased
+    v15.0.0
     v14.0.0
     v13.0.0
     v12.0.0
