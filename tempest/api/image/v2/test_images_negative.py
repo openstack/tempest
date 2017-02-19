@@ -98,3 +98,16 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           name='test', container_format='bare',
                           disk_format='wrong')
+
+    @test.attr(type=['negative'])
+    @decorators.idempotent_id('ab980a34-8410-40eb-872b-f264752f46e5')
+    def test_delete_protected_image(self):
+        # Create a protected image
+        image = self.create_image(protected=True)
+        self.addCleanup(self.client.update_image, image['id'],
+                        [dict(replace="/protected", value=False)])
+
+        # Try deleting the protected image
+        self.assertRaises(lib_exc.Forbidden,
+                          self.client.delete_image,
+                          image['id'])
