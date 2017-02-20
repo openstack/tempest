@@ -143,9 +143,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         @param ssh: RemoteClient ssh instance to server
         @param sid: server uuid
         """
-        ports = [p["mac_address"] for p in
-                 self._list_ports(device_id=sid,
-                                  network_id=self.network_v6['id'])]
+        ports = [
+            p["mac_address"] for p in
+            self.admin_manager.ports_client.list_ports(
+                device_id=sid, network_id=self.network_v6['id'])['ports']
+        ]
         self.assertEqual(1, len(ports),
                          message=("Multiple IPv6 ports found on network %s. "
                                   "ports: %s")

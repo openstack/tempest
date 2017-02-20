@@ -127,23 +127,23 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         via checking the result of list_[networks,routers,subnets]
         """
 
-        seen_nets = self._list_networks()
-        seen_names = [n['name'] for n in seen_nets]
-        seen_ids = [n['id'] for n in seen_nets]
+        seen_nets = self.admin_manager.networks_client.list_networks()
+        seen_names = [n['name'] for n in seen_nets['networks']]
+        seen_ids = [n['id'] for n in seen_nets['networks']]
         self.assertIn(self.network['name'], seen_names)
         self.assertIn(self.network['id'], seen_ids)
 
         if self.subnet:
-            seen_subnets = self._list_subnets()
-            seen_net_ids = [n['network_id'] for n in seen_subnets]
-            seen_subnet_ids = [n['id'] for n in seen_subnets]
+            seen_subnets = self.admin_manager.subnets_client.list_subnets()
+            seen_net_ids = [n['network_id'] for n in seen_subnets['subnets']]
+            seen_subnet_ids = [n['id'] for n in seen_subnets['subnets']]
             self.assertIn(self.network['id'], seen_net_ids)
             self.assertIn(self.subnet['id'], seen_subnet_ids)
 
         if self.router:
-            seen_routers = self._list_routers()
-            seen_router_ids = [n['id'] for n in seen_routers]
-            seen_router_names = [n['name'] for n in seen_routers]
+            seen_routers = self.admin_manager.routers_client.list_routers()
+            seen_router_ids = [n['id'] for n in seen_routers['routers']]
+            seen_router_names = [n['name'] for n in seen_routers['routers']]
             self.assertIn(self.router['name'],
                           seen_router_names)
             self.assertIn(self.router['id'],
@@ -240,7 +240,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             ip_address, private_key=private_key)
         old_nic_list = self._get_server_nics(ssh_client)
         # get a port from a list of one item
-        port_list = self._list_ports(device_id=server['id'])
+        port_list = self.admin_manager.ports_client.list_ports(
+            device_id=server['id'])['ports']
         self.assertEqual(1, len(port_list))
         old_port = port_list[0]
         interface = self.interface_client.create_interface(
@@ -253,9 +254,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                         server['id'], interface['port_id'])
 
         def check_ports():
-            self.new_port_list = [port for port in
-                                  self._list_ports(device_id=server['id'])
-                                  if port['id'] != old_port['id']]
+            self.new_port_list = [
+                port for port in
+                self.admin_manager.ports_client.list_ports(
+                    device_id=server['id'])['ports']
+                if port['id'] != old_port['id']
+            ]
             return len(self.new_port_list) == 1
 
         if not test_utils.call_until_true(
@@ -301,10 +305,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         floating_ip, server = self.floating_ip_tuple
         # get internal ports' ips:
         # get all network ports in the new network
-        internal_ips = (p['fixed_ips'][0]['ip_address'] for p in
-                        self._list_ports(tenant_id=server['tenant_id'],
-                                         network_id=network['id'])
-                        if p['device_owner'].startswith('network'))
+        internal_ips = (
+            p['fixed_ips'][0]['ip_address'] for p in
+            self.admin_manager.ports_client.list_ports(
+                tenant_id=server['tenant_id'],
+                network_id=network['id'])['ports']
+            if p['device_owner'].startswith('network')
+        )
 
         self._check_server_connectivity(floating_ip,
                                         internal_ips,
@@ -320,8 +327,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # We ping the external IP from the instance using its floating IP
         # which is always IPv4, so we must only test connectivity to
         # external IPv4 IPs if the external network is dualstack.
-        v4_subnets = [s for s in self._list_subnets(
-            network_id=CONF.network.public_network_id) if s['ip_version'] == 4]
+        v4_subnets = [
+            s for s in self.admin_manager.subnets_client.list_subnets(
+                network_id=CONF.network.public_network_id)['subnets']
+            if s['ip_version'] == 4
+        ]
         self.assertEqual(1, len(v4_subnets),
                          "Found %d IPv4 subnets" % len(v4_subnets))
 
@@ -624,7 +634,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._setup_network_and_servers()
         floating_ip, server = self.floating_ip_tuple
         server_id = server['id']
-        port_id = self._list_ports(device_id=server_id)[0]['id']
+        port_id = self.admin_manager.ports_client.list_ports(
+            device_id=server_id)['ports'][0]['id']
         server_pip = server['addresses'][self.network['name']][0]['addr']
 
         server2 = self._create_server(self.network)
@@ -677,8 +688,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                              'Server should have been created from a '
                              'pre-existing port.')
         # Assert the port is bound to the server.
-        port_list = self._list_ports(device_id=server['id'],
-                                     network_id=self.network['id'])
+        port_list = self.admin_manager.ports_client.list_ports(
+            device_id=server['id'], network_id=self.network['id'])['ports']
         self.assertEqual(1, len(port_list),
                          'There should only be one port created for '
                          'server %s.' % server['id'])
@@ -696,8 +707,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # Boot another server with the same port to make sure nothing was
         # left around that could cause issues.
         server = self._create_server(self.network, port['id'])
-        port_list = self._list_ports(device_id=server['id'],
-                                     network_id=self.network['id'])
+        port_list = self.admin_manager.ports_client.list_ports(
+            device_id=server['id'], network_id=self.network['id'])['ports']
         self.assertEqual(1, len(port_list),
                          'There should only be one port created for '
                          'server %s.' % server['id'])
@@ -727,9 +738,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         unschedule_router = (self.admin_manager.network_agents_client.
                              delete_router_from_l3_agent)
 
-        agent_list_alive = set(a["id"] for a in
-                               self._list_agents(agent_type="L3 agent") if
-                               a["alive"] is True)
+        agent_list_alive = set(
+            a["id"] for a in
+            self.admin_manager.network_agents_client.list_agents(
+                agent_type="L3 agent")['agents'] if a["alive"] is True
+        )
         self._setup_network_and_servers()
 
         # NOTE(kevinbenton): we have to use the admin credentials to check
@@ -811,8 +824,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._create_new_network()
         self._hotplug_server()
         fip, server = self.floating_ip_tuple
-        new_ports = self._list_ports(device_id=server["id"],
-                                     network_id=self.new_net["id"])
+        new_ports = self.admin_manager.ports_client.list_ports(
+            device_id=server["id"], network_id=self.new_net["id"])['ports']
         spoof_port = new_ports[0]
         private_key = self._get_server_key(server)
         ssh_client = self.get_remote_client(fip['floating_ip_address'],

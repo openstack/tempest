@@ -220,22 +220,24 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # Checks that we see the newly created network/subnet/router via
         # checking the result of list_[networks,routers,subnets]
         # Check that (router, subnet) couple exist in port_list
-        seen_nets = self._list_networks()
-        seen_names = [n['name'] for n in seen_nets]
-        seen_ids = [n['id'] for n in seen_nets]
+        seen_nets = self.admin_manager.networks_client.list_networks()
+        seen_names = [n['name'] for n in seen_nets['networks']]
+        seen_ids = [n['id'] for n in seen_nets['networks']]
 
         self.assertIn(tenant.network['name'], seen_names)
         self.assertIn(tenant.network['id'], seen_ids)
 
-        seen_subnets = [(n['id'], n['cidr'], n['network_id'])
-                        for n in self._list_subnets()]
+        seen_subnets = [
+            (n['id'], n['cidr'], n['network_id']) for n in
+            self.admin_manager.subnets_client.list_subnets()['subnets']
+        ]
         mysubnet = (tenant.subnet['id'], tenant.subnet['cidr'],
                     tenant.network['id'])
         self.assertIn(mysubnet, seen_subnets)
 
-        seen_routers = self._list_routers()
-        seen_router_ids = [n['id'] for n in seen_routers]
-        seen_router_names = [n['name'] for n in seen_routers]
+        seen_routers = self.admin_manager.routers_client.list_routers()
+        seen_router_ids = [n['id'] for n in seen_routers['routers']]
+        seen_router_names = [n['name'] for n in seen_routers['routers']]
 
         self.assertIn(tenant.router['name'], seen_router_names)
         self.assertIn(tenant.router['id'], seen_router_ids)
@@ -243,9 +245,11 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         myport = (tenant.router['id'], tenant.subnet['id'])
         router_ports = [
             (i['device_id'], f['subnet_id'])
-            for i in self._list_ports(device_id=tenant.router['id'])
+            for i in self.admin_manager.ports_client.list_ports(
+                device_id=tenant.router['id'])['ports']
             if net_info.is_router_interface_port(i)
-            for f in i['fixed_ips']]
+            for f in i['fixed_ips']
+        ]
 
         self.assertIn(myport, router_ports)
 
@@ -450,7 +454,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         mac_addr = mac_addr.strip().lower()
         # Get the fixed_ips and mac_address fields of all ports. Select
         # only those two columns to reduce the size of the response.
-        port_list = self._list_ports(fields=['fixed_ips', 'mac_address'])
+        port_list = self.admin_manager.ports_client.list_ports(
+            fields=['fixed_ips', 'mac_address'])['ports']
         port_detail_list = [
             (port['fixed_ips'][0]['subnet_id'],
              port['fixed_ips'][0]['ip_address'],
@@ -536,7 +541,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                      ip=self._get_server_ip(server),
                                      should_succeed=False)
             server_id = server['id']
-            port_id = self._list_ports(device_id=server_id)[0]['id']
+            port_id = self.admin_manager.ports_client.list_ports(
+                device_id=server_id)['ports'][0]['id']
 
             # update port with new security group and check connectivity
             self.ports_client.update_port(port_id, security_groups=[
@@ -598,7 +604,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         access_point_ssh = self._connect_to_access_point(new_tenant)
         server_id = server['id']
-        port_id = self._list_ports(device_id=server_id)[0]['id']
+        port_id = self.admin_manager.ports_client.list_ports(
+            device_id=server_id)['ports'][0]['id']
 
         # Flip the port's port security and check connectivity
         try:
@@ -642,7 +649,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         sec_groups = []
         server = self._create_server(name, tenant, sec_groups)
         server_id = server['id']
-        ports = self._list_ports(device_id=server_id)
+        ports = self.admin_manager.ports_client.list_ports(
+            device_id=server_id)['ports']
         self.assertEqual(1, len(ports))
         for port in ports:
             self.assertEmpty(port['security_groups'],
