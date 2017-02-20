@@ -153,7 +153,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
         # Should allow
         self.assertEqual(volume['snapshot_id'], src_snap['id'])
-        self.assertEqual(int(volume['size']), src_size + 1)
+        self.assertEqual(volume['size'], src_size + 1)
 
 
 class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):

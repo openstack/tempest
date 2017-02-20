@@ -43,7 +43,7 @@ class VolumesV2CloneTest(base.BaseVolumeTest):
         volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
         # Should allow
         self.assertEqual(volume['source_volid'], src_vol['id'])
-        self.assertEqual(int(volume['size']), src_size + 1)
+        self.assertEqual(volume['size'], src_size + 1)
 
     @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
     def test_create_from_bootable_volume(self):

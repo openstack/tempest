@@ -24,13 +24,13 @@ class VolumesV2ExtendTest(base.BaseVolumeTest):
     def test_volume_extend(self):
         # Extend Volume Test.
         volume = self.create_volume()
-        extend_size = int(volume['size']) + 1
+        extend_size = volume['size'] + 1
         self.volumes_client.extend_volume(volume['id'],
                                           new_size=extend_size)
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume['id'], 'available')
         volume = self.volumes_client.show_volume(volume['id'])['volume']
-        self.assertEqual(int(volume['size']), extend_size)
+        self.assertEqual(volume['size'], extend_size)
 
 
 class VolumesV1ExtendTest(VolumesV2ExtendTest):
