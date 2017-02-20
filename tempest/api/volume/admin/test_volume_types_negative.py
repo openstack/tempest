@@ -24,8 +24,8 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('b48c98f2-e662-4885-9b71-032256906314')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
-        self.name_field = self.special_fields['name_field']
-        params = {self.name_field: data_utils.rand_uuid(),
+        name_field = self.special_fields['name_field']
+        params = {name_field: data_utils.rand_uuid(),
                   'volume_type': data_utils.rand_uuid()}
         self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.create_volume, **params)

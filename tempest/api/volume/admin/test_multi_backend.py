@@ -34,7 +34,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         super(VolumeMultiBackendV2Test, cls).resource_setup()
 
         # read backend name from a list .
-        cls.backend_names = set(CONF.volume.backend_names)
+        backend_names = set(CONF.volume.backend_names)
 
         cls.name_field = cls.special_fields['name_field']
         cls.volume_id_list_with_prefix = []
@@ -42,10 +42,10 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
 
         # Volume/Type creation (uses volume_backend_name)
         # It is not allowed to create the same backend name twice
-        if len(cls.backend_names) < 2:
+        if len(backend_names) < 2:
             raise cls.skipException("Requires at least two different "
                                     "backend names")
-        for backend_name in cls.backend_names:
+        for backend_name in backend_names:
             # Volume/Type creation (uses backend_name)
             cls._create_type_and_volume(backend_name, False)
             # Volume/Type creation (uses capabilities:volume_backend_name)

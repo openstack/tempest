@@ -40,16 +40,16 @@ class VolumeRetypeWithMigrationV2Test(base.BaseVolumeAdminTest):
     def resource_setup(cls):
         super(VolumeRetypeWithMigrationV2Test, cls).resource_setup()
         # read backend name from a list.
-        cls.backend_src = CONF.volume.backend_names[0]
-        cls.backend_dst = CONF.volume.backend_names[1]
+        backend_src = CONF.volume.backend_names[0]
+        backend_dst = CONF.volume.backend_names[1]
 
-        extra_specs_src = {"volume_backend_name": cls.backend_src}
-        extra_specs_dst = {"volume_backend_name": cls.backend_dst}
+        extra_specs_src = {"volume_backend_name": backend_src}
+        extra_specs_dst = {"volume_backend_name": backend_dst}
 
-        cls.src_vol_type = cls.create_volume_type(extra_specs=extra_specs_src)
+        src_vol_type = cls.create_volume_type(extra_specs=extra_specs_src)
         cls.dst_vol_type = cls.create_volume_type(extra_specs=extra_specs_dst)
 
-        cls.src_vol = cls.create_volume(volume_type=cls.src_vol_type['name'])
+        cls.src_vol = cls.create_volume(volume_type=src_vol_type['name'])
 
     @classmethod
     def resource_cleanup(cls):
