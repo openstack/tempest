@@ -97,7 +97,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
-        for i in range(0, int(max_file_limit) + 1):
+        for i in range(0, max_file_limit + 1):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.encode_as_text(
@@ -117,7 +117,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
         person = []
-        for i in range(0, int(max_file_limit)):
+        for i in range(0, max_file_limit):
             # NOTE(andreaf) The cirros disk image is blank before boot
             # so we can only inject safely to /
             path = '/test' + str(i) + '.txt'

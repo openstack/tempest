@@ -101,7 +101,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
             # check some extensions for the flavor create/show/detail response
             self.assertEqual(flavor['swap'], '')
             self.assertEqual(int(flavor['rxtx_factor']), 1)
-            self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
+            self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'], 0)
             self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
