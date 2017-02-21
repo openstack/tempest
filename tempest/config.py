@@ -19,6 +19,7 @@ import functools
 import os
 import tempfile
 
+import debtcollector.removals
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -1191,6 +1192,8 @@ class TempestConfigProxy(object):
 CONF = TempestConfigProxy()
 
 
+@debtcollector.removals.remove(
+    message='use testtools.skipUnless instead', removal_version='Queens')
 def skip_unless_config(*args):
     """Decorator to raise a skip if a config opt doesn't exist or is False
 
@@ -1229,6 +1232,8 @@ def skip_unless_config(*args):
     return decorator
 
 
+@debtcollector.removals.remove(
+    message='use testtools.skipIf instead', removal_version='Queens')
 def skip_if_config(*args):
     """Raise a skipException if a config exists and is True
 
