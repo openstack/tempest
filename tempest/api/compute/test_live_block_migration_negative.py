@@ -31,11 +31,6 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
         if not CONF.compute_feature_enabled.live_migration:
             raise cls.skipException("Live migration is not enabled")
 
-    @classmethod
-    def setup_clients(cls):
-        super(LiveBlockMigrationNegativeTestJSON, cls).setup_clients()
-        cls.admin_servers_client = cls.os_adm.servers_client
-
     def _migrate_server_to(self, server_id, dest_host):
         bmflm = CONF.compute_feature_enabled.block_migration_for_live_migration
         self.admin_servers_client.live_migrate_server(

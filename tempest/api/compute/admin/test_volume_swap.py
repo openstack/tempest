@@ -38,12 +38,6 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
         if not CONF.compute_feature_enabled.swap_volume:
             raise cls.skipException("Swapping volumes is not supported.")
 
-    @classmethod
-    def setup_clients(cls):
-        super(TestVolumeSwap, cls).setup_clients()
-        # We need the admin client for performing the update (swap) volume call
-        cls.servers_admin_client = cls.os_adm.servers_client
-
     @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
     @test.services('volume')
     def test_volume_swap(self):
@@ -58,7 +52,7 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
         # Attach "volume1" to server
         self.attach_volume(server, volume1)
         # Swap volume from "volume1" to "volume2"
-        self.servers_admin_client.update_attached_volume(
+        self.admin_servers_client.update_attached_volume(
             server['id'], volume1['id'], volumeId=volume2['id'])
         waiters.wait_for_volume_status(self.volumes_client,
                                        volume1['id'], 'available')
