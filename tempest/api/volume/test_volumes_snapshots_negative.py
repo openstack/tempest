@@ -47,6 +47,7 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           self.snapshots_client.create_snapshot,
                           volume_id=None, display_name=s_name)
 
+    @test.attr(type=['negative'])
     @decorators.idempotent_id('677863d1-34f9-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot_decreasing_size(self):
         # Creates a volume a snapshot passing a size different from the source
