@@ -104,7 +104,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _setup_network_and_servers(self, **kwargs):
         boot_with_port = kwargs.pop('boot_with_port', False)
-        self.security_group = self._create_security_group()
         self.network, self.subnet, self.router = self.create_networks(**kwargs)
         self.check_networks()
 
@@ -152,7 +151,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _create_server(self, network, port_id=None):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
-        security_groups = [{'name': self.security_group['name']}]
+        security_groups = [
+            {'name': self._create_security_group()['name']}
+        ]
         network = {'uuid': network['id']}
         if port_id is not None:
             network['port'] = port_id
