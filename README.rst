@@ -263,9 +263,7 @@ To run one single test serially ::
 
     $ testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
 
-Alternatively, you can use the run_tempest.sh script which will create a venv
-and run the tests or use tox to do the same. Tox also contains several existing
-job configurations. For example::
+Tox also contains several existing job configurations. For example::
 
     $ tox -efull
 
