@@ -21,6 +21,7 @@ from tempest.api.compute import base
 from tempest.common import image as common_image
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -43,7 +44,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
 
     @test.attr(type=['negative'])
     @test.services('image')
-    @test.idempotent_id('90f0d93a-91c1-450c-91e6-07d18172cefe')
+    @decorators.idempotent_id('90f0d93a-91c1-450c-91e6-07d18172cefe')
     def test_boot_with_low_ram(self):
         """Try boot a vm with lower than min ram
 

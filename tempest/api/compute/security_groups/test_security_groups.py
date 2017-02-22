@@ -145,7 +145,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(s_new_name, fetched_group['name'])
         self.assertEqual(s_new_des, fetched_group['description'])
 
-    @test.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
+    @decorators.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
     @test.services('network')
     def test_list_security_groups_by_server(self):
         # Create a couple security groups that we will use
