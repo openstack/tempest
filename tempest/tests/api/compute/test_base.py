@@ -48,10 +48,14 @@ class TestBaseV2ComputeTest(base.TestCase):
 
     @mock.patch.multiple(compute_base.BaseV2ComputeTest,
                          compute_images_client=mock.DEFAULT,
+                         servers_client=mock.DEFAULT,
                          images=[], create=True)
     @mock.patch.object(waiters, 'wait_for_image_status')
+    @mock.patch.object(waiters, 'wait_for_server_status')
     def test_create_image_from_server_wait_until_active(self,
+                                                        wait_for_server_status,
                                                         wait_for_image_status,
+                                                        servers_client,
                                                         compute_images_client):
         """Tests create_image_from_server with wait_until='ACTIVE' kwarg."""
         # setup mocks
@@ -67,6 +71,35 @@ class TestBaseV2ComputeTest(base.TestCase):
         # make our assertions
         wait_for_image_status.assert_called_once_with(
             compute_images_client, image_id, 'ACTIVE')
+        wait_for_server_status.assert_called_once_with(
+            servers_client, mock.sentinel.server_id, 'ACTIVE')
+        compute_images_client.show_image.assert_called_once_with(image_id)
+
+    @mock.patch.multiple(compute_base.BaseV2ComputeTest,
+                         compute_images_client=mock.DEFAULT,
+                         servers_client=mock.DEFAULT,
+                         images=[], create=True)
+    @mock.patch.object(waiters, 'wait_for_image_status')
+    @mock.patch.object(waiters, 'wait_for_server_status')
+    def test_create_image_from_server_wait_until_active_no_server_wait(
+            self, wait_for_server_status, wait_for_image_status,
+            servers_client, compute_images_client):
+        """Tests create_image_from_server with wait_until='ACTIVE' kwarg."""
+        # setup mocks
+        image_id = uuidutils.generate_uuid()
+        fake_image = mock.Mock(response={'location': image_id})
+        compute_images_client.create_image.return_value = fake_image
+        compute_images_client.show_image.return_value = (
+            {'image': fake_image})
+        # call the utility method
+        image = compute_base.BaseV2ComputeTest.create_image_from_server(
+            mock.sentinel.server_id, wait_until='ACTIVE',
+            wait_for_server=False)
+        self.assertEqual(fake_image, image)
+        # make our assertions
+        wait_for_image_status.assert_called_once_with(
+            compute_images_client, image_id, 'ACTIVE')
+        self.assertEqual(0, wait_for_server_status.call_count)
         compute_images_client.show_image.assert_called_once_with(image_id)
 
     @mock.patch.multiple(compute_base.BaseV2ComputeTest,
