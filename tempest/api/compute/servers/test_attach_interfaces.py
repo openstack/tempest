@@ -79,7 +79,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _check_interface(self, iface, port_id=None, network_id=None,
                          fixed_ip=None, mac_addr=None):
-        self.assertIn('port_state', iface)
         if port_id:
             self.assertEqual(iface['port_id'], port_id)
         if network_id:
