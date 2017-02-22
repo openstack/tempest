@@ -54,10 +54,10 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
         # Swap volume from "volume1" to "volume2"
         self.admin_servers_client.update_attached_volume(
             server['id'], volume1['id'], volumeId=volume2['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume1['id'], 'available')
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume2['id'], 'in-use')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume1['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume2['id'], 'in-use')
         self.addCleanup(self.servers_client.detach_volume,
                         server['id'], volume2['id'])
         # Verify "volume2" is attached to the server

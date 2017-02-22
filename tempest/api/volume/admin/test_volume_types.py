@@ -58,14 +58,14 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          "to the requested name")
         self.assertIsNotNone(volume['id'],
                              "Field volume id is empty or not found.")
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Update volume with new volume_type
         self.volumes_client.retype_volume(volume['id'],
                                           new_type=volume_types[1]['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Get volume details and Verify
         fetched_volume = self.volumes_client.show_volume(

@@ -41,8 +41,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         volume = self.volumes_client.create_volume(**kwargs)['volume']
         self.assertIn('id', volume)
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client, volume['id'],
-                                       'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.assertIn(name_field, volume)
         self.assertEqual(volume[name_field], v_name,
                          "The created volume name is not equal "
@@ -106,8 +106,8 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.assertIn('id', new_volume)
         self.addCleanup(self.delete_volume, self.volumes_client,
                         new_volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       new_volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                new_volume['id'], 'available')
 
         params = {name_field: volume[name_field],
                   descrip_field: volume[descrip_field]}

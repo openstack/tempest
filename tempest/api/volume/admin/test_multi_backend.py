@@ -74,8 +74,8 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         else:
             cls.volume_id_list_without_prefix.append(
                 cls.volume['id'])
-        waiters.wait_for_volume_status(cls.admin_volume_client,
-                                       cls.volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(cls.admin_volume_client,
+                                                cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):

@@ -60,11 +60,11 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                                   instance_uuid=server['id'],
                                   mountpoint='/dev/%s' %
                                              CONF.compute.volume_device_name)
-        waiters.wait_for_volume_status(self.client,
-                                       self.volume['id'], 'in-use')
+        waiters.wait_for_volume_resource_status(self.client,
+                                                self.volume['id'], 'in-use')
         self.client.detach_volume(self.volume['id'])
-        waiters.wait_for_volume_status(self.client,
-                                       self.volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.client,
+                                                self.volume['id'], 'available')
 
     @decorators.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
     def test_volume_bootable(self):
@@ -91,11 +91,10 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                                   instance_uuid=server['id'],
                                   mountpoint='/dev/%s' %
                                              CONF.compute.volume_device_name)
-        waiters.wait_for_volume_status(self.client,
-                                       self.volume['id'], 'in-use')
-        self.addCleanup(waiters.wait_for_volume_status, self.client,
-                        self.volume['id'],
-                        'available')
+        waiters.wait_for_volume_resource_status(self.client, self.volume['id'],
+                                                'in-use')
+        self.addCleanup(waiters.wait_for_volume_resource_status, self.client,
+                        self.volume['id'], 'available')
         self.addCleanup(self.client.detach_volume, self.volume['id'])
         volume = self.client.show_volume(self.volume['id'])['volume']
         self.assertIn('attachments', volume)
@@ -124,8 +123,8 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                         self.image_client.delete_image,
                         image_id)
         waiters.wait_for_image_status(self.image_client, image_id, 'active')
-        waiters.wait_for_volume_status(self.client,
-                                       self.volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.client,
+                                                self.volume['id'], 'available')
 
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):

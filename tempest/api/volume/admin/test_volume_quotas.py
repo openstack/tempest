@@ -146,7 +146,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
             transfer_id, auth_key=auth_key)['transfer']
 
         # Verify volume transferred is available
-        waiters.wait_for_volume_status(
+        waiters.wait_for_volume_resource_status(
             self.alt_client, volume['id'], 'available')
 
         # List of tenants quota usage post transfer

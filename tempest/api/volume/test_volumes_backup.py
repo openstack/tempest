@@ -40,11 +40,11 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.addCleanup(self.volumes_client.delete_volume,
                         restored_volume['volume_id'])
         self.assertEqual(backup_id, restored_volume['backup_id'])
-        waiters.wait_for_backup_status(self.backups_client,
-                                       backup_id, 'available')
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       restored_volume['volume_id'],
-                                       'available')
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup_id, 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                restored_volume['volume_id'],
+                                                'available')
         return restored_volume
 
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
@@ -60,8 +60,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
                                     name=backup_name,
                                     description=description)
         self.assertEqual(backup_name, backup['name'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Get a given backup
         backup = self.backups_client.show_backup(backup['id'])['backup']

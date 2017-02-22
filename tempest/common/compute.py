@@ -124,8 +124,9 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                   'imageRef': image_id,
                   'size': CONF.volume.volume_size}
         volume = volumes_client.create_volume(**params)
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['volume']['id'], 'available')
+        waiters.wait_for_volume_resource_status(volumes_client,
+                                                volume['volume']['id'],
+                                                'available')
 
         bd_map_v2 = [{
             'uuid': volume['volume']['id'],

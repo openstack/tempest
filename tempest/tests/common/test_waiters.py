@@ -66,7 +66,7 @@ class TestImageWaiters(base.TestCase):
         client.show_volume = mock_show
         volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
         self.assertRaises(exceptions.VolumeRestoreErrorException,
-                          waiters.wait_for_volume_status,
+                          waiters.wait_for_volume_resource_status,
                           client, volume_id, 'available')
         mock_show.assert_has_calls([mock.call(volume_id),
                                     mock.call(volume_id)])

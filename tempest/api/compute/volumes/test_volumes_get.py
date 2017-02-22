@@ -57,7 +57,8 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.assertIsNotNone(volume['id'],
                              "Field volume id is empty or not found.")
         # Wait for Volume status to become ACTIVE
-        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.client, volume['id'],
+                                                'available')
         # GET Volume
         fetched_volume = self.client.show_volume(volume['id'])['volume']
         # Verification of details of fetched Volume

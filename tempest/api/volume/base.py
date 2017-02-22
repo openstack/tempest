@@ -131,8 +131,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.volumes.append(volume)
-        waiters.wait_for_volume_status(cls.volumes_client, volume['id'],
-                                       wait_until)
+        waiters.wait_for_volume_resource_status(cls.volumes_client,
+                                                volume['id'], wait_until)
         return volume
 
     @classmethod
@@ -146,8 +146,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
         cls.snapshots.append(snapshot)
-        waiters.wait_for_snapshot_status(cls.snapshots_client,
-                                         snapshot['id'], 'available')
+        waiters.wait_for_volume_resource_status(cls.snapshots_client,
+                                                snapshot['id'], 'available')
         return snapshot
 
     def create_backup(self, volume_id, backup_client=None, **kwargs):
@@ -158,8 +158,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         backup = backup_client.create_backup(
             volume_id=volume_id, **kwargs)['backup']
         self.addCleanup(backup_client.delete_backup, backup['id'])
-        waiters.wait_for_backup_status(backup_client, backup['id'],
-                                       'available')
+        waiters.wait_for_volume_resource_status(backup_client, backup['id'],
+                                                'available')
         return backup
 
     # NOTE(afazekas): these create_* and clean_* could be defined
@@ -182,10 +182,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         self.servers_client.attach_volume(
             server_id, volumeId=volume_id,
             device='/dev/%s' % CONF.compute.volume_device_name)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume_id, 'in-use')
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        volume_id, 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'in-use')
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client, volume_id, 'available')
         self.addCleanup(self.servers_client.detach_volume, server_id,
                         volume_id)
 

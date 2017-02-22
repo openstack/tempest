@@ -410,8 +410,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             kwargs['imageRef'] = image_ref
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.volumes.append(volume)
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(cls.volumes_client,
+                                                volume['id'], 'available')
         return volume
 
     @classmethod
@@ -450,15 +450,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # On teardown detach the volume and wait for it to be available. This
         # is so we don't error out when trying to delete the volume during
         # teardown.
-        self.addCleanup(waiters.wait_for_volume_status,
+        self.addCleanup(waiters.wait_for_volume_resource_status,
                         self.volumes_client, volume['id'], 'available')
         # Ignore 404s on detach in case the server is deleted or the volume
         # is already detached.
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.servers_client.detach_volume,
                         server['id'], volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'in-use')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'in-use')
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):

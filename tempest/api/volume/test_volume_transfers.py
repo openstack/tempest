@@ -43,8 +43,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
             volume_id=volume['id'])['transfer']
         transfer_id = transfer['id']
         auth_key = transfer['auth_key']
-        waiters.wait_for_volume_status(self.client,
-                                       volume['id'], 'awaiting-transfer')
+        waiters.wait_for_volume_resource_status(
+            self.client, volume['id'], 'awaiting-transfer')
 
         # Get a volume transfer
         body = self.client.show_volume_transfer(transfer_id)['transfer']
@@ -58,8 +58,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
-        waiters.wait_for_volume_status(self.alt_client,
-                                       volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(self.alt_client,
+                                                volume['id'], 'available')
 
     @decorators.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
@@ -71,8 +71,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         body = self.client.create_volume_transfer(
             volume_id=volume['id'])['transfer']
         transfer_id = body['id']
-        waiters.wait_for_volume_status(self.client,
-                                       volume['id'], 'awaiting-transfer')
+        waiters.wait_for_volume_resource_status(
+            self.client, volume['id'], 'awaiting-transfer')
 
         # List all volume transfers (looking for the one we created)
         body = self.client.list_volume_transfers()['transfers']
@@ -84,7 +84,8 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
 
         # Delete a volume transfer
         self.client.delete_volume_transfer(transfer_id)
-        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(
+            self.client, volume['id'], 'available')
 
 
 class VolumesV1TransfersTest(VolumesV2TransfersTest):
