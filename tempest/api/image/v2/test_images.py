@@ -164,7 +164,6 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         cls.client.store_image_file(image['id'], data=image_file)
         # Keep the data of one test image so it can be used to filter lists
         cls.test_data = image
-        cls.test_data['size'] = size
 
         return image['id']
 
