@@ -75,31 +75,15 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     @test.services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
-        instance = self.create_server()
-        instance_id = instance['id']
-        LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, instance['status'])
-        self.servers_client.suspend_server(instance_id)
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'SUSPENDED')
-        fetched_instance = (self.servers_client.show_server(instance_id)
-                            ['server'])
-        LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, fetched_instance['status'])
-        self.servers_client.resume_server(instance_id)
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'ACTIVE')
-        fetched_instance = (self.servers_client.show_server(instance_id)
-                            ['server'])
-        LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, fetched_instance['status'])
-        self.servers_client.suspend_server(instance_id)
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'SUSPENDED')
-        fetched_instance = (self.servers_client.show_server(instance_id)
-                            ['server'])
-        LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, fetched_instance['status'])
-        self.servers_client.resume_server(instance_id)
-        waiters.wait_for_server_status(self.servers_client, instance_id,
-                                       'ACTIVE')
+        instance_id = self.create_server()['id']
+
+        for _ in range(2):
+            LOG.debug("Suspending instance %s", instance_id)
+            self.servers_client.suspend_server(instance_id)
+            waiters.wait_for_server_status(self.servers_client, instance_id,
+                                           'SUSPENDED')
+
+            LOG.debug("Resuming instance %s", instance_id)
+            self.servers_client.resume_server(instance_id)
+            waiters.wait_for_server_status(self.servers_client, instance_id,
+                                           'ACTIVE')
