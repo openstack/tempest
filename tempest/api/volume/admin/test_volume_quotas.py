@@ -114,7 +114,7 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         volume_default = quota_set_default['volumes']
 
         self.admin_quotas_client.update_quota_set(
-            project_id, volumes=(int(volume_default) + 5))
+            project_id, volumes=(volume_default + 5))
 
         self.admin_quotas_client.delete_quota_set(project_id)
         quota_set_new = (self.admin_quotas_client.show_quota_set(project_id)

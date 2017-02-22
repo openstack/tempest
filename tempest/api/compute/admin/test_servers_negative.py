@@ -66,7 +66,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_id = self._get_unused_flavor_id()
         quota_set = self.quotas_client.show_quota_set(
             self.tenant_id)['quota_set']
-        ram = int(quota_set['ram'])
+        ram = quota_set['ram']
         if ram == -1:
             raise self.skipException("ram quota set is -1,"
                                      " cannot test overlimit")
@@ -94,7 +94,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_id = self._get_unused_flavor_id()
         quota_set = self.quotas_client.show_quota_set(
             self.tenant_id)['quota_set']
-        vcpus = int(quota_set['cores'])
+        vcpus = quota_set['cores']
         if vcpus == -1:
             raise self.skipException("cores quota set is -1,"
                                      " cannot test overlimit")
