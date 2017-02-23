@@ -73,7 +73,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html?expanded=#bulk-create-ports
+        http://developer.openstack.org/api-ref/networking/v2/index.html#bulk-create-ports
         """
         uri = '/ports'
         return self.create_resource(uri, kwargs)
