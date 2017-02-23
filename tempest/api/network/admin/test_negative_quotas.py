@@ -39,6 +39,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 
+    @test.attr(type=['negative'])
     @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
     def test_network_quota_exceeding(self):
         # Set the network quota to two
