@@ -26,6 +26,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     Add and remove Flavor Access require admin privileges.
     """
 
+    credentials = ['primary', 'admin', 'alt']
+
     @classmethod
     def skip_checks(cls):
         super(FlavorsAccessNegativeTestJSON, cls).skip_checks()
@@ -151,4 +153,4 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.admin_flavors_client.remove_flavor_access,
                           new_flavor['id'],
-                          data_utils.rand_uuid())
+                          self.os_alt.servers_client.tenant_id)
