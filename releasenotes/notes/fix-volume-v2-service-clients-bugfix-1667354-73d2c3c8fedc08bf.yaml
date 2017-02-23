@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix below volume v2 service clients to make v2 API call: Bug#1667354
+
+    - SchedulerStatsClient
+    - CapabilitiesClient
