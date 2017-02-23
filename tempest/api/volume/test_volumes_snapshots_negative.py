@@ -62,6 +62,13 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
                           size=src_size - 1,
                           snapshot_id=src_snap['id'])
 
+    @test.attr(type=['negative'])
+    @decorators.idempotent_id('8fd92339-e22f-4591-86b4-1e2215372a40')
+    def test_list_snapshot_invalid_param_limit(self):
+        self.assertRaises(lib_exc.BadRequest,
+                          self.snapshots_client.list_snapshots,
+                          limit='invalid')
+
 
 class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
     _api_version = 1
