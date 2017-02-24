@@ -731,36 +731,6 @@ class NetworkScenarioTest(ScenarioTest):
                         network['id'])
         return network
 
-    def _list_networks(self, *args, **kwargs):
-        """List networks using admin creds """
-        networks_list = self.admin_manager.networks_client.list_networks(
-            *args, **kwargs)
-        return networks_list['networks']
-
-    def _list_subnets(self, *args, **kwargs):
-        """List subnets using admin creds """
-        subnets_list = self.admin_manager.subnets_client.list_subnets(
-            *args, **kwargs)
-        return subnets_list['subnets']
-
-    def _list_routers(self, *args, **kwargs):
-        """List routers using admin creds """
-        routers_list = self.admin_manager.routers_client.list_routers(
-            *args, **kwargs)
-        return routers_list['routers']
-
-    def _list_ports(self, *args, **kwargs):
-        """List ports using admin creds """
-        ports_list = self.admin_manager.ports_client.list_ports(
-            *args, **kwargs)
-        return ports_list['ports']
-
-    def _list_agents(self, *args, **kwargs):
-        """List agents using admin creds """
-        agents_list = self.admin_manager.network_agents_client.list_agents(
-            *args, **kwargs)
-        return agents_list['agents']
-
     def _create_subnet(self, network, subnets_client=None,
                        routers_client=None, namestart='subnet-smoke',
                        **kwargs):
@@ -779,7 +749,8 @@ class NetworkScenarioTest(ScenarioTest):
             :returns: True if subnet with cidr already exist in tenant
                   False else
             """
-            cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
+            cidr_in_use = self.admin_manager.subnets_client.list_subnets(
+                tenant_id=tenant_id, cidr=cidr)['subnets']
             return len(cidr_in_use) != 0
 
         ip_version = kwargs.pop('ip_version', 4)
@@ -827,7 +798,8 @@ class NetworkScenarioTest(ScenarioTest):
         return subnet
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        ports = self._list_ports(device_id=server['id'], fixed_ip=ip_addr)
+        ports = self.admin_manager.ports_client.list_ports(
+            device_id=server['id'], fixed_ip=ip_addr)['ports']
         # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
@@ -856,7 +828,8 @@ class NetworkScenarioTest(ScenarioTest):
         return port_map[0]
 
     def _get_network_by_name(self, network_name):
-        net = self._list_networks(name=network_name)
+        net = self.admin_manager.networks_client.list_networks(
+            name=network_name)['networks']
         self.assertNotEqual(len(net), 0,
                             "Unable to get network by name: %s" % network_name)
         return net[0]
