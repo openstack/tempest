@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
+
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -95,8 +97,12 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
-        # Create a snapshot
-        snapshot = self.create_snapshot(self.volume_origin['id'])
+        # Create a snapshot with metadata
+        metadata = {"snap-meta1": "value1",
+                    "snap-meta2": "value2",
+                    "snap-meta3": "value3"}
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        metadata=metadata)
 
         # Get the snap and check for some of its details
         snap_get = self.snapshots_client.show_snapshot(
@@ -104,6 +110,10 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
+
+        # Verify snapshot metadata
+        self.assertThat(snap_get['metadata'].items(),
+                        matchers.ContainsAll(metadata.items()))
 
         # Compare also with the output from the list action
         tracking_data = (snapshot['id'], snapshot[self.name_field])
