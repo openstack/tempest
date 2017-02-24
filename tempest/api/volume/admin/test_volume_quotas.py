@@ -32,6 +32,12 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         cls.demo_tenant_id = cls.os.credentials.tenant_id
         cls.alt_client = cls.os_alt.volumes_client
 
+    @classmethod
+    def setup_clients(cls):
+        super(BaseVolumeQuotasAdminTestJSON, cls).setup_clients()
+        cls.transfer_client = cls.os.volume_transfers_v2_client
+        cls.alt_transfer_client = cls.os_alt.volume_transfers_v2_client
+
     @decorators.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
         quotas = (self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
@@ -136,13 +142,13 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
             self.alt_client.tenant_id, params={'usage': True})['quota_set']
 
         # Creates a volume transfer
-        transfer = self.volumes_client.create_volume_transfer(
+        transfer = self.transfer_client.create_volume_transfer(
             volume_id=volume['id'])['transfer']
         transfer_id = transfer['id']
         auth_key = transfer['auth_key']
 
         # Accepts a volume transfer
-        self.alt_client.accept_volume_transfer(
+        self.alt_transfer_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
 
         # Verify volume transferred is available

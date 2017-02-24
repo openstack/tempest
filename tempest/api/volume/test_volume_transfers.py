@@ -28,15 +28,18 @@ class VolumesTransfersTest(base.BaseVolumeTest):
     def setup_clients(cls):
         super(VolumesTransfersTest, cls).setup_clients()
 
-        cls.client = cls.volumes_client
-        cls.alt_client = cls.os_alt.volumes_client
-        cls.adm_client = cls.os_adm.volumes_client
+        cls.client = cls.os.volume_transfers_v2_client
+        cls.alt_client = cls.os_alt.volume_transfers_v2_client
+        cls.alt_volumes_client = cls.os_alt.volumes_v2_client
+        cls.adm_volumes_client = cls.os_adm.volumes_v2_client
 
     @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.adm_volumes_client,
+                        volume['id'])
 
         # Create a volume transfer
         transfer = self.client.create_volume_transfer(
@@ -44,7 +47,7 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         transfer_id = transfer['id']
         auth_key = transfer['auth_key']
         waiters.wait_for_volume_resource_status(
-            self.client, volume['id'], 'awaiting-transfer')
+            self.volumes_client, volume['id'], 'awaiting-transfer')
 
         # Get a volume transfer
         body = self.client.show_volume_transfer(transfer_id)['transfer']
@@ -58,21 +61,23 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
-        waiters.wait_for_volume_resource_status(self.alt_client,
+        waiters.wait_for_volume_resource_status(self.alt_volumes_client,
                                                 volume['id'], 'available')
 
     @decorators.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.adm_volumes_client,
+                        volume['id'])
 
         # Create a volume transfer
         body = self.client.create_volume_transfer(
             volume_id=volume['id'])['transfer']
         transfer_id = body['id']
         waiters.wait_for_volume_resource_status(
-            self.client, volume['id'], 'awaiting-transfer')
+            self.volumes_client, volume['id'], 'awaiting-transfer')
 
         # List all volume transfers (looking for the one we created)
         body = self.client.list_volume_transfers()['transfers']
@@ -85,4 +90,4 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # Delete a volume transfer
         self.client.delete_volume_transfer(transfer_id)
         waiters.wait_for_volume_resource_status(
-            self.client, volume['id'], 'available')
+            self.volumes_client, volume['id'], 'available')
