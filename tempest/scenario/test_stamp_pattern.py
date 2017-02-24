@@ -88,6 +88,7 @@ class TestStampPattern(manager.ScenarioTest):
                                           CONF.compute.build_interval):
             raise lib_exc.TimeoutException
 
+    @decorators.skip_because(bug="1664793")
     @decorators.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
