@@ -43,9 +43,7 @@ class QosSpecsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/index.html
-                                ?expanded=create-qos-specification-detail
-                                #quality-of-service-qos-specifications-qos-specs
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-qos-specification
         """
         post_body = json.dumps({'qos_specs': kwargs})
         resp, body = self.post('qos-specs', post_body)
@@ -81,9 +79,7 @@ class QosSpecsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/index.html
-                            ?expanded=set-keys-in-qos-specification-detail
-                            #quality-of-service-qos-specifications-qos-specs
+        http://developer.openstack.org/api-ref/block-storage/v2/#set-keys-in-qos-specification
         """
         put_body = json.dumps({"qos_specs": kwargs})
         resp, body = self.put('qos-specs/%s' % qos_id, put_body)
@@ -98,9 +94,7 @@ class QosSpecsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/index.html
-                            ?expanded=unset-keys-in-qos-specification-detail
-                            #quality-of-service-qos-specifications-qos-specs
+        http://developer.openstack.org/api-ref/block-storage/v2/#unset-keys-in-qos-specification
         """
         put_body = json.dumps({'keys': keys})
         resp, body = self.put('qos-specs/%s/delete_keys' % qos_id, put_body)
