@@ -43,16 +43,13 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
     def _get_bdm(self, source_id, source_type, delete_on_termination=False):
-        # NOTE(gfidente): the syntax for block_device_mapping is
-        # dev_name=id:type:size:delete_on_terminate
-        # where type needs to be "snap" if the server is booted
-        # from a snapshot, size instead can be safely left empty
-
-        bd_map = [{
-            'device_name': 'vda',
-            '{}_id'.format(source_type): source_id,
-            'delete_on_termination': str(int(delete_on_termination))}]
-        return {'block_device_mapping': bd_map}
+        bd_map_v2 = [{
+            'uuid': source_id,
+            'source_type': source_type,
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': delete_on_termination}]
+        return {'block_device_mapping_v2': bd_map_v2}
 
     def _boot_instance_from_resource(self, source_id,
                                      source_type,
@@ -236,14 +233,3 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
         # delete instance
         self._delete_server(instance)
-
-
-class TestVolumeBootPatternV2(TestVolumeBootPattern):
-    def _get_bdm(self, source_id, source_type, delete_on_termination=False):
-        bd_map_v2 = [{
-            'uuid': source_id,
-            'source_type': source_type,
-            'destination_type': 'volume',
-            'boot_index': 0,
-            'delete_on_termination': delete_on_termination}]
-        return {'block_device_mapping_v2': bd_map_v2}
