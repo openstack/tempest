@@ -33,6 +33,16 @@ class TestSubunitDescribeCalls(base.TestCase):
         p.communicate()
         self.assertEqual(0, p.returncode)
 
+    def test_return_code_no_output(self):
+        subunit_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'sample_streams/calls.subunit')
+        p = subprocess.Popen([
+            'subunit-describe-calls', '-s', subunit_file],
+            stdin=subprocess.PIPE)
+        p.communicate()
+        self.assertEqual(0, p.returncode)
+
     def test_parse(self):
         subunit_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
