@@ -294,7 +294,8 @@ def output(url_parser, output_file):
             outfile.write(json.dumps(url_parser.test_logs))
         return
 
-    for test_name, items in url_parser.test_logs.iteritems():
+    for test_name in url_parser.test_logs:
+        items = url_parser.test_logs[test_name]
         sys.stdout.write('{0}\n'.format(test_name))
         if not items:
             sys.stdout.write('\n')
