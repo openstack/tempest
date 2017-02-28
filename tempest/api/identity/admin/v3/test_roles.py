@@ -306,3 +306,66 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles_ids = [assignment['role']['id']
                      for assignment in role_assignments]
         self.assertIn(self.roles[0]['id'], roles_ids)
+
+    @decorators.idempotent_id('d92a41d2-5501-497a-84bb-6e294330e8f8')
+    def test_domain_roles_create_delete(self):
+        domain_role = self.roles_client.create_role(
+            name=data_utils.rand_name('domain_role'),
+            domain_id=self.domain['id'])['role']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.roles_client.delete_role,
+            domain_role['id'])
+
+        domain_roles = self.roles_client.list_roles(
+            domain_id=self.domain['id'])['roles']
+        self.assertEqual(1, len(domain_roles))
+        self.assertIn(domain_role, domain_roles)
+
+        self.roles_client.delete_role(domain_role['id'])
+        domain_roles = self.roles_client.list_roles(
+            domain_id=self.domain['id'])['roles']
+        self.assertEmpty(domain_roles)
+
+    @decorators.idempotent_id('eb1e1c24-1bc4-4d47-9748-e127a1852c82')
+    def test_implied_domain_roles(self):
+        # Create two roles in the same domain
+        domain_role1 = self.setup_test_role(domain_id=self.domain['id'])
+        domain_role2 = self.setup_test_role(domain_id=self.domain['id'])
+
+        # Check if we can create an inference rule from roles in the same
+        # domain
+        self._create_implied_role(domain_role1['id'], domain_role2['id'])
+
+        # Create another role in a different domain
+        domain2 = self.setup_test_domain()
+        domain_role3 = self.setup_test_role(domain_id=domain2['id'])
+
+        # Check if we can create cross domain implied roles
+        self._create_implied_role(domain_role1['id'], domain_role3['id'])
+
+        # Finally, we also should be able to create an implied from a
+        # domain role to a global one
+        self._create_implied_role(domain_role1['id'], self.role['id'])
+
+    @decorators.idempotent_id('3859df7e-5b78-4e4d-b10e-214c8953842a')
+    def test_assignments_for_domain_roles(self):
+        domain_role = self.setup_test_role(domain_id=self.domain['id'])
+
+        # Create a grant using "domain_role"
+        self.roles_client.create_user_role_on_project(
+            self.project['id'], self.user_body['id'], domain_role['id'])
+        self.addCleanup(
+            self.roles_client.delete_role_from_user_on_project,
+            self.project['id'], self.user_body['id'], domain_role['id'])
+
+        # NOTE(rodrigods): Regular roles would appear in the effective
+        # list of role assignments (meaning the role would be returned in
+        # a token) as a result from the grant above. This is not the case
+        # for domain roles, they should not appear in the effective role
+        # assignments list.
+        params = {'scope.project.id': self.project['id'],
+                  'user.id': self.user_body['id']}
+        role_assignments = self.role_assignments.list_role_assignments(
+            effective=True, **params)['role_assignments']
+        self.assertEmpty(role_assignments)
