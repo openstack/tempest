@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -49,108 +48,69 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('0621c53e-d45d-40e7-951d-43e5e257b272')
     def test_flavor_access_list_with_public_flavor(self):
         # Test to list flavor access with exceptions by querying public flavor
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-        new_flavor = self.admin_flavors_client.create_flavor(
-            name=flavor_name,
-            ram=self.ram, vcpus=self.vcpus,
-            disk=self.disk,
-            id=new_flavor_id,
-            is_public='True')['flavor']
-        self.addCleanup(self.admin_flavors_client.delete_flavor,
-                        new_flavor['id'])
+        flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
+                                    disk=self.disk, is_public='True')
         self.assertRaises(lib_exc.NotFound,
                           self.admin_flavors_client.list_flavor_access,
-                          new_flavor_id)
+                          flavor['id'])
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('41eaaade-6d37-4f28-9c74-f21b46ca67bd')
     def test_flavor_non_admin_add(self):
         # Test to add flavor access as a user without admin privileges.
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-        new_flavor = self.admin_flavors_client.create_flavor(
-            name=flavor_name,
-            ram=self.ram, vcpus=self.vcpus,
-            disk=self.disk,
-            id=new_flavor_id,
-            is_public='False')['flavor']
-        self.addCleanup(self.admin_flavors_client.delete_flavor,
-                        new_flavor['id'])
+        flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
+                                    disk=self.disk, is_public='False')
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.add_flavor_access,
-                          new_flavor['id'],
+                          flavor['id'],
                           self.tenant_id)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('073e79a6-c311-4525-82dc-6083d919cb3a')
     def test_flavor_non_admin_remove(self):
         # Test to remove flavor access as a user without admin privileges.
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-        new_flavor = self.admin_flavors_client.create_flavor(
-            name=flavor_name,
-            ram=self.ram, vcpus=self.vcpus,
-            disk=self.disk,
-            id=new_flavor_id,
-            is_public='False')['flavor']
-        self.addCleanup(self.admin_flavors_client.delete_flavor,
-                        new_flavor['id'])
+        flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
+                                    disk=self.disk, is_public='False')
+
         # Add flavor access to a tenant.
-        self.admin_flavors_client.add_flavor_access(new_flavor['id'],
+        self.admin_flavors_client.add_flavor_access(flavor['id'],
                                                     self.tenant_id)
         self.addCleanup(self.admin_flavors_client.remove_flavor_access,
-                        new_flavor['id'], self.tenant_id)
+                        flavor['id'], self.tenant_id)
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.remove_flavor_access,
-                          new_flavor['id'],
+                          flavor['id'],
                           self.tenant_id)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('f3592cc0-0306-483c-b210-9a7b5346eddc')
     def test_add_flavor_access_duplicate(self):
         # Create a new flavor.
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-        new_flavor = self.admin_flavors_client.create_flavor(
-            name=flavor_name,
-            ram=self.ram, vcpus=self.vcpus,
-            disk=self.disk,
-            id=new_flavor_id,
-            is_public='False')['flavor']
-        self.addCleanup(self.admin_flavors_client.delete_flavor,
-                        new_flavor['id'])
+        flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
+                                    disk=self.disk, is_public='False')
 
         # Add flavor access to a tenant.
-        self.admin_flavors_client.add_flavor_access(new_flavor['id'],
+        self.admin_flavors_client.add_flavor_access(flavor['id'],
                                                     self.tenant_id)
         self.addCleanup(self.admin_flavors_client.remove_flavor_access,
-                        new_flavor['id'], self.tenant_id)
+                        flavor['id'], self.tenant_id)
 
         # An exception should be raised when adding flavor access to the same
         # tenant
         self.assertRaises(lib_exc.Conflict,
                           self.admin_flavors_client.add_flavor_access,
-                          new_flavor['id'],
+                          flavor['id'],
                           self.tenant_id)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('1f710927-3bc7-4381-9f82-0ca6e42644b7')
     def test_remove_flavor_access_not_found(self):
         # Create a new flavor.
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-        new_flavor = self.admin_flavors_client.create_flavor(
-            name=flavor_name,
-            ram=self.ram, vcpus=self.vcpus,
-            disk=self.disk,
-            id=new_flavor_id,
-            is_public='False')['flavor']
-        self.addCleanup(self.admin_flavors_client.delete_flavor,
-                        new_flavor['id'])
+        flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
+                                    disk=self.disk, is_public='False')
 
         # An exception should be raised when flavor access is not found
         self.assertRaises(lib_exc.NotFound,
                           self.admin_flavors_client.remove_flavor_access,
-                          new_flavor['id'],
+                          flavor['id'],
                           self.os_alt.servers_client.tenant_id)
