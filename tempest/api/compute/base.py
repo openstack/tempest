@@ -445,8 +445,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         attach_kwargs = dict(volumeId=volume['id'])
         if device:
             attach_kwargs['device'] = device
-        self.servers_client.attach_volume(
-            server['id'], **attach_kwargs)
+        attachment = self.servers_client.attach_volume(
+            server['id'], **attach_kwargs)['volumeAttachment']
         # On teardown detach the volume and wait for it to be available. This
         # is so we don't error out when trying to delete the volume during
         # teardown.
@@ -459,6 +459,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                         server['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
+        return attachment
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
