@@ -58,10 +58,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.password = data_utils.rand_password()
         # Server for positive tests
         server = cls.create_test_server(adminPass=cls.password,
-                                        wait_until='BUILD')
+                                        wait_until='ACTIVE')
         cls.server_id = server['id']
-        waiters.wait_for_server_status(cls.servers_client, cls.server_id,
-                                       'ACTIVE')
 
     @classmethod
     def resource_cleanup(cls):
