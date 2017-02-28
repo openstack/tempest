@@ -145,7 +145,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
-        cls.snapshots.append(snapshot)
+        cls.snapshots.append(snapshot['id'])
         waiters.wait_for_volume_resource_status(cls.snapshots_client,
                                                 snapshot['id'], 'available')
         return snapshot
@@ -171,11 +171,14 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
 
-    @staticmethod
-    def delete_snapshot(client, snapshot_id):
+    def delete_snapshot(self, snapshot_id, snapshots_client=None):
         """Delete snapshot by the given client"""
-        client.delete_snapshot(snapshot_id)
-        client.wait_for_resource_deletion(snapshot_id)
+        if snapshots_client is None:
+            snapshots_client = self.snapshots_client
+        snapshots_client.delete_snapshot(snapshot_id)
+        snapshots_client.wait_for_resource_deletion(snapshot_id)
+        if snapshot_id in self.snapshots:
+            self.snapshots.remove(snapshot_id)
 
     def attach_volume(self, server_id, volume_id):
         """Attach a volume to a server"""
@@ -207,12 +210,12 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def clear_snapshots(cls):
         for snapshot in cls.snapshots:
             test_utils.call_and_ignore_notfound_exc(
-                cls.snapshots_client.delete_snapshot, snapshot['id'])
+                cls.snapshots_client.delete_snapshot, snapshot)
 
         for snapshot in cls.snapshots:
             test_utils.call_and_ignore_notfound_exc(
                 cls.snapshots_client.wait_for_resource_deletion,
-                snapshot['id'])
+                snapshot)
 
     def create_server(self, **kwargs):
         name = kwargs.pop(

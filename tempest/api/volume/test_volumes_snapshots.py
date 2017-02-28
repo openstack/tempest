@@ -36,12 +36,6 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
 
-    def cleanup_snapshot(self, snapshot):
-        # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
-
     @decorators.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
     def test_snapshot_create_with_volume_in_use(self):
@@ -54,7 +48,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         snapshot = self.create_snapshot(self.volume_origin['id'],
                                         force=True)
         # Delete the snapshot
-        self.cleanup_snapshot(snapshot)
+        self.delete_snapshot(snapshot['id'])
 
     @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @test.services('compute')
@@ -70,9 +64,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         # Delete the snapshots. Some snapshot implementations can take
         # different paths according to order they are deleted.
-        self.cleanup_snapshot(snapshot1)
-        self.cleanup_snapshot(snapshot3)
-        self.cleanup_snapshot(snapshot2)
+        self.delete_snapshot(snapshot1['id'])
+        self.delete_snapshot(snapshot3['id'])
+        self.delete_snapshot(snapshot2['id'])
 
     @decorators.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
     @test.services('compute')
@@ -91,9 +85,9 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
 
         # Delete the snapshots. Some snapshot implementations can take
         # different paths according to order they are deleted.
-        self.cleanup_snapshot(snapshot3)
-        self.cleanup_snapshot(snapshot1)
-        self.cleanup_snapshot(snapshot2)
+        self.delete_snapshot(snapshot3['id'])
+        self.delete_snapshot(snapshot1['id'])
+        self.delete_snapshot(snapshot2['id'])
 
     @decorators.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
@@ -139,7 +133,7 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
 
         # Delete the snapshot
-        self.cleanup_snapshot(snapshot)
+        self.delete_snapshot(snapshot['id'])
 
     @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):

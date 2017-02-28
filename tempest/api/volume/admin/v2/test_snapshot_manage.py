@@ -61,8 +61,8 @@ class SnapshotManageAdminV2Test(base.BaseVolumeAdminTest):
         new_snapshot = self.admin_snapshot_manage_client.manage_snapshot(
             volume_id=volume['id'],
             ref={'source-name': snapshot_ref})['snapshot']
-        self.addCleanup(self.delete_snapshot,
-                        self.admin_snapshots_client, new_snapshot['id'])
+        self.addCleanup(self.delete_snapshot, new_snapshot['id'],
+                        self.admin_snapshots_client)
 
         # Wait for the snapshot to be available after manage operation
         waiters.wait_for_volume_resource_status(self.admin_snapshots_client,
