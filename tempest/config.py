@@ -1021,7 +1021,12 @@ DefaultGroup = [
                help="Prefix to be added when generating the name for "
                     "test resources. It can be used to discover all "
                     "resources associated with a specific test run when "
-                    "running tempest on a real-life cloud"),
+                    "running tempest on a real-life cloud",
+               deprecated_for_removal=True,
+               deprecated_reason="It is enough to add 'tempest' as this "
+                                 "prefix to ideintify resources which are "
+                                 "created by Tempest and no projects set "
+                                 "this option on OpenStack dev community."),
 ]
 
 _opts = [
