@@ -11,17 +11,12 @@
 #    under the License.
 
 import re
-import sys
 import time
-
-import netaddr
-import six
 
 from oslo_log import log as logging
 
 from tempest import config
-from tempest.lib.common import ssh
-from tempest.lib.common.utils import test_utils
+from tempest.lib.common.utils.linux import remote_client
 import tempest.lib.exceptions
 
 CONF = config.CONF
@@ -29,39 +24,11 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-def debug_ssh(function):
-    """Decorator to generate extra debug info in case off SSH failure"""
-    def wrapper(self, *args, **kwargs):
-        try:
-            return function(self, *args, **kwargs)
-        except tempest.lib.exceptions.SSHTimeout:
-            try:
-                original_exception = sys.exc_info()
-                caller = test_utils.find_test_caller() or "not found"
-                if self.server:
-                    msg = 'Caller: %s. Timeout trying to ssh to server %s'
-                    LOG.debug(msg, caller, self.server)
-                    if self.log_console and self.servers_client:
-                        try:
-                            msg = 'Console log for server %s: %s'
-                            console_log = (
-                                self.servers_client.get_console_output(
-                                    self.server['id'])['output'])
-                            LOG.debug(msg, self.server['id'], console_log)
-                        except Exception:
-                            msg = 'Could not get console_log for server %s'
-                            LOG.debug(msg, self.server['id'])
-                # re-raise the original ssh timeout exception
-                six.reraise(*original_exception)
-            finally:
-                # Delete the traceback to avoid circular references
-                _, _, trace = original_exception
-                del trace
-    return wrapper
+class RemoteClient(remote_client.RemoteClient):
 
-
-class RemoteClient(object):
-
+    # TODO(oomichi): Make this class deprecated after migrating
+    #                necessary methods to tempest.lib and cleaning
+    #                unnecessary methods up from this class.
     def __init__(self, ip_address, username, password=None, pkey=None,
                  server=None, servers_client=None):
         """Executes commands in a VM over ssh
@@ -73,35 +40,15 @@ class RemoteClient(object):
         :param server: server dict, used for debugging purposes
         :param servers_client: servers client, used for debugging purposes
         """
-        self.server = server
-        self.servers_client = servers_client
-
-        ssh_timeout = CONF.validation.ssh_timeout
-        connect_timeout = CONF.validation.connect_timeout
-        self.log_console = CONF.compute_feature_enabled.console_output
-        self.ssh_shell_prologue = CONF.validation.ssh_shell_prologue
-        self.ping_count = CONF.validation.ping_count
-        self.ping_size = CONF.validation.ping_size
-
-        self.ssh_client = ssh.Client(ip_address, username, password,
-                                     ssh_timeout, pkey=pkey,
-                                     channel_timeout=connect_timeout)
-
-    @debug_ssh
-    def exec_command(self, cmd):
-        # Shell options below add more clearness on failures,
-        # path is extended for some non-cirros guest oses (centos7)
-        cmd = self.ssh_shell_prologue + " " + cmd
-        LOG.debug("Remote command: %s", cmd)
-        return self.ssh_client.exec_command(cmd)
-
-    @debug_ssh
-    def validate_authentication(self):
-        """Validate ssh connection and authentication
-
-           This method raises an Exception when the validation fails.
-        """
-        self.ssh_client.test_connection_auth()
+        super(RemoteClient, self).__init__(
+            ip_address, username, password=password, pkey=pkey,
+            server=server, servers_client=servers_client,
+            ssh_timeout=CONF.validation.ssh_timeout,
+            connect_timeout=CONF.validation.connect_timeout,
+            console_output_enabled=CONF.compute_feature_enabled.console_output,
+            ssh_shell_prologue=CONF.validation.ssh_shell_prologue,
+            ping_count=CONF.validation.ping_count,
+            ping_size=CONF.validation.ping_size)
 
     def get_disks(self):
         # Select root disk devices as shown by lsblk
@@ -130,19 +77,6 @@ class RemoteClient(object):
         message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
         # usually to /dev/ttyS0
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
-        return self.exec_command(cmd)
-
-    def ping_host(self, host, count=None, size=None, nic=None):
-        if count is None:
-            count = self.ping_count
-        if size is None:
-            size = self.ping_size
-
-        addr = netaddr.IPAddress(host)
-        cmd = 'ping6' if addr.version == 6 else 'ping'
-        if nic:
-            cmd = 'sudo {cmd} -I {nic}'.format(cmd=cmd, nic=nic)
-        cmd += ' -c{0} -w{0} -s{1} {2}'.format(count, size, host)
         return self.exec_command(cmd)
 
     def set_mac_address(self, nic, address):
