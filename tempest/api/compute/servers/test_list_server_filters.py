@@ -269,16 +269,34 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
+
+        # list servers filter by ip is something "regexp match", i.e,
+        # filter by "10.1.1.1" will return both "10.1.1.1" and "10.1.1.10".
+        # so here look for the longest server ip, and filter by that ip,
+        # so as to ensure only one server is returned.
+        ip_list = {}
         self.s1 = self.client.show_server(self.s1['id'])['server']
         # Get first ip address inspite of v4 or v6
-        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
-        params = {'ip': addr_spec['addr']}
+        ip_addr = self.s1['addresses'][self.fixed_network_name][0]['addr']
+        ip_list[ip_addr] = self.s1['id']
+
+        self.s2 = self.client.show_server(self.s2['id'])['server']
+        ip_addr = self.s2['addresses'][self.fixed_network_name][0]['addr']
+        ip_list[ip_addr] = self.s2['id']
+
+        self.s3 = self.client.show_server(self.s3['id'])['server']
+        ip_addr = self.s3['addresses'][self.fixed_network_name][0]['addr']
+        ip_list[ip_addr] = self.s3['id']
+
+        longest_ip = max([[len(ip), ip] for ip in ip_list])[1]
+        params = {'ip': longest_ip}
         body = self.client.list_servers(**params)
         servers = body['servers']
 
-        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
-        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
-        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
+        self.assertIn(ip_list[longest_ip], map(lambda x: x['id'], servers))
+        del ip_list[longest_ip]
+        for ip in ip_list:
+            self.assertNotIn(ip_list[ip], map(lambda x: x['id'], servers))
 
     @decorators.skip_because(bug="1540645")
     @decorators.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
