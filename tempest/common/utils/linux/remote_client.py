@@ -99,20 +99,6 @@ class RemoteClient(object):
         """
         self.ssh_client.test_connection_auth()
 
-    def get_hostname(self):
-        # Get host name using command "hostname"
-        actual_hostname = self.exec_command("hostname").rstrip()
-        return actual_hostname
-
-    def get_ram_size_in_mb(self):
-        output = self.exec_command('free -m | grep Mem')
-        if output:
-            return output.split()[1]
-
-    def get_number_of_vcpus(self):
-        output = self.exec_command('grep -c ^processor /proc/cpuinfo')
-        return int(output)
-
     def get_disks(self):
         # Select root disk devices as shown by lsblk
         command = 'lsblk -lb --nodeps'
