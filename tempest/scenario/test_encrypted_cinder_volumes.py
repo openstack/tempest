@@ -62,6 +62,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         self.nova_volume_detach(server, attached_volume)
 
     @decorators.idempotent_id('79165fb4-5534-4b9d-8429-97ccffb8f86e')
+    @test.attr(type='slow')
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
         server = self.launch_instance()
@@ -71,6 +72,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         self.attach_detach_volume(server, volume)
 
     @decorators.idempotent_id('cbc752ed-b716-4717-910f-956cce965722')
+    @test.attr(type='slow')
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
         server = self.launch_instance()

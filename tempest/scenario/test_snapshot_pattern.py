@@ -41,6 +41,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
             raise cls.skipException("Snapshotting is not available.")
 
     @decorators.idempotent_id('608e604b-1d63-4a82-8e3e-91bc665c90b4')
+    @test.attr(type='slow')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     @test.services('compute', 'network', 'image')

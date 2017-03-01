@@ -46,6 +46,7 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
         self.delete_container(container_name)
 
     @decorators.idempotent_id('916c7111-cb1f-44b2-816d-8f760e4ea910')
+    @test.attr(type='slow')
     @test.services('object_storage')
     def test_swift_acl_anonymous_download(self):
         """This test will cover below steps:

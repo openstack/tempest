@@ -247,6 +247,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def test_dualnet_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', dualnet=True)
 
+    @test.attr(type='slow')
     @decorators.idempotent_id('cf1c4425-766b-45b8-be35-e2959728eb00')
     @test.services('compute', 'network')
     def test_dualnet_multi_prefix_dhcpv6_stateless(self):
