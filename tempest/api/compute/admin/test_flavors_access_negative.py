@@ -39,7 +39,6 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(FlavorsAccessNegativeTestJSON, cls).resource_setup()
 
         cls.tenant_id = cls.flavors_client.tenant_id
-        cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1
         cls.disk = 10

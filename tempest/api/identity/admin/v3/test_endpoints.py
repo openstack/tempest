@@ -33,11 +33,10 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
-        cls.service_data = (
+        service_data = (
             cls.services_client.create_service(name=s_name, type=s_type,
                                                description=s_description))
-        cls.service_data = cls.service_data['service']
-        cls.service_id = cls.service_data['id']
+        cls.service_id = service_data['service']['id']
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
