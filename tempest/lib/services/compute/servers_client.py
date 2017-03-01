@@ -1,5 +1,6 @@
 # Copyright 2012 OpenStack Foundation
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
+# Copyright 2017 AT&T Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -731,4 +732,93 @@ class ServersClient(base_compute_client.BaseComputeClient):
         body = json.loads(body)
         self.validate_response(security_groups_schema.list_security_groups,
                                resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_tags(self, server_id):
+        """Lists all tags for a server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#list-tags
+        """
+        url = 'servers/%s/tags' % server_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.list_tags, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_all_tags(self, server_id, tags):
+        """Replaces all tags on specified server with the new set of tags.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#replace-tags
+
+        :param tags: List of tags to replace current server tags with.
+        """
+        url = 'servers/%s/tags' % server_id
+        put_body = {'tags': tags}
+        resp, body = self.put(url, json.dumps(put_body))
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.update_all_tags, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_all_tags(self, server_id):
+        """Deletes all tags from the specified server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#delete-all-tags
+        """
+        url = 'servers/%s/tags' % server_id
+        resp, body = self.delete(url)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.delete_all_tags, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def check_tag_existence(self, server_id, tag):
+        """Checks tag existence on the server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#check-tag-existence
+
+        :param tag: Check for existence of tag on specified server.
+        """
+        url = 'servers/%s/tags/%s' % (server_id, tag)
+        resp, body = self.get(url)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.check_tag_existence, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_tag(self, server_id, tag):
+        """Adds a single tag to the server if server has no specified tag.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#add-a-single-tag
+
+        :param tag: Tag to be added to the specified server.
+        """
+        url = 'servers/%s/tags/%s' % (server_id, tag)
+        resp, body = self.put(url, None)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.update_tag, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_tag(self, server_id, tag):
+        """Deletes a single tag from the specified server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#delete-a-single-tag
+
+        :param tag: Tag to be removed from the specified server.
+        """
+        url = 'servers/%s/tags/%s' % (server_id, tag)
+        resp, body = self.delete(url)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.delete_tag, resp, body)
         return rest_client.ResponseBody(resp, body)
