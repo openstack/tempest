@@ -75,9 +75,15 @@ class RemoteClient(object):
         """
         self.server = server
         self.servers_client = servers_client
+
         ssh_timeout = CONF.validation.ssh_timeout
         connect_timeout = CONF.validation.connect_timeout
         self.log_console = CONF.compute_feature_enabled.console_output
+        self.ssh_shell_prologue = CONF.validation.ssh_shell_prologue
+        self.project_network_mask_bits = CONF.network.project_network_mask_bits
+        self.dhcp_client = CONF.scenario.dhcp_client
+        self.ping_count = CONF.validation.ping_count
+        self.ping_size = CONF.validation.ping_size
 
         self.ssh_client = ssh.Client(ip_address, username, password,
                                      ssh_timeout, pkey=pkey,
@@ -87,7 +93,7 @@ class RemoteClient(object):
     def exec_command(self, cmd):
         # Shell options below add more clearness on failures,
         # path is extended for some non-cirros guest oses (centos7)
-        cmd = CONF.validation.ssh_shell_prologue + " " + cmd
+        cmd = self.ssh_shell_prologue + " " + cmd
         LOG.debug("Remote command: %s", cmd)
         return self.ssh_client.exec_command(cmd)
 
@@ -128,8 +134,12 @@ class RemoteClient(object):
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
         return self.exec_command(cmd)
 
-    def ping_host(self, host, count=CONF.validation.ping_count,
-                  size=CONF.validation.ping_size, nic=None):
+    def ping_host(self, host, count=None, size=None, nic=None):
+        if count is None:
+            count = self.ping_count
+        if size is None:
+            size = self.ping_size
+
         addr = netaddr.IPAddress(host)
         cmd = 'ping6' if addr.version == 6 else 'ping'
         if nic:
@@ -164,7 +174,7 @@ class RemoteClient(object):
 
     def assign_static_ip(self, nic, addr):
         cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
-            ip=addr, mask=CONF.network.project_network_mask_bits,
+            ip=addr, mask=self.project_network_mask_bits,
             nic=nic
         )
         return self.exec_command(cmd)
@@ -213,7 +223,7 @@ class RemoteClient(object):
         """
         # TODO(yfried): add support for dhcpcd
         supported_clients = ['udhcpc', 'dhclient']
-        dhcp_client = CONF.scenario.dhcp_client
+        dhcp_client = self.dhcp_client
         if dhcp_client not in supported_clients:
             raise tempest.lib.exceptions.InvalidConfiguration(
                 '%s DHCP client unsupported' % dhcp_client)
