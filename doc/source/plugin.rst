@@ -1,3 +1,5 @@
+.. _tempest_plugin:
+
 =============================
 Tempest Test Plugin Interface
 =============================
