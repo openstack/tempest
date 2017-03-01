@@ -30,7 +30,6 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_adm.migrations_client
-        cls.flavors_admin_client = cls.os_adm.flavors_client
 
     @decorators.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
@@ -54,8 +53,8 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
     def _flavor_clean_up(self, flavor_id):
         try:
-            self.flavors_admin_client.delete_flavor(flavor_id)
-            self.flavors_admin_client.wait_for_resource_deletion(flavor_id)
+            self.admin_flavors_client.delete_flavor(flavor_id)
+            self.admin_flavors_client.wait_for_resource_deletion(flavor_id)
         except exceptions.NotFound:
             pass
 
@@ -68,9 +67,9 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         # First we have to create a flavor that we can delete so make a copy
         # of the normal flavor from which we'd create a server.
-        flavor = self.flavors_admin_client.show_flavor(
+        flavor = self.admin_flavors_client.show_flavor(
             self.flavor_ref)['flavor']
-        flavor = self.flavors_admin_client.create_flavor(
+        flavor = self.admin_flavors_client.create_flavor(
             name=data_utils.rand_name('test_resize_flavor_'),
             ram=flavor['ram'],
             disk=flavor['disk'],

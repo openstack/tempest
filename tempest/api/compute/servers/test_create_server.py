@@ -236,7 +236,6 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(ServersWithSpecificFlavorTestJSON, cls).setup_clients()
-        cls.flavor_client = cls.os_adm.flavors_client
         cls.client = cls.servers_client
 
     @classmethod
