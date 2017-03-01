@@ -80,7 +80,6 @@ class RemoteClient(object):
         connect_timeout = CONF.validation.connect_timeout
         self.log_console = CONF.compute_feature_enabled.console_output
         self.ssh_shell_prologue = CONF.validation.ssh_shell_prologue
-        self.project_network_mask_bits = CONF.network.project_network_mask_bits
         self.ping_count = CONF.validation.ping_count
         self.ping_size = CONF.validation.ping_size
 
@@ -171,11 +170,9 @@ class RemoteClient(object):
         cmd = "ip address"
         return self.exec_command(cmd)
 
-    def assign_static_ip(self, nic, addr):
+    def assign_static_ip(self, nic, addr, network_mask_bits=28):
         cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
-            ip=addr, mask=self.project_network_mask_bits,
-            nic=nic
-        )
+            ip=addr, mask=network_mask_bits, nic=nic)
         return self.exec_command(cmd)
 
     def set_nic_state(self, nic, state="up"):
