@@ -94,7 +94,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             raise exceptions.TimeoutException(msg)
 
     def _get_floating_ip_in_server_addresses(self, floating_ip, server):
-        for network_name, addresses in server['addresses'].items():
+        for addresses in server['addresses'].values():
             for address in addresses:
                 if (address['OS-EXT-IPS:type'] == 'floating' and
                         address['addr'] == floating_ip['ip']):

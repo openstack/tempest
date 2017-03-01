@@ -82,7 +82,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         aggregate = self.aggregates_client.set_metadata(aggregate['id'],
                                                         metadata=meta)
 
-        for key, value in meta.items():
+        for key in meta.keys():
             self.assertEqual(meta[key],
                              aggregate['aggregate']['metadata'][key])
 

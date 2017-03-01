@@ -49,7 +49,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
         self.assertGreaterEqual(len(addresses), 1)
-        for network_name, network_addresses in addresses.items():
+        for network_addresses in addresses.values():
             self.assertGreaterEqual(len(network_addresses), 1)
             for address in network_addresses:
                 self.assertTrue(address['addr'])
