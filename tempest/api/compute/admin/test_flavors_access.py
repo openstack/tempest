@@ -37,7 +37,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
         # Non admin tenant ID
         cls.tenant_id = cls.flavors_client.tenant_id
-        cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1
         cls.disk = 10
