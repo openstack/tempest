@@ -926,14 +926,15 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True,
                                    nic=None):
-        """check ping server via source ssh connection
+        """assert ping server via source ssh connection
+
+        Note: This is an internal method.  Use check_remote_connectivity
+        instead.
 
         :param source: RemoteClient: an ssh connection from which to ping
         :param dest: and IP to ping against
         :param should_succeed: boolean should ping succeed or not
         :param nic: specific network interface to ping from
-        :returns: boolean -- should_succeed == ping
-        :returns: ping is false if ping failed
         """
         def ping_remote():
             try:
@@ -947,6 +948,25 @@ class NetworkScenarioTest(ScenarioTest):
         return test_utils.call_until_true(ping_remote,
                                           CONF.validation.ping_timeout,
                                           1)
+
+    def check_remote_connectivity(self, source, dest, should_succeed=True,
+                                  nic=None):
+        """assert ping server via source ssh connection
+
+        :param source: RemoteClient: an ssh connection from which to ping
+        :param dest: and IP to ping against
+        :param should_succeed: boolean should ping succeed or not
+        :param nic: specific network interface to ping from
+        """
+        result = self._check_remote_connectivity(source, dest, should_succeed,
+                                                 nic)
+        source_host = source.ssh_client.host
+        if should_succeed:
+            msg = "Timed out waiting for %s to become reachable from %s" \
+                % (dest, source_host)
+        else:
+            msg = "%s is reachable from %s" % (dest, source_host)
+        self.assertTrue(result, msg)
 
     def _create_security_group(self, security_group_rules_client=None,
                                tenant_id=None,
