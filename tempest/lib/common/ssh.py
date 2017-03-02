@@ -111,6 +111,7 @@ class Client(object):
             except (EOFError,
                     socket.error, socket.timeout,
                     paramiko.SSHException) as e:
+                ssh.close()
                 if self._is_timed_out(_start_time):
                     LOG.exception("Failed to establish authenticated ssh"
                                   " connection to %s@%s after %d attempts",
