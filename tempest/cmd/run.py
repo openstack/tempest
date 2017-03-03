@@ -78,11 +78,20 @@ By default tempest run's output to STDOUT will be generated using the
 subunit-trace output filter. But, if you would prefer a subunit v2 stream be
 output to STDOUT use the **--subunit** flag
 
+Combining Runs
+==============
+
+There are certain situations in which you want to split a single run of tempest
+across 2 executions of tempest run. (for example to run part of the tests
+serially and others in parallel) To accomplish this but still treat the results
+as a single run you can leverage the **--combine** option which will append
+the current run's results with the previous runs.
 """
 
 import io
 import os
 import sys
+import tempfile
 import threading
 
 from cliff import command
@@ -165,6 +174,12 @@ class TempestRun(command.Command):
         else:
             print("No .testr.conf file was found for local execution")
             sys.exit(2)
+        if parsed_args.combine:
+            temp_stream = tempfile.NamedTemporaryFile()
+            return_code = run_argv(['tempest', 'last', '--subunit'], sys.stdin,
+                                   temp_stream, sys.stderr)
+            if return_code > 0:
+                sys.exit(return_code)
 
         regex = self._build_regex(parsed_args)
         if parsed_args.list_tests:
@@ -173,6 +188,16 @@ class TempestRun(command.Command):
         else:
             options = self._build_options(parsed_args)
             returncode = self._run(regex, options)
+            if returncode > 0:
+                sys.exit(returncode)
+
+        if parsed_args.combine:
+            return_code = run_argv(['tempest', 'last', '--subunit'], sys.stdin,
+                                   temp_stream, sys.stderr)
+            if return_code > 0:
+                sys.exit(return_code)
+            returncode = run_argv(['tempest', 'load', temp_stream.name],
+                                  sys.stdin, sys.stdout, sys.stderr)
         sys.exit(returncode)
 
     def get_description(self):
@@ -231,6 +256,10 @@ class TempestRun(command.Command):
         # output args
         parser.add_argument("--subunit", action='store_true',
                             help='Enable subunit v2 output')
+        parser.add_argument("--combine", action='store_true',
+                            help='Combine the output of this run with the '
+                                 "previous run's as a combined stream in the "
+                                 "testr repository after it finish")
 
         parser.set_defaults(parallel=True)
         return parser
