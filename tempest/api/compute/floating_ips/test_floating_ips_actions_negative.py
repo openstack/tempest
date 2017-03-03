@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -99,3 +101,27 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.associate_floating_ip_to_server,
                           '', self.server_id)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('58a80596-ffb2-11e6-9393-fa163e4fa634')
+    @test.services('network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
+    def test_associate_ip_to_server_with_floating_ip(self):
+        # The VM have one port
+        # Associate floating IP A to the VM
+        # Associate floating IP B which is from same pool with floating IP A
+        # to the VM, should raise BadRequest exception
+        body = self.client.create_floating_ip(
+            pool=CONF.network.public_network_id)['floating_ip']
+        self.addCleanup(self.client.delete_floating_ip, body['id'])
+        self.client.associate_floating_ip_to_server(body['ip'], self.server_id)
+        self.addCleanup(self.client.disassociate_floating_ip_from_server,
+                        body['ip'], self.server_id)
+
+        body = self.client.create_floating_ip(
+            pool=CONF.network.public_network_id)['floating_ip']
+        self.addCleanup(self.client.delete_floating_ip, body['id'])
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.associate_floating_ip_to_server,
+                          body['ip'], self.server_id)
