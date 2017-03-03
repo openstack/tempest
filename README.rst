@@ -209,15 +209,9 @@ that has python 2.7)
 Python 3.x
 ----------
 
-Starting during the Liberty release development cycle work began on enabling
-Tempest to run under both Python 2.7 and Python 3.4. Tempest strives to fully
-support running with Python 3.4 and newer. A gating unit test job was added to
-also run Tempest's unit tests under Python 3. This means that the Tempest
-code at least imports under Python 3.4 and things that have unit test coverage
-will work on Python 3.4. However, because large parts of Tempest are
-self-verifying there might be uncaught issues running on Python 3. So until
-there is a gating job which does a full Tempest run using Python 3 there
-isn't any guarantee that running Tempest under Python 3 is bug free.
+Starting during the Pike cycle Tempest has a gating CI job that runs tempest
+with Python 3. Any tempest release after 15.0.0 should fully support running
+under Python 3 as well as Python 2.7.
 
 Legacy run method
 -----------------
