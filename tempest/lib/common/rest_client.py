@@ -23,6 +23,7 @@ import jsonschema
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 import six
+from six.moves import urllib
 
 from tempest.lib.common import http
 from tempest.lib.common import jsonschema_validator
@@ -914,6 +915,16 @@ class RestClient(object):
                 except jsonschema.ValidationError as ex:
                     msg = ("HTTP response header is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseHeader(msg)
+
+    def _get_base_version_url(self):
+        # TODO(oomichi): This method can be used for auth's replace_version().
+        # So it is nice to have common logic for the maintenance.
+        endpoint = self.base_url
+        url = urllib.parse.urlsplit(endpoint)
+        new_path = re.split(r'(^|/)+v\d+(\.\d+)?', url.path)[0]
+        url = list(url)
+        url[2] = new_path + '/'
+        return urllib.parse.urlunsplit(url)
 
 
 class ResponseBody(dict):

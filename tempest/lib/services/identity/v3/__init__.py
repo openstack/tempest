@@ -30,9 +30,10 @@ from tempest.lib.services.identity.v3.services_client import ServicesClient
 from tempest.lib.services.identity.v3.token_client import V3TokenClient
 from tempest.lib.services.identity.v3.trusts_client import TrustsClient
 from tempest.lib.services.identity.v3.users_client import UsersClient
+from tempest.lib.services.identity.v3.versions_client import VersionsClient
 
 __all__ = ['CredentialsClient', 'DomainsClient', 'EndPointsClient',
            'GroupsClient', 'IdentityClient', 'InheritedRolesClient',
            'PoliciesClient', 'ProjectsClient', 'RegionsClient',
            'RoleAssignmentsClient', 'RolesClient', 'ServicesClient',
-           'V3TokenClient', 'TrustsClient', 'UsersClient', ]
+           'V3TokenClient', 'TrustsClient', 'UsersClient', 'VersionsClient']

@@ -21,6 +21,20 @@ from tempest import test
 class TestApiDiscovery(base.BaseIdentityV3Test):
     """Tests for API discovery features."""
 
+    @decorators.idempotent_id('721f480f-35b6-46c7-846e-047e6acea0dc')
+    @test.attr(type='smoke')
+    def test_list_api_versions(self):
+        # NOTE: Actually this API doesn't depend on v3 API at all, because
+        # the API operation is "GET /" without v3's endpoint. The reason of
+        # this test path is just v3 API is CURRENT on Keystone side.
+        versions = self.non_admin_versions_client.list_versions()
+        expected_resources = ('id', 'links', 'media-types', 'status',
+                              'updated')
+
+        for version in versions['versions']["values"]:
+            for res in expected_resources:
+                self.assertIn(res, version)
+
     @test.attr(type='smoke')
     @decorators.idempotent_id('b9232f5e-d9e5-4d97-b96c-28d3db4de1bd')
     def test_api_version_resources(self):
