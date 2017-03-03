@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds a new cli option to tempest run, --combine, which is used to indicate
+    you want the subunit stream output combined with the previous run's in
+    the testr repository
