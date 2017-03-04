@@ -64,7 +64,7 @@ The Old Way using subunit2sql directly
 
 SELECT * from tests where test_id like "%test_id%";
 (where $test_id is the full test_id, but truncated to the class because of
-setupClass or tearDownClass failures)
+setUpClass or tearDownClass failures)
 
 You can access the infra mysql subunit2sql db w/ read-only permissions with:
 
@@ -82,7 +82,7 @@ you would run the following:
  #. run the query: MySQL [subunit2sql]> select * from tests where test_id like
     "tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON%";
     which will return a table of all the tests in the class (but it will also
-    catch failures in setupClass and tearDownClass)
+    catch failures in setUpClass and tearDownClass)
  #. paste the output table with numbers and the mysql command you ran to
     generate it into the etherpad.
 
