@@ -133,7 +133,7 @@ IdentityGroup = [
     cfg.StrOpt('uri_v3',
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('auth_version',
-               default='v2',
+               default='v3',
                help="Identity API version to be used for authentication "
                     "for API tests."),
     cfg.StrOpt('region',
