@@ -494,6 +494,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @decorators.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
+    @test.attr(type='slow')
     @test.services('compute', 'network')
     def test_port_update_new_security_group(self):
         """Verifies the traffic after updating the vm port
@@ -548,6 +549,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @decorators.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
+    @test.attr(type='slow')
     @test.services('compute', 'network')
     def test_multiple_security_groups(self):
         """Verify multiple security groups and checks that rules
@@ -579,6 +581,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                    private_key=private_key,
                                    should_connect=True)
 
+    @test.attr(type='slow')
     @test.requires_ext(service='network', extension='port-security')
     @decorators.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
     @test.services('compute', 'network')
@@ -619,6 +622,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 self._log_console_output(servers=tenant.servers)
             raise
 
+    @test.attr(type='slow')
     @test.requires_ext(service='network', extension='port-security')
     @decorators.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
     @testtools.skipUnless(

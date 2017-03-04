@@ -95,7 +95,6 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         waiters.wait_for_server_termination(self.servers_client, server['id'])
 
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
-    @test.attr(type='smoke')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     @test.services('compute', 'volume', 'image')
@@ -177,6 +176,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.assertEqual(timestamp, timestamp3)
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
+    @test.attr(type='slow')
     @test.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image
