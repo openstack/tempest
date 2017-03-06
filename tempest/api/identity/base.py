@@ -15,6 +15,7 @@
 
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
@@ -72,7 +73,9 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
             kwargs['password'] = user_password
         user = self.users_client.create_user(**kwargs)['user']
         # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.users_client.delete_user, user['id'])
         return user
 
     def setup_test_role(self, domain_id=None):
@@ -83,7 +86,9 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
         role = self.roles_client.create_role(**params)['role']
         # Delete the role at the end of the test
-        self.addCleanup(self.roles_client.delete_role, role['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.roles_client.delete_role, role['id'])
         return role
 
 
@@ -152,7 +157,9 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
             name=data_utils.rand_name('test_tenant'),
             description=data_utils.rand_name('desc'))['tenant']
         # Delete the tenant at the end of the test
-        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.tenants_client.delete_tenant, tenant['id'])
         return tenant
 
 
@@ -246,12 +253,16 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             name=data_utils.rand_name('test_project'),
             description=data_utils.rand_name('desc'))['project']
         # Delete the project at the end of the test
-        self.addCleanup(self.projects_client.delete_project, project['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.projects_client.delete_project, project['id'])
         return project
 
     def setup_test_domain(self):
         """Set up a test domain."""
         domain = self.create_domain()
         # Delete the domain at the end of the test
-        self.addCleanup(self.delete_domain, domain['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.delete_domain, domain['id'])
         return domain
