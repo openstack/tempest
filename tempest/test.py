@@ -643,7 +643,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cred_provider, networks_client, CONF.compute.fixed_network_name)
 
     def assertEmpty(self, list, msg=None):
+        if msg is None:
+            msg = "list is not empty: %s" % list
         self.assertEqual(0, len(list), msg)
 
     def assertNotEmpty(self, list, msg=None):
+        if msg is None:
+            msg = "list is empty."
         self.assertGreater(len(list), 0, msg)
