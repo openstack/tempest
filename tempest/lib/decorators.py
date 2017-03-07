@@ -15,6 +15,7 @@
 import functools
 import uuid
 
+import debtcollector.removals
 import six
 import testtools
 
@@ -61,6 +62,7 @@ def idempotent_id(id):
     return decorator
 
 
+@debtcollector.removals.remove(removal_version='Queen')
 class skip_unless_attr(object):
     """Decorator to skip tests if a specified attr does not exists or False"""
     def __init__(self, attr, msg=None):

@@ -1,0 +1,5 @@
+---
+deprecations:
+  - The ``skip_unless_attr`` decorator in lib/decorators.py has been deprecated,
+    please use the standard ``testtools.skipUnless`` and ``testtools.skipIf``
+    decorators.

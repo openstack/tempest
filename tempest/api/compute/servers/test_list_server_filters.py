@@ -12,13 +12,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.compute import base
 from tempest.common import fixed_network
 from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
-from tempest.lib import exceptions as lib_exc
+
+
+CONF = config.CONF
 
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
@@ -37,31 +41,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ListServerFiltersTestJSON, cls).resource_setup()
 
-        # Check to see if the alternate image ref actually exists...
-        images_client = cls.compute_images_client
-        images = images_client.list_images()['images']
-
-        if cls.image_ref != cls.image_ref_alt and \
-            any([image for image in images
-                 if image['id'] == cls.image_ref_alt]):
-            cls.multiple_images = True
-        else:
-            cls.image_ref_alt = cls.image_ref
-
-        # Do some sanity checks here. If one of the images does
-        # not exist, fail early since the tests won't work...
-        try:
-            cls.compute_images_client.show_image(cls.image_ref)
-        except lib_exc.NotFound:
-            raise RuntimeError("Image %s (image_ref) was not found!" %
-                               cls.image_ref)
-
-        try:
-            cls.compute_images_client.show_image(cls.image_ref_alt)
-        except lib_exc.NotFound:
-            raise RuntimeError("Image %s (image_ref_alt) was not found!" %
-                               cls.image_ref_alt)
-
         network = cls.get_tenant_network()
         if network:
             cls.fixed_network_name = network.get('name')
@@ -74,9 +53,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                         **network_kwargs)
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
-        cls.s2 = cls.create_test_server(name=cls.s2_name,
-                                        image_id=cls.image_ref_alt,
-                                        wait_until='ACTIVE')
+        # If image_ref_alt is "" or None then we still want to boot a server
+        # but we rely on `testtools.skipUnless` decorator to actually skip
+        # the irrelevant tests.
+        cls.s2 = cls.create_test_server(
+            name=cls.s2_name, image_id=cls.image_ref_alt or cls.image_ref,
+            wait_until='ACTIVE')
 
         cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
         cls.s3 = cls.create_test_server(name=cls.s3_name,
@@ -84,7 +66,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                         wait_until='ACTIVE')
 
     @decorators.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
-    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
+    @testtools.skipUnless(CONF.compute.image_ref != CONF.compute.image_ref_alt,
+                          "Need distinct images to run this test")
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
@@ -169,7 +152,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                          len([x for x in servers['servers'] if 'id' in x]))
 
     @decorators.idempotent_id('b3304c3b-97df-46d2-8cd3-e2b6659724e7')
-    @decorators.skip_unless_attr('multiple_images', 'Only one image found')
+    @testtools.skipUnless(CONF.compute.image_ref != CONF.compute.image_ref_alt,
+                          "Need distinct images to run this test")
     def test_list_servers_detailed_filter_by_image(self):
         # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
