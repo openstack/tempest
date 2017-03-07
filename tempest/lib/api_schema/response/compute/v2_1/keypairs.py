@@ -34,12 +34,9 @@ get_keypair = {
 
                 },
                 'additionalProperties': False,
-                # When we run the get keypair API, response body includes
-                # all the above mentioned attributes.
-                # But in Nova API sample file, response body includes only
-                # 'public_key', 'name' & 'fingerprint'. So only 'public_key',
-                # 'name' & 'fingerprint' are defined as 'required'.
-                'required': ['public_key', 'name', 'fingerprint']
+                'required': ['public_key', 'name', 'fingerprint', 'user_id',
+                             'deleted', 'created_at', 'updated_at',
+                             'deleted_at', 'id']
             }
         },
         'additionalProperties': False,
