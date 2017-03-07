@@ -67,16 +67,6 @@ class TestRemoteClient(base.TestCase):
         self.ssh_mock = self.useFixture(mockpatch.PatchObject(self.conn,
                                                               'ssh_client'))
 
-    def test_get_hostname(self):
-        self.ssh_mock.mock.exec_command.return_value = 'fake_hostname'
-        self.assertEqual(self.conn.get_hostname(), 'fake_hostname')
-
-    def test_get_ram_size(self):
-        free_output = "Mem:         48294      45738       2555          0" \
-                      "402      40346"
-        self.ssh_mock.mock.exec_command.return_value = free_output
-        self.assertEqual(self.conn.get_ram_size_in_mb(), '48294')
-
     def test_write_to_console_regular_str(self):
         self.conn.write_to_console('test')
         self._assert_exec_called_with(
@@ -101,11 +91,6 @@ class TestRemoteClient(base.TestCase):
     def _assert_exec_called_with(self, cmd):
         cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
         self.ssh_mock.mock.exec_command.assert_called_with(cmd)
-
-    def test_get_number_of_vcpus(self):
-        self.ssh_mock.mock.exec_command.return_value = '16'
-        self.assertEqual(self.conn.get_number_of_vcpus(), 16)
-        self._assert_exec_called_with('grep -c ^processor /proc/cpuinfo')
 
     def test_get_disks(self):
         output_lsblk = """\

@@ -122,7 +122,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
-        self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
+        output = linux_client.exec_command('grep -c ^processor /proc/cpuinfo')
+        self.assertEqual(flavor['vcpus'], int(output))
 
     @decorators.idempotent_id('ac1ad47f-984b-4441-9274-c9079b7a0666')
     @testtools.skipUnless(CONF.validation.run_validation,
@@ -136,7 +137,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
-        hostname = linux_client.get_hostname()
+        hostname = linux_client.exec_command("hostname").rstrip()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
         self.assertEqual(self.name.lower(), hostname, msg)
