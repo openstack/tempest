@@ -37,16 +37,20 @@ class TestDataUtils(base.TestCase):
         actual2 = data_utils.rand_uuid_hex()
         self.assertNotEqual(actual, actual2)
 
-    def test_rand_name(self):
-        actual = data_utils.rand_name()
+    def test_rand_name_with_default_prefix(self):
+        actual = data_utils.rand_name('foo')
         self.assertIsInstance(actual, str)
-        actual2 = data_utils.rand_name()
+        self.assertTrue(actual.startswith('tempest-foo'))
+        actual2 = data_utils.rand_name('foo')
+        self.assertTrue(actual2.startswith('tempest-foo'))
         self.assertNotEqual(actual, actual2)
 
-        actual = data_utils.rand_name('foo')
+    def test_rand_name_with_none_prefix(self):
+        actual = data_utils.rand_name('foo', prefix=None)
+        self.assertIsInstance(actual, str)
         self.assertTrue(actual.startswith('foo'))
-        actual2 = data_utils.rand_name('foo')
-        self.assertTrue(actual.startswith('foo'))
+        actual2 = data_utils.rand_name('foo', prefix=None)
+        self.assertTrue(actual2.startswith('foo'))
         self.assertNotEqual(actual, actual2)
 
     def test_rand_name_with_prefix(self):

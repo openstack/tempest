@@ -1,0 +1,10 @@
+---
+upgrade:
+  - The default value of rand_name()'s prefix argument is changed
+    to 'tempest' from None to identify resources are created by
+    Tempest.
+deprecations:
+  - The resources_prefix is marked as deprecated because it is
+    enough to set 'tempest' as the prefix on rand_name() to
+    ideintify resources which are created by Tempest and no
+    projects set this option on OpenStack dev community.

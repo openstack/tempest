@@ -43,7 +43,7 @@ def rand_uuid_hex():
     return uuid.uuid4().hex
 
 
-def rand_name(name='', prefix=None):
+def rand_name(name='', prefix='tempest'):
     """Generate a random name that includes a random number
 
     :param str name: The name that you want to include
