@@ -313,7 +313,7 @@ that is a unique ``uuid-4`` instance. This ID is used to complement the fully
 qualified test name and track test functionality through refactoring. The
 format of the metadata looks like::
 
-    @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
+    @decorators.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
         ...
