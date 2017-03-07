@@ -471,7 +471,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         # NOTE: SHUTOFF is irregular status. To avoid test instability,
         #       one server is created only for this test without using
-        #       the server that was created in setupClass.
+        #       the server that was created in setUpClass.
         server = self.create_test_server(wait_until='ACTIVE')
         temp_server_id = server['id']
 
