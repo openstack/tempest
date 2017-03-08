@@ -29,7 +29,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listServices
+        https://developer.openstack.org/api-ref/compute/#list-compute-services
         """
         url = 'os-services'
         if params:
@@ -45,7 +45,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#enableScheduling
+        https://developer.openstack.org/api-ref/compute/#enable-scheduling-for-a-compute-service
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/enable', post_body)
@@ -58,7 +58,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#disableScheduling
+        https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/disable', post_body)
