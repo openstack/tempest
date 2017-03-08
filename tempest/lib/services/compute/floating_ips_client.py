@@ -29,7 +29,7 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listfloatingipsObject
+        https://developer.openstack.org/api-ref/compute/#list-floating-ip-addresses
         """
         url = 'os-floating-ips'
         if params:
@@ -45,7 +45,7 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showFloatingIP
+        https://developer.openstack.org/api-ref/compute/#show-floating-ip-address-details
         """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.get(url)
@@ -58,7 +58,7 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createFloatingIP
+        https://developer.openstack.org/api-ref/compute/#create-allocate-floating-ip-address
         """
         url = 'os-floating-ips'
         post_body = json.dumps(kwargs)
@@ -72,7 +72,7 @@ class FloatingIPsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#deleteFloatingIP
+        https://developer.openstack.org/api-ref/compute/#delete-deallocate-floating-ip-address
         """
         url = "os-floating-ips/%s" % floating_ip_id
         resp, body = self.delete(url)

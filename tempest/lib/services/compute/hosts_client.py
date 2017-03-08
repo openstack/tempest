@@ -23,7 +23,12 @@ from tempest.lib.services.compute import base_compute_client
 class HostsClient(base_compute_client.BaseComputeClient):
 
     def list_hosts(self, **params):
-        """List all hosts."""
+        """List all hosts.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#list-hosts
+        """
 
         url = 'os-hosts'
         if params:
@@ -47,7 +52,7 @@ class HostsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#enablehost
+        https://developer.openstack.org/api-ref/compute/#update-host-status
         """
 
         request_body = {
