@@ -50,7 +50,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-admin-v2.html#admin-showUser
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#show-user-details-admin-endpoint
         """
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
@@ -62,7 +62,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-admin-v2.html#admin-deleteUser
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#delete-user-admin-endpoint
         """
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
