@@ -29,7 +29,7 @@ class ImagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createImage
+        https://developer.openstack.org/api-ref/compute/#create-image-createimage-action
         """
 
         post_body = {'createImage': kwargs}
@@ -44,7 +44,8 @@ class ImagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#listImages
+        https://developer.openstack.org/api-ref/compute/#list-images
+        https://developer.openstack.org/api-ref/compute/#list-images-with-details
         """
         url = 'images'
         _schema = schema.list_images
@@ -85,7 +86,7 @@ class ImagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createImageMetadata
+        https://developer.openstack.org/api-ref/compute/#update-image-metadata
         """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.put('images/%s/metadata' % image_id, post_body)
@@ -98,7 +99,7 @@ class ImagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateImageMetadata
+        https://developer.openstack.org/api-ref/compute/#create-image-metadata
         """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('images/%s/metadata' % image_id, post_body)
@@ -118,7 +119,7 @@ class ImagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#setImageMetadataItem
+        https://developer.openstack.org/api-ref/compute/#create-or-update-image-metadata-item
         """
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('images/%s/metadata/%s' % (image_id, key),

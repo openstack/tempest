@@ -47,7 +47,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateQuota
+        https://developer.openstack.org/api-ref/compute/#update-quotas
         """
 
         post_body = json.dumps({'quota_set': kwargs})
