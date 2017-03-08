@@ -42,7 +42,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createAggregate
+        https://developer.openstack.org/api-ref/compute/#create-aggregate
         """
         post_body = json.dumps({'aggregate': kwargs})
         resp, body = self.post('os-aggregates', post_body)
@@ -56,7 +56,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#updateAggregate
+        https://developer.openstack.org/api-ref/compute/#update-aggregate
         """
         put_body = json.dumps({'aggregate': kwargs})
         resp, body = self.put('os-aggregates/%s' % aggregate_id, put_body)
@@ -88,7 +88,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addHost
+        https://developer.openstack.org/api-ref/compute/#add-host
         """
         post_body = json.dumps({'add_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
@@ -102,7 +102,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#removeAggregateHost
+        https://developer.openstack.org/api-ref/compute/#remove-host
         """
         post_body = json.dumps({'remove_host': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
@@ -116,7 +116,7 @@ class AggregatesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#addAggregateMetadata
+        https://developer.openstack.org/api-ref/compute/#create-or-update-aggregate-metadata
         """
         post_body = json.dumps({'set_metadata': kwargs})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
