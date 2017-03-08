@@ -26,10 +26,6 @@ import uuid
 from oslo_utils import uuidutils
 import six.moves.urllib.parse as urlparse
 
-# TODO(oomichi): Need to remove this after switching all modules to decorators
-# on all OpenStack projects because they runs check-uuid on their own gates.
-OLD_DECORATOR_MODULE = 'test'
-
 DECORATOR_MODULE = 'decorators'
 DECORATOR_NAME = 'idempotent_id'
 DECORATOR_IMPORT = 'tempest.%s' % DECORATOR_MODULE
@@ -128,8 +124,7 @@ class TestChecker(object):
                 hasattr(decorator.func, 'attr') and
                 decorator.func.attr == DECORATOR_NAME and
                 hasattr(decorator.func, 'value') and
-                (decorator.func.value.id == DECORATOR_MODULE or
-                 decorator.func.value.id == OLD_DECORATOR_MODULE)):
+                decorator.func.value.id == DECORATOR_MODULE):
                 for arg in decorator.args:
                     idempotent_id = ast.literal_eval(arg)
         return idempotent_id
@@ -361,7 +356,7 @@ def run():
         sys.exit("@decorators.idempotent_id existence and uniqueness checks "
                  "failed\n"
                  "Run 'tox -v -euuidgen' to automatically fix tests with\n"
-                 "missing @test.idempotent_id decorators.")
+                 "missing @decorators.idempotent_id decorators.")
 
 if __name__ == '__main__':
     run()
