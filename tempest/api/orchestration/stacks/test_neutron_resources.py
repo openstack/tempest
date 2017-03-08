@@ -84,12 +84,15 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 # to heat.
                 body = cls.client.show_resource(cls.stack_identifier,
                                                 'Server')
-                server_id = body['physical_resource_id']
-                LOG.debug('Console output for %s', server_id)
-                output = cls.servers_client.get_console_output(
-                    server_id)['output']
-                LOG.debug(output)
-            raise
+                server_id = body.get('physical_resource_id')
+                if server_id:
+                    LOG.debug('Console output for %s', server_id)
+                    output = cls.servers_client.get_console_output(
+                        server_id)['output']
+                    LOG.debug(output)
+                else:
+                    LOG.debug('Server resource is %s', body)
+            raise  # original exception
 
         cls.test_resources = {}
         for resource in resources:
