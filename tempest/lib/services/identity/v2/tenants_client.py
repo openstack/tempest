@@ -39,7 +39,7 @@ class TenantsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-v2-ext.html#deleteTenant
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#delete-tenant
         """
         resp, body = self.delete('tenants/%s' % str(tenant_id))
         self.expected_success(204, resp.status)
@@ -50,7 +50,7 @@ class TenantsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-v2-ext.html#admin-showTenantById
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#show-tenant-details-by-id
         """
         resp, body = self.get('tenants/%s' % str(tenant_id))
         self.expected_success(200, resp.status)

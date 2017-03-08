@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-http://developer.openstack.org/api-ref-identity-v3.html#groups-v3
+https://developer.openstack.org/api-ref/identity/v3/index.html#groups
 """
 
 from oslo_serialization import jsonutils as json
