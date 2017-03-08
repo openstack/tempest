@@ -21,9 +21,7 @@ CONF = config.CONF
 
 
 def _get_host(host):
-    if CONF.volume_feature_enabled.volume_services:
-        host = host.split('@')[0]
-    return host
+    return host.split('@')[0]
 
 
 class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
