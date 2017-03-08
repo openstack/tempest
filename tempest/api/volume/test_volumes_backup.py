@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
+
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.common import waiters
@@ -49,10 +51,15 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
 
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
-        # Create backup
-        volume = self.create_volume()
+        # Create a volume with metadata
+        metadata = {"vol-meta1": "value1",
+                    "vol-meta2": "value2",
+                    "vol-meta3": "value3"}
+        volume = self.create_volume(metadata=metadata)
         self.addCleanup(self.volumes_client.delete_volume,
                         volume['id'])
+
+        # Create a backup
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
         description = data_utils.rand_name("volume-backup-description")
@@ -74,7 +81,15 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
-        self.restore_backup(backup['id'])
+        restored_volume = self.restore_backup(backup['id'])
+
+        restored_volume_metadata = self.volumes_client.show_volume(
+            restored_volume['volume_id'])['volume']['metadata']
+
+        # Verify the backups has been restored successfully
+        # with the metadata of the source volume.
+        self.assertThat(restored_volume_metadata.items(),
+                        matchers.ContainsAll(metadata.items()))
 
     @decorators.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
     @test.services('compute')
