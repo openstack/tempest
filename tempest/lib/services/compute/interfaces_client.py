@@ -33,7 +33,7 @@ class InterfacesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#createAttachInterface
+        https://developer.openstack.org/api-ref/compute/#create-interface
         """
         post_body = {'interfaceAttachment': kwargs}
         post_body = json.dumps(post_body)
