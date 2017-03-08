@@ -28,7 +28,7 @@ class BackupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#createBackup
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#create-backup
         """
         post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
@@ -41,7 +41,7 @@ class BackupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-blockstorage-v2.html#restoreBackup
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#restore-backup
         """
         post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
