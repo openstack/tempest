@@ -596,7 +596,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             # NOTE(amuller): we are renewing the lease as part of the retry
             # because Neutron updates dnsmasq asynchronously after the
             # subnet-update API call returns.
-            ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'])
+            ssh_client.renew_lease(fixed_ip=floating_ip['fixed_ip_address'],
+                                   dhcp_client=CONF.scenario.dhcp_client)
             if ssh_client.get_dns_servers() != [alt_dns_server]:
                 LOG.debug("Failed to update DNS nameservers")
                 return False
