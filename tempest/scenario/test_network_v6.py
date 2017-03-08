@@ -164,7 +164,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         sshv4_2, ips_from_api_2, sid2 = self.prepare_server(networks=net_list)
 
         def guest_has_address(ssh, addr):
-            return addr in ssh.get_ip_list()
+            return addr in ssh.exec_command("ip address")
 
         # Turn on 2nd NIC for Cirros when dualnet
         if dualnet:
@@ -172,8 +172,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             self.turn_nic6_on(sshv4_2, sid2)
 
         # get addresses assigned to vNIC as reported by 'ip address' utility
-        ips_from_ip_1 = sshv4_1.get_ip_list()
-        ips_from_ip_2 = sshv4_2.get_ip_list()
+        ips_from_ip_1 = sshv4_1.exec_command("ip address")
+        ips_from_ip_2 = sshv4_2.exec_command("ip address")
         self.assertIn(ips_from_api_1['4'], ips_from_ip_1)
         self.assertIn(ips_from_api_2['4'], ips_from_ip_2)
         for i in range(n_subnets6):

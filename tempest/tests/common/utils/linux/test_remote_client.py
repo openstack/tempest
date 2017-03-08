@@ -139,23 +139,6 @@ a0:b0:c0:d0:e0:f0"""
         self._assert_exec_called_with(
             "ip addr | awk '/ether/ {print $2}'")
 
-    def test_get_ip_list(self):
-        ips = """1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-    inet6 ::1/128 scope host
-       valid_lft forever preferred_lft forever
-2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
-    link/ether fa:16:3e:6e:26:3b brd ff:ff:ff:ff:ff:ff
-    inet 10.0.0.4/24 brd 10.0.0.255 scope global eth0
-    inet6 fd55:faaf:e1ab:3d9:f816:3eff:fe6e:263b/64 scope global dynamic
-       valid_lft 2591936sec preferred_lft 604736sec
-    inet6 fe80::f816:3eff:fe6e:263b/64 scope link
-       valid_lft forever preferred_lft forever"""
-        self.ssh_mock.mock.exec_command.return_value = ips
-        self.assertEqual(self.conn.get_ip_list(), ips)
-        self._assert_exec_called_with('ip address')
-
     def test_assign_static_ip(self):
         self.ssh_mock.mock.exec_command.return_value = ''
         ip = '10.0.0.2'

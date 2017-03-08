@@ -166,10 +166,6 @@ class RemoteClient(object):
         nic = self.exec_command(cmd)
         return nic.strip().strip(":").lower()
 
-    def get_ip_list(self):
-        cmd = "ip address"
-        return self.exec_command(cmd)
-
     def assign_static_ip(self, nic, addr, network_mask_bits=28):
         cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
             ip=addr, mask=network_mask_bits, nic=nic)
