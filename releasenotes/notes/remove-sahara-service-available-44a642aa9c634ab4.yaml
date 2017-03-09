@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    The 'sahara' config option in the 'service-available' group has been moved to the sahara plugin
+    (openstack/sahara-tests) along with tests and service client during the Ocata timeframe.
+    A 'sahara' config option was left over on Tempest side, and it's removed now.
+    As long as the sahara plugin is installed, this change as no impact on users of sahara tests.
