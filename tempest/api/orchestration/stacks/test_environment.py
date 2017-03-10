@@ -11,7 +11,7 @@
 #    under the License.
 
 from tempest.api.orchestration import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 
