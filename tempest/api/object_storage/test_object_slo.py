@@ -18,7 +18,7 @@ from oslo_serialization import jsonutils as json
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest import test
