@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import test_keypairs
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 

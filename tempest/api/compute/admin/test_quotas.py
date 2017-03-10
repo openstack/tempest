@@ -18,7 +18,7 @@ from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 LOG = logging.getLogger(__name__)
