@@ -18,9 +18,9 @@ import random
 import netaddr
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest.common.utils import net_info
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 

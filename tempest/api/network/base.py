@@ -15,9 +15,9 @@
 
 import netaddr
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
