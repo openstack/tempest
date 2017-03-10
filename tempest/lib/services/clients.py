@@ -125,6 +125,9 @@ class ClientsRegistry(object):
                 name=plugin_name,
                 detailed_error=detailed_error % plugin_name)
         self._service_clients[plugin_name] = service_client_data
+        LOG.debug("Successfully registered plugin %s in the service client "
+                  "registry with configuration: %s", plugin_name,
+                  service_client_data)
 
     def get_service_clients(self):
         return self._service_clients
