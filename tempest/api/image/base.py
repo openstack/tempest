@@ -145,6 +145,7 @@ class BaseV2ImageTest(BaseImageTest):
         cls.namespace_objects_client = cls.os.namespace_objects_client
         cls.namespace_tags_client = cls.os.namespace_tags_client
         cls.schemas_client = cls.os.schemas_client
+        cls.versions_client = cls.os.image_versions_client
 
     def create_namespace(cls, namespace_name=None, visibility='public',
                          description='Tempest', protected=False,
