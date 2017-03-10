@@ -175,11 +175,6 @@ class RemoteClient(object):
         cmd = "sudo ip link set {nic} {state}".format(nic=nic, state=state)
         return self.exec_command(cmd)
 
-    def get_pids(self, pr_name):
-        # Get pid(s) of a process/program
-        cmd = "ps -ef | grep %s | grep -v 'grep' | awk {'print $1'}" % pr_name
-        return self.exec_command(cmd).split('\n')
-
     def get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
         resolve_file = self.exec_command(cmd).strip().split('\n')
@@ -188,10 +183,6 @@ class RemoteClient(object):
                        if len(l) and l[0] == 'nameserver']
         return dns_servers
 
-    def send_signal(self, pid, signum):
-        cmd = 'sudo /bin/kill -{sig} {pid}'.format(pid=pid, sig=signum)
-        return self.exec_command(cmd)
-
     def _renew_lease_udhcpc(self, fixed_ip=None):
         """Renews DHCP lease via udhcpc client. """
         file_path = '/var/run/udhcpc.'
@@ -199,7 +190,8 @@ class RemoteClient(object):
         pid = self.exec_command('cat {path}{nic}.pid'.
                                 format(path=file_path, nic=nic_name))
         pid = pid.strip()
-        self.send_signal(pid, 'USR1')
+        cmd = 'sudo /bin/kill -{sig} {pid}'.format(pid=pid, sig='USR1')
+        self.exec_command(cmd)
 
     def _renew_lease_dhclient(self, fixed_ip=None):
         """Renews DHCP lease via dhclient client. """
