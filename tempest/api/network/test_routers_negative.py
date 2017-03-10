@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+import testtools
 
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
@@ -80,6 +81,31 @@ class RoutersNegativeTest(base.BaseRouterTest):
                           self._add_router_interface_with_subnet_id,
                           self.router['id'],
                           subnet02['id'])
+
+    @test.attr(type=['negative'])
+    @decorators.idempotent_id('7101cc02-058a-11e7-93e1-fa163e4fa634')
+    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
+    def test_router_set_gateway_used_ip_returns_409(self):
+        # At first create a address from public_network_id
+        port = self.admin_ports_client.create_port(
+            network_id=CONF.network.public_network_id)['port']
+        self.addCleanup(self.admin_ports_client.delete_port,
+                        port_id=port['id'])
+        # Add used ip and subnet_id in external_fixed_ips
+        fixed_ip = {
+            'subnet_id': port['fixed_ips'][0]['subnet_id'],
+            'ip_address': port['fixed_ips'][0]['ip_address']
+        }
+        external_gateway_info = {
+            'network_id': CONF.network.public_network_id,
+            'external_fixed_ips': [fixed_ip]
+        }
+        # Create a router and set gateway to used ip
+        self.assertRaises(lib_exc.Conflict,
+                          self.admin_routers_client.create_router,
+                          external_gateway_info=external_gateway_info)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('04df80f9-224d-47f5-837a-bf23e33d1c20')
