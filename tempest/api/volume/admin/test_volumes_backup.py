@@ -17,9 +17,9 @@ from oslo_serialization import base64
 from oslo_serialization import jsonutils as json
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
