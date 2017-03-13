@@ -87,29 +87,48 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                          'Token must be invalid because the connection '
                          'closed.')
         # Parse the RFB version from the data to make sure it is valid
-        # and greater than or equal to 3.3
+        # and belong to the known supported RFB versions.
         version = float("%d.%d" % (int(data[4:7], base=10),
                                    int(data[8:11], base=10)))
-        self.assertTrue(version >= 3.3, 'Bad RFB Version: ' + str(version))
-        # Send our RFB version to the server, which we will just go with 3.3
+        # Add the max RFB versions supported
+        supported_versions = [3.3, 3.8]
+        self.assertIn(version, supported_versions,
+                      'Bad RFB Version: ' + str(version))
+        # Send our RFB version to the server
         self._websocket.send_frame(data)
         # Get the sever authentication type and make sure None is supported
         data = self._websocket.receive_frame()
         self.assertIsNotNone(data, 'Expected authentication type None.')
-        self.assertGreaterEqual(
-            len(data), 2, 'Expected authentication type None.')
-        self.assertIn(
-            1, [ord_func(data[i + 1]) for i in range(ord_func(data[0]))],
-            'Expected authentication type None.')
-        # Send to the server that we only support authentication type None
-        self._websocket.send_frame(six.int2byte(1))
-        # The server should send 4 bytes of 0's if security handshake succeeded
-        data = self._websocket.receive_frame()
-        self.assertEqual(
-            len(data), 4, 'Server did not think security was successful.')
-        self.assertEqual(
-            [ord_func(i) for i in data], [0, 0, 0, 0],
-            'Server did not think security was successful.')
+        data_length = len(data)
+        if version == 3.3:
+            # For RFB 3.3: in the security handshake, rather than a two-way
+            # negotiation, the server decides the security type and sends a
+            # single word(4 bytes).
+            self.assertEqual(
+                data_length, 4, 'Expected authentication type None.')
+            self.assertIn(1, [ord_func(data[i]) for i in (0, 3)],
+                          'Expected authentication type None.')
+        else:
+            self.assertGreaterEqual(
+                len(data), 2, 'Expected authentication type None.')
+            self.assertIn(
+                1,
+                [ord_func(data[i + 1]) for i in range(ord_func(data[0]))],
+                'Expected authentication type None.')
+            # Send to the server that we only support authentication
+            # type None
+            self._websocket.send_frame(six.int2byte(1))
+
+            # The server should send 4 bytes of 0's if security
+            # handshake succeeded
+            data = self._websocket.receive_frame()
+            self.assertEqual(
+                len(data), 4,
+                'Server did not think security was successful.')
+            self.assertEqual(
+                [ord_func(i) for i in data], [0, 0, 0, 0],
+                'Server did not think security was successful.')
+
         # Say to leave the desktop as shared as part of client initialization
         self._websocket.send_frame(six.int2byte(1))
         # Get the server initialization packet back and make sure it is the
