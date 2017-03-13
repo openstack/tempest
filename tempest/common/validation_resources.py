@@ -15,7 +15,7 @@ from oslo_log import log as logging
 
 from tempest import config
 
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
