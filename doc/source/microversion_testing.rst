@@ -1,13 +1,83 @@
-===================================
-How To Implement Microversion Tests
-===================================
+=================================
+Microversion Testing With Tempest
+=================================
 
-Tempest provides stable interfaces to test API Microversion.
-For Details, see: `API Microversion testing Framework`_
-This document explains how to implement Microversion tests using those
-interfaces.
+Many OpenStack Services provide their APIs with `microversion`_
+support and want to test them in Tempest.
 
-.. _API Microversion testing Framework: http://docs.openstack.org/developer/tempest/library/api_microversion_testing.html
+.. _microversion: http://specs.openstack.org/openstack/api-wg/guidelines/microversion_specification.html
+
+This document covers how to test microversions for each project and
+whether tests should live in Tempest or on project side.
+
+Tempest Scope For Microversion Testing
+""""""""""""""""""""""""""""""""""""""
+APIs microversions for any OpenStack service grow rapidly and
+testing each and every microversion in Tempest is not feasible and
+efficient way.
+Also not every API microversion changes the complete system behavior
+and many of them only change the API or DB layer to accept and return more
+data on API.
+
+Tempest is an integration test suite, but not all API microversion testing fall under this category.
+As a result, Tempest mainly covers integration test cases for microversions, Other testing coverage
+for microversion should be hosted on project side as functional tests or via Tempest plugin as per
+project guidelines.
+
+.. note:: Integration tests are those tests which involve more than one service to
+     verify the expected behavior by single or combination of API requests.
+     If a test is just to verify the API behavior as success and failure cases
+     or verify its expected response object, then it does not fall under integration
+     tests.
+
+Tempest will cover only integration testing of applicable microversions with
+below exceptions:
+
+  #. Test covers a feature which is important for interoperability. This covers tests requirement
+     from Defcore.
+  #. Test needed to fill Schema gaps.
+     Tempest validates API responses with defined JSON schema. API responses can be different on
+     each microversion and the JSON schemas need to be defined separately for the microversion.
+     While implementing new integration tests for a specific microversion, there
+     may be a gap in the JSON schemas (caused by previous microversions) implemented
+     in Tempest.
+     Filling that gap while implementing the new integration test cases is not efficient due to
+     many reasons:
+
+     * Hard to review
+     * Sync between multiple integration tests patches which try to fill the same schema gap at same
+       time
+     * Might delay the microversion change on project side where project team wants Tempest
+       tests to verify the results.
+
+     Tempest will allow to fill the schema gaps at the end of each cycle, or more
+     often if required.
+     Schema gap can be filled with testing those with a minimal set of tests. Those
+     tests might not be integration tests and might be already covered on project
+     side also.
+     This exception is needed because:
+
+     * Allow to create microversion response schema in Tempest at the same time that projects are
+       implementing their API microversions. This will make implementation easier for adding
+       required tests before a new microversion change can be merged in the corresponding project
+       and hence accelerate the development of microversions.
+     * New schema must be verified by at least one test case which exercises such schema.
+
+     For example:
+        If any projects implemented 4 API microversion say- v2.3, v2.4, v2.5, v2.6
+        Assume microversion v2.3, v2.4, v2.6 change the API Response which means Tempest
+        needs to add JSON schema for v2.3, v2.4, v2.6.
+        In that case if only 1 or 2 tests can verify all new schemas then we do not need
+        separate tests for each new schemas. In worst case, we have to add 3 separate tests.
+  #. Test covers service behavior at large scale with involvement of more deep layer like hypervisor
+     etc not just API/DB layer. This type of tests will be added case by case basis and
+     with project team consultation about why it cannot be covered on project side and worth to test
+     in Tempest.
+
+Project Scope For Microversion Testing
+""""""""""""""""""""""""""""""""""""""
+All microversions testing which are not covered under Tempest as per above section, should be
+tested on project side as functional tests or as Tempest plugin as per project decision.
 
 
 Configuration options for Microversion
@@ -35,6 +105,14 @@ Configuration options for Microversion
 
 How To Implement Microversion Tests
 """""""""""""""""""""""""""""""""""
+
+Tempest provides stable interfaces to test API Microversion.
+For Details, see: `API Microversion testing Framework`_
+This document explains how to implement Microversion tests using those
+interfaces.
+
+.. _API Microversion testing Framework: http://docs.openstack.org/developer/tempest/library/api_microversion_testing.html
+
 
 Step1: Add skip logic based on configured Microversion range
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
