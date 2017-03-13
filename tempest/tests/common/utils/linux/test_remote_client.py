@@ -182,7 +182,7 @@ class TestRemoteClientWithServer(base.TestCase):
                                            user='user',
                                            password='pass')))
         self.log = self.useFixture(fixtures.FakeLogger(
-            name='tempest.common.utils.linux.remote_client',
+            name='tempest.lib.common.utils.linux.remote_client',
             level='DEBUG'))
 
     def test_validate_debug_ssh_console(self):
