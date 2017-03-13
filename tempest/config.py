@@ -984,9 +984,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('heat',
                 default=False,
                 help="Whether or not Heat is expected to be available"),
-    cfg.BoolOpt('sahara',
-                default=False,
-                help="Whether or not Sahara is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
