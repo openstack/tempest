@@ -18,10 +18,9 @@ import time
 from six.moves.urllib import parse as urlparse
 import testtools
 
-
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest import test
 
