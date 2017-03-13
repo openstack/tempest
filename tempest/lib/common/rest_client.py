@@ -732,12 +732,21 @@ class RestClient(object):
         if resp.status < 400:
             return
 
-        JSON_ENC = ['application/json', 'application/json; charset=utf-8']
+        # NOTE(zhipengh): There is a purposefully duplicate of content-type
+        # with the only difference is with or without spaces, as specified
+        # in RFC7231.
+        JSON_ENC = ['application/json', 'application/json; charset=utf-8',
+                    'application/json;charset=utf-8']
+
         # NOTE(mtreinish): This is for compatibility with Glance and swift
         # APIs. These are the return content types that Glance api v1
         # (and occasionally swift) are using.
+        # NOTE(zhipengh): There is a purposefully duplicate of content-type
+        # with the only difference is with or without spaces, as specified
+        # in RFC7231.
         TXT_ENC = ['text/plain', 'text/html', 'text/html; charset=utf-8',
-                   'text/plain; charset=utf-8']
+                   'text/plain; charset=utf-8', 'text/html;charset=utf-8',
+                   'text/plain;charset=utf-8']
 
         if ctype.lower() in JSON_ENC:
             parse_resp = True
