@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test

@@ -13,9 +13,9 @@
 from oslo_log import log as logging
 import testtools
 
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
