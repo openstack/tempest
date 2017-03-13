@@ -15,8 +15,8 @@
 import six
 
 from tempest.common import image as common_image
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 import tempest.test
 

@@ -20,8 +20,8 @@ import six
 
 from oslo_log import log as logging
 from tempest.api.image import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest import test
 

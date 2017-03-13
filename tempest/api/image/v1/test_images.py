@@ -17,9 +17,9 @@ import six
 
 from tempest.api.image import base
 from tempest.common import image as common_image
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 
