@@ -124,7 +124,6 @@ class TempestTestPluginManager(object):
             'tempest.test_plugins', invoke_on_load=True,
             propagate_map_exceptions=True,
             on_load_failure_callback=self.failure_hook)
-        self._register_service_clients()
 
     @staticmethod
     def failure_hook(_, ep, err):

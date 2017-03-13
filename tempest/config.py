@@ -1188,6 +1188,12 @@ class TempestConfigProxy(object):
             # loaded, options registered, and _config is set.
             _register_tempest_service_clients()
 
+            # Registering service clients and pushing their configuration to
+            # the service clients register. Doing this in the config module
+            # ensures that the configuration is available by the time we
+            # discover tests from plugins.
+            plugins.TempestTestPluginManager()._register_service_clients()
+
         return getattr(self._config, attr)
 
     def set_config_path(self, path):
