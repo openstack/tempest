@@ -514,10 +514,20 @@ image_feature_group = cfg.OptGroup(name='image-feature-enabled',
 ImageFeaturesGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
-                help="Is the v2 image API enabled"),
+                help="Is the v2 image API enabled",
+                deprecated_for_removal=True,
+                deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
+                                  'are current one. In future, Tempest will '
+                                  'test v2 APIs only so this config option '
+                                  'will be removed.'),
     cfg.BoolOpt('api_v1',
                 default=True,
-                help="Is the v1 image API enabled"),
+                help="Is the v1 image API enabled",
+                deprecated_for_removal=True,
+                deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
+                                  'are current one. In future, Tempest will '
+                                  'test v2 APIs only so this config option '
+                                  'will be removed.'),
     cfg.BoolOpt('deactivate_image',
                 default=False,
                 help="Is the deactivate-image feature enabled."
