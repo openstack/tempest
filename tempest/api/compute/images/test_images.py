@@ -64,3 +64,35 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               wait_for_server=False)
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
+
+    @decorators.idempotent_id('71bcb732-0261-11e7-9086-fa163e4fa634')
+    def test_create_image_from_paused_server(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.servers_client.pause_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'PAUSED')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+
+        snapshot_name = data_utils.rand_name('test-snap')
+        image = self.create_image_from_server(server['id'],
+                                              name=snapshot_name,
+                                              wait_until='ACTIVE',
+                                              wait_for_server=False)
+        self.addCleanup(self.client.delete_image, image['id'])
+        self.assertEqual(snapshot_name, image['name'])
+
+    @decorators.idempotent_id('8ca07fec-0262-11e7-907e-fa163e4fa634')
+    def test_create_image_from_suspended_server(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.servers_client.suspend_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'SUSPENDED')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+
+        snapshot_name = data_utils.rand_name('test-snap')
+        image = self.create_image_from_server(server['id'],
+                                              name=snapshot_name,
+                                              wait_until='ACTIVE',
+                                              wait_for_server=False)
+        self.addCleanup(self.client.delete_image, image['id'])
+        self.assertEqual(snapshot_name, image['name'])
