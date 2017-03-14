@@ -18,8 +18,8 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
