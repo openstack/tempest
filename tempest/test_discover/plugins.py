@@ -46,10 +46,41 @@ class TempestPlugin(object):
         """Add additional configuration options to tempest.
 
         This method will be run for the plugin during the register_opts()
-        function in tempest.config
+        function in tempest.config.
 
         :param ConfigOpts conf: The conf object that can be used to register
             additional options on.
+
+        Example:
+            >>> # Config options are defined in a config.py module
+            >>> service_option = cfg.BoolOpt(
+            >>>     "my_service",
+            >>>     default=True,
+            >>>     help="Whether or not my service is available")
+            >>>
+            >>> # Note: as long as the group is listed in get_opt_lists,
+            >>> # it will be possible to access its optins in the plugin code
+            >>> # via ("-" in the group name are replaces with "_"):
+            >>> #     CONF.my_service.<option_name>
+            >>> my_service_group = cfg.OptGroup(name="my-service",
+            >>>                                 title="My service options")
+            >>>
+            >>> MyServiceGroup = [<list of options>]
+            >>> # (...) More groups and options...
+            >>>
+            >>> # Plugin is implemented in a plugin.py module
+            >>> from my_plugin import config as my_config
+            >>>
+            >>> def register_opts(self, conf):
+            >>>    conf.register_opt(my_config.service_option,
+            >>>                      group='service_available')
+            >>>    conf.register_group(my_config.my_service_group)
+            >>>    conf.register_opts(my_config.MyService +
+            >>>                       my_config.my_service_group)
+            >>>
+            >>>    conf.register_group(my_config.my_service_feature_group)
+            >>>    conf.register_opts(my_config.MyServiceFeaturesGroup,
+            >>>                       my_config.my_service_feature_group)
         """
         return
 
