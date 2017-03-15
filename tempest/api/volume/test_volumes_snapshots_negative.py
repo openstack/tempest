@@ -68,7 +68,3 @@ class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.snapshots_client.list_snapshots,
                           limit='invalid')
-
-
-class VolumesV1SnapshotNegativeTestJSON(VolumesV2SnapshotNegativeTestJSON):
-    _api_version = 1

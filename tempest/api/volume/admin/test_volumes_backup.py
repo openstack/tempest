@@ -136,7 +136,3 @@ class VolumesBackupsAdminV2Test(base.BaseVolumeAdminTest):
                                                       status="error")
         waiters.wait_for_volume_resource_status(self.admin_backups_client,
                                                 backup['id'], 'error')
-
-
-class VolumesBackupsAdminV1Test(VolumesBackupsAdminV2Test):
-    _api_version = 1

@@ -140,7 +140,3 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         msg = ("volumes %s were created in the same backend" % ", "
                .join(volume_hosts))
         six.assertCountEqual(self, volume_hosts, set(volume_hosts), msg)
-
-
-class VolumeMultiBackendV1Test(VolumeMultiBackendV2Test):
-    _api_version = 1

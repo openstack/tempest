@@ -107,7 +107,3 @@ class SnapshotsActionsV2Test(base.BaseVolumeAdminTest):
     def test_snapshot_force_delete_when_snapshot_is_error_deleting(self):
         # test force delete when status of snapshot is error_deleting
         self._create_reset_and_force_delete_temp_snapshot('error_deleting')
-
-
-class SnapshotsActionsV1Test(SnapshotsActionsV2Test):
-    _api_version = 1

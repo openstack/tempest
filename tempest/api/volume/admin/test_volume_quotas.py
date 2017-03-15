@@ -169,7 +169,3 @@ class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(primary_quota['gigabytes']['in_use'] -
                          volume['size'],
                          new_primary_quota['gigabytes']['in_use'])
-
-
-class VolumeQuotasAdminV1TestJSON(BaseVolumeQuotasAdminV2TestJSON):
-    _api_version = 1

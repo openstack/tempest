@@ -89,7 +89,3 @@ class VolumesV2MetadataTest(base.BaseVolumeTest):
         body = self.volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
-
-
-class VolumesV1MetadataTest(VolumesV2MetadataTest):
-    _api_version = 1

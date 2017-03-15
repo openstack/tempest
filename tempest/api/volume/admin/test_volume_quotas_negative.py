@@ -70,7 +70,3 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=CONF.volume.volume_size)
-
-
-class VolumeQuotasNegativeV1TestJSON(BaseVolumeQuotasNegativeV2TestJSON):
-    _api_version = 1

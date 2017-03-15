@@ -141,7 +141,3 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'],
                                               size=CONF.volume.volume_size)
-
-
-class VolumesV1GetTest(VolumesV2GetTest):
-    _api_version = 1

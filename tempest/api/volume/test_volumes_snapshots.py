@@ -158,7 +158,3 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Should allow
         self.assertEqual(volume['snapshot_id'], src_snap['id'])
         self.assertEqual(volume['size'], src_size + 1)
-
-
-class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
-    _api_version = 1

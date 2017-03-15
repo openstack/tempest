@@ -134,7 +134,3 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
             restored_volume_id)['volume']
 
         self.assertEqual('true', restored_volume_info['bootable'])
-
-
-class VolumesBackupsV1Test(VolumesBackupsV2Test):
-    _api_version = 1
