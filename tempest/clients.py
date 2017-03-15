@@ -125,6 +125,8 @@ class Manager(clients.ServiceClients):
                 self.image_v2.NamespacePropertiesClient()
             self.namespace_tags_client = \
                 self.image_v2.NamespaceTagsClient()
+            self.image_versions_client = \
+                self.image_v2.VersionsClient()
 
     def _set_compute_clients(self):
         self.agents_client = self.compute.AgentsClient()
