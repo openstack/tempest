@@ -223,8 +223,8 @@ IdentityFeatureGroup = [
                 default=True,
                 help='Does the environment support reseller?',
                 deprecated_for_removal=True,
-                deprecated_reason="All supported version of OpenStack now "
-                                  "supports the 'reseller' feature"),
+                deprecated_reason="All supported versions of OpenStack now "
+                                  "support the 'reseller' feature"),
     # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
     # in Newton and Ocata. This option can be removed after Mitaka is end of
     # life.
@@ -531,7 +531,10 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('deactivate_image',
                 default=False,
                 help="Is the deactivate-image feature enabled."
-                     " The feature has been integrated since Kilo."),
+                     " The feature has been integrated since Kilo.",
+                deprecated_for_removal=True,
+                deprecated_reason="All supported versions of OpenStack now "
+                                  "support the 'deactivate_image' feature"),
 ]
 
 network_group = cfg.OptGroup(name='network',
