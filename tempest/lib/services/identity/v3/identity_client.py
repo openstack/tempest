@@ -43,3 +43,10 @@ class IdentityClient(rest_client.RestClient):
         resp, body = self.delete("auth/tokens", headers=headers)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def list_auth_projects(self):
+        """Get available project scopes."""
+        resp, body = self.get("auth/projects")
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)

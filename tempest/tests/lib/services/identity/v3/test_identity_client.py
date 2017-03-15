@@ -32,6 +32,34 @@ class TestIdentityClient(base.BaseServiceTest):
         "description": "test_description"
     }
 
+    FAKE_AUTH_PROJECTS = {
+        "projects": [
+            {
+                "domain_id": "1789d1",
+                "enabled": True,
+                "id": "263fd9",
+                "links": {
+                    "self": "https://example.com/identity/v3/projects/263fd9"
+                },
+                "name": "Test Group"
+            },
+            {
+                "domain_id": "1789d1",
+                "enabled": True,
+                "id": "50ef01",
+                "links": {
+                    "self": "https://example.com/identity/v3/projects/50ef01"
+                },
+                "name": "Build Group"
+            }
+        ],
+        "links": {
+            "self": "https://example.com/identity/v3/auth/projects",
+            "previous": None,
+            "next": None
+        }
+    }
+
     def setUp(self):
         super(TestIdentityClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -54,6 +82,13 @@ class TestIdentityClient(base.BaseServiceTest):
             bytes_body,
             resp_token="cbc36478b0bd8e67e89")
 
+    def _test_list_auth_projects(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_auth_projects,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_AUTH_PROJECTS,
+            bytes_body)
+
     def test_show_api_description_with_str_body(self):
         self._test_show_api_description()
 
@@ -73,3 +108,9 @@ class TestIdentityClient(base.BaseServiceTest):
             {},
             resp_token="cbc36478b0bd8e67e89",
             status=204)
+
+    def test_list_auth_projects_with_str_body(self):
+        self._test_list_auth_projects()
+
+    def test_list_auth_projects_with_bytes_body(self):
+        self._test_list_auth_projects(bytes_body=True)

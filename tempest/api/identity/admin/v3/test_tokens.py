@@ -16,9 +16,12 @@
 import six
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
@@ -150,3 +153,34 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                          token_auth['token']['project']['id'])
         self.assertEqual(project2['name'],
                          token_auth['token']['project']['name'])
+
+    @decorators.idempotent_id('08ed85ce-2ba8-4864-b442-bcc61f16ae89')
+    def test_get_available_project_scopes(self):
+        manager_project_id = self.manager.credentials.project_id
+        admin_user_id = self.os_adm.credentials.user_id
+        admin_role_id = self.get_role_by_name(CONF.identity.admin_role)['id']
+
+        # Grant the user the role on both projects.
+        self.roles_client.create_user_role_on_project(
+            manager_project_id, admin_user_id, admin_role_id)
+        self.addCleanup(
+            self.roles_client.delete_role_from_user_on_project,
+            manager_project_id, admin_user_id, admin_role_id)
+
+        assigned_project_ids = [self.os_adm.credentials.project_id,
+                                manager_project_id]
+
+        # Get available project scopes
+        available_projects =\
+            self.client.list_auth_projects()['projects']
+
+        # create list to save fetched project's id
+        fetched_project_ids = [i['id'] for i in available_projects]
+
+        # verifying the project ids in list
+        missing_project_ids = \
+            [p for p in assigned_project_ids
+             if p not in fetched_project_ids]
+        self.assertEmpty(missing_project_ids,
+                         "Failed to find project_id %s in fetched list" %
+                         ', '.join(missing_project_ids))
