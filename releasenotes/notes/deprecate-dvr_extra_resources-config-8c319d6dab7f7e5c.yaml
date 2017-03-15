@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    The ``dvr_extra_resources`` configuration switch from the ``config`` module
+    is deprecated. It was added to support the Liberty Release which we don't
+    support anymore.
+
