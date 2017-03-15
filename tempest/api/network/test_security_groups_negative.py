@@ -176,6 +176,16 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           name=name)
 
     @test.attr(type=['negative'])
+    @decorators.idempotent_id('966e2b96-023a-11e7-a9e4-fa163e4fa634')
+    def test_create_security_group_update_name_default(self):
+        # Update security group name to 'default', it should be failed.
+        group_create_body, _ = self._create_security_group()
+        self.assertRaises(lib_exc.Conflict,
+                          self.security_groups_client.update_security_group,
+                          group_create_body['security_group']['id'],
+                          name="default")
+
+    @test.attr(type=['negative'])
     @decorators.idempotent_id('8fde898f-ce88-493b-adc9-4e4692879fc5')
     def test_create_duplicate_security_group_rule_fails(self):
         # Create duplicate security group rule, it should fail.
