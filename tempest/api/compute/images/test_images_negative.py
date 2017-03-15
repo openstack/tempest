@@ -54,7 +54,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         meta = {'image_type': 'test'}
         self.assertRaises(lib_exc.NotFound,
                           self.create_image_from_server,
-                          server['id'], meta=meta)
+                          server['id'], metadata=meta)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('82c5b0c4-9dbd-463c-872b-20c4755aae7f')
@@ -63,7 +63,7 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a new image with invalid server id
         meta = {'image_type': 'test'}
         self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          data_utils.rand_name('invalid'), meta=meta)
+                          data_utils.rand_name('invalid'), metadata=meta)
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
