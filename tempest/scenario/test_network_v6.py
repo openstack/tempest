@@ -72,11 +72,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet - create IPv6 subnets on a different network
         :return: list of created networks
         """
-        self.network = self._create_network()
+        network = self._create_network()
         if dualnet:
-            self.network_v6 = self._create_network()
+            network_v6 = self._create_network()
 
-        sub4 = self._create_subnet(network=self.network,
+        sub4 = self._create_subnet(network=network,
                                    namestart='sub4',
                                    ip_version=4)
 
@@ -90,7 +90,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         self.subnets_v6 = []
         for _ in range(n_subnets6):
-            net6 = self.network_v6 if dualnet else self.network
+            net6 = network_v6 if dualnet else network
             sub6 = self._create_subnet(network=net6,
                                        namestart='sub6',
                                        ip_version=6,
@@ -105,7 +105,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                             router['id'], subnet_id=sub6['id'])
 
             self.subnets_v6.append(sub6)
-        return [self.network, self.network_v6] if dualnet else [self.network]
+        return [network, network_v6] if dualnet else [network]
 
     @staticmethod
     def define_server_ips(srv):
@@ -121,8 +121,6 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def prepare_server(self, networks=None):
         username = CONF.validation.image_ssh_user
 
-        networks = networks or [self.network]
-
         srv = self.create_server(
             key_name=self.keypair['name'],
             security_groups=[{'name': self.sec_grp['name']}],
@@ -134,7 +132,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             username=username)
         return ssh, ips, srv["id"]
 
-    def turn_nic6_on(self, ssh, sid):
+    def turn_nic6_on(self, ssh, sid, network_id):
         """Turns the IPv6 vNIC on
 
         Required because guest images usually set only the first vNIC on boot.
@@ -142,16 +140,18 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         @param ssh: RemoteClient ssh instance to server
         @param sid: server uuid
+        @param network_id: the network id the NIC is connected to
         """
         ports = [
             p["mac_address"] for p in
             self.admin_manager.ports_client.list_ports(
-                device_id=sid, network_id=self.network_v6['id'])['ports']
+                device_id=sid, network_id=network_id)['ports']
         ]
+
         self.assertEqual(1, len(ports),
                          message=("Multiple IPv6 ports found on network %s. "
                                   "ports: %s")
-                         % (self.network_v6, ports))
+                         % (network_id, ports))
         mac6 = ports[0]
         ssh.set_nic_state(ssh.get_nic_name_by_mac(mac6))
 
@@ -168,8 +168,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         # Turn on 2nd NIC for Cirros when dualnet
         if dualnet:
-            self.turn_nic6_on(sshv4_1, sid1)
-            self.turn_nic6_on(sshv4_2, sid2)
+            network, network_v6 = net_list
+            self.turn_nic6_on(sshv4_1, sid1, network_v6['id'])
+            self.turn_nic6_on(sshv4_2, sid2, network_v6['id'])
 
         # get addresses assigned to vNIC as reported by 'ip address' utility
         ips_from_ip_1 = sshv4_1.exec_command("ip address")
