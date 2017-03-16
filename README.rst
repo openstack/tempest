@@ -104,7 +104,7 @@ as it is simpler, and quicker to work with.
     $ tempest run
 
    from the Tempest workspace directory. Or you can use the ``--workspace``
-   argument to run in the workspace you created regarless of your current
+   argument to run in the workspace you created regardless of your current
    working directory. For example::
 
     $ tempest run --workspace cloud-01
