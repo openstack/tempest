@@ -139,14 +139,6 @@ a0:b0:c0:d0:e0:f0"""
         self._assert_exec_called_with(
             "ip addr | awk '/ether/ {print $2}'")
 
-    def test_assign_static_ip(self):
-        self.ssh_mock.mock.exec_command.return_value = ''
-        ip = '10.0.0.2'
-        nic = 'eth0'
-        self.assertEqual(self.conn.assign_static_ip(nic, ip), '')
-        self._assert_exec_called_with(
-            "sudo ip addr add %s/%s dev %s" % (ip, '28', nic))
-
 
 class TestRemoteClientWithServer(base.TestCase):
 

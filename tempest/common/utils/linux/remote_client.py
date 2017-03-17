@@ -100,11 +100,6 @@ class RemoteClient(remote_client.RemoteClient):
         nic = self.exec_command(cmd)
         return nic.strip().strip(":").lower()
 
-    def assign_static_ip(self, nic, addr, network_mask_bits=28):
-        cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
-            ip=addr, mask=network_mask_bits, nic=nic)
-        return self.exec_command(cmd)
-
     def get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
         resolve_file = self.exec_command(cmd).strip().split('\n')
