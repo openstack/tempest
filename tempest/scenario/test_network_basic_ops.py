@@ -289,7 +289,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client.assign_static_ip(
             nic=new_nic, addr=new_port['fixed_ips'][0]['ip_address'],
             network_mask_bits=CONF.network.project_network_mask_bits)
-        ssh_client.set_nic_state(nic=new_nic)
+        ssh_client.exec_command("sudo ip link set %s up" % new_nic)
 
     def _get_server_nics(self, ssh_client):
         reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+):')

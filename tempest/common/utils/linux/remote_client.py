@@ -80,10 +80,10 @@ class RemoteClient(remote_client.RemoteClient):
         return self.exec_command(cmd)
 
     def set_mac_address(self, nic, address):
-        self.set_nic_state(nic=nic, state="down")
+        self.exec_command("sudo ip link set %s down" % nic)
         cmd = "sudo ip link set dev {0} address {1}".format(nic, address)
         self.exec_command(cmd)
-        self.set_nic_state(nic=nic, state="up")
+        self.exec_command("sudo ip link set %s up" % nic)
 
     def get_mac_address(self, nic=""):
         show_nic = "show {nic} ".format(nic=nic) if nic else ""
@@ -103,10 +103,6 @@ class RemoteClient(remote_client.RemoteClient):
     def assign_static_ip(self, nic, addr, network_mask_bits=28):
         cmd = "sudo ip addr add {ip}/{mask} dev {nic}".format(
             ip=addr, mask=network_mask_bits, nic=nic)
-        return self.exec_command(cmd)
-
-    def set_nic_state(self, nic, state="up"):
-        cmd = "sudo ip link set {nic} {state}".format(nic=nic, state=state)
         return self.exec_command(cmd)
 
     def get_dns_servers(self):
