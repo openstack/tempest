@@ -223,6 +223,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.role_assignments = cls.os_admin.role_assignments_client
         cls.oauth_consumers_client = cls.os_adm.oauth_consumers_client
         cls.domain_config_client = cls.os_adm.domain_config_client
+        cls.endpoint_filter_client = cls.os_adm.endpoint_filter_client
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity
             # admin clients for these tests shall use 'domain' scoped tokens.
