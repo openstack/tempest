@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.lib import decorators
 
 
@@ -21,13 +22,16 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
-        body = self.create_test_server(wait_until='ACTIVE',
-                                       min_count=1,
-                                       max_count=2)
+        body, servers = compute.create_test_server(self.os,
+                                                   wait_until='ACTIVE',
+                                                   min_count=2)
+        for server in servers:
+            self.addCleanup(self.servers_client.delete_server, server['id'])
         # NOTE(maurosr): do status response check and also make sure that
         # reservation_id is not in the response body when the request send
         # contains return_reservation_id=False
         self.assertNotIn('reservation_id', body)
+        self.assertEqual(2, len(servers))
 
     @decorators.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
     def test_multiple_create_with_reservation_return(self):
