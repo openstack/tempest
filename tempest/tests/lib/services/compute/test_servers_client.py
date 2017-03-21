@@ -168,6 +168,10 @@ class TestServersClient(base.BaseServiceTest):
         "url": "http://os.co/v2/616fb98f-46ca-475e-917e-2563e5a8cd19"
     }
 
+    FAKE_SERVER_PASSWORD = {
+        "adminPass": "fake-password",
+    }
+
     FAKE_INSTANCE_ACTION_EVENTS = {
         "event": "fake-event",
         "start_time": "2016-10-02T10:00:00-05:00",
@@ -321,6 +325,21 @@ class TestServersClient(base.BaseServiceTest):
             rotation='fake-rotation',
             name='fake-name'
             )
+
+    def test_evacuate_server_with_str_body(self):
+        self._test_evacuate_server()
+
+    def test_evacuate_server_with_bytes_body(self):
+        self._test_evacuate_server(bytes_body=True)
+
+    def _test_evacuate_server(self, bytes_body=False):
+        kwargs = {'server_id': self.server_id,
+                  'host': 'fake-target-host'}
+        self.check_service_client_function(
+            self.client.evacuate_server,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_SERVER_PASSWORD,
+            **kwargs)
 
     def test_change_password_with_str_body(self):
         self._test_change_password()

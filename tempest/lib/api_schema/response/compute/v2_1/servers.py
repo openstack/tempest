@@ -564,3 +564,19 @@ server_actions_confirm_resize = copy.deepcopy(
 update_attached_volume = {
     'status_code': [202]
 }
+
+evacuate_server = {
+    'status_code': [200]
+}
+
+evacuate_server_with_admin_pass = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'adminPass': {'type': 'string'}
+        },
+        'additionalProperties': False,
+        'required': ['adminPass']
+    }
+}
