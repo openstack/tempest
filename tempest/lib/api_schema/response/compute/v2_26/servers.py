@@ -52,12 +52,7 @@ list_tags = {
     'response_body': {
         'type': 'object',
         'properties': {
-            'tags': {
-                'type': 'array',
-                'items': {
-                    'type': 'string'
-                }
-            }
+            'tags': tag_items,
         },
         'additionalProperties': False,
         'required': ['tags']
