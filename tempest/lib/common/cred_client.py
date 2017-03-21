@@ -59,7 +59,8 @@ class CredsClient(object):
     def _check_role_exists(self, role_name):
         try:
             roles = self._list_roles()
-            role = next(r for r in roles if r['name'] == role_name)
+            lc_role_name = role_name.lower()
+            role = next(r for r in roles if r['name'].lower() == lc_role_name)
         except StopIteration:
             return None
         return role
