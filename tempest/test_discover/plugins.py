@@ -102,11 +102,10 @@ class TempestPlugin(object):
         in any ServiceClients object instantiated by tests.
         The default implementation returns an empty list.
 
-        :return list of dictionaries. Each element of the list represents
-            the service client for an API. Each dict must define all
-            parameters required for the invocation of
-            `service_clients.ServiceClients.register_service_client_module`.
-        :rtype: list
+        :returns: Each element of the list represents the service client for an
+          API. Each dict must define all parameters required for the invocation
+          of `service_clients.ServiceClients.register_service_client_module`.
+        :rtype: list of dictionaries
 
         Example:
 
