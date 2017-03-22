@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add update encryption type API to the v2 encryption_types_client library.
+    This feature enables the possibility to update an encryption type for an
+    existing volume type.
