@@ -1,0 +1,5 @@
+upgrade:
+  - Remove Cinder v1 API tests.
+    Cinder v1 API has been deprecated since Juno release, and Juno is
+    not supported by current Tempest. Then Cinder v1 API tests are
+    removed from Tempest.
