@@ -86,7 +86,3 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         self.client.delete_volume_transfer(transfer_id)
         waiters.wait_for_volume_resource_status(
             self.client, volume['id'], 'available')
-
-
-class VolumesV1TransfersTest(VolumesV2TransfersTest):
-    _api_version = 1

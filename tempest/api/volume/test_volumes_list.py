@@ -221,8 +221,3 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         params = {self.name: volume[self.name],
                   'status': 'available'}
         self._list_by_param_value_and_assert(params, with_detail=True)
-
-
-class VolumesV1ListTestJSON(VolumesV2ListTestJSON):
-    _api_version = 1
-    VOLUME_FIELDS = ('id', 'display_name')

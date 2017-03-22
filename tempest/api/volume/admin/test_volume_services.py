@@ -80,7 +80,3 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         self.assertNotEqual(0, len(services))
         self.assertEqual(self.host_name, _get_host(services[0]['host']))
         self.assertEqual(self.binary_name, services[0]['binary'])
-
-
-class VolumesServicesV1TestJSON(VolumesServicesV2TestJSON):
-    _api_version = 1

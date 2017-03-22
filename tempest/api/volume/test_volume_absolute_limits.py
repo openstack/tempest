@@ -46,7 +46,3 @@ class AbsoluteLimitsV2Tests(base.BaseVolumeTest):
         self.assertEqual(absolute_limits['totalSnapshotsUsed'], 0)
         self.assertEqual(absolute_limits['totalBackupsUsed'], 0)
         self.assertEqual(absolute_limits['totalBackupGigabytesUsed'], 0)
-
-
-class AbsoluteLimitsV1Tests(AbsoluteLimitsV2Tests):
-    _api_version = 1

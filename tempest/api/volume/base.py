@@ -37,11 +37,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        if cls._api_version == 1:
-            if not CONF.volume_feature_enabled.api_v1:
-                msg = "Volume API v1 is disabled"
-                raise cls.skipException(msg)
-        elif cls._api_version == 2:
+        if cls._api_version == 2:
             if not CONF.volume_feature_enabled.api_v2:
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
@@ -65,23 +61,13 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.compute_networks_client = cls.os.compute_networks_client
         cls.compute_images_client = cls.os.compute_images_client
 
-        if cls._api_version == 1:
-            cls.snapshots_client = cls.os.snapshots_client
-            cls.volumes_client = cls.os.volumes_client
-            cls.backups_client = cls.os.backups_client
-            cls.volume_services_client = cls.os.volume_services_client
-            cls.volumes_extension_client = cls.os.volumes_extension_client
-            cls.availability_zone_client = (
-                cls.os.volume_availability_zone_client)
-            cls.volume_limits_client = cls.os.volume_limits_client
-        else:
-            cls.snapshots_client = cls.os.snapshots_v2_client
-            cls.volumes_client = cls.os.volumes_v2_client
-            cls.backups_client = cls.os.backups_v2_client
-            cls.volumes_extension_client = cls.os.volumes_v2_extension_client
-            cls.availability_zone_client = (
-                cls.os.volume_v2_availability_zone_client)
-            cls.volume_limits_client = cls.os.volume_v2_limits_client
+        cls.snapshots_client = cls.os.snapshots_v2_client
+        cls.volumes_client = cls.os.volumes_v2_client
+        cls.backups_client = cls.os.backups_v2_client
+        cls.volumes_extension_client = cls.os.volumes_v2_extension_client
+        cls.availability_zone_client = (
+            cls.os.volume_v2_availability_zone_client)
+        cls.volume_limits_client = cls.os.volume_v2_limits_client
 
     @classmethod
     def resource_setup(cls):
@@ -94,14 +80,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.build_interval = CONF.volume.build_interval
         cls.build_timeout = CONF.volume.build_timeout
 
-        if cls._api_version == 1:
-            # Special fields and resp code for cinder v1
-            cls.special_fields = {'name_field': 'display_name',
-                                  'descrip_field': 'display_description'}
-        else:
-            # Special fields and resp code for cinder v2
-            cls.special_fields = {'name_field': 'name',
-                                  'descrip_field': 'description'}
+        cls.special_fields = {'name_field': 'name',
+                              'descrip_field': 'description'}
 
     @classmethod
     def resource_cleanup(cls):
@@ -246,38 +226,24 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def setup_clients(cls):
         super(BaseVolumeAdminTest, cls).setup_clients()
 
-        if cls._api_version == 1:
-            cls.admin_volume_qos_client = cls.os_adm.volume_qos_client
-            cls.admin_volume_services_client = \
-                cls.os_adm.volume_services_client
-            cls.admin_volume_types_client = cls.os_adm.volume_types_client
-            cls.admin_volume_client = cls.os_adm.volumes_client
-            cls.admin_hosts_client = cls.os_adm.volume_hosts_client
-            cls.admin_snapshots_client = cls.os_adm.snapshots_client
-            cls.admin_backups_client = cls.os_adm.backups_client
-            cls.admin_encryption_types_client = \
-                cls.os_adm.encryption_types_client
-            cls.admin_quotas_client = cls.os_adm.volume_quotas_client
-            cls.admin_volume_limits_client = cls.os_adm.volume_limits_client
-        elif cls._api_version == 2:
-            cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
-            cls.admin_volume_services_client = \
-                cls.os_adm.volume_services_v2_client
-            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
-            cls.admin_volume_client = cls.os_adm.volumes_v2_client
-            cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
-            cls.admin_snapshot_manage_client = \
-                cls.os_adm.snapshot_manage_v2_client
-            cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
-            cls.admin_backups_client = cls.os_adm.backups_v2_client
-            cls.admin_encryption_types_client = \
-                cls.os_adm.encryption_types_v2_client
-            cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
-            cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
-            cls.admin_capabilities_client = \
-                cls.os_adm.volume_capabilities_v2_client
-            cls.admin_scheduler_stats_client = \
-                cls.os_adm.volume_scheduler_stats_v2_client
+        cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
+        cls.admin_volume_services_client = \
+            cls.os_adm.volume_services_v2_client
+        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+        cls.admin_volume_client = cls.os_adm.volumes_v2_client
+        cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
+        cls.admin_snapshot_manage_client = \
+            cls.os_adm.snapshot_manage_v2_client
+        cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
+        cls.admin_backups_client = cls.os_adm.backups_v2_client
+        cls.admin_encryption_types_client = \
+            cls.os_adm.encryption_types_v2_client
+        cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
+        cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
+        cls.admin_capabilities_client = \
+            cls.os_adm.volume_capabilities_v2_client
+        cls.admin_scheduler_stats_client = \
+            cls.os_adm.volume_scheduler_stats_v2_client
 
     @classmethod
     def resource_setup(cls):

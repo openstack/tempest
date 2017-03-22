@@ -43,7 +43,3 @@ class ExtensionsV2TestJSON(base.BaseVolumeTest):
             self.assertIn(ext, map(lambda x: x['alias'], extensions))
         else:
             raise self.skipException('There are not any extensions configured')
-
-
-class ExtensionsV1TestJSON(ExtensionsV2TestJSON):
-    _api_version = 1

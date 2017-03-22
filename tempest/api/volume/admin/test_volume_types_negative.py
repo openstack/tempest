@@ -64,7 +64,3 @@ class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
         volume_type = self.create_volume_type(**params)
         self.assertRaises(lib_exc.NotFound,
                           self.create_volume, volume_type=volume_type['id'])
-
-
-class VolumeTypesNegativeV1Test(VolumeTypesNegativeV2Test):
-    _api_version = 1

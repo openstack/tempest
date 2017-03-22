@@ -157,7 +157,3 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         operation = 'disassociate-all'
         waiters.wait_for_qos_operations(self.admin_volume_qos_client,
                                         self.created_qos['id'], operation)
-
-
-class QosSpecsV1TestJSON(QosSpecsV2TestJSON):
-    _api_version = 1

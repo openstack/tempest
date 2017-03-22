@@ -43,7 +43,3 @@ class VolumesV2CloneNegativeTest(base.BaseVolumeTest):
                           self.volumes_client.create_volume,
                           size=src_size - 1,
                           source_volid=src_vol['id'])
-
-
-class VolumesV1CloneNegativeTest(VolumesV2CloneNegativeTest):
-    _api_version = 1

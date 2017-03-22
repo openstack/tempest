@@ -31,7 +31,3 @@ class VolumesV2ExtendTest(base.BaseVolumeTest):
                                                 volume['id'], 'available')
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual(volume['size'], extend_size)
-
-
-class VolumesV1ExtendTest(VolumesV2ExtendTest):
-    _api_version = 1

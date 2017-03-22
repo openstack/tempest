@@ -103,7 +103,3 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
     def test_snapshot_list_param_limit_equals_zero(self):
         # List returns zero elements
         self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
-
-
-class VolumesV1SnapshotLimitTestJSON(VolumesV2SnapshotListTestJSON):
-    _api_version = 1

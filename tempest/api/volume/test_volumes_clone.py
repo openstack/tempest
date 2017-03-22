@@ -60,7 +60,3 @@ class VolumesV2CloneTest(base.BaseVolumeTest):
         self.assertEqual('true', cloned_vol_details['bootable'])
         self.assertEqual(src_vol['id'], cloned_vol_details['source_volid'])
         self.assertEqual(src_vol['size'], cloned_vol_details['size'])
-
-
-class VolumesV1CloneTest(VolumesV2CloneTest):
-    _api_version = 1

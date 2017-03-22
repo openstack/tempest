@@ -75,7 +75,3 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           volume_id=self.volume['id'])
-
-
-class VolumeSnapshotNegativeV1TestJSON(VolumeSnapshotQuotasNegativeV2TestJSON):
-    _api_version = 1

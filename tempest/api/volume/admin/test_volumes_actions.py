@@ -53,7 +53,3 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error
         self._create_reset_and_force_delete_temp_volume('error')
-
-
-class VolumesActionsV1Test(VolumesActionsV2Test):
-    _api_version = 1

@@ -183,7 +183,3 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         self.assertEqual(name, updated_vol_type['name'])
         self.assertEqual(description, updated_vol_type['description'])
         self.assertEqual(is_public, updated_vol_type['is_public'])
-
-
-class VolumeTypesV1Test(VolumeTypesV2Test):
-    _api_version = 1

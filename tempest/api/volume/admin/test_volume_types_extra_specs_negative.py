@@ -136,7 +136,3 @@ class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
             lib_exc.NotFound,
             self.admin_volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], data_utils.rand_uuid())
-
-
-class ExtraSpecsNegativeV1Test(ExtraSpecsNegativeV2Test):
-    _api_version = 1

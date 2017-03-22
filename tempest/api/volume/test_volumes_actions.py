@@ -153,7 +153,3 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
             # to compare here.
             self.assertEqual(str(readonly),
                              fetched_volume['metadata']['readonly'])
-
-
-class VolumesV1ActionsTest(VolumesV2ActionsTest):
-    _api_version = 1

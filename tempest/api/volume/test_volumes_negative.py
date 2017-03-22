@@ -294,7 +294,3 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
             self.volumes_client.list_volumes(detail=True,
                                              params=params)['volumes']
         self.assertEqual(0, len(fetched_volume))
-
-
-class VolumesV1NegativeTest(VolumesV2NegativeTest):
-    _api_version = 1

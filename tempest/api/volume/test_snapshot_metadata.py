@@ -102,7 +102,3 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         body = self.snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
-
-
-class SnapshotV1MetadataTestJSON(SnapshotV2MetadataTestJSON):
-    _api_version = 1

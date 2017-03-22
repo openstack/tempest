@@ -24,7 +24,3 @@ class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
         hosts = self.admin_hosts_client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2, "No. of hosts are < 2,"
                                 "response of list hosts is: % s" % hosts)
-
-
-class VolumeHostsAdminV1TestsJSON(VolumeHostsAdminV2TestsJSON):
-    _api_version = 1
