@@ -170,7 +170,7 @@ negative testing should be handled with project function tests.
 All negative tests should be based on `API-WG guideline`_ . Such negative
 tests can block any changes from accurate failure code to invalid one.
 
-.. _API-WG guideline: https://github.com/openstack/api-wg/blob/master/guidelines/http.rst#failure-code-clarifications
+.. _API-WG guideline: http://specs.openstack.org/openstack/api-wg/guidelines/http.html#failure-code-clarifications
 
 If facing some gray area which is not clarified on the above guideline, propose
 a new guideline to the API-WG. With a proposal to the API-WG we will be able to
