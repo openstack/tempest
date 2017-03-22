@@ -79,12 +79,6 @@ class RemoteClient(remote_client.RemoteClient):
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
         return self.exec_command(cmd)
 
-    def set_mac_address(self, nic, address):
-        self.exec_command("sudo ip link set %s down" % nic)
-        cmd = "sudo ip link set dev {0} address {1}".format(nic, address)
-        self.exec_command(cmd)
-        self.exec_command("sudo ip link set %s up" % nic)
-
     def get_mac_address(self, nic=""):
         show_nic = "show {nic} ".format(nic=nic) if nic else ""
         cmd = "ip addr %s| awk '/ether/ {print $2}'" % show_nic
