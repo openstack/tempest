@@ -767,6 +767,12 @@ VolumeGroup = [
     cfg.IntOpt('volume_size',
                default=1,
                help='Default size in GB for volumes created by volumes tests'),
+    cfg.ListOpt('manage_volume_ref',
+                default=['source-name', 'volume-%s'],
+                help="A reference to existing volume for volume manage. "
+                     "It contains two elements, the first is ref type "
+                     "(like 'source-name', 'source-id', etc), the second is "
+                     "volume name template used in storage backend"),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
@@ -806,6 +812,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('manage_snapshot',
                 default=False,
                 help='Runs Cinder manage snapshot tests'),
+    cfg.BoolOpt('manage_volume',
+                default=False,
+                help='Runs Cinder manage volume tests'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '

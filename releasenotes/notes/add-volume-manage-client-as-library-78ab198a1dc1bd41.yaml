@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Add the unmanage volume API service method in v2 volumes_client library.
+    Define v2 volume_manage_client client for the volume service as library
+    interfaces, allowing other projects to use this module as stable libraries
+    without maintenance changes.
+
+    * volume_manage_client(v2)
