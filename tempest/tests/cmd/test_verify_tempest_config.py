@@ -192,7 +192,7 @@ class TestDiscovery(base.TestCase):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
-        fake_resp = {'versions': [{'id': 'v1.0'}, {'id': 'v2.0'}]}
+        fake_resp = {'versions': [{'id': 'v2.0'}]}
         fake_resp = json.dumps(fake_resp)
         mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
@@ -206,7 +206,7 @@ class TestDiscovery(base.TestCase):
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
-        fake_resp = {'versions': [{'id': 'v1.0'}, {'id': 'v3.0'}]}
+        fake_resp = {'versions': [{'id': 'v3.0'}]}
         fake_resp = json.dumps(fake_resp)
         mock_request.return_value = (None, fake_resp)
         fake_os = mock.MagicMock()
@@ -231,11 +231,9 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
-        print_mock.assert_any_call('api_v1', 'volume-feature-enabled',
-                                   False, True)
         print_mock.assert_any_call('api_v3', 'volume-feature-enabled',
                                    True, True)
-        self.assertEqual(2, print_mock.call_count)
+        self.assertEqual(1, print_mock.call_count)
 
     def test_verify_glance_version_no_v2_with_v1_1(self):
         def fake_get_versions():
