@@ -17,6 +17,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+import testtools
 
 CONF = config.CONF
 
@@ -66,6 +67,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(snapshot_name, image['name'])
 
     @decorators.idempotent_id('71bcb732-0261-11e7-9086-fa163e4fa634')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     def test_create_image_from_paused_server(self):
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.pause_server(server['id'])
@@ -82,6 +85,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(snapshot_name, image['name'])
 
     @decorators.idempotent_id('8ca07fec-0262-11e7-907e-fa163e4fa634')
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     def test_create_image_from_suspended_server(self):
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.suspend_server(server['id'])
