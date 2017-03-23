@@ -40,10 +40,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(TestVolumeMigrateRetypeAttached, cls).setup_clients()
-        if CONF.volume_feature_enabled.api_v1:
-            cls.admin_volume_types_client = cls.os_adm.volume_types_client
-        else:
-            cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
 
     @classmethod
     def skip_checks(cls):
