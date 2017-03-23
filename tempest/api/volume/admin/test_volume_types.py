@@ -36,7 +36,6 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
         # Create/update/get/delete volume with volume_type and extra spec.
         volume_types = list()
         vol_name = data_utils.rand_name(self.__class__.__name__ + '-volume')
-        name_field = self.special_fields['name_field']
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -46,14 +45,14 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
             vol_type = self.create_volume_type(
                 extra_specs=extra_specs)
             volume_types.append(vol_type)
-        params = {name_field: vol_name,
+        params = {'name': vol_name,
                   'volume_type': volume_types[0]['id'],
                   'size': CONF.volume.volume_size}
 
         # Create volume
         volume = self.create_volume(**params)
         self.assertEqual(volume_types[0]['name'], volume["volume_type"])
-        self.assertEqual(volume[name_field], vol_name,
+        self.assertEqual(volume['name'], vol_name,
                          "The created volume name is not equal "
                          "to the requested name")
         self.assertIsNotNone(volume['id'],
@@ -74,7 +73,7 @@ class VolumeTypesV2Test(base.BaseVolumeAdminTest):
                          fetched_volume['volume_type'],
                          'The fetched Volume type is different '
                          'from updated volume type')
-        self.assertEqual(vol_name, fetched_volume[name_field],
+        self.assertEqual(vol_name, fetched_volume['name'],
                          'The fetched Volume is different '
                          'from the created Volume')
         self.assertEqual(volume['id'], fetched_volume['id'],

@@ -36,7 +36,6 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         # read backend name from a list .
         backend_names = set(CONF.volume.backend_names)
 
-        cls.name_field = cls.special_fields['name_field']
         cls.volume_id_list_with_prefix = []
         cls.volume_id_list_without_prefix = []
 
@@ -65,7 +64,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         cls.create_volume_type(name=type_name,
                                extra_specs=extra_specs)
 
-        params = {cls.name_field: vol_name, 'volume_type': type_name,
+        params = {'name': vol_name, 'volume_type': type_name,
                   'size': CONF.volume.volume_size}
         cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']

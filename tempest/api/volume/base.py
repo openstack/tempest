@@ -80,9 +80,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.build_interval = CONF.volume.build_interval
         cls.build_timeout = CONF.volume.build_timeout
 
-        cls.special_fields = {'name_field': 'name',
-                              'descrip_field': 'description'}
-
     @classmethod
     def resource_cleanup(cls):
         cls.clear_snapshots()
@@ -104,10 +101,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             min_disk = image.get('minDisk')
             kwargs['size'] = max(kwargs['size'], min_disk)
 
-        name_field = cls.special_fields['name_field']
-        if name_field not in kwargs:
+        if 'name' not in kwargs:
             name = data_utils.rand_name(cls.__name__ + '-Volume')
-            kwargs[name_field] = name
+            kwargs['name'] = name
 
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.volumes.append(volume)
@@ -118,10 +114,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
-        name_field = cls.special_fields['name_field']
-        if name_field not in kwargs:
+        if 'name' not in kwargs:
             name = data_utils.rand_name(cls.__name__ + '-Snapshot')
-            kwargs[name_field] = name
+            kwargs['name'] = name
 
         snapshot = cls.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
