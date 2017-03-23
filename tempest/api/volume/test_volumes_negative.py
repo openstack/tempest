@@ -26,8 +26,6 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesV2NegativeTest, cls).resource_setup()
 
-        cls.name_field = cls.special_fields['name_field']
-
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()
         cls.mountpoint = "/dev/vdc"
@@ -52,7 +50,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume with invalid size
         # in request
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.BadRequest,
                           self.volumes_client.create_volume,
                           size='#$%', params=params)
@@ -63,7 +61,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         # Should not be able to create volume without passing size
         # in request
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.BadRequest,
                           self.volumes_client.create_volume,
                           size='', params=params)
@@ -73,7 +71,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.BadRequest,
                           self.volumes_client.create_volume,
                           size='0', params=params)
@@ -83,7 +81,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_size_negative(self):
         # Should not be able to create volume with size negative
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.BadRequest,
                           self.volumes_client.create_volume,
                           size='-1', params=params)
@@ -93,7 +91,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_nonexistent_volume_type(self):
         # Should not be able to create volume with non-existent volume type
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
                           size='1', volume_type=data_utils.rand_uuid(),
                           params=params)
@@ -103,7 +101,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_nonexistent_snapshot_id(self):
         # Should not be able to create volume with non-existent snapshot
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
                           size='1', snapshot_id=data_utils.rand_uuid(),
                           params=params)
@@ -113,7 +111,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_nonexistent_source_volid(self):
         # Should not be able to create volume with non-existent source volume
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
                           size='1', source_volid=data_utils.rand_uuid(),
                           params=params)
@@ -122,7 +120,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
     def test_update_volume_with_nonexistent_volume_id(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
                           volume_id=data_utils.rand_uuid(), params=params)
 
@@ -130,7 +128,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
     def test_update_volume_with_invalid_volume_id(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
                           volume_id=data_utils.rand_name('invalid'),
                           params=params)
@@ -139,7 +137,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
     def test_update_volume_with_empty_volume_id(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
                           volume_id='', params=params)
 
@@ -263,7 +261,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('0f4aa809-8c7b-418f-8fb3-84c7a5dfc52f')
     def test_list_volumes_with_nonexistent_name(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         fetched_volume = self.volumes_client.list_volumes(
             params=params)['volumes']
         self.assertEqual(0, len(fetched_volume))
@@ -272,7 +270,7 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('9ca17820-a0e7-4cbd-a7fa-f4468735e359')
     def test_list_volumes_detail_with_nonexistent_name(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         fetched_volume = \
             self.volumes_client.list_volumes(
                 detail=True, params=params)['volumes']

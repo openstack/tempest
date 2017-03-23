@@ -33,8 +33,6 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesV2SnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
-        cls.name_field = cls.special_fields['name_field']
-        cls.descrip_field = cls.special_fields['descrip_field']
 
     @decorators.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
     @test.services('compute')
@@ -110,27 +108,27 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
                         matchers.ContainsAll(metadata.items()))
 
         # Compare also with the output from the list action
-        tracking_data = (snapshot['id'], snapshot[self.name_field])
+        tracking_data = (snapshot['id'], snapshot['name'])
         snaps_list = self.snapshots_client.list_snapshots()['snapshots']
-        snaps_data = [(f['id'], f[self.name_field]) for f in snaps_list]
+        snaps_data = [(f['id'], f['name']) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
         new_s_name = data_utils.rand_name(
             self.__class__.__name__ + '-new-snap')
         new_desc = 'This is the new description of snapshot.'
-        params = {self.name_field: new_s_name,
-                  self.descrip_field: new_desc}
+        params = {'name': new_s_name,
+                  'description': new_desc}
         update_snapshot = self.snapshots_client.update_snapshot(
             snapshot['id'], **params)['snapshot']
         # Assert response body for update_snapshot method
-        self.assertEqual(new_s_name, update_snapshot[self.name_field])
-        self.assertEqual(new_desc, update_snapshot[self.descrip_field])
+        self.assertEqual(new_s_name, update_snapshot['name'])
+        self.assertEqual(new_desc, update_snapshot['description'])
         # Assert response body for show_snapshot method
         updated_snapshot = self.snapshots_client.show_snapshot(
             snapshot['id'])['snapshot']
-        self.assertEqual(new_s_name, updated_snapshot[self.name_field])
-        self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
+        self.assertEqual(new_s_name, updated_snapshot['name'])
+        self.assertEqual(new_desc, updated_snapshot['description'])
 
         # Delete the snapshot
         self.delete_snapshot(snapshot['id'])

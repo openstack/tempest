@@ -29,7 +29,6 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesV2SnapshotListTestJSON, cls).resource_setup()
         volume_origin = cls.create_volume()
-        cls.name_field = cls.special_fields['name_field']
         # Create snapshots with params
         for _ in range(2):
             cls.snapshot = cls.create_snapshot(volume_origin['id'])
@@ -59,7 +58,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
     def test_snapshots_list_with_params(self):
         """list snapshots with params."""
         # Verify list snapshots by display_name filter
-        params = {self.name_field: self.snapshot[self.name_field]}
+        params = {'name': self.snapshot['name']}
         self._list_by_param_values_and_assert(**params)
 
         # Verify list snapshots by status filter
@@ -68,21 +67,21 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
 
         # Verify list snapshots by status and display name filter
         params = {'status': 'available',
-                  self.name_field: self.snapshot[self.name_field]}
+                  'name': self.snapshot['name']}
         self._list_by_param_values_and_assert(**params)
 
     @decorators.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Verify list snapshot details by display_name filter
-        params = {self.name_field: self.snapshot[self.name_field]}
+        params = {'name': self.snapshot['name']}
         self._list_by_param_values_and_assert(with_detail=True, **params)
         # Verify list snapshot details by status filter
         params = {'status': 'available'}
         self._list_by_param_values_and_assert(with_detail=True, **params)
         # Verify list snapshot details by status and display name filter
         params = {'status': 'available',
-                  self.name_field: self.snapshot[self.name_field]}
+                  'name': self.snapshot['name']}
         self._list_by_param_values_and_assert(with_detail=True, **params)
 
     @decorators.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
