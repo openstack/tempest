@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add versions_client module for volume service.
+    This new module provides list_versions() method which shows API versions
+    from Volume service.

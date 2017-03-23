@@ -14,5 +14,6 @@
 
 from tempest.lib.services.volume.v3.base_client import BaseClient
 from tempest.lib.services.volume.v3.messages_client import MessagesClient
+from tempest.lib.services.volume.v3.versions_client import VersionsClient
 
-__all__ = ['MessagesClient', 'BaseClient']
+__all__ = ['MessagesClient', 'BaseClient', 'VersionsClient']

@@ -45,6 +45,7 @@ class VolumesV3Test(api_version_utils.BaseMicroversionTest,
     def setup_clients(cls):
         super(VolumesV3Test, cls).setup_clients()
         cls.messages_client = cls.os.volume_v3_messages_client
+        cls.versions_client = cls.os.volume_v3_versions_client
 
     def setUp(self):
         super(VolumesV3Test, self).setUp()
