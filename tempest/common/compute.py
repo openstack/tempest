@@ -13,6 +13,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import base64
+import textwrap
+
 from oslo_log import log as logging
 from oslo_utils import excutils
 
@@ -112,6 +115,19 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         if CONF.validation.connect_method == 'floating':
             if wait_until is None:
                 wait_until = 'ACTIVE'
+
+        if 'user_data' not in kwargs:
+            # If nothing overrides the default user data script then run
+            # a simple script on the host to print networking info. This is
+            # to aid in debugging ssh failures.
+            script = '''
+                     #!/bin/sh
+                     echo "Printing {user} user authorized keys"
+                     cat ~{user}/.ssh/authorized_keys || true
+                     '''.format(user=CONF.validation.image_ssh_user)
+            script_clean = textwrap.dedent(script).lstrip().encode('utf8')
+            script_b64 = base64.b64encode(script_clean)
+            kwargs['user_data'] = script_b64
 
     if volume_backed:
         volume_name = data_utils.rand_name(__name__ + '-volume')
