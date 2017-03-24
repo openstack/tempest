@@ -140,9 +140,8 @@ html_static_path = ['_static']
 git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
    "-n1"]
 try:
-    html_last_updated_fmt = subprocess.Popen(git_cmd,
-                                             stdout=subprocess.PIPE).\
-                                             communicate()[0]
+    html_last_updated_fmt = str(
+        subprocess.Popen(git_cmd, stdout=subprocess.PIPE).communicate()[0])
 except Exception:
     warnings.warn('Cannot get last updated time from git repository. '
                   'Not setting "html_last_updated_fmt".')
@@ -183,3 +182,6 @@ html_use_index = False
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = None
+
+# A list of warning types to suppress arbitrary warning messages.
+suppress_warnings = ['image.nonlocal_uri']
