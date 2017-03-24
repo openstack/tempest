@@ -22,9 +22,12 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
-        body, servers = compute.create_test_server(self.os,
-                                                   wait_until='ACTIVE',
-                                                   min_count=2)
+        tenant_network = self.get_tenant_network()
+        body, servers = compute.create_test_server(
+            self.os,
+            wait_until='ACTIVE',
+            min_count=2,
+            tenant_network=tenant_network)
         for server in servers:
             self.addCleanup(self.servers_client.delete_server, server['id'])
         # NOTE(maurosr): do status response check and also make sure that
