@@ -50,6 +50,8 @@ class RemoteClient(remote_client.RemoteClient):
             ping_count=CONF.validation.ping_count,
             ping_size=CONF.validation.ping_size)
 
+    # Note that this method will not work on SLES11 guests, as they do
+    # not support the TYPE column on lsblk
     def get_disks(self):
         # Select root disk devices as shown by lsblk
         command = 'lsblk -lb --nodeps'
