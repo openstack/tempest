@@ -65,6 +65,20 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
         server = self._create_server()
+
+        # NOTE(andreaf) Create one remote client used throughout the test.
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server),
+                self.image_ssh_user,
+                self.image_ssh_password,
+                self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.servers_client)
+            # NOTE(andreaf) We need to ensure the ssh key has been
+            # injected in the guest before we power cycle
+            linux_client.validate_authentication()
+
         volume = self.create_volume()
         attachment = self.attach_volume(server, volume,
                                         device=('/dev/%s' % self.device))
@@ -78,14 +92,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                        'ACTIVE')
 
         if CONF.validation.run_validation:
-            linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
-                self.image_ssh_user,
-                self.image_ssh_password,
-                self.validation_resources['keypair']['private_key'],
-                server=server,
-                servers_client=self.servers_client)
-
             disks = linux_client.get_disks()
             device_name_to_match = '\n' + self.device + ' '
             self.assertIn(device_name_to_match, disks)
@@ -103,14 +109,6 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                                        'ACTIVE')
 
         if CONF.validation.run_validation:
-            linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
-                self.image_ssh_user,
-                self.image_ssh_password,
-                self.validation_resources['keypair']['private_key'],
-                server=server,
-                servers_client=self.servers_client)
-
             disks = linux_client.get_disks()
             self.assertNotIn(device_name_to_match, disks)
 
