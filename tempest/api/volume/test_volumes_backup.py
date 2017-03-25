@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
 from testtools import matchers
 
 from tempest.api.volume import base
@@ -113,6 +114,8 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
                                     name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
 
+    @testtools.skipUnless(CONF.service_available.glance,
+                          "Glance is not available")
     @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
     def test_bootable_volume_backup_and_restore(self):
         # Create volume from image
