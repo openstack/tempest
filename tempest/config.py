@@ -291,7 +291,9 @@ ComputeGroup = [
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
-                    "an instance"),
+                    "an instance. Not all hypervisors guarantee that they "
+                    "will respect the user defined device name, tests may "
+                    "fail if inappropriate device name is set."),
     cfg.IntOpt('shelved_offload_time',
                default=0,
                help='Time in seconds before a shelved instance is eligible '
