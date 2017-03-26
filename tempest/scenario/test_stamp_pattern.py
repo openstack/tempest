@@ -68,10 +68,7 @@ class TestStampPattern(manager.ScenarioTest):
                                                 volume['id'], 'available')
         waiters.wait_for_volume_resource_status(self.snapshots_client,
                                                 snapshot['id'], 'available')
-        if 'display_name' in snapshot:
-            self.assertEqual(snapshot_name, snapshot['display_name'])
-        else:
-            self.assertEqual(snapshot_name, snapshot['name'])
+        self.assertEqual(snapshot_name, snapshot['name'])
         return snapshot
 
     def _wait_for_volume_available_on_the_system(self, ip_address,
