@@ -32,7 +32,9 @@ class VolumesActionsV2Test(base.BaseVolumeAdminTest):
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
         volume = self.create_volume()
-        for status in ['error', 'available']:
+        self.addCleanup(self.admin_volume_client.reset_volume_status,
+                        volume['id'], status='available')
+        for status in ['error', 'available', 'maintenance']:
             self.admin_volume_client.reset_volume_status(
                 volume['id'], status=status)
             volume_get = self.admin_volume_client.show_volume(
