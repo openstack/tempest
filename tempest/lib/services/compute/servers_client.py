@@ -814,3 +814,19 @@ class ServersClient(base_compute_client.BaseComputeClient):
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_tag, resp, body)
         return rest_client.ResponseBody(resp, body)
+
+    def evacuate_server(self, server_id, **kwargs):
+        """Evacuate the given server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#evacuate-server-evacuate-action
+        """
+        if self.enable_instance_password:
+            evacuate_schema = schema.evacuate_server_with_admin_pass
+        else:
+            evacuate_schema = schema.evacuate_server
+
+        return self.action(server_id, 'evacuate',
+                           evacuate_schema,
+                           **kwargs)
