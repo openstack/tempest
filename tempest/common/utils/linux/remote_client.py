@@ -62,10 +62,14 @@ class RemoteClient(remote_client.RemoteClient):
                 # Show header line too
                 selected.append(l)
             # lsblk lists disk type in a column right-aligned with TYPE
-            elif pos > 0 and l[pos:pos + 4] == "disk":
+            elif pos is not None and pos > 0 and l[pos:pos + 4] == "disk":
                 selected.append(l)
 
-        return "\n".join(selected)
+        if selected:
+            return "\n".join(selected)
+        else:
+            msg = "'TYPE' column is requred but the output doesn't have it: "
+            raise tempest.lib.exceptions.TempestException(msg + output)
 
     def get_boot_time(self):
         cmd = 'cut -f1 -d. /proc/uptime'
