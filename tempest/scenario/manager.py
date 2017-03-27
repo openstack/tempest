@@ -230,12 +230,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         volume['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.volumes_client.delete_volume, volume['id'])
-
-        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
-        if 'display_name' in volume:
-            self.assertEqual(name, volume['display_name'])
-        else:
-            self.assertEqual(name, volume['name'])
+        self.assertEqual(name, volume['name'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
         # The volume retrieved on creation has a non-up-to-date status.
