@@ -20,11 +20,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesV2SnapshotNegativeTestJSON(base.BaseVolumeTest):
+class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesV2SnapshotNegativeTestJSON, cls).skip_checks()
+        super(VolumesSnapshotNegativeTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 

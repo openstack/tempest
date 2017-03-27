@@ -20,13 +20,13 @@ from tempest.common import waiters
 from tempest.lib import decorators
 
 
-class VolumesV2TransfersTest(base.BaseVolumeTest):
+class VolumesTransfersTest(base.BaseVolumeTest):
 
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_clients(cls):
-        super(VolumesV2TransfersTest, cls).setup_clients()
+        super(VolumesTransfersTest, cls).setup_clients()
 
         cls.client = cls.volumes_client
         cls.alt_client = cls.os_alt.volumes_client

@@ -20,7 +20,7 @@ def _get_host(host):
     return host.split('@')[0]
 
 
-class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
+class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
     """Tests Volume Services API.
 
     volume service list requires admin privileges.
@@ -28,7 +28,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesServicesV2TestJSON, cls).resource_setup()
+        super(VolumesServicesTestJSON, cls).resource_setup()
         cls.services = (cls.admin_volume_services_client.list_services()
                         ['services'])
         # NOTE: Cinder service-list API returns the list contains

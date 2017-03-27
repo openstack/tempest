@@ -20,7 +20,7 @@ from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
-class VolumeTypesNegativeV2Test(base.BaseVolumeAdminTest):
+class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
 
     @test.attr(type=['negative'])
     @decorators.idempotent_id('b48c98f2-e662-4885-9b71-032256906314')

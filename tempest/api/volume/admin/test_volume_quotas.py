@@ -21,14 +21,14 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups']
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
-class BaseVolumeQuotasAdminV2TestJSON(base.BaseVolumeAdminTest):
+class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasAdminV2TestJSON, cls).setup_credentials()
+        super(BaseVolumeQuotasAdminTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
         cls.alt_client = cls.os_alt.volumes_client
 

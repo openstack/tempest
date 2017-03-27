@@ -20,11 +20,11 @@ from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
-class ExtraSpecsNegativeV2Test(base.BaseVolumeAdminTest):
+class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(ExtraSpecsNegativeV2Test, cls).resource_setup()
+        super(ExtraSpecsNegativeTest, cls).resource_setup()
         extra_specs = {"spec1": "val1"}
         cls.volume_type = cls.create_volume_type(extra_specs=extra_specs)
 

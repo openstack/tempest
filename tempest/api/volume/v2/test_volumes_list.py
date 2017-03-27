@@ -22,8 +22,8 @@ from tempest.api.volume import base
 from tempest.lib import decorators
 
 
-class VolumesV2ListTestJSON(base.BaseVolumeTest):
-    """volumes v2 specific tests.
+class VolumesListTestJSON(base.BaseVolumeTest):
+    """volumes tests.
 
     This test creates a number of 1G volumes. To run successfully,
     ensure that the backing file for the volume group that Nova uses
@@ -34,7 +34,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2ListTestJSON, cls).resource_setup()
+        super(VolumesListTestJSON, cls).resource_setup()
 
         # Create 3 test volumes
         # NOTE(zhufl): When using pre-provisioned credentials, the project

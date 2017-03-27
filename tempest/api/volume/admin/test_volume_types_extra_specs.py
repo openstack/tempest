@@ -18,11 +18,11 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 
-class VolumeTypesExtraSpecsV2Test(base.BaseVolumeAdminTest):
+class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeTypesExtraSpecsV2Test, cls).resource_setup()
+        super(VolumeTypesExtraSpecsTest, cls).resource_setup()
         cls.volume_type = cls.create_volume_type()
 
     @decorators.idempotent_id('b42923e9-0452-4945-be5b-d362ae533e60')

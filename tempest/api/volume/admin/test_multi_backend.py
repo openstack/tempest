@@ -20,18 +20,18 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
+class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeMultiBackendV2Test, cls).skip_checks()
+        super(VolumeMultiBackendTest, cls).skip_checks()
 
         if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeMultiBackendV2Test, cls).resource_setup()
+        super(VolumeMultiBackendTest, cls).resource_setup()
 
         # read backend name from a list .
         backend_names = set(CONF.volume.backend_names)
@@ -89,7 +89,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             cls.admin_volume_client.delete_volume(volume_id)
             cls.admin_volume_client.wait_for_resource_deletion(volume_id)
 
-        super(VolumeMultiBackendV2Test, cls).resource_cleanup()
+        super(VolumeMultiBackendTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):

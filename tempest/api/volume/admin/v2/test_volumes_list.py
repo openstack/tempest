@@ -23,11 +23,11 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumesListAdminV2TestJSON(base.BaseVolumeAdminTest):
+class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesListAdminV2TestJSON, cls).resource_setup()
+        super(VolumesListAdminTestJSON, cls).resource_setup()
         # Create 3 test volumes
         # NOTE(zhufl): When using pre-provisioned credentials, the project
         # may have volumes other than those created below.

@@ -22,7 +22,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumeTypesV2Test(base.BaseVolumeAdminTest):
+class VolumeTypesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):

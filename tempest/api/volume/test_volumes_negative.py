@@ -20,11 +20,11 @@ from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 
-class VolumesV2NegativeTest(base.BaseVolumeTest):
+class VolumesNegativeTest(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2NegativeTest, cls).resource_setup()
+        super(VolumesNegativeTest, cls).resource_setup()
 
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()

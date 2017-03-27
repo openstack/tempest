@@ -20,17 +20,17 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
+class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesV2SnapshotListTestJSON, cls).skip_checks()
+        super(VolumesSnapshotListTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2SnapshotListTestJSON, cls).resource_setup()
+        super(VolumesSnapshotListTestJSON, cls).resource_setup()
         cls.snapshot_id_list = []
         # Create a volume
         volume_origin = cls.create_volume()
@@ -46,7 +46,7 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         self.assertNotEmpty(snap_list)
         if sort_key is 'display_name':
             sort_key = 'name'
-        # Note: On Cinder V2 API, 'display_name' works as a sort key
+        # Note: On Cinder API, 'display_name' works as a sort key
         # on a request, a volume name appears as 'name' on the response.
         # So Tempest needs to change the key name here for this inconsistent
         # API behavior.

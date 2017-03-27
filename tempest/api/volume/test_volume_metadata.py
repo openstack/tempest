@@ -19,18 +19,18 @@ from tempest.api.volume import base
 from tempest.lib import decorators
 
 
-class VolumesV2MetadataTest(base.BaseVolumeTest):
+class VolumesMetadataTest(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2MetadataTest, cls).resource_setup()
+        super(VolumesMetadataTest, cls).resource_setup()
         # Create a volume
         cls.volume = cls.create_volume()
 
     def tearDown(self):
         # Update the metadata to {}
         self.volumes_client.update_volume_metadata(self.volume['id'], {})
-        super(VolumesV2MetadataTest, self).tearDown()
+        super(VolumesMetadataTest, self).tearDown()
 
     @decorators.idempotent_id('6f5b125b-f664-44bf-910f-751591fe5769')
     def test_crud_volume_metadata(self):

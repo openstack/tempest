@@ -22,17 +22,17 @@ from tempest import test
 CONF = config.CONF
 
 
-class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
+class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
+        super(BaseVolumeQuotasNegativeTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
+        super(BaseVolumeQuotasNegativeTestJSON, cls).resource_setup()
         cls.shared_quota_set = {'gigabytes': 2 * CONF.volume.volume_size,
                                 'volumes': 1}
 

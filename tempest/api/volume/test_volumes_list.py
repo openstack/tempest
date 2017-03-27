@@ -23,7 +23,7 @@ from tempest.lib import decorators
 from tempest import test
 
 
-class VolumesV2ListTestJSON(base.BaseVolumeTest):
+class VolumesListTestJSON(base.BaseVolumeTest):
     # NOTE: This test creates a number of 1G volumes. To run successfully,
     # ensure that the backing file for the volume group that Nova uses
     # has space for at least 3 1G volumes!
@@ -57,7 +57,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2ListTestJSON, cls).resource_setup()
+        super(VolumesListTestJSON, cls).resource_setup()
         cls.name = cls.VOLUME_FIELDS[1]
         # Create 3 test volumes
         cls.volume_list = []

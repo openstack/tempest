@@ -17,7 +17,7 @@ from tempest.api.volume import base
 from tempest.lib import decorators
 
 
-class VolumesActionsV2Test(base.BaseVolumeAdminTest):
+class VolumesActionsTest(base.BaseVolumeAdminTest):
 
     def _create_reset_and_force_delete_temp_volume(self, status=None):
         # Create volume, reset volume status, and force delete temp volume

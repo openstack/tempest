@@ -20,7 +20,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumePoolsAdminV2TestsJSON(base.BaseVolumeAdminTest):
+class VolumePoolsAdminTestsJSON(base.BaseVolumeAdminTest):
     def _assert_pools(self, with_detail=False):
         cinder_pools = self.admin_volume_client.show_pools(
             detail=with_detail)['pools']

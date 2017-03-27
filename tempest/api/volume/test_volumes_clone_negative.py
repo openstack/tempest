@@ -22,11 +22,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesV2CloneNegativeTest(base.BaseVolumeTest):
+class VolumesCloneNegativeTest(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesV2CloneNegativeTest, cls).skip_checks()
+        super(VolumesCloneNegativeTest, cls).skip_checks()
         if not CONF.volume_feature_enabled.clone:
             raise cls.skipException("Cinder volume clones are disabled")
 

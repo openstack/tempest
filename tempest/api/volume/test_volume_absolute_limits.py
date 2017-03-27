@@ -21,14 +21,14 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class AbsoluteLimitsV2Tests(base.BaseVolumeTest):
+class AbsoluteLimitsTests(base.BaseVolumeTest):
 
     # avoid existing volumes of pre-defined tenant
     force_tenant_isolation = True
 
     @classmethod
     def resource_setup(cls):
-        super(AbsoluteLimitsV2Tests, cls).resource_setup()
+        super(AbsoluteLimitsTests, cls).resource_setup()
         # Create a shared volume for tests
         cls.volume = cls.create_volume()
 

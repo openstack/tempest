@@ -19,7 +19,7 @@ from tempest.api.volume import base
 from tempest.lib import decorators
 
 
-class BackendsCapabilitiesAdminV2TestsJSON(base.BaseVolumeAdminTest):
+class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
 
     CAPABILITIES = ('namespace',
                     'vendor_name',
@@ -34,7 +34,7 @@ class BackendsCapabilitiesAdminV2TestsJSON(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(BackendsCapabilitiesAdminV2TestsJSON, cls).resource_setup()
+        super(BackendsCapabilitiesAdminTestsJSON, cls).resource_setup()
         # Get host list, formation: host@backend-name
         cls.hosts = [
             pool['name'] for pool in

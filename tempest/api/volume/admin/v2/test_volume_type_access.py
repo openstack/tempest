@@ -23,13 +23,13 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class VolumeTypesAccessV2Test(base.BaseVolumeAdminTest):
+class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
 
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_clients(cls):
-        super(VolumeTypesAccessV2Test, cls).setup_clients()
+        super(VolumeTypesAccessTest, cls).setup_clients()
         cls.alt_client = cls.os_alt.volumes_client
 
     @decorators.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')

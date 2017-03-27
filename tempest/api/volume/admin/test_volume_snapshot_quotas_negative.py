@@ -22,23 +22,23 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
+class VolumeSnapshotQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).skip_checks()
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException('Cinder volume snapshots are disabled')
 
     @classmethod
     def setup_credentials(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).setup_credentials()
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).resource_setup()
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).resource_setup()
         cls.default_volume_size = CONF.volume.volume_size
         cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
                                 'volumes': 1, 'snapshots': 1}

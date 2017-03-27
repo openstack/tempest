@@ -26,11 +26,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesBackupsV2Test(base.BaseVolumeTest):
+class VolumesBackupsTest(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesBackupsV2Test, cls).skip_checks()
+        super(VolumesBackupsTest, cls).skip_checks()
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 

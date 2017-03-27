@@ -25,11 +25,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesV2ActionsTest(base.BaseVolumeTest):
+class VolumesActionsTest(base.BaseVolumeTest):
 
     @classmethod
     def setup_clients(cls):
-        super(VolumesV2ActionsTest, cls).setup_clients()
+        super(VolumesActionsTest, cls).setup_clients()
         cls.client = cls.volumes_client
         if CONF.service_available.glance:
             # Check if glance v1 is available to determine which client to use.
@@ -44,7 +44,7 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2ActionsTest, cls).resource_setup()
+        super(VolumesActionsTest, cls).resource_setup()
 
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()

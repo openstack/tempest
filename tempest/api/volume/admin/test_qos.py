@@ -18,16 +18,16 @@ from tempest.lib.common.utils import data_utils as utils
 from tempest.lib import decorators
 
 
-class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
+class QosSpecsTestJSON(base.BaseVolumeAdminTest):
     """Test the Cinder QoS-specs.
 
     Tests for  create, list, delete, show, associate,
-    disassociate, set/unset key V2 APIs.
+    disassociate, set/unset key APIs.
     """
 
     @classmethod
     def resource_setup(cls):
-        super(QosSpecsV2TestJSON, cls).resource_setup()
+        super(QosSpecsTestJSON, cls).resource_setup()
         # Create admin qos client
         # Create a test shared qos-specs for tests
         cls.qos_name = utils.rand_name(cls.__name__ + '-QoS')

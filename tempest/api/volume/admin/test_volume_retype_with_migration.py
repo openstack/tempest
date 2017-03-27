@@ -23,11 +23,11 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class VolumeRetypeWithMigrationV2Test(base.BaseVolumeAdminTest):
+class VolumeRetypeWithMigrationTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeRetypeWithMigrationV2Test, cls).skip_checks()
+        super(VolumeRetypeWithMigrationTest, cls).skip_checks()
 
         if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled.")
@@ -38,7 +38,7 @@ class VolumeRetypeWithMigrationV2Test(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeRetypeWithMigrationV2Test, cls).resource_setup()
+        super(VolumeRetypeWithMigrationTest, cls).resource_setup()
         # read backend name from a list.
         backend_src = CONF.volume.backend_names[0]
         backend_dst = CONF.volume.backend_names[1]
@@ -73,7 +73,7 @@ class VolumeRetypeWithMigrationV2Test(base.BaseVolumeAdminTest):
                     fetched_vol['id'])
                 break
 
-        super(VolumeRetypeWithMigrationV2Test, cls).resource_cleanup()
+        super(VolumeRetypeWithMigrationTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
     def test_available_volume_retype_with_migration(self):

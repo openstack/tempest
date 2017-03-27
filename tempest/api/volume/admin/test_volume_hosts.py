@@ -17,7 +17,7 @@ from tempest.api.volume import base
 from tempest.lib import decorators
 
 
-class VolumeHostsAdminV2TestsJSON(base.BaseVolumeAdminTest):
+class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('d5f3efa2-6684-4190-9ced-1c2f526352ad')
     def test_list_hosts(self):

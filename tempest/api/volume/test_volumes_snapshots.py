@@ -21,17 +21,17 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
+class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesV2SnapshotTestJSON, cls).skip_checks()
+        super(VolumesSnapshotTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2SnapshotTestJSON, cls).resource_setup()
+        super(VolumesSnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
 
     @decorators.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')

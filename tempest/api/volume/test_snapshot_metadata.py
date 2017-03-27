@@ -22,16 +22,16 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
+class SnapshotMetadataTestJSON(base.BaseVolumeTest):
     @classmethod
     def skip_checks(cls):
-        super(SnapshotV2MetadataTestJSON, cls).skip_checks()
+        super(SnapshotMetadataTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(SnapshotV2MetadataTestJSON, cls).resource_setup()
+        super(SnapshotMetadataTestJSON, cls).resource_setup()
         # Create a volume
         cls.volume = cls.create_volume()
         # Create a snapshot
@@ -41,7 +41,7 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
         # Update the metadata to {}
         self.snapshots_client.update_snapshot_metadata(
             self.snapshot['id'], metadata={})
-        super(SnapshotV2MetadataTestJSON, self).tearDown()
+        super(SnapshotMetadataTestJSON, self).tearDown()
 
     @decorators.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
     def test_crud_snapshot_metadata(self):

@@ -26,7 +26,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesV2GetTest(base.BaseVolumeTest):
+class VolumesGetTest(base.BaseVolumeTest):
 
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume

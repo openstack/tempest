@@ -23,7 +23,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class SnapshotManageAdminV2Test(base.BaseVolumeAdminTest):
+class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
     """Unmanage & manage snapshots
 
      This feature provides the ability to import/export volume snapshot
