@@ -225,6 +225,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_volume_services_client = \
             cls.os_adm.volume_services_v2_client
         cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+        cls.admin_volume_manage_client = cls.os_adm.volume_manage_v2_client
         cls.admin_volume_client = cls.os_adm.volumes_v2_client
         cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
         cls.admin_snapshot_manage_client = \

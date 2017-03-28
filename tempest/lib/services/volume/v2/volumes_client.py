@@ -351,3 +351,15 @@ class VolumesClient(rest_client.RestClient):
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def unmanage_volume(self, volume_id):
+        """Unmanage volume.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#unmanage-volume
+        """
+        post_body = json.dumps({'os-unmanage': {}})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
