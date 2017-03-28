@@ -97,7 +97,6 @@ class VolumesV2SnapshotListTestJSON(base.BaseVolumeTest):
         self._list_snapshots_by_param_limit(limit=100000,
                                             expected_elements=len(snap_list))
 
-    @decorators.skip_because(bug='1540893')
     @decorators.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
     def test_snapshot_list_param_limit_equals_zero(self):
         # List returns zero elements
