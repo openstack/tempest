@@ -78,11 +78,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                 params=params)['volumes']
 
         # Validating params of fetched volumes
-        # In v2, only list detail view includes items in params.
-        # In v1, list view and list detail view are same. So the
-        # following check should be run when 'with_detail' is True
-        # or v1 tests.
-        if with_detail or self._api_version == 1:
+        if with_detail:
             for volume in fetched_vol_list:
                 for key in params:
                     msg = "Failed to list volumes %s by %s" % \
