@@ -67,3 +67,17 @@ class EncryptionTypesClient(rest_client.RestClient):
             "/types/%s/encryption/provider" % volume_type_id)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def update_encryption_type(self, volume_type_id, **kwargs):
+        """Update an encryption type for an existing volume type.
+
+        TODO: Current api-site doesn't contain this API description.
+        After fixing the api-site, we need to fix here also for putting
+        the link to api-site.
+        """
+        url = "/types/%s/encryption/provider" % volume_type_id
+        put_body = json.dumps({'encryption': kwargs})
+        resp, body = self.put(url, put_body)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
