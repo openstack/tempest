@@ -878,16 +878,16 @@ class NetworkScenarioTest(ScenarioTest):
                       show_floatingip(floatingip_id)['floatingip'])
             return status == result['status']
 
-        test_utils.call_until_true(refresh,
-                                   CONF.network.build_timeout,
-                                   CONF.network.build_interval)
-        floating_ip = self.floating_ips_client.show_floatingip(
-            floatingip_id)['floatingip']
-        self.assertEqual(status, floating_ip['status'],
-                         message="FloatingIP: {fp} is at status: {cst}. "
-                                 "failed  to reach status: {st}"
-                         .format(fp=floating_ip, cst=floating_ip['status'],
-                                 st=status))
+        if not test_utils.call_until_true(refresh,
+                                          CONF.network.build_timeout,
+                                          CONF.network.build_interval):
+            floating_ip = self.floating_ips_client.show_floatingip(
+                floatingip_id)['floatingip']
+            self.assertEqual(status, floating_ip['status'],
+                             message="FloatingIP: {fp} is at status: {cst}. "
+                                     "failed  to reach status: {st}"
+                             .format(fp=floating_ip, cst=floating_ip['status'],
+                                     st=status))
         LOG.info("FloatingIP: {fp} is at status: {st}"
                  .format(fp=floating_ip, st=status))
 
