@@ -286,9 +286,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                               % CONF.network.build_timeout)
 
         num, new_nic = self.diff_list[0]
-        ssh_client.assign_static_ip(
-            nic=new_nic, addr=new_port['fixed_ips'][0]['ip_address'],
-            network_mask_bits=CONF.network.project_network_mask_bits)
+        ssh_client.exec_command("sudo ip addr add %s/%s dev %s" % (
+                                new_port['fixed_ips'][0]['ip_address'],
+                                CONF.network.project_network_mask_bits,
+                                new_nic))
         ssh_client.exec_command("sudo ip link set %s up" % new_nic)
 
     def _get_server_nics(self, ssh_client):
