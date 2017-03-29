@@ -14,11 +14,8 @@
 #    under the License.
 
 from tempest.api.compute.security_groups import base
-from tempest import config
 from tempest.lib import decorators
 from tempest import test
-
-CONF = config.CONF
 
 
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
