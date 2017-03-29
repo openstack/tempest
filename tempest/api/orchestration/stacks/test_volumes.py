@@ -35,18 +35,10 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.assertEqual('available', volume.get('status'))
         self.assertEqual(CONF.volume.volume_size, volume.get('size'))
 
-        # Some volume properties have been renamed with Cinder v2
-        if CONF.volume_feature_enabled.api_v2:
-            description_field = 'description'
-            name_field = 'name'
-        else:
-            description_field = 'display_description'
-            name_field = 'display_name'
-
         self.assertEqual(template['resources']['volume']['properties'][
-            'description'], volume.get(description_field))
+            'description'], volume.get('description'))
         self.assertEqual(template['resources']['volume']['properties'][
-            'name'], volume.get(name_field))
+            'name'], volume.get('name'))
 
     def _outputs_verify(self, stack_identifier, template):
         self.assertEqual('available',

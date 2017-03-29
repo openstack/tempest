@@ -94,10 +94,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.os.security_group_default_rules_client)
         cls.versions_client = cls.os.compute_versions_client
 
-        if CONF.volume_feature_enabled.api_v1:
-            cls.volumes_client = cls.os.volumes_client
-        else:
-            cls.volumes_client = cls.os.volumes_v2_client
+        cls.volumes_client = cls.os.volumes_v2_client
 
     @classmethod
     def resource_setup(cls):
