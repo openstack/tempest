@@ -153,7 +153,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                   "ports: %s")
                          % (network_id, ports))
         mac6 = ports[0]
-        ssh.set_nic_state(ssh.get_nic_name_by_mac(mac6))
+        nic = ssh.get_nic_name_by_mac(mac6)
+        ssh.exec_command("sudo ip link set %s up" % nic)
 
     def _prepare_and_test(self, address6_mode, n_subnets6=1, dualnet=False):
         net_list = self.prepare_network(address6_mode=address6_mode,
