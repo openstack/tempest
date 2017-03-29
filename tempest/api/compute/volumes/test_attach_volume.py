@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 import testtools
 
 from tempest.api.compute import base
@@ -24,8 +23,6 @@ from tempest import config
 from tempest.lib import decorators
 
 CONF = config.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class AttachVolumeTestJSON(base.BaseV2ComputeTest):

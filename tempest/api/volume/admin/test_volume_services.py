@@ -13,11 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from tempest.api.volume import base
-from tempest import config
 from tempest.lib import decorators
-
-
-CONF = config.CONF
 
 
 def _get_host(host):
