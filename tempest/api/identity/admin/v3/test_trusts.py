@@ -46,21 +46,21 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
     def create_trustor_and_roles(self):
         # create a project that trusts will be granted on
-        self.trustor_project_name = data_utils.rand_name(name='project')
+        trustor_project_name = data_utils.rand_name(name='project')
         project = self.projects_client.create_project(
-            self.trustor_project_name, domain_id='default')['project']
+            trustor_project_name, domain_id='default')['project']
         self.trustor_project_id = project['id']
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
-        self.trustor_username = data_utils.rand_name('user')
-        u_desc = self.trustor_username + 'description'
-        u_email = self.trustor_username + '@testmail.xx'
-        self.trustor_password = data_utils.rand_password()
+        trustor_username = data_utils.rand_name('user')
+        u_desc = trustor_username + 'description'
+        u_email = trustor_username + '@testmail.xx'
+        trustor_password = data_utils.rand_password()
         user = self.users_client.create_user(
-            name=self.trustor_username,
+            name=trustor_username,
             description=u_desc,
-            password=self.trustor_password,
+            password=trustor_password,
             email=u_email,
             project_id=self.trustor_project_id,
             domain_id='default')['user']
@@ -95,10 +95,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         # Initialize a new client with the trustor credentials
         creds = common_creds.get_credentials(
             identity_version='v3',
-            username=self.trustor_username,
-            password=self.trustor_password,
+            username=trustor_username,
+            password=trustor_password,
             user_domain_id='default',
-            tenant_name=self.trustor_project_name,
+            tenant_name=trustor_project_name,
             project_domain_id='default',
             domain_id='default')
         os = clients.Manager(credentials=creds)
