@@ -26,6 +26,13 @@ CONF = config.CONF
 class VolumesV2ImageMetadata(base.BaseVolumeTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(VolumesV2ImageMetadata, cls).skip_checks()
+        if not CONF.service_available.glance:
+            skip_msg = ("%s skipped as Glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
     def resource_setup(cls):
         super(VolumesV2ImageMetadata, cls).resource_setup()
         # Create a volume from image ID
