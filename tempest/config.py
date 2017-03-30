@@ -686,9 +686,7 @@ ValidationGroup = [
                help='Default IP version for ssh connections.'),
     cfg.IntOpt('ping_timeout',
                default=120,
-               help='Timeout in seconds to wait for ping to succeed.',
-               deprecated_opts=[cfg.DeprecatedOpt('ping_timeout',
-                                                  group='compute')]),
+               help='Timeout in seconds to wait for ping to succeed.'),
     cfg.IntOpt('connect_timeout',
                default=60,
                help='Timeout in seconds to wait for the TCP connection to be '
@@ -698,13 +696,7 @@ ValidationGroup = [
                help='Timeout in seconds to wait for the ssh banner.'),
     cfg.StrOpt('image_ssh_user',
                default="root",
-               help="User name used to authenticate to an instance.",
-               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_user',
-                                                  group='compute'),
-                                cfg.DeprecatedOpt('ssh_user',
-                                                  group='compute'),
-                                cfg.DeprecatedOpt('ssh_user',
-                                                  group='scenario')]),
+               help="User name used to authenticate to an instance."),
     cfg.StrOpt('image_ssh_password',
                default="password",
                help="Password used to authenticate to an instance."),
@@ -729,9 +721,7 @@ ValidationGroup = [
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
-                    "connect_method=floating.",
-               deprecated_opts=[cfg.DeprecatedOpt('network_for_ssh',
-                                                  group='compute')]),
+                    "connect_method=floating."),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
