@@ -106,7 +106,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#attach-volume
+        http://developer.openstack.org/api-ref/block-storage/v2/#attach-volume-to-server
         """
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -163,7 +163,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#extend-volume
+        http://developer.openstack.org/api-ref/block-storage/v2/#extend-volume-size
         """
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -176,7 +176,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#reset-volume-status
+        http://developer.openstack.org/api-ref/block-storage/v2/#reset-volume-statuses
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -307,7 +307,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#update-volume-image-metadata
+        http://developer.openstack.org/api-ref/block-storage/v2/#set-image-metadata-for-volume
         """
         post_body = json.dumps({'os-set_image_metadata': {'metadata': kwargs}})
         url = "volumes/%s/action" % (volume_id)
@@ -344,7 +344,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#show_backend_capabilities
+        http://developer.openstack.org/api-ref/block-storage/v2/#show-back-end-capabilities
         """
         url = 'capabilities/%s' % host
         resp, body = self.get(url)
