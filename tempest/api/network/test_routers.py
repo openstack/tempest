@@ -243,6 +243,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
+    @decorators.skip_because(bug='1676207')
     def test_create_router_set_gateway_with_fixed_ip(self):
         # Don't know public_network_address, so at first create address
         # from public_network and delete
