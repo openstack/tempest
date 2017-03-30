@@ -834,7 +834,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         peer_address = peer['addresses'][self.new_net['name']][0]['addr']
         self.check_remote_connectivity(ssh_client, dest=peer_address,
                                        nic=spoof_nic, should_succeed=True)
-        ssh_client.set_mac_address(spoof_nic, spoof_mac)
+        # Set a mac address by making nic down temporary
+        cmd = ("sudo ip link set {nic} down;"
+               "sudo ip link set dev {nic} address {mac};"
+               "sudo ip link set {nic} up").format(nic=spoof_nic,
+                                                   mac=spoof_mac)
+        ssh_client.exec_command(cmd)
+
         new_mac = ssh_client.get_mac_address(nic=spoof_nic)
         self.assertEqual(spoof_mac, new_mac)
         self.check_remote_connectivity(ssh_client, dest=peer_address,
