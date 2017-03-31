@@ -26,6 +26,18 @@ class TestRolesClient(base.BaseServiceTest):
     FAKE_ROLE_ID_2 = "2"
     FAKE_ROLE_NAME_2 = "test2"
 
+    FAKE_ROLE_ID_3 = "3"
+    FAKE_ROLE_NAME_3 = "test3"
+
+    FAKE_ROLE_ID_4 = "4"
+    FAKE_ROLE_NAME_4 = "test4"
+
+    FAKE_ROLE_ID_5 = "5"
+    FAKE_ROLE_NAME_5 = "test5"
+
+    FAKE_ROLE_ID_6 = "6"
+    FAKE_ROLE_NAME_6 = "test6"
+
     FAKE_ROLE_INFO = {
         "role": {
             "domain_id": FAKE_DOMAIN_ID,
@@ -77,8 +89,8 @@ class TestRolesClient(base.BaseServiceTest):
         }
     }
 
-    FAKE_LIST_ROLE_INFERENCES_RULES = {
-        "role_inference": {
+    COMMON_FAKE_LIST_ROLE_INFERENCE_RULES = [
+        {
             "prior_role": {
                 "id": FAKE_ROLE_ID,
                 "name": FAKE_ROLE_NAME,
@@ -97,17 +109,57 @@ class TestRolesClient(base.BaseServiceTest):
                     }
                 },
                 {
-                    "id": "3",
-                    "name": "test3",
+                    "id": FAKE_ROLE_ID_3,
+                    "name": FAKE_ROLE_NAME_3,
                     "links": {
-                        "self": "http://example.com/identity/v3/roles/3"
+                        "self": "http://example.com/identity/v3/roles/%s" % (
+                            FAKE_ROLE_ID_3)
                     }
                 }
             ]
         },
+        {
+            "prior_role": {
+                "id": FAKE_ROLE_ID_4,
+                "name": FAKE_ROLE_NAME_4,
+                "links": {
+                    "self": "http://example.com/identity/v3/roles/%s" % (
+                        FAKE_ROLE_ID_4)
+                }
+            },
+            "implies": [
+                {
+                    "id": FAKE_ROLE_ID_5,
+                    "name": FAKE_ROLE_NAME_5,
+                    "links": {
+                        "self": "http://example.com/identity/v3/roles/%s" % (
+                            FAKE_ROLE_ID_5)
+                    }
+                },
+                {
+                    "id": FAKE_ROLE_ID_6,
+                    "name": FAKE_ROLE_NAME_6,
+                    "links": {
+                        "self": "http://example.com/identity/v3/roles/%s" % (
+                            FAKE_ROLE_ID_6)
+                    }
+                }
+            ]
+        }
+    ]
+
+    FAKE_LIST_ROLE_INFERENCE_RULES = {
+        "role_inference": COMMON_FAKE_LIST_ROLE_INFERENCE_RULES[0],
         "links": {
             "self": "http://example.com/identity/v3/roles/"
                     "%s/implies" % FAKE_ROLE_ID
+        }
+    }
+
+    FAKE_LIST_ALL_ROLE_INFERENCE_RULES = {
+        "role_inferences": COMMON_FAKE_LIST_ROLE_INFERENCE_RULES,
+        "links": {
+            "self": "http://example.com/identity/v3/role_inferences"
         }
     }
 
@@ -254,9 +306,16 @@ class TestRolesClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.list_role_inferences_rules,
             'tempest.lib.common.rest_client.RestClient.get',
-            self.FAKE_LIST_ROLE_INFERENCES_RULES,
+            self.FAKE_LIST_ROLE_INFERENCE_RULES,
             bytes_body,
             prior_role=self.FAKE_ROLE_ID)
+
+    def _test_list_all_role_inference_rules(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_all_role_inference_rules,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_ALL_ROLE_INFERENCE_RULES,
+            bytes_body)
 
     def test_create_role_with_str_body(self):
         self._test_create_role()
@@ -441,3 +500,9 @@ class TestRolesClient(base.BaseServiceTest):
             status=204,
             prior_role=self.FAKE_ROLE_ID,
             implies_role=self.FAKE_ROLE_ID_2)
+
+    def test_list_all_role_inference_rules_with_str_body(self):
+        self._test_list_all_role_inference_rules()
+
+    def test_list_all_role_inference_rules_with_bytes_body(self):
+        self._test_list_all_role_inference_rules(bytes_body=True)
