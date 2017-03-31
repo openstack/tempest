@@ -129,6 +129,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test backup."""
         if backup_client is None:
             backup_client = self.backups_client
+        if 'name' not in kwargs:
+            name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
+            kwargs['name'] = name
 
         backup = backup_client.create_backup(
             volume_id=volume_id, **kwargs)['backup']
