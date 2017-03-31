@@ -67,7 +67,7 @@ Development
    HACKING
    REVIEWING
    microversion_testing
-   test-removal
+   test_removal
    write_tests
 
 -------
