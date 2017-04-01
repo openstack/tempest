@@ -29,7 +29,7 @@ import six.moves.urllib.parse as urlparse
 DECORATOR_MODULE = 'decorators'
 DECORATOR_NAME = 'idempotent_id'
 DECORATOR_IMPORT = 'tempest.%s' % DECORATOR_MODULE
-IMPORT_LINE = 'from tempest import %s' % DECORATOR_MODULE
+IMPORT_LINE = 'from tempest.lib import %s' % DECORATOR_MODULE
 DECORATOR_TEMPLATE = "@%s.%s('%%s')" % (DECORATOR_MODULE,
                                         DECORATOR_NAME)
 UNIT_TESTS_EXCLUDE = 'tempest.tests'
