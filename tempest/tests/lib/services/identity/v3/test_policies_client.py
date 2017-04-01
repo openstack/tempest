@@ -81,6 +81,10 @@ class TestPoliciesClient(base.BaseServiceTest):
                 }
             ]
     }
+    FAKE_ENDPOINT_ID = "234789"
+    FAKE_SERVICE_ID = "556782"
+    FAKE_POLICY_ID = "717273"
+    FAKE_REGION_ID = "73"
 
     def setUp(self):
         super(TestPoliciesClient, self).setUp()
@@ -149,4 +153,88 @@ class TestPoliciesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.delete',
             {},
             policy_id="717273",
+            status=204)
+
+    def test_update_policy_association_for_endpoint(self):
+        self.check_service_client_function(
+            self.client.update_policy_association_for_endpoint,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            endpoint_id=self.FAKE_ENDPOINT_ID,
+            status=204)
+
+    def test_show_policy_association_for_endpoint(self):
+        self.check_service_client_function(
+            self.client.show_policy_association_for_endpoint,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            endpoint_id=self.FAKE_ENDPOINT_ID,
+            status=204)
+
+    def test_delete_policy_association_for_endpoint(self):
+        self.check_service_client_function(
+            self.client.delete_policy_association_for_endpoint,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            endpoint_id=self.FAKE_ENDPOINT_ID,
+            status=204)
+
+    def test_update_policy_association_for_service(self):
+        self.check_service_client_function(
+            self.client.update_policy_association_for_service,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            status=204)
+
+    def test_show_policy_association_for_service(self):
+        self.check_service_client_function(
+            self.client.show_policy_association_for_service,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            status=204)
+
+    def test_delete_policy_association_for_service(self):
+        self.check_service_client_function(
+            self.client.delete_policy_association_for_service,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            status=204)
+
+    def test_update_policy_association_for_region_and_service(self):
+        self.check_service_client_function(
+            self.client.update_policy_association_for_region_and_service,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            region_id=self.FAKE_REGION_ID,
+            status=204)
+
+    def test_show_policy_association_for_region_and_service(self):
+        self.check_service_client_function(
+            self.client.show_policy_association_for_region_and_service,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            region_id=self.FAKE_REGION_ID,
+            status=204)
+
+    def test_delete_policy_association_for_region_and_service(self):
+        self.check_service_client_function(
+            self.client.delete_policy_association_for_region_and_service,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            policy_id=self.FAKE_POLICY_ID,
+            service_id=self.FAKE_SERVICE_ID,
+            region_id=self.FAKE_REGION_ID,
             status=204)

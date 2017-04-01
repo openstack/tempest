@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add ``v3-ext/OS-ENDPOINT-POLICY`` API calls to support creation, deletion and
+    retrieval of associations between service endpoints and policies. Such associations
+    enable an endpoint to request its policy.
