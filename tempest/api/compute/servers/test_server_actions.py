@@ -145,6 +145,18 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # The server should be signaled to reboot gracefully
         self._test_reboot_server('SOFT')
 
+    @decorators.idempotent_id('1d1c9104-1b0a-11e7-a3d4-fa163e65f5ce')
+    def test_remove_server_all_security_groups(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+
+        # Remove all Security group
+        self.client.remove_security_group(
+            server['id'], name=server['security_groups'][0]['name'])
+
+        # Verify all Security group
+        server = self.client.show_server(server['id'])['server']
+        self.assertNotIn('security_groups', server)
+
     def _rebuild_server_and_check(self, image_ref):
         rebuilt_server = (self.client.rebuild_server(self.server_id, image_ref)
                           ['server'])
