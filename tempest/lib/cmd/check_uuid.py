@@ -355,7 +355,7 @@ def run():
     if errors:
         sys.exit("@decorators.idempotent_id existence and uniqueness checks "
                  "failed\n"
-                 "Run 'tox -v -euuidgen' to automatically fix tests with\n"
+                 "Run 'tox -v -e uuidgen' to automatically fix tests with\n"
                  "missing @decorators.idempotent_id decorators.")
 
 if __name__ == '__main__':
