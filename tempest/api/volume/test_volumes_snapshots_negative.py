@@ -68,3 +68,17 @@ class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.snapshots_client.list_snapshots,
                           limit='invalid')
+
+    @test.attr(type=['negative'])
+    @decorators.idempotent_id('27b5f37f-bf69-4e8c-986e-c44f3d6819b8')
+    def test_list_snapshots_invalid_param_sort(self):
+        self.assertRaises(lib_exc.BadRequest,
+                          self.snapshots_client.list_snapshots,
+                          sort_key='invalid')
+
+    @test.attr(type=['negative'])
+    @decorators.idempotent_id('b68deeda-ca79-4a32-81af-5c51179e553a')
+    def test_list_snapshots_invalid_param_marker(self):
+        self.assertRaises(lib_exc.NotFound,
+                          self.snapshots_client.list_snapshots,
+                          marker=data_utils.rand_uuid())
