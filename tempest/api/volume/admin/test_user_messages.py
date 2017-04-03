@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume.v3 import base
+from tempest.api.volume import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -33,7 +33,8 @@ MESSAGE_KEYS = [
     'links']
 
 
-class UserMessagesTest(base.VolumesV3AdminTest):
+class UserMessagesTest(base.BaseVolumeAdminTest):
+    _api_version = 3
     min_microversion = '3.3'
     max_microversion = 'latest'
 

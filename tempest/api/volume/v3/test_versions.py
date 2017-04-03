@@ -12,12 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest.api.volume.v3 import base
+from tempest.api.volume import base
 from tempest.lib import decorators
 from tempest import test
 
 
-class VersionsTest(base.VolumesV3Test):
+class VersionsTest(base.BaseVolumeTest):
+
+    _api_version = 3
 
     @decorators.idempotent_id('77838fc4-b49b-4c64-9533-166762517369')
     @test.attr(type='smoke')

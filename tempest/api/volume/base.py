@@ -13,9 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api.volume import api_microversion_fixture
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
@@ -24,7 +26,8 @@ import tempest.test
 CONF = config.CONF
 
 
-class BaseVolumeTest(tempest.test.BaseTestCase):
+class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
+                     tempest.test.BaseTestCase):
     """Base test case class for all Cinder API tests."""
 
     _api_version = 2
@@ -49,6 +52,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
             raise exceptions.InvalidConfiguration(msg)
 
+        api_version_utils.check_skip_with_microversion(
+            cls.min_microversion, cls.max_microversion,
+            CONF.volume.min_microversion, CONF.volume.max_microversion)
+
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources()
@@ -68,10 +75,21 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.availability_zone_client = (
             cls.os.volume_v2_availability_zone_client)
         cls.volume_limits_client = cls.os.volume_v2_limits_client
+        cls.messages_client = cls.os.volume_v3_messages_client
+        cls.versions_client = cls.os.volume_v3_versions_client
+
+    def setUp(self):
+        super(BaseVolumeTest, self).setUp()
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.request_microversion))
 
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.volume.min_microversion))
 
         cls.snapshots = []
         cls.volumes = []
@@ -240,6 +258,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.os_adm.volume_capabilities_v2_client
         cls.admin_scheduler_stats_client = \
             cls.os_adm.volume_scheduler_stats_v2_client
+        cls.admin_messages_client = cls.os_adm.volume_v3_messages_client
+        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
 
     @classmethod
     def resource_setup(cls):
