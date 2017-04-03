@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add a new client to handle the domain configuration feature from the
+    identity v3 API.
