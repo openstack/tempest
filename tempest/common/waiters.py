@@ -261,16 +261,16 @@ def wait_for_qos_operations(client, qos_id, operation, args=None):
         time.sleep(client.build_interval)
 
 
-def wait_for_interface_status(client, server, port_id, status):
+def wait_for_interface_status(client, server_id, port_id, status):
     """Waits for an interface to reach a given status."""
-    body = (client.show_interface(server, port_id)
+    body = (client.show_interface(server_id, port_id)
             ['interfaceAttachment'])
     interface_status = body['port_state']
     start = int(time.time())
 
     while(interface_status != status):
         time.sleep(client.build_interval)
-        body = (client.show_interface(server, port_id)
+        body = (client.show_interface(server_id, port_id)
                 ['interfaceAttachment'])
         interface_status = body['port_state']
 
