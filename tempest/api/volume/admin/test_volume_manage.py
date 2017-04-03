@@ -22,11 +22,11 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class VolumeManageAdminV2Test(base.BaseVolumeAdminTest):
+class VolumeManageAdminTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeManageAdminV2Test, cls).skip_checks()
+        super(VolumeManageAdminTest, cls).skip_checks()
 
         if not CONF.volume_feature_enabled.manage_volume:
             raise cls.skipException("Manage volume tests are disabled")
