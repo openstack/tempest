@@ -9,6 +9,8 @@ they are used in conjunction. The source of truth on each option is the sample
 config file which explains the purpose of each individual option. You can see
 the sample config file here: :ref:`tempest-sampleconf`
 
+.. _tempest_cred_provider_conf:
+
 Test Credentials
 ----------------
 
@@ -232,6 +234,9 @@ Tempest's config around network configuration.
 
 Enabling Remote Access to Created Servers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _tempest_conf_network_allocation:
+
 Network Creation/Usage for Servers
 """"""""""""""""""""""""""""""""""
 When Tempest creates servers for testing, some tests require being able to
