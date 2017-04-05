@@ -217,14 +217,6 @@ IdentityFeatureGroup = [
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
                      "To get the list of extensions run: 'keystone discover'"),
-    # TODO(rodrigods): Remove the reseller flag when Kilo and Liberty is end
-    # of life.
-    cfg.BoolOpt('reseller',
-                default=True,
-                help='Does the environment support reseller?',
-                deprecated_for_removal=True,
-                deprecated_reason="All supported versions of OpenStack now "
-                                  "support the 'reseller' feature"),
     # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
     # in Newton and Ocata. This option can be removed after Mitaka is end of
     # life.
