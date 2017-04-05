@@ -100,9 +100,8 @@ class TestClientsFactory(base.TestCase):
     def test___init___no_module(self):
         auth_provider = fake_auth_provider.FakeAuthProvider()
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
-        with testtools.ExpectedException(ImportError, '.*fake_module.*'):
-            clients.ClientsFactory('fake_module', class_names,
-                                   auth_provider)
+        self.assertRaises(ImportError, clients.ClientsFactory,
+                          'fake_module', class_names, auth_provider)
 
     def test___init___not_a_class(self):
         class_names = ['FakeServiceClient1', 'FakeServiceClient2']
