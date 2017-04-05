@@ -30,7 +30,6 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @classmethod
     def setup_clients(cls):
         super(VolumesActionsTest, cls).setup_clients()
-        cls.client = cls.volumes_client
         if CONF.service_available.glance:
             # Check if glance v1 is available to determine which client to use.
             if CONF.image_feature_enabled.api_v1:
@@ -56,23 +55,23 @@ class VolumesActionsTest(base.BaseVolumeTest):
         # Create a server
         server = self.create_server(wait_until='ACTIVE')
         # Volume is attached and detached successfully from an instance
-        self.client.attach_volume(self.volume['id'],
-                                  instance_uuid=server['id'],
-                                  mountpoint='/dev/%s' %
-                                             CONF.compute.volume_device_name)
-        waiters.wait_for_volume_resource_status(self.client,
+        self.volumes_client.attach_volume(self.volume['id'],
+                                          instance_uuid=server['id'],
+                                          mountpoint='/dev/%s' %
+                                          CONF.compute.volume_device_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'in-use')
-        self.client.detach_volume(self.volume['id'])
-        waiters.wait_for_volume_resource_status(self.client,
+        self.volumes_client.detach_volume(self.volume['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'available')
 
     @decorators.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
     def test_volume_bootable(self):
         # Verify that a volume bootable flag is retrieved
         for bool_bootable in [True, False]:
-            self.client.set_bootable_volume(self.volume['id'],
-                                            bootable=bool_bootable)
-            fetched_volume = self.client.show_volume(
+            self.volumes_client.set_bootable_volume(self.volume['id'],
+                                                    bootable=bool_bootable)
+            fetched_volume = self.volumes_client.show_volume(
                 self.volume['id'])['volume']
             # Get Volume information
             # NOTE(masayukig): 'bootable' is "true" or "false" in the current
@@ -87,16 +86,18 @@ class VolumesActionsTest(base.BaseVolumeTest):
         # Create a server
         server = self.create_server(wait_until='ACTIVE')
         # Verify that a volume's attachment information is retrieved
-        self.client.attach_volume(self.volume['id'],
-                                  instance_uuid=server['id'],
-                                  mountpoint='/dev/%s' %
-                                             CONF.compute.volume_device_name)
-        waiters.wait_for_volume_resource_status(self.client, self.volume['id'],
+        self.volumes_client.attach_volume(self.volume['id'],
+                                          instance_uuid=server['id'],
+                                          mountpoint='/dev/%s' %
+                                          CONF.compute.volume_device_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                self.volume['id'],
                                                 'in-use')
-        self.addCleanup(waiters.wait_for_volume_resource_status, self.client,
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client,
                         self.volume['id'], 'available')
-        self.addCleanup(self.client.detach_volume, self.volume['id'])
-        volume = self.client.show_volume(self.volume['id'])['volume']
+        self.addCleanup(self.volumes_client.detach_volume, self.volume['id'])
+        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertIn('attachments', volume)
         attachment = volume['attachments'][0]
 
@@ -115,7 +116,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
         image_name = data_utils.rand_name(self.__class__.__name__ + '-Image')
-        body = self.client.upload_volume(
+        body = self.volumes_client.upload_volume(
             self.volume['id'], image_name=image_name,
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
@@ -123,30 +124,30 @@ class VolumesActionsTest(base.BaseVolumeTest):
                         self.image_client.delete_image,
                         image_id)
         waiters.wait_for_image_status(self.image_client, image_id, 'active')
-        waiters.wait_for_volume_resource_status(self.client,
+        waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'available')
 
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
-        body = self.client.reserve_volume(self.volume['id'])
+        body = self.volumes_client.reserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.client.show_volume(self.volume['id'])['volume']
+        body = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertIn('attaching', body['status'])
         # Unmark volume as reserved.
-        body = self.client.unreserve_volume(self.volume['id'])
+        body = self.volumes_client.unreserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.client.show_volume(self.volume['id'])['volume']
+        body = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertIn('available', body['status'])
 
     @decorators.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
         for readonly in [True, False]:
             # Update volume readonly
-            self.client.update_volume_readonly(self.volume['id'],
-                                               readonly=readonly)
+            self.volumes_client.update_volume_readonly(self.volume['id'],
+                                                       readonly=readonly)
             # Get Volume information
-            fetched_volume = self.client.show_volume(
+            fetched_volume = self.volumes_client.show_volume(
                 self.volume['id'])['volume']
             # NOTE(masayukig): 'readonly' is "True" or "False" in the current
             # cinder implementation. So we need to cast boolean values to str
