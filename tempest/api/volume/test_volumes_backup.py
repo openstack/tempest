@@ -66,7 +66,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         description = data_utils.rand_name("volume-backup-description")
         backup = self.create_backup(volume_id=volume['id'],
                                     name=backup_name,
-                                    description=description)
+                                    description=description,
+                                    container='container')
         self.assertEqual(backup_name, backup['name'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
@@ -75,6 +76,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         backup = self.backups_client.show_backup(backup['id'])['backup']
         self.assertEqual(backup_name, backup['name'])
         self.assertEqual(description, backup['description'])
+        self.assertEqual('container', backup['container'])
 
         # Get all backups with detail
         backups = self.backups_client.list_backups(
