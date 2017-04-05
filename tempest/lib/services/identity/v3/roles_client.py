@@ -214,6 +214,18 @@ class RolesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+    def list_all_role_inference_rules(self):
+        """Lists all role inference rules.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#list-all-role-inference-rules
+        """
+        resp, body = self.get('role_inferences')
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
     def check_role_inference_rule(self, prior_role, implies_role):
         """Check a role inference rule."""
         resp, body = self.head('roles/%s/implies/%s' %

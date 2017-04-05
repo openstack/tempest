@@ -381,3 +381,48 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         role_assignments = self.role_assignments.list_role_assignments(
             effective=True, **params)['role_assignments']
         self.assertEmpty(role_assignments)
+
+    @decorators.idempotent_id('3748c316-c18f-4b08-997b-c60567bc6235')
+    def test_list_all_implied_roles(self):
+        # Create inference rule from "roles[0]" to "roles[1]"
+        self._create_implied_role(
+            self.roles[0]['id'], self.roles[1]['id'])
+
+        # Create inference rule from "roles[0]" to "roles[2]"
+        self._create_implied_role(
+            self.roles[0]['id'], self.roles[2]['id'])
+
+        # Create inference rule from "roles[2]" to "role"
+        self._create_implied_role(
+            self.roles[2]['id'], self.role['id'])
+
+        rules = self.roles_client.list_all_role_inference_rules()[
+            'role_inferences']
+        # Sort the rules by the number of inferences, since there should be 1
+        # inference between "roles[2]" and "role" and 2 inferences for
+        # "roles[0]": between "roles[1]" and "roles[2]".
+        sorted_rules = sorted(rules, key=lambda r: len(r['implies']))
+
+        # Check that 2 sets of rules are returned.
+        self.assertEqual(2, len(sorted_rules))
+        # Check that only 1 inference rule exists between "roles[2]" and "role"
+        self.assertEqual(1, len(sorted_rules[0]['implies']))
+        # Check that 2 inference rules exist for "roles[0]": one between
+        # "roles[1]" and one between "roles[2]".
+        self.assertEqual(2, len(sorted_rules[1]['implies']))
+
+        # Check that "roles[2]" is the "prior_role" and that "role" is the
+        # "implies" role.
+        self.assertEqual(self.roles[2]['id'],
+                         sorted_rules[0]['prior_role']['id'])
+        self.assertEqual(self.role['id'],
+                         sorted_rules[0]['implies'][0]['id'])
+
+        # Check that "roles[0]" is the "prior_role" and that "roles[1]" and
+        # "roles[2]" are the "implies" roles.
+        self.assertEqual(self.roles[0]['id'],
+                         sorted_rules[1]['prior_role']['id'])
+
+        implies_ids = [r['id'] for r in sorted_rules[1]['implies']]
+        self.assertIn(self.roles[1]['id'], implies_ids)
+        self.assertIn(self.roles[2]['id'], implies_ids)
