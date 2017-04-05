@@ -55,3 +55,8 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error
         self._create_reset_and_force_delete_temp_volume('error')
+
+    @decorators.idempotent_id('b957cabd-1486-4e21-90cf-a9ed3c39dfb2')
+    def test_volume_force_delete_when_volume_is_maintenance(self):
+        # test force delete when status of volume is maintenance
+        self._create_reset_and_force_delete_temp_volume('maintenance')
