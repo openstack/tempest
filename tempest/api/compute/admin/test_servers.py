@@ -35,14 +35,15 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(ServersAdminTestJSON, cls).resource_setup()
 
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
-        server = cls.create_test_server(name=cls.s1_name,
-                                        wait_until='ACTIVE')
+        server = cls.create_test_server(name=cls.s1_name)
         cls.s1_id = server['id']
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
+        waiters.wait_for_server_status(cls.non_admin_client,
+                                       cls.s1_id, 'ACTIVE')
 
     @decorators.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
