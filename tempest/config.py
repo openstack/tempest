@@ -613,9 +613,8 @@ NetworkGroup = [
                 default=False,
                 help="The environment does not support network separation "
                      "between tenants."),
-    # TODO(ylobankov): Delete this option once the Liberty release is EOL.
     cfg.BoolOpt('dvr_extra_resources',
-                default=True,
+                default=False,
                 help="Whether or not to create internal network, subnet, "
                      "port and add network interface to distributed router "
                      "in L3 agent scheduler test. Extra resources need to be "

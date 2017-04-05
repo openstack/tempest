@@ -68,6 +68,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
             raise exceptions.InvalidConfiguration(msg)
         cls.router = cls.create_router()
 
+        # TODO(ylobankov): Delete this 'if' block once 'dvr_extra_resources'
+        # option is deleted. Currently this option is deprecated for removal.
         if CONF.network.dvr_extra_resources:
             # NOTE(armax): If DVR is an available extension, and the created
             # router is indeed a distributed one, more resources need to be
@@ -97,6 +99,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
                         cls.router['id'],
                         external_gateway_info=external_gateway_info)
 
+    # TODO(ylobankov): Delete this cleanup block once 'dvr_extra_resources'
+    # option is deleted. Currently this option is deprecated for removal.
     @classmethod
     def resource_cleanup(cls):
         if cls.is_dvr_router:
