@@ -48,22 +48,24 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
             cls.fixed_network_name = None
         network_kwargs = fixed_network.set_networks_kwarg(network)
         cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
-        cls.s1 = cls.create_test_server(name=cls.s1_name,
-                                        wait_until='ACTIVE',
-                                        **network_kwargs)
+        cls.s1 = cls.create_test_server(name=cls.s1_name, **network_kwargs)
 
         cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
         # If image_ref_alt is "" or None then we still want to boot a server
         # but we rely on `testtools.skipUnless` decorator to actually skip
         # the irrelevant tests.
         cls.s2 = cls.create_test_server(
-            name=cls.s2_name, image_id=cls.image_ref_alt or cls.image_ref,
-            wait_until='ACTIVE')
+            name=cls.s2_name, image_id=cls.image_ref_alt or cls.image_ref)
 
         cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
         cls.s3 = cls.create_test_server(name=cls.s3_name,
                                         flavor=cls.flavor_ref_alt,
                                         wait_until='ACTIVE')
+
+        waiters.wait_for_server_status(cls.client, cls.s1['id'],
+                                       'ACTIVE')
+        waiters.wait_for_server_status(cls.client, cls.s2['id'],
+                                       'ACTIVE')
 
     @decorators.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
     @testtools.skipUnless(CONF.compute.image_ref != CONF.compute.image_ref_alt,
