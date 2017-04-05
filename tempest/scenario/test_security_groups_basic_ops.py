@@ -625,9 +625,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @test.attr(type='slow')
     @test.requires_ext(service='network', extension='port-security')
     @decorators.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
-    @testtools.skipUnless(
-        CONF.compute_feature_enabled.allow_port_security_disabled,
-        'Port security must be enabled.')
     # TODO(mriedem): We shouldn't actually need to check this since neutron
     # disables the port_security extension by default, but the problem is nova
     # assumes port_security_enabled=True if it's not set on the network
