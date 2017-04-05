@@ -24,9 +24,9 @@ class CapabilitiesClient(rest_client.RestClient):
     def show_backend_capabilities(self, host):
         """Shows capabilities for a storage back end.
 
-         Output params: see http://developer.openstack.org/
-                            api-ref-blockstorage-v2.html
-                            #showBackendCapabilities
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#show-back-end-capabilities
         """
         url = 'capabilities/%s' % host
         resp, body = self.get(url)

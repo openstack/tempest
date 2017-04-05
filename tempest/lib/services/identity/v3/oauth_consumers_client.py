@@ -58,7 +58,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#update-consumers
+        https://developer.openstack.org/api-ref/identity/v3-ext/#update-consumer
         """
         post_body = {"description": description}
         post_body = json.dumps({'consumer': post_body})
