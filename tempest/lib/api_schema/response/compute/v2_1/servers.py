@@ -100,8 +100,10 @@ common_show_server = {
                 'id': {'type': 'string'},
                 'links': parameter_types.links
             },
-            'additionalProperties': False,
-            'required': ['id', 'links']
+            # NOTE(gmann): This will be empty object if there is no
+            # flavor info present in DB. This can happen when flavor info is
+            # deleted after server creation.
+            'additionalProperties': False
         },
         'fault': {
             'type': 'object',
