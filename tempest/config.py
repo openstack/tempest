@@ -613,17 +613,6 @@ NetworkGroup = [
                 default=False,
                 help="The environment does not support network separation "
                      "between tenants."),
-    cfg.BoolOpt('dvr_extra_resources',
-                default=False,
-                help="Whether or not to create internal network, subnet, "
-                     "port and add network interface to distributed router "
-                     "in L3 agent scheduler test. Extra resources need to be "
-                     "provisioned in order to bind router to L3 agent in the "
-                     "Liberty release or older, and are not required since "
-                     "the Mitaka release.",
-                deprecated_for_removal=True,
-                deprecated_reason='This config switch was added for Liberty '
-                                  'which is not supported anymore.')
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',

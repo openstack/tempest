@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    The deprecated config option 'dvr_extra_resources' from network group has been removed.
+    This option was for extra resources which were provisioned to bind a router to Neutron
+    L3 agent. The extra resources need to be provisioned in Liberty release or older,
+    and are not required since Mitaka release. Current Tempest doesn't support Liberty, so
+    this option has been removed from Tempest.
