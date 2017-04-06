@@ -50,6 +50,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                                 'available')
         return restored_volume
 
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'ceph does not support arbitrary container names')
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         # Create a volume with metadata
