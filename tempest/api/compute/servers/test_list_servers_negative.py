@@ -36,8 +36,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # servers are cleaned up automatically in the
         # tearDownClass method of the super-class.
         cls.deleted_fixtures = []
-        for _ in range(2):
-            srv = cls.create_test_server(wait_until='ACTIVE')
+        cls.create_test_server(wait_until='ACTIVE', min_count=2)
 
         srv = cls.create_test_server(wait_until='ACTIVE')
         cls.client.delete_server(srv['id'])
