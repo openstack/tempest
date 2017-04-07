@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -57,8 +55,6 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project_name, body['name'])
         self.assertEqual(domain['id'], body['domain_id'])
 
-    @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
-                          'Reseller not available.')
     @decorators.idempotent_id('1854f9c0-70bc-4d11-a08a-1c789d339e3d')
     def test_project_create_with_parent(self):
         # Create root project without providing a parent_id
@@ -89,8 +85,6 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(root_project_id, parent_id)
 
     @decorators.idempotent_id('a7eb9416-6f9b-4dbb-b71b-7f73aaef59d5')
-    @testtools.skipUnless(CONF.identity_feature_enabled.reseller,
-                          'Reseller not available.')
     def test_create_is_domain_project(self):
         project_name = data_utils.rand_name('is_domain_project')
         project = self.projects_client.create_project(
