@@ -172,7 +172,7 @@ of the configuration.
 You can generate a new sample tempest.conf file, run the following
 command from the top level of the Tempest directory::
 
-    $ tox -egenconfig
+    $ tox -e genconfig
 
 The most important pieces that are needed are the user ids, openstack
 endpoint, and basic flavors and images needed to run tests.
@@ -258,11 +258,11 @@ To run one single test serially ::
 
 Tox also contains several existing job configurations. For example::
 
-    $ tox -efull
+    $ tox -e full
 
 which will run the same set of tests as the OpenStack gate. (it's exactly how
 the gate invokes Tempest) Or::
 
-    $ tox -esmoke
+    $ tox -e smoke
 
 to run the tests tagged as smoke.
