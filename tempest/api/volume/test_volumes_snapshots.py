@@ -102,6 +102,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
+        self.assertEqual(self.volume_origin['size'], snap_get['size'])
 
         # Verify snapshot metadata
         self.assertThat(snap_get['metadata'].items(),
@@ -135,7 +136,8 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
-        # Creates a volume a snapshot passing a size different from the source
+        # Creates a volume from a snapshot passing a size
+        # different from the source
         src_size = CONF.volume.volume_size
 
         src_vol = self.create_volume(size=src_size)
