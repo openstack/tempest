@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated config option 'allow_port_security_disabled' from compute_feature_enabled
+    group has been removed.
