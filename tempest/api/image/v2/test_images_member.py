@@ -96,20 +96,3 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     def test_get_image_members_schema(self):
         body = self.schemas_client.show_schema("members")
         self.assertEqual("members", body['name'])
-
-    @decorators.idempotent_id('cb961424-3f68-4d21-8e36-30ad66fb6bfb')
-    def test_get_private_image(self):
-        image_id = self._create_image()
-        member = self.image_member_client.create_image_member(
-            image_id, member=self.alt_tenant_id)
-        self.assertEqual(member['member_id'], self.alt_tenant_id)
-        self.assertEqual(member['image_id'], image_id)
-        self.assertEqual(member['status'], 'pending')
-        self.assertNotIn(image_id, self._list_image_ids_as_alt())
-        self.alt_image_member_client.update_image_member(image_id,
-                                                         self.alt_tenant_id,
-                                                         status='accepted')
-        self.assertIn(image_id, self._list_image_ids_as_alt())
-        self.image_member_client.delete_image_member(image_id,
-                                                     self.alt_tenant_id)
-        self.assertNotIn(image_id, self._list_image_ids_as_alt())
