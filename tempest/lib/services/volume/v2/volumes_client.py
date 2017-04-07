@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from debtcollector import moves
 from debtcollector import removals
 from oslo_serialization import jsonutils as json
 import six
@@ -20,11 +21,42 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.volume.v2 import transfers_client
 
 
 class VolumesClient(rest_client.RestClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"
+
+    create_volume_transfer = moves.moved_function(
+        transfers_client.TransfersClient.create_volume_transfer,
+        'VolumesClient.create_volume_transfer', __name__,
+        message='Use create_volume_transfer from new location.',
+        version='Pike', removal_version='Queens')
+
+    show_volume_transfer = moves.moved_function(
+        transfers_client.TransfersClient.show_volume_transfer,
+        'VolumesClient.show_volume_transfer', __name__,
+        message='Use show_volume_transfer from new location.',
+        version='Pike', removal_version='Queens')
+
+    list_volume_transfers = moves.moved_function(
+        transfers_client.TransfersClient.list_volume_transfers,
+        'VolumesClient.list_volume_transfers', __name__,
+        message='Use list_volume_transfer from new location.',
+        version='Pike', removal_version='Queens')
+
+    delete_volume_transfer = moves.moved_function(
+        transfers_client.TransfersClient.delete_volume_transfer,
+        'VolumesClient.delete_volume_transfer', __name__,
+        message='Use delete_volume_transfer from new location.',
+        version='Pike', removal_version='Queens')
+
+    accept_volume_transfer = moves.moved_function(
+        transfers_client.TransfersClient.accept_volume_transfer,
+        'VolumesClient.accept_volume_transfer', __name__,
+        message='Use accept_volume_transfer from new location.',
+        version='Pike', removal_version='Queens')
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
@@ -180,62 +212,6 @@ class VolumesClient(rest_client.RestClient):
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def create_volume_transfer(self, **kwargs):
-        """Create a volume transfer.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#create-volume-transfer
-        """
-        post_body = json.dumps({'transfer': kwargs})
-        resp, body = self.post('os-volume-transfer', post_body)
-        body = json.loads(body)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def show_volume_transfer(self, transfer_id):
-        """Returns the details of a volume transfer."""
-        url = "os-volume-transfer/%s" % transfer_id
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def list_volume_transfers(self, **params):
-        """List all the volume transfers created.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#list-volume-transfers
-        """
-        url = 'os-volume-transfer'
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def delete_volume_transfer(self, transfer_id):
-        """Delete a volume transfer."""
-        resp, body = self.delete("os-volume-transfer/%s" % transfer_id)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def accept_volume_transfer(self, transfer_id, **kwargs):
-        """Accept a volume transfer.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#accept-volume-transfer
-        """
-        url = 'os-volume-transfer/%s/accept' % transfer_id
-        post_body = json.dumps({'accept': kwargs})
-        resp, body = self.post(url, post_body)
-        body = json.loads(body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 

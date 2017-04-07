@@ -287,6 +287,8 @@ class Manager(clients.ServiceClients):
             self.volume_v2.CapabilitiesClient()
         self.volume_scheduler_stats_v2_client = \
             self.volume_v2.SchedulerStatsClient()
+        self.volume_transfers_v2_client = \
+            self.volume_v2.TransfersClient()
 
     def _set_object_storage_clients(self):
         # Mandatory parameters (always defined)
