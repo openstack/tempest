@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+from oslo_log import log as logging
 import testtools
 
 from tempest.api.compute import base
@@ -23,6 +23,7 @@ from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
@@ -80,6 +81,22 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             if host != target_host:
                 return target_host
 
+    def _live_migrate(self, server_id, target_host, state,
+                      volume_backed=False):
+        self._migrate_server_to(server_id, target_host, volume_backed)
+        waiters.wait_for_server_status(self.servers_client, server_id, state)
+        migration_list = (self.admin_migration_client.list_migrations()
+                          ['migrations'])
+
+        msg = ("Live Migration failed. Migrations list for Instance "
+               "%s: [" % server_id)
+        for live_migration in migration_list:
+            if (live_migration['instance_uuid'] == server_id):
+                msg += "\n%s" % live_migration
+        msg += "]"
+        self.assertEqual(target_host, self._get_host_for_server(server_id),
+                         msg)
+
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
         """Tests live migration between two hosts.
 
@@ -94,27 +111,23 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         # Live migrate an instance to another host
         server_id = self.create_test_server(wait_until="ACTIVE",
                                             volume_backed=volume_backed)['id']
-        actual_host = self._get_host_for_server(server_id)
-        target_host = self._get_host_other_than(actual_host)
+        source_host = self._get_host_for_server(server_id)
+        destination_host = self._get_host_other_than(source_host)
 
         if state == 'PAUSED':
             self.admin_servers_client.pause_server(server_id)
             waiters.wait_for_server_status(self.admin_servers_client,
                                            server_id, state)
 
-        self._migrate_server_to(server_id, target_host, volume_backed)
-        waiters.wait_for_server_status(self.servers_client, server_id, state)
-        migration_list = (self.admin_migration_client.list_migrations()
-                          ['migrations'])
-
-        msg = ("Live Migration failed. Migrations list for Instance "
-               "%s: [" % server_id)
-        for live_migration in migration_list:
-            if (live_migration['instance_uuid'] == server_id):
-                msg += "\n%s" % live_migration
-        msg += "]"
-        self.assertEqual(target_host, self._get_host_for_server(server_id),
-                         msg)
+        LOG.info("Live migrate from source %s to destination %s",
+                 source_host, destination_host)
+        self._live_migrate(server_id, destination_host, state, volume_backed)
+        if CONF.compute_feature_enabled.live_migrate_back_and_forth:
+            # If live_migrate_back_and_forth is enabled it is a grenade job.
+            # Therefore test should validate whether LM is compatible in both
+            # ways, so live migrate VM back to the source host
+            LOG.info("Live migrate back to source %s", source_host)
+            self._live_migrate(server_id, source_host, state, volume_backed)
 
     @decorators.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     def test_live_block_migration(self):
