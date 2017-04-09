@@ -167,11 +167,10 @@ class Manager(clients.ServiceClients):
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
-        params_volume = {}
-        for _key in ('build_interval', 'build_timeout'):
-            _value = self.parameters['volume'].get(_key)
-            if _value:
-                params_volume[_key] = _value
+        params_volume = {
+            'build_interval': CONF.volume.build_interval,
+            'build_timeout': CONF.volume.build_timeout
+        }
         self.volumes_extensions_client = self.compute.VolumesClient(
             **params_volume)
         self.compute_versions_client = self.compute.VersionsClient(
