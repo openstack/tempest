@@ -246,11 +246,17 @@ class ServiceClients(object):
 
     Examples:
 
-        >>> from tempest.lib.services import clients
-        >>> johndoe = cred_provider.get_creds_by_role(['johndoe'])
-        >>> johndoe_clients = clients.ServiceClients(johndoe,
-        >>>                                                  identity_uri)
-        >>> johndoe_servers = johndoe_clients.servers_client.list_servers()
+        >>> # johndoe is a tempest.lib.auth.Credentials type instance
+        >>> johndoe_clients = clients.ServiceClients(johndoe, identity_uri)
+        >>>
+        >>> # List servers in default region
+        >>> johndoe_servers_client = johndoe_clients.compute.ServersClient()
+        >>> johndoe_servers = johndoe_servers_client.list_servers()
+        >>>
+        >>> # List servers in Region B
+        >>> johndoe_servers_client_B = johndoe_clients.compute.ServersClient(
+        >>>     region='B')
+        >>> johndoe_servers = johndoe_servers_client_B.list_servers()
 
     """
     # NOTE(andreaf) This class does not depend on tempest configuration
