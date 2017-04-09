@@ -82,10 +82,10 @@ def services(*args):
     exercised by a test case.
     """
     def decorator(f):
-        services = ['compute', 'image', 'baremetal', 'volume',
-                    'network', 'identity', 'object_storage']
+        known_services = get_service_list()
+
         for service in args:
-            if service not in services:
+            if service not in known_services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
                                                    'service' % service)
         attr(type=list(args))(f)
