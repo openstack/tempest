@@ -29,7 +29,6 @@ from tempest.common import credentials_factory as credentials
 from tempest.common import fixed_network
 import tempest.common.validation_resources as vresources
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common import cred_client
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -55,6 +54,10 @@ attr = debtcollector.moves.moved_function(
     version='Pike', removal_version='?')
 
 
+class InvalidServiceTag(lib_exc.TempestException):
+    message = "Invalid service tag"
+
+
 def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
@@ -78,8 +81,7 @@ def services(*args):
 
         for service in args:
             if service not in known_services:
-                raise exceptions.InvalidServiceTag('%s is not a valid '
-                                                   'service' % service)
+                raise InvalidServiceTag('%s is not a valid service' % service)
         decorators.attr(type=list(args))(f)
 
         @functools.wraps(f)

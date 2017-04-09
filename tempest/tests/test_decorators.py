@@ -17,7 +17,6 @@ from oslotest import mockpatch
 import testtools
 
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest import test
 from tempest.tests import base
@@ -91,7 +90,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
         self._test_services_helper('compute', 'compute')
 
     def test_services_decorator_with_invalid_service(self):
-        self.assertRaises(exceptions.InvalidServiceTag,
+        self.assertRaises(test.InvalidServiceTag,
                           self._test_services_helper, 'compute',
                           'bad_service')
 
@@ -107,7 +106,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
         for service in service_list:
             try:
                 self._test_services_helper(service)
-            except exceptions.InvalidServiceTag:
+            except test.InvalidServiceTag:
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:

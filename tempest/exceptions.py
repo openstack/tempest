@@ -17,10 +17,6 @@
 from tempest.lib import exceptions
 
 
-class InvalidServiceTag(exceptions.TempestException):
-    message = "Invalid service tag"
-
-
 class BuildErrorException(exceptions.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
