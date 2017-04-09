@@ -118,9 +118,12 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_volume(self, volume_id):
+    def delete_volume(self, volume_id, cascade=False):
         """Deletes the Specified Volume."""
-        resp, body = self.delete("volumes/%s" % volume_id)
+        url = 'volumes/%s' % volume_id
+        if cascade:
+            url += '?cascade=True'
+        resp, body = self.delete(url)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
