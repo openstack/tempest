@@ -1,7 +1,7 @@
 .. _tempest_test_writing:
 
 Tempest Test Writing Guide
-==========================
+##########################
 
 This guide serves as a starting point for developers working on writing new
 Tempest tests. At a high level tests in Tempest are just tests that conform to
