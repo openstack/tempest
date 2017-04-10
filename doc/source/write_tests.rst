@@ -112,6 +112,7 @@ of these would be::
         super(TestExampleCase, cls).resource_setup()
         cls.shared_server = cls.servers_client.create_server(...)
 
+.. _credentials:
 
 Allocating Credentials
 ''''''''''''''''''''''
@@ -241,3 +242,70 @@ different services (and scenario tests) to override this setting. When
 inheriting from classes other than the base TestCase in tempest/test.py it is
 worth checking the immediate parent for what is set to determine if your
 class needs to override that setting.
+
+Interacting with Credentials and Clients
+========================================
+
+Once you have your basic TestCase setup you'll want to start writing tests. To
+do that you need to interact with an OpenStack deployment. This section will
+cover how credentials and clients are used inside of Tempest tests.
+
+
+Manager Objects
+---------------
+
+The primary interface with which you interact with both credentials and
+API clients is the client manager object. These objects are created
+automatically by the base test class as part of credential setup. (for more
+details see the previous :ref:`credentials` section) Each manager object is
+initialized with a set of credentials and has each client object already setup
+to use that set of credentials for making all the API requests. Each client is
+accessible as a top level attribute on the manager object. So to start making
+API requests you just access the client's method for making that call and the
+credentials are already setup for you. For example if you wanted to make an API
+call to create a server in Nova::
+
+  from tempest import test
+
+
+  class TestExampleCase(test.BaseTestCase):
+    def test_example_create_server(self):
+      self.os.servers_client.create_server(...)
+
+is all you need to do. As described previously, in the above example the ``self.os``
+is created automatically because the base test class sets the ``credentials``
+attribute to allocate a primary credential set and initializes the client
+manager as ``self.os``. This same access pattern can be used for all of the
+clients in Tempest.
+
+Credentials Objects
+-------------------
+
+In certain cases you need direct access to the credentials. (the most common
+use case would be an API request that takes a user or project id in the request
+body) If you're in a situation where you need to access this you'll need to
+access the ``credentials`` object which is allocated from the configured
+credential provider in the base test class. This is accessible from the manager
+object via the manager's ``credentials`` attribute. For example::
+
+  from tempest import test
+
+
+  class TestExampleCase(test.BaseTestCase):
+    def test_example_create_server(self):
+      credentials = self.os.credentials
+
+The credentials object provides access to all of the credential information you
+would need to make API requests. For example, building off the previous
+example::
+
+  from tempest import test
+
+
+  class TestExampleCase(test.BaseTestCase):
+    def test_example_create_server(self):
+      credentials = self.os.credentials
+      username = credentials.username
+      user_id = credentials.user_id
+      password = credentials.password
+      tenant_id = credentials.tenant_id
