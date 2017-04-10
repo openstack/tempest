@@ -88,7 +88,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-v2-ext.html#enableUser
+        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#enable-disable-user
         """
         # NOTE: The URL (users/<id>/enabled) is different from the api-site
         # one (users/<id>/OS-KSADM/enabled) , but they are the same API

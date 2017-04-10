@@ -41,7 +41,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#get_tag_definition
+        https://developer.openstack.org/api-ref/image/v2/metadefs-index.html#get-tag-definition
         """
         url = 'metadefs/namespaces/%s/tags/%s' % (namespace,
                                                   tag_name)

@@ -24,8 +24,9 @@ class SchedulerStatsClient(rest_client.RestClient):
     def list_pools(self, detail=False):
         """List all the volumes pools (hosts).
 
-        Output params: see http://developer.openstack.org/
-                           api-ref-blockstorage-v2.html#listPools
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#list-back-end-storage-pools
         """
         url = 'scheduler-stats/get_pools'
         if detail:

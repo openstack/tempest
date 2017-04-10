@@ -25,7 +25,7 @@ class EndpointsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-identity-v2-ext.html#createEndpoint
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#create-endpoint-template
         """
 
         post_body = json.dumps({'endpoint': kwargs})
