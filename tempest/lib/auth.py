@@ -539,18 +539,18 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
         # Select entries with matching service type
         service_catalog = [ep for ep in catalog if ep['type'] == service]
-        if len(service_catalog) > 0:
+        if service_catalog:
             if name is not None:
                 service_catalog = (
                     [ep for ep in service_catalog if ep['name'] == name])
-                if len(service_catalog) > 0:
+                if service_catalog:
                     service_catalog = service_catalog[0]['endpoints']
                 else:
                     raise exceptions.EndpointNotFound(name)
             else:
                 service_catalog = service_catalog[0]['endpoints']
         else:
-            if len(catalog) == 0 and service == 'identity':
+            if not catalog and service == 'identity':
                 # NOTE(andreaf) If there's no catalog at all and the service
                 # is identity, it's a valid use case. Having a non-empty
                 # catalog with no identity in it is not valid instead.
@@ -571,13 +571,13 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         # Filter by endpoint type (interface)
         filtered_catalog = [ep for ep in service_catalog if
                             ep['interface'] == endpoint_type]
-        if len(filtered_catalog) == 0:
+        if not filtered_catalog:
             # No matching type, keep all and try matching by region at least
             filtered_catalog = service_catalog
         # Filter by region
         filtered_catalog = [ep for ep in filtered_catalog if
                             ep['region'] == region]
-        if len(filtered_catalog) == 0:
+        if not filtered_catalog:
             # No matching region (or name), take the first endpoint
             filtered_catalog = [service_catalog[0]]
         # There should be only one match. If not take the first.

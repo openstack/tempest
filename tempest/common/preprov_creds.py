@@ -241,7 +241,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
     def _get_creds(self, roles=None):
         useable_hashes = self._get_match_hash_list(roles)
-        if len(useable_hashes) == 0:
+        if not useable_hashes:
             msg = 'No users configured for type/roles %s' % roles
             raise lib_exc.InvalidCredentials(msg)
         free_hash = self._get_free_hash(useable_hashes)

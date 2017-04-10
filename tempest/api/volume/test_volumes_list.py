@@ -47,7 +47,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             fetched_list = [fieldsgetter(item) for item in fetched_list]
 
         missing_vols = [v for v in expected_list if v not in fetched_list]
-        if len(missing_vols) == 0:
+        if not missing_vols:
             return
 
         def str_vol(vol):

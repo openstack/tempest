@@ -106,7 +106,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
             # Clean up metering label rules
             # Not all classes in the hierarchy have the client class variable
-            if len(cls.metering_label_rules) > 0:
+            if cls.metering_label_rules:
                 label_rules_client = cls.admin_metering_label_rules_client
                 for metering_label_rule in cls.metering_label_rules:
                     test_utils.call_and_ignore_notfound_exc(
