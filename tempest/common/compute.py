@@ -15,6 +15,7 @@
 
 import base64
 import socket
+import ssl
 import struct
 import textwrap
 
@@ -236,7 +237,11 @@ def shelve_server(servers_client, server_id, force_shelve_offload=False):
 
 def create_websocket(url):
     url = urlparse.urlparse(url)
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if url.scheme == 'https':
+        client_socket = ssl.wrap_socket(socket.socket(socket.AF_INET,
+                                                      socket.SOCK_STREAM))
+    else:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     client_socket.connect((url.hostname, url.port))
     # Turn the Socket into a WebSocket to do the communication
