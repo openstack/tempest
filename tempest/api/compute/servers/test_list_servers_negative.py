@@ -122,7 +122,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an empty list when a date in the future is passed
         changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
         body = self.client.list_servers(**changes_since)
-        self.assertEqual(0, len(body['servers']))
+        self.assertEmpty(body['servers'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('93055106-2d34-46fe-af68-d9ddbf7ee570')

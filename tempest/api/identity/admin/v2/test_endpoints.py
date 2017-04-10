@@ -62,7 +62,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         # Asserting LIST endpoints
         missing_endpoints =\
             [e for e in self.setup_endpoints if e not in fetched_endpoints]
-        self.assertEqual(0, len(missing_endpoints),
+        self.assertEmpty(missing_endpoints,
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 

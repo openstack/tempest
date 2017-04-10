@@ -58,7 +58,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
             output = self.client.list_virtual_interfaces(self.server['id'])
             self.assertIsNotNone(output)
             virt_ifaces = output
-            self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
+            self.assertNotEmpty(virt_ifaces['virtual_interfaces'],
                                 'Expected virtual interfaces, got 0 '
                                 'interfaces.')
             for virt_iface in virt_ifaces['virtual_interfaces']:

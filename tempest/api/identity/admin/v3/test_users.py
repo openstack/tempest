@@ -131,7 +131,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         missing_projects =\
             [p for p in assigned_project_ids
              if p not in fetched_project_ids]
-        self.assertEqual(0, len(missing_projects),
+        self.assertEmpty(missing_projects,
                          "Failed to find project %s in fetched list" %
                          ', '.join(m_project for m_project
                                    in missing_projects))

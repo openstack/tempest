@@ -111,7 +111,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
                         rule['id'])
         rules = (self.adm_client.list_security_group_default_rules()
                  ['security_group_default_rules'])
-        self.assertNotEqual(0, len(rules))
+        self.assertNotEmpty(rules)
         self.assertIn(rule, rules)
 
     @decorators.idempotent_id('15cbb349-86b4-4f71-a048-04b7ef3f150b')

@@ -142,7 +142,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of servers are returned
         params = {'limit': 0}
         servers = self.client.list_servers(**params)
-        self.assertEqual(0, len(servers['servers']))
+        self.assertEmpty(servers['servers'])
 
     @decorators.idempotent_id('37791bbd-90c0-4de0-831e-5f38cba9c6b3')
     def test_list_servers_filter_by_exceed_limit(self):

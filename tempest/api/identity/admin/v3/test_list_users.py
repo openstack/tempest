@@ -93,7 +93,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         fetched_ids = [u['id'] for u in body]
         missing_users = [u['id'] for u in self.users
                          if u['id'] not in fetched_ids]
-        self.assertEqual(0, len(missing_users),
+        self.assertEmpty(missing_users,
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 

@@ -186,4 +186,4 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         rules = (self.security_groups_client.show_security_group(sg1_id)
                  ['security_group']['rules'])
         # The group1 has no rules because group2 has deleted
-        self.assertEqual(0, len(rules))
+        self.assertEmpty(rules)

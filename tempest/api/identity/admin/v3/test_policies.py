@@ -41,7 +41,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
-        self.assertEqual(0, len(missing_pols))
+        self.assertEmpty(missing_pols)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('e544703a-2f03-4cf2-9b0f-350782fdb0d3')

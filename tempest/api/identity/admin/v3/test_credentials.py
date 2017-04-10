@@ -107,6 +107,6 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             fetched_cred_ids.append(i['id'])
         missing_creds = [c for c in created_cred_ids
                          if c not in fetched_cred_ids]
-        self.assertEqual(0, len(missing_creds),
+        self.assertEmpty(missing_creds,
                          "Failed to find cred %s in fetched list" %
                          ', '.join(m_cred for m_cred in missing_creds))

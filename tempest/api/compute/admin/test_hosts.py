@@ -44,14 +44,14 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         # If send the request with a blank zone, the request will be successful
         # and it will return all the hosts list
         hosts = self.client.list_hosts(zone='')['hosts']
-        self.assertNotEqual(0, len(hosts))
+        self.assertNotEmpty(hosts)
 
     @decorators.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
         # successful and no hosts will be returned
         hosts = self.client.list_hosts(zone='xxx')['hosts']
-        self.assertEqual(0, len(hosts))
+        self.assertEmpty(hosts)
 
     @decorators.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
     def test_show_host_detail(self):
