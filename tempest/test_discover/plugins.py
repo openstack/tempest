@@ -51,36 +51,37 @@ class TempestPlugin(object):
         :param ConfigOpts conf: The conf object that can be used to register
             additional options on.
 
-        Example:
-            >>> # Config options are defined in a config.py module
-            >>> service_option = cfg.BoolOpt(
-            >>>     "my_service",
-            >>>     default=True,
-            >>>     help="Whether or not my service is available")
-            >>>
-            >>> # Note: as long as the group is listed in get_opt_lists,
-            >>> # it will be possible to access its optins in the plugin code
-            >>> # via ("-" in the group name are replaces with "_"):
-            >>> #     CONF.my_service.<option_name>
-            >>> my_service_group = cfg.OptGroup(name="my-service",
-            >>>                                 title="My service options")
-            >>>
-            >>> MyServiceGroup = [<list of options>]
-            >>> # (...) More groups and options...
-            >>>
-            >>> # Plugin is implemented in a plugin.py module
-            >>> from my_plugin import config as my_config
-            >>>
-            >>> def register_opts(self, conf):
-            >>>    conf.register_opt(my_config.service_option,
-            >>>                      group='service_available')
-            >>>    conf.register_group(my_config.my_service_group)
-            >>>    conf.register_opts(my_config.MyService +
-            >>>                       my_config.my_service_group)
-            >>>
-            >>>    conf.register_group(my_config.my_service_feature_group)
-            >>>    conf.register_opts(my_config.MyServiceFeaturesGroup,
-            >>>                       my_config.my_service_feature_group)
+        Example::
+
+            # Config options are defined in a config.py module
+            service_option = cfg.BoolOpt(
+                "my_service",
+                default=True,
+                help="Whether or not my service is available")
+
+            # Note: as long as the group is listed in get_opt_lists,
+            # it will be possible to access its optins in the plugin code
+            # via ("-" in the group name are replaces with "_"):
+            #     CONF.my_service.<option_name>
+            my_service_group = cfg.OptGroup(name="my-service",
+                                            title="My service options")
+
+            MyServiceGroup = [<list of options>]
+            # (...) More groups and options...
+
+            # Plugin is implemented in a plugin.py module
+            from my_plugin import config as my_config
+
+            def register_opts(self, conf):
+                conf.register_opt(my_config.service_option,
+                                  group='service_available')
+                conf.register_group(my_config.my_service_group)
+                conf.register_opts(my_config.MyService +
+                                   my_config.my_service_group)
+
+                conf.register_group(my_config.my_service_feature_group)
+                conf.register_opts(my_config.MyServiceFeaturesGroup,
+                                   my_config.my_service_feature_group)
         """
         return
 
@@ -107,37 +108,41 @@ class TempestPlugin(object):
           of `service_clients.ServiceClients.register_service_client_module`.
         :rtype: list of dictionaries
 
-        Example:
+        Example implementation with one service client::
 
-            >>>  # Example implementation with one service client
-            >>>  myservice_config = config.service_client_config('myservice')
-            >>>  params = {
-            >>>     'name': 'myservice',
-            >>>     'service_version': 'myservice',
-            >>>     'module_path': 'myservice_tempest_tests.services',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params.update(myservice_config)
-            >>>  return [params]
+            def get_service_clients(self):
+                # Example implementation with one service client
+                myservice_config = config.service_client_config('myservice')
+                params = {
+                    'name': 'myservice',
+                    'service_version': 'myservice',
+                    'module_path': 'myservice_tempest_tests.services',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params.update(myservice_config)
+                return [params]
 
-            >>>  # Example implementation with two service clients
-            >>>  foo1_config = config.service_client_config('foo')
-            >>>  params_foo1 = {
-            >>>     'name': 'foo_v1',
-            >>>     'service_version': 'foo.v1',
-            >>>     'module_path': 'bar_tempest_tests.services.foo.v1',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params_foo1.update(foo_config)
-            >>>  foo2_config = config.service_client_config('foo')
-            >>>  params_foo2 = {
-            >>>     'name': 'foo_v2',
-            >>>     'service_version': 'foo.v2',
-            >>>     'module_path': 'bar_tempest_tests.services.foo.v2',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params_foo2.update(foo2_config)
-            >>>  return [params_foo1, params_foo2]
+        Example implementation with two service clients::
+
+            def get_service_clients(self):
+                # Example implementation with two service clients
+                foo1_config = config.service_client_config('foo')
+                params_foo1 = {
+                    'name': 'foo_v1',
+                    'service_version': 'foo.v1',
+                    'module_path': 'bar_tempest_tests.services.foo.v1',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params_foo1.update(foo_config)
+                foo2_config = config.service_client_config('foo')
+                params_foo2 = {
+                    'name': 'foo_v2',
+                    'service_version': 'foo.v2',
+                    'module_path': 'bar_tempest_tests.services.foo.v2',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params_foo2.update(foo2_config)
+                return [params_foo1, params_foo2]
         """
         return []
 
