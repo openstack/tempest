@@ -31,12 +31,10 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         # Delete the tenant at the end of the test
         self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
         # second:create a user
-        user = self.users_client.create_user(name=user_name,
-                                             password=user_password,
-                                             tenantId=tenant['id'],
-                                             email='')['user']
-        # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=user_name,
+                                     password=user_password,
+                                     tenantId=tenant['id'],
+                                     email='')
         # then get a token for the user
         body = self.token_client.auth(user_name,
                                       user_password,
@@ -65,13 +63,10 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
         tenant_id = None  # No default tenant so will get unscoped token.
-        email = ''
-        user = self.users_client.create_user(name=user_name,
-                                             password=user_password,
-                                             tenantId=tenant_id,
-                                             email=email)['user']
-        # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=user_name,
+                                     password=user_password,
+                                     tenantId=tenant_id,
+                                     email='')
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant')

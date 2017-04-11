@@ -67,10 +67,14 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         if len(role) > 0:
             return role[0]
 
-    def _create_test_user(self, **kwargs):
+    def create_test_user(self, **kwargs):
         if kwargs.get('password', None) is None:
-            user_password = data_utils.rand_password()
-            kwargs['password'] = user_password
+            kwargs['password'] = data_utils.rand_password()
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_user')
+        if 'email' not in kwargs:
+            kwargs['email'] = kwargs['name'] + '@testmail.tm'
+
         user = self.users_client.create_user(**kwargs)['user']
         # Delete the user at the end of the test
         self.addCleanup(
@@ -145,10 +149,7 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
     def setup_test_user(self, password=None):
         """Set up a test user."""
         tenant = self.setup_test_tenant()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        user = self._create_test_user(name=username, email=email,
-                                      tenantId=tenant['id'], password=password)
+        user = self.create_test_user(tenantId=tenant['id'], password=password)
         return user
 
     def setup_test_tenant(self):
@@ -242,11 +243,8 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def setup_test_user(self, password=None):
         """Set up a test user."""
         project = self.setup_test_project()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        user = self._create_test_user(name=username, email=email,
-                                      project_id=project['id'],
-                                      password=password)
+        user = self.create_test_user(project_id=project['id'],
+                                     password=password)
         return user
 
     def setup_test_project(self):
