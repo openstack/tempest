@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 
 # Copyright 2016 Hewlett Packard Enterprise Development Company, L.P.
 #
@@ -37,6 +37,8 @@
 # data/tempest-plugins-registry.footer is found relative to the
 # current working directory, it will be prepended or appended to
 # the generated reStructuredText plugins table respectively.
+
+set -ex
 
 (
 declare -A plugins
