@@ -78,9 +78,9 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
             self.users_client.delete_user, user['id'])
         return user
 
-    def setup_test_role(self, domain_id=None):
+    def setup_test_role(self, name=None, domain_id=None):
         """Set up a test role."""
-        params = {'name': data_utils.rand_name('test_role')}
+        params = {'name': name or data_utils.rand_name('test_role')}
         if domain_id:
             params['domain_id'] = domain_id
 

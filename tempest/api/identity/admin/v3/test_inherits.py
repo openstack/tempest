@@ -65,9 +65,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('4e6f0366-97c8-423c-b2be-41eae6ac91c8')
     def test_inherit_assign_list_check_revoke_roles_on_domains_user(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
         # Assign role on domains user
         self.inherited_roles_client.create_inherited_role_on_domains_user(
             self.domain['id'], self.user['id'], src_role['id'])
@@ -91,9 +89,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('c7a8dda2-be50-4fb4-9a9c-e830771078b1')
     def test_inherit_assign_list_check_revoke_roles_on_domains_group(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
         # Assign role on domains group
         self.inherited_roles_client.create_inherited_role_on_domains_group(
             self.domain['id'], self.group['id'], src_role['id'])
@@ -117,9 +113,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('18b70e45-7687-4b72-8277-b8f1a47d7591')
     def test_inherit_assign_check_revoke_roles_on_projects_user(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
         # Assign role on projects user
         self.inherited_roles_client.create_inherited_role_on_projects_user(
             self.project['id'], self.user['id'], src_role['id'])
@@ -134,9 +128,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('26021436-d5a4-4256-943c-ded01e0d4b45')
     def test_inherit_assign_check_revoke_roles_on_projects_group(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
         # Assign role on projects group
         self.inherited_roles_client.create_inherited_role_on_projects_group(
             self.project['id'], self.group['id'], src_role['id'])
@@ -152,9 +144,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('3acf666e-5354-42ac-8e17-8b68893bcd36')
     def test_inherit_assign_list_revoke_user_roles_on_domain(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
 
         # Create a project hierarchy
         leaf_project_name = data_utils.rand_name('project')
@@ -202,9 +192,7 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
     @decorators.idempotent_id('9f02ccd9-9b57-46b4-8f77-dd5a736f3a06')
     def test_inherit_assign_list_revoke_user_roles_on_project_tree(self):
         # Create role
-        src_role = self.roles_client.create_role(
-            name=data_utils.rand_name('Role'))['role']
-        self.addCleanup(self.roles_client.delete_role, src_role['id'])
+        src_role = self.setup_test_role()
 
         # Create a project hierarchy
         leaf_project_name = data_utils.rand_name('project')
