@@ -87,10 +87,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.addCleanup(self.tenants_client.delete_tenant, tenant2['id'])
 
         # Create a role
-        role_name = data_utils.rand_name(name='role')
-        role = self.roles_client.create_role(name=role_name)['role']
-        # Delete the role at the end of the test
-        self.addCleanup(self.roles_client.delete_role, role['id'])
+        role = self.setup_test_role()
 
         # Grant the user the role on the tenants.
         self.roles_client.create_user_role_on_project(tenant1['id'],
