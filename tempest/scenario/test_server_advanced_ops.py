@@ -45,11 +45,6 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
-    @testtools.skipUnless(CONF.compute.flavor_ref !=
-                          CONF.compute.flavor_ref_alt
-                          and CONF.compute.flavor_ref_alt != "",
-                          'The flavor_ref_alt option should not be empty and '
-                          'should not be identical with flavor_ref')
     @test.services('compute', 'volume')
     def test_resize_volume_backed_server_confirm(self):
         # We create an instance for use in this test
