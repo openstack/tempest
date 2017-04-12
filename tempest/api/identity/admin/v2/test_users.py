@@ -21,7 +21,6 @@ from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class UsersTestJSON(base.BaseIdentityV2AdminTest):
@@ -33,7 +32,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('2d55a71e-da1d-4b43-9c03-d269fd93d905')
     def test_create_user(self):
         # Create a user

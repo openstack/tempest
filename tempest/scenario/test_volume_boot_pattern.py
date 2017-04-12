@@ -170,7 +170,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
         self.assertEqual(timestamp, timestamp3)
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image

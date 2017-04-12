@@ -17,7 +17,6 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -36,7 +35,7 @@ class ListImageFiltersNegativeTestJSON(base.BaseV2ComputeTest):
         super(ListImageFiltersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('391b0440-432c-4d4b-b5da-c5096aa247eb')
     def test_get_nonexistent_image(self):
         # Check raises a NotFound

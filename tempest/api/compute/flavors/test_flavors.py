@@ -15,14 +15,13 @@
 
 from tempest.api.compute import base
 from tempest.lib import decorators
-from tempest import test
 
 
 class FlavorsV2TestJSON(base.BaseV2ComputeTest):
     _min_disk = 'minDisk'
     _min_ram = 'minRam'
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('e36c0eaa-dff5-4082-ad1f-3f9a80aa3f59')
     def test_list_flavors(self):
         # List of all flavors should contain the expected flavor
@@ -39,7 +38,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         self.assertIn(flavor, flavors)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('1f12046b-753d-40d2-abb6-d8eb8b30cb2f')
     def test_get_flavor(self):
         # The expected flavor details should be returned

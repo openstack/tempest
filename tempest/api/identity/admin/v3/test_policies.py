@@ -16,7 +16,6 @@
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
@@ -44,7 +43,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
         self.assertEqual(0, len(missing_pols))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('e544703a-2f03-4cf2-9b0f-350782fdb0d3')
     def test_create_update_delete_policy(self):
         # Test to update policy

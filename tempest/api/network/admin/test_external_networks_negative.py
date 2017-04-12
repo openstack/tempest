@@ -19,14 +19,13 @@ from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
 class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d402ae6c-0be0-4d8e-833b-a738895d98d0')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')

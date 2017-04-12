@@ -17,12 +17,11 @@ from tempest.api.volume import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('b48c98f2-e662-4885-9b71-032256906314')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
@@ -31,7 +30,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.create_volume, **params)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
@@ -39,7 +38,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
             lib_exc.BadRequest,
             self.admin_volume_types_client.create_volume_type, name='')
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('994610d6-0476-4018-a644-a2602ef5d4aa')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
@@ -47,7 +46,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
                           self.admin_volume_types_client.show_volume_type,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6b3926d2-7d73-4896-bc3d-e42dfd11a9f6')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
@@ -55,7 +54,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
                           self.admin_volume_types_client.delete_volume_type,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8c09f849-f225-4d78-ba87-bffd9a5e0c6f')
     def test_create_volume_with_private_volume_type(self):
         # Should not be able to create volume with private volume type.

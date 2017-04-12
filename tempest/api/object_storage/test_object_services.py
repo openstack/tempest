@@ -24,7 +24,6 @@ from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -75,7 +74,7 @@ class ObjectTest(base.BaseObjectTest):
             for meta_key in not_in_meta:
                 self.assertNotIn('x-object-meta-' + meta_key, resp)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('5b4ce26f-3545-46c9-a2ba-5754358a4c62')
     def test_create_object(self):
         # create object
@@ -319,7 +318,7 @@ class ObjectTest(base.BaseObjectTest):
                                                    object_name)
         self.assertHeaders(resp, 'Object', 'DELETE')
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('7a94c25d-66e6-434c-9c38-97d4e2c29945')
     def test_update_object_metadata(self):
         # update object metadata
@@ -460,7 +459,7 @@ class ObjectTest(base.BaseObjectTest):
             object_name)
         self.assertNotIn('x-object-meta-test-meta', resp)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('9a447cf6-de06-48de-8226-a8c6ed31caf2')
     def test_list_object_metadata(self):
         # get object metadata
@@ -530,7 +529,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s' % (self.container_name, object_name))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('02610ba7-86b7-4272-9ed8-aa8d417cb3cd')
     def test_get_object(self):
         # retrieve object's data (in response body)

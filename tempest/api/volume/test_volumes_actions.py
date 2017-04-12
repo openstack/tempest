@@ -49,7 +49,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
         cls.volume = cls.create_volume()
 
     @decorators.idempotent_id('fff42874-7db5-4487-a8e1-ddda5fb5288d')
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @test.services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Create a server

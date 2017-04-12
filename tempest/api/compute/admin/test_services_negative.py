@@ -15,7 +15,6 @@
 from tempest.api.compute import base
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -27,13 +26,13 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1126d1f8-266e-485f-a687-adc547492646')
     def test_list_services_with_non_admin_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_services)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d0884a69-f693-4e79-a9af-232d15643bf7')
     def test_get_service_by_invalid_params(self):
         # return all services if send the request with invalid parameter
@@ -42,7 +41,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                         ['services'])
         self.assertEqual(len(services), len(services_xxx))
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1e966d4a-226e-47c7-b601-0b18a27add54')
     def test_get_service_by_invalid_service_and_valid_host(self):
         services = self.client.list_services()['services']
@@ -51,7 +50,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                              binary='xxx')['services']
         self.assertEqual(0, len(services))
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64e7e7fb-69e8-4cb6-a71d-8d5eb0c98655')
     def test_get_service_with_valid_service_and_invalid_host(self):
         services = self.client.list_services()['services']

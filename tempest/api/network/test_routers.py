@@ -41,7 +41,7 @@ class RoutersTest(base.BaseRouterTest):
                            if cls._ip_version == 4 else
                            CONF.network.project_network_v6_cidr)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
@@ -122,7 +122,7 @@ class RoutersTest(base.BaseRouterTest):
             self._verify_router_gateway(create_body['router']['id'],
                                         exp_ext_gw_info=external_gateway_info)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('b42e6e39-2e37-49cc-a6f4-8467e940900a')
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
@@ -141,7 +141,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('2b7d2f37-6748-4d78-92e5-1d590234f0d5')
     def test_add_remove_router_interface_with_port_id(self):
         network = self.create_network()
@@ -376,7 +376,7 @@ class RoutersTest(base.BaseRouterTest):
         show_body = self.routers_client.show_router(router['id'])
         self.assertTrue(show_body['router']['admin_state_up'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('802c73c9-c937-4cef-824b-2191e24a6aab')
     def test_add_multiple_router_interfaces(self):
         network01 = self.create_network(

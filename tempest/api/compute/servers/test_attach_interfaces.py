@@ -219,7 +219,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @test.services('network')
     def test_add_remove_fixed_ip(self):

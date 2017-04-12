@@ -50,22 +50,9 @@ related_bug = debtcollector.moves.moved_function(
     version='Pike', removal_version='?')
 
 
-def attr(**kwargs):
-    """A decorator which applies the testtools attr decorator
-
-    This decorator applies the testtools.testcase.attr if it is in the list of
-    attributes to testtools we want to apply.
-    """
-
-    def decorator(f):
-        if 'type' in kwargs and isinstance(kwargs['type'], str):
-            f = testtools.testcase.attr(kwargs['type'])(f)
-        elif 'type' in kwargs and isinstance(kwargs['type'], list):
-            for attr in kwargs['type']:
-                f = testtools.testcase.attr(attr)(f)
-        return f
-
-    return decorator
+attr = debtcollector.moves.moved_function(
+    decorators.attr, 'attr', __name__,
+    version='Pike', removal_version='?')
 
 
 def get_service_list():
@@ -93,7 +80,7 @@ def services(*args):
             if service not in known_services:
                 raise exceptions.InvalidServiceTag('%s is not a valid '
                                                    'service' % service)
-        attr(type=list(args))(f)
+        decorators.attr(type=list(args))(f)
 
         @functools.wraps(f)
         def wrapper(self, *func_args, **func_kwargs):

@@ -16,7 +16,6 @@
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
@@ -72,7 +71,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # Verify that 'description' is not being updated or deleted.
         self.assertEqual(old_description, updated_group['description'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
     def test_group_users_add_list_delete(self):
         name = data_utils.rand_name('Group')

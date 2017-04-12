@@ -88,7 +88,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         waiters.wait_for_volume_retype(self.volumes_client,
                                        volume_id, new_volume_type)
 
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
     @test.services('compute', 'volume')
     def test_volume_migrate_attached(self):

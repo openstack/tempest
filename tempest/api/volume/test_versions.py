@@ -14,7 +14,6 @@
 
 from tempest.api.volume import base
 from tempest.lib import decorators
-from tempest import test
 
 
 class VersionsTest(base.BaseVolumeTest):
@@ -22,7 +21,7 @@ class VersionsTest(base.BaseVolumeTest):
     _api_version = 3
 
     @decorators.idempotent_id('77838fc4-b49b-4c64-9533-166762517369')
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     def test_list_versions(self):
         # NOTE: The version data is checked on service client side
         #       with JSON-Schema validation. It is enough to just call

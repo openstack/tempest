@@ -77,7 +77,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                         subnet['subnet']['id'])
         return net
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('5de47127-9977-400a-936f-abcfbec1218f')
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
@@ -91,7 +91,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('9a438d88-10c6-4bcd-8b5b-5b6e25e1346f')
     def test_list_servers(self):
         # The created server should be in the list of all servers

@@ -22,7 +22,6 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -265,7 +264,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.assertEqual(1, len(trusts_get))
         self.validate_trust(trusts_get[0], summary=True)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
 

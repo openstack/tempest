@@ -75,7 +75,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         cls.delete_containers()
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):

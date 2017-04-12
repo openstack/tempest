@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    A new ``attr`` decorator has been added in the ``tempest.lib.decorators``
+    module. For example, use it to tag specific tests, which could be leveraged
+    by test runners to run only a subset of Tempest tests.

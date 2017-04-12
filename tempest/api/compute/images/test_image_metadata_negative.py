@@ -17,7 +17,6 @@ from tempest.api.compute import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
@@ -27,7 +26,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         super(ImagesMetadataNegativeTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('94069db2-792f-4fa8-8bd3-2271a6e0c095')
     def test_list_nonexistent_image_metadata(self):
         # Negative test: List on nonexistent image
@@ -35,7 +34,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.NotFound, self.client.list_image_metadata,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a403ef9e-9f95-427c-b70a-3ce3388796f1')
     def test_update_nonexistent_image_metadata(self):
         # Negative test:An update should not happen for a non-existent image
@@ -44,7 +43,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.update_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('41ae052c-6ee6-405c-985e-5712393a620d')
     def test_get_nonexistent_image_metadata_item(self):
         # Negative test: Get on non-existent image should not happen
@@ -52,7 +51,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.show_image_metadata_item,
                           data_utils.rand_uuid(), 'os_version')
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('dc64f2ce-77e8-45b0-88c8-e15041d08eaf')
     def test_set_nonexistent_image_metadata(self):
         # Negative test: Metadata should not be set to a non-existent image
@@ -60,7 +59,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.NotFound, self.client.set_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('2154fd03-ab54-457c-8874-e6e3eb56e9cf')
     def test_set_nonexistent_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
@@ -71,7 +70,7 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
                           data_utils.rand_uuid(), 'os_distro',
                           meta)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('848e157f-6bcf-4b2e-a5dd-5124025a8518')
     def test_delete_nonexistent_image_metadata_item(self):
         # Negative test: Shouldn't be able to delete metadata

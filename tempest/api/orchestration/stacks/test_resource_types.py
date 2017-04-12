@@ -12,12 +12,11 @@
 
 from tempest.api.orchestration import base
 from tempest.lib import decorators
-from tempest import test
 
 
 class ResourceTypesTest(base.BaseOrchestrationTest):
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('7123d082-3577-4a30-8f00-f805327c4ffd')
     def test_resource_type_list(self):
         """Verify it is possible to list resource types."""
@@ -25,7 +24,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
         self.assertIsInstance(resource_types, list)
         self.assertIn('OS::Nova::Server', resource_types)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('0e85a483-828b-4a28-a0e3-f0a21809192b')
     def test_resource_type_show(self):
         """Verify it is possible to get schema about resource types."""
@@ -38,7 +37,7 @@ class ResourceTypesTest(base.BaseOrchestrationTest):
                                        'attributes', 'resource_type')
             self.assertEqual(resource_type, type_schema['resource_type'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('8401821d-65fe-4d43-9fa3-57d5ce3a35c7')
     def test_resource_type_template(self):
         """Verify it is possible to get template about resource types."""

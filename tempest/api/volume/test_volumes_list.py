@@ -23,7 +23,6 @@ from testtools import matchers
 from tempest.api.volume import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class VolumesListTestJSON(base.BaseVolumeTest):
@@ -99,7 +98,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
                     else:
                         self.assertEqual(params[key], volume[key], msg)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('0b6ddd39-b948-471f-8038-4787978747c4')
     def test_volume_list(self):
         # Get a list of Volumes

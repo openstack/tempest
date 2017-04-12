@@ -42,7 +42,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
                 'Either api_v1 or api_v2 must be True in '
                 '[image-feature-enabled].')
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @test.services('image')
     @decorators.idempotent_id('90f0d93a-91c1-450c-91e6-07d18172cefe')
     def test_boot_with_low_ram(self):

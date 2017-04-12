@@ -17,13 +17,12 @@ from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
-    @test.attr(type=['negative', 'gate'])
+    @decorators.attr(type=['negative', 'gate'])
     @decorators.idempotent_id('1f3fbff5-4e44-400d-9ca1-d953f05f609b')
     def test_delete_active_domain(self):
         d_name = data_utils.rand_name('domain')
@@ -39,14 +38,14 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.Forbidden, self.domains_client.delete_domain,
                           domain_id)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9018461d-7d24-408d-b3fe-ae37e8cd5c9e')
     def test_create_domain_with_empty_name(self):
         # Domain name should not be empty
         self.assertRaises(lib_exc.BadRequest,
                           self.domains_client.create_domain, name='')
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('37b1bbf2-d664-4785-9a11-333438586eae')
     def test_create_domain_with_name_length_over_64(self):
         # Domain name length should not ne greater than 64 characters
@@ -55,14 +54,14 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
                           self.domains_client.create_domain,
                           name=d_name)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('43781c07-764f-4cf2-a405-953c1916f605')
     def test_delete_non_existent_domain(self):
         # Attempt to delete a non existent domain should fail
         self.assertRaises(lib_exc.NotFound, self.domains_client.delete_domain,
                           data_utils.rand_uuid_hex())
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e6f9e4a2-4f36-4be8-bdbc-4e199ae29427')
     def test_domain_create_duplicate(self):
         domain_name = data_utils.rand_name('domain-dup')

@@ -16,7 +16,6 @@
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
@@ -109,7 +108,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint

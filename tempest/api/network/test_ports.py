@@ -52,7 +52,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
     def test_create_update_delete_port(self):
         # Verify port creation
@@ -100,7 +100,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
         return cidr
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
     def test_create_port_in_allowed_allocation_pools(self):
         network = self.create_network()
@@ -125,7 +125,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         ip_range = netaddr.IPRange(start_ip_address, end_ip_address)
         self.assertIn(ip_address, ip_range)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
     def test_show_port(self):
         # Verify the details of port
@@ -153,7 +153,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         for field_name in fields:
             self.assertEqual(port[field_name], self.port[field_name])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
     def test_list_ports(self):
         # Verify the port exists in the list of all ports
@@ -342,7 +342,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertEqual(free_mac_address,
                          show_port['mac_address'])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
     @testtools.skipUnless(
         test.is_extension_enabled('security-group', 'network'),
