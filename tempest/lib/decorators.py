@@ -16,8 +16,11 @@ import functools
 import uuid
 
 import debtcollector.removals
+from oslo_log import log as logging
 import six
 import testtools
+
+LOG = logging.getLogger(__name__)
 
 
 def skip_because(*args, **kwargs):
@@ -41,6 +44,28 @@ def skip_because(*args, **kwargs):
                 msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
                 raise testtools.TestCase.skipException(msg)
             return f(self, *func_args, **func_kwargs)
+        return wrapper
+    return decorator
+
+
+def related_bug(bug, status_code=None):
+    """A decorator useful to know solutions from launchpad bug reports
+
+    @param bug: The launchpad bug number causing the test
+    @param status_code: The status code related to the bug report
+    """
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(self, *func_args, **func_kwargs):
+            try:
+                return f(self, *func_args, **func_kwargs)
+            except Exception as exc:
+                exc_status_code = getattr(exc, 'status_code', None)
+                if status_code is None or status_code == exc_status_code:
+                    LOG.error('Hints: This test was made for the bug %s. '
+                              'The failure could be related to '
+                              'https://launchpad.net/bugs/%s', bug, bug)
+                raise exc
         return wrapper
     return decorator
 

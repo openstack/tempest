@@ -45,6 +45,11 @@ idempotent_id = debtcollector.moves.moved_function(
     version='Mitaka', removal_version='?')
 
 
+related_bug = debtcollector.moves.moved_function(
+    decorators.related_bug, 'related_bug', __name__,
+    version='Pike', removal_version='?')
+
+
 def attr(**kwargs):
     """A decorator which applies the testtools attr decorator
 
@@ -141,28 +146,6 @@ def is_extension_enabled(extension_name, service):
     if extension_name in config_dict[service]:
         return True
     return False
-
-
-def related_bug(bug, status_code=None):
-    """A decorator useful to know solutions from launchpad bug reports
-
-    @param bug: The launchpad bug number causing the test
-    @param status_code: The status code related to the bug report
-    """
-    def decorator(f):
-        @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
-            try:
-                return f(self, *func_args, **func_kwargs)
-            except Exception as exc:
-                exc_status_code = getattr(exc, 'status_code', None)
-                if status_code is None or status_code == exc_status_code:
-                    LOG.error('Hints: This test was made for the bug %s. '
-                              'The failure could be related to '
-                              'https://launchpad.net/bugs/%s', bug, bug)
-                raise exc
-        return wrapper
-    return decorator
 
 
 def is_scheduler_filter_enabled(filter_name):
