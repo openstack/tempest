@@ -358,27 +358,24 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         self._test_pagination('volumes', ids=self.volume_id_list, detail=False)
 
     @decorators.idempotent_id('46eff077-100b-427f-914e-3db2abcdb7e2')
-    @decorators.skip_because(bug='1572765')
     def test_volume_list_with_detail_param_marker(self):
         # Choosing a random volume from a list of volumes for 'marker'
         # parameter
-        random_volume = random.choice(self.volume_id_list)
+        marker = random.choice(self.volume_id_list)
 
-        params = {'marker': random_volume}
+        # Though Cinder volumes are returned sorted by ID by default
+        # this is implicit. Let make this explicit in case Cinder
+        # folks change their minds.
+        params = {'marker': marker, 'sort': 'id:asc'}
 
         # Running volume list using marker parameter
         vol_with_marker = self.volumes_client.list_volumes(
             detail=True, params=params)['volumes']
 
-        # Fetching the index of the random volume from volume_id_list
-        index_marker = self.volume_id_list.index(random_volume)
+        expected_volumes_id = {
+            id for id in self.volume_id_list if id > marker
+        }
 
-        # The expected list with marker parameter
-        verify_volume_list = self.volume_id_list[:index_marker]
-
-        failed_msg = "Failed to list volume details by marker"
-
-        # Validating the expected list is the same like the observed list
-        self.assertEqual(verify_volume_list,
-                         map(lambda x: x['id'],
-                             vol_with_marker[::-1]), failed_msg)
+        self.assertEqual(
+            expected_volumes_id, {v['id'] for v in vol_with_marker}
+        )
