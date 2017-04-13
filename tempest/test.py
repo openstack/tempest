@@ -642,12 +642,24 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return fixed_network.get_tenant_network(
             cred_provider, networks_client, CONF.compute.fixed_network_name)
 
-    def assertEmpty(self, list, msg=None):
-        if msg is None:
-            msg = "list is not empty: %s" % list
-        self.assertEqual(0, len(list), msg)
+    def assertEmpty(self, items, msg=None):
+        """Asserts whether a sequence or collection is empty
 
-    def assertNotEmpty(self, list, msg=None):
+        :param items: sequence or collection to be tested
+        :param msg: message to be passed to the AssertionError
+        :raises AssertionError: when items is not empty
+        """
         if msg is None:
-            msg = "list is empty."
-        self.assertGreater(len(list), 0, msg)
+            msg = "sequence or collection is not empty: %s" % items
+        self.assertEqual(0, len(items), msg)
+
+    def assertNotEmpty(self, items, msg=None):
+        """Asserts whether a sequence or collection is not empty
+
+        :param items: sequence or collection to be tested
+        :param msg: message to be passed to the AssertionError
+        :raises AssertionError: when items is empty
+        """
+        if msg is None:
+            msg = "sequence or collection is empty."
+        self.assertGreater(len(items), 0, msg)
