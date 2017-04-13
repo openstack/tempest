@@ -17,7 +17,9 @@
 import copy
 import importlib
 import inspect
+import warnings
 
+from debtcollector import removals
 from oslo_log import log as logging
 
 from tempest.lib import auth
@@ -29,7 +31,7 @@ from tempest.lib.services import image
 from tempest.lib.services import network
 from tempest.lib.services import volume
 
-
+warnings.simplefilter("once")
 LOG = logging.getLogger(__name__)
 
 
@@ -257,6 +259,7 @@ class ServiceClients(object):
     # initialises this class using values from tempest CONF object. The wrapper
     # class should only be used by tests hosted in Tempest.
 
+    @removals.removed_kwarg('client_parameters')
     def __init__(self, credentials, identity_uri, region=None, scope='project',
                  disable_ssl_certificate_validation=True, ca_certs=None,
                  trace_requests='', client_parameters=None):
@@ -272,7 +275,12 @@ class ServiceClients(object):
         Parameters dscv, ca_certs and trace_requests all apply to the auth
         provider as well as any service clients provided by this manager.
 
-        Any other client parameter must be set via client_parameters.
+        Any other client parameter should be set via ClientsRegistry.
+
+        Client parameter used to be set via client_parameters, but this is
+        deprecated, and it is actually already not honoured
+        anymore: https://launchpad.net/bugs/1680915.
+
         The list of available parameters is defined in the service clients
         interfaces. For reference, most clients will accept 'region',
         'service', 'endpoint_type', 'build_timeout' and 'build_interval', which
@@ -286,6 +294,10 @@ class ServiceClients(object):
         - Token clients for 'identity' must be given an 'auth_url' parameter
         - Volume client for 'volume' accepts 'default_volume_size'
         - Servers client from 'compute' accepts 'enable_instance_password'
+
+        If Tempest configuration is used, parameters will be loaded in the
+        Registry automatically for all service client (Tempest stable ones
+        and plugins).
 
         Examples:
 
@@ -310,14 +322,6 @@ class ServiceClients(object):
             name, as declared in `service_clients.available_modules()` except
             for the version. Values are dictionaries of parameters that are
             going to be passed to all clients in the service client module.
-
-        Examples:
-
-            >>> params_service_x = {'param_name': 'param_value'}
-            >>> client_parameters = { 'service_x': params_service_x }
-
-            >>> params_service_y = config.service_client_config('service_y')
-            >>> client_parameters['service_y'] = params_service_y
 
         """
         self._registered_services = set([])

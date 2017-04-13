@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Deprecate the client_parameters argument in
+    `tempest.lib.services.clients.ServiceClients`. The parameter is actually
+    not honoured already - see https://bugs.launchpad.net/tempest/+bug/1680915
