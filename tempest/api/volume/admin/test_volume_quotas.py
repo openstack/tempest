@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import tempest_fixtures as fixtures
 from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -25,6 +26,11 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     credentials = ['primary', 'alt', 'admin']
+
+    def setUp(self):
+        # NOTE(jeremy.zhang): Avoid conflicts with volume quota class tests.
+        self.useFixture(fixtures.LockFixture('volume_quotas'))
+        super(BaseVolumeQuotasAdminTestJSON, self).setUp()
 
     @classmethod
     def setup_credentials(cls):
