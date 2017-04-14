@@ -178,7 +178,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.rebuild_server,
                           server['id'], self.image_ref)
 
-    @test.related_bug('1660878', status_code=409)
+    @decorators.related_bug('1660878', status_code=409)
     @test.attr(type=['negative'])
     @decorators.idempotent_id('581a397d-5eab-486f-9cf9-1014bbd4c984')
     def test_reboot_deleted_server(self):
@@ -219,7 +219,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           name=server_name)
 
     @test.attr(type=['negative'])
-    @test.related_bug('1651064', status_code=500)
+    @decorators.related_bug('1651064', status_code=500)
     @decorators.idempotent_id('12146ac1-d7df-4928-ad25-b1f99e5286cd')
     def test_create_server_invalid_bdm_in_2nd_dict(self):
         volume = self.create_volume()

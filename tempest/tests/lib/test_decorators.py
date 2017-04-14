@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import testtools
 
 from tempest.lib import base as test
@@ -123,3 +124,33 @@ class TestSkipUnlessAttrDecorator(base.TestCase):
 
     def test_no_skip_for_attr_exist_and_true(self):
         self._test_skip_unless_attr('expected_attr', expected_to_skip=False)
+
+
+class TestRelatedBugDecorator(base.TestCase):
+    def test_relatedbug_when_no_exception(self):
+        f = mock.Mock()
+        sentinel = object()
+
+        @decorators.related_bug(bug="1234", status_code=500)
+        def test_foo(self):
+            f(self)
+
+        test_foo(sentinel)
+        f.assert_called_once_with(sentinel)
+
+    def test_relatedbug_when_exception(self):
+        class MyException(Exception):
+            def __init__(self, status_code):
+                self.status_code = status_code
+
+        def f(self):
+            raise MyException(status_code=500)
+
+        @decorators.related_bug(bug="1234", status_code=500)
+        def test_foo(self):
+            f(self)
+
+        with mock.patch.object(decorators.LOG, 'error') as m_error:
+            self.assertRaises(MyException, test_foo, object())
+
+        m_error.assert_called_once_with(mock.ANY, '1234', '1234')

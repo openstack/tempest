@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    A new ``related_bug`` decorator has been added to
+    ``tempest.lib.decorators``. Use it to decorate and tag a test that was
+    added in relation to a launchpad bug report.

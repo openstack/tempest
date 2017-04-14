@@ -18,7 +18,6 @@ from tempest.common import fixed_network
 from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -93,7 +92,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
 
-    @test.related_bug('1659811')
+    @decorators.related_bug('1659811')
     @decorators.idempotent_id('7e5d6b8f-454a-4ba1-8ae2-da857af8338b')
     def test_list_servers_by_admin_with_specified_tenant(self):
         # In nova v2, tenant_id is ignored unless all_tenants is specified
