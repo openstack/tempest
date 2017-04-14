@@ -82,12 +82,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # add user into group
         users = []
         for _ in range(3):
-            name = data_utils.rand_name('User')
-            password = data_utils.rand_password()
-            user = self.users_client.create_user(name=name,
-                                                 password=password)['user']
+            user = self.create_test_user()
             users.append(user)
-            self.addCleanup(self.users_client.delete_user, user['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
 
         # list users in group
@@ -105,10 +101,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
     def test_list_user_groups(self):
         # create a user
-        user = self.users_client.create_user(
-            name=data_utils.rand_name('User'),
-            password=data_utils.rand_password())['user']
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user()
         # create two groups, and add user into them
         groups = []
         for _ in range(2):

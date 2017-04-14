@@ -32,12 +32,9 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         # Create a User
         u_name = data_utils.rand_name('user')
         u_desc = '%s-description' % u_name
-        u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_password()
-        user = self.users_client.create_user(
-            name=u_name, description=u_desc, password=u_password,
-            email=u_email)['user']
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(
+            name=u_name, description=u_desc, password=u_password)
         # Perform Authentication
         resp = self.token.auth(user_id=user['id'],
                                password=u_password).response
@@ -63,11 +60,8 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         """
 
         # Create a user.
-        user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
-        user = self.users_client.create_user(name=user_name,
-                                             password=user_password)['user']
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(password=user_password)
 
         # Create a couple projects
         project1_name = data_utils.rand_name(name='project')

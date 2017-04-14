@@ -19,7 +19,6 @@ from testtools import matchers
 
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest import test
 
@@ -30,7 +29,6 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def resource_setup(cls):
         super(UsersTestJSON, cls).resource_setup()
         cls.alt_user = data_utils.rand_name('test_user')
-        cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @test.attr(type='smoke')
@@ -38,12 +36,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user(self):
         # Create a user
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=self.alt_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=self.alt_user, tenantId=tenant['id'])
         self.assertEqual(self.alt_user, user['name'])
 
     @decorators.idempotent_id('89d9fdb8-15c2-4304-a429-48715d0af33d')
@@ -51,13 +44,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Create a user with enabled : False
         tenant = self.setup_test_tenant()
         name = data_utils.rand_name('test_user')
-        user = self.users_client.create_user(name=name,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email,
-                                             enabled=False)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=name,
+                                     tenantId=tenant['id'],
+                                     email=self.alt_email,
+                                     enabled=False)
         self.assertEqual(name, user['name'])
         self.assertEqual(False, user['enabled'])
         self.assertEqual(self.alt_email, user['email'])
@@ -65,14 +55,9 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
-        test_user = data_utils.rand_name('test_user')
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=test_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of this method
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(tenantId=tenant['id'])
+
         # Updating user details with new values
         u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
@@ -92,15 +77,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
     def test_delete_user(self):
         # Delete a user
-        test_user = data_utils.rand_name('test_user')
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=test_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.users_client.delete_user, user['id'])
+        user = self.create_test_user(tenantId=tenant['id'])
         self.users_client.delete_user(user['id'])
 
     @decorators.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
@@ -152,24 +130,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         tenant = self.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
-        password1 = data_utils.rand_password()
-        alt_tenant_user1 = data_utils.rand_name('tenant_user1')
-        user1 = self.users_client.create_user(name=alt_tenant_user1,
-                                              password=password1,
-                                              tenantId=tenant['id'],
-                                              email='user1@123')['user']
+        user1 = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(user1['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user1['id'])
-        password2 = data_utils.rand_password()
-        alt_tenant_user2 = data_utils.rand_name('tenant_user2')
-        user2 = self.users_client.create_user(name=alt_tenant_user2,
-                                              password=password2,
-                                              tenantId=tenant['id'],
-                                              email='user2@123')['user']
+        user2 = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(user2['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user2['id'])
         # List of users for the respective tenant ID
         body = (self.tenants_client.list_tenant_users(tenant['id'])
                 ['users'])
@@ -195,16 +159,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         role = self.roles_client.create_user_role_on_project(
             tenant['id'], user['id'], role['id'])['role']
 
-        alt_user2 = data_utils.rand_name('second_user')
-        alt_password2 = data_utils.rand_password()
-        second_user = self.users_client.create_user(
-            name=alt_user2,
-            password=alt_password2,
-            tenantId=tenant['id'],
-            email='user2@123')['user']
+        second_user = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(second_user['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, second_user['id'])
         role = self.roles_client.create_user_role_on_project(
             tenant['id'], second_user['id'], role['id'])['role']
         # List of users with roles for the respective tenant ID
