@@ -411,16 +411,17 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return image
 
-    def _log_console_output(self, servers=None):
+    def _log_console_output(self, servers=None, client=None):
         if not CONF.compute_feature_enabled.console_output:
             LOG.debug('Console output not supported, cannot log')
             return
+        client = client or self.servers_client
         if not servers:
-            servers = self.servers_client.list_servers()
+            servers = client.list_servers()
             servers = servers['servers']
         for server in servers:
             try:
-                console_output = self.servers_client.get_console_output(
+                console_output = client.get_console_output(
                     server['id'])['output']
                 LOG.debug('Console output for %s\nbody=\n%s',
                           server['id'], console_output)

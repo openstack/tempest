@@ -122,6 +122,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.router = None
             self.security_groups = {}
             self.servers = list()
+            self.access_point = None
 
         def set_network(self, network, subnet, router):
             self.network = network
@@ -458,6 +459,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         subnet_id = tenant.subnet['id']
         self.assertIn((subnet_id, server_ip, mac_addr), port_detail_list)
 
+    def _log_console_output_for_all_tenants(self):
+        for tenant in self.tenants.values():
+            client = tenant.manager.servers_client
+            self._log_console_output(servers=tenant.servers, client=client)
+            if tenant.access_point is not None:
+                self._log_console_output(
+                    servers=[tenant.access_point], client=client)
+
     @decorators.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
     @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
@@ -475,8 +484,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self._test_cross_tenant_block(source_tenant, dest_tenant)
             self._test_cross_tenant_allow(source_tenant, dest_tenant)
         except Exception:
-            for tenant in self.tenants.values():
-                self._log_console_output(servers=tenant.servers)
+            self._log_console_output_for_all_tenants()
             raise
 
     @decorators.idempotent_id('63163892-bbf6-4249-aa12-d5ea1f8f421b')
@@ -489,8 +497,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self._test_in_tenant_block(self.primary_tenant)
             self._test_in_tenant_allow(self.primary_tenant)
         except Exception:
-            for tenant in self.tenants.values():
-                self._log_console_output(servers=tenant.servers)
+            self._log_console_output_for_all_tenants()
             raise
 
     @decorators.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
@@ -544,8 +551,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 source=access_point_ssh,
                 dest=self._get_server_ip(server))
         except Exception:
-            for tenant in self.tenants.values():
-                self._log_console_output(servers=tenant.servers)
+            self._log_console_output_for_all_tenants()
             raise
 
     @decorators.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
@@ -618,8 +624,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 source=access_point_ssh,
                 dest=self._get_server_ip(server))
         except Exception:
-            for tenant in self.tenants.values():
-                self._log_console_output(servers=tenant.servers)
+            self._log_console_output_for_all_tenants()
             raise
 
     @decorators.attr(type='slow')
