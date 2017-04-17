@@ -33,7 +33,7 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         super(VirtualInterfacesNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
     @test.services('network')
     def test_list_virtual_interfaces_invalid_server_id(self):

@@ -23,7 +23,6 @@ from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -54,7 +53,7 @@ class AccountTest(base.BaseObjectTest):
         cls.delete_containers()
         super(AccountTest, cls).resource_cleanup()
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('3499406a-ae53-4f8c-b43a-133d4dc6fe3f')
     def test_list_containers(self):
         # list of all containers should not be empty
@@ -265,7 +264,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(sorted(orig_container_list, reverse=True),
                          container_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')
     def test_list_account_metadata(self):
         # list all account metadata

@@ -16,7 +16,6 @@
 from tempest.api.object_storage import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -24,7 +23,7 @@ class ContainerTest(base.BaseObjectTest):
         self.delete_containers()
         super(ContainerTest, self).tearDown()
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('92139d73-7819-4db1-85f8-3f2f22a8d91f')
     def test_create_container(self):
         container_name = data_utils.rand_name(name='TestContainer')
@@ -124,7 +123,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container(container_name)
         self.assertHeaders(resp, 'Container', 'DELETE')
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('312ff6bd-5290-497f-bda1-7c5fec6697ab')
     def test_list_container_contents(self):
         # get container contents list
@@ -271,7 +270,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual([object_name], object_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('96e68f0e-19ec-4aa2-86f3-adc6a45e14dd')
     def test_list_container_metadata(self):
         # List container metadata

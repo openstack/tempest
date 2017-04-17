@@ -46,7 +46,7 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
             msg = "subnet_allocation extension not enabled."
             raise cls.skipException(msg)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
     def test_create_list_show_update_delete_subnetpools(self):
         subnetpool_name = data_utils.rand_name('subnetpools')

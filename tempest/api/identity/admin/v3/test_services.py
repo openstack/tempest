@@ -17,7 +17,6 @@ from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
@@ -29,7 +28,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
                           service_id)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
         # Creating a Service

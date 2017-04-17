@@ -174,7 +174,7 @@ class NetworksTest(BaseNetworkTestResources):
         project_network_v6_mask_bits is the equivalent for ipv6 subnets
     """
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
     def test_create_update_delete_network_subnet(self):
         # Create a network
@@ -196,7 +196,7 @@ class NetworksTest(BaseNetworkTestResources):
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('2bf13842-c93f-4a69-83ed-717d2ec3b44e')
     def test_show_network(self):
         # Verify the details of a network
@@ -220,7 +220,7 @@ class NetworksTest(BaseNetworkTestResources):
         self.assertNotIn('tenant_id', network)
         self.assertNotIn('project_id', network)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
@@ -241,7 +241,7 @@ class NetworksTest(BaseNetworkTestResources):
         for network in networks:
             self.assertEqual(sorted(network.keys()), sorted(fields))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
     def test_show_subnet(self):
         # Verify the details of a subnet
@@ -263,7 +263,7 @@ class NetworksTest(BaseNetworkTestResources):
         for field_name in fields:
             self.assertEqual(subnet[field_name], self.subnet[field_name])
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
@@ -368,7 +368,7 @@ class NetworksTest(BaseNetworkTestResources):
             enable_dhcp=True,
             **self.subnet_dict(['gateway', 'host_routes', 'dns_nameservers']))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
     @test.requires_ext(extension='external-net', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
@@ -452,7 +452,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('d4f9024d-1e28-4fc1-a6b1-25dbc6fa11e2')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
@@ -468,7 +468,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], networks_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('8936533b-c0aa-4f29-8e53-6cc873aec489')
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
@@ -503,7 +503,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], subnets_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('48037ff2-e889-4c3b-b86a-8e3f34d2d060')
     def test_bulk_create_delete_port(self):
         networks = [self.create_network(), self.create_network()]

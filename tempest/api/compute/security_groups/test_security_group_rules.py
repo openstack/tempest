@@ -53,7 +53,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
             self.assertEqual(self.expected[key], actual_rule[key],
                              "Miss-matched key is %s" % key)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('850795d7-d4d3-4e55-b527-a774c0123d3a')
     @test.services('network')
     def test_security_group_rules_create(self):
@@ -123,7 +123,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
                                   'name': group_name}
         self._check_expected_response(rule)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('a6154130-5a55-4850-8be4-5e9e796dbf17')
     @test.services('network')
     def test_security_group_rules_list(self):

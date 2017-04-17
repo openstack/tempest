@@ -22,6 +22,34 @@ from tempest.lib import decorators
 from tempest.tests import base
 
 
+class TestAttrDecorator(base.TestCase):
+    def _test_attr_helper(self, expected_attrs, **decorator_args):
+        @decorators.attr(**decorator_args)
+        def foo():
+            pass
+
+        # By our decorators.attr decorator the attribute __testtools_attrs
+        # will be set only for 'type' argument, so we test it first.
+        if 'type' in decorator_args:
+            # this is what testtools sets
+            self.assertEqual(getattr(foo, '__testtools_attrs'),
+                             set(expected_attrs))
+
+    def test_attr_without_type(self):
+        self._test_attr_helper(expected_attrs='baz', bar='baz')
+
+    def test_attr_decorator_with_list_type(self):
+        # if type is 'smoke' we'll get the original list of types
+        self._test_attr_helper(expected_attrs=['smoke', 'foo'],
+                               type=['smoke', 'foo'])
+
+    def test_attr_decorator_with_unknown_type(self):
+        self._test_attr_helper(expected_attrs=['foo'], type='foo')
+
+    def test_attr_decorator_with_duplicated_type(self):
+        self._test_attr_helper(expected_attrs=['foo'], type=['foo', 'foo'])
+
+
 class TestSkipBecauseDecorator(base.TestCase):
     def _test_skip_because_helper(self, expected_to_skip=True,
                                   **decorator_args):

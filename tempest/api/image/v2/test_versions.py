@@ -14,13 +14,12 @@
 
 from tempest.api.image import base
 from tempest.lib import decorators
-from tempest import test
 
 
 class VersionsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('659ea30a-a17c-4317-832c-0f68ed23c31d')
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     def test_list_versions(self):
         versions = self.versions_client.list_versions()['versions']
         expected_resources = ('id', 'links', 'status')

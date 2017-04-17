@@ -133,7 +133,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.assertGreater(new_boot_time, boot_time,
                                '%s > %s' % (new_boot_time, boot_time))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
     def test_reboot_server_hard(self):
         # The server should be power cycled

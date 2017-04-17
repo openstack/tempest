@@ -19,7 +19,6 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -74,7 +73,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(body), 1)
         self.assertIn(role_id, fetched_role_ids)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('18afc6c0-46cf-4911-824e-9989cc056c3a')
     def test_role_create_update_show_list(self):
         r_name = data_utils.rand_name('Role')

@@ -67,7 +67,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                              "rule does not match with %s." %
                              (key, value))
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
         # Verify the security group belonging to project exist in list
@@ -80,7 +80,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         msg = "Security-group list doesn't contain default security-group"
         self.assertIsNotNone(found, msg)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
     def test_create_list_update_show_delete_security_group(self):
         group_create_body, name = self._create_security_group()
@@ -109,7 +109,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertEqual(show_body['security_group']['description'],
                          new_description)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('cfb99e0e-7410-4a3d-8a0c-959a63ee77e9')
     def test_create_show_delete_security_group_rule(self):
         group_create_body, _ = self._create_security_group()

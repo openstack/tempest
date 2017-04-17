@@ -16,7 +16,6 @@ from tempest.api.object_storage import base
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -32,7 +31,7 @@ class AccountNegativeTest(base.BaseObjectTest):
         cls.os = cls.os_roles_operator
         cls.os_operator = cls.os_roles_operator_alt
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user

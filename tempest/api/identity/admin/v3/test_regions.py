@@ -17,7 +17,6 @@ from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class RegionsTestJSON(base.BaseIdentityV3AdminTest):
@@ -79,7 +78,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         regions_list = [r['id'] for r in body]
         self.assertNotIn(region['id'], regions_list)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
     def test_create_region_with_specific_id(self):
         # Create a region with a specific id

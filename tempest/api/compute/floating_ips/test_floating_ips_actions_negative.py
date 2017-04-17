@@ -48,7 +48,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
             if cls.non_exist_id not in floating_ip_ids:
                 break
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e0f059b-e4dd-48fb-8207-06e3bba5b074')
     @test.services('network')
     def test_allocate_floating_ip_from_nonexistent_pool(self):
@@ -58,7 +58,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.create_floating_ip,
                           pool="non_exist_pool")
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')
     @test.services('network')
     def test_delete_nonexistent_floating_ip(self):
@@ -69,7 +69,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         self.assertRaises(lib_exc.NotFound, self.client.delete_floating_ip,
                           self.non_exist_id)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('595fa616-1a71-4670-9614-46564ac49a4c')
     @test.services('network')
     def test_associate_nonexistent_floating_ip(self):
@@ -80,7 +80,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.associate_floating_ip_to_server,
                           "0.0.0.0", self.server_id)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0a081a66-e568-4e6b-aa62-9587a876dca8')
     @test.services('network')
     def test_dissociate_nonexistent_floating_ip(self):
@@ -90,7 +90,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.disassociate_floating_ip_from_server,
                           "0.0.0.0", self.server_id)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('804b4fcb-bbf5-412f-925d-896672b61eb3')
     @test.services('network')
     def test_associate_ip_to_server_without_passing_floating_ip(self):

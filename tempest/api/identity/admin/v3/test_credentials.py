@@ -17,7 +17,6 @@ from oslo_serialization import jsonutils as json
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
@@ -52,7 +51,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     def _delete_credential(self, cred_id):
         self.creds_client.delete_credential(cred_id)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
         blob = '{"access": "%s", "secret": "%s"}' % (

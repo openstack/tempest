@@ -30,7 +30,7 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         super(FloatingIPDetailsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
     @test.services('network')
     def test_get_nonexistent_floating_ip_details(self):

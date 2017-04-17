@@ -22,7 +22,6 @@ from tempest.api.object_storage import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -128,7 +127,7 @@ class ContainerSyncTest(base.BaseObjectTest):
                 resp, object_content = obj_client.get_object(cont, obj_name)
                 self.assertEqual(object_content, obj_name[::-1].encode())
 
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @decorators.skip_because(bug='1317133')
     @decorators.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
     @testtools.skipIf(

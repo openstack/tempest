@@ -352,7 +352,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.check_remote_connectivity(ssh_source, remote_ip,
                                            should_connect)
 
-    @test.attr(type='smoke')
+    @decorators.attr(type='smoke')
     @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
@@ -408,7 +408,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @decorators.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
     @testtools.skipUnless(test.is_extension_enabled('net-mtu', 'network'),
                           'No way to calculate MTU for networks')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_mtu_sized_frames(self):
         """Validate that network MTU sized frames fit through."""
@@ -421,7 +421,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'Connectivity can only be tested when in a '
                       'multitenant network environment')
     @decorators.skip_because(bug="1610994")
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
         """Test connectivity between VMs on different networks
@@ -497,7 +497,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'Router state can be altered only with multitenant '
                       'networks capabilities')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_update_router_admin_state(self):
         """Test to update admin state up of router
@@ -531,7 +531,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'network isolation not available')
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_subnet_details(self):
         """Tests that subnet's extra configuration details are affecting VMs.
@@ -615,7 +615,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.network_feature_enabled.port_admin_state_change,
                           "Changing a port's admin state is not supported "
                           "by the test environment")
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
         """Test to update admin_state_up attribute of instance port
@@ -661,7 +661,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                        should_succeed=True)
 
     @decorators.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_preserve_preexisting_port(self):
         """Test preserve pre-existing port
@@ -713,7 +713,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @test.requires_ext(service='network', extension='l3_agent_scheduler')
     @decorators.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
@@ -793,7 +793,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
     @decorators.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @test.services('compute', 'network')
     def test_port_security_macspoofing_port(self):
         """Tests port_security extension enforces mac spoofing

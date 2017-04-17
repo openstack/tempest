@@ -19,7 +19,6 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -37,7 +36,7 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
             server_id, host=dest_host, block_migration=bmflm,
             disk_over_commit=False)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7fb7856e-ae92-44c9-861a-af62d7830bcb')
     def test_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status

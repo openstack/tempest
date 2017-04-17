@@ -15,7 +15,6 @@
 from tempest.api.compute import base
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -26,7 +25,7 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(AZAdminNegativeTestJSON, cls).setup_clients()
         cls.non_adm_client = cls.availability_zone_client
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('bf34dca2-fdc3-4073-9c02-7648d9eae0d7')
     def test_get_availability_zone_list_detail_with_non_admin_user(self):
         # List of availability zones and available services with

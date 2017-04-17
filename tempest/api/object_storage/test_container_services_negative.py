@@ -20,7 +20,6 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 CONF = config.CONF
 
@@ -36,7 +35,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
             _, body = cls.capabilities_client.list_capabilities()
             cls.constraints = body['swift']
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('30686921-4bed-4764-a038-40d741ed4e78')
     @testtools.skipUnless(
         CONF.object_storage_feature_enabled.discoverability,
@@ -52,7 +51,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         self.assertIn('Container name length of ' + str(max_length + 1) +
                       ' longer than ' + str(max_length), str(ex))
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('41e645bf-2e68-4f84-bf7b-c71aa5cd76ce')
     @testtools.skipUnless(
         CONF.object_storage_feature_enabled.discoverability,
@@ -69,7 +68,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                                container_name, metadata=metadata)
         self.assertIn('Metadata name too long', str(ex))
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('81e36922-326b-4b7c-8155-3bbceecd7a82')
     @testtools.skipUnless(
         CONF.object_storage_feature_enabled.discoverability,
@@ -86,7 +85,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                                container_name, metadata=metadata)
         self.assertIn('Metadata value longer than ' + str(max_length), str(ex))
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('ac666539-d566-4f02-8ceb-58e968dfb732')
     @testtools.skipUnless(
         CONF.object_storage_feature_enabled.discoverability,
@@ -106,7 +105,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         self.assertIn('Too many metadata items; max ' + str(max_count),
                       str(ex))
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('1a95ab2e-b712-4a98-8a4d-8ce21b7557d6')
     def test_get_metadata_headers_with_invalid_container_name(self):
         # Attempts to retrieve metadata headers with an invalid
@@ -115,7 +114,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                           self.container_client.list_container_metadata,
                           'invalid_container_name')
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('125a24fa-90a7-4cfc-b604-44e49d788390')
     def test_update_metadata_with_nonexistent_container_name(self):
         # Attempts to update metadata using a nonexistent container name.
@@ -125,7 +124,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                           self.container_client.update_container_metadata,
                           'nonexistent_container_name', metadata)
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('65387dbf-a0e2-4aac-9ddc-16eb3f1f69ba')
     def test_delete_with_nonexistent_container_name(self):
         # Attempts to delete metadata using a nonexistent container name.
@@ -135,7 +134,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                           self.container_client.delete_container_metadata,
                           'nonexistent_container_name', metadata)
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('14331d21-1e81-420a-beea-19cb5e5207f5')
     def test_list_all_container_objects_with_nonexistent_container(self):
         # Attempts to get a listing of all objects on a container
@@ -145,7 +144,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                           self.container_client.list_container_contents,
                           'nonexistent_container_name', params)
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('86b2ab08-92d5-493d-acd2-85f0c848819e')
     def test_list_all_container_objects_on_deleted_container(self):
         # Attempts to get a listing of all objects on a container
@@ -159,7 +158,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
                           self.container_client.list_container_contents,
                           container_name, params)
 
-    @test.attr(type=["negative"])
+    @decorators.attr(type=["negative"])
     @decorators.idempotent_id('42da116e-1e8c-4c96-9e06-2f13884ed2b1')
     def test_delete_non_empty_container(self):
         # create a container and an object within it

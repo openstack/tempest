@@ -17,7 +17,6 @@ from tempest.api.volume import base
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -46,14 +45,14 @@ class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
 
-    @test.attr(type='negative')
+    @decorators.attr(type='negative')
     @decorators.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=CONF.volume.volume_size)
 
-    @test.attr(type='negative')
+    @decorators.attr(type='negative')
     @decorators.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
         # NOTE(gfidente): quota set needs to be changed for this test
