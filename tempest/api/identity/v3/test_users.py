@@ -32,7 +32,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
     @classmethod
     def resource_setup(cls):
         super(IdentityV3UsersTest, cls).resource_setup()
-        cls.creds = cls.os.credentials
+        cls.creds = cls.os_primary.credentials
         cls.user_id = cls.creds.user_id
 
     def _update_password(self, original_password, password):

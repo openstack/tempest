@@ -31,7 +31,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(AggregatesAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.aggregates_client
+        cls.client = cls.os_admin.aggregates_client
 
     @classmethod
     def resource_setup(cls):
@@ -40,7 +40,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.az_name_prefix = 'test_az'
 
         cls.host = None
-        hypers = cls.os_adm.hypervisor_client.list_hypervisors(
+        hypers = cls.os_admin.hypervisor_client.list_hypervisors(
             detail=True)['hypervisors']
 
         if CONF.compute.hypervisor_type:
@@ -226,7 +226,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], host=self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'],
                         host=self.host)
-        admin_servers_client = self.os_adm.servers_client
+        admin_servers_client = self.os_admin.servers_client
         server = self.create_test_server(availability_zone=az_name,
                                          wait_until='ACTIVE')
         body = admin_servers_client.show_server(server['id'])['server']

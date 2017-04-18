@@ -25,8 +25,8 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(TenantUsagesNegativeTestJSON, cls).setup_clients()
-        cls.adm_client = cls.os_adm.tenant_usages_client
-        cls.client = cls.os.tenant_usages_client
+        cls.adm_client = cls.os_admin.tenant_usages_client
+        cls.client = cls.os_primary.tenant_usages_client
 
     @classmethod
     def resource_setup(cls):

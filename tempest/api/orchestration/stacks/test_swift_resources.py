@@ -40,8 +40,8 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def setup_clients(cls):
         super(SwiftResourcesTestJSON, cls).setup_clients()
-        cls.account_client = cls.os.account_client
-        cls.container_client = cls.os.container_client
+        cls.account_client = cls.os_primary.account_client
+        cls.container_client = cls.os_primary.container_client
 
     @classmethod
     def resource_setup(cls):

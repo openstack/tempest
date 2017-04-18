@@ -68,20 +68,21 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_clients(cls):
         super(BaseNetworkTest, cls).setup_clients()
-        cls.agents_client = cls.os.network_agents_client
-        cls.network_extensions_client = cls.os.network_extensions_client
-        cls.networks_client = cls.os.networks_client
-        cls.routers_client = cls.os.routers_client
-        cls.subnetpools_client = cls.os.subnetpools_client
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
-        cls.quotas_client = cls.os.network_quotas_client
-        cls.floating_ips_client = cls.os.floating_ips_client
-        cls.security_groups_client = cls.os.security_groups_client
+        cls.agents_client = cls.os_primary.network_agents_client
+        cls.network_extensions_client =\
+            cls.os_primary.network_extensions_client
+        cls.networks_client = cls.os_primary.networks_client
+        cls.routers_client = cls.os_primary.routers_client
+        cls.subnetpools_client = cls.os_primary.subnetpools_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
+        cls.quotas_client = cls.os_primary.network_quotas_client
+        cls.floating_ips_client = cls.os_primary.floating_ips_client
+        cls.security_groups_client = cls.os_primary.security_groups_client
         cls.security_group_rules_client = (
-            cls.os.security_group_rules_client)
-        cls.network_versions_client = cls.os.network_versions_client
-        cls.service_providers_client = cls.os.service_providers_client
+            cls.os_primary.security_group_rules_client)
+        cls.network_versions_client = cls.os_primary.network_versions_client
+        cls.service_providers_client = cls.os_primary.service_providers_client
 
     @classmethod
     def resource_setup(cls):
@@ -258,16 +259,16 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     @classmethod
     def setup_clients(cls):
         super(BaseAdminNetworkTest, cls).setup_clients()
-        cls.admin_agents_client = cls.os_adm.network_agents_client
-        cls.admin_networks_client = cls.os_adm.networks_client
-        cls.admin_routers_client = cls.os_adm.routers_client
-        cls.admin_subnets_client = cls.os_adm.subnets_client
-        cls.admin_ports_client = cls.os_adm.ports_client
-        cls.admin_quotas_client = cls.os_adm.network_quotas_client
-        cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
-        cls.admin_metering_labels_client = cls.os_adm.metering_labels_client
+        cls.admin_agents_client = cls.os_admin.network_agents_client
+        cls.admin_networks_client = cls.os_admin.networks_client
+        cls.admin_routers_client = cls.os_admin.routers_client
+        cls.admin_subnets_client = cls.os_admin.subnets_client
+        cls.admin_ports_client = cls.os_admin.ports_client
+        cls.admin_quotas_client = cls.os_admin.network_quotas_client
+        cls.admin_floating_ips_client = cls.os_admin.floating_ips_client
+        cls.admin_metering_labels_client = cls.os_admin.metering_labels_client
         cls.admin_metering_label_rules_client = (
-            cls.os_adm.metering_label_rules_client)
+            cls.os_admin.metering_label_rules_client)
 
     @classmethod
     def create_metering_label(cls, name, description):

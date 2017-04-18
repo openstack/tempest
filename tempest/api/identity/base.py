@@ -107,10 +107,10 @@ class BaseIdentityV2Test(BaseIdentityTest):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2Test, cls).setup_clients()
-        cls.non_admin_client = cls.os.identity_public_client
-        cls.non_admin_token_client = cls.os.token_client
-        cls.non_admin_tenants_client = cls.os.tenants_public_client
-        cls.non_admin_users_client = cls.os.users_public_client
+        cls.non_admin_client = cls.os_primary.identity_public_client
+        cls.non_admin_token_client = cls.os_primary.token_client
+        cls.non_admin_tenants_client = cls.os_primary.tenants_public_client
+        cls.non_admin_users_client = cls.os_primary.users_public_client
 
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
@@ -135,17 +135,17 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
-        cls.client = cls.os_adm.identity_client
-        cls.non_admin_client = cls.os.identity_client
-        cls.token_client = cls.os_adm.token_client
-        cls.tenants_client = cls.os_adm.tenants_client
-        cls.non_admin_tenants_client = cls.os.tenants_client
-        cls.roles_client = cls.os_adm.roles_client
-        cls.non_admin_roles_client = cls.os.roles_client
-        cls.users_client = cls.os_adm.users_client
-        cls.non_admin_users_client = cls.os.users_client
-        cls.services_client = cls.os_adm.identity_services_client
-        cls.endpoints_client = cls.os_adm.endpoints_client
+        cls.client = cls.os_admin.identity_client
+        cls.non_admin_client = cls.os_primary.identity_client
+        cls.token_client = cls.os_admin.token_client
+        cls.tenants_client = cls.os_admin.tenants_client
+        cls.non_admin_tenants_client = cls.os_primary.tenants_client
+        cls.roles_client = cls.os_admin.roles_client
+        cls.non_admin_roles_client = cls.os_primary.roles_client
+        cls.users_client = cls.os_admin.users_client
+        cls.non_admin_users_client = cls.os_primary.users_client
+        cls.services_client = cls.os_admin.identity_services_client
+        cls.endpoints_client = cls.os_admin.endpoints_client
 
     @classmethod
     def resource_setup(cls):
@@ -183,11 +183,12 @@ class BaseIdentityV3Test(BaseIdentityTest):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV3Test, cls).setup_clients()
-        cls.non_admin_client = cls.os.identity_v3_client
-        cls.non_admin_users_client = cls.os.users_v3_client
-        cls.non_admin_token = cls.os.token_v3_client
-        cls.non_admin_projects_client = cls.os.projects_client
-        cls.non_admin_versions_client = cls.os.identity_versions_v3_client
+        cls.non_admin_client = cls.os_primary.identity_v3_client
+        cls.non_admin_users_client = cls.os_primary.users_v3_client
+        cls.non_admin_token = cls.os_primary.token_v3_client
+        cls.non_admin_projects_client = cls.os_primary.projects_client
+        cls.non_admin_versions_client =\
+            cls.os_primary.identity_versions_v3_client
 
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
@@ -206,30 +207,31 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV3AdminTest, cls).setup_clients()
-        cls.client = cls.os_adm.identity_v3_client
-        cls.domains_client = cls.os_adm.domains_client
-        cls.users_client = cls.os_adm.users_v3_client
-        cls.trusts_client = cls.os_adm.trusts_client
-        cls.roles_client = cls.os_adm.roles_v3_client
-        cls.inherited_roles_client = cls.os_adm.inherited_roles_client
-        cls.token = cls.os_adm.token_v3_client
-        cls.endpoints_client = cls.os_adm.endpoints_v3_client
-        cls.regions_client = cls.os_adm.regions_client
-        cls.services_client = cls.os_adm.identity_services_v3_client
-        cls.policies_client = cls.os_adm.policies_client
-        cls.creds_client = cls.os_adm.credentials_client
-        cls.groups_client = cls.os_adm.groups_client
-        cls.projects_client = cls.os_adm.projects_client
+        cls.client = cls.os_admin.identity_v3_client
+        cls.domains_client = cls.os_admin.domains_client
+        cls.users_client = cls.os_admin.users_v3_client
+        cls.trusts_client = cls.os_admin.trusts_client
+        cls.roles_client = cls.os_admin.roles_v3_client
+        cls.inherited_roles_client = cls.os_admin.inherited_roles_client
+        cls.token = cls.os_admin.token_v3_client
+        cls.endpoints_client = cls.os_admin.endpoints_v3_client
+        cls.regions_client = cls.os_admin.regions_client
+        cls.services_client = cls.os_admin.identity_services_v3_client
+        cls.policies_client = cls.os_admin.policies_client
+        cls.creds_client = cls.os_admin.credentials_client
+        cls.groups_client = cls.os_admin.groups_client
+        cls.projects_client = cls.os_admin.projects_client
         cls.role_assignments = cls.os_admin.role_assignments_client
-        cls.oauth_consumers_client = cls.os_adm.oauth_consumers_client
-        cls.domain_config_client = cls.os_adm.domain_config_client
-        cls.endpoint_filter_client = cls.os_adm.endpoint_filter_client
+        cls.oauth_consumers_client = cls.os_admin.oauth_consumers_client
+        cls.domain_config_client = cls.os_admin.domain_config_client
+        cls.endpoint_filter_client = cls.os_admin.endpoint_filter_client
+
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity
             # admin clients for these tests shall use 'domain' scoped tokens.
             # As the client manager is already created by the base class,
             # we set the scope for the inner auth provider.
-            cls.os_adm.auth_provider.scope = 'domain'
+            cls.os_admin.auth_provider.scope = 'domain'
 
     @classmethod
     def disable_user(cls, user_name, domain_id=None):

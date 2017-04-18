@@ -35,7 +35,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(FloatingIPsBulkAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.floating_ips_bulk_client
+        cls.client = cls.os_admin.floating_ips_bulk_client
 
     @classmethod
     def resource_setup(cls):

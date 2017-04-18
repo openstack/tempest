@@ -29,7 +29,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(MigrationsAdminTest, cls).setup_clients()
-        cls.client = cls.os_adm.migrations_client
+        cls.client = cls.os_admin.migrations_client
 
     @decorators.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):

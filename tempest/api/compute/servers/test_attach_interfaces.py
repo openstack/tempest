@@ -46,8 +46,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AttachInterfacesTestJSON, cls).setup_clients()
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
 
     # TODO(mriedem): move this into a common waiters utility module
     def wait_for_port_detach(self, port_id):
@@ -231,7 +231,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         network_id = ifs[0]['net_id']
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Remove the fixed IP from server.
-        server_detail = self.os.servers_client.show_server(
+        server_detail = self.os_primary.servers_client.show_server(
             server['id'])['server']
         # Get the Fixed IP from server.
         fixed_ip = None

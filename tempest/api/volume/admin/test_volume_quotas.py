@@ -35,13 +35,13 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminTestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.os.credentials.tenant_id
+        cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
         cls.alt_client = cls.os_alt.volumes_client
 
     @classmethod
     def setup_clients(cls):
         super(BaseVolumeQuotasAdminTestJSON, cls).setup_clients()
-        cls.transfer_client = cls.os.volume_transfers_v2_client
+        cls.transfer_client = cls.os_primary.volume_transfers_v2_client
         cls.alt_transfer_client = cls.os_alt.volume_transfers_v2_client
 
     @decorators.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
@@ -86,7 +86,7 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
         quota_usage = self.admin_quotas_client.show_quota_set(
-            self.os_adm.credentials.tenant_id,
+            self.os_admin.credentials.tenant_id,
             params={'usage': True})['quota_set']
         for key in QUOTA_KEYS:
             self.assertIn(key, quota_usage)

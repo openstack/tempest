@@ -364,7 +364,7 @@ class ListSharedImagesTest(base.BaseV2ImageTest):
     @classmethod
     def setup_clients(cls):
         super(ListSharedImagesTest, cls).setup_clients()
-        cls.image_member_client = cls.os.image_member_client_v2
+        cls.image_member_client = cls.os_primary.image_member_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
 
     @decorators.idempotent_id('3fa50be4-8e38-4c02-a8db-7811bb780122')

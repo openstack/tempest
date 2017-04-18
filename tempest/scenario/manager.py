@@ -1242,9 +1242,9 @@ class EncryptionScenarioTest(ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
         cls.admin_encryption_types_client =\
-            cls.os_adm.encryption_types_v2_client
+            cls.os_admin.encryption_types_v2_client
 
     def create_encryption_type(self, client=None, type_id=None, provider=None,
                                key_size=None, cipher=None,

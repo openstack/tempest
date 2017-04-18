@@ -23,7 +23,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(HypervisorAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.hypervisor_client
+        cls.client = cls.os_admin.hypervisor_client
 
     def _list_hypervisors(self):
         # List of hypervisors

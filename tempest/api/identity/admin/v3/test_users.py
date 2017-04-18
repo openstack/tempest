@@ -147,8 +147,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                           'Security compliance not available.')
     @decorators.idempotent_id('568cd46c-ee6c-4ab4-a33a-d3791931979e')
     def test_password_history_not_enforced_in_admin_reset(self):
-        old_password = self.os.credentials.password
-        user_id = self.os.credentials.user_id
+        old_password = self.os_primary.credentials.password
+        user_id = self.os_primary.credentials.user_id
 
         new_password = data_utils.rand_password()
         self.users_client.update_user(user_id, password=new_password)

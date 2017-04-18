@@ -22,7 +22,7 @@ class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ComputeTenantNetworksTest, cls).resource_setup()
-        cls.client = cls.os.tenant_networks_client
+        cls.client = cls.os_primary.tenant_networks_client
         cls.network = cls.get_tenant_network()
 
     @classmethod

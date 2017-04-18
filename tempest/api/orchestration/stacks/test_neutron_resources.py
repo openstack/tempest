@@ -41,9 +41,9 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def setup_clients(cls):
         super(NeutronResourcesTestJSON, cls).setup_clients()
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
-        cls.routers_client = cls.os.routers_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
+        cls.routers_client = cls.os_primary.routers_client
 
     @classmethod
     def resource_setup(cls):

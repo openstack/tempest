@@ -24,7 +24,7 @@ class TokensV3Test(base.BaseIdentityV3Test):
     @decorators.idempotent_id('6f8e4436-fc96-4282-8122-e41df57197a9')
     def test_create_token(self):
 
-        creds = self.os.credentials
+        creds = self.os_primary.credentials
         user_id = creds.user_id
         username = creds.username
         password = creds.password

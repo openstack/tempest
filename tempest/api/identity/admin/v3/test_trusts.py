@@ -278,9 +278,9 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # Listing trusts can be done by trustor, by trustee, or without
         # any filter if scoped to a project, so we must ensure token scope is
         # project for this test.
-        original_scope = self.os_adm.auth_provider.scope
-        set_scope(self.os_adm.auth_provider, 'project')
-        self.addCleanup(set_scope, self.os_adm.auth_provider, original_scope)
+        original_scope = self.os_admin.auth_provider.scope
+        set_scope(self.os_admin.auth_provider, 'project')
+        self.addCleanup(set_scope, self.os_admin.auth_provider, original_scope)
         trusts_get = self.trusts_client.list_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]

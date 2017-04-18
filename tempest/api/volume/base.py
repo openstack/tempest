@@ -64,20 +64,21 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def setup_clients(cls):
         super(BaseVolumeTest, cls).setup_clients()
-        cls.servers_client = cls.os.servers_client
+        cls.servers_client = cls.os_primary.servers_client
 
         if CONF.service_available.glance:
-            cls.images_client = cls.os.image_client_v2
+            cls.images_client = cls.os_primary.image_client_v2
 
-        cls.snapshots_client = cls.os.snapshots_v2_client
-        cls.volumes_client = cls.os.volumes_v2_client
-        cls.backups_client = cls.os.backups_v2_client
-        cls.volumes_extension_client = cls.os.volumes_v2_extension_client
+        cls.snapshots_client = cls.os_primary.snapshots_v2_client
+        cls.volumes_client = cls.os_primary.volumes_v2_client
+        cls.backups_client = cls.os_primary.backups_v2_client
+        cls.volumes_extension_client =\
+            cls.os_primary.volumes_v2_extension_client
         cls.availability_zone_client = (
-            cls.os.volume_v2_availability_zone_client)
-        cls.volume_limits_client = cls.os.volume_v2_limits_client
-        cls.messages_client = cls.os.volume_v3_messages_client
-        cls.versions_client = cls.os.volume_v3_versions_client
+            cls.os_primary.volume_v2_availability_zone_client)
+        cls.volume_limits_client = cls.os_primary.volume_v2_limits_client
+        cls.messages_client = cls.os_primary.volume_v3_messages_client
+        cls.versions_client = cls.os_primary.volume_v3_versions_client
 
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
@@ -246,29 +247,29 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def setup_clients(cls):
         super(BaseVolumeAdminTest, cls).setup_clients()
 
-        cls.admin_volume_qos_client = cls.os_adm.volume_qos_v2_client
+        cls.admin_volume_qos_client = cls.os_admin.volume_qos_v2_client
         cls.admin_volume_services_client = \
-            cls.os_adm.volume_services_v2_client
-        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
-        cls.admin_volume_manage_client = cls.os_adm.volume_manage_v2_client
-        cls.admin_volume_client = cls.os_adm.volumes_v2_client
-        cls.admin_hosts_client = cls.os_adm.volume_hosts_v2_client
+            cls.os_admin.volume_services_v2_client
+        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
+        cls.admin_volume_manage_client = cls.os_admin.volume_manage_v2_client
+        cls.admin_volume_client = cls.os_admin.volumes_v2_client
+        cls.admin_hosts_client = cls.os_admin.volume_hosts_v2_client
         cls.admin_snapshot_manage_client = \
-            cls.os_adm.snapshot_manage_v2_client
-        cls.admin_snapshots_client = cls.os_adm.snapshots_v2_client
-        cls.admin_backups_client = cls.os_adm.backups_v2_client
+            cls.os_admin.snapshot_manage_v2_client
+        cls.admin_snapshots_client = cls.os_admin.snapshots_v2_client
+        cls.admin_backups_client = cls.os_admin.backups_v2_client
         cls.admin_encryption_types_client = \
-            cls.os_adm.encryption_types_v2_client
+            cls.os_admin.encryption_types_v2_client
         cls.admin_quota_classes_client = \
-            cls.os_adm.volume_quota_classes_v2_client
-        cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
-        cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
+            cls.os_admin.volume_quota_classes_v2_client
+        cls.admin_quotas_client = cls.os_admin.volume_quotas_v2_client
+        cls.admin_volume_limits_client = cls.os_admin.volume_v2_limits_client
         cls.admin_capabilities_client = \
-            cls.os_adm.volume_capabilities_v2_client
+            cls.os_admin.volume_capabilities_v2_client
         cls.admin_scheduler_stats_client = \
-            cls.os_adm.volume_scheduler_stats_v2_client
-        cls.admin_messages_client = cls.os_adm.volume_v3_messages_client
-        cls.admin_volume_types_client = cls.os_adm.volume_types_v2_client
+            cls.os_admin.volume_scheduler_stats_v2_client
+        cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
+        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
 
     @classmethod
     def resource_setup(cls):

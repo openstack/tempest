@@ -26,7 +26,7 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(InstanceUsageAuditLogTestJSON, cls).setup_clients()
-        cls.adm_client = cls.os_adm.instance_usages_audit_log_client
+        cls.adm_client = cls.os_admin.instance_usages_audit_log_client
 
     @decorators.idempotent_id('25319919-33d9-424f-9f99-2c203ee48b9d')
     def test_list_instance_usage_audit_logs(self):

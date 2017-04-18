@@ -163,7 +163,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         # Verify flavor is not used by other user
         self.assertRaises(lib_exc.BadRequest,
-                          self.os.servers_client.create_server,
+                          self.os_primary.servers_client.create_server,
                           name='test', imageRef=self.image_ref,
                           flavorRef=flavor['id'])
 
