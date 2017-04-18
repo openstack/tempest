@@ -220,6 +220,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.related_bug('1651064', status_code=500)
+    @test.services('volume')
     @decorators.idempotent_id('12146ac1-d7df-4928-ad25-b1f99e5286cd')
     def test_create_server_invalid_bdm_in_2nd_dict(self):
         volume = self.create_volume()
