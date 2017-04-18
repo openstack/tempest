@@ -258,7 +258,7 @@ class _WebSocket(object):
         while True:
             header = self._socket.recv(2)
             # If we didn't receive any data, just return None
-            if len(header) == 0:
+            if not header:
                 return None
             # We will make the assumption that we are only dealing with
             # frames less than 125 bytes here (for the negotiation) and
@@ -313,6 +313,6 @@ class _WebSocket(object):
         self._socket.sendall(reqdata.encode('utf8'))
         self.response = data = self._socket.recv(4096)
         # Loop through & concatenate all of the data in the response body
-        while len(data) > 0 and self.response.find(b'\r\n\r\n') < 0:
+        while data and self.response.find(b'\r\n\r\n') < 0:
             data = self._socket.recv(4096)
             self.response += data

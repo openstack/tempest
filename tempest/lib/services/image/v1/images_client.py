@@ -118,7 +118,7 @@ class ImagesClient(rest_client.RestClient):
         if 'changes_since' in kwargs:
             kwargs['changes-since'] = kwargs.pop('changes_since')
 
-        if len(kwargs) > 0:
+        if kwargs:
             url += '?%s' % urllib.urlencode(kwargs)
 
         resp, body = self.get(url)

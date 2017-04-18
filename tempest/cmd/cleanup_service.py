@@ -105,7 +105,7 @@ class BaseService(object):
 
     def _filter_by_tenant_id(self, item_list):
         if (item_list is None
-                or len(item_list) == 0
+                or not item_list
                 or not hasattr(self, 'tenant_id')
                 or self.tenant_id is None
                 or 'tenant_id' not in item_list[0]):

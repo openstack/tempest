@@ -32,7 +32,7 @@ class TempestException(Exception):
         except Exception:
             # at least get the core message out if something happened
             self._error_string = self.message
-        if len(args) > 0:
+        if args:
             # If there is a non-kwarg parameter, assume it's the error
             # message or reason description and tack it on to the end
             # of the exception message

@@ -104,7 +104,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
             try:
                 uptime = (self.client.show_hypervisor_uptime(hyper['id'])
                           ['hypervisor'])
-                if len(uptime) > 0:
+                if uptime:
                     has_valid_uptime = True
                     break
             except Exception:

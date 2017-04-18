@@ -47,7 +47,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         else:
             users = cls.users_client.list_users()['users']
         user = [u for u in users if u['name'] == name]
-        if len(user) > 0:
+        if user:
             return user[0]
 
     @classmethod
@@ -57,14 +57,14 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         except AttributeError:
             tenants = cls.projects_client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
-        if len(tenant) > 0:
+        if tenant:
             return tenant[0]
 
     @classmethod
     def get_role_by_name(cls, name):
         roles = cls.roles_client.list_roles()['roles']
         role = [r for r in roles if r['name'] == name]
-        if len(role) > 0:
+        if role:
             return role[0]
 
     def create_test_user(self, **kwargs):

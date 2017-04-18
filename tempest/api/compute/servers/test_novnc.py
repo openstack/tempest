@@ -82,7 +82,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         """Verify we can connect to novnc and do the websocket connection."""
         # Turn the Socket into a WebSocket to do the communication
         data = self._websocket.receive_frame()
-        self.assertFalse(data is None or len(data) == 0,
+        self.assertFalse(data is None or not data,
                          'Token must be invalid because the connection '
                          'closed.')
         # Parse the RFB version from the data to make sure it is valid
@@ -181,6 +181,6 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         self._websocket = compute.create_websocket(url)
         # Make sure the novncproxy rejected the connection and closed it
         data = self._websocket.receive_frame()
-        self.assertTrue(data is None or len(data) == 0,
+        self.assertTrue(data is None or not data,
                         "The novnc proxy actually sent us some data, but we "
                         "expected it to close the connection.")

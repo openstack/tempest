@@ -114,7 +114,7 @@ def tables(output_lines):
                 label = line
             else:
                 LOG.warning('Invalid line between tables: %s', line)
-    if len(table_) > 0:
+    if table_:
         LOG.warning('Missing end of table')
 
     return tables_

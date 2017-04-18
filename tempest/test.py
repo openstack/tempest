@@ -126,7 +126,7 @@ def is_extension_enabled(extension_name, service):
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
         'identity': CONF.identity_feature_enabled.api_extensions
     }
-    if len(config_dict[service]) == 0:
+    if not config_dict[service]:
         return False
     if config_dict[service][0] == 'all':
         return True
@@ -147,7 +147,7 @@ def is_scheduler_filter_enabled(filter_name):
     """
 
     filters = CONF.compute_feature_enabled.scheduler_available_filters
-    if len(filters) == 0:
+    if not filters:
         return False
     if 'all' in filters:
         return True
@@ -621,7 +621,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if msg is None:
             msg = "sequence or collection is not empty: %s" % items
-        self.assertEqual(0, len(items), msg)
+        self.assertFalse(items, msg)
 
     def assertNotEmpty(self, items, msg=None):
         """Asserts whether a sequence or collection is not empty
@@ -632,4 +632,4 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if msg is None:
             msg = "sequence or collection is empty."
-        self.assertGreater(len(items), 0, msg)
+        self.assertTrue(items, msg)

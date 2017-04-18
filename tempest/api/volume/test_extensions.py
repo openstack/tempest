@@ -32,7 +32,7 @@ class ExtensionsTestJSON(base.BaseVolumeTest):
         # List of all extensions
         extensions = (self.volumes_extension_client.list_extensions()
                       ['extensions'])
-        if len(CONF.volume_feature_enabled.api_extensions) == 0:
+        if not CONF.volume_feature_enabled.api_extensions:
             raise self.skipException('There are not any extensions configured')
         extension_list = [extension.get('alias') for extension in extensions]
         LOG.debug("Cinder extensions: %s", ','.join(extension_list))
