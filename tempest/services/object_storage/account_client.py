@@ -23,41 +23,6 @@ from tempest.lib.common import rest_client
 
 class AccountClient(rest_client.RestClient):
 
-    def create_account(self, data=None,
-                       params=None,
-                       metadata=None,
-                       remove_metadata=None,
-                       metadata_prefix='X-Account-Meta-',
-                       remove_metadata_prefix='X-Remove-Account-Meta-'):
-        """Create an account."""
-        if metadata is None:
-            metadata = {}
-        if remove_metadata is None:
-            remove_metadata = {}
-        url = ''
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        headers = {}
-        for key in metadata:
-            headers[metadata_prefix + key] = metadata[key]
-        for key in remove_metadata:
-            headers[remove_metadata_prefix + key] = remove_metadata[key]
-
-        resp, body = self.put(url, data, headers)
-        self.expected_success(200, resp.status)
-        return resp, body
-
-    def delete_account(self, data=None, params=None):
-        """Delete an account."""
-        url = ''
-        if params:
-            url = '?%s%s' % (url, urllib.urlencode(params))
-
-        resp, body = self.delete(url, headers={}, body=data)
-        self.expected_success(200, resp.status)
-        return resp, body
-
     def list_account_metadata(self):
         """HEAD on the storage URL
 
@@ -68,19 +33,14 @@ class AccountClient(rest_client.RestClient):
         return resp, body
 
     def create_account_metadata(self, metadata,
-                                metadata_prefix='X-Account-Meta-',
-                                data=None, params=None):
+                                metadata_prefix='X-Account-Meta-'):
         """Creates an account metadata entry."""
         headers = {}
         if metadata:
             for key in metadata:
                 headers[metadata_prefix + key] = metadata[key]
 
-        url = ''
-        if params:
-            url = '?%s%s' % (url, urllib.urlencode(params))
-
-        resp, body = self.post(url, headers=headers, body=data)
+        resp, body = self.post('', headers=headers, body=None)
         self.expected_success([200, 204], resp.status)
         return resp, body
 

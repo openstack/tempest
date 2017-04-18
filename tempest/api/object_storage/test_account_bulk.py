@@ -56,11 +56,10 @@ class BulkTest(base.BaseObjectTest):
 
     def _upload_archive(self, filepath):
         # upload an archived file
-        params = {'extract-archive': 'tar'}
         with open(filepath) as fh:
             mydata = fh.read()
-            resp, body = self.account_client.create_account(data=mydata,
-                                                            params=params)
+            resp, body = self.bulk_client.upload_archive(
+                upload_path='', data=mydata, archive_file_format='tar')
         return resp, body
 
     def _check_contents_deleted(self, container_name):
@@ -113,9 +112,7 @@ class BulkTest(base.BaseObjectTest):
         self._upload_archive(filepath)
 
         data = '%s/%s\n%s' % (container_name, object_name, container_name)
-        params = {'bulk-delete': ''}
-        resp, body = self.account_client.delete_account(data=data,
-                                                        params=params)
+        resp, body = self.bulk_client.delete_bulk_data(data=data)
 
         # When deleting multiple files using the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
@@ -140,10 +137,8 @@ class BulkTest(base.BaseObjectTest):
         self._upload_archive(filepath)
 
         data = '%s/%s\n%s' % (container_name, object_name, container_name)
-        params = {'bulk-delete': ''}
 
-        resp, body = self.account_client.create_account_metadata(
-            {}, data=data, params=params)
+        resp, body = self.bulk_client.delete_bulk_data_with_post(data=data)
 
         # When deleting multiple files using the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
