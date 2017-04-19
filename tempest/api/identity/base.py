@@ -223,6 +223,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.projects_client = cls.os_admin.projects_client
         cls.role_assignments = cls.os_admin.role_assignments_client
         cls.oauth_consumers_client = cls.os_admin.oauth_consumers_client
+        cls.oauth_token_client = cls.os_admin.oauth_token_client
         cls.domain_config_client = cls.os_admin.domain_config_client
         cls.endpoint_filter_client = cls.os_admin.endpoint_filter_client
         cls.endpoint_groups_client = cls.os_admin.endpoint_groups_client
