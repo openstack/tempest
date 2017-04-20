@@ -16,6 +16,7 @@
 import random
 
 import netaddr
+from oslo_utils import netutils
 
 from tempest.api.network import base
 from tempest.common.utils import net_info
@@ -92,8 +93,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         port_mac = data_utils.rand_mac_address()
         port = self.create_port(self.network, mac_address=port_mac)
         real_ip = next(iter(port['fixed_ips']), None)['ip_address']
-        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                   port_mac).format()
+        eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+            subnet['cidr'], port_mac))
         return real_ip, eui_ip
 
     @decorators.idempotent_id('e5517e62-6f16-430d-a672-f80875493d4c')
@@ -188,10 +189,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, **kwargs_dhcp)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
-                    subnet_slaac['cidr'],
-                    port_mac
-                ).format()
+                eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+                    subnet_slaac['cidr'], port_mac))
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
@@ -236,10 +235,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, ip_version=4)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
-                    subnet_slaac['cidr'],
-                    port_mac
-                ).format()
+                eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+                    subnet_slaac['cidr'], port_mac))
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
