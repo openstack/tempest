@@ -147,12 +147,8 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
         src_role = self.setup_test_role()
 
         # Create a project hierarchy
-        leaf_project_name = data_utils.rand_name('project')
-        leaf_project = self.projects_client.create_project(
-            leaf_project_name, domain_id=self.domain['id'],
-            parent_id=self.project['id'])['project']
-        self.addCleanup(
-            self.projects_client.delete_project, leaf_project['id'])
+        leaf_project = self.setup_test_project(domain_id=self.domain['id'],
+                                               parent_id=self.project['id'])
 
         # Assign role on domain
         self.inherited_roles_client.create_inherited_role_on_domains_user(
@@ -195,12 +191,8 @@ class InheritsV3TestJSON(BaseInheritsV3Test):
         src_role = self.setup_test_role()
 
         # Create a project hierarchy
-        leaf_project_name = data_utils.rand_name('project')
-        leaf_project = self.projects_client.create_project(
-            leaf_project_name, domain_id=self.domain['id'],
-            parent_id=self.project['id'])['project']
-        self.addCleanup(
-            self.projects_client.delete_project, leaf_project['id'])
+        leaf_project = self.setup_test_project(domain_id=self.domain['id'],
+                                               parent_id=self.project['id'])
 
         # Assign role on parent project
         self.inherited_roles_client.create_inherited_role_on_projects_user(

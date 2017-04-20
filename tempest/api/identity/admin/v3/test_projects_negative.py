@@ -33,8 +33,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def test_project_create_duplicate(self):
         # Project names should be unique
         project_name = data_utils.rand_name('project-dup')
-        project = self.projects_client.create_project(project_name)['project']
-        self.addCleanup(self.projects_client.delete_project, project['id'])
+        self.setup_test_project(name=project_name)
 
         self.assertRaises(lib_exc.Conflict,
                           self.projects_client.create_project, project_name)
@@ -67,9 +66,7 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('8d68c012-89e0-4394-8d6b-ccd7196def97')
     def test_project_delete_by_unauthorized_user(self):
         # Non-admin user should not be able to delete a project
-        project_name = data_utils.rand_name('project')
-        project = self.projects_client.create_project(project_name)['project']
-        self.addCleanup(self.projects_client.delete_project, project['id'])
+        project = self.setup_test_project()
         self.assertRaises(
             lib_exc.Forbidden, self.non_admin_projects_client.delete_project,
             project['id'])

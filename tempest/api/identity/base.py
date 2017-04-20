@@ -247,11 +247,13 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
                                      password=password)
         return user
 
-    def setup_test_project(self):
+    def setup_test_project(self, **kwargs):
         """Set up a test project."""
-        project = self.projects_client.create_project(
-            name=data_utils.rand_name('test_project'),
-            description=data_utils.rand_name('desc'))['project']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_project')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('test_description')
+        project = self.projects_client.create_project(**kwargs)['project']
         # Delete the project at the end of the test
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
