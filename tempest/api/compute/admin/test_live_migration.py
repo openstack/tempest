@@ -162,11 +162,17 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
         # Attach the volume to the server
         self.attach_volume(server, volume, device='/dev/xvdb')
-
+        server = self.admin_servers_client.show_server(server_id)['server']
+        volume_id1 = server["os-extended-volumes:volumes_attached"][0]["id"]
         self._migrate_server_to(server_id, target_host)
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'ACTIVE')
+
+        server = self.admin_servers_client.show_server(server_id)['server']
+        volume_id2 = server["os-extended-volumes:volumes_attached"][0]["id"]
+
         self.assertEqual(target_host, self._get_host_for_server(server_id))
+        self.assertEqual(volume_id1, volume_id2)
 
 
 class LiveAutoBlockMigrationV225TestJSON(LiveBlockMigrationTestJSON):
