@@ -34,10 +34,14 @@ except ImportError:
 LPCACHEDIR = os.path.expanduser('~/.launchpadlib/cache')
 LOG = logging.getLogger(__name__)
 
+BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+TESTDIR = os.path.join(BASEDIR, 'tempest')
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('test_path', help='Path of test dir')
+    parser.add_argument('test_path', nargs='?', default=TESTDIR,
+                        help='Path of test dir')
     return parser.parse_args()
 
 
