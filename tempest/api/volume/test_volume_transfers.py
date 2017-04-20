@@ -73,19 +73,20 @@ class VolumesTransfersTest(base.BaseVolumeTest):
                         volume['id'])
 
         # Create a volume transfer
-        body = self.client.create_volume_transfer(
-            volume_id=volume['id'])['transfer']
-        transfer_id = body['id']
+        transfer_id = self.client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']['id']
         waiters.wait_for_volume_resource_status(
             self.volumes_client, volume['id'], 'awaiting-transfer')
 
-        # List all volume transfers (looking for the one we created)
-        body = self.client.list_volume_transfers()['transfers']
-        for transfer in body:
-            if volume['id'] == transfer['volume_id']:
-                break
-        else:
-            self.fail('Transfer not found for volume %s' % volume['id'])
+        # List all volume transfers with details, check the detail-specific
+        # elements, and look for the created transfer.
+        transfers = self.client.list_volume_transfers(detail=True)['transfers']
+        self.assertNotEmpty(transfers)
+        for transfer in transfers:
+            self.assertIn('created_at', transfer)
+        volume_list = [transfer['volume_id'] for transfer in transfers]
+        self.assertIn(volume['id'], volume_list,
+                      'Transfer not found for volume %s' % volume['id'])
 
         # Delete a volume transfer
         self.client.delete_volume_transfer(transfer_id)

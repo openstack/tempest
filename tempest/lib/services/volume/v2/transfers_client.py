@@ -44,14 +44,17 @@ class TransfersClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_volume_transfers(self, **params):
+    def list_volume_transfers(self, detail=False, **params):
         """List all the volume transfers created.
 
         For a full list of available parameters, please refer to the official
         API reference:
         https://developer.openstack.org/api-ref/block-storage/v2/#list-volume-transfers
+        https://developer.openstack.org/api-ref/block-storage/v2/#list-volume-transfers-with-details
         """
         url = 'os-volume-transfer'
+        if detail:
+            url += '/detail'
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
