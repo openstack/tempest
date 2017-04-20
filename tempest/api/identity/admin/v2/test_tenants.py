@@ -15,7 +15,6 @@
 
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -26,12 +25,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Create several tenants and delete them
         tenants = []
         for _ in range(3):
-            tenant_name = data_utils.rand_name(name='tenant-new')
-            tenant = self.tenants_client.create_tenant(
-                name=tenant_name)['tenant']
-            # Add the tenant to the cleanup list
-            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                            self.tenants_client.delete_tenant, tenant['id'])
+            tenant = self.setup_test_tenant()
             tenants.append(tenant)
         tenant_ids = [tn['id'] for tn in tenants]
         body = self.tenants_client.list_tenants()['tenants']
@@ -48,14 +42,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
-        tenant_name = data_utils.rand_name(name='tenant')
         tenant_desc = data_utils.rand_name(name='desc')
-        body = self.tenants_client.create_tenant(name=tenant_name,
-                                                 description=tenant_desc)
-        tenant = body['tenant']
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
+        tenant = self.setup_test_tenant(description=tenant_desc)
         tenant_id = tenant['id']
         desc1 = tenant['description']
         self.assertEqual(desc1, tenant_desc, 'Description should have '
@@ -69,13 +57,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('670bdddc-1cd7-41c7-b8e2-751cfb67df50')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
-        tenant_name = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(name=tenant_name,
-                                                 enabled=True)
-        tenant = body['tenant']
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
+        tenant = self.setup_test_tenant(enabled=True)
         tenant_id = tenant['id']
         en1 = tenant['enabled']
         self.assertTrue(en1, 'Enable should be True in response')
@@ -87,13 +69,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
-        tenant_name = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(name=tenant_name,
-                                                 enabled=False)
-        tenant = body['tenant']
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
+        tenant = self.setup_test_tenant(enabled=False)
         tenant_id = tenant['id']
         en1 = tenant['enabled']
         self.assertEqual('false', str(en1).lower(),
@@ -108,14 +84,9 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = data_utils.rand_name(name='tenant')
-        body = self.tenants_client.create_tenant(name=t_name1)['tenant']
-        tenant = body
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
-
-        t_id = body['id']
-        resp1_name = body['name']
+        tenant = self.setup_test_tenant(name=t_name1)
+        t_id = tenant['id']
+        resp1_name = tenant['name']
 
         t_name2 = data_utils.rand_name(name='tenant2')
         body = self.tenants_client.update_tenant(t_id, name=t_name2)['tenant']
@@ -134,15 +105,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
-        t_name = data_utils.rand_name(name='tenant')
         t_desc = data_utils.rand_name(name='desc')
-        body = self.tenants_client.create_tenant(name=t_name,
-                                                 description=t_desc)
-        tenant = body['tenant']
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
-
+        tenant = self.setup_test_tenant(description=t_desc)
         t_id = tenant['id']
         resp1_desc = tenant['description']
 
@@ -164,14 +128,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('8fc8981f-f12d-4c66-9972-2bdcf2bc2e1a')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
-        t_name = data_utils.rand_name(name='tenant')
         t_en = False
-        body = self.tenants_client.create_tenant(name=t_name, enabled=t_en)
-        tenant = body['tenant']
-        # Add the tenant to the cleanup list
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.tenants_client.delete_tenant, tenant['id'])
-
+        tenant = self.setup_test_tenant(enabled=t_en)
         t_id = tenant['id']
         resp1_en = tenant['enabled']
 
