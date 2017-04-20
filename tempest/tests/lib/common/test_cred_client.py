@@ -73,6 +73,5 @@ class TestCredClientV3(base.TestCase):
 
     def test_delete_project(self):
         self.creds_client.delete_project('fake_id')
-        print(self.projects_client.calls)
         self.projects_client.delete_project.assert_called_once_with(
             'fake_id')

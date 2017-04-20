@@ -103,5 +103,4 @@ class ServiceClientsFakePrivate(config.TempestConfigPrivate):
         self._set_attrs()
         self.fake_service1 = cfg.CONF['fake-service1']
         self.fake_service2 = cfg.CONF['fake-service2']
-        print('Services registered')
         self.lock_path = cfg.CONF.oslo_concurrency.lock_path
