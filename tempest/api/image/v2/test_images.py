@@ -18,11 +18,14 @@ import random
 
 import six
 
+import testtools
+
 from oslo_log import log as logging
 from tempest.api.image import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -124,6 +127,40 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual(new_image_name, body['name'])
+
+    @testtools.skipUnless(CONF.image_feature_enabled.deactivate_image,
+                          'deactivate-image is not available.')
+    @decorators.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')
+    def test_deactivate_reactivate_image(self):
+        # Create image
+        image_name = data_utils.rand_name('image')
+        image = self.create_image(name=image_name,
+                                  container_format='bare',
+                                  disk_format='raw',
+                                  visibility='private')
+
+        # Upload an image file
+        content = data_utils.random_bytes()
+        image_file = six.BytesIO(content)
+        self.client.store_image_file(image['id'], image_file)
+
+        # Deactivate image
+        self.client.deactivate_image(image['id'])
+        body = self.client.show_image(image['id'])
+        self.assertEqual("deactivated", body['status'])
+
+        # User unable to download deactivated image
+        self.assertRaises(lib_exc.Forbidden, self.client.show_image_file,
+                          image['id'])
+
+        # Reactivate image
+        self.client.reactivate_image(image['id'])
+        body = self.client.show_image(image['id'])
+        self.assertEqual("active", body['status'])
+
+        # User able to download image after reactivation
+        body = self.client.show_image_file(image['id'])
+        self.assertEqual(content, body.data)
 
 
 class ListUserImagesTest(base.BaseV2ImageTest):
