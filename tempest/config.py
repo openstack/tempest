@@ -208,6 +208,10 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
                 help='Is the v2 identity API enabled'),
+    cfg.BoolOpt('api_v2_admin',
+                default=True,
+                help="Is the v2 identity admin API available? This setting "
+                     "only applies if api_v2 is set to True."),
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),

@@ -127,6 +127,12 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
     force_tenant_isolation = True
 
     @classmethod
+    def skip_checks(cls):
+        super(BaseIdentityV2AdminTest, cls).skip_checks()
+        if not CONF.identity_feature_enabled.api_v2_admin:
+            raise cls.skipException('Identity v2 admin not available')
+
+    @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
         cls.client = cls.os_adm.identity_client
