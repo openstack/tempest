@@ -152,11 +152,13 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
         user = self.create_test_user(tenantId=tenant['id'], password=password)
         return user
 
-    def setup_test_tenant(self):
+    def setup_test_tenant(self, **kwargs):
         """Set up a test tenant."""
-        tenant = self.projects_client.create_tenant(
-            name=data_utils.rand_name('test_tenant'),
-            description=data_utils.rand_name('desc'))['tenant']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_tenant')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('desc')
+        tenant = self.projects_client.create_tenant(**kwargs)['tenant']
         # Delete the tenant at the end of the test
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
