@@ -68,6 +68,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.compute_networks_client = cls.os.compute_networks_client
         cls.compute_images_client = cls.os.compute_images_client
 
+        if CONF.service_available.glance:
+            cls.images_client = cls.os.image_client_v2
+
         cls.snapshots_client = cls.os.snapshots_v2_client
         cls.volumes_client = cls.os.volumes_v2_client
         cls.backups_client = cls.os.backups_v2_client

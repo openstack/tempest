@@ -13,11 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.volume import base
+from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
+
+CONF = config.CONF
 
 
 class VolumesNegativeTest(base.BaseVolumeTest):
@@ -263,3 +270,32 @@ class VolumesNegativeTest(base.BaseVolumeTest):
             self.volumes_client.list_volumes(detail=True,
                                              params=params)['volumes']
         self.assertEqual(0, len(fetched_volume))
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('5b810c91-0ad1-47ce-aee8-615f789be78f')
+    @test.services('image')
+    def test_create_volume_from_image_with_decreasing_size(self):
+        # Create image
+        image_name = data_utils.rand_name(self.__class__.__name__ + "-image")
+        image = self.images_client.create_image(
+            name=image_name,
+            container_format=CONF.image.container_formats[0],
+            disk_format=CONF.image.disk_formats[0],
+            visibility='private',
+            min_disk=CONF.volume.volume_size + 1)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.images_client.delete_image, image['id'])
+
+        # Upload image with 1KB data
+        image_file = six.BytesIO(data_utils.random_bytes())
+        self.images_client.store_image_file(image['id'], image_file)
+        waiters.wait_for_image_status(self.images_client,
+                                      image['id'], 'active')
+
+        # Note(jeremyZ): To shorten the test time (uploading a big size image
+        # is time-consuming), here just consider the scenario that volume size
+        # is smaller than the min_disk of image.
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume,
+                          size=CONF.volume.volume_size,
+                          imageRef=image['id'])
