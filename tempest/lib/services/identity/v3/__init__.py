@@ -19,6 +19,8 @@ from tempest.lib.services.identity.v3.domain_configuration_client \
 from tempest.lib.services.identity.v3.domains_client import DomainsClient
 from tempest.lib.services.identity.v3.endpoint_filter_client import \
     EndPointsFilterClient
+from tempest.lib.services.identity.v3.endpoint_groups_client import \
+    EndPointGroupsClient
 from tempest.lib.services.identity.v3.endpoints_client import EndPointsClient
 from tempest.lib.services.identity.v3.groups_client import GroupsClient
 from tempest.lib.services.identity.v3.identity_client import IdentityClient
@@ -39,8 +41,9 @@ from tempest.lib.services.identity.v3.users_client import UsersClient
 from tempest.lib.services.identity.v3.versions_client import VersionsClient
 
 __all__ = ['CredentialsClient', 'DomainsClient', 'DomainConfigurationClient',
-           'EndPointsClient', 'EndPointsFilterClient', 'GroupsClient',
-           'IdentityClient', 'InheritedRolesClient', 'OAUTHConsumerClient',
-           'PoliciesClient', 'ProjectsClient', 'RegionsClient',
-           'RoleAssignmentsClient', 'RolesClient', 'ServicesClient',
-           'V3TokenClient', 'TrustsClient', 'UsersClient', 'VersionsClient']
+           'EndPointGroupsClient', 'EndPointsClient', 'EndPointsFilterClient',
+           'GroupsClient', 'IdentityClient', 'InheritedRolesClient',
+           'OAUTHConsumerClient', 'PoliciesClient', 'ProjectsClient',
+           'RegionsClient', 'RoleAssignmentsClient', 'RolesClient',
+           'ServicesClient', 'V3TokenClient', 'TrustsClient', 'UsersClient',
+           'VersionsClient']
