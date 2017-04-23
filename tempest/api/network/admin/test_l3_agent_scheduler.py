@@ -27,11 +27,7 @@ AGENT_MODES = (
 
 
 class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
-    _agent_mode = 'legacy'
-
-    """
-    Tests the following operations in the Neutron API using the REST client for
-    Neutron:
+    """Tests the following operations in the Neutron API:
 
         List routers that the given L3 agent is hosting.
         List L3 agents hosting the given router.
@@ -52,14 +48,10 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(L3AgentSchedulerTestJSON, cls).resource_setup()
-        body = cls.admin_agents_client.list_agents()
-        agents = body['agents']
+        agents = cls.admin_agents_client.list_agents(
+            agent_type=AGENT_TYPE)['agents']
         for agent in agents:
-            # TODO(armax): falling back on default _agent_mode can be
-            # dropped as soon as Icehouse is dropped.
-            agent_mode = (
-                agent['configurations'].get('agent_mode', cls._agent_mode))
-            if agent['agent_type'] == AGENT_TYPE and agent_mode in AGENT_MODES:
+            if agent['configurations']['agent_mode'] in AGENT_MODES:
                 cls.agent = agent
                 break
         else:
