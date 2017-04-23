@@ -1,0 +1,5 @@
+---
+deprecations:
+  - The config option ``forbid_global_implied_dsr`` from the ``IdentityFeature``
+    group is now deprecated. This feature flag was introduced to support
+    testing of old OpenStack versions which are not supported anymore.
