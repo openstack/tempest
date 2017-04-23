@@ -152,11 +152,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self._delete_domain, domain['id'])
         self.assertIn('id', domain)
         expected_data = {'name': d_name, 'enabled': True}
-        # TODO(gmann): there is bug in keystone liberty version where
-        # description is not being returned if it is not being passed in
-        # request. Bug#1649245. Once bug is fixed then we can enable the below
-        # check.
-        # self.assertEqual('', domain['description'])
+        self.assertEqual('', domain['description'])
         self.assertDictContainsSubset(expected_data, domain)
 
 
