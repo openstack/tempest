@@ -232,10 +232,12 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         # For example, when creating a trust, we will set the expiry time of
         # the trust to 2015-02-17T17:34:01.907051Z. However, if we make a GET
         # request on the trust, the response will contain the time rounded up
-        # to 2015-02-17T17:34:02.000000Z. That is why we shouldn't set flag
-        # "subsecond" to True when we invoke timeutils.isotime(...) to avoid
-        # problems with rounding.
-        expires_str = timeutils.isotime(at=expires_at)
+        # to 2015-02-17T17:34:02.000000Z. That is why we set microsecond to
+        # 0 when we invoke isoformat to avoid problems with rounding.
+        expires_at = expires_at.replace(microsecond=0)
+        # NOTE(ekhugen) Python datetime does not support military timezones
+        # since we used UTC we'll add the Z so our compare works.
+        expires_str = expires_at.isoformat() + 'Z'
 
         trust = self.create_trust(expires=expires_str)
         self.validate_trust(trust, expires=expires_str)
