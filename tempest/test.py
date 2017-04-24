@@ -455,7 +455,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """Returns a credentials provider
 
         If no credential provider exists yet creates one.
-        It uses self.identity_version if defined, or the configuration value
+        It always use the configuration value from identity.auth_version,
+        since we always want to provision accounts with the current version
+        of the identity API.
         """
         if (not hasattr(cls, '_creds_provider') or not cls._creds_provider or
                 not cls._creds_provider.name == cls.__name__):
@@ -464,8 +466,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
             cls._creds_provider = credentials.get_credentials_provider(
                 name=cls.__name__, network_resources=cls.network_resources,
-                force_tenant_isolation=force_tenant_isolation,
-                identity_version=cls.get_identity_version())
+                force_tenant_isolation=force_tenant_isolation)
         return cls._creds_provider
 
     @classmethod
