@@ -229,6 +229,8 @@ class Manager(clients.ServiceClients):
             **params_v3)
         self.oauth_consumers_client = self.identity_v3.OAUTHConsumerClient(
             **params_v3)
+        self.domain_config_client = self.identity_v3.DomainConfigurationClient(
+            **params_v3)
 
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
