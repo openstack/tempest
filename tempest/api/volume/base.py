@@ -65,7 +65,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def setup_clients(cls):
         super(BaseVolumeTest, cls).setup_clients()
         cls.servers_client = cls.os.servers_client
-        cls.compute_networks_client = cls.os.compute_networks_client
         cls.compute_images_client = cls.os.compute_images_client
 
         cls.snapshots_client = cls.os.snapshots_v2_client
