@@ -31,10 +31,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # One of those domains will be disabled
         cls.setup_domains = list()
         for i in range(3):
-            domain = cls.domains_client.create_domain(
-                name=data_utils.rand_name('domain'),
-                description=data_utils.rand_name('domain-desc'),
-                enabled=i < 2)['domain']
+            domain = cls.create_domain(enabled=i < 2)
             cls.setup_domains.append(domain)
 
     @classmethod
