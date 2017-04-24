@@ -188,7 +188,7 @@ requested credentials you can reference:
 +-------------------+---------------------+
 
 By default cls.os is available since it is allocated in the base tempest test
-class. (located in tempest/test.py) If your TestCase inherits from a different
+class (located in tempest/test.py). If your TestCase inherits from a different
 direct parent class (it'll still inherit from the BaseTestCase, just not
 directly) be sure to check if that class overrides allocated credentials.
 
@@ -199,10 +199,10 @@ When neutron is enabled and a testing requires networking this isn't normally
 automatically setup when a tenant is created. Since tempest needs isolated
 tenants to function properly it also needs to handle network allocation. By
 default the base test class will allocate a network, subnet, and router
-automatically. (this depends on the configured credential provider, for more
-details see: :ref:`tempest_conf_network_allocation`) However, there are
-situations where you do no need all of these resources allocated. (or your
-TestCase inherits from a class that overrides the default in tempest/test.py)
+automatically (this depends on the configured credential provider, for more
+details see: :ref:`tempest_conf_network_allocation`). However, there are
+situations where you do no need all of these resources allocated (or your
+TestCase inherits from a class that overrides the default in tempest/test.py).
 There is a class level mechanism to override this allocation and specify which
 resources you need. To do this you need to call `cls.set_network_resources()`
 in the `setup_credentials()` method before the `super()`. For example::
@@ -256,8 +256,8 @@ Manager Objects
 
 The primary interface with which you interact with both credentials and
 API clients is the client manager object. These objects are created
-automatically by the base test class as part of credential setup. (for more
-details see the previous :ref:`credentials` section) Each manager object is
+automatically by the base test class as part of credential setup (for more
+details see the previous :ref:`credentials` section). Each manager object is
 initialized with a set of credentials and has each client object already setup
 to use that set of credentials for making all the API requests. Each client is
 accessible as a top level attribute on the manager object. So to start making
@@ -281,9 +281,9 @@ clients in Tempest.
 Credentials Objects
 -------------------
 
-In certain cases you need direct access to the credentials. (the most common
+In certain cases you need direct access to the credentials (the most common
 use case would be an API request that takes a user or project id in the request
-body) If you're in a situation where you need to access this you'll need to
+body). If you're in a situation where you need to access this you'll need to
 access the ``credentials`` object which is allocated from the configured
 credential provider in the base test class. This is accessible from the manager
 object via the manager's ``credentials`` attribute. For example::
