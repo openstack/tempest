@@ -92,6 +92,31 @@ class TempestPlugin(object):
         :return option_list: A list of tuples with the group name and options
                              in that group.
         :rtype: list
+
+        Example::
+
+            # Config options are defined in a config.py module
+            service_option = cfg.BoolOpt(
+                "my_service", default=True,
+                help="Whether or not my service is available")
+
+            my_service_group = cfg.OptGroup(name="my-service",
+                                            title="My service options")
+            my_service_features_group = cfg.OptGroup(
+                name="my-service-features",
+                title="My service available features")
+
+            MyServiceGroup = [<list of options>]
+            MyServiceFeaturesGroup = [<list of options>]
+
+            # Plugin is implemented in a plugin.py module
+            from my_plugin import config as my_config
+
+            def get_opt_lists(self, conf):
+                return [
+                    (my_service_group.name, MyServiceGroup),
+                    (my_service_features_group.name, MyServiceFeaturesGroup)
+                ]
         """
         return []
 
