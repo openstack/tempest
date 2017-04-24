@@ -91,18 +91,15 @@ class TestRestClientNotFoundHandling(BaseRestClientTestClass):
 
 
 class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
-    TYPE = "json"
 
     def _verify_headers(self, resp):
-        self.assertEqual(self.rest_client._get_type(), self.TYPE)
         resp = dict((k.lower(), v) for k, v in six.iteritems(resp))
         self.assertEqual(self.header_value, resp['accept'])
         self.assertEqual(self.header_value, resp['content-type'])
 
     def setUp(self):
         super(TestRestClientHeadersJSON, self).setUp()
-        self.rest_client.TYPE = self.TYPE
-        self.header_value = 'application/%s' % self.rest_client._get_type()
+        self.header_value = 'application/json'
 
     def test_post(self):
         resp, __ = self.rest_client.post(self.url, {})
