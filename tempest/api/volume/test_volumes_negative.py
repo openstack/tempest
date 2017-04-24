@@ -37,6 +37,25 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         cls.volume = cls.create_volume()
         cls.mountpoint = "/dev/vdc"
 
+    def create_image(self):
+        # Create image
+        image_name = data_utils.rand_name(self.__class__.__name__ + "-image")
+        image = self.images_client.create_image(
+            name=image_name,
+            container_format=CONF.image.container_formats[0],
+            disk_format=CONF.image.disk_formats[0],
+            visibility='private',
+            min_disk=CONF.volume.volume_size + 1)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.images_client.delete_image, image['id'])
+
+        # Upload image with 1KB data
+        image_file = six.BytesIO(data_utils.random_bytes())
+        self.images_client.store_image_file(image['id'], image_file)
+        waiters.wait_for_image_status(self.images_client,
+                                      image['id'], 'active')
+        return image
+
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f131c586-9448-44a4-a8b0-54ca838aa43e')
     def test_volume_get_nonexistent_volume_id(self):
@@ -276,21 +295,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @test.services('image')
     def test_create_volume_from_image_with_decreasing_size(self):
         # Create image
-        image_name = data_utils.rand_name(self.__class__.__name__ + "-image")
-        image = self.images_client.create_image(
-            name=image_name,
-            container_format=CONF.image.container_formats[0],
-            disk_format=CONF.image.disk_formats[0],
-            visibility='private',
-            min_disk=CONF.volume.volume_size + 1)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.images_client.delete_image, image['id'])
-
-        # Upload image with 1KB data
-        image_file = six.BytesIO(data_utils.random_bytes())
-        self.images_client.store_image_file(image['id'], image_file)
-        waiters.wait_for_image_status(self.images_client,
-                                      image['id'], 'active')
+        image = self.create_image()
 
         # Note(jeremyZ): To shorten the test time (uploading a big size image
         # is time-consuming), here just consider the scenario that volume size
@@ -298,4 +303,20 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.volumes_client.create_volume,
                           size=CONF.volume.volume_size,
+                          imageRef=image['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('d15e7f35-2cfc-48c8-9418-c8223a89bcbb')
+    @test.services('image')
+    def test_create_volume_from_deactivated_image(self):
+        # Create image
+        image = self.create_image()
+
+        # Deactivate the image
+        self.images_client.deactivate_image(image['id'])
+        body = self.images_client.show_image(image['id'])
+        self.assertEqual("deactivated", body['status'])
+        # Try creating a volume from deactivated image
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_volume,
                           imageRef=image['id'])
