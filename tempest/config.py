@@ -223,7 +223,11 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('forbid_global_implied_dsr',
                 default=False,
                 help='Does the environment forbid global roles implying '
-                     'domain specific ones?'),
+                     'domain specific ones?',
+                deprecated_for_removal=True,
+                deprecated_reason="This feature flag was introduced to "
+                                  "support testing of old OpenStack versions, "
+                                  "which are not supported anymore"),
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
