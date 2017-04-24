@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add list volume transfers with details API to v2 transfers_client library.
+    This feature enables the possibility to list volume transfers with details.
