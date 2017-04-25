@@ -70,7 +70,6 @@ class RestClient(object):
     :param str http_timeout: Timeout in seconds to wait for the http request to
                              return
     """
-    TYPE = "json"
 
     # The version of the API this client implements
     api_version = None
@@ -105,12 +104,6 @@ class RestClient(object):
             disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
             timeout=http_timeout)
 
-    def _get_type(self):
-        if self.TYPE != "json":
-            self.LOG.warning("Tempest has dropped XML support and the TYPE "
-                             "became meaningless")
-        return self.TYPE
-
     def get_headers(self, accept_type=None, send_type=None):
         """Return the default headers which will be used with outgoing requests
 
@@ -125,9 +118,9 @@ class RestClient(object):
                  dict for outgoing request
         """
         if accept_type is None:
-            accept_type = self._get_type()
+            accept_type = 'json'
         if send_type is None:
-            send_type = self._get_type()
+            send_type = 'json'
         return {'Content-Type': 'application/%s' % send_type,
                 'Accept': 'application/%s' % accept_type}
 
