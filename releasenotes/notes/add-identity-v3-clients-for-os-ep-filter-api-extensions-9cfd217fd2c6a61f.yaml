@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Defines the identity v3 OS-EP-FILTER extension API client.
+    This client manages associations between endpoints, projects
+    along with groups.
