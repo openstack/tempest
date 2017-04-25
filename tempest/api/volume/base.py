@@ -65,7 +65,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def setup_clients(cls):
         super(BaseVolumeTest, cls).setup_clients()
         cls.servers_client = cls.os.servers_client
-        cls.compute_images_client = cls.os.compute_images_client
 
         if CONF.service_available.glance:
             cls.images_client = cls.os.image_client_v2
@@ -116,9 +115,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             kwargs['size'] = CONF.volume.volume_size
 
         if 'imageRef' in kwargs:
-            image = cls.compute_images_client.show_image(
-                kwargs['imageRef'])['image']
-            min_disk = image.get('minDisk')
+            image = cls.images_client.show_image(kwargs['imageRef'])
+            min_disk = image['min_disk']
             kwargs['size'] = max(kwargs['size'], min_disk)
 
         if 'name' not in kwargs:
