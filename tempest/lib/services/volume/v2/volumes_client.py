@@ -118,11 +118,16 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_volume(self, volume_id, cascade=False):
-        """Deletes the Specified Volume."""
+    def delete_volume(self, volume_id, **params):
+        """Deletes the Specified Volume.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#delete-volume
+        """
         url = 'volumes/%s' % volume_id
-        if cascade:
-            url += '?cascade=True'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
         resp, body = self.delete(url)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)

@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    The ``delete_volume`` method of the ``VolumesClient`` class
+    now has an additional ``**params`` argument that enables passing
+    additional information in the query string of the HTTP request.
+
