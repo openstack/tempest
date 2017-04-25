@@ -263,7 +263,17 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                      'the config drive.', server['id'])
             dev_name = self.ssh_client.exec_command(cmd_blkid)
             dev_name = dev_name.rstrip()
-            self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
+            try:
+                self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
+            except exceptions.SSHExecCommandFailed:
+                # So the command failed, let's try to know why and print some
+                # useful information.
+                lsblk = self.ssh_client.exec_command('sudo lsblk --fs --ascii')
+                LOG.error("Mounting %s on /mnt failed. Right after the "
+                          "failure 'lsblk' in the guest reported:\n%s",
+                          dev_name, lsblk)
+                raise
+
             cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
             md_json = self.ssh_client.exec_command(cmd_md)
             self.verify_device_metadata(md_json)
