@@ -14,7 +14,12 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
+from tempest import test
+
+CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeAdminTest):
@@ -60,3 +65,36 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
     def test_volume_force_delete_when_volume_is_maintenance(self):
         # test force delete when status of volume is maintenance
         self._create_reset_and_force_delete_temp_volume('maintenance')
+
+    @decorators.idempotent_id('d38285d9-929d-478f-96a5-00e66a115b81')
+    @test.services('compute')
+    def test_force_detach_volume(self):
+        # Create a server and a volume
+        server_id = self.create_server(wait_until='ACTIVE')['id']
+        volume_id = self.create_volume()['id']
+
+        # Attach volume
+        self.volumes_client.attach_volume(
+            volume_id,
+            instance_uuid=server_id,
+            mountpoint='/dev/%s' % CONF.compute.volume_device_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'in-use')
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client, volume_id, 'available')
+        self.addCleanup(self.volumes_client.detach_volume, volume_id)
+        attachment = self.volumes_client.show_volume(
+            volume_id)['volume']['attachments'][0]
+
+        # Reset volume's status to error
+        self.admin_volume_client.reset_volume_status(volume_id, status='error')
+
+        # Force detach volume
+        self.admin_volume_client.force_detach_volume(
+            volume_id, connector=None,
+            attachment_id=attachment['attachment_id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'available')
+        vol_info = self.volumes_client.show_volume(volume_id)['volume']
+        self.assertIn('attachments', vol_info)
+        self.assertEmpty(vol_info['attachments'])
