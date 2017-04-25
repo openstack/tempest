@@ -277,6 +277,8 @@ class Manager(clients.ServiceClients):
         self.volume_hosts_v2_client = self.volume_v2.HostsClient()
         self.volume_quotas_client = self.volume_v1.QuotasClient()
         self.volume_quotas_v2_client = self.volume_v2.QuotasClient()
+        self.volume_quota_classes_v2_client = \
+            self.volume_v2.QuotaClassesClient()
         self.volumes_extension_client = self.volume_v1.ExtensionsClient()
         self.volumes_v2_extension_client = self.volume_v2.ExtensionsClient()
         self.volume_availability_zone_client = \

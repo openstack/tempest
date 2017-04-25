@@ -259,6 +259,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_backups_client = cls.os_adm.backups_v2_client
         cls.admin_encryption_types_client = \
             cls.os_adm.encryption_types_v2_client
+        cls.admin_quota_classes_client = \
+            cls.os_adm.volume_quota_classes_v2_client
         cls.admin_quotas_client = cls.os_adm.volume_quotas_v2_client
         cls.admin_volume_limits_client = cls.os_adm.volume_v2_limits_client
         cls.admin_capabilities_client = \

@@ -23,6 +23,8 @@ from tempest.lib.services.volume.v2.extensions_client import ExtensionsClient
 from tempest.lib.services.volume.v2.hosts_client import HostsClient
 from tempest.lib.services.volume.v2.limits_client import LimitsClient
 from tempest.lib.services.volume.v2.qos_client import QosSpecsClient
+from tempest.lib.services.volume.v2.quota_classes_client import \
+    QuotaClassesClient
 from tempest.lib.services.volume.v2.quotas_client import QuotasClient
 from tempest.lib.services.volume.v2.scheduler_stats_client import \
     SchedulerStatsClient
@@ -40,4 +42,5 @@ __all__ = ['AvailabilityZoneClient', 'BackupsClient', 'EncryptionTypesClient',
            'ExtensionsClient', 'HostsClient', 'QosSpecsClient', 'QuotasClient',
            'ServicesClient', 'SnapshotsClient', 'TypesClient', 'VolumesClient',
            'LimitsClient', 'CapabilitiesClient', 'SchedulerStatsClient',
-           'SnapshotManageClient', 'VolumeManageClient', 'TransfersClient']
+           'SnapshotManageClient', 'VolumeManageClient', 'TransfersClient',
+           'QuotaClassesClient']

@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Define v2 quota_classes_client for the volume service as library
+    interfaces, allowing other projects to use this module as stable libraries
+    without maintenance changes.
+
+    * quota_classes_client(v2)
