@@ -286,6 +286,19 @@ class VolumesClient(rest_client.RestClient):
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)
 
+    def force_detach_volume(self, volume_id, **kwargs):
+        """Force detach a volume.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#force-detach-volume
+        """
+        post_body = json.dumps({'os-force_detach': kwargs})
+        url = 'volumes/%s/action' % volume_id
+        resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def update_volume_image_metadata(self, volume_id, **kwargs):
         """Update image metadata for the volume.
 

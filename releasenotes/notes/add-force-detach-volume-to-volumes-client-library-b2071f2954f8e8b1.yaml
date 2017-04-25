@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add force detach volume feature API to v2 volumes_client library.
+    This feature enables the possibility to force a volume to detach, and
+    roll back an unsuccessful detach operation after you disconnect the volume.
