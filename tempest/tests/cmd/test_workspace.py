@@ -47,23 +47,25 @@ class TestTempestWorkspace(TestTempestWorkspaceBase):
         self.assertEqual(return_code, expected, msg)
 
     def test_run_workspace_list(self):
-        cmd = ['tempest', 'workspace', '--workspace-path',
-               self.store_file, 'list']
+        cmd = ['tempest', 'workspace', 'list',
+               '--workspace-path', self.store_file]
         self._run_cmd_gets_return_code(cmd, 0)
 
     def test_run_workspace_register(self):
         name = data_utils.rand_uuid()
         path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, path, ignore_errors=True)
-        cmd = ['tempest', 'workspace', '--workspace-path', self.store_file,
-               'register', '--name', name, '--path', path]
+        cmd = ['tempest', 'workspace', 'register',
+               '--workspace-path', self.store_file,
+               '--name', name, '--path', path]
         self._run_cmd_gets_return_code(cmd, 0)
         self.assertIsNotNone(self.workspace_manager.get_workspace(name))
 
     def test_run_workspace_rename(self):
         new_name = data_utils.rand_uuid()
-        cmd = ['tempest', 'workspace', '--workspace-path', self.store_file,
-               'rename', "--old-name", self.name, '--new-name', new_name]
+        cmd = ['tempest', 'workspace', 'rename',
+               '--workspace-path', self.store_file,
+               '--old-name', self.name, '--new-name', new_name]
         self._run_cmd_gets_return_code(cmd, 0)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
         self.assertIsNotNone(self.workspace_manager.get_workspace(new_name))
@@ -71,15 +73,17 @@ class TestTempestWorkspace(TestTempestWorkspaceBase):
     def test_run_workspace_move(self):
         new_path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, new_path, ignore_errors=True)
-        cmd = ['tempest', 'workspace', '--workspace-path', self.store_file,
-               'move', '--name', self.name, '--path', new_path]
+        cmd = ['tempest', 'workspace', 'move',
+               '--workspace-path', self.store_file,
+               '--name', self.name, '--path', new_path]
         self._run_cmd_gets_return_code(cmd, 0)
         self.assertEqual(
             self.workspace_manager.get_workspace(self.name), new_path)
 
     def test_run_workspace_remove(self):
-        cmd = ['tempest', 'workspace', '--workspace-path', self.store_file,
-               'remove', '--name', self.name]
+        cmd = ['tempest', 'workspace', 'remove',
+               '--workspace-path', self.store_file,
+               '--name', self.name]
         self._run_cmd_gets_return_code(cmd, 0)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
 
