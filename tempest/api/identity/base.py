@@ -236,11 +236,13 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.users_client.update_user(user['id'], name=user_name, enabled=False)
 
     @classmethod
-    def create_domain(cls):
+    def create_domain(cls, **kwargs):
         """Create a domain."""
-        domain = cls.domains_client.create_domain(
-            name=data_utils.rand_name('test_domain'),
-            description=data_utils.rand_name('desc'))['domain']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_domain')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('desc')
+        domain = cls.domains_client.create_domain(**kwargs)['domain']
         return domain
 
     def delete_domain(self, domain_id):

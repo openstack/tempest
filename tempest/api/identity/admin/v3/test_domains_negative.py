@@ -25,11 +25,7 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative', 'gate'])
     @decorators.idempotent_id('1f3fbff5-4e44-400d-9ca1-d953f05f609b')
     def test_delete_active_domain(self):
-        d_name = data_utils.rand_name('domain')
-        d_desc = data_utils.rand_name('domain-desc')
-        domain = self.domains_client.create_domain(
-            name=d_name,
-            description=d_desc)['domain']
+        domain = self.create_domain()
         domain_id = domain['id']
 
         self.addCleanup(self.delete_domain, domain_id)
