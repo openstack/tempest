@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    As in the [doc]:
+    https://developer.openstack.org/api-ref/block-storage/v3/
+    #force-delete-a-backup.
+
+      * Force-deletes a backup(v2)
+

@@ -121,7 +121,7 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
                                                 'available')
 
     @decorators.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
-    def test_volume_backup_reset_status(self):
+    def test_volume_backup_reset_status_force_delete(self):
         # Create a volume
         volume = self.create_volume()
         # Create a backup
@@ -136,3 +136,6 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
                                                       status="error")
         waiters.wait_for_volume_resource_status(self.admin_backups_client,
                                                 backup['id'], 'error')
+        # Force delete a backup volume when backup is in error state.
+        self.admin_backups_client.force_delete_backup(backup['id'])
+        self.admin_backups_client.wait_for_resource_deletion(backup['id'])

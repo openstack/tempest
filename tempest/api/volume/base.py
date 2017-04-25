@@ -145,7 +145,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                                                 snapshot['id'], 'available')
         return snapshot
 
-    def create_backup(self, volume_id, backup_client=None, **kwargs):
+    def create_backup(self, volume_id, backup_client=None,
+                      wait_until="available", **kwargs):
         """Wrapper utility that returns a test backup."""
         if backup_client is None:
             backup_client = self.backups_client
@@ -155,9 +156,12 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 
         backup = backup_client.create_backup(
             volume_id=volume_id, **kwargs)['backup']
-        self.addCleanup(backup_client.delete_backup, backup['id'])
-        waiters.wait_for_volume_resource_status(backup_client, backup['id'],
-                                                'available')
+
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        backup_client.delete_backup, backup['id'])
+        waiters.wait_for_volume_resource_status(backup_client,
+                                                backup['id'],
+                                                wait_until)
         return backup
 
     # NOTE(afazekas): these create_* and clean_* could be defined
