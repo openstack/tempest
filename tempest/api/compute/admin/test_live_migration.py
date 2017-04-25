@@ -13,10 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from oslo_log import log as logging
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
@@ -173,6 +176,80 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertEqual(target_host, self._get_host_for_server(server_id))
         self.assertEqual(volume_id1, volume_id2)
+
+
+class LiveBlockMigrationRemoteConsolesV26TestJson(LiveBlockMigrationTestJSON):
+    min_microversion = '2.6'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('6190af80-513e-4f0f-90f2-9714e84955d7')
+    @testtools.skipUnless(CONF.compute_feature_enabled.serial_console,
+                          'Serial console not supported.')
+    @testtools.skipUnless(
+        test.is_scheduler_filter_enabled("DifferentHostFilter"),
+        'DifferentHostFilter is not available.')
+    def test_live_migration_serial_console(self):
+        """Test the live-migration of an instance which has a serial console
+
+        The serial console feature of an instance uses ports on the host.
+        These ports need to be updated when they are already in use by
+        another instance on the target host. This test checks if this
+        update behavior is correctly done, by connecting to the serial
+        consoles of the instances before and after the live migration.
+        """
+        server01_id = self.create_test_server(wait_until='ACTIVE')['id']
+        hints = {'different_host': server01_id}
+        server02_id = self.create_test_server(scheduler_hints=hints,
+                                              wait_until='ACTIVE')['id']
+        host01_id = self._get_host_for_server(server01_id)
+        host02_id = self._get_host_for_server(server02_id)
+        self.assertNotEqual(host01_id, host02_id)
+
+        # At this step we have 2 instances on different hosts, both with
+        # serial consoles, both with port 10000 (the default value).
+        # https://bugs.launchpad.net/nova/+bug/1455252 describes the issue
+        # when live-migrating in such a scenario.
+
+        self._verify_console_interaction(server01_id)
+        self._verify_console_interaction(server02_id)
+
+        self._migrate_server_to(server01_id, host02_id)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server01_id, 'ACTIVE')
+        self.assertEqual(host02_id, self._get_host_for_server(server01_id))
+        self._verify_console_interaction(server01_id)
+        # At this point, both instances have a valid serial console
+        # connection, which means the ports got updated.
+
+    def _verify_console_interaction(self, server_id):
+        body = self.servers_client.get_remote_console(server_id,
+                                                      console_type='serial',
+                                                      protocol='serial')
+        console_url = body['remote_console']['url']
+        data = "test_live_migration_serial_console"
+        console_output = ''
+        t = 0.0
+        interval = 0.1
+
+        ws = compute.create_websocket(console_url)
+        try:
+            # NOTE (markus_z): It can take a long time until the terminal
+            # of the instance is available for interaction. Hence the
+            # long timeout value.
+            while data not in console_output and t <= 120.0:
+                try:
+                    ws.send_frame(data)
+                    recieved = ws.receive_frame()
+                    console_output += recieved
+                except Exception:
+                    # In case we had an issue with send/receive on the
+                    # websocket connection, we create a new one.
+                    ws = compute.create_websocket(console_url)
+                time.sleep(interval)
+                t += interval
+        finally:
+            ws.close()
+        self.assertIn(data, console_output)
 
 
 class LiveAutoBlockMigrationV225TestJSON(LiveBlockMigrationTestJSON):
