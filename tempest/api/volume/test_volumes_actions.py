@@ -19,27 +19,12 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
-from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeTest):
-
-    @classmethod
-    def setup_clients(cls):
-        super(VolumesActionsTest, cls).setup_clients()
-        if CONF.service_available.glance:
-            # Check if glance v1 is available to determine which client to use.
-            if CONF.image_feature_enabled.api_v1:
-                cls.image_client = cls.os.image_client
-            elif CONF.image_feature_enabled.api_v2:
-                cls.image_client = cls.os.image_client_v2
-            else:
-                raise exceptions.InvalidConfiguration(
-                    'Either api_v1 or api_v2 must be True in '
-                    '[image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):
@@ -121,9 +106,9 @@ class VolumesActionsTest(base.BaseVolumeTest):
             disk_format=CONF.volume.disk_format)['os-volume_upload_image']
         image_id = body["image_id"]
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.image_client.delete_image,
+                        self.images_client.delete_image,
                         image_id)
-        waiters.wait_for_image_status(self.image_client, image_id, 'active')
+        waiters.wait_for_image_status(self.images_client, image_id, 'active')
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'available')
 
