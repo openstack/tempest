@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Tempest checks a volume delete by waiting for NotFound(404) on
+    show_volume(). Sometime a volume delete fails and the volume status
+    becomes error_deleting which means the delete is failed.
+    So Tempest doesn't need to wait anymore. A new release of Tempest
+    raises an exception DeleteErrorException instead of waiting.
