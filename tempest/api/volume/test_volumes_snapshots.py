@@ -16,6 +16,7 @@ from tempest.api.volume import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
@@ -41,6 +42,10 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # Create a test instance
         server = self.create_server(wait_until='ACTIVE')
         self.attach_volume(server['id'], self.volume_origin['id'])
+
+        # Snapshot a volume which attached to an instance with force=False
+        self.assertRaises(lib_exc.BadRequest, self.create_snapshot,
+                          self.volume_origin['id'], force=False)
 
         # Snapshot a volume even if it's attached to an instance
         snapshot = self.create_snapshot(self.volume_origin['id'],
