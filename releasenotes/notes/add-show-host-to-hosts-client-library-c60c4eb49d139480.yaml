@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add show host API to the volume v2 hosts_client library.
+    This feature enables the possibility to show details for a host.
