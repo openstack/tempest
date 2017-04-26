@@ -102,20 +102,20 @@ to work even if just one ``test_method`` is selected for execution.
 Service Tagging
 ---------------
 Service tagging is used to specify which services are exercised by a particular
-test method. You specify the services with the tempest.test.services decorator.
-For example:
+test method. You specify the services with the ``tempest.test.services``
+decorator. For example:
 
 @services('compute', 'image')
 
 Valid service tag names are the same as the list of directories in tempest.api
 that have tests.
 
-For scenario tests having a service tag is required. For the api tests service
-tags are only needed if the test method makes an api call (either directly or
+For scenario tests having a service tag is required. For the API tests service
+tags are only needed if the test method makes an API call (either directly or
 indirectly through another service) that differs from the parent directory
-name. For example, any test that make an api call to a service other than nova
-in tempest.api.compute would require a service tag for those services, however
-they do not need to be tagged as compute.
+name. For example, any test that make an API call to a service other than Nova
+in ``tempest.api.compute`` would require a service tag for those services,
+however they do not need to be tagged as ``compute``.
 
 Test fixtures and resources
 ---------------------------
@@ -198,7 +198,7 @@ will expand the guideline based on our discussion and experience.
 Test skips because of Known Bugs
 --------------------------------
 If a test is broken because of a bug it is appropriate to skip the test until
-bug has been fixed. You should use the skip_because decorator so that
+bug has been fixed. You should use the ``skip_because`` decorator so that
 Tempest's skip tracking tool can watch the bug status.
 
 Example::
@@ -229,7 +229,7 @@ parallel.
   require admin privileges are outside of projects.
 
 - Races between methods in the same class are not a problem because
-  parallelization in tempest is at the test class level, but if there is a json
+  parallelization in Tempest is at the test class level, but if there is a json
   and xml version of the same test class there could still be a race between
   methods.
 
@@ -238,8 +238,8 @@ parallel.
   avoided to prevent resource conflicts.
 
 - If the execution of a set of tests is required to be serialized then locking
-  can be used to perform this. See AggregatesAdminTest in
-  tempest.api.compute.admin for an example of using locking.
+  can be used to perform this. See usage of ``LockFixture`` for examples of
+  using locking.
 
 Sample Configuration File
 -------------------------
@@ -251,7 +251,7 @@ regenerated. This can be done running::
 
 Unit Tests
 ----------
-Unit tests are a separate class of tests in tempest. They verify tempest
+Unit tests are a separate class of tests in Tempest. They verify Tempest
 itself, and thus have a different set of guidelines around them:
 
 1. They can not require anything running externally. All you should need to
@@ -321,8 +321,8 @@ format of the metadata looks like::
 
 Tempest.lib includes a ``check-uuid`` tool that will test for the existence
 and uniqueness of idempotent_id metadata for every test. If you have
-tempest installed you run the tool against Tempest by calling from the
-tempest repo::
+Tempest installed you run the tool against Tempest by calling from the
+Tempest repo::
 
     check-uuid
 
@@ -337,7 +337,7 @@ one::
 
     check-uuid --fix
 
-The ``check-uuid`` tool is used as part of the tempest gate job
+The ``check-uuid`` tool is used as part of the Tempest gate job
 to ensure that all tests have an ``idempotent_id`` decorator.
 
 Branchless Tempest Considerations
@@ -350,7 +350,7 @@ branches are also gated by the Tempest master branch, which also means that
 proposed commits to Tempest must work against both the master and all the
 currently supported stable branches of the projects. As such there are a few
 special considerations that have to be accounted for when pushing new changes
-to tempest.
+to Tempest.
 
 1. New Tests for new features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -370,13 +370,21 @@ be able to merge.
 When trying to land a bug fix which changes a tested API you'll have to use the
 following procedure::
 
-    - Propose change to the project, get a +2 on the change even with failing
-    - Propose skip on Tempest which will only be approved after the
+    1. Propose change to the project, get a +2 on the change even with failing
+    2. Propose skip on Tempest which will only be approved after the
       corresponding change in the project has a +2 on change
-    - Land project change in master and all open stable branches (if required)
-    - Land changed test in Tempest
+    3. Land project change in master and all open stable branches (if required)
+    4. Land changed test in Tempest
 
 Otherwise the bug fix won't be able to land in the project.
+
+Handily, `Zuul’s cross-repository dependencies
+<https://docs.openstack.org/infra/zuul/gating.html#cross-repository-dependencies>`_.
+can be leveraged to do without step 2 and to have steps 3 and 4 happen
+"atomically". To do that, make the patch written in step 1 to depend (refer to
+Zuul's documentation above) on the patch written in step 4. The commit message
+for the Tempest change should have a link to the Gerrit review that justifies
+that change.
 
 3. New Tests for existing features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

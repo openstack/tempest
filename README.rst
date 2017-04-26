@@ -23,7 +23,7 @@ Design Principles
 Tempest Design Principles that we strive to live by.
 
 - Tempest should be able to run against any OpenStack cloud, be it a
-  one node devstack install, a 20 node lxc cloud, or a 1000 node kvm
+  one node DevStack install, a 20 node LXC cloud, or a 1000 node KVM
   cloud.
 - Tempest should be explicit in testing features. It is easy to auto
   discover features of a cloud incorrectly, and give people an
@@ -65,13 +65,13 @@ as it is simpler, and quicker to work with.
     $ pip install tempest/
 
    This can be done within a venv, but the assumption for this guide is that
-   the Tempest cli entry point will be in your shell's PATH.
+   the Tempest CLI entry point will be in your shell's PATH.
 
-#. Installing Tempest may create a /etc/tempest dir, however if one isn't
-   created you can create one or use ~/.tempest/etc or ~/.config/tempest in
-   place of /etc/tempest. If none of these dirs are created tempest will create
-   ~/.tempest/etc when it's needed. The contents of this dir will always
-   automatically be copied to all etc/ dirs in local workspaces as an initial
+#. Installing Tempest may create a ``/etc/tempest dir``, however if one isn't
+   created you can create one or use ``~/.tempest/etc`` or ``~/.config/tempest`` in
+   place of ``/etc/tempest``. If none of these dirs are created Tempest will create
+   ``~/.tempest/etc`` when it's needed. The contents of this dir will always
+   automatically be copied to all ``etc/`` dirs in local workspaces as an initial
    setup step. So if there is any common configuration you'd like to be shared
    between local Tempest workspaces it's recommended that you pre-populate it
    before running ``tempest init``.
@@ -90,12 +90,12 @@ as it is simpler, and quicker to work with.
    is that you'll create a new working directory for each to maintain separate
    configuration files and local artifact storage for each.
 
-#. Then cd into the newly created working dir and also modify the local
-   config files located in the etc/ subdir created by the ``tempest init``
-   command. Tempest is expecting a tempest.conf file in etc/ so if only a
+#. Then ``cd`` into the newly created working dir and also modify the local
+   config files located in the ``etc/`` subdir created by the ``tempest init``
+   command. Tempest is expecting a ``tempest.conf`` file in etc/ so if only a
    sample exists you must rename or copy it to tempest.conf before making
    any changes to it otherwise Tempest will not know how to load it. For
-   details on configuring tempest refer to the :ref:`tempest-configuration`.
+   details on configuring Tempest refer to the :ref:`tempest-configuration`.
 
 #. Once the configuration is done you're now ready to run Tempest. This can
    be done using the :ref:`tempest_run` command. This can be done by either
@@ -124,8 +124,8 @@ Library
 Tempest exposes a library interface. This interface is a stable interface and
 should be backwards compatible (including backwards compatibility with the
 old tempest-lib package, with the exception of the import). If you plan to
-directly consume tempest in your project you should only import code from the
-tempest library interface, other pieces of tempest do not have the same
+directly consume Tempest in your project you should only import code from the
+Tempest library interface, other pieces of Tempest do not have the same
 stable interface and there are no guarantees on the Python API unless otherwise
 stated.
 
@@ -137,7 +137,7 @@ Release Versioning
 shows what changes have been released on each version.
 
 Tempest's released versions are broken into 2 sets of information. Depending on
-how you intend to consume tempest you might need
+how you intend to consume Tempest you might need
 
 The version is a set of 3 numbers:
 
@@ -146,12 +146,12 @@ X.Y.Z
 While this is almost `semver`_ like, the way versioning is handled is slightly
 different:
 
-X is used to represent the supported OpenStack releases for tempest tests
-in-tree, and to signify major feature changes to tempest. It's a monotonically
+X is used to represent the supported OpenStack releases for Tempest tests
+in-tree, and to signify major feature changes to Tempest. It's a monotonically
 increasing integer where each version either indicates a new supported OpenStack
 release, the drop of support for an OpenStack release (which will coincide with
 the upstream stable branch going EOL), or a major feature lands (or is removed)
-from tempest.
+from Tempest.
 
 Y.Z is used to represent library interface changes. This is treated the same
 way as minor and patch versions from `semver`_ but only for the library
@@ -166,16 +166,16 @@ Configuration
 
 Detailed configuration of Tempest is beyond the scope of this
 document see :ref:`tempest-configuration` for more details on configuring
-Tempest. The etc/tempest.conf.sample attempts to be a self-documenting version
-of the configuration.
+Tempest. The ``etc/tempest.conf.sample`` attempts to be a self-documenting
+version of the configuration.
 
 You can generate a new sample tempest.conf file, run the following
 command from the top level of the Tempest directory::
 
     $ tox -e genconfig
 
-The most important pieces that are needed are the user ids, openstack
-endpoint, and basic flavors and images needed to run tests.
+The most important pieces that are needed are the user ids, OpenStack
+endpoints, and basic flavors and images needed to run tests.
 
 Unit Tests
 ----------
@@ -190,13 +190,13 @@ should only be run on the unit test directory. The default value of OS_TEST_PATH
 is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
 Tempest suite.
 
-Alternatively, there are the py27 and py34 tox jobs which will run the unit
+Alternatively, there are the py27 and py35 tox jobs which will run the unit
 tests with the corresponding version of python.
 
 Python 2.6
 ----------
 
-Starting in the kilo release the OpenStack services dropped all support for
+Starting in the Kilo release the OpenStack services dropped all support for
 python 2.6. This change has been mirrored in Tempest, starting after the
 tempest-2 tag. This means that proposed changes to Tempest which only fix
 python 2.6 compatibility will be rejected, and moving forward more features not
@@ -208,8 +208,8 @@ that has python 2.7)
 Python 3.x
 ----------
 
-Starting during the Pike cycle Tempest has a gating CI job that runs tempest
-with Python 3. Any tempest release after 15.0.0 should fully support running
+Starting during the Pike cycle Tempest has a gating CI job that runs Tempest
+with Python 3. Any Tempest release after 15.0.0 should fully support running
 under Python 3 as well as Python 2.7.
 
 Legacy run method
@@ -239,10 +239,10 @@ and reference data to be used in testing.
 
 .. note::
 
-    If you have a running devstack environment, Tempest will be
+    If you have a running DevStack environment, Tempest will be
     automatically configured and placed in ``/opt/stack/tempest``. It
     will have a configuration file already set up to work with your
-    devstack installation.
+    DevStack installation.
 
 Tempest is not tied to any single test runner, but `testr`_ is the most commonly
 used tool. Also, the nosetests test runner is **not** recommended to run Tempest.

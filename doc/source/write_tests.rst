@@ -6,13 +6,13 @@ Tempest Test Writing Guide
 This guide serves as a starting point for developers working on writing new
 Tempest tests. At a high level tests in Tempest are just tests that conform to
 the standard python `unit test`_ framework. But there are several aspects of
-that are unique to tempest and it's role as an integration test suite running
+that are unique to Tempest and its role as an integration test suite running
 against a real cloud.
 
 .. _unit test: https://docs.python.org/3.6/library/unittest.html
 
-.. note:: This guide is for writing tests in the tempest repository. While many
-          parts of this guide are also applicable to tempest plugins, not all
+.. note:: This guide is for writing tests in the Tempest repository. While many
+          parts of this guide are also applicable to Tempest plugins, not all
           the APIs mentioned are considered stable or recommended for use in
           plugins. Please refer to :ref:`tempest_plugin` for details about
           writing plugins
@@ -24,8 +24,8 @@ Adding a New TestCase
 The base unit of testing in Tempest is the `TestCase`_ (also called the test
 class). Each TestCase contains test methods which are the individual tests that
 will be executed by the test runner. But, the TestCase is the smallest self
-contained unit for tests from the tempest perspective. It's also the level at
-which tempest is parallel safe. In other words, multiple TestCases can be
+contained unit for tests from the Tempest perspective. It's also the level at
+which Tempest is parallel safe. In other words, multiple TestCases can be
 executed in parallel, but individual test methods in the same TestCase can not.
 Also, all test methods within a TestCase are assumed to be executed serially. As
 such you can use the test case to store variables that are shared between
@@ -151,7 +151,7 @@ for tests cases that need a second user/project.
 You can also specify credentials with specific roles assigned. This is useful
 for cases where there are specific RBAC requirements hard coded into an API.
 The canonical example of this are swift tests which often want to test swift's
-concepts of operator and reseller_admin. An actual example from tempest on how
+concepts of operator and reseller_admin. An actual example from Tempest on how
 to do this is::
 
     class PublicObjectTest(base.BaseObjectTest):
@@ -187,7 +187,7 @@ requested credentials you can reference:
 | [$label, $role]   | cls.os_roles_$label |
 +-------------------+---------------------+
 
-By default cls.os_primary is available since it is allocated in the base tempest test
+By default cls.os_primary is available since it is allocated in the base Tempest test
 class (located in tempest/test.py). If your TestCase inherits from a different
 direct parent class (it'll still inherit from the BaseTestCase, just not
 directly) be sure to check if that class overrides allocated credentials.
@@ -195,8 +195,8 @@ directly) be sure to check if that class overrides allocated credentials.
 Dealing with Network Allocation
 '''''''''''''''''''''''''''''''
 
-When neutron is enabled and a testing requires networking this isn't normally
-automatically setup when a tenant is created. Since tempest needs isolated
+When Neutron is enabled and a testing requires networking this isn't normally
+automatically setup when a tenant is created. Since Tempest needs isolated
 tenants to function properly it also needs to handle network allocation. By
 default the base test class will allocate a network, subnet, and router
 automatically (this depends on the configured credential provider, for more
