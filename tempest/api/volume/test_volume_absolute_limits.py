@@ -21,7 +21,10 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class AbsoluteLimitsTests(base.BaseVolumeTest):
+# NOTE(zhufl): This inherits from BaseVolumeAdminTest because
+# it requires force_tenant_isolation=True, which need admin
+# credentials to create non-admin users for the tests.
+class AbsoluteLimitsTests(base.BaseVolumeAdminTest):
 
     # avoid existing volumes of pre-defined tenant
     force_tenant_isolation = True
