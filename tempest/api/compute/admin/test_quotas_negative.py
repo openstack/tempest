@@ -28,8 +28,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(QuotasAdminNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.os.quotas_client
-        cls.adm_client = cls.os_adm.quotas_client
+        cls.client = cls.os_primary.quotas_client
+        cls.adm_client = cls.os_admin.quotas_client
         cls.sg_client = cls.security_groups_client
         cls.sgr_client = cls.security_group_rules_client
 

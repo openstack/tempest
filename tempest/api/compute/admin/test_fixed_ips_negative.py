@@ -33,7 +33,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(FixedIPsNegativeTestJson, cls).setup_clients()
-        cls.client = cls.os_adm.fixed_ips_client
+        cls.client = cls.os_admin.fixed_ips_client
         cls.non_admin_client = cls.fixed_ips_client
 
     @classmethod

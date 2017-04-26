@@ -63,38 +63,41 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def setup_clients(cls):
         super(BaseV2ComputeTest, cls).setup_clients()
-        cls.servers_client = cls.os.servers_client
-        cls.server_groups_client = cls.os.server_groups_client
-        cls.flavors_client = cls.os.flavors_client
-        cls.compute_images_client = cls.os.compute_images_client
-        cls.extensions_client = cls.os.extensions_client
-        cls.floating_ip_pools_client = cls.os.floating_ip_pools_client
-        cls.floating_ips_client = cls.os.compute_floating_ips_client
-        cls.keypairs_client = cls.os.keypairs_client
+        cls.servers_client = cls.os_primary.servers_client
+        cls.server_groups_client = cls.os_primary.server_groups_client
+        cls.flavors_client = cls.os_primary.flavors_client
+        cls.compute_images_client = cls.os_primary.compute_images_client
+        cls.extensions_client = cls.os_primary.extensions_client
+        cls.floating_ip_pools_client = cls.os_primary.floating_ip_pools_client
+        cls.floating_ips_client = cls.os_primary.compute_floating_ips_client
+        cls.keypairs_client = cls.os_primary.keypairs_client
         cls.security_group_rules_client = (
-            cls.os.compute_security_group_rules_client)
-        cls.security_groups_client = cls.os.compute_security_groups_client
-        cls.quotas_client = cls.os.quotas_client
-        cls.compute_networks_client = cls.os.compute_networks_client
-        cls.limits_client = cls.os.limits_client
-        cls.volumes_extensions_client = cls.os.volumes_extensions_client
-        cls.snapshots_extensions_client = cls.os.snapshots_extensions_client
-        cls.interfaces_client = cls.os.interfaces_client
-        cls.fixed_ips_client = cls.os.fixed_ips_client
-        cls.availability_zone_client = cls.os.availability_zone_client
-        cls.agents_client = cls.os.agents_client
-        cls.aggregates_client = cls.os.aggregates_client
-        cls.services_client = cls.os.services_client
+            cls.os_primary.compute_security_group_rules_client)
+        cls.security_groups_client =\
+            cls.os_primary.compute_security_groups_client
+        cls.quotas_client = cls.os_primary.quotas_client
+        cls.compute_networks_client = cls.os_primary.compute_networks_client
+        cls.limits_client = cls.os_primary.limits_client
+        cls.volumes_extensions_client =\
+            cls.os_primary.volumes_extensions_client
+        cls.snapshots_extensions_client =\
+            cls.os_primary.snapshots_extensions_client
+        cls.interfaces_client = cls.os_primary.interfaces_client
+        cls.fixed_ips_client = cls.os_primary.fixed_ips_client
+        cls.availability_zone_client = cls.os_primary.availability_zone_client
+        cls.agents_client = cls.os_primary.agents_client
+        cls.aggregates_client = cls.os_primary.aggregates_client
+        cls.services_client = cls.os_primary.services_client
         cls.instance_usages_audit_log_client = (
-            cls.os.instance_usages_audit_log_client)
-        cls.hypervisor_client = cls.os.hypervisor_client
-        cls.certificates_client = cls.os.certificates_client
-        cls.migrations_client = cls.os.migrations_client
+            cls.os_primary.instance_usages_audit_log_client)
+        cls.hypervisor_client = cls.os_primary.hypervisor_client
+        cls.certificates_client = cls.os_primary.certificates_client
+        cls.migrations_client = cls.os_primary.migrations_client
         cls.security_group_default_rules_client = (
-            cls.os.security_group_default_rules_client)
-        cls.versions_client = cls.os.compute_versions_client
+            cls.os_primary.security_group_default_rules_client)
+        cls.versions_client = cls.os_primary.compute_versions_client
 
-        cls.volumes_client = cls.os.volumes_v2_client
+        cls.volumes_client = cls.os_primary.volumes_v2_client
 
     @classmethod
     def resource_setup(cls):
@@ -470,9 +473,9 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     def setup_clients(cls):
         super(BaseV2ComputeAdminTest, cls).setup_clients()
         cls.availability_zone_admin_client = (
-            cls.os_adm.availability_zone_client)
-        cls.admin_flavors_client = cls.os_adm.flavors_client
-        cls.admin_servers_client = cls.os_adm.servers_client
+            cls.os_admin.availability_zone_client)
+        cls.admin_flavors_client = cls.os_admin.flavors_client
+        cls.admin_servers_client = cls.os_admin.servers_client
 
     def create_flavor(self, ram, vcpus, disk, name=None,
                       is_public='True', **kwargs):

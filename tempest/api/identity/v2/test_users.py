@@ -30,7 +30,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
     @classmethod
     def resource_setup(cls):
         super(IdentityUsersTest, cls).resource_setup()
-        cls.creds = cls.os.credentials
+        cls.creds = cls.os_primary.credentials
         cls.username = cls.creds.username
         cls.password = cls.creds.password
         cls.tenant_name = cls.creds.tenant_name

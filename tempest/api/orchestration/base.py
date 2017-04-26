@@ -42,13 +42,13 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_clients(cls):
         super(BaseOrchestrationTest, cls).setup_clients()
-        cls.orchestration_client = cls.os.orchestration_client
+        cls.orchestration_client = cls.os_primary.orchestration_client
         cls.client = cls.orchestration_client
-        cls.servers_client = cls.os.servers_client
-        cls.keypairs_client = cls.os.keypairs_client
-        cls.networks_client = cls.os.networks_client
-        cls.images_v2_client = cls.os.image_client_v2
-        cls.volumes_client = cls.os.volumes_v2_client
+        cls.servers_client = cls.os_primary.servers_client
+        cls.keypairs_client = cls.os_primary.keypairs_client
+        cls.networks_client = cls.os_primary.networks_client
+        cls.images_v2_client = cls.os_primary.image_client_v2
+        cls.volumes_client = cls.os_primary.volumes_v2_client
 
     @classmethod
     def resource_setup(cls):

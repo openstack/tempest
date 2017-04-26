@@ -31,9 +31,9 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(ServersAdminNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.servers_client
+        cls.client = cls.os_admin.servers_client
         cls.non_adm_client = cls.servers_client
-        cls.quotas_client = cls.os_adm.quotas_client
+        cls.quotas_client = cls.os_admin.quotas_client
 
     @classmethod
     def resource_setup(cls):

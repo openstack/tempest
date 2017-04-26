@@ -94,7 +94,7 @@ class BaseV1ImageTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageTest, cls).setup_clients()
-        cls.client = cls.os.image_client
+        cls.client = cls.os_primary.image_client
 
     @classmethod
     def _get_create_params(cls, **kwargs):
@@ -108,7 +108,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageMembersTest, cls).setup_clients()
-        cls.image_member_client = cls.os.image_member_client
+        cls.image_member_client = cls.os_primary.image_member_client
         cls.alt_image_member_client = cls.os_alt.image_member_client
         cls.alt_img_cli = cls.os_alt.image_client
 
@@ -138,14 +138,15 @@ class BaseV2ImageTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2ImageTest, cls).setup_clients()
-        cls.client = cls.os.image_client_v2
-        cls.namespaces_client = cls.os.namespaces_client
-        cls.resource_types_client = cls.os.resource_types_client
-        cls.namespace_properties_client = cls.os.namespace_properties_client
-        cls.namespace_objects_client = cls.os.namespace_objects_client
-        cls.namespace_tags_client = cls.os.namespace_tags_client
-        cls.schemas_client = cls.os.schemas_client
-        cls.versions_client = cls.os.image_versions_client
+        cls.client = cls.os_primary.image_client_v2
+        cls.namespaces_client = cls.os_primary.namespaces_client
+        cls.resource_types_client = cls.os_primary.resource_types_client
+        cls.namespace_properties_client =\
+            cls.os_primary.namespace_properties_client
+        cls.namespace_objects_client = cls.os_primary.namespace_objects_client
+        cls.namespace_tags_client = cls.os_primary.namespace_tags_client
+        cls.schemas_client = cls.os_primary.schemas_client
+        cls.versions_client = cls.os_primary.image_versions_client
 
     def create_namespace(cls, namespace_name=None, visibility='public',
                          description='Tempest', protected=False,
@@ -167,7 +168,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2MemberImageTest, cls).setup_clients()
-        cls.image_member_client = cls.os.image_member_client_v2
+        cls.image_member_client = cls.os_primary.image_member_client_v2
         cls.alt_image_member_client = cls.os_alt.image_member_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
 
@@ -196,8 +197,8 @@ class BaseV1ImageAdminTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageAdminTest, cls).setup_clients()
-        cls.client = cls.os.image_client
-        cls.admin_client = cls.os_adm.image_client
+        cls.client = cls.os_primary.image_client
+        cls.admin_client = cls.os_admin.image_client
 
 
 class BaseV2ImageAdminTest(BaseImageTest):
@@ -206,5 +207,5 @@ class BaseV2ImageAdminTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2ImageAdminTest, cls).setup_clients()
-        cls.client = cls.os.image_client_v2
-        cls.admin_client = cls.os_adm.image_client_v2
+        cls.client = cls.os_primary.image_client_v2
+        cls.admin_client = cls.os_admin.image_client_v2

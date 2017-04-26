@@ -38,7 +38,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(TestNetworkAdvancedServerOps, cls).setup_clients()
-        cls.admin_servers_client = cls.os_adm.servers_client
+        cls.admin_servers_client = cls.os_admin.servers_client
 
     @classmethod
     def skip_checks(cls):

@@ -24,7 +24,7 @@ class IdentityTenantsTest(base.BaseIdentityV2Test):
 
     @decorators.idempotent_id('ecae2459-243d-4ba1-ad02-65f15dc82b78')
     def test_list_tenants_returns_only_authorized_tenants(self):
-        alt_tenant_name = self.alt_manager.credentials.tenant_name
+        alt_tenant_name = self.os_alt.credentials.tenant_name
         resp = self.non_admin_tenants_client.list_tenants()
 
         # check that user can see only that tenants that he presents in so user
@@ -32,18 +32,19 @@ class IdentityTenantsTest(base.BaseIdentityV2Test):
         # from received tenants list
         for tenant in resp['tenants']:
             body = self.non_admin_token_client.auth(
-                self.os.credentials.username,
-                self.os.credentials.password,
+                self.os_primary.credentials.username,
+                self.os_primary.credentials.password,
                 tenant['name'])
             self.assertNotEmpty(body['token']['id'])
             self.assertEqual(body['token']['tenant']['id'], tenant['id'])
             self.assertEqual(body['token']['tenant']['name'], tenant['name'])
-            self.assertEqual(body['user']['id'], self.os.credentials.user_id)
+            self.assertEqual(
+                body['user']['id'], self.os_primary.credentials.user_id)
 
         # check that user cannot log in to alt user's tenant
         self.assertRaises(
             lib_exc.Unauthorized,
             self.non_admin_token_client.auth,
-            self.os.credentials.username,
-            self.os.credentials.password,
+            self.os_primary.credentials.username,
+            self.os_primary.credentials.password,
             alt_tenant_name)

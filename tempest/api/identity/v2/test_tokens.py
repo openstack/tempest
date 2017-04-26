@@ -27,7 +27,7 @@ class TokensTest(base.BaseIdentityV2Test):
         token_client = self.non_admin_token_client
 
         # get a token for the user
-        creds = self.os.credentials
+        creds = self.os_primary.credentials
         username = creds.username
         password = creds.password
         tenant_name = creds.tenant_name

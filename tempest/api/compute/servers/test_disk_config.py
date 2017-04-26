@@ -35,7 +35,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerDiskConfigTestJSON, cls).setup_clients()
-        cls.client = cls.os.servers_client
+        cls.client = cls.os_primary.servers_client
 
     def _update_server_with_disk_config(self, server_id, disk_config):
         server = self.client.show_server(server_id)['server']

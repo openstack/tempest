@@ -33,7 +33,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
                 "Less than 2 compute nodes, skipping multi-nodes test.")
 
     def _get_host(self, server_id):
-        return self.os_adm.servers_client.show_server(
+        return self.os_admin.servers_client.show_server(
             server_id)['server']['OS-EXT-SRV-ATTR:host']
 
     @decorators.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')

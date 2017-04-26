@@ -23,7 +23,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(HostsAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.hosts_client
+        cls.client = cls.os_admin.hosts_client
 
     @decorators.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
     def test_list_hosts(self):

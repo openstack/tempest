@@ -38,7 +38,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def setup_clients(cls):
         super(FloatingIPAdminTestJSON, cls).setup_clients()
-        cls.alt_floating_ips_client = cls.alt_manager.floating_ips_client
+        cls.alt_floating_ips_client = cls.os_alt.floating_ips_client
 
     @classmethod
     def resource_setup(cls):

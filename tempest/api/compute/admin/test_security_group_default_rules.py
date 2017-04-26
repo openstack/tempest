@@ -38,7 +38,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupDefaultRulesTest, cls).setup_clients()
-        cls.adm_client = cls.os_adm.security_group_default_rules_client
+        cls.adm_client = cls.os_admin.security_group_default_rules_client
 
     def _create_security_group_default_rules(self, ip_protocol='tcp',
                                              from_port=22, to_port=22,

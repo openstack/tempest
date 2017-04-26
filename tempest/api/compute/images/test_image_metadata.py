@@ -42,9 +42,9 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         # prefer glance v1 for the compute API tests since the compute image
         # API proxy was written for glance v1.
         if CONF.image_feature_enabled.api_v1:
-            cls.glance_client = cls.os.image_client
+            cls.glance_client = cls.os_primary.image_client
         elif CONF.image_feature_enabled.api_v2:
-            cls.glance_client = cls.os.image_client_v2
+            cls.glance_client = cls.os_primary.image_client_v2
         else:
             raise exceptions.InvalidConfiguration(
                 'Either api_v1 or api_v2 must be True in '

@@ -48,8 +48,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(LiveBlockMigrationTestJSON, cls).setup_clients()
-        cls.admin_hosts_client = cls.os_adm.hosts_client
-        cls.admin_migration_client = cls.os_adm.migrations_client
+        cls.admin_hosts_client = cls.os_admin.hosts_client
+        cls.admin_migration_client = cls.os_admin.migrations_client
 
     @classmethod
     def _get_compute_hostnames(cls):

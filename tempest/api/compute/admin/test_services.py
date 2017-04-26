@@ -24,7 +24,7 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(ServicesAdminTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.services_client
+        cls.client = cls.os_admin.services_client
 
     @decorators.idempotent_id('5be41ef4-53d1-41cc-8839-5c2a48a1b283')
     def test_list_services(self):

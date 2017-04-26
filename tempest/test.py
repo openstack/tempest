@@ -331,16 +331,32 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 manager = cls.get_client_manager(
                     credential_type=credentials_type)
                 setattr(cls, 'os_%s' % credentials_type, manager)
+                # NOTE(jordanP): Tempest should use os_primary, os_admin
+                # and os_alt throughout its code base but we keep the aliases
+                # around for a while for Tempest plugins. Aliases should be
+                # removed eventually.
                 # Setup some common aliases
-                # TODO(andreaf) The aliases below are a temporary hack
-                # to avoid changing too much code in one patch. They should
-                # be removed eventually
                 if credentials_type == 'primary':
-                    cls.os = cls.manager = cls.os_primary
+                    cls.os = debtcollector.moves.moved_read_only_property(
+                        'os', 'os_primary', version='Pike',
+                        removal_version='Ocata')
+                    cls.manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'manager', 'os_primary', version='Pike',
+                            removal_version='Ocata')
                 if credentials_type == 'admin':
-                    cls.os_adm = cls.admin_manager = cls.os_admin
+                    cls.os_adm = debtcollector.moves.moved_read_only_property(
+                        'os_adm', 'os_admin', version='Pike',
+                        removal_version='Ocata')
+                    cls.admin_manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'admin_manager', 'os_admin', version='Pike',
+                            removal_version='Ocata')
                 if credentials_type == 'alt':
-                    cls.alt_manager = cls.os_alt
+                    cls.alt_manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'alt_manager', 'os_alt', version='Pike',
+                            removal_version='Ocata')
             elif isinstance(credentials_type, list):
                 manager = cls.get_client_manager(roles=credentials_type[1:],
                                                  force_new=True)

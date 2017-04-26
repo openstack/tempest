@@ -27,7 +27,7 @@ class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(InstanceUsageAuditLogNegativeTestJSON, cls).setup_clients()
-        cls.adm_client = cls.os_adm.instance_usages_audit_log_client
+        cls.adm_client = cls.os_admin.instance_usages_audit_log_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a9d33178-d2c9-4131-ad3b-f4ca8d0308a2')

@@ -25,8 +25,8 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
     @classmethod
     def setup_clients(cls):
         super(KeyPairsV210TestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.keypairs_client
-        cls.non_admin_client = cls.os.keypairs_client
+        cls.client = cls.os_admin.keypairs_client
+        cls.non_admin_client = cls.os_primary.keypairs_client
 
     def _create_and_check_keypairs(self, user_id):
         key_list = list()

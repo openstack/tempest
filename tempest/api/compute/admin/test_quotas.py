@@ -35,7 +35,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(QuotasAdminTestJSON, cls).setup_clients()
-        cls.adm_client = cls.os_adm.quotas_client
+        cls.adm_client = cls.os_admin.quotas_client
 
     @classmethod
     def resource_setup(cls):
@@ -153,7 +153,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(QuotaClassesAdminTestJSON, cls).resource_setup()
-        cls.adm_client = cls.os_adm.quota_classes_client
+        cls.adm_client = cls.os_admin.quota_classes_client
 
     def _restore_default_quotas(self, original_defaults):
         LOG.debug("restoring quota class defaults")

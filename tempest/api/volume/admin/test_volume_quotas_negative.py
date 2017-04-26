@@ -27,7 +27,7 @@ class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def setup_credentials(cls):
         super(BaseVolumeQuotasNegativeTestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.os.credentials.tenant_id
+        cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):

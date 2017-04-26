@@ -31,7 +31,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @classmethod
     def resource_setup(cls):
         super(EC2CredentialsTest, cls).resource_setup()
-        cls.creds = cls.os.credentials
+        cls.creds = cls.os_primary.credentials
 
     @decorators.idempotent_id('b580fab9-7ae9-46e8-8138-417260cb6f9f')
     def test_create_ec2_credential(self):

@@ -26,7 +26,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(AggregatesAdminNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.aggregates_client
+        cls.client = cls.os_admin.aggregates_client
         cls.user_client = cls.aggregates_client
 
     @classmethod
@@ -34,7 +34,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate'
 
-        hosts_all = cls.os_adm.hosts_client.list_hosts()['hosts']
+        hosts_all = cls.os_admin.hosts_client.list_hosts()['hosts']
         hosts = ([host['host_name']
                  for host in hosts_all if host['service'] == 'compute'])
         cls.host = hosts[0]
@@ -124,7 +124,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('0ef07828-12b4-45ba-87cc-41425faf5711')
     def test_aggregate_add_non_exist_host(self):
         # Adding a non-exist host to an aggregate should raise exceptions.
-        hosts_all = self.os_adm.hosts_client.list_hosts()['hosts']
+        hosts_all = self.os_admin.hosts_client.list_hosts()['hosts']
         hosts = map(lambda x: x['host_name'], hosts_all)
         while True:
             non_exist_host = data_utils.rand_name('nonexist_host')

@@ -99,7 +99,7 @@ of these would be::
            specific situations you should not need to use this.
         """
         super(TestExampleCase, cls).setup_clients()
-        cls.servers_client = cls.os.servers_client
+        cls.servers_client = cls.os_primary.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -143,10 +143,10 @@ to set a class variable ``credentials`` on the TestCase directly. For example::
 
 In this example the ``TestExampleAdmin`` TestCase will allocate 2 sets of
 credentials, one regular user and one admin user. The corresponding manager
-objects will be set as class variables cls.os and cls.os_adm respectively. You
-can also allocate a second user by putting **'alt'** in the list too. A set of
-alt credentials are the same as primary but can be used for tests cases that
-need a second user/project.
+objects will be set as class variables ``cls.os_primary`` and ``cls.os_admin``
+respectively. You can also allocate a second user by putting **'alt'** in the
+list too. A set of alt credentials are the same as primary but can be used
+for tests cases that need a second user/project.
 
 You can also specify credentials with specific roles assigned. This is useful
 for cases where there are specific RBAC requirements hard coded into an API.

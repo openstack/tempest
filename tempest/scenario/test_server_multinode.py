@@ -49,7 +49,7 @@ class TestServerMultinode(manager.ScenarioTest):
     @test.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
         available_zone = \
-            self.os_adm.availability_zone_client.list_availability_zones(
+            self.os_admin.availability_zone_client.list_availability_zones(
                 detail=True)['availabilityZoneInfo']
         hosts = []
         for zone in available_zone:
