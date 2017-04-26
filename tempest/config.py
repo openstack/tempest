@@ -361,7 +361,10 @@ ComputeFeaturesGroup = [
                      "serial console output?"),
     cfg.BoolOpt('resize',
                 default=False,
-                help="Does the test environment support resizing?"),
+                help="Does the test environment support resizing? When you "
+                     "enable this feature, 'flavor_ref_alt' should be set and "
+                     "it should refer to a larger flavor than 'flavor_ref' "
+                     "one."),
     cfg.BoolOpt('pause',
                 default=True,
                 help="Does the test environment support pausing?"),

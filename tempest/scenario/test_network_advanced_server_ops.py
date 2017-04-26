@@ -185,9 +185,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @test.services('compute', 'network')
     def test_server_connectivity_resize(self):
         resize_flavor = CONF.compute.flavor_ref_alt
-        if resize_flavor == CONF.compute.flavor_ref:
-            msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
-            raise self.skipException(msg)
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
         floating_ip = self._setup_network(server, keypair)
