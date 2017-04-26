@@ -269,7 +269,6 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_scheduler_stats_client = \
             cls.os_admin.volume_scheduler_stats_v2_client
         cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
-        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
 
     @classmethod
     def resource_setup(cls):
