@@ -96,18 +96,18 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(['password'], token_auth['token']['methods'])
         self.assertEqual(user['id'], token_auth['token']['user']['id'])
         self.assertEqual(user['name'], token_auth['token']['user']['name'])
-        self.assertEqual('default',
+        self.assertEqual(CONF.identity.default_domain_id,
                          token_auth['token']['user']['domain']['id'])
-        self.assertEqual('Default',
-                         token_auth['token']['user']['domain']['name'])
+        self.assertIsNotNone(token_auth['token']['user']['domain']['name'])
         self.assertNotIn('catalog', token_auth['token'])
         self.assertNotIn('project', token_auth['token'])
         self.assertNotIn('roles', token_auth['token'])
 
         # Use the unscoped token to get a scoped token.
-        token_auth = self.token.auth(token=token_id,
-                                     project_name=project1_name,
-                                     project_domain_name='Default')
+        token_auth = self.token.auth(
+            token=token_id,
+            project_name=project1_name,
+            project_domain_id=CONF.identity.default_domain_id)
         token1_id = token_auth.response['x-subject-token']
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
@@ -122,10 +122,9 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                          token_auth['token']['project']['id'])
         self.assertEqual(project1['name'],
                          token_auth['token']['project']['name'])
-        self.assertEqual('default',
+        self.assertEqual(CONF.identity.default_domain_id,
                          token_auth['token']['project']['domain']['id'])
-        self.assertEqual('Default',
-                         token_auth['token']['project']['domain']['name'])
+        self.assertIsNotNone(token_auth['token']['project']['domain']['name'])
         self.assertEqual(1, len(token_auth['token']['roles']))
         self.assertEqual(role['id'], token_auth['token']['roles'][0]['id'])
         self.assertEqual(role['name'], token_auth['token']['roles'][0]['name'])
@@ -134,9 +133,10 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.delete_token(token1_id)
 
         # Now get another scoped token using the unscoped token.
-        token_auth = self.token.auth(token=token_id,
-                                     project_name=project2_name,
-                                     project_domain_name='Default')
+        token_auth = self.token.auth(
+            token=token_id,
+            project_name=project2_name,
+            project_domain_id=CONF.identity.default_domain_id)
 
         self.assertEqual(project2['id'],
                          token_auth['token']['project']['id'])

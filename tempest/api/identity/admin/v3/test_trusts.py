@@ -47,7 +47,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         # create a project that trusts will be granted on
         trustor_project_name = data_utils.rand_name(name='project')
         project = self.projects_client.create_project(
-            trustor_project_name, domain_id='default')['project']
+            trustor_project_name,
+            domain_id=CONF.identity.default_domain_id)['project']
         self.trustor_project_id = project['id']
         self.assertIsNotNone(self.trustor_project_id)
 
@@ -62,7 +63,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             password=trustor_password,
             email=u_email,
             project_id=self.trustor_project_id,
-            domain_id='default')['user']
+            domain_id=CONF.identity.default_domain_id)['user']
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
@@ -96,10 +97,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             identity_version='v3',
             username=trustor_username,
             password=trustor_password,
-            user_domain_id='default',
+            user_domain_id=CONF.identity.default_domain_id,
             tenant_name=trustor_project_name,
-            project_domain_id='default',
-            domain_id='default')
+            project_domain_id=CONF.identity.default_domain_id,
+            domain_id=CONF.identity.default_domain_id)
         os = clients.Manager(credentials=creds)
         self.trustor_client = os.trusts_client
 

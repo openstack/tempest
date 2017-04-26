@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class UsersNegativeTest(base.BaseIdentityV3AdminTest):
@@ -43,4 +46,4 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.Unauthorized, self.token.auth,
                           username=user['name'],
                           password=password,
-                          user_domain_id='default')
+                          user_domain_id=CONF.identity.default_domain_id)
