@@ -52,6 +52,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             validatable=True,
             wait_until='ACTIVE',
             adminPass=self.image_ssh_password)
+        self.addCleanup(self.delete_server, server['id'])
         # Record addresses so that we can ssh later
         server['addresses'] = self.servers_client.list_addresses(
             server['id'])['addresses']
