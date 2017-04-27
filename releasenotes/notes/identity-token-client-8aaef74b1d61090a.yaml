@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add additional API endpoints to the identity v2 client token API:
+    -  list_endpoints_for_token
+    -  check_token_existence

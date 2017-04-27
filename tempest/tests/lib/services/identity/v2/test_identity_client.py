@@ -26,6 +26,33 @@ class TestIdentityClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_ENDPOINTS_FOR_TOKEN = {
+        "endpoints_links": [],
+        "endpoints": [
+            {
+                "name": "nova",
+                "adminURL": "https://nova.region-one.internal.com/" +
+                            "v2/be1319401cfa4a0aa590b97cc7b64d8d",
+                "region": "RegionOne",
+                "internalURL": "https://nova.region-one.internal.com/" +
+                               "v2/be1319401cfa4a0aa590b97cc7b64d8d",
+                "type": "compute",
+                "id": "11b41ee1b00841128b7333d4bf1a6140",
+                "publicURL": "https://nova.region-one.public.com/v2/" +
+                             "be1319401cfa4a0aa590b97cc7b64d8d"
+            },
+            {
+                "name": "neutron",
+                "adminURL": "https://neutron.region-one.internal.com/",
+                "region": "RegionOne",
+                "internalURL": "https://neutron.region-one.internal.com/",
+                "type": "network",
+                "id": "cdbfa3c416d741a9b5c968f2dc628acb",
+                "publicURL": "https://neutron.region-one.public.com/"
+            }
+        ]
+    }
+
     FAKE_API_INFO = {
         "name": "API_info",
         "type": "API",
@@ -148,6 +175,22 @@ class TestIdentityClient(base.BaseServiceTest):
             bytes_body,
             token_id="cbc36478b0bd8e67e89")
 
+    def _test_list_endpoints_for_token(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_endpoints_for_token,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ENDPOINTS_FOR_TOKEN,
+            bytes_body,
+            token_id="cbc36478b0bd8e67e89")
+
+    def _test_check_token_existence(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.check_token_existence,
+            'tempest.lib.common.rest_client.RestClient.head',
+            {},
+            bytes_body,
+            token_id="cbc36478b0bd8e67e89")
+
     def test_show_api_description_with_str_body(self):
         self._test_show_api_description()
 
@@ -165,6 +208,18 @@ class TestIdentityClient(base.BaseServiceTest):
 
     def test_show_token_with_bytes_body(self):
         self._test_show_token(bytes_body=True)
+
+    def test_list_endpoints_for_token_with_str_body(self):
+        self._test_list_endpoints_for_token()
+
+    def test_list_endpoints_for_token_with_bytes_body(self):
+        self._test_list_endpoints_for_token(bytes_body=True)
+
+    def test_check_token_existence_with_bytes_body(self):
+        self._test_check_token_existence(bytes_body=True)
+
+    def test_check_token_existence_with_str_body(self):
+        self._test_check_token_existence()
 
     def test_delete_token(self):
         self.check_service_client_function(
