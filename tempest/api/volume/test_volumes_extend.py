@@ -13,9 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class VolumesExtendTest(base.BaseVolumeTest):
@@ -31,3 +36,19 @@ class VolumesExtendTest(base.BaseVolumeTest):
                                                 volume['id'], 'available')
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual(volume['size'], extend_size)
+
+    @decorators.idempotent_id('86be1cba-2640-11e5-9c82-635fb964c912')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          "Cinder volume snapshots are disabled")
+    def test_volume_extend_when_volume_has_snapshot(self):
+        volume = self.create_volume()
+        self.create_snapshot(volume['id'])
+
+        extend_size = volume['size'] + 1
+        self.volumes_client.extend_volume(volume['id'], new_size=extend_size)
+
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        resized_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual(extend_size, resized_volume['size'])
