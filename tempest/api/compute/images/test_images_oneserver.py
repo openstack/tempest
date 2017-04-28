@@ -24,6 +24,11 @@ CONF = config.CONF
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def resource_setup(cls):
+        super(ImagesOneServerTestJSON, cls).resource_setup()
+        cls.server_id = cls.create_test_server(wait_until='ACTIVE')['id']
+
+    @classmethod
     def skip_checks(cls):
         super(ImagesOneServerTestJSON, cls).skip_checks()
         if not CONF.service_available.glance:
@@ -46,12 +51,10 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
-        server_id = self.create_test_server(wait_until='ACTIVE')['id']
-
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        image = self.create_image_from_server(server_id, name=name,
+        image = self.create_image_from_server(self.server_id, name=name,
                                               metadata=meta,
                                               wait_until='ACTIVE')
 
@@ -76,8 +79,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
-        server_id = self.create_test_server(wait_until='ACTIVE')['id']
-
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
 
@@ -85,6 +86,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # #1370954 in glance which will 500 if mysql is used as the
         # backend and it attempts to store a 4 byte utf-8 character
         utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
-        body = self.client.create_image(server_id, name=utf8_name)
+        body = self.client.create_image(self.server_id, name=utf8_name)
         image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)
