@@ -34,13 +34,12 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # by the test methods in this class. These
         # servers are cleaned up automatically in the
         # tearDownClass method of the super-class.
-        cls.deleted_fixtures = []
-        cls.create_test_server(wait_until='ACTIVE', min_count=2)
+        body = cls.create_test_server(wait_until='ACTIVE', min_count=3)
 
-        srv = cls.create_test_server(wait_until='ACTIVE')
-        cls.client.delete_server(srv['id'])
-        waiters.wait_for_server_termination(cls.client, srv['id'])
-        cls.deleted_fixtures.append(srv)
+        # delete one of the created servers
+        cls.deleted_id = body['server']['id']
+        cls.client.delete_server(cls.deleted_id)
+        waiters.wait_for_server_termination(cls.client, cls.deleted_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('24a26f1a-1ddc-4eea-b0d7-a90cc874ad8f')
@@ -49,9 +48,8 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # List servers and verify server not returned
         body = self.client.list_servers()
         servers = body['servers']
-        deleted_ids = [s['id'] for s in self.deleted_fixtures]
         actual = [srv for srv in servers
-                  if srv['id'] in deleted_ids]
+                  if srv['id'] == self.deleted_id]
         self.assertEqual([], actual)
 
     @decorators.attr(type=['negative'])
@@ -136,9 +134,8 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('93055106-2d34-46fe-af68-d9ddbf7ee570')
     def test_list_servers_detail_server_is_deleted(self):
         # Server details are not listed for a deleted server
-        deleted_ids = [s['id'] for s in self.deleted_fixtures]
         body = self.client.list_servers(detail=True)
         servers = body['servers']
         actual = [srv for srv in servers
-                  if srv['id'] in deleted_ids]
+                  if srv['id'] == self.deleted_id]
         self.assertEqual([], actual)
