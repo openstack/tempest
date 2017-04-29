@@ -18,6 +18,7 @@ https://developer.openstack.org/api-ref/identity/v3/index.html#service-catalog-a
 """
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -25,9 +26,17 @@ from tempest.lib.common import rest_client
 class EndPointsClient(rest_client.RestClient):
     api_version = "v3"
 
-    def list_endpoints(self):
-        """GET endpoints."""
-        resp, body = self.get('endpoints')
+    def list_endpoints(self, **params):
+        """List endpoints.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-endpoints
+        """
+        url = 'endpoints'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)

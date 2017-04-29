@@ -29,56 +29,93 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     def resource_setup(cls):
         super(EndPointsTestJSON, cls).resource_setup()
         cls.service_ids = list()
-        s_name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        s_description = data_utils.rand_name('description')
+
+        # Create endpoints so as to use for LIST and GET test cases
+        interfaces = ['public', 'internal']
+        cls.setup_endpoint_ids = list()
+        for i in range(2):
+            cls._create_service()
+            region = data_utils.rand_name('region')
+            url = data_utils.rand_url()
+            endpoint = cls.client.create_endpoint(
+                service_id=cls.service_ids[i], interface=interfaces[i],
+                url=url, region=region, enabled=True)['endpoint']
+            cls.setup_endpoint_ids.append(endpoint['id'])
+
+    @classmethod
+    def _create_service(cls, s_name=None, s_type=None, s_description=None):
+        if s_name is None:
+            s_name = data_utils.rand_name('service')
+        if s_type is None:
+            s_type = data_utils.rand_name('type')
+        if s_description is None:
+            s_description = data_utils.rand_name('description')
         service_data = (
             cls.services_client.create_service(name=s_name, type=s_type,
                                                description=s_description))
-        cls.service_id = service_data['service']['id']
-        cls.service_ids.append(cls.service_id)
-        # Create endpoints so as to use for LIST and GET test cases
-        cls.setup_endpoints = list()
-        for _ in range(2):
-            region = data_utils.rand_name('region')
-            url = data_utils.rand_url()
-            interface = 'public'
-            endpoint = cls.client.create_endpoint(service_id=cls.service_id,
-                                                  interface=interface,
-                                                  url=url, region=region,
-                                                  enabled=True)['endpoint']
-            cls.setup_endpoints.append(endpoint)
+        service = service_data['service']
+        cls.service_ids.append(service['id'])
+        return service
 
     @classmethod
     def resource_cleanup(cls):
-        for e in cls.setup_endpoints:
-            cls.client.delete_endpoint(e['id'])
+        for e in cls.setup_endpoint_ids:
+            cls.client.delete_endpoint(e)
         for s in cls.service_ids:
             cls.services_client.delete_service(s)
         super(EndPointsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
     def test_list_endpoints(self):
-        # Get a list of endpoints
+        # Get the list of all the endpoints.
         fetched_endpoints = self.client.list_endpoints()['endpoints']
-        # Asserting LIST endpoints
+        fetched_endpoint_ids = [e['id'] for e in fetched_endpoints]
+        # Check that all the created endpoints are present in
+        # "fetched_endpoints".
         missing_endpoints =\
-            [e for e in self.setup_endpoints if e not in fetched_endpoints]
-        self.assertEmpty(missing_endpoints,
+            [e for e in self.setup_endpoint_ids
+             if e not in fetched_endpoint_ids]
+        self.assertEqual(0, len(missing_endpoints),
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
+
+        # Check that filtering endpoints by service_id works.
+        fetched_endpoints_for_service = self.client.list_endpoints(
+            service_id=self.service_ids[0])['endpoints']
+        fetched_endpoints_for_alt_service = self.client.list_endpoints(
+            service_id=self.service_ids[1])['endpoints']
+
+        # Assert that both filters returned the correct result.
+        self.assertEqual(1, len(fetched_endpoints_for_service))
+        self.assertEqual(1, len(fetched_endpoints_for_alt_service))
+        self.assertEqual(set(self.setup_endpoint_ids),
+                         set([fetched_endpoints_for_service[0]['id'],
+                              fetched_endpoints_for_alt_service[0]['id']]))
+
+        # Check that filtering endpoints by interface works.
+        fetched_public_endpoints = self.client.list_endpoints(
+            interface='public')['endpoints']
+        fetched_internal_endpoints = self.client.list_endpoints(
+            interface='internal')['endpoints']
+
+        # Check that the expected endpoint_id is present per filter. [0] is
+        # public and [1] is internal.
+        self.assertIn(self.setup_endpoint_ids[0],
+                      [e['id'] for e in fetched_public_endpoints])
+        self.assertIn(self.setup_endpoint_ids[1],
+                      [e['id'] for e in fetched_internal_endpoints])
 
     @decorators.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
     def test_create_list_show_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
         interface = 'public'
-        endpoint = self.client.create_endpoint(service_id=self.service_id,
+        endpoint = self.client.create_endpoint(service_id=self.service_ids[0],
                                                interface=interface,
                                                url=url, region=region,
                                                enabled=True)['endpoint']
 
-        self.setup_endpoints.append(endpoint)
+        self.setup_endpoint_ids.append(endpoint['id'])
         # Asserting Create Endpoint response body
         self.assertIn('id', endpoint)
         self.assertEqual(region, endpoint['region'])
@@ -93,7 +130,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_endpoint = (
             self.client.show_endpoint(endpoint['id'])['endpoint'])
         # Asserting if the attributes of endpoint are the same
-        self.assertEqual(self.service_id, fetched_endpoint['service_id'])
+        self.assertEqual(self.service_ids[0], fetched_endpoint['service_id'])
         self.assertEqual(interface, fetched_endpoint['interface'])
         self.assertEqual(url, fetched_endpoint['url'])
         self.assertEqual(region, fetched_endpoint['region'])
@@ -101,7 +138,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
         # Deleting the endpoint created in this method
         self.client.delete_endpoint(endpoint['id'])
-        self.setup_endpoints.remove(endpoint)
+        self.setup_endpoint_ids.remove(endpoint['id'])
 
         # Checking whether endpoint is deleted successfully
         fetched_endpoints = self.client.list_endpoints()['endpoints']
@@ -117,7 +154,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         url1 = data_utils.rand_url()
         interface1 = 'public'
         endpoint_for_update = (
-            self.client.create_endpoint(service_id=self.service_id,
+            self.client.create_endpoint(service_id=self.service_ids[0],
                                         interface=interface1,
                                         url=url1, region=region1,
                                         enabled=True)['endpoint'])
@@ -126,11 +163,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
-        service2 = (
-            self.services_client.create_service(name=s_name, type=s_type,
-                                                description=s_description))
-        service2 = service2['service']
-        self.service_ids.append(service2['id'])
+        service2 = self._create_service(s_name=s_name, s_type=s_type,
+                                        s_description=s_description)
         # Updating endpoint with new values
         region2 = data_utils.rand_name('region')
         url2 = data_utils.rand_url()
