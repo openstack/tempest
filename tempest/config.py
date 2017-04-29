@@ -161,7 +161,9 @@ IdentityGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for OpenStack Identity "
-                    "(Keystone) API v3"),
+                    "(Keystone) API v3. The default value adminURL is "
+                    "deprecated and will be modified to publicURL in "
+                    "the next release."),
     cfg.StrOpt('admin_role',
                default='admin',
                help="Role required to administrate keystone."),
