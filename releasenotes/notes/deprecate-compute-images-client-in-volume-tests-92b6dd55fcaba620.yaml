@@ -6,5 +6,5 @@ deprecations:
     compute_images_client and Glance v1 APIs are removed in volume tests.
 upgrade:
   - |
-    Swith to use Glance v2 APIs in volume tests, by adding the Glance v2 client
-    images_client.
+    Switch to use Glance v2 APIs in volume tests, by adding the Glance v2
+    client images_client.
