@@ -22,6 +22,7 @@ Tempest Specific Commandments
 - [T112] Check that tempest.lib should not import local tempest code
 - [T113] Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
 - [T114] Check that tempest.lib does not use tempest config
+- [T115] Check that admin tests should exist under admin path
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
