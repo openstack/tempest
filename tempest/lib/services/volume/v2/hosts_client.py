@@ -34,3 +34,11 @@ class HostsClient(rest_client.RestClient):
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def show_host(self, host_name):
+        """Show host details."""
+        url = 'os-hosts/%s' % host_name
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
