@@ -55,14 +55,6 @@ class BackupsClient(rest_client.RestClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def force_delete_backup(self, backup_id):
-        """Force delete a backup volume."""
-        post_body = json.dumps({'os-force_delete': {}})
-        url = 'backups/%s/action' % backup_id
-        resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp)
-
     def show_backup(self, backup_id):
         """Returns the details of a single backup."""
         url = "backups/%s" % backup_id
