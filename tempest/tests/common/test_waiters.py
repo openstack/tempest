@@ -59,6 +59,7 @@ class TestImageWaiters(base.TestCase):
         # Tests that the wait method raises VolumeRestoreErrorException if
         # the volume status is 'error_restoring'.
         client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
                            build_interval=1)
         volume1 = {'volume': {'status': 'restoring-backup'}}
         volume2 = {'volume': {'status': 'error_restoring'}}

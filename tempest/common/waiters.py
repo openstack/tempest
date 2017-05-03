@@ -188,8 +188,9 @@ def wait_for_volume_resource_status(client, resource_id, statuses):
     """
     if not isinstance(statuses, list):
         statuses = [statuses]
-    resource_name = re.findall(r'(Volume|Snapshot|Backup|Group)',
-                               client.__class__.__name__)[0].lower()
+    resource_name = re.findall(
+        r'(volume|group-snapshot|snapshot|backup|group)',
+        client.resource_type)[-1].replace('-', '_')
     show_resource = getattr(client, 'show_' + resource_name)
     resource_status = show_resource(resource_id)[resource_name]['status']
     start = int(time.time())

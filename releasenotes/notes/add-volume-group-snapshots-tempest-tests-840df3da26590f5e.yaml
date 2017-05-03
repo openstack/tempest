@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add group_snapshots client for the volume service as library.
+    Add tempest tests for create group snapshot, delete group snapshot, show
+    group snapshot, and list group snapshots volume APIs.

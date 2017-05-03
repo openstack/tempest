@@ -112,3 +112,8 @@ class BackupsClient(base_client.BaseClient):
         except lib_exc.NotFound:
             return True
         return False
+
+    @property
+    def resource_type(self):
+        """Returns the primary type of resource this client works with."""
+        return 'backup'

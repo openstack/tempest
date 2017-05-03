@@ -85,6 +85,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.messages_client = cls.os_primary.volume_v3_messages_client
         cls.versions_client = cls.os_primary.volume_v3_versions_client
         cls.groups_client = cls.os_primary.groups_v3_client
+        cls.group_snapshots_client = cls.os_primary.group_snapshots_v3_client
 
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
@@ -275,6 +276,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.os_admin.volume_scheduler_stats_v2_client
         cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
         cls.admin_groups_client = cls.os_admin.groups_v3_client
+        cls.admin_group_snapshots_client = \
+            cls.os_admin.group_snapshots_v3_client
         cls.admin_group_types_client = cls.os_admin.group_types_v3_client
 
     @classmethod

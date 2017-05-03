@@ -268,6 +268,9 @@ class Manager(clients.ServiceClients):
             self.backups_v3_client = self.volume_v3.BackupsClient()
             self.group_types_v3_client = self.volume_v3.GroupTypesClient()
             self.groups_v3_client = self.volume_v3.GroupsClient()
+            self.group_snapshots_v3_client = \
+                self.volume_v3.GroupSnapshotsClient()
+            self.snapshots_v3_client = self.volume_v3.SnapshotsClient()
             self.volume_v3_messages_client = self.volume_v3.MessagesClient()
             self.volume_v3_versions_client = self.volume_v3.VersionsClient()
             self.volumes_v3_client = self.volume_v3.VolumesClient()
