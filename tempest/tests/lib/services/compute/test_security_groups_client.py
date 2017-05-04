@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import security_groups_client
@@ -103,11 +103,11 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
     def test_is_resource_deleted_true(self):
         mod = ('tempest.lib.services.compute.security_groups_client.'
                'SecurityGroupsClient.show_security_group')
-        self.useFixture(mockpatch.Patch(mod, side_effect=lib_exc.NotFound))
+        self.useFixture(fixtures.MockPatch(mod, side_effect=lib_exc.NotFound))
         self.assertTrue(self.client.is_resource_deleted('fake-id'))
 
     def test_is_resource_deleted_false(self):
         mod = ('tempest.lib.services.compute.security_groups_client.'
                'SecurityGroupsClient.show_security_group')
-        self.useFixture(mockpatch.Patch(mod, return_value='success'))
+        self.useFixture(fixtures.MockPatch(mod, return_value='success'))
         self.assertFalse(self.client.is_resource_deleted('fake-id'))

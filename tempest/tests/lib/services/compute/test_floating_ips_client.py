@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import floating_ips_client
@@ -99,14 +99,14 @@ class TestFloatingIpsClient(base.BaseServiceTest):
             server_id='c782b7a9-33cd-45f0-b795-7f87f456408b')
 
     def test_is_resource_deleted_true(self):
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.services.compute.floating_ips_client.'
             'FloatingIPsClient.show_floating_ip',
             side_effect=lib_exc.NotFound()))
         self.assertTrue(self.client.is_resource_deleted('fake-id'))
 
     def test_is_resource_deleted_false(self):
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.services.compute.floating_ips_client.'
             'FloatingIPsClient.show_floating_ip',
             return_value={"floating_ip": TestFloatingIpsClient.floating_ip}))

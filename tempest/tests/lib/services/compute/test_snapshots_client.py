@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import snapshots_client
@@ -91,13 +91,13 @@ class TestSnapshotsClient(base.BaseServiceTest):
     def test_is_resource_deleted_true(self):
         module = ('tempest.lib.services.compute.snapshots_client.'
                   'SnapshotsClient.show_snapshot')
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             module, side_effect=lib_exc.NotFound))
         self.assertTrue(self.client.is_resource_deleted('fake-id'))
 
     def test_is_resource_deleted_false(self):
         module = ('tempest.lib.services.compute.snapshots_client.'
                   'SnapshotsClient.show_snapshot')
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             module, return_value={}))
         self.assertFalse(self.client.is_resource_deleted('fake-id'))
