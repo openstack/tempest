@@ -339,24 +339,24 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 if credentials_type == 'primary':
                     cls.os = debtcollector.moves.moved_read_only_property(
                         'os', 'os_primary', version='Pike',
-                        removal_version='Ocata')
+                        removal_version='Queens')
                     cls.manager =\
                         debtcollector.moves.moved_read_only_property(
                             'manager', 'os_primary', version='Pike',
-                            removal_version='Ocata')
+                            removal_version='Queens')
                 if credentials_type == 'admin':
                     cls.os_adm = debtcollector.moves.moved_read_only_property(
                         'os_adm', 'os_admin', version='Pike',
-                        removal_version='Ocata')
+                        removal_version='Queens')
                     cls.admin_manager =\
                         debtcollector.moves.moved_read_only_property(
                             'admin_manager', 'os_admin', version='Pike',
-                            removal_version='Ocata')
+                            removal_version='Queens')
                 if credentials_type == 'alt':
                     cls.alt_manager =\
                         debtcollector.moves.moved_read_only_property(
                             'alt_manager', 'os_alt', version='Pike',
-                            removal_version='Ocata')
+                            removal_version='Queens')
             elif isinstance(credentials_type, list):
                 manager = cls.get_client_manager(roles=credentials_type[1:],
                                                  force_new=True)
