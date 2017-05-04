@@ -14,9 +14,8 @@
 #    under the License.
 
 import netaddr
-import testtools
 
-from tempest.api.network import base_routers as base
+from tempest.api.network import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -26,7 +25,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class RoutersNegativeTest(base.BaseRouterTest):
+class RoutersNegativeTest(base.BaseNetworkTest):
 
     @classmethod
     def skip_checks(cls):
@@ -75,37 +74,15 @@ class RoutersNegativeTest(base.BaseRouterTest):
             network_name=data_utils.rand_name('router-network02-'))
         subnet01 = self.create_subnet(network01)
         subnet02 = self.create_subnet(network02)
-        self._add_router_interface_with_subnet_id(self.router['id'],
-                                                  subnet01['id'])
+        interface = self.routers_client.add_router_interface(
+            self.router['id'], subnet_id=subnet01['id'])
+        self.addCleanup(self.routers_client.remove_router_interface,
+                        self.router['id'], subnet_id=subnet01['id'])
+        self.assertEqual(subnet01['id'], interface['subnet_id'])
         self.assertRaises(lib_exc.BadRequest,
-                          self._add_router_interface_with_subnet_id,
+                          self.routers_client.add_router_interface,
                           self.router['id'],
-                          subnet02['id'])
-
-    @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('7101cc02-058a-11e7-93e1-fa163e4fa634')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
-    @testtools.skipUnless(CONF.network.public_network_id,
-                          'The public_network_id option must be specified.')
-    def test_router_set_gateway_used_ip_returns_409(self):
-        # At first create a address from public_network_id
-        port = self.admin_ports_client.create_port(
-            network_id=CONF.network.public_network_id)['port']
-        self.addCleanup(self.admin_ports_client.delete_port,
-                        port_id=port['id'])
-        # Add used ip and subnet_id in external_fixed_ips
-        fixed_ip = {
-            'subnet_id': port['fixed_ips'][0]['subnet_id'],
-            'ip_address': port['fixed_ips'][0]['ip_address']
-        }
-        external_gateway_info = {
-            'network_id': CONF.network.public_network_id,
-            'external_fixed_ips': [fixed_ip]
-        }
-        # Create a router and set gateway to used ip
-        self.assertRaises(lib_exc.Conflict,
-                          self.admin_routers_client.create_router,
-                          external_gateway_info=external_gateway_info)
+                          subnet_id=subnet02['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('04df80f9-224d-47f5-837a-bf23e33d1c20')
@@ -142,7 +119,7 @@ class RoutersNegativeIpV6Test(RoutersNegativeTest):
     _ip_version = 6
 
 
-class DvrRoutersNegativeTest(base.BaseRouterTest):
+class DvrRoutersNegativeTest(base.BaseNetworkTest):
 
     @classmethod
     def skip_checks(cls):
