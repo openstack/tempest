@@ -33,15 +33,6 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         self.addCleanup(self._cleanup_router, router)
         return router
 
-    def _delete_router(self, router_id, routers_client=None):
-        client = routers_client or self.routers_client
-        client.delete_router(router_id)
-        # Asserting that the router is not found in the list
-        # after deletion
-        list_body = client.list_routers()
-        routers_list = [router['id'] for router in list_body['routers']]
-        self.assertNotIn(router_id, routers_list)
-
     def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
         interface = self.routers_client.add_router_interface(
             router_id, subnet_id=subnet_id)
