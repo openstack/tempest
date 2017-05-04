@@ -167,15 +167,13 @@ def verify_api_versions(os, service, update):
 def get_extension_client(os, service):
     extensions_client = {
         'nova': os.extensions_client,
-        'cinder': os.volumes_extension_client,
         'neutron': os.network_extensions_client,
         'swift': os.capabilities_client,
+        # NOTE: Cinder v3 API is current and v2 and v1 are deprecated.
+        # V3 extension API is the same as v2, so we reuse the v2 client
+        # for v3 API also.
+        'cinder': os.volumes_v2_extension_client,
     }
-    # NOTE (e0ne): Use Cinder API v2 by default because v1 is deprecated
-    if CONF.volume_feature_enabled.api_v2:
-        extensions_client['cinder'] = os.volumes_v2_extension_client
-    else:
-        extensions_client['cinder'] = os.volumes_extension_client
 
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
