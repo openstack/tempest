@@ -153,8 +153,8 @@ class RoutersTest(base.BaseRouterTest):
         interface = self.routers_client.add_router_interface(
             router['id'],
             port_id=port_body['port']['id'])
-        self.addCleanup(self._remove_router_interface_with_port_id,
-                        router['id'], port_body['port']['id'])
+        self.addCleanup(self.routers_client.remove_router_interface,
+                        router['id'], port_id=port_body['port']['id'])
         self.assertIn('subnet_id', interface.keys())
         self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details

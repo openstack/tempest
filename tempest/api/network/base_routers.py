@@ -45,8 +45,3 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         body = self.routers_client.remove_router_interface(router_id,
                                                            subnet_id=subnet_id)
         self.assertEqual(subnet_id, body['subnet_id'])
-
-    def _remove_router_interface_with_port_id(self, router_id, port_id):
-        body = self.routers_client.remove_router_interface(router_id,
-                                                           port_id=port_id)
-        self.assertEqual(port_id, body['port_id'])
