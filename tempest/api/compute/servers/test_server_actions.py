@@ -168,6 +168,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
+        # Get the IPs the server has before rebuilding it
+        original_addresses = (self.client.show_server(self.server_id)['server']
+                              ['addresses'])
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
@@ -197,6 +200,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
+        self.assertEqual(original_addresses, server['addresses'])
 
         if CONF.validation.run_validation:
             # Authentication is attempted in the following order of priority:
