@@ -370,7 +370,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        cls._delete_volume(cls.volumes_extensions_client, volume_id)
+        cls._delete_volume(cls.volumes_client, volume_id)
 
     @classmethod
     def get_server_ip(cls, server):
