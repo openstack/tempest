@@ -25,6 +25,12 @@ CONF = config.CONF
 class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
 
     @classmethod
+    def resource_setup(cls):
+        super(ServersOnMultiNodesTest, cls).resource_setup()
+        cls.server01 = cls.create_test_server(wait_until='ACTIVE')['id']
+        cls.host01 = cls._get_host(cls.server01)
+
+    @classmethod
     def skip_checks(cls):
         super(ServersOnMultiNodesTest, cls).skip_checks()
 
@@ -32,8 +38,9 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
             raise cls.skipException(
                 "Less than 2 compute nodes, skipping multi-nodes test.")
 
-    def _get_host(self, server_id):
-        return self.os_admin.servers_client.show_server(
+    @classmethod
+    def _get_host(cls, server_id):
+        return cls.os_admin.servers_client.show_server(
             server_id)['server']['OS-EXT-SRV-ATTR:host']
 
     @decorators.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')
@@ -41,40 +48,31 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         test.is_scheduler_filter_enabled("SameHostFilter"),
         'SameHostFilter is not available.')
     def test_create_servers_on_same_host(self):
-        server01 = self.create_test_server(wait_until='ACTIVE')['id']
-
-        hints = {'same_host': server01}
+        hints = {'same_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host01 = self._get_host(server01)
         host02 = self._get_host(server02)
-        self.assertEqual(host01, host02)
+        self.assertEqual(self.host01, host02)
 
     @decorators.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
     @testtools.skipUnless(
         test.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts(self):
-        server01 = self.create_test_server(wait_until='ACTIVE')['id']
-
-        hints = {'different_host': server01}
+        hints = {'different_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host01 = self._get_host(server01)
         host02 = self._get_host(server02)
-        self.assertNotEqual(host01, host02)
+        self.assertNotEqual(self.host01, host02)
 
     @decorators.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
     @testtools.skipUnless(
         test.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts_with_list_of_servers(self):
-        server01 = self.create_test_server(wait_until='ACTIVE')['id']
-
         # This scheduler-hint supports list of servers also.
-        hints = {'different_host': [server01]}
+        hints = {'different_host': [self.server01]}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host01 = self._get_host(server01)
         host02 = self._get_host(server02)
-        self.assertNotEqual(host01, host02)
+        self.assertNotEqual(self.host01, host02)
