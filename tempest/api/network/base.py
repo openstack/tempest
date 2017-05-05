@@ -269,25 +269,3 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         cls.admin_metering_labels_client = cls.os_admin.metering_labels_client
         cls.admin_metering_label_rules_client = (
             cls.os_admin.metering_label_rules_client)
-
-    @classmethod
-    def create_metering_label(cls, name, description):
-        """Wrapper utility that returns a test metering label."""
-        body = cls.admin_metering_labels_client.create_metering_label(
-            description=description,
-            name=name)
-        metering_label = body['metering_label']
-        cls.metering_labels.append(metering_label)
-        return metering_label
-
-    @classmethod
-    def create_metering_label_rule(cls, remote_ip_prefix, direction,
-                                   metering_label_id):
-        """Wrapper utility that returns a test metering label rule."""
-        client = cls.admin_metering_label_rules_client
-        body = client.create_metering_label_rule(
-            remote_ip_prefix=remote_ip_prefix, direction=direction,
-            metering_label_id=metering_label_id)
-        metering_label_rule = body['metering_label_rule']
-        cls.metering_label_rules.append(metering_label_rule)
-        return metering_label_rule
