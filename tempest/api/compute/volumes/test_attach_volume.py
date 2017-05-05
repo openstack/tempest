@@ -113,51 +113,35 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def test_list_get_volume_attachments(self):
         # List volume attachment of the server
         server = self._create_server()
-        volume = self.create_volume()
-        attachment = self.attach_volume(server, volume,
-                                        device=('/dev/%s' % self.device))
+        volume_1st = self.create_volume()
+        attachment_1st = self.attach_volume(server, volume_1st,
+                                            device=('/dev/%s' % self.device))
         body = self.servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(1, len(body))
-        self.assertIn(attachment, body)
+        self.assertIn(attachment_1st, body)
 
         # Get volume attachment of the server
         body = self.servers_client.show_volume_attachment(
             server['id'],
-            attachment['id'])['volumeAttachment']
+            attachment_1st['id'])['volumeAttachment']
         self.assertEqual(server['id'], body['serverId'])
-        self.assertEqual(volume['id'], body['volumeId'])
-        self.assertEqual(attachment['id'], body['id'])
+        self.assertEqual(volume_1st['id'], body['volumeId'])
+        self.assertEqual(attachment_1st['id'], body['id'])
 
-    @decorators.idempotent_id('757d488b-a951-4bc7-b3cd-f417028da08a')
-    def test_list_get_two_volume_attachments(self):
-        # NOTE: This test is using the volume device auto-assignment
-        # without specifying the device ("/dev/sdb", etc). The feature
-        # is supported since Nova Liberty release or later. So this should
-        # be skipped on older clouds.
-        server = self._create_server()
-        volume_1st = self.create_volume()
+        # attach one more volume to server
         volume_2nd = self.create_volume()
-        attachment_1st = self.attach_volume(server, volume_1st)
         attachment_2nd = self.attach_volume(server, volume_2nd)
-
         body = self.servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(2, len(body))
 
-        body = self.servers_client.show_volume_attachment(
-            server['id'],
-            attachment_1st['id'])['volumeAttachment']
-        self.assertEqual(server['id'], body['serverId'])
-        self.assertEqual(attachment_1st['volumeId'], body['volumeId'])
-        self.assertEqual(attachment_1st['id'], body['id'])
-
-        body = self.servers_client.show_volume_attachment(
-            server['id'],
-            attachment_2nd['id'])['volumeAttachment']
-        self.assertEqual(server['id'], body['serverId'])
-        self.assertEqual(attachment_2nd['volumeId'], body['volumeId'])
-        self.assertEqual(attachment_2nd['id'], body['id'])
+        for attachment in [attachment_1st, attachment_2nd]:
+            body = self.servers_client.show_volume_attachment(
+                server['id'], attachment['id'])['volumeAttachment']
+            self.assertEqual(server['id'], body['serverId'])
+            self.assertEqual(attachment['volumeId'], body['volumeId'])
+            self.assertEqual(attachment['id'], body['id'])
 
 
 class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
