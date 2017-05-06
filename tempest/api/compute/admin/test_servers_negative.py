@@ -124,8 +124,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           data_utils.rand_uuid())
 
     @decorators.idempotent_id('b0b17f83-d14e-4fc4-8f31-bcc9f3cfa629')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @decorators.attr(type=['negative'])
