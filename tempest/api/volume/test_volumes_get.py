@@ -137,3 +137,17 @@ class VolumesGetTest(base.BaseVolumeTest):
         origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'],
                                               size=CONF.volume.volume_size)
+
+
+class VolumesSummaryTest(base.BaseVolumeTest):
+
+    _api_version = 3
+    min_microversion = '3.12'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('c4f2431e-4920-4736-9e00-4040386b6feb')
+    def test_show_volume_summary(self):
+        volume_summary = \
+            self.volumes_client.show_volume_summary()['volume-summary']
+        for key in ['total_size', 'total_count']:
+            self.assertIn(key, volume_summary)
