@@ -123,10 +123,13 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def resource_cleanup(cls):
-        cls.clear_images()
+        cls.clear_resources('images', cls.images,
+                            cls.compute_images_client.delete_image)
         cls.clear_servers()
-        cls.clear_security_groups()
-        cls.clear_server_groups()
+        cls.clear_resources('security groups', cls.security_groups,
+                            cls.security_groups_client.delete_security_group)
+        cls.clear_resources('server groups', cls.server_groups,
+                            cls.server_groups_client.delete_server_group)
         cls.clear_volumes()
         super(BaseV2ComputeTest, cls).resource_cleanup()
 
@@ -172,40 +175,17 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 raise
 
     @classmethod
-    def clear_images(cls):
-        LOG.debug('Clearing images: %s', ','.join(cls.images))
-        for image_id in cls.images:
+    def clear_resources(cls, resource_name, resources, resource_del_func):
+        LOG.debug('Clearing %s: %s', resource_name,
+                  ','.join(map(str, resources)))
+        for res_id in resources:
             try:
                 test_utils.call_and_ignore_notfound_exc(
-                    cls.compute_images_client.delete_image, image_id)
-            except Exception:
-                LOG.exception('Exception raised deleting image %s', image_id)
-
-    @classmethod
-    def clear_security_groups(cls):
-        LOG.debug('Clearing security groups: %s', ','.join(
-            str(sg['id']) for sg in cls.security_groups))
-        for sg in cls.security_groups:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.security_groups_client.delete_security_group, sg['id'])
+                    resource_del_func, res_id)
             except Exception as exc:
-                LOG.info('Exception raised deleting security group %s',
-                         sg['id'])
+                LOG.exception('Exception raised deleting %s: %s',
+                              resource_name, res_id)
                 LOG.exception(exc)
-
-    @classmethod
-    def clear_server_groups(cls):
-        LOG.debug('Clearing server groups: %s', ','.join(cls.server_groups))
-        for server_group_id in cls.server_groups:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.server_groups_client.delete_server_group,
-                    server_group_id
-                )
-            except Exception:
-                LOG.exception('Exception raised deleting server-group %s',
-                              server_group_id)
 
     @classmethod
     def create_test_server(cls, validatable=False, volume_backed=False,
@@ -243,7 +223,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             description = data_utils.rand_name('description')
         body = cls.security_groups_client.create_security_group(
             name=name, description=description)['security_group']
-        cls.security_groups.append(body)
+        cls.security_groups.append(body['id'])
 
         return body
 
