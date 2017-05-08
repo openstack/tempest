@@ -531,6 +531,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.unshelve_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
+        images = self.compute_images_client.list_images(**params)['images']
+        msg = ('After unshelve, shelved image is not deleted.')
+        self.assertEmpty(images, msg)
+
     @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
         self.client.stop_server(self.server_id)
