@@ -102,14 +102,10 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
         self._update_server_name(server['id'], 'ACTIVE', prefix_name)
 
-    @decorators.idempotent_id('6ac19cb1-27a3-40ec-b350-810bdc04c08e')
-    def test_update_server_name_in_stop_state(self):
-        # The server name should be changed to the provided value
-        server = self.create_test_server(wait_until='ACTIVE')
+        # stop server and check server name update again
         self.client.stop_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
         # Update instance name with non-ASCII characters
-        prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
         updated_server = self._update_server_name(server['id'],
                                                   'SHUTOFF',
                                                   prefix_name)
