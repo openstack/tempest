@@ -83,8 +83,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
         # GET extra specs and verify the value of the key2
         # is the same as before
-        get_body = (self.admin_flavors_client.list_flavor_extra_specs(
-            self.flavor['id'])['extra_specs'])
+        get_body = self.admin_flavors_client.list_flavor_extra_specs(
+            self.flavor['id'])['extra_specs']
         self.assertEqual(get_body, {"key1": "value", "key2": "value2"})
 
         # UNSET extra specs that were set in this test
@@ -92,6 +92,9 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
                                                           "key1")
         self.admin_flavors_client.unset_flavor_extra_spec(self.flavor['id'],
                                                           "key2")
+        get_body = self.admin_flavors_client.list_flavor_extra_specs(
+            self.flavor['id'])['extra_specs']
+        self.assertEmpty(get_body)
 
     @decorators.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
