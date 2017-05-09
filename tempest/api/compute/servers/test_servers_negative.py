@@ -551,7 +551,7 @@ class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
     def setUp(self):
         super(ServersNegativeTestMultiTenantJSON, self).setUp()
         try:
-            waiters.wait_for_server_status(self.client, self.server_id,
+            waiters.wait_for_server_status(self.servers_client, self.server_id,
                                            'ACTIVE')
         except Exception:
             self.__class__.server_id = self.rebuild_server(self.server_id)
