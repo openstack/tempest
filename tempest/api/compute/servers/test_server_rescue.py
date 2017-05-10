@@ -42,81 +42,50 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ServerRescueTestJSON, cls).resource_setup()
 
-        # Floating IP creation
-        body = cls.floating_ips_client.create_floating_ip(
-            pool=CONF.network.floating_network_name)['floating_ip']
-        cls.floating_ip_id = str(body['id']).strip()
-        cls.floating_ip = str(body['ip']).strip()
-
-        # Security group creation
-        cls.sg_name = data_utils.rand_name('sg')
-        sg_desc = data_utils.rand_name('sg-desc')
-        cls.sg = cls.security_groups_client.create_security_group(
-            name=cls.sg_name, description=sg_desc)['security_group']
-        cls.sg_id = cls.sg['id']
-
-        cls.password = data_utils.rand_password()
-        # Server for positive tests
-        server = cls.create_test_server(adminPass=cls.password,
+        password = data_utils.rand_password()
+        server = cls.create_test_server(adminPass=password,
                                         wait_until='ACTIVE')
-        cls.server_id = server['id']
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Deleting the floating IP which is created in this method
-        cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
-        cls.sg = cls.security_groups_client.delete_security_group(
-            cls.sg_id)
-        super(ServerRescueTestJSON, cls).resource_cleanup()
-
-    def _unrescue(self, server_id):
-        self.servers_client.unrescue_server(server_id)
-        waiters.wait_for_server_status(self.servers_client, server_id,
-                                       'ACTIVE')
+        cls.servers_client.rescue_server(server['id'], adminPass=password)
+        waiters.wait_for_server_status(cls.servers_client, server['id'],
+                                       'RESCUE')
+        cls.rescued_server_id = server['id']
 
     @decorators.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
-        self.servers_client.rescue_server(
-            self.server_id, adminPass=self.password)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
+        password = data_utils.rand_password()
+        server = self.create_test_server(adminPass=password,
+                                         wait_until='ACTIVE')
+        self.servers_client.rescue_server(server['id'], adminPass=password)
+        waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'RESCUE')
-        self.servers_client.unrescue_server(self.server_id)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
+        self.servers_client.unrescue_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
 
     @decorators.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
-        # Rescue the server
-        self.servers_client.rescue_server(
-            self.server_id, adminPass=self.password)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'RESCUE')
-        self.addCleanup(self._unrescue, self.server_id)
-
         # Association of floating IP to a rescued vm
-        client = self.floating_ips_client
-        client.associate_floating_ip_to_server(self.floating_ip,
-                                               self.server_id)
+        floating_ip_body = self.floating_ips_client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
+        self.addCleanup(self.floating_ips_client.delete_floating_ip,
+                        floating_ip_body['id'])
+
+        self.floating_ips_client.associate_floating_ip_to_server(
+            str(floating_ip_body['ip']).strip(), self.rescued_server_id)
 
         # Disassociation of floating IP that was associated in this method
-        client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                    self.server_id)
+        self.floating_ips_client.disassociate_floating_ip_from_server(
+            str(floating_ip_body['ip']).strip(), self.rescued_server_id)
 
     @decorators.idempotent_id('affca41f-7195-492d-8065-e09eee245404')
     def test_rescued_vm_add_remove_security_group(self):
-        # Rescue the server
-        self.servers_client.rescue_server(
-            self.server_id, adminPass=self.password)
-        waiters.wait_for_server_status(self.servers_client, self.server_id,
-                                       'RESCUE')
-        self.addCleanup(self._unrescue, self.server_id)
-
         # Add Security group
-        self.servers_client.add_security_group(self.server_id,
-                                               name=self.sg_name)
+        sg = self.create_security_group()
+        self.servers_client.add_security_group(self.rescued_server_id,
+                                               name=sg['name'])
 
         # Delete Security group
-        self.servers_client.remove_security_group(self.server_id,
-                                                  name=self.sg_name)
+        self.servers_client.remove_security_group(self.rescued_server_id,
+                                                  name=sg['name'])
