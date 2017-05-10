@@ -14,7 +14,7 @@
 
 import copy
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib.services.compute import versions_client
 from tempest.tests.lib import fake_auth_provider
@@ -73,7 +73,7 @@ class TestVersionsClient(base.BaseServiceTest):
             200)
 
     def _test_get_version_by_url(self, bytes_body=False):
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             "tempest.lib.common.rest_client.RestClient.token",
             return_value="Dummy Token"))
         params = {"version_url": self.versions_client._get_base_version_url()}

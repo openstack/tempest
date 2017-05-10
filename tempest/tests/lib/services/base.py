@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
 from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
 
 from tempest.tests import base
 from tempest.tests.lib import fake_http
@@ -33,7 +33,7 @@ class BaseServiceTest(base.TestCase):
                                       body, to_utf=False, status=200,
                                       headers=None, **kwargs):
         mocked_response = self.create_response(body, to_utf, status, headers)
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             function2mock, return_value=mocked_response))
         if kwargs:
             resp = function(**kwargs)

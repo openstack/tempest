@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslotest import mockpatch
+import fixtures
 from tempest.tests.lib import fake_auth_provider
 
 from tempest.lib.services.compute import server_groups_client
@@ -50,7 +50,7 @@ class TestServerGroupsClient(base.BaseServiceTest):
 
     def test_delete_server_group(self):
         response = fake_http.fake_http_response({}, status=204), ''
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.common.rest_client.RestClient.delete',
             return_value=response))
         self.client.delete_server_group('fake-group')

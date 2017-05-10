@@ -14,7 +14,7 @@
 
 import copy
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import volumes_client
@@ -102,13 +102,13 @@ class TestVolumesClient(base.BaseServiceTest):
     def test_is_resource_deleted_true(self):
         module = ('tempest.lib.services.compute.volumes_client.'
                   'VolumesClient.show_volume')
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             module, side_effect=lib_exc.NotFound))
         self.assertTrue(self.client.is_resource_deleted('fake-id'))
 
     def test_is_resource_deleted_false(self):
         module = ('tempest.lib.services.compute.volumes_client.'
                   'VolumesClient.show_volume')
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             module, return_value={}))
         self.assertFalse(self.client.is_resource_deleted('fake-id'))
