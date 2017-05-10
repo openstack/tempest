@@ -15,13 +15,13 @@
 
 import testtools
 
-from tempest.api.network import base_routers as base
+from tempest.api.network import base
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest import test
 
 
-class RoutersTestDVR(base.BaseRouterTest):
+class RoutersTestDVR(base.BaseAdminNetworkTest):
 
     @classmethod
     def resource_setup(cls):
