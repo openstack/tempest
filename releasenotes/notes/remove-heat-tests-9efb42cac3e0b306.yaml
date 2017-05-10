@@ -1,0 +1,4 @@
+---
+upgrade:
+  - The Heat API tests have been removed from tempest, they were unmaintained.
+    The future direction of api test for heat is their in-tree Gabbi tests
