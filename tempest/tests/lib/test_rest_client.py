@@ -15,8 +15,8 @@
 import copy
 import json
 
+import fixtures
 import jsonschema
-from oslotest import mockpatch
 import six
 
 from tempest.lib.common import http
@@ -38,16 +38,16 @@ class BaseRestClientTestClass(base.TestCase):
         self.rest_client = rest_client.RestClient(
             self.fake_auth_provider, None, None)
         self.patchobject(http.ClosingHttp, 'request', self.fake_http.request)
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              '_log_request'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 '_log_request'))
 
 
 class TestRestClientHTTPMethods(BaseRestClientTestClass):
     def setUp(self):
         self.fake_http = fake_http.fake_httplib2()
         super(TestRestClientHTTPMethods, self).setUp()
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              '_error_checker'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 '_error_checker'))
 
     def test_post(self):
         __, return_dict = self.rest_client.post(self.url, {}, {})
@@ -70,8 +70,8 @@ class TestRestClientHTTPMethods(BaseRestClientTestClass):
         self.assertEqual('PUT', return_dict['method'])
 
     def test_head(self):
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              'response_checker'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 'response_checker'))
         __, return_dict = self.rest_client.head(self.url)
         self.assertEqual('HEAD', return_dict['method'])
 
@@ -122,8 +122,8 @@ class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
         self._verify_headers(resp)
 
     def test_head(self):
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              'response_checker'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 'response_checker'))
         resp, __ = self.rest_client.head(self.url)
         self._verify_headers(resp)
 
@@ -136,8 +136,8 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
     def setUp(self):
         self.fake_http = fake_http.fake_httplib2()
         super(TestRestClientUpdateHeaders, self).setUp()
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              '_error_checker'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 '_error_checker'))
         self.headers = {'X-Configuration-Session': 'session_id'}
 
     def test_post_update_headers(self):
@@ -201,8 +201,8 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
         )
 
     def test_head_update_headers(self):
-        self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              'response_checker'))
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 'response_checker'))
 
         __, return_dict = self.rest_client.head(self.url,
                                                 extra_headers=True,
@@ -1145,8 +1145,8 @@ class TestRestClientJSONSchemaValidatorVersion(TestJSONSchemaValidationBase):
     }
 
     def test_current_json_schema_validator_version(self):
-        with mockpatch.PatchObject(jsonschema.Draft4Validator,
-                                   "check_schema") as chk_schema:
+        with fixtures.MockPatchObject(jsonschema.Draft4Validator,
+                                      "check_schema") as chk_schema:
             body = {'foo': 'test'}
             self._test_validate_pass(self.schema, body)
             chk_schema.mock.assert_called_once_with(

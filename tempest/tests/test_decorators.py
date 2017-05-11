@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
 from oslo_config import cfg
-from oslotest import mockpatch
 import testtools
 
 from tempest import config
@@ -95,8 +95,8 @@ class TestServicesDecorator(BaseDecoratorsTest):
                           'bad_service')
 
     def test_services_decorator_with_service_valid_and_unavailable(self):
-        self.useFixture(mockpatch.PatchObject(test.CONF.service_available,
-                                              'cinder', False))
+        self.useFixture(fixtures.MockPatchObject(test.CONF.service_available,
+                                                 'cinder', False))
         self.assertRaises(testtools.TestCase.skipException,
                           self._test_services_helper, 'compute',
                           'volume')
