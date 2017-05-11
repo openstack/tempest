@@ -63,6 +63,12 @@ class VolumesTransfersTest(base.BaseVolumeTest):
             transfer_id, auth_key=auth_key)['transfer']
         waiters.wait_for_volume_resource_status(self.alt_volumes_client,
                                                 volume['id'], 'available')
+        accepted_volume = self.alt_volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual(self.os_alt.credentials.user_id,
+                         accepted_volume['user_id'])
+        self.assertEqual(self.os_alt.credentials.project_id,
+                         accepted_volume['os-vol-tenant-attr:tenant_id'])
 
     @decorators.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
