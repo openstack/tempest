@@ -35,10 +35,9 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         super(VolumesSnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
 
-    @decorators.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
+    @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @test.services('compute')
-    def test_snapshot_create_with_volume_in_use(self):
-        # Create a snapshot when volume status is in-use
+    def test_snapshot_create_delete_with_volume_in_use(self):
         # Create a test instance
         server = self.create_server(wait_until='ACTIVE')
         self.attach_volume(server['id'], self.volume_origin['id'])
@@ -46,19 +45,6 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # Snapshot a volume which attached to an instance with force=False
         self.assertRaises(lib_exc.BadRequest, self.create_snapshot,
                           self.volume_origin['id'], force=False)
-
-        # Snapshot a volume even if it's attached to an instance
-        snapshot = self.create_snapshot(self.volume_origin['id'],
-                                        force=True)
-        # Delete the snapshot
-        self.delete_snapshot(snapshot['id'])
-
-    @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
-    @test.services('compute')
-    def test_snapshot_delete_with_volume_in_use(self):
-        # Create a test instance
-        server = self.create_server(wait_until='ACTIVE')
-        self.attach_volume(server['id'], self.volume_origin['id'])
 
         # Snapshot a volume attached to an instance
         snapshot1 = self.create_snapshot(self.volume_origin['id'], force=True)
