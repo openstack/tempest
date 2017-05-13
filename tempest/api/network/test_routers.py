@@ -16,7 +16,7 @@
 import netaddr
 import testtools
 
-from tempest.api.network import base_routers as base
+from tempest.api.network import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -25,7 +25,35 @@ from tempest import test
 CONF = config.CONF
 
 
-class RoutersTest(base.BaseRouterTest):
+class RoutersTest(base.BaseAdminNetworkTest):
+    # NOTE(salv-orlando): This class inherits from BaseAdminNetworkTest
+    # as some router operations, such as enabling or disabling SNAT
+    # require admin credentials by default
+
+    def _cleanup_router(self, router):
+        self.delete_router(router)
+        self.routers.remove(router)
+
+    def _create_router(self, name=None, admin_state_up=False,
+                       external_network_id=None, enable_snat=None):
+        # associate a cleanup with created routers to avoid quota limits
+        router = self.create_router(name, admin_state_up,
+                                    external_network_id, enable_snat)
+        self.addCleanup(self._cleanup_router, router)
+        return router
+
+    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
+        interface = self.routers_client.add_router_interface(
+            router_id, subnet_id=subnet_id)
+        self.addCleanup(self._remove_router_interface_with_subnet_id,
+                        router_id, subnet_id)
+        self.assertEqual(subnet_id, interface['subnet_id'])
+        return interface
+
+    def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
+        body = self.routers_client.remove_router_interface(router_id,
+                                                           subnet_id=subnet_id)
+        self.assertEqual(subnet_id, body['subnet_id'])
 
     @classmethod
     def skip_checks(cls):
