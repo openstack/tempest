@@ -215,7 +215,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                 implies_role_id)
 
     @decorators.idempotent_id('c90c316c-d706-4728-bcba-eb1912081b69')
-    def test_implied_roles_create_delete(self):
+    def test_implied_roles_create_check_show_delete(self):
         prior_role_id = self.roles[0]['id']
         implies_role_id = self.roles[1]['id']
 
@@ -224,8 +224,18 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                                   ignore_not_found=True)
 
         # Check if the inference rule exists
-        self.roles_client.show_role_inference_rule(
+        self.roles_client.check_role_inference_rule(
             prior_role_id, implies_role_id)
+
+        # Show the inference rule and check its elements
+        resp_body = self.roles_client.show_role_inference_rule(
+            prior_role_id, implies_role_id)
+        self.assertIn('role_inference', resp_body)
+        role_inference = resp_body['role_inference']
+        for key1 in ['prior_role', 'implies']:
+            self.assertIn(key1, role_inference)
+            for key2 in ['id', 'links', 'name']:
+                self.assertIn(key2, role_inference[key1])
 
         # Delete the inference rule
         self.roles_client.delete_role_inference_rule(
