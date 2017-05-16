@@ -80,6 +80,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.messages_client = cls.os_primary.volume_v3_messages_client
         cls.versions_client = cls.os_primary.volume_v3_versions_client
 
+        if cls._api_version == 3:
+            cls.volumes_client = cls.os_primary.volumes_v3_client
+
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture(
@@ -265,6 +268,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_scheduler_stats_client = \
             cls.os_admin.volume_scheduler_stats_v2_client
         cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
+
+        if cls._api_version == 3:
+            cls.admin_volume_client = cls.os_admin.volumes_v3_client
 
     @classmethod
     def resource_setup(cls):

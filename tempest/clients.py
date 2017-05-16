@@ -269,6 +269,7 @@ class Manager(clients.ServiceClients):
         self.volume_manage_v2_client = self.volume_v2.VolumeManageClient()
         self.volumes_client = self.volume_v1.VolumesClient()
         self.volumes_v2_client = self.volume_v2.VolumesClient()
+        self.volumes_v3_client = self.volume_v3.VolumesClient()
         self.volume_v3_messages_client = self.volume_v3.MessagesClient()
         self.volume_v3_versions_client = self.volume_v3.VersionsClient()
         self.volume_types_client = self.volume_v1.TypesClient()
