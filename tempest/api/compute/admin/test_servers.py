@@ -65,7 +65,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         params = {'status': 'invalid_status'}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
-        self.assertEqual([], servers)
+        self.assertEmpty(servers)
 
     @decorators.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):

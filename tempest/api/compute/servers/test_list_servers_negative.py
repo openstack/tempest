@@ -50,7 +50,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] == self.deleted_id]
-        self.assertEqual([], actual)
+        self.assertEmpty(actual)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ff01387d-c7ad-47b4-ae9e-64fa214638fe')
@@ -58,7 +58,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Listing servers for a non existing image returns empty list
         body = self.client.list_servers(image='non_existing_image')
         servers = body['servers']
-        self.assertEqual([], servers)
+        self.assertEmpty(servers)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5913660b-223b-44d4-a651-a0fbfd44ca75')
@@ -66,7 +66,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Listing servers by non existing flavor returns empty list
         body = self.client.list_servers(flavor='non_existing_flavor')
         servers = body['servers']
-        self.assertEqual([], servers)
+        self.assertEmpty(servers)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e2c77c4a-000a-4af3-a0bd-629a328bde7c')
@@ -74,7 +74,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Listing servers for a non existent server name returns empty list
         body = self.client.list_servers(name='non_existing_server_name')
         servers = body['servers']
-        self.assertEqual([], servers)
+        self.assertEmpty(servers)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('fcdf192d-0f74-4d89-911f-1ec002b822c4')
@@ -82,7 +82,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an empty list when invalid status is specified
         body = self.client.list_servers(status='non_existing_status')
         servers = body['servers']
-        self.assertEqual([], servers)
+        self.assertEmpty(servers)
 
     @decorators.idempotent_id('12c80a9f-2dec-480e-882b-98ba15757659')
     def test_list_servers_by_limits(self):
@@ -138,4 +138,4 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] == self.deleted_id]
-        self.assertEqual([], actual)
+        self.assertEmpty(actual)
