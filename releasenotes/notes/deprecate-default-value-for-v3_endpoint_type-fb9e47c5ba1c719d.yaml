@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Deprecate default value for configuration parameter v3_endpoint_type
+    of identity section in OpenStack Pike and modify the default value to
+    publicURL in OpenStack Q release.
