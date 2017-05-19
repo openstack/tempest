@@ -54,6 +54,11 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
+        server = cls.create_test_server()
+        cls.client.delete_server(server['id'])
+        waiters.wait_for_server_termination(cls.client, server['id'])
+        cls.deleted_server_id = server['id']
+
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('dbbfd247-c40c-449e-8f6c-d2aa7c7da7cf')
     def test_server_name_blank(self):
@@ -170,25 +175,17 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('98fa0458-1485-440f-873b-fe7f0d714930')
     def test_rebuild_deleted_server(self):
         # Rebuild a deleted server
-        server = self.create_test_server()
-        self.client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.client, server['id'])
-
         self.assertRaises(lib_exc.NotFound,
                           self.client.rebuild_server,
-                          server['id'], self.image_ref)
+                          self.deleted_server_id, self.image_ref)
 
     @decorators.related_bug('1660878', status_code=409)
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('581a397d-5eab-486f-9cf9-1014bbd4c984')
     def test_reboot_deleted_server(self):
         # Reboot a deleted server
-        server = self.create_test_server()
-        self.client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.client, server['id'])
-
         self.assertRaises(lib_exc.NotFound, self.client.reboot_server,
-                          server['id'], type='SOFT')
+                          self.deleted_server_id, type='SOFT')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d86141a7-906e-4731-b187-d64a2ea61422')
