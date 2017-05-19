@@ -647,6 +647,9 @@ NetworkFeaturesGroup = [
     cfg.BoolOpt('port_security',
                 default=False,
                 help="Does the test environment support port security?"),
+    cfg.BoolOpt('floating_ips',
+                default=True,
+                help='Does the test environment support floating_ips')
 ]
 
 validation_group = cfg.OptGroup(name='validation',

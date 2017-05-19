@@ -48,6 +48,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
 
     @classmethod
     def setup_credentials(cls):

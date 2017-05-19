@@ -1,0 +1,5 @@
+---
+features:
+  - A new config option in the network-feature-enabled section, floating_ips,
+    to specify whether floating ips are available in the cloud under test. By
+    default this is set to True.

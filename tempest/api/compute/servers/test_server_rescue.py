@@ -65,6 +65,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
+    @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
+                          "Floating ips are not available")
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Association of floating IP to a rescued vm
         floating_ip_body = self.floating_ips_client.create_floating_ip(

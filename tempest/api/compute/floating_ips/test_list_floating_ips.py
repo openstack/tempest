@@ -24,6 +24,12 @@ CONF = config.CONF
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(FloatingIPDetailsTestJSON, cls).skip_checks()
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
+    @classmethod
     def setup_clients(cls):
         super(FloatingIPDetailsTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client

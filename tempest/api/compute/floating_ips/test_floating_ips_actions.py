@@ -30,6 +30,12 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     floating_ip = None
 
     @classmethod
+    def skip_checks(cls):
+        super(FloatingIPsTestJSON, cls).skip_checks()
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
+    @classmethod
     def setup_clients(cls):
         super(FloatingIPsTestJSON, cls).setup_clients()
         cls.client = cls.floating_ips_client
