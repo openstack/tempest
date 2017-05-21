@@ -58,7 +58,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
             namespace['namespace'])
         body = self.namespace_tags_client.list_namespace_tags(
             namespace['namespace'])
-        self.assertEqual([], body['tags'])
+        self.assertEmpty(body['tags'])
 
     @decorators.idempotent_id('a2a3765e-1a2c-3f6d-a3a7-3cc3466ab875')
     def test_create_update_delete_tag(self):

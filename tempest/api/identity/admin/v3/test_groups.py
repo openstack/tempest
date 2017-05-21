@@ -134,4 +134,4 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         for g in body:
             fetched_ids.append(g['id'])
         missing_groups = [g for g in group_ids if g not in fetched_ids]
-        self.assertEqual([], missing_groups)
+        self.assertEmpty(missing_groups)

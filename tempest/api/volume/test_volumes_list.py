@@ -343,7 +343,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
 
             # If cannot follow make sure it's because we have finished
             else:
-                self.assertEqual([], remaining or [],
+                self.assertEmpty(remaining or [],
                                  'No more pages reported, but still '
                                  'missing ids %s' % remaining)
                 break
