@@ -24,8 +24,8 @@ where your test contributions should go.
    field_guide/scenario
    field_guide/unit_tests
 
-For users
-=========
+Users Guide
+===========
 
 Tempest Configuration Guide
 ---------------------------
@@ -48,8 +48,8 @@ Command Documentation
    workspace
    run
 
-For developers
-==============
+Developers Guide
+================
 
 Development
 -----------
