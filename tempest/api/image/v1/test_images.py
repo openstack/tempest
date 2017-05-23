@@ -43,7 +43,8 @@ def get_container_and_disk_format():
         else:
             msg = ("The container format and the disk format don't match. "
                    "Container format: %(container)s, Disk format: %(disk)s." %
-                   {'container': container_format, 'disk': disk_format})
+                   {'container': container_format, 'disk':
+                       CONF.image.disk_formats})
             raise exceptions.InvalidConfiguration(msg)
     else:
         disk_format = CONF.image.disk_formats[0]
