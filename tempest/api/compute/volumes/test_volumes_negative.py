@@ -24,6 +24,11 @@ CONF = config.CONF
 
 class VolumesNegativeTest(base.BaseV2ComputeTest):
 
+    # These tests will fail with a 404 starting from microversion 2.36. For
+    # more information, see:
+    # https://developer.openstack.org/api-ref/compute/#volume-extension-os-volumes-os-snapshots-deprecated
+    max_microversion = '2.35'
+
     @classmethod
     def skip_checks(cls):
         super(VolumesNegativeTest, cls).skip_checks()
