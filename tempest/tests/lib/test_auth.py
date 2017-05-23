@@ -16,7 +16,7 @@
 import copy
 import datetime
 
-from oslotest import mockpatch
+import fixtures
 import testtools
 
 from tempest.lib import auth
@@ -82,9 +82,9 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
 
     def test_auth_data_property_when_cache_exists(self):
         self.auth_provider.cache = 'foo'
-        self.useFixture(mockpatch.PatchObject(self.auth_provider,
-                                              'is_expired',
-                                              return_value=False))
+        self.useFixture(fixtures.MockPatchObject(self.auth_provider,
+                                                 'is_expired',
+                                                 return_value=False))
         self.assertEqual('foo', getattr(self.auth_provider, 'auth_data'))
 
     def test_delete_auth_data_property_through_deleter(self):

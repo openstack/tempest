@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
 import mock
 from oslo_config import cfg
-from oslotest import mockpatch
 
 from tempest.common import credentials_factory as credentials
 from tempest.common import dynamic_creds
@@ -84,7 +84,7 @@ class TestDynamicCredentialProvider(base.TestCase):
             tenant_name='fake_tenant')
 
     def _mock_user_create(self, id, name):
-        user_fix = self.useFixture(mockpatch.PatchObject(
+        user_fix = self.useFixture(fixtures.MockPatchObject(
             self.users_client.UsersClient,
             'create_user',
             return_value=(rest_client.ResponseBody
@@ -92,7 +92,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return user_fix
 
     def _mock_tenant_create(self, id, name):
-        tenant_fix = self.useFixture(mockpatch.PatchObject(
+        tenant_fix = self.useFixture(fixtures.MockPatchObject(
             self.tenants_client.TenantsClient,
             'create_tenant',
             return_value=(rest_client.ResponseBody
@@ -100,7 +100,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return tenant_fix
 
     def _mock_list_roles(self, id, name):
-        roles_fix = self.useFixture(mockpatch.PatchObject(
+        roles_fix = self.useFixture(fixtures.MockPatchObject(
             self.roles_client.RolesClient,
             'list_roles',
             return_value=(rest_client.ResponseBody
@@ -111,7 +111,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return roles_fix
 
     def _mock_list_2_roles(self):
-        roles_fix = self.useFixture(mockpatch.PatchObject(
+        roles_fix = self.useFixture(fixtures.MockPatchObject(
             self.roles_client.RolesClient,
             'list_roles',
             return_value=(rest_client.ResponseBody
@@ -122,7 +122,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return roles_fix
 
     def _mock_assign_user_role(self):
-        tenant_fix = self.useFixture(mockpatch.PatchObject(
+        tenant_fix = self.useFixture(fixtures.MockPatchObject(
             self.roles_client.RolesClient,
             'create_user_role_on_project',
             return_value=(rest_client.ResponseBody
@@ -130,7 +130,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return tenant_fix
 
     def _mock_list_role(self):
-        roles_fix = self.useFixture(mockpatch.PatchObject(
+        roles_fix = self.useFixture(fixtures.MockPatchObject(
             self.roles_client.RolesClient,
             'list_roles',
             return_value=(rest_client.ResponseBody
@@ -140,7 +140,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         return roles_fix
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
-        ec2_creds_fix = self.useFixture(mockpatch.PatchObject(
+        ec2_creds_fix = self.useFixture(fixtures.MockPatchObject(
             self.users_client.UsersClient,
             'list_user_ec2_credentials',
             return_value=(rest_client.ResponseBody
@@ -153,21 +153,21 @@ class TestDynamicCredentialProvider(base.TestCase):
         return ec2_creds_fix
 
     def _mock_network_create(self, iso_creds, id, name):
-        net_fix = self.useFixture(mockpatch.PatchObject(
+        net_fix = self.useFixture(fixtures.MockPatchObject(
             iso_creds.networks_admin_client,
             'create_network',
             return_value={'network': {'id': id, 'name': name}}))
         return net_fix
 
     def _mock_subnet_create(self, iso_creds, id, name):
-        subnet_fix = self.useFixture(mockpatch.PatchObject(
+        subnet_fix = self.useFixture(fixtures.MockPatchObject(
             iso_creds.subnets_admin_client,
             'create_subnet',
             return_value={'subnet': {'id': id, 'name': name}}))
         return subnet_fix
 
     def _mock_router_create(self, id, name):
-        router_fix = self.useFixture(mockpatch.PatchObject(
+        router_fix = self.useFixture(fixtures.MockPatchObject(
             routers_client.RoutersClient,
             'create_router',
             return_value={'router': {'id': id, 'name': name}}))
@@ -634,7 +634,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
     def setUp(self):
         super(TestDynamicCredentialProviderV3, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
-        self.useFixture(mockpatch.PatchObject(
+        self.useFixture(fixtures.MockPatchObject(
             domains_client.DomainsClient, 'list_domains',
             return_value=dict(domains=[dict(id='default',
                                             name='Default')])))
@@ -645,7 +645,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
         pass
 
     def _mock_tenant_create(self, id, name):
-        project_fix = self.useFixture(mockpatch.PatchObject(
+        project_fix = self.useFixture(fixtures.MockPatchObject(
             self.tenants_client.ProjectsClient,
             'create_project',
             return_value=(rest_client.ResponseBody
