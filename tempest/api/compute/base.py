@@ -204,7 +204,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
         tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
-            cls.os,
+            cls.os_primary,
             validatable,
             validation_resources=cls.validation_resources,
             tenant_network=tenant_network,

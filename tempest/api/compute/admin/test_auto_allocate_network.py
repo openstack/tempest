@@ -151,7 +151,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         """Tests that no networking is allocated for the server."""
         # create the server with no networking
         server, _ = compute.create_test_server(
-            self.os, networks='none', wait_until='ACTIVE')
+            self.os_primary, networks='none', wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
         # get the server ips
         addresses = self.servers_client.list_addresses(
@@ -176,7 +176,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # - Third request sees net1 and net2 for the tenant and fails with a
         #   NetworkAmbiguous 400 error.
         _, servers = compute.create_test_server(
-            self.os, networks='auto', wait_until='ACTIVE',
+            self.os_primary, networks='auto', wait_until='ACTIVE',
             min_count=3)
         server_nets = set()
         for server in servers:

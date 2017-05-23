@@ -178,16 +178,16 @@ requested credentials you can reference:
 +-------------------+---------------------+
 | Credentials Entry | Manager Variable    |
 +===================+=====================+
-| primary           | cls.os              |
+| primary           | cls.os_primary      |
 +-------------------+---------------------+
-| admin             | cls.os_adm          |
+| admin             | cls.os_admin        |
 +-------------------+---------------------+
 | alt               | cls.os_alt          |
 +-------------------+---------------------+
 | [$label, $role]   | cls.os_roles_$label |
 +-------------------+---------------------+
 
-By default cls.os is available since it is allocated in the base tempest test
+By default cls.os_primary is available since it is allocated in the base tempest test
 class (located in tempest/test.py). If your TestCase inherits from a different
 direct parent class (it'll still inherit from the BaseTestCase, just not
 directly) be sure to check if that class overrides allocated credentials.
@@ -270,13 +270,13 @@ call to create a server in Nova::
 
   class TestExampleCase(test.BaseTestCase):
     def test_example_create_server(self):
-      self.os.servers_client.create_server(...)
+      self.os_primary.servers_client.create_server(...)
 
-is all you need to do. As described previously, in the above example the ``self.os``
-is created automatically because the base test class sets the ``credentials``
-attribute to allocate a primary credential set and initializes the client
-manager as ``self.os``. This same access pattern can be used for all of the
-clients in Tempest.
+is all you need to do. As described previously, in the above example the
+``self.os_primary`` is created automatically because the base test class sets the
+``credentials`` attribute to allocate a primary credential set and initializes
+the client manager as ``self.os_primary``. This same access pattern can be used
+for all of the clients in Tempest.
 
 Credentials Objects
 -------------------
@@ -293,7 +293,7 @@ object via the manager's ``credentials`` attribute. For example::
 
   class TestExampleCase(test.BaseTestCase):
     def test_example_create_server(self):
-      credentials = self.os.credentials
+      credentials = self.os_primary.credentials
 
 The credentials object provides access to all of the credential information you
 would need to make API requests. For example, building off the previous
@@ -304,7 +304,7 @@ example::
 
   class TestExampleCase(test.BaseTestCase):
     def test_example_create_server(self):
-      credentials = self.os.credentials
+      credentials = self.os_primary.credentials
       username = credentials.username
       user_id = credentials.user_id
       password = credentials.password

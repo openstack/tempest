@@ -264,7 +264,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         # create two servers
         _, servers = compute.create_test_server(
-            self.os, tenant_network=network, wait_until='ACTIVE', min_count=2)
+            self.os_primary, tenant_network=network,
+            wait_until='ACTIVE', min_count=2)
         # add our cleanups for the servers since we bypassed the base class
         for server in servers:
             self.addCleanup(self.delete_server, server['id'])

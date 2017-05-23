@@ -24,7 +24,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
     def test_multiple_create(self):
         tenant_network = self.get_tenant_network()
         body, servers = compute.create_test_server(
-            self.os,
+            self.os_primary,
             wait_until='ACTIVE',
             min_count=2,
             tenant_network=tenant_network)

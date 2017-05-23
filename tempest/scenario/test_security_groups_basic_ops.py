@@ -168,7 +168,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         cls.floating_ips = {}
         cls.tenants = {}
-        cls.primary_tenant = cls.TenantProperties(cls.os)
+        cls.primary_tenant = cls.TenantProperties(cls.os_primary)
         cls.alt_tenant = cls.TenantProperties(cls.os_alt)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
             cls.tenants[tenant.creds.tenant_id] = tenant
