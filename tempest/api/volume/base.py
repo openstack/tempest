@@ -224,7 +224,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 
         tenant_network = self.get_tenant_network()
         body, _ = compute.create_test_server(
-            self.os,
+            self.os_primary,
             tenant_network=tenant_network,
             name=name,
             **kwargs)
