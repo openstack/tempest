@@ -1,0 +1,5 @@
+---
+features:
+  - Add a new identity catalog client. At this point, the new client
+    contains a single functionality, "show_catalog", which returns a
+    catalog object.
