@@ -133,7 +133,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         # self.create_test_server() here as this method creates the server
         # in the "primary" (i.e non-admin) tenant.
         test_server, _ = compute.create_test_server(
-            self.os_adm, wait_until="ACTIVE", name=name, **network_kwargs)
+            self.os_admin, wait_until="ACTIVE", name=name, **network_kwargs)
         self.addCleanup(self.client.delete_server, test_server['id'])
         server = self.client.show_server(test_server['id'])['server']
         self.assertEqual(server['status'], 'ACTIVE')

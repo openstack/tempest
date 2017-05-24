@@ -73,7 +73,7 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
 
         # Verify current project's default quotas
         default_quotas = self.admin_quotas_client.show_default_quota_set(
-            self.os_adm.credentials.tenant_id)['quota_set']
+            self.os_admin.credentials.tenant_id)['quota_set']
         self.assertThat(default_quotas.items(),
                         matchers.ContainsAll(body.items()))
 

@@ -29,7 +29,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(DeleteServersAdminTestJSON, cls).setup_clients()
         cls.non_admin_client = cls.servers_client
-        cls.admin_client = cls.os_adm.servers_client
+        cls.admin_client = cls.os_admin.servers_client
 
     @decorators.idempotent_id('99774678-e072-49d1-9d2a-49a59bc56063')
     def test_delete_server_while_in_error_state(self):
