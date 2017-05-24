@@ -41,8 +41,7 @@ class Manager(clients.ServiceClients):
         _, identity_uri = get_auth_provider_class(credentials)
         super(Manager, self).__init__(
             credentials=credentials, identity_uri=identity_uri, scope=scope,
-            region=CONF.identity.region,
-            client_parameters=self._prepare_configuration())
+            region=CONF.identity.region)
         # TODO(andreaf) When clients are initialised without the right
         # parameters available, the calls below will trigger a KeyError.
         # We should catch that and raise a better error.
@@ -61,35 +60,6 @@ class Manager(clients.ServiceClients):
             build_interval=CONF.orchestration.build_interval,
             build_timeout=CONF.orchestration.build_timeout,
             **self.default_params)
-
-    def _prepare_configuration(self):
-        """Map values from CONF into Manager parameters
-
-        This uses `config.service_client_config` for all services to collect
-        most configuration items needed to init the clients.
-        """
-        # NOTE(andreaf) Once all service clients in Tempest are migrated
-        # to tempest.lib, their configuration will be picked up from the
-        # registry, and this method will become redundant.
-
-        configuration = {}
-
-        # Setup the parameters for all Tempest services which are not in lib.
-        # NOTE(andreaf) Since client.py is an internal module of Tempest,
-        # it doesn't have to consider plugin configuration.
-        for service in clients._tempest_internal_modules():
-            try:
-                # NOTE(andreaf) Use the unversioned service name to fetch
-                # the configuration since configuration is not versioned.
-                service_for_config = service.split('.')[0]
-                if service_for_config not in configuration:
-                    configuration[service_for_config] = (
-                        config.service_client_config(service_for_config))
-            except lib_exc.UnknownServiceClient:
-                LOG.warning(
-                    'Could not load configuration for service %s', service)
-
-        return configuration
 
     def _set_network_clients(self):
         self.network_agents_client = self.network.AgentsClient()
@@ -296,8 +266,10 @@ class Manager(clients.ServiceClients):
             self.volume_v2.TransfersClient()
 
     def _set_object_storage_clients(self):
-        # Mandatory parameters (always defined)
-        params = self.parameters['object-storage']
+        # NOTE(andreaf) Load configuration from config. Once object storage
+        # is in lib, configuration will be pulled directly from the registry
+        # and this will not be required anymore.
+        params = config.service_client_config('object-storage')
 
         self.account_client = object_storage.AccountClient(self.auth_provider,
                                                            **params)
