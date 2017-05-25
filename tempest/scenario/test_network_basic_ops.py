@@ -238,7 +238,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ip_address = old_floating_ip['floating_ip_address']
         private_key = self._get_server_key(server)
         ssh_client = self.get_remote_client(
-            ip_address, private_key=private_key)
+            ip_address, private_key=private_key, server=server)
         old_nic_list = self._get_server_nics(ssh_client)
         # get a port from a list of one item
         port_list = self.admin_manager.ports_client.list_ports(
@@ -346,7 +346,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ip_address = floating_ip['floating_ip_address']
         private_key = self._get_server_key(self.floating_ip_tuple.server)
         ssh_source = self.get_remote_client(
-            ip_address, private_key=private_key)
+            ip_address, private_key=private_key,
+            server=self.floating_ip_tuple.server)
 
         for remote_ip in address_list:
             self.check_remote_connectivity(ssh_source, remote_ip,
@@ -573,7 +574,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ip_address = floating_ip['floating_ip_address']
         private_key = self._get_server_key(server)
         ssh_client = self.get_remote_client(
-            ip_address, private_key=private_key)
+            ip_address, private_key=private_key, server=server)
 
         dns_servers = [initial_dns_server]
         servers = ssh_client.get_dns_servers()
@@ -639,7 +640,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         private_key = self._get_server_key(server2)
         ssh_client = self.get_remote_client(server2_fip['floating_ip_address'],
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server2)
 
         self.check_public_network_connectivity(
             should_connect=True, msg="before updating "
@@ -828,7 +830,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         spoof_port = new_ports[0]
         private_key = self._get_server_key(server)
         ssh_client = self.get_remote_client(fip['floating_ip_address'],
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server)
         spoof_nic = ssh_client.get_nic_name_by_mac(spoof_port["mac_address"])
         peer = self._create_server(self.new_net)
         peer_address = peer['addresses'][self.new_net['name']][0]['addr']

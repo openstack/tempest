@@ -129,7 +129,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
             ip_address=fip['floating_ip_address'],
-            username=username)
+            username=username, server=srv)
         return ssh, ips, srv["id"]
 
     def turn_nic6_on(self, ssh, sid, network_id):

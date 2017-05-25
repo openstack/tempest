@@ -56,7 +56,8 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.ssh_client = self.get_remote_client(
                 ip_address=self.fip,
                 username=self.ssh_user,
-                private_key=keypair['private_key'])
+                private_key=keypair['private_key'],
+                server=self.instance)
 
     def verify_metadata(self):
         if self.run_ssh and CONF.compute_feature_enabled.metadata_service:

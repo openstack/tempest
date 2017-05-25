@@ -139,14 +139,16 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
         # check that we can SSH to the server before reboot
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'])
+            floating_ip['ip'], private_key=keypair['private_key'],
+            server=server)
 
         self.nova_reboot(server)
 
         # check that we can SSH to the server after reboot
         # (both connections are part of the scenario)
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'])
+            floating_ip['ip'], private_key=keypair['private_key'],
+            server=server)
 
         self.check_disks()
 
