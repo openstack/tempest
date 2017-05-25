@@ -373,9 +373,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def resource_setup(cls):
         """Class level resource setup for test cases."""
-        if hasattr(cls, "os"):
+        if hasattr(cls, "os_primary"):
             cls.validation_resources = vresources.create_validation_resources(
-                cls.os, cls.validation_resources)
+                cls.os_primary, cls.validation_resources)
         else:
             LOG.warning("Client manager not found, validation resources not"
                         " created")
@@ -388,8 +388,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         resources, in case a failure during `resource_setup` should happen.
         """
         if cls.validation_resources:
-            if hasattr(cls, "os"):
-                vresources.clear_validation_resources(cls.os,
+            if hasattr(cls, "os_primary"):
+                vresources.clear_validation_resources(cls.os_primary,
                                                       cls.validation_resources)
                 cls.validation_resources = {}
             else:
