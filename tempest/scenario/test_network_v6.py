@@ -144,7 +144,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         """
         ports = [
             p["mac_address"] for p in
-            self.admin_manager.ports_client.list_ports(
+            self.os_admin.ports_client.list_ports(
                 device_id=sid, network_id=network_id)['ports']
         ]
 

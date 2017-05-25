@@ -741,7 +741,7 @@ class NetworkScenarioTest(ScenarioTest):
             :returns: True if subnet with cidr already exist in tenant
                   False else
             """
-            cidr_in_use = self.admin_manager.subnets_client.list_subnets(
+            cidr_in_use = self.os_admin.subnets_client.list_subnets(
                 tenant_id=tenant_id, cidr=cidr)['subnets']
             return len(cidr_in_use) != 0
 
@@ -790,7 +790,7 @@ class NetworkScenarioTest(ScenarioTest):
         return subnet
 
     def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        ports = self.admin_manager.ports_client.list_ports(
+        ports = self.os_admin.ports_client.list_ports(
             device_id=server['id'], fixed_ip=ip_addr)['ports']
         # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
@@ -820,7 +820,7 @@ class NetworkScenarioTest(ScenarioTest):
         return port_map[0]
 
     def _get_network_by_name(self, network_name):
-        net = self.admin_manager.networks_client.list_networks(
+        net = self.os_admin.networks_client.list_networks(
             name=network_name)['networks']
         self.assertNotEqual(len(net), 0,
                             "Unable to get network by name: %s" % network_name)

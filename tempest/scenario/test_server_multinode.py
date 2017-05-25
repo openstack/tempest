@@ -39,10 +39,10 @@ class TestServerMultinode(manager.ScenarioTest):
     def setup_clients(cls):
         super(TestServerMultinode, cls).setup_clients()
         # Use admin client by default
-        cls.manager = cls.admin_manager
+        cls.manager = cls.os_admin
         # this is needed so that we can use the availability_zone:host
         # scheduler hint, which is admin_only by default
-        cls.servers_client = cls.admin_manager.servers_client
+        cls.servers_client = cls.os_admin.servers_client
 
     @decorators.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
     @decorators.attr(type='smoke')
