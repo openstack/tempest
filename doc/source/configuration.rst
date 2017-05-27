@@ -52,8 +52,7 @@ This involves configuring the following options in the ``identity`` section:
  #. ``uri_v3``
 
 The ``auth_version`` option is used to tell Tempest whether it should be using
-keystone's v2 or v3 api for communicating with keystone. (except for the
-identity api tests which will test a specific version) The two uri options are
+keystone's v2 or v3 api for communicating with keystone. The two uri options are
 used to tell Tempest the url of the keystone endpoint. The ``uri`` option is
 used for keystone v2 request and ``uri_v3`` is used for keystone v3. You want to
 ensure that which ever version you set for ``auth_version`` has its uri option
