@@ -232,9 +232,9 @@ parallel.
   and xml version of the same test class there could still be a race between
   methods.
 
-- The rand_name() function from tempest.common.utils.data_utils should be used
-  anywhere a resource is created with a name. Static naming should be avoided
-  to prevent resource conflicts.
+- The rand_name() function from tempest.lib.common.utils.data_utils should be
+  used anywhere a resource is created with a name. Static naming should be
+  avoided to prevent resource conflicts.
 
 - If the execution of a set of tests is required to be serialized then locking
   can be used to perform this. See AggregatesAdminTest in
