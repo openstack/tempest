@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add the ``disable_log_reason`` and the ``update_forced_down`` API endpoints
+    to the compute ``services_client``.
+    Add '2.11' compute validation schema for compute services API.
