@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import random
+
 from oslo_log import log as logging
 from testtools import matchers
 
@@ -53,31 +55,41 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
         LOG.debug("Get the current default quota class values")
         body = self.admin_quota_classes_client.show_quota_class_set(
             'default')['quota_class_set']
-        body.pop('id')
 
-        # Restore the defaults when the test is done
-        self.addCleanup(self._restore_default_quotas, body.copy())
+        # Note(jeremyZ) Only include specified quota keys to avoid the conflict
+        # that other tests may create/delete volume types or update volume
+        # type's default quotas in concurrency running.
+        update_kwargs = {key: body[key] for key in body if key in QUOTA_KEYS}
 
-        # Increment some of the values for updating the default quota class.
-        # For safety, only items with value >= 0 will be updated, and items
-        # with value < 0 (-1 means unlimited) will be ignored.
-        for quota, default in body.items():
+        # Restore the defaults when the test is done.
+        self.addCleanup(self._restore_default_quotas, update_kwargs.copy())
+
+        # Note(jeremyZ) Increment some of the values for updating the default
+        # quota class. For safety, only items with value >= 0 will be updated,
+        # and items with value < 0 (-1 means unlimited) will be ignored.
+        for quota, default in update_kwargs.items():
             if default >= 0:
-                body[quota] = default + 1
+                update_kwargs[quota] = default + 1
+
+        # Create a volume type for updating default quotas class.
+        volume_type_name = self.create_volume_type()['name']
+        for key in ['volumes', 'snapshots', 'gigabytes']:
+            update_kwargs['%s_%s' % (key, volume_type_name)] = \
+                random.randint(1, 10)
 
         LOG.debug("Update limits for the default quota class set")
         update_body = self.admin_quota_classes_client.update_quota_class_set(
-            'default', **body)['quota_class_set']
+            'default', **update_kwargs)['quota_class_set']
         self.assertThat(update_body.items(),
-                        matchers.ContainsAll(body.items()))
+                        matchers.ContainsAll(update_kwargs.items()))
 
-        # Verify current project's default quotas
+        # Verify current project's default quotas.
         default_quotas = self.admin_quotas_client.show_default_quota_set(
             self.os_admin.credentials.tenant_id)['quota_set']
         self.assertThat(default_quotas.items(),
-                        matchers.ContainsAll(body.items()))
+                        matchers.ContainsAll(update_kwargs.items()))
 
-        # Verify a new project's default quotas
+        # Verify a new project's default quotas.
         project_name = data_utils.rand_name('quota_class_tenant')
         description = data_utils.rand_name('desc_')
         project_id = self.identity_utils.create_project(
@@ -86,4 +98,4 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
         default_quotas = self.admin_quotas_client.show_default_quota_set(
             project_id)['quota_set']
         self.assertThat(default_quotas.items(),
-                        matchers.ContainsAll(body.items()))
+                        matchers.ContainsAll(update_kwargs.items()))
