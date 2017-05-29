@@ -40,6 +40,8 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
         if not CONF.network.public_network_id:
             msg = "The public_network_id option must be specified."
             raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
 
     @classmethod
     def resource_setup(cls):

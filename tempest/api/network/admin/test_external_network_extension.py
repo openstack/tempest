@@ -10,10 +10,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.network import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
@@ -91,6 +96,8 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertFalse(show_net['router:external'])
 
     @decorators.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
+    @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
+                          'Floating ips are not availabled')
     def test_delete_external_networks_with_floating_ip(self):
         # Verifies external network can be deleted while still holding
         # (unassociated) floating IPs

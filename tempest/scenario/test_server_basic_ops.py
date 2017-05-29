@@ -43,6 +43,12 @@ class TestServerBasicOps(manager.ScenarioTest):
      * Terminate the instance
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestServerBasicOps, cls).skip_checks()
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
     def setUp(self):
         super(TestServerBasicOps, self).setUp()
         self.run_ssh = CONF.validation.run_validation

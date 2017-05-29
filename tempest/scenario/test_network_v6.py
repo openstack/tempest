@@ -51,6 +51,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if CONF.network.shared_physical_network:
             msg = 'Deployment uses a shared physical network'
             raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
 
     @classmethod
     def setup_credentials(cls):
