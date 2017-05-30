@@ -84,10 +84,6 @@ class Client(object):
         ssh.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())
         _start_time = time.time()
-        if self.proxy_client is not None:
-            proxy_chan = self._get_proxy_channel()
-        else:
-            proxy_chan = None
         if self.pkey is not None:
             LOG.info("Creating ssh connection to '%s:%d' as '%s'"
                      " with public key authentication",
@@ -98,6 +94,10 @@ class Client(object):
                      self.host, self.port, self.username, str(self.password))
         attempts = 0
         while True:
+            if self.proxy_client is not None:
+                proxy_chan = self._get_proxy_channel()
+            else:
+                proxy_chan = None
             try:
                 ssh.connect(self.host, port=self.port, username=self.username,
                             password=self.password,
