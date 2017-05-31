@@ -76,7 +76,7 @@ class ServicesClient(rest_client.RestClient):
         url = 'services'
         if params:
             url += '?%s' % urllib.urlencode(params)
-        resp, body = self.get('services')
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
