@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Enhances the v3 identity client with the ``check_token_existence``
+    endpoint, allowing users to check the existence of tokens

@@ -109,6 +109,14 @@ class TestIdentityClient(base.BaseServiceTest):
             resp_token="cbc36478b0bd8e67e89",
             status=204)
 
+    def test_check_token_existence(self):
+        self.check_service_client_function(
+            self.client.check_token_existence,
+            'tempest.lib.common.rest_client.RestClient.head',
+            {},
+            resp_token="cbc36478b0bd8e67e89",
+            status=200)
+
     def test_list_auth_projects_with_str_body(self):
         self._test_list_auth_projects()
 
