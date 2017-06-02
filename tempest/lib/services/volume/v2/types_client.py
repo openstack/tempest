@@ -41,7 +41,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#list-volume-types
+        https://developer.openstack.org/api-ref/block-storage/v2/#list-all-volume-types-for-v2
         """
         url = 'types'
         if params:
@@ -57,7 +57,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#show-volume-type-details
+        https://developer.openstack.org/api-ref/block-storage/v2/#show-volume-type-details-for-v2
         """
         url = "types/%s" % volume_type_id
         resp, body = self.get(url)
@@ -70,7 +70,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#create-volume-type
+        https://developer.openstack.org/api-ref/block-storage/v2/#create-volume-type-for-v2
         """
         post_body = json.dumps({'volume_type': kwargs})
         resp, body = self.post('types', post_body)
