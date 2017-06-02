@@ -1,0 +1,6 @@
+---
+upgrade:
+  - verify_tempest_config command starts using extension_client of
+    cinder v2 API only, because cinder v3 API is current and v2 and
+    v1 are deprecated and v3 extension API is the same as v2. Then
+    we can reuse the v2 client for v3 API also.
