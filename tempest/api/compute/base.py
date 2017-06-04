@@ -22,6 +22,7 @@ from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import api_version_request
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -202,6 +203,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         """
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
+
+        request_version = api_version_request.APIVersionRequest(
+            cls.request_microversion)
+        v2_37_version = api_version_request.APIVersionRequest('2.37')
+
+        # NOTE(snikitin): since microversion v2.37 'networks' field is required
+        if request_version >= v2_37_version and 'networks' not in kwargs:
+            kwargs['networks'] = 'none'
+
         tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
             cls.os_primary,
