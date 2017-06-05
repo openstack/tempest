@@ -13,9 +13,10 @@
 #    under the License.
 
 import fixtures
-from tempest.tests.lib import fake_auth_provider
 
+from tempest.lib.services.compute import base_compute_client
 from tempest.lib.services.compute import server_groups_client
+from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
 from tempest.tests.lib.services import base
 
@@ -36,7 +37,7 @@ class TestServerGroupsClient(base.BaseServiceTest):
             fake_auth, 'compute', 'regionOne')
 
     def _test_create_server_group(self, bytes_body=False):
-        expected = {"server_group": TestServerGroupsClient.server_group}
+        expected = {"server_group": self.server_group}
         self.check_service_client_function(
             self.client.create_server_group,
             'tempest.lib.common.rest_client.RestClient.post', expected,
@@ -56,7 +57,7 @@ class TestServerGroupsClient(base.BaseServiceTest):
         self.client.delete_server_group('fake-group')
 
     def _test_list_server_groups(self, bytes_body=False):
-        expected = {"server_groups": [TestServerGroupsClient.server_group]}
+        expected = {"server_groups": [self.server_group]}
         self.check_service_client_function(
             self.client.list_server_groups,
             'tempest.lib.common.rest_client.RestClient.get',
@@ -69,7 +70,7 @@ class TestServerGroupsClient(base.BaseServiceTest):
         self._test_list_server_groups(bytes_body=True)
 
     def _test_show_server_group(self, bytes_body=False):
-        expected = {"server_group": TestServerGroupsClient.server_group}
+        expected = {"server_group": self.server_group}
         self.check_service_client_function(
             self.client.show_server_group,
             'tempest.lib.common.rest_client.RestClient.get',
@@ -81,3 +82,20 @@ class TestServerGroupsClient(base.BaseServiceTest):
 
     def test_show_server_group_byte_body(self):
         self._test_show_server_group(bytes_body=True)
+
+
+class TestServerGroupsClientMinV213(TestServerGroupsClient):
+
+    server_group = {
+        "id": "5bbcc3c4-1da2-4437-a48a-66f15b1b13f9",
+        "name": "test",
+        "policies": ["anti-affinity"],
+        "members": [],
+        "metadata": {},
+        "project_id": "0beb4bffb7a445eb8eb05fee3ee7660a",
+        "user_id": "86031628064a4f99bb66ec03c507dcd8"}
+
+    def setUp(self):
+        super(TestServerGroupsClientMinV213, self).setUp()
+        self.patchobject(base_compute_client, 'COMPUTE_MICROVERSION',
+                         new='2.13')
