@@ -101,12 +101,15 @@ class TestServicesClient(base.BaseServiceTest):
             bytes_body,
             service_id="686766")
 
-    def _test_list_services(self, bytes_body=False):
+    def _test_list_services(self, bytes_body=False, mock_args='services',
+                            **params):
         self.check_service_client_function(
             self.client.list_services,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_SERVICES,
-            bytes_body)
+            bytes_body,
+            mock_args=[mock_args],
+            **params)
 
     def _test_update_service(self, bytes_body=False):
         self.check_service_client_function(
@@ -133,6 +136,10 @@ class TestServicesClient(base.BaseServiceTest):
 
     def test_list_services_with_bytes_body(self):
         self._test_list_services(bytes_body=True)
+
+    def test_list_services_with_params(self):
+        self._test_list_services(
+            type='fake-type', mock_args='services?type=fake-type')
 
     def test_update_service_with_str_body(self):
         self._test_update_service()

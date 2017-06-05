@@ -31,12 +31,42 @@ class BaseServiceTest(base.TestCase):
 
     def check_service_client_function(self, function, function2mock,
                                       body, to_utf=False, status=200,
-                                      headers=None, **kwargs):
+                                      headers=None, mock_args=None,
+                                      **kwargs):
+        """Mock a service client function for unit testing.
+
+        :param function: The service client function to call.
+        :param function2mock: The REST call to mock inside the service client
+               function.
+        :param body: Expected response body returned by the service client
+               function.
+        :param to_utf: Whether to use UTF-8 encoding for request.
+        :param status: Expected response status returned by the service client
+               function.
+        :param headers: Expected headers returned by the service client
+               function.
+        :param mock_args: List/dict/value of expected args/kwargs called by
+               function2mock. For example:
+               * If mock_args=['foo'] then ``assert_called_once_with('foo')``
+                 is called.
+               * If mock_args={'foo': 'bar'} then
+                 ``assert_called_once_with(foo='bar')`` is called.
+               * If mock_args='foo' then ``assert_called_once_with('foo')``
+                 is called.
+        :param kwargs: kwargs that are passed to function.
+        """
         mocked_response = self.create_response(body, to_utf, status, headers)
-        self.useFixture(fixtures.MockPatch(
+        fixture = self.useFixture(fixtures.MockPatch(
             function2mock, return_value=mocked_response))
         if kwargs:
             resp = function(**kwargs)
         else:
             resp = function()
         self.assertEqual(body, resp)
+
+        if isinstance(mock_args, list):
+            fixture.mock.assert_called_once_with(*mock_args)
+        elif isinstance(mock_args, dict):
+            fixture.mock.assert_called_once_with(**mock_args)
+        elif mock_args is not None:
+            fixture.mock.assert_called_once_with(mock_args)
