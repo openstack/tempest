@@ -321,7 +321,7 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    @removals.remove(message="use show_pools from tempest.lib.services."
+    @removals.remove(message="use list_pools from tempest.lib.services."
                              "volume.v2.scheduler_stats_client")
     def show_pools(self, detail=False):
         # List all the volumes pools (hosts)
