@@ -18,6 +18,7 @@ import testtools
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -56,11 +57,19 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
         # Verify snapshot does not exist in snapshot list
         self.assertNotIn(snapshot['id'], snapshot_list)
 
+        name = data_utils.rand_name(self.__class__.__name__ +
+                                    '-Managed-Snapshot')
+        description = data_utils.rand_name(self.__class__.__name__ +
+                                           '-Managed-Snapshot-Description')
+        metadata = {"manage-snap-meta1": "value1",
+                    "manage-snap-meta2": "value2",
+                    "manage-snap-meta3": "value3"}
+
         # Manage the snapshot
         snapshot_ref = '_snapshot-%s' % snapshot['id']
         new_snapshot = self.admin_snapshot_manage_client.manage_snapshot(
-            volume_id=volume['id'],
-            ref={'source-name': snapshot_ref})['snapshot']
+            volume_id=volume['id'], ref={'source-name': snapshot_ref},
+            name=name, description=description, metadata=metadata)['snapshot']
         self.addCleanup(self.delete_snapshot, new_snapshot['id'],
                         self.admin_snapshots_client)
 
@@ -70,4 +79,10 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
                                                 'available')
 
         # Verify the managed snapshot has the expected parent volume
-        self.assertEqual(new_snapshot['volume_id'], volume['id'])
+        # and the expected field values.
+        new_snap_info = self.admin_snapshots_client.show_snapshot(
+            new_snapshot['id'])['snapshot']
+        self.assertEqual(volume['id'], new_snap_info['volume_id'])
+        self.assertEqual(name, new_snap_info['name'])
+        self.assertEqual(description, new_snap_info['description'])
+        self.assertEqual(metadata, new_snap_info['metadata'])
