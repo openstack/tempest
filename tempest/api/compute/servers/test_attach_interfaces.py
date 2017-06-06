@@ -49,7 +49,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
 
-    # TODO(mriedem): move this into a common waiters utility module
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
 
