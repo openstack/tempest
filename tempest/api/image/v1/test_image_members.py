@@ -54,6 +54,6 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
                                                      self.alt_tenant_id)
         body = self.image_member_client.list_image_members(image_id)
         members = body['members']
-        self.assertEqual(0, len(members), str(members))
+        self.assertEmpty(members)
         self.assertRaises(
             lib_exc.NotFound, self.alt_img_cli.show_image, image_id)

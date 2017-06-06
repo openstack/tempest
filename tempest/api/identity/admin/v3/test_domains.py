@@ -57,7 +57,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
             fetched_ids.append(d['id'])
         missing_doms = [d for d in self.setup_domains
                         if d['id'] not in fetched_ids]
-        self.assertEqual(0, len(missing_doms))
+        self.assertEmpty(missing_doms)
 
     @decorators.idempotent_id('c6aee07b-4981-440c-bb0b-eb598f58ffe9')
     def test_list_domains_filter_by_name(self):

@@ -41,13 +41,13 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
     def test_list_services(self):
         services = (self.admin_volume_services_client.list_services()
                     ['services'])
-        self.assertNotEqual(0, len(services))
+        self.assertNotEmpty(services)
 
     @decorators.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
         services = (self.admin_volume_services_client.list_services(
             binary=self.binary_name)['services'])
-        self.assertNotEqual(0, len(services))
+        self.assertNotEmpty(services)
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
 
@@ -76,7 +76,7 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
         services = (self.admin_volume_services_client.list_services(
             host=hostname, binary='cinder-volume')['services'])
 
-        self.assertNotEqual(0, len(services),
+        self.assertNotEmpty(services,
                             'cinder-volume not found on host %s' % hostname)
         self.assertEqual(hostname, _get_host(services[0]['host']))
         self.assertEqual('cinder-volume', services[0]['binary'])
@@ -87,6 +87,6 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name, binary=self.binary_name))['services']
 
-        self.assertNotEqual(0, len(services))
+        self.assertNotEmpty(services)
         self.assertEqual(self.host_name, _get_host(services[0]['host']))
         self.assertEqual(self.binary_name, services[0]['binary'])

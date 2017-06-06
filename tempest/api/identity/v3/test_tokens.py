@@ -54,15 +54,13 @@ class TokensV3Test(base.BaseIdentityV3Test):
             self.assertEqual(subject_id, user_id)
         else:
             # Expect a user ID, but don't know what it will be.
-            self.assertGreaterEqual(len(subject_id), 0,
-                                    'Expected user ID in token.')
+            self.assertIsNotNone(subject_id, 'Expected user ID in token.')
 
         subject_name = resp['user']['name']
         if username:
             self.assertEqual(subject_name, username)
         else:
             # Expect a user name, but don't know what it will be.
-            self.assertGreaterEqual(len(subject_name), 0,
-                                    'Expected user name in token.')
+            self.assertIsNotNone(subject_name, 'Expected user name in token.')
 
         self.assertEqual(resp['methods'][0], 'password')

@@ -86,8 +86,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         body = self.client.create_agent(**self.params_agent)['agent']
         self.addCleanup(self.client.delete_agent, body['agent_id'])
         agents = self.client.list_agents()['agents']
-        self.assertGreater(len(agents), 0,
-                           'Cannot get any agents.(%s)' % agents)
+        self.assertNotEmpty(agents, 'Cannot get any agents.(%s)' % agents)
         self.assertIn(body['agent_id'], map(lambda x: x['agent_id'], agents))
 
     @decorators.idempotent_id('eabadde4-3cd7-4ec4-a4b5-5a936d2d4408')
@@ -105,8 +104,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         agent_id_xen = agent_xen['agent_id']
         agents = (self.client.list_agents(hypervisor=agent_xen['hypervisor'])
                   ['agents'])
-        self.assertGreater(len(agents), 0,
-                           'Cannot get any agents.(%s)' % agents)
+        self.assertNotEmpty(agents, 'Cannot get any agents.(%s)' % agents)
         self.assertIn(agent_id_xen, map(lambda x: x['agent_id'], agents))
         self.assertNotIn(body['agent_id'], map(lambda x: x['agent_id'],
                                                agents))

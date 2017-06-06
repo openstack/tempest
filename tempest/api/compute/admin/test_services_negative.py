@@ -48,7 +48,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         host_name = services[0]['host']
         services = self.client.list_services(host=host_name,
                                              binary='xxx')['services']
-        self.assertEqual(0, len(services))
+        self.assertEmpty(services)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64e7e7fb-69e8-4cb6-a71d-8d5eb0c98655')
@@ -57,4 +57,4 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         binary_name = services[0]['binary']
         services = self.client.list_services(host='xxx',
                                              binary=binary_name)['services']
-        self.assertEqual(0, len(services))
+        self.assertEmpty(services)

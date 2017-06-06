@@ -261,7 +261,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         params = {'name': v_name}
         fetched_volume = self.volumes_client.list_volumes(
             params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        self.assertEmpty(fetched_volume)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9ca17820-a0e7-4cbd-a7fa-f4468735e359')
@@ -271,7 +271,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         fetched_volume = \
             self.volumes_client.list_volumes(
                 detail=True, params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        self.assertEmpty(fetched_volume)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('143b279b-7522-466b-81be-34a87d564a7c')
@@ -279,7 +279,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         params = {'status': 'null'}
         fetched_volume = self.volumes_client.list_volumes(
             params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        self.assertEmpty(fetched_volume)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ba94b27b-be3f-496c-a00e-0283b373fa75')
@@ -288,7 +288,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         fetched_volume = \
             self.volumes_client.list_volumes(detail=True,
                                              params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        self.assertEmpty(fetched_volume)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5b810c91-0ad1-47ce-aee8-615f789be78f')

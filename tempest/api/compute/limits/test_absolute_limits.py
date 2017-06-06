@@ -42,6 +42,6 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
         # check whether all expected elements exist
         missing_elements =\
             [ele for ele in expected_elements if ele not in absolute_limits]
-        self.assertEqual(0, len(missing_elements),
+        self.assertEmpty(missing_elements,
                          "Failed to find element %s in absolute limits list"
                          % ', '.join(ele for ele in missing_elements))

@@ -98,7 +98,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         missing_regions =\
             [e for e in self.setup_regions if e not in fetched_regions]
         # Asserting List Regions response
-        self.assertEqual(0, len(missing_regions),
+        self.assertEmpty(missing_regions,
                          "Failed to find region %s in fetched list" %
                          ', '.join(str(e) for e in missing_regions))
 
