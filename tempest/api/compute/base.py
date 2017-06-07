@@ -479,3 +479,21 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         self.addCleanup(client.wait_for_resource_deletion, flavor['id'])
         self.addCleanup(client.delete_flavor, flavor['id'])
         return flavor
+
+    def get_host_for_server(self, server_id):
+        server_details = self.admin_servers_client.show_server(server_id)
+        return server_details['server']['OS-EXT-SRV-ATTR:host']
+
+    def get_host_other_than(self, server_id):
+        source_host = self.get_host_for_server(server_id)
+
+        list_hosts_resp = self.os_admin.hosts_client.list_hosts()['hosts']
+        hosts = [
+            host_record['host_name']
+            for host_record in list_hosts_resp
+            if host_record['service'] == 'compute'
+        ]
+
+        for target_host in hosts:
+            if source_host != target_host:
+                return target_host

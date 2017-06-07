@@ -29,13 +29,13 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
+class LiveMigrationTest(base.BaseV2ComputeAdminTest):
     max_microversion = '2.24'
     block_migration = None
 
     @classmethod
     def skip_checks(cls):
-        super(LiveBlockMigrationTestJSON, cls).skip_checks()
+        super(LiveMigrationTest, cls).skip_checks()
 
         if not CONF.compute_feature_enabled.live_migration:
             skip_msg = ("%s skipped as live-migration is "
@@ -47,25 +47,9 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setup_clients(cls):
-        super(LiveBlockMigrationTestJSON, cls).setup_clients()
+        super(LiveMigrationTest, cls).setup_clients()
         cls.admin_hosts_client = cls.os_admin.hosts_client
         cls.admin_migration_client = cls.os_admin.migrations_client
-
-    @classmethod
-    def _get_compute_hostnames(cls):
-        body = cls.admin_hosts_client.list_hosts()['hosts']
-        return [
-            host_record['host_name']
-            for host_record in body
-            if host_record['service'] == 'compute'
-        ]
-
-    def _get_server_details(self, server_id):
-        body = self.admin_servers_client.show_server(server_id)['server']
-        return body
-
-    def _get_host_for_server(self, server_id):
-        return self._get_server_details(server_id)['OS-EXT-SRV-ATTR:host']
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
         kwargs = dict()
@@ -78,11 +62,6 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self.admin_servers_client.live_migrate_server(
             server_id, host=dest_host, block_migration=block_migration,
             **kwargs)
-
-    def _get_host_other_than(self, host):
-        for target_host in self._get_compute_hostnames():
-            if host != target_host:
-                return target_host
 
     def _live_migrate(self, server_id, target_host, state,
                       volume_backed=False):
@@ -97,7 +76,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             if (live_migration['instance_uuid'] == server_id):
                 msg += "\n%s" % live_migration
         msg += "]"
-        self.assertEqual(target_host, self._get_host_for_server(server_id),
+        self.assertEqual(target_host, self.get_host_for_server(server_id),
                          msg)
 
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
@@ -114,8 +93,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         # Live migrate an instance to another host
         server_id = self.create_test_server(wait_until="ACTIVE",
                                             volume_backed=volume_backed)['id']
-        source_host = self._get_host_for_server(server_id)
-        destination_host = self._get_host_other_than(source_host)
+        source_host = self.get_host_for_server(server_id)
+        destination_host = self.get_host_other_than(server_id)
 
         if state == 'PAUSED':
             self.admin_servers_client.pause_server(server_id)
@@ -158,8 +137,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     def test_iscsi_volume(self):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
-        actual_host = self._get_host_for_server(server_id)
-        target_host = self._get_host_other_than(actual_host)
+        target_host = self.get_host_other_than(server_id)
 
         volume = self.create_volume()
 
@@ -174,11 +152,11 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         server = self.admin_servers_client.show_server(server_id)['server']
         volume_id2 = server["os-extended-volumes:volumes_attached"][0]["id"]
 
-        self.assertEqual(target_host, self._get_host_for_server(server_id))
+        self.assertEqual(target_host, self.get_host_for_server(server_id))
         self.assertEqual(volume_id1, volume_id2)
 
 
-class LiveBlockMigrationRemoteConsolesV26TestJson(LiveBlockMigrationTestJSON):
+class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
     min_microversion = '2.6'
     max_microversion = 'latest'
 
@@ -201,8 +179,8 @@ class LiveBlockMigrationRemoteConsolesV26TestJson(LiveBlockMigrationTestJSON):
         hints = {'different_host': server01_id}
         server02_id = self.create_test_server(scheduler_hints=hints,
                                               wait_until='ACTIVE')['id']
-        host01_id = self._get_host_for_server(server01_id)
-        host02_id = self._get_host_for_server(server02_id)
+        host01_id = self.get_host_for_server(server01_id)
+        host02_id = self.get_host_for_server(server02_id)
         self.assertNotEqual(host01_id, host02_id)
 
         # At this step we have 2 instances on different hosts, both with
@@ -216,7 +194,7 @@ class LiveBlockMigrationRemoteConsolesV26TestJson(LiveBlockMigrationTestJSON):
         self._migrate_server_to(server01_id, host02_id)
         waiters.wait_for_server_status(self.servers_client,
                                        server01_id, 'ACTIVE')
-        self.assertEqual(host02_id, self._get_host_for_server(server01_id))
+        self.assertEqual(host02_id, self.get_host_for_server(server01_id))
         self._verify_console_interaction(server01_id)
         # At this point, both instances have a valid serial console
         # connection, which means the ports got updated.
@@ -252,7 +230,7 @@ class LiveBlockMigrationRemoteConsolesV26TestJson(LiveBlockMigrationTestJSON):
         self.assertIn(data, console_output)
 
 
-class LiveAutoBlockMigrationV225TestJSON(LiveBlockMigrationTestJSON):
+class LiveAutoBlockMigrationV225Test(LiveMigrationTest):
     min_microversion = '2.25'
     max_microversion = 'latest'
     block_migration = 'auto'
