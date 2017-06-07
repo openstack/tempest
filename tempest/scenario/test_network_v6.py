@@ -171,7 +171,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         # Turn on 2nd NIC for Cirros when dualnet
         if dualnet:
-            network, network_v6 = net_list
+            _, network_v6 = net_list
             self.turn_nic6_on(sshv4_1, sid1, network_v6['id'])
             self.turn_nic6_on(sshv4_2, sid2, network_v6['id'])
 

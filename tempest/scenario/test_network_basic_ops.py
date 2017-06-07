@@ -212,7 +212,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.servers, mtu=mtu)
 
     def _disassociate_floating_ips(self):
-        floating_ip, server = self.floating_ip_tuple
+        floating_ip, _ = self.floating_ip_tuple
         self._disassociate_floating_ip(floating_ip)
         self.floating_ip_tuple = Floating_IP_tuple(
             floating_ip, None)
@@ -287,7 +287,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                               "guest after %s sec"
                                               % CONF.network.build_timeout)
 
-        num, new_nic = self.diff_list[0]
+        _, new_nic = self.diff_list[0]
         ssh_client.exec_command("sudo ip addr add %s/%s dev %s" % (
                                 new_port['fixed_ips'][0]['ip_address'],
                                 CONF.network.project_network_mask_bits,
@@ -630,7 +630,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 admin_state_up attribute of instance port to True
         """
         self._setup_network_and_servers()
-        floating_ip, server = self.floating_ip_tuple
+        _, server = self.floating_ip_tuple
         server_id = server['id']
         port_id = self.os_admin.ports_client.list_ports(
             device_id=server_id)['ports'][0]['id']
