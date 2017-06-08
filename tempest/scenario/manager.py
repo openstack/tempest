@@ -195,7 +195,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         tenant_network = self.get_tenant_network()
 
-        body, servers = compute.create_test_server(
+        body, _ = compute.create_test_server(
             clients,
             tenant_network=tenant_network,
             wait_until=wait_until,
