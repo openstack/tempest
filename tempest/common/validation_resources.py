@@ -80,10 +80,23 @@ def create_validation_resources(os, validation_resources=None):
             validation_data['security_group'] = \
                 create_ssh_security_group(os, add_rule)
         if validation_resources['floating_ip']:
-            floating_client = os.compute_floating_ips_client
-            validation_data.update(
-                floating_client.create_floating_ip(
-                    pool=CONF.network.floating_network_name))
+            if CONF.service_available.neutron:
+                floatingip = os.floating_ips_client.create_floatingip(
+                    floating_network_id=CONF.network.public_network_id)
+                # validation_resources['floating_ip'] has historically looked
+                # like a compute API POST /os-floating-ips response, so we need
+                # to mangle it a bit for a Neutron response with different
+                # fields.
+                validation_data['floating_ip'] = floatingip['floatingip']
+                validation_data['floating_ip']['ip'] = (
+                    floatingip['floatingip']['floating_ip_address'])
+            else:
+                # NOTE(mriedem): The os-floating-ips compute API was deprecated
+                # in the 2.36 microversion. Any tests for CRUD operations on
+                # floating IPs using the compute API should be capped at 2.35.
+                validation_data.update(
+                    os.compute_floating_ips_client.create_floating_ip(
+                        pool=CONF.network.floating_network_name))
     return validation_data
 
 
