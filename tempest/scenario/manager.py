@@ -1259,6 +1259,17 @@ class EncryptionScenarioTest(ScenarioTest):
             type_id, provider=provider, key_size=key_size, cipher=cipher,
             control_location=control_location)['encryption']
 
+    def create_encrypted_volume(self, encryption_provider, volume_type,
+                                key_size=256, cipher='aes-xts-plain64',
+                                control_location='front-end'):
+        volume_type = self.create_volume_type(name=volume_type)
+        self.create_encryption_type(type_id=volume_type['id'],
+                                    provider=encryption_provider,
+                                    key_size=key_size,
+                                    cipher=cipher,
+                                    control_location=control_location)
+        return self.create_volume(volume_type=volume_type['name'])
+
 
 class ObjectStorageScenarioTest(ScenarioTest):
     """Provide harness to do Object Storage scenario tests.

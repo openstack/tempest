@@ -24,7 +24,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestVolumeBootPattern(manager.ScenarioTest):
+class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
     # Boot from volume scenario is quite slow, and needs extra
     # breathing room to get through deletes in the time allotted.
@@ -227,3 +227,26 @@ class TestVolumeBootPattern(manager.ScenarioTest):
 
         # delete instance
         self._delete_server(instance)
+
+    @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
+    @testtools.skipIf(CONF.volume.storage_protocol.lower() in ['ceph', 'nfs'],
+                      'Currently, {} does not support volume encryption'
+                      .format(CONF.volume.storage_protocol))
+    @test.services('compute', 'volume')
+    def test_boot_server_from_encrypted_volume_luks(self):
+        # Create an encrypted volume
+        volume = self.create_encrypted_volume('nova.volume.encryptors.'
+                                              'luks.LuksEncryptor',
+                                              volume_type='luks')
+
+        self.volumes_client.set_bootable_volume(volume['id'], bootable=True)
+
+        # Boot a server from the encrypted volume
+        server = self._boot_instance_from_resource(
+            source_id=volume['id'],
+            source_type='volume',
+            delete_on_termination=False)
+
+        server_info = self.servers_client.show_server(server['id'])['server']
+        created_volume = server_info['os-extended-volumes:volumes_attached']
+        self.assertEqual(volume['id'], created_volume[0]['id'])
