@@ -101,7 +101,7 @@ class AccountTest(base.BaseObjectTest):
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-        self.assertEqual(len(container_list), 0)
+        self.assertEmpty(container_list)
 
     @decorators.idempotent_id('1c7efa35-e8a2-4b0b-b5ff-862c7fd83704')
     def test_list_containers_with_format_json(self):
@@ -162,7 +162,7 @@ class AccountTest(base.BaseObjectTest):
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
 
-        self.assertEqual(len(container_list), 0)
+        self.assertEmpty(container_list)
 
         params = {'marker': self.containers[self.containers_count // 2]}
         resp, container_list = \
@@ -182,7 +182,7 @@ class AccountTest(base.BaseObjectTest):
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
-        self.assertEqual(len(container_list), 0)
+        self.assertEmpty(container_list)
 
         params = {'end_marker': self.containers[self.containers_count // 2]}
         resp, container_list = \

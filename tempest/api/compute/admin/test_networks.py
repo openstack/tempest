@@ -62,4 +62,4 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
             self.assertIn(configured_network, [x['label'] for x in networks])
         else:
             network_labels = [x['label'] for x in networks]
-            self.assertGreaterEqual(len(network_labels), 1)
+            self.assertNotEmpty(network_labels)

@@ -49,7 +49,7 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
     @decorators.idempotent_id('e335be47-b9a1-46fd-be30-0874c0b751e6')
     def test_list_agents_non_admin(self):
         body = self.agents_client.list_agents()
-        self.assertEqual(len(body["agents"]), 0)
+        self.assertEmpty(body["agents"])
 
     @decorators.idempotent_id('869bc8e8-0fda-4a30-9b71-f8a7cf58ca9f')
     def test_show_agent(self):

@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools import matchers
-
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest.lib import decorators
@@ -56,7 +54,7 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # List volume transfers, the result should be greater than
         # or equal to 1
         body = self.client.list_volume_transfers()['transfers']
-        self.assertThat(len(body), matchers.GreaterThan(0))
+        self.assertNotEmpty(body)
 
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(

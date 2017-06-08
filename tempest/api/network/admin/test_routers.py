@@ -134,7 +134,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.assertEqual(len(list_body['ports']), 1)
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
-        self.assertGreaterEqual(len(fixed_ips), 1)
+        self.assertNotEmpty(fixed_ips)
         # Assert that all of the IPs from the router gateway port
         # are allocated from a valid public subnet.
         public_net_body = self.admin_networks_client.show_network(

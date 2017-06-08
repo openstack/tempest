@@ -52,7 +52,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
 
     def _get_host_name(self):
         hosts = self.hosts_client.list_hosts()['hosts']
-        self.assertGreaterEqual(len(hosts), 1)
+        self.assertNotEmpty(hosts)
         computes = [x for x in hosts if x['service'] == 'compute']
         return computes[0]['host_name']
 
