@@ -118,9 +118,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                     name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
 
-    @testtools.skipUnless(CONF.service_available.glance,
-                          "Glance is not available")
     @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
+    @test.services('image')
     def test_bootable_volume_backup_and_restore(self):
         # Create volume from image
         img_uuid = CONF.compute.image_ref

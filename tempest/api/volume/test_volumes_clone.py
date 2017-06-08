@@ -13,11 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.volume import base
 from tempest import config
 from tempest.lib import decorators
+from tempest import test
 
 
 CONF = config.CONF
@@ -47,9 +46,8 @@ class VolumesCloneTest(base.BaseVolumeTest):
         self.assertEqual(volume['source_volid'], src_vol['id'])
         self.assertEqual(volume['size'], src_size + 1)
 
-    @testtools.skipUnless(CONF.service_available.glance,
-                          "Glance is not available")
     @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
+    @test.services('image')
     def test_create_from_bootable_volume(self):
         # Create volume from image
         img_uuid = CONF.compute.image_ref
