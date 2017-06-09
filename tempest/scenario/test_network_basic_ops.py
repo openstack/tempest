@@ -295,7 +295,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ssh_client.exec_command("sudo ip link set %s up" % new_nic)
 
     def _get_server_nics(self, ssh_client):
-        reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+):')
+        reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+)[@]?.*:')
         ipatxt = ssh_client.exec_command("ip address")
         return reg.findall(ipatxt)
 
