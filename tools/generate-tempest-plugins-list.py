@@ -65,7 +65,7 @@ r = requests.get(url)
 # json library won't choke.
 projects = sorted(filter(is_in_openstack_namespace, json.loads(r.text[4:])))
 
-found_plugins = filter(has_tempest_plugin, projects)
+found_plugins = list(filter(has_tempest_plugin, projects))
 
 # Every element of the found_plugins list begins with "openstack/".
 # We drop those initial 10 octets when printing the list.
