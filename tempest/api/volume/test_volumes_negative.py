@@ -170,7 +170,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('f5e56b0a-5d02-43c1-a2a7-c9b792c2e3f6')
     @test.services('compute')
     def test_attach_volumes_with_nonexistent_volume_id(self):
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
 
         self.assertRaises(lib_exc.NotFound,
                           self.volumes_client.attach_volume,

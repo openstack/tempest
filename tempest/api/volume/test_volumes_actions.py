@@ -38,7 +38,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @test.services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Create a server
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
         # Volume is attached and detached successfully from an instance
         self.volumes_client.attach_volume(self.volume['id'],
                                           instance_uuid=server['id'],
@@ -69,7 +69,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @test.services('compute')
     def test_get_volume_attachment(self):
         # Create a server
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
         # Verify that a volume's attachment information is retrieved
         self.volumes_client.attach_volume(self.volume['id'],
                                           instance_uuid=server['id'],

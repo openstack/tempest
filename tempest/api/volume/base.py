@@ -217,7 +217,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                 cls.snapshots_client.wait_for_resource_deletion,
                 snapshot)
 
-    def create_server(self, **kwargs):
+    def create_server(self, wait_until='ACTIVE', **kwargs):
         name = kwargs.pop(
             'name',
             data_utils.rand_name(self.__class__.__name__ + '-instance'))
@@ -227,6 +227,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             self.os_primary,
             tenant_network=tenant_network,
             name=name,
+            wait_until=wait_until,
             **kwargs)
 
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

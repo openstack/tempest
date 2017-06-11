@@ -39,7 +39,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     @test.services('compute')
     def test_snapshot_create_delete_with_volume_in_use(self):
         # Create a test instance
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
         self.attach_volume(server['id'], self.volume_origin['id'])
 
         # Snapshot a volume which attached to an instance with force=False
@@ -65,7 +65,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         snapshot1 = self.create_snapshot(self.volume_origin['id'])
 
         # Create a server and attach it
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
         self.attach_volume(server['id'], self.volume_origin['id'])
 
         # Now that the volume is attached, create another snapshots
