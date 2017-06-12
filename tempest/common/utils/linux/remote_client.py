@@ -93,12 +93,12 @@ class RemoteClient(remote_client.RemoteClient):
     def get_nic_name_by_mac(self, address):
         cmd = "ip -o link | awk '/%s/ {print $2}'" % address
         nic = self.exec_command(cmd)
-        return nic.strip().strip(":").lower()
+        return nic.strip().strip(":").split('@')[0].lower()
 
     def get_nic_name_by_ip(self, address):
         cmd = "ip -o addr | awk '/%s/ {print $2}'" % address
         nic = self.exec_command(cmd)
-        return nic.strip().strip(":").lower()
+        return nic.strip().strip(":").split('@')[0].lower()
 
     def get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
