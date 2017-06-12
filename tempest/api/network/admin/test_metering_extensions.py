@@ -74,7 +74,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
         # Asserting that the label is not found in list after deletion
         labels = self.admin_metering_labels_client.list_metering_labels(
             id=metering_label_id)
-        self.assertEqual(len(labels['metering_labels']), 0)
+        self.assertEmpty(labels['metering_labels'])
 
     def _delete_metering_label_rule(self, metering_label_rule_id):
         client = self.admin_metering_label_rules_client

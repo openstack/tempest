@@ -822,7 +822,7 @@ class NetworkScenarioTest(ScenarioTest):
     def _get_network_by_name(self, network_name):
         net = self.os_admin.networks_client.list_networks(
             name=network_name)['networks']
-        self.assertNotEqual(len(net), 0,
+        self.assertNotEmpty(net,
                             "Unable to get network by name: %s" % network_name)
         return net[0]
 

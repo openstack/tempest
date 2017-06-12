@@ -50,7 +50,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
         flavor_access = (self.admin_flavors_client.list_flavor_access(
                          flavor['id'])['flavor_access'])
-        self.assertEqual(len(flavor_access), 0, str(flavor_access))
+        self.assertEmpty(flavor_access)
 
     @decorators.idempotent_id('59e622f6-bdf6-45e3-8ba8-fedad905a6b4')
     def test_flavor_access_add_remove(self):

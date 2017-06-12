@@ -414,7 +414,7 @@ class ObjectTest(base.BaseObjectTest):
             self.container_name,
             object_name)
         self.assertIn('x-object-manifest', resp)
-        self.assertNotEqual(len(resp['x-object-manifest']), 0)
+        self.assertNotEmpty(resp['x-object-manifest'])
 
     @decorators.idempotent_id('0dbbe89c-6811-4d84-a2df-eca2bdd40c0e')
     def test_update_object_metadata_with_x_object_metakey(self):
@@ -521,10 +521,10 @@ class ObjectTest(base.BaseObjectTest):
         self.assertTrue(resp['etag'].endswith('\"'))
         self.assertTrue(resp['etag'].strip('\"').isalnum())
         self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
-        self.assertNotEqual(len(resp['content-type']), 0)
+        self.assertNotEmpty(resp['content-type'])
         self.assertTrue(re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*",
                                  resp['x-trans-id']))
-        self.assertNotEqual(len(resp['date']), 0)
+        self.assertNotEmpty(resp['date'])
         self.assertEqual(resp['accept-ranges'], 'bytes')
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s' % (self.container_name, object_name))
@@ -613,10 +613,10 @@ class ObjectTest(base.BaseObjectTest):
         self.assertTrue(resp['etag'].endswith('\"'))
         self.assertTrue(resp['etag'].strip('\"').isalnum())
         self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
-        self.assertNotEqual(len(resp['content-type']), 0)
+        self.assertNotEmpty(resp['content-type'])
         self.assertTrue(re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*",
                                  resp['x-trans-id']))
-        self.assertNotEqual(len(resp['date']), 0)
+        self.assertNotEmpty(resp['date'])
         self.assertEqual(resp['accept-ranges'], 'bytes')
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s' % (self.container_name, object_name))
