@@ -108,7 +108,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         volume = self.create_volume()
         self.addCleanup(self.volumes_client.delete_volume,
                         volume['id'])
-        server = self.create_server(wait_until='ACTIVE')
+        server = self.create_server()
         # Attach volume to instance
         self.attach_volume(server['id'], volume['id'])
         # Create backup using force flag

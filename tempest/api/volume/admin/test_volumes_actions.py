@@ -70,7 +70,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
     @test.services('compute')
     def test_force_detach_volume(self):
         # Create a server and a volume
-        server_id = self.create_server(wait_until='ACTIVE')['id']
+        server_id = self.create_server()['id']
         volume_id = self.create_volume()['id']
 
         # Attach volume
