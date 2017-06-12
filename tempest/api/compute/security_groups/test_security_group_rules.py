@@ -159,8 +159,8 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         # Get rules of the created Security Group
         rules = self.security_groups_client.show_security_group(
             securitygroup_id)['security_group']['rules']
-        self.assertTrue(any([i for i in rules if i['id'] == rule1_id]))
-        self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
+        self.assertNotEmpty([i for i in rules if i['id'] == rule1_id])
+        self.assertNotEmpty([i for i in rules if i['id'] == rule2_id])
 
     @decorators.idempotent_id('fc5c5acf-2091-43a6-a6ae-e42760e9ffaf')
     @test.services('network')

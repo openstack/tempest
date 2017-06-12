@@ -44,12 +44,12 @@ class ListImagesTestJSON(base.BaseV2ComputeTest):
     def test_list_images(self):
         # The list of all images should contain the image
         images = self.client.list_images()['images']
-        found = any([i for i in images if i['id'] == self.image_ref])
-        self.assertTrue(found)
+        found = [i for i in images if i['id'] == self.image_ref]
+        self.assertNotEmpty(found)
 
     @decorators.idempotent_id('9f94cb6b-7f10-48c5-b911-a0b84d7d4cd6')
     def test_list_images_with_detail(self):
         # Detailed list of all images should contain the expected images
         images = self.client.list_images(detail=True)['images']
-        found = any([i for i in images if i['id'] == self.image_ref])
-        self.assertTrue(found)
+        found = [i for i in images if i['id'] == self.image_ref]
+        self.assertNotEmpty(found)
