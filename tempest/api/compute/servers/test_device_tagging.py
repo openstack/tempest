@@ -84,10 +84,14 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                 if d['mac'] == self.net_2_200_mac:
                     self.assertEqual(d['tags'], ['net-2-200'])
 
-        found_devices = [d['tags'][0] for d in md_dict['devices']]
-        self.assertItemsEqual(found_devices, ['port-1', 'port-2', 'net-1',
-                                              'net-2-100', 'net-2-200',
-                                              'boot', 'other'])
+            # A hypervisor may present multiple paths to a tagged disk, so
+            # there may be duplicated tags in the metadata, use set() to
+            # remove duplicated tags.
+            found_devices = [d['tags'][0] for d in md_dict['devices']]
+            self.assertEqual(set(found_devices), set(['port-1', 'port-2',
+                                                      'net-1', 'net-2-100',
+                                                      'net-2-200', 'boot',
+                                                      'other']))
 
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @test.services('network', 'volume', 'image')
