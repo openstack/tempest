@@ -72,7 +72,13 @@ r = urllib.urlopen(url)
 # json library won't choke.
 projects = sorted(filter(is_in_openstack_namespace, json.loads(r.read()[4:])))
 
-found_plugins = list(filter(has_tempest_plugin, projects))
+# Retrieve projects having no deb, ui or spec namespace as those namespaces
+# do not contains tempest plugins.
+projects_list = [i for i in projects if not (i.startswith('openstack/deb-') or
+                                             i.endswith('-ui') or
+                                             i.endswith('-specs'))]
+
+found_plugins = list(filter(has_tempest_plugin, projects_list))
 
 # Every element of the found_plugins list begins with "openstack/".
 # We drop those initial 10 octets when printing the list.
