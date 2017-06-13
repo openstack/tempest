@@ -126,8 +126,8 @@ they are found.
 
 
 def print_stats(items, fname, verbose=False):
-    errors = len(filter(lambda x: x.level == "ERROR", items))
-    traces = len(filter(lambda x: x.level == "TRACE", items))
+    errors = len([x for x in items if x.level == "ERROR"])
+    traces = len([x for x in items if x.level == "TRACE"])
     print("%d ERRORS found in %s" % (errors, fname))
     print("%d TRACES found in %s" % (traces, fname))
 
