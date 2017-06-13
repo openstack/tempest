@@ -58,7 +58,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         hosts = self.client.list_hosts()['hosts']
 
         hosts = [host for host in hosts if host['service'] == 'compute']
-        self.assertGreaterEqual(len(hosts), 1)
+        self.assertNotEmpty(hosts)
 
         for host in hosts:
             hostname = host['host_name']
