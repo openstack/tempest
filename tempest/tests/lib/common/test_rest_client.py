@@ -276,6 +276,11 @@ class TestRestClientParseRespJSON(BaseRestClientTestClass):
         body = self.rest_client._parse_resp(json.dumps(self.null_dict))
         self.assertEqual(self.null_dict, body)
 
+    def test_parse_empty_list(self):
+        empty_list = []
+        body = self.rest_client._parse_resp(json.dumps(empty_list))
+        self.assertEqual(empty_list, body)
+
 
 class TestRestClientErrorCheckerJSON(base.TestCase):
     c_type = "application/json"
