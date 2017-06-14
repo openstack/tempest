@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new config option 'manage_snapshot_ref' is added in the volume section,
+    to specify snapshot ref parameter for different storage backend drivers
+    when managing an existing snapshot. By default it is set to fit the LVM
+    driver.
