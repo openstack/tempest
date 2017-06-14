@@ -54,8 +54,8 @@ class ObjectExpiryTest(base.BaseObjectTest):
         # actually expire, so figure out how many secs in the future that is.
         sleepy_time = int(resp['x-delete-at']) - int(time.time())
         sleepy_time = sleepy_time if sleepy_time > 0 else 0
-        resp, body = self.object_client.get_object(self.container_name,
-                                                   self.object_name)
+        resp, _ = self.object_client.get_object(self.container_name,
+                                                self.object_name)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 

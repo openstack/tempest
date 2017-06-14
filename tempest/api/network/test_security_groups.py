@@ -83,7 +83,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
     def test_create_list_update_show_delete_security_group(self):
-        group_create_body, name = self._create_security_group()
+        group_create_body, _ = self._create_security_group()
 
         # List security groups and verify if created group is there in response
         list_body = self.security_groups_client.list_security_groups()

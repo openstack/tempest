@@ -46,7 +46,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        resp, _ = cls.account_client.create_update_or_delete_account_metadata(
+        cls.account_client.create_update_or_delete_account_metadata(
             delete_metadata=cls.metadata)
 
         cls.delete_containers()

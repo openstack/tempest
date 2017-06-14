@@ -143,7 +143,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('99b297f6-2b5d-47c7-97a9-8b6bb4f91042')
     def test_assign_user_role_for_non_existent_role(self):
         # Attempt to assign a non existent role to user should fail
-        (user, tenant, role) = self._get_role_params()
+        (user, tenant, _) = self._get_role_params()
         non_existent_role = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound,
                           self.roles_client.create_user_role_on_project,
@@ -153,7 +153,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('b2285aaa-9e76-4704-93a9-7a8acd0a6c8f')
     def test_assign_user_role_for_non_existent_tenant(self):
         # Attempt to assign a role on a non existent tenant should fail
-        (user, tenant, role) = self._get_role_params()
+        (user, _, role) = self._get_role_params()
         non_existent_tenant = data_utils.rand_uuid_hex()
         self.assertRaises(lib_exc.NotFound,
                           self.roles_client.create_user_role_on_project,
@@ -244,7 +244,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('682adfb2-fd5f-4b0a-a9ca-322e9bebb907')
     def test_list_user_roles_request_without_token(self):
         # Request to list user's roles without a valid token should fail
-        (user, tenant, role) = self._get_role_params()
+        (user, tenant, _) = self._get_role_params()
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         try:

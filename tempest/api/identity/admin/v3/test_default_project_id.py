@@ -79,7 +79,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         admin_client = clients.Manager(credentials=creds)
 
         # verify the user's token and see that it is scoped to the project
-        token, auth_data = admin_client.auth_provider.get_auth()
+        token, _ = admin_client.auth_provider.get_auth()
         result = admin_client.identity_v3_client.show_token(token)['token']
         self.assertEqual(result['project']['domain']['id'], dom_id)
         self.assertEqual(result['project']['id'], proj_id)

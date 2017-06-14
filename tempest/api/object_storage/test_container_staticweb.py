@@ -124,9 +124,8 @@ class StaticWebTest(base.BaseObjectTest):
 
         # test GET on http://account_url/container_name
         # we should retrieve a listing of objects
-        resp, body = self.account_client.request("GET",
-                                                 self.container_name,
-                                                 headers={})
+        _, body = self.account_client.request("GET", self.container_name,
+                                              headers={})
         self.assertIn(self.object_name, body.decode())
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
         self.assertIn(css, body.decode())

@@ -65,8 +65,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_delete_object_without_using_creds(self):
         # create object
         object_name = data_utils.rand_name(name='Object')
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, 'data')
+        self.object_client.create_object(self.container_name, object_name,
+                                         'data')
         # trying to delete object with empty headers
         # X-Auth-Token is not provided
         self.object_client.auth_provider.set_alt_auth_data(
@@ -134,7 +134,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # attempt to read object using non-authorized user
         # update X-Container-Read metadata ACL
         cont_headers = {'X-Container-Read': 'badtenant:baduser'}
-        resp_meta, body = self.container_client.update_container_metadata(
+        resp_meta, _ = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')
@@ -158,7 +158,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # attempt to write object using non-authorized user
         # update X-Container-Write metadata ACL
         cont_headers = {'X-Container-Write': 'badtenant:baduser'}
-        resp_meta, body = self.container_client.update_container_metadata(
+        resp_meta, _ = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')
@@ -183,7 +183,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read':
                         tenant_name + ':' + username,
                         'X-Container-Write': ''}
-        resp_meta, body = self.container_client.update_container_metadata(
+        resp_meta, _ = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')
@@ -208,7 +208,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read':
                         tenant_name + ':' + username,
                         'X-Container-Write': ''}
-        resp_meta, body = self.container_client.update_container_metadata(
+        resp_meta, _ = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertHeaders(resp_meta, 'Container', 'POST')

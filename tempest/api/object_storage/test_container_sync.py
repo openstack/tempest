@@ -90,8 +90,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             cont_client = [self.clients[c][0] for c in cont]
             obj_client = [self.clients[c][1] for c in cont]
             headers = make_headers(cont[1], cont_client[1])
-            resp, body = \
-                cont_client[0].put(str(cont[0]), body=None, headers=headers)
+            cont_client[0].put(str(cont[0]), body=None, headers=headers)
             # create object in container
             object_name = data_utils.rand_name(name='TestSyncObject')
             data = object_name[::-1].encode()  # Raw data, we need bytes

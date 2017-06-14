@@ -128,7 +128,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         url = self._get_temp_url(self.container_name,
                                  self.object_name, "GET",
                                  expires, key2)
-        resp, body = self.object_client.get(url)
+        _, body = self.object_client.get(url)
         self.assertEqual(body, self.content)
 
     @decorators.idempotent_id('9b08dade-3571-4152-8a4f-a4f2a873a735')
@@ -168,7 +168,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  expires, self.key)
 
         # Testing a HEAD on this Temp URL
-        resp, body = self.object_client.head(url)
+        resp, _ = self.object_client.head(url)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @decorators.idempotent_id('9d9cfd90-708b-465d-802c-e4a8090b823d')

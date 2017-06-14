@@ -27,7 +27,7 @@ class ContainerTest(base.BaseObjectTest):
     @decorators.idempotent_id('92139d73-7819-4db1-85f8-3f2f22a8d91f')
     def test_create_container(self):
         container_name = data_utils.rand_name(name='TestContainer')
-        resp, body = self.container_client.create_container(container_name)
+        resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 

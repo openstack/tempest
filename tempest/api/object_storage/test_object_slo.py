@@ -127,7 +127,7 @@ class ObjectSloTest(base.BaseObjectTest):
         # list static large object metadata using multipart manifest
         object_name = self._create_large_object()
 
-        resp, body = self.object_client.list_object_metadata(
+        resp, _ = self.object_client.list_object_metadata(
             self.container_name,
             object_name)
 
@@ -155,7 +155,7 @@ class ObjectSloTest(base.BaseObjectTest):
         object_name = self._create_large_object()
 
         params_del = {'multipart-manifest': 'delete'}
-        resp, body = self.object_client.delete_object(
+        resp, _ = self.object_client.delete_object(
             self.container_name,
             object_name,
             params=params_del)
