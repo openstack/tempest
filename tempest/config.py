@@ -768,6 +768,12 @@ VolumeGroup = [
                      "It contains two elements, the first is ref type "
                      "(like 'source-name', 'source-id', etc), the second is "
                      "volume name template used in storage backend"),
+    cfg.ListOpt('manage_snapshot_ref',
+                default=['source-name', '_snapshot-%s'],
+                help="A reference to existing snapshot for snapshot manage. "
+                     "It contains two elements, the first is ref type "
+                     "(like 'source-name', 'source-id', etc), the second is "
+                     "snapshot name template used in storage backend"),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
