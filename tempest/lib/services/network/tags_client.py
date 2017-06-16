@@ -27,14 +27,10 @@ class TagsClient(base.BaseNetworkClient):
         For more information, please refer to the official API reference:
         http://developer.openstack.org/api-ref/networking/v2/index.html#add-a-tag
         """
-        # NOTE(felipemonteiro): Cannot use ``update_resource`` method because
-        # this API requires self.put but returns 201 instead of 200 expected
-        # by ``update_resource``.
-        uri = '%s/%s/%s/tags/%s' % (
-            self.uri_prefix, resource_type, resource_id, tag)
-        resp, _ = self.put(uri, json.dumps({}))
-        self.expected_success(201, resp.status)
-        return rest_client.ResponseBody(resp)
+        uri = '/%s/%s/tags/%s' % (resource_type, resource_id, tag)
+        return self.update_resource(
+            uri, json.dumps({}), expect_response_code=201,
+            expect_empty_body=True)
 
     def check_tag_existence(self, resource_type, resource_id, tag):
         """Confirm that a given tag is set on the resource.
