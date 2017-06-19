@@ -26,12 +26,8 @@
 import json
 import re
 
-try:
-    # For Python 3.0 and later
-    import urllib
-except ImportError:
-    # Fall back to Python 2's urllib2
-    import urllib2 as urllib
+from six.moves import urllib
+
 
 url = 'https://review.openstack.org/projects/'
 
@@ -55,18 +51,18 @@ def is_in_openstack_namespace(proj):
 
 def has_tempest_plugin(proj):
     try:
-        r = urllib.urlopen("https://git.openstack.org/cgit/%s/plain/setup.cfg"
-                           % proj)
-    except urllib.HTTPError as err:
+        r = urllib.request.urlopen(
+            "https://git.openstack.org/cgit/%s/plain/setup.cfg" % proj)
+    except urllib.error.HTTPError as err:
         if err.code == 404:
             return False
     p = re.compile('^tempest\.test_plugins', re.M)
-    if p.findall(r.read()):
+    if p.findall(r.read().decode('utf-8')):
         return True
     else:
         False
 
-r = urllib.urlopen(url)
+r = urllib.request.urlopen(url)
 # Gerrit prepends 4 garbage octets to the JSON, in order to counter
 # cross-site scripting attacks.  Therefore we must discard it so the
 # json library won't choke.
