@@ -204,6 +204,19 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                         except Exception:
                             LOG.exception('Deleting server %s failed',
                                           server['id'])
+                    for server in servers:
+                        # NOTE(artom) If the servers were booted with volumes
+                        # and with delete_on_termination=False we need to wait
+                        # for the servers to go away before proceeding with
+                        # cleanup, otherwise we'll attempt to delete the
+                        # volumes while they're still attached to servers that
+                        # are in the process of being deleted.
+                        try:
+                            waiters.wait_for_server_termination(
+                                clients.servers_client, server['id'])
+                        except Exception:
+                            LOG.exception('Server %s failed to delete in time',
+                                          server['id'])
 
     return body, servers
 
