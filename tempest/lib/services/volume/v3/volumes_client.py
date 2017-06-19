@@ -18,11 +18,9 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 from tempest.lib.services.volume.v2 import volumes_client
-from tempest.lib.services.volume.v3 import base_client
 
 
-class VolumesClient(base_client.BaseClient,
-                    volumes_client.VolumesClient):
+class VolumesClient(volumes_client.VolumesClient):
     """Client class to send CRUD Volume V3 API requests"""
     api_version = "v3"
 

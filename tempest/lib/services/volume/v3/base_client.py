@@ -13,34 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.lib.common import api_version_utils
-from tempest.lib.common import rest_client
+from debtcollector import moves
 
-VOLUME_MICROVERSION = None
+from tempest.lib.services.volume import base_client
 
 
-class BaseClient(rest_client.RestClient):
-    """Base class to handle Cinder v3 client microversion support."""
-    api_version = 'v3'
-    api_microversion_header_name = 'Openstack-Api-Version'
-
-    def get_headers(self, accept_type=None, send_type=None):
-        headers = super(BaseClient, self).get_headers(
-            accept_type=accept_type, send_type=send_type)
-        if VOLUME_MICROVERSION:
-            headers[self.api_microversion_header_name] = ('volume %s' %
-                                                          VOLUME_MICROVERSION)
-        return headers
-
-    def request(self, method, url, extra_headers=False, headers=None,
-                body=None, chunked=False):
-
-        resp, resp_body = super(BaseClient, self).request(
-            method, url, extra_headers, headers, body, chunked)
-        if (VOLUME_MICROVERSION and
-            VOLUME_MICROVERSION != api_version_utils.LATEST_MICROVERSION):
-            api_version_utils.assert_version_header_matches_request(
-                self.api_microversion_header_name,
-                'volume %s' % VOLUME_MICROVERSION,
-                resp)
-        return resp, resp_body
+BaseClient = moves.moved_class(base_client.BaseClient, 'BaseClient', __name__,
+                               version="Pike", removal_version='?')
+BaseClient.api_version = 'v3'

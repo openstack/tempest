@@ -18,10 +18,11 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.volume import versions as schema
 from tempest.lib.common import rest_client
-from tempest.lib.services.volume.v3 import base_client
+from tempest.lib.services.volume import base_client
 
 
 class VersionsClient(base_client.BaseClient):
+    api_version = 'v3'
 
     def list_versions(self):
         """List API versions
