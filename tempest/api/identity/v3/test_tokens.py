@@ -15,11 +15,38 @@
 
 from oslo_utils import timeutils
 import six
+
 from tempest.api.identity import base
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 
 class TokensV3Test(base.BaseIdentityV3Test):
+
+    @decorators.idempotent_id('a9512ac3-3909-48a4-b395-11f438e16260')
+    def test_validate_token(self):
+        creds = self.os_primary.credentials
+        user_id = creds.user_id
+        username = creds.username
+        password = creds.password
+        user_domain_id = creds.user_domain_id
+        # GET and validate token
+        subject_token, token_body = self.non_admin_token.get_token(
+            user_id=user_id,
+            username=username,
+            user_domain_id=user_domain_id,
+            password=password,
+            auth_data=True)
+        authenticated_token = self.non_admin_client.show_token(
+            subject_token)['token']
+        # sanity checking to make sure they are indeed the same token
+        self.assertEqual(authenticated_token, token_body)
+        # test to see if token has been properly authenticated
+        self.assertEqual(authenticated_token['user']['id'], user_id)
+        self.assertEqual(authenticated_token['user']['name'], username)
+        self.non_admin_client.delete_token(subject_token)
+        self.assertRaises(
+            lib_exc.NotFound, self.non_admin_client.show_token, subject_token)
 
     @decorators.idempotent_id('6f8e4436-fc96-4282-8122-e41df57197a9')
     def test_create_token(self):
