@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -44,4 +45,25 @@ class IdentityClient(rest_client.RestClient):
         resp, body = self.get('/extensions')
         self.expected_success(200, resp.status)
         body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_endpoints_for_token(self, token_id):
+        """List endpoints for a token """
+        resp, body = self.get("tokens/%s/endpoints" % token_id)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def check_token_existence(self, token_id, **params):
+        """Validates a token and confirms that it belongs to a tenant.
+
+        For a full list of available parameters, please refer to the
+        official API reference:
+        https://developer.openstack.org/api-ref/identity/v2-admin/#validate-token
+        """
+        url = "tokens/%s" % token_id
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.head(url)
+        self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
