@@ -15,8 +15,10 @@
 
 import copy
 
+import mock
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.services.network import base as network_base
 from tempest.lib.services.network import security_groups_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -89,15 +91,22 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
 
     def _test_create_security_group(self, bytes_body=False):
         kwargs = {'name': 'fake-security-group-name'}
-        self.check_service_client_function(
-            self.client.create_security_group,
-            'tempest.lib.common.rest_client.RestClient.post',
-            self.FAKE_SECURITY_GROUP,
-            bytes_body,
-            status=201,
-            mock_args=['v2.0/security-groups',
-                       json.dumps({"security_group": kwargs})],
-            **kwargs)
+        payload = json.dumps({"security_group": kwargs}, sort_keys=True)
+        json_dumps = json.dumps
+
+        # NOTE: Use sort_keys for json.dumps so that the expected and actual
+        # payloads are guaranteed to be identical for mock_args assert check.
+        with mock.patch.object(network_base.json, 'dumps') as mock_dumps:
+            mock_dumps.side_effect = lambda d: json_dumps(d, sort_keys=True)
+
+            self.check_service_client_function(
+                self.client.create_security_group,
+                'tempest.lib.common.rest_client.RestClient.post',
+                self.FAKE_SECURITY_GROUP,
+                bytes_body,
+                status=201,
+                mock_args=['v2.0/security-groups', payload],
+                **kwargs)
 
     def _test_show_security_group(self, bytes_body=False):
         self.check_service_client_function(
@@ -113,15 +122,23 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
         resp_body = copy.deepcopy(self.FAKE_SECURITY_GROUP)
         resp_body["security_group"]["name"] = 'updated-security-group-name'
 
-        self.check_service_client_function(
-            self.client.update_security_group,
-            'tempest.lib.common.rest_client.RestClient.put',
-            resp_body,
-            bytes_body,
-            security_group_id=self.FAKE_SEC_GROUP_ID,
-            mock_args=['v2.0/security-groups/%s' % self.FAKE_SEC_GROUP_ID,
-                       json.dumps({'security_group': kwargs})],
-            **kwargs)
+        payload = json.dumps({'security_group': kwargs}, sort_keys=True)
+        json_dumps = json.dumps
+
+        # NOTE: Use sort_keys for json.dumps so that the expected and actual
+        # payloads are guaranteed to be identical for mock_args assert check.
+        with mock.patch.object(network_base.json, 'dumps') as mock_dumps:
+            mock_dumps.side_effect = lambda d: json_dumps(d, sort_keys=True)
+
+            self.check_service_client_function(
+                self.client.update_security_group,
+                'tempest.lib.common.rest_client.RestClient.put',
+                resp_body,
+                bytes_body,
+                security_group_id=self.FAKE_SEC_GROUP_ID,
+                mock_args=['v2.0/security-groups/%s' % self.FAKE_SEC_GROUP_ID,
+                           payload],
+                **kwargs)
 
     def test_list_security_groups_with_str_body(self):
         self._test_list_security_groups()
