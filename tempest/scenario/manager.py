@@ -313,13 +313,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return secgroup
 
-    def get_remote_client(self, ip_address, username=None, private_key=None):
+    def get_remote_client(self, ip_address, username=None, private_key=None,
+                          server=None):
         """Get a SSH client to a remote server
 
         @param ip_address the server floating or fixed IP address to use
                           for ssh validation
         @param username name of the Linux account on the remote server
         @param private_key the SSH private key to use
+        @param server: server dict, used for debugging purposes
         @return a RemoteClient object
         """
 
@@ -334,22 +336,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         else:
             password = CONF.validation.image_ssh_password
             private_key = None
-        linux_client = remote_client.RemoteClient(ip_address, username,
-                                                  pkey=private_key,
-                                                  password=password)
-        try:
-            linux_client.validate_authentication()
-        except Exception as e:
-            message = ('Initializing SSH connection to %(ip)s failed. '
-                       'Error: %(error)s' % {'ip': ip_address,
-                                             'error': e})
-            caller = test_utils.find_test_caller()
-            if caller:
-                message = '(%s) %s' % (caller, message)
-            LOG.exception(message)
-            self._log_console_output()
-            raise
-
+        linux_client = remote_client.RemoteClient(
+            ip_address, username, pkey=private_key, password=password,
+            server=server, servers_client=self.servers_client)
+        linux_client.validate_authentication()
         return linux_client
 
     def _image_create(self, name, fmt, path,
