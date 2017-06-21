@@ -18,6 +18,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -38,8 +39,9 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
             raise cls.skipException("Manage snapshot tests are disabled")
 
         if len(CONF.volume.manage_snapshot_ref) != 2:
-            raise cls.skipException("Manage snapshot ref is not correctly "
-                                    "configured")
+            msg = ("Manage snapshot ref is not correctly configured, "
+                   "it should be a list of two elements")
+            raise exceptions.InvalidConfiguration(msg)
 
     @decorators.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
     def test_unmanage_manage_snapshot(self):
