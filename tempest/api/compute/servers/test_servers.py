@@ -134,3 +134,14 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('2001:2001::3', server['accessIPv6'])
+
+
+class ServerShowV247Test(base.BaseV2ComputeTest):
+    min_microversion = '2.47'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('88b0bdb2-494c-11e7-a919-92ebcb67fe33')
+    def test_show_server(self):
+        server = self.create_test_server()
+        # All fields will be checked by API schema
+        self.servers_client.show_server(server['id'])
