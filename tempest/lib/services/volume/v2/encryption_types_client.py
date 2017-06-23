@@ -50,9 +50,9 @@ class EncryptionTypesClient(rest_client.RestClient):
     def create_encryption_type(self, volume_type_id, **kwargs):
         """Create encryption type.
 
-        TODO: Current api-site doesn't contain this API description.
-        After fixing the api-site, we need to fix here also for putting
-        the link to api-site.
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#create-an-encryption-type-for-v2
         """
         url = "/types/%s/encryption" % volume_type_id
         post_body = json.dumps({'encryption': kwargs})
@@ -71,9 +71,9 @@ class EncryptionTypesClient(rest_client.RestClient):
     def update_encryption_type(self, volume_type_id, **kwargs):
         """Update an encryption type for an existing volume type.
 
-        TODO: Current api-site doesn't contain this API description.
-        After fixing the api-site, we need to fix here also for putting
-        the link to api-site.
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#update-an-encryption-type-for-v2
         """
         url = "/types/%s/encryption/provider" % volume_type_id
         put_body = json.dumps({'encryption': kwargs})
