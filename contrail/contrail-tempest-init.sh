@@ -31,7 +31,7 @@ source $TEMPEST_DIR/contrail/functions
 cd ${TEMPEST_DIR:-$(pwd)}
 
 cp $TEMPEST_DIR/etc/tempest.conf.sample $TEMPEST_CONFIG
-password=${ADMIN_PASSWORD:-contrail123}
+password=${OS_PASSWORD:-contrail123}
 ALT_USERNAME=${ALT_USERNAME:-alt_demo}
 ALT_TENANT_NAME=${ALT_TENANT_NAME:-alt_demo}
 USERNAME="demo"
