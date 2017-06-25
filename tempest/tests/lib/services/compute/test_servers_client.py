@@ -235,7 +235,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_delete_server(self, bytes_body=False):
+    def test_delete_server(self):
         self.check_service_client_function(
             self.client.delete_server,
             'tempest.lib.common.rest_client.RestClient.delete',
@@ -288,6 +288,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_addresses_by_network,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_ADDRESS['addresses'],
+            bytes_body,
             server_id=self.server_id,
             network_id=self.network_id
             )
@@ -303,6 +304,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.action,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             server_id=self.server_id,
             action_name='fake-action-name',
             schema={'status_code': 200}
@@ -319,6 +321,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.create_backup,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id,
             backup_type='fake-backup',
@@ -339,6 +342,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.evacuate_server,
             'tempest.lib.common.rest_client.RestClient.post',
             self.FAKE_SERVER_PASSWORD,
+            bytes_body,
             **kwargs)
 
     def test_change_password_with_str_body(self):
@@ -352,6 +356,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.change_password,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id,
             adminPass='fake-admin-pass'
@@ -368,16 +373,11 @@ class TestServersClient(base.BaseServiceTest):
             self.client.show_password,
             'tempest.lib.common.rest_client.RestClient.get',
             {'password': 'fake-password'},
+            bytes_body,
             server_id=self.server_id
             )
 
-    def test_delete_password_with_str_body(self):
-        self._test_delete_password()
-
-    def test_delete_password_with_bytes_body(self):
-        self._test_delete_password(True)
-
-    def _test_delete_password(self, bytes_body=False):
+    def test_delete_password(self):
         self.check_service_client_function(
             self.client.delete_password,
             'tempest.lib.common.rest_client.RestClient.delete',
@@ -386,13 +386,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_reboot_server_with_str_body(self):
-        self._test_reboot_server()
-
-    def test_reboot_server_with_bytes_body(self):
-        self._test_reboot_server(True)
-
-    def _test_reboot_server(self, bytes_body=False):
+    def test_reboot_server(self):
         self.check_service_client_function(
             self.client.reboot_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -413,18 +407,13 @@ class TestServersClient(base.BaseServiceTest):
             self.client.rebuild_server,
             'tempest.lib.common.rest_client.RestClient.post',
             self.FAKE_REBUILD_SERVER,
+            bytes_body,
             status=202,
             server_id=self.server_id,
             image_ref='fake-image-ref'
             )
 
-    def test_resize_server_with_str_body(self):
-        self._test_resize_server()
-
-    def test_resize_server_with_bytes_body(self):
-        self._test_resize_server(True)
-
-    def _test_resize_server(self, bytes_body=False):
+    def test_resize_server(self):
         self.check_service_client_function(
             self.client.resize_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -434,13 +423,7 @@ class TestServersClient(base.BaseServiceTest):
             flavor_ref='fake-flavor-ref'
             )
 
-    def test_confirm_resize_server_with_str_body(self):
-        self._test_confirm_resize_server()
-
-    def test_confirm_resize_server_with_bytes_body(self):
-        self._test_confirm_resize_server(True)
-
-    def _test_confirm_resize_server(self, bytes_body=False):
+    def test_confirm_resize_server(self):
         self.check_service_client_function(
             self.client.confirm_resize_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -449,13 +432,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_revert_resize_server_with_str_body(self):
-        self._test_revert_resize()
-
-    def test_revert_resize_server_with_bytes_body(self):
-        self._test_revert_resize(True)
-
-    def _test_revert_resize(self, bytes_body=False):
+    def test_revert_resize(self):
         self.check_service_client_function(
             self.client.revert_resize_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -475,6 +452,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_server_metadata,
             'tempest.lib.common.rest_client.RestClient.get',
             {'metadata': {'fake-key': 'fake-meta-data'}},
+            bytes_body,
             server_id=self.server_id
             )
 
@@ -489,6 +467,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.set_server_metadata,
             'tempest.lib.common.rest_client.RestClient.put',
             {'metadata': {'fake-key': 'fake-meta-data'}},
+            bytes_body,
             server_id=self.server_id,
             meta='fake-meta'
             )
@@ -504,6 +483,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.update_server_metadata,
             'tempest.lib.common.rest_client.RestClient.post',
             {'metadata': {'fake-key': 'fake-meta-data'}},
+            bytes_body,
             server_id=self.server_id,
             meta='fake-meta'
             )
@@ -519,6 +499,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.show_server_metadata_item,
             'tempest.lib.common.rest_client.RestClient.get',
             {'meta': {'fake-key': 'fake-meta-data'}},
+            bytes_body,
             server_id=self.server_id,
             key='fake-key'
             )
@@ -534,18 +515,13 @@ class TestServersClient(base.BaseServiceTest):
             self.client.set_server_metadata_item,
             'tempest.lib.common.rest_client.RestClient.put',
             {'meta': {'fake-key': 'fake-meta-data'}},
+            bytes_body,
             server_id=self.server_id,
             key='fake-key',
             meta='fake-meta'
             )
 
-    def test_delete_server_metadata_item_with_str_body(self):
-        self._test_delete_server_metadata()
-
-    def test_delete_server_metadata_item_with_bytes_body(self):
-        self._test_delete_server_metadata(True)
-
-    def _test_delete_server_metadata(self, bytes_body=False):
+    def test_delete_server_metadata(self):
         self.check_service_client_function(
             self.client.delete_server_metadata_item,
             'tempest.lib.common.rest_client.RestClient.delete',
@@ -555,13 +531,7 @@ class TestServersClient(base.BaseServiceTest):
             key='fake-key'
             )
 
-    def test_stop_server_with_str_body(self):
-        self._test_stop_server()
-
-    def test_stop_server_with_bytes_body(self):
-        self._test_stop_server(True)
-
-    def _test_stop_server(self, bytes_body=False):
+    def test_stop_server(self):
         self.check_service_client_function(
             self.client.stop_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -570,13 +540,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_start_server_with_str_body(self):
-        self._test_start_server()
-
-    def test_start_server_with_bytes_body(self):
-        self._test_start_server(True)
-
-    def _test_start_server(self, bytes_body=False):
+    def test_start_server(self):
         self.check_service_client_function(
             self.client.start_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -596,6 +560,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.attach_volume,
             'tempest.lib.common.rest_client.RestClient.post',
             {'volumeAttachment': self.FAKE_COMMON_VOLUME},
+            bytes_body,
             server_id=self.server_id
             )
 
@@ -621,6 +586,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.detach_volume,
             'tempest.lib.common.rest_client.RestClient.delete',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id,
             volume_id=self.FAKE_COMMON_VOLUME['volumeId']
@@ -637,6 +603,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.show_volume_attachment,
             'tempest.lib.common.rest_client.RestClient.get',
             {'volumeAttachment': self.FAKE_COMMON_VOLUME},
+            bytes_body,
             server_id=self.server_id,
             volume_id=self.FAKE_COMMON_VOLUME['volumeId']
             )
@@ -652,6 +619,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_volume_attachments,
             'tempest.lib.common.rest_client.RestClient.get',
             {'volumeAttachments': [self.FAKE_COMMON_VOLUME]},
+            bytes_body,
             server_id=self.server_id
             )
 
@@ -666,18 +634,13 @@ class TestServersClient(base.BaseServiceTest):
             self.client.add_security_group,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id,
             name='fake-name'
             )
 
-    def test_remove_security_group_with_str_body(self):
-        self._test_remove_security_group()
-
-    def test_remove_security_group_with_bytes_body(self):
-        self._test_remove_security_group(True)
-
-    def _test_remove_security_group(self, bytes_body=False):
+    def test_remove_security_group(self):
         self.check_service_client_function(
             self.client.remove_security_group,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -698,6 +661,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.live_migrate_server,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id
             )
@@ -713,17 +677,12 @@ class TestServersClient(base.BaseServiceTest):
             self.client.migrate_server,
             'tempest.lib.common.rest_client.RestClient.post',
             {},
+            bytes_body,
             status=202,
             server_id=self.server_id
             )
 
-    def test_lock_server_with_str_body(self):
-        self._test_lock_server()
-
-    def test_lock_server_with_bytes_body(self):
-        self._test_lock_server(True)
-
-    def _test_lock_server(self, bytes_body=False):
+    def test_lock_server(self):
         self.check_service_client_function(
             self.client.lock_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -732,13 +691,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_unlock_server_with_str_body(self):
-        self._test_unlock_server()
-
-    def test_unlock_server_with_bytes_body(self):
-        self._test_unlock_server(True)
-
-    def _test_unlock_server(self, bytes_body=False):
+    def test_unlock_server(self):
         self.check_service_client_function(
             self.client.unlock_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -747,13 +700,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_suspend_server_with_str_body(self):
-        self._test_suspend_server()
-
-    def test_suspend_server_with_bytes_body(self):
-        self._test_suspend_server(True)
-
-    def _test_suspend_server(self, bytes_body=False):
+    def test_suspend_server(self):
         self.check_service_client_function(
             self.client.suspend_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -762,13 +709,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_resume_server_with_str_body(self):
-        self._test_resume_server()
-
-    def test_resume_server_with_bytes_body(self):
-        self._test_resume_server(True)
-
-    def _test_resume_server(self, bytes_body=False):
+    def test_resume_server(self):
         self.check_service_client_function(
             self.client.resume_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -777,13 +718,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_pause_server_with_str_body(self):
-        self._test_pause_server()
-
-    def test_pause_server_with_bytes_body(self):
-        self._test_pause_server(True)
-
-    def _test_pause_server(self, bytes_body=False):
+    def test_pause_server(self):
         self.check_service_client_function(
             self.client.pause_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -792,13 +727,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_unpause_server_with_str_body(self):
-        self._test_unpause_server()
-
-    def test_unpause_server_with_bytes_body(self):
-        self._test_unpause_server(True)
-
-    def _test_unpause_server(self, bytes_body=False):
+    def test_unpause_server(self):
         self.check_service_client_function(
             self.client.unpause_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -807,13 +736,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_reset_state_with_str_body(self):
-        self._test_reset_state()
-
-    def test_reset_state_with_bytes_body(self):
-        self._test_reset_state(True)
-
-    def _test_reset_state(self, bytes_body=False):
+    def test_reset_state(self):
         self.check_service_client_function(
             self.client.reset_state,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -823,13 +746,7 @@ class TestServersClient(base.BaseServiceTest):
             state='fake-state'
             )
 
-    def test_shelve_server_with_str_body(self):
-        self._test_shelve_server()
-
-    def test_shelve_server_with_bytes_body(self):
-        self._test_shelve_server(True)
-
-    def _test_shelve_server(self, bytes_body=False):
+    def test_shelve_server(self):
         self.check_service_client_function(
             self.client.shelve_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -838,13 +755,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_unshelve_server_with_str_body(self):
-        self._test_unshelve_server()
-
-    def test_unshelve_server_with_bytes_body(self):
-        self._test_unshelve_server(True)
-
-    def _test_unshelve_server(self, bytes_body=False):
+    def test_unshelve_server(self):
         self.check_service_client_function(
             self.client.unshelve_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -853,13 +764,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_shelve_offload_server_with_str_body(self):
-        self._test_shelve_offload_server()
-
-    def test_shelve_offload_server_with_bytes_body(self):
-        self._test_shelve_offload_server(True)
-
-    def _test_shelve_offload_server(self, bytes_body=False):
+    def test_shelve_offload_server(self):
         self.check_service_client_function(
             self.client.shelve_offload_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -879,6 +784,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.get_console_output,
             'tempest.lib.common.rest_client.RestClient.post',
             {'output': 'fake-output'},
+            bytes_body,
             server_id=self.server_id,
             length='fake-length'
             )
@@ -894,6 +800,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_virtual_interfaces,
             'tempest.lib.common.rest_client.RestClient.get',
             {'virtual_interfaces': [self.FAKE_VIRTUAL_INTERFACES]},
+            bytes_body,
             server_id=self.server_id
             )
 
@@ -908,16 +815,11 @@ class TestServersClient(base.BaseServiceTest):
             self.client.rescue_server,
             'tempest.lib.common.rest_client.RestClient.post',
             {'adminPass': 'fake-admin-pass'},
+            bytes_body,
             server_id=self.server_id
             )
 
-    def test_unrescue_server_with_str_body(self):
-        self._test_unrescue_server()
-
-    def test_unrescue_server_with_bytes_body(self):
-        self._test_unrescue_server(True)
-
-    def _test_unrescue_server(self, bytes_body=False):
+    def test_unrescue_server(self):
         self.check_service_client_function(
             self.client.unrescue_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -937,6 +839,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.show_server_diagnostics,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_SERVER_DIAGNOSTICS,
+            bytes_body,
             status=200,
             server_id=self.server_id
             )
@@ -952,6 +855,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_instance_actions,
             'tempest.lib.common.rest_client.RestClient.get',
             {'instanceActions': [self.FAKE_INSTANCE_ACTIONS]},
+            bytes_body,
             server_id=self.server_id
             )
 
@@ -966,17 +870,12 @@ class TestServersClient(base.BaseServiceTest):
             self.client.show_instance_action,
             'tempest.lib.common.rest_client.RestClient.get',
             {'instanceAction': self.FAKE_INSTANCE_WITH_EVENTS},
+            bytes_body,
             server_id=self.server_id,
             request_id='fake-request-id'
             )
 
-    def test_force_delete_server_with_str_body(self):
-        self._test_force_delete_server()
-
-    def test_force_delete_server_with_bytes_body(self):
-        self._test_force_delete_server(True)
-
-    def _test_force_delete_server(self, bytes_body=False):
+    def test_force_delete_server(self):
         self.check_service_client_function(
             self.client.force_delete_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -985,13 +884,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_restore_soft_deleted_server_with_str_body(self):
-        self._test_restore_soft_deleted_server()
-
-    def test_restore_soft_deleted_server_with_bytes_body(self):
-        self._test_restore_soft_deleted_server(True)
-
-    def _test_restore_soft_deleted_server(self, bytes_body=False):
+    def test_restore_soft_deleted_server(self):
         self.check_service_client_function(
             self.client.restore_soft_deleted_server,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -1000,13 +893,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_reset_network_with_str_body(self):
-        self._test_reset_network()
-
-    def test_reset_network_with_bytes_body(self):
-        self._test_reset_network(True)
-
-    def _test_reset_network(self, bytes_body=False):
+    def test_reset_network(self):
         self.check_service_client_function(
             self.client.reset_network,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -1015,13 +902,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id
             )
 
-    def test_inject_network_info_with_str_body(self):
-        self._test_inject_network_info()
-
-    def test_inject_network_info_with_bytes_body(self):
-        self._test_inject_network_info(True)
-
-    def _test_inject_network_info(self, bytes_body=False):
+    def test_inject_network_info(self):
         self.check_service_client_function(
             self.client.inject_network_info,
             'tempest.lib.common.rest_client.RestClient.post',
@@ -1041,6 +922,7 @@ class TestServersClient(base.BaseServiceTest):
             self.client.get_vnc_console,
             'tempest.lib.common.rest_client.RestClient.post',
             {'console': self.FAKE_VNC_CONSOLE},
+            bytes_body,
             server_id=self.server_id,
             type='fake-console-type'
             )
@@ -1056,7 +938,8 @@ class TestServersClient(base.BaseServiceTest):
             self.client.list_security_groups_by_server,
             'tempest.lib.common.rest_client.RestClient.get',
             {'security_groups': self.FAKE_SECURITY_GROUPS},
-            server_id=self.server_id,
+            bytes_body,
+            server_id=self.server_id
             )
 
     @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
@@ -1151,15 +1034,7 @@ class TestServersClient(base.BaseServiceTest):
 
     @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
                        new_callable=mock.PropertyMock(return_value='2.26'))
-    def test_delete_tag_str_body(self, _):
-        self._test_delete_tag()
-
-    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
-                       new_callable=mock.PropertyMock(return_value='2.26'))
-    def test_delete_tag_byte_body(self, _):
-        self._test_delete_tag(bytes_body=True)
-
-    def _test_delete_tag(self, bytes_body=False):
+    def test_delete_tag(self, _):
         self.check_service_client_function(
             self.client.delete_tag,
             'tempest.lib.common.rest_client.RestClient.delete',
@@ -1167,7 +1042,7 @@ class TestServersClient(base.BaseServiceTest):
             server_id=self.server_id,
             tag=self.FAKE_TAGS[0],
             status=204,
-            to_utf=bytes_body)
+            )
 
 
 class TestServersClientMinV26(base.BaseServiceTest):
