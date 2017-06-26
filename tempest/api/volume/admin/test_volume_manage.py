@@ -18,6 +18,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -32,8 +33,9 @@ class VolumeManageAdminTest(base.BaseVolumeAdminTest):
             raise cls.skipException("Manage volume tests are disabled")
 
         if len(CONF.volume.manage_volume_ref) != 2:
-            raise cls.skipException("Manage volume ref is not correctly "
-                                    "configured")
+            msg = ("Manage volume ref is not correctly configured, "
+                   "it should be a list of two elements")
+            raise exceptions.InvalidConfiguration(msg)
 
     @decorators.idempotent_id('70076c71-0ce1-4208-a8ff-36a66e65cc1e')
     def test_unmanage_manage_volume(self):
