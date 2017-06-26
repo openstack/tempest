@@ -40,6 +40,8 @@ remove
 ------
 Deletes the entry for a given tempest workspace --name
 
+--rmdir Deletes the given tempest workspace directory
+
 General Options
 ===============
 
@@ -49,6 +51,7 @@ General Options
 """
 
 import os
+import shutil
 import sys
 
 from cliff import command
@@ -102,11 +105,16 @@ class WorkspaceManager(object):
             sys.exit(1)
 
     @lockutils.synchronized('workspaces', external=True)
-    def remove_workspace(self, name):
+    def remove_workspace_entry(self, name):
         self._populate()
         self._name_exists(name)
-        self.workspaces.pop(name)
+        workspace_path = self.workspaces.pop(name)
         self._write_file()
+        return workspace_path
+
+    @lockutils.synchronized('workspaces', external=True)
+    def remove_workspace_directory(self, workspace_path):
+        shutil.rmtree(workspace_path)
 
     @lockutils.synchronized('workspaces', external=True)
     def list_workspaces(self):
@@ -226,12 +234,16 @@ class TempestWorkspaceRemove(command.Command):
         parser = super(TempestWorkspaceRemove, self).get_parser(prog_name)
         add_global_arguments(parser)
         parser.add_argument('--name', required=True)
+        parser.add_argument('--rmdir', action='store_true',
+                            help='Deletes the given workspace directory')
 
         return parser
 
     def take_action(self, parsed_args):
         self.manager = WorkspaceManager(parsed_args.workspace_path)
-        self.manager.remove_workspace(parsed_args.name)
+        workspace_path = self.manager.remove_workspace_entry(parsed_args.name)
+        if parsed_args.rmdir:
+            self.manager.remove_workspace_directory(workspace_path)
         sys.exit(0)
 
 

@@ -80,10 +80,17 @@ class TestTempestWorkspace(TestTempestWorkspaceBase):
         self.assertEqual(
             self.workspace_manager.get_workspace(self.name), new_path)
 
-    def test_run_workspace_remove(self):
+    def test_run_workspace_remove_entry(self):
         cmd = ['tempest', 'workspace', 'remove',
                '--workspace-path', self.store_file,
                '--name', self.name]
+        self._run_cmd_gets_return_code(cmd, 0)
+        self.assertIsNone(self.workspace_manager.get_workspace(self.name))
+
+    def test_run_workspace_remove_directory(self):
+        cmd = ['tempest', 'workspace', 'remove',
+               '--workspace-path', self.store_file,
+               '--name', self.name, '--rmdir']
         self._run_cmd_gets_return_code(cmd, 0)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
 
@@ -117,8 +124,13 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(
             self.workspace_manager.get_workspace(self.name), new_path)
 
-    def test_workspace_manager_remove(self):
-        self.workspace_manager.remove_workspace(self.name)
+    def test_workspace_manager_remove_entry(self):
+        self.workspace_manager.remove_workspace_entry(self.name)
+        self.assertIsNone(self.workspace_manager.get_workspace(self.name))
+
+    def test_workspace_manager_remove_directory(self):
+        path = self.workspace_manager.remove_workspace_entry(self.name)
+        self.workspace_manager.remove_workspace_directory(path)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
 
     def test_path_expansion(self):
