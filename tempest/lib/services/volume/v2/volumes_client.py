@@ -72,6 +72,10 @@ class VolumesClient(rest_client.RestClient):
         """List all the volumes created.
 
         Params can be a string (must be urlencoded) or a dictionary.
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#list-volumes-with-details
+        http://developer.openstack.org/api-ref/block-storage/v2/#list-volumes
         """
         url = 'volumes'
         if detail:
@@ -155,7 +159,12 @@ class VolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def set_bootable_volume(self, volume_id, **kwargs):
-        """set a bootable flag for a volume - true or false."""
+        """Set a bootable flag for a volume - true or false.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-volume-bootable-status
+        """
         post_body = json.dumps({'os-set_bootable': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
@@ -239,7 +248,12 @@ class VolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def create_volume_metadata(self, volume_id, metadata):
-        """Create metadata for the volume."""
+        """Create metadata for the volume.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#create-volume-metadata
+        """
         put_body = json.dumps({'metadata': metadata})
         url = "volumes/%s/metadata" % volume_id
         resp, body = self.post(url, put_body)
@@ -256,7 +270,12 @@ class VolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_metadata(self, volume_id, metadata):
-        """Update metadata for the volume."""
+        """Update metadata for the volume.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/block-storage/v2/#update-volume-metadata
+        """
         put_body = json.dumps({'metadata': metadata})
         url = "volumes/%s/metadata" % volume_id
         resp, body = self.put(url, put_body)
@@ -281,7 +300,12 @@ class VolumesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def retype_volume(self, volume_id, **kwargs):
-        """Updates volume with new volume type."""
+        """Updates volume with new volume type.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#retype-volume
+        """
         post_body = json.dumps({'os-retype': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)
