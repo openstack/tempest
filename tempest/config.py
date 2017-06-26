@@ -1070,6 +1070,15 @@ DefaultGroup = [
                                  "prefix to ideintify resources which are "
                                  "created by Tempest and no projects set "
                                  "this option on OpenStack dev community."),
+    cfg.BoolOpt('pause_teardown',
+                default=False,
+                help="""Whether to pause a test in global teardown.
+
+The best use case is investigating used resources of one test.
+A test can be run as follows:
+ $ ostestr --pdb TEST_ID
+or
+ $ python -m testtools.run TEST_ID"""),
 ]
 
 _opts = [
