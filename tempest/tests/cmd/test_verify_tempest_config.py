@@ -199,7 +199,9 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
-        print_mock.assert_not_called()
+        print_mock.assert_any_call('api_v3', 'volume-feature-enabled',
+                                   False, True)
+        self.assertEqual(1, print_mock.call_count)
 
     @mock.patch('tempest.lib.common.http.ClosingHttp.request')
     def test_verify_cinder_api_versions_no_v2(self, mock_request):
@@ -215,9 +217,7 @@ class TestDiscovery(base.TestCase):
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
         print_mock.assert_any_call('api_v2', 'volume-feature-enabled',
                                    False, True)
-        print_mock.assert_any_call('api_v3', 'volume-feature-enabled',
-                                   True, True)
-        self.assertEqual(2, print_mock.call_count)
+        self.assertEqual(1, print_mock.call_count)
 
     @mock.patch('tempest.lib.common.http.ClosingHttp.request')
     def test_verify_cinder_api_versions_no_v1(self, mock_request):
@@ -231,9 +231,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_cinder_api_versions(fake_os, True)
-        print_mock.assert_any_call('api_v3', 'volume-feature-enabled',
-                                   True, True)
-        self.assertEqual(1, print_mock.call_count)
+        print_mock.assert_not_called()
 
     def test_verify_glance_version_no_v2_with_v1_1(self):
         def fake_get_versions():

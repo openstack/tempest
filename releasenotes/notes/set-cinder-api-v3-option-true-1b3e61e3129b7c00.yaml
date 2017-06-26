@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The volume config option 'api_v3' default is changed to
+    ``True`` because the volume v3 API is CURRENT.
