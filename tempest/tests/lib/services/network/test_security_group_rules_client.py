@@ -15,8 +15,10 @@
 
 import copy
 
+import mock
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.services.network import base as network_base
 from tempest.lib.services.network import security_group_rules_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -80,16 +82,22 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
         kwargs = {'direction': 'egress',
                   'security_group_id': '85cc3048-abc3-43cc-89b3-377341426ac5',
                   'remote_ip_prefix': None}
+        payload = json.dumps({"security_group_rule": kwargs}, sort_keys=True)
+        json_dumps = json.dumps
 
-        self.check_service_client_function(
-            self.client.create_security_group_rule,
-            'tempest.lib.common.rest_client.RestClient.post',
-            self.FAKE_SECURITY_GROUP_RULE,
-            bytes_body,
-            status=201,
-            mock_args=['v2.0/security-group-rules',
-                       json.dumps({"security_group_rule": kwargs})],
-            **kwargs)
+        # NOTE: Use sort_keys for json.dumps so that the expected and actual
+        # payloads are guaranteed to be identical for mock_args assert check.
+        with mock.patch.object(network_base.json, 'dumps') as mock_dumps:
+            mock_dumps.side_effect = lambda d: json_dumps(d, sort_keys=True)
+
+            self.check_service_client_function(
+                self.client.create_security_group_rule,
+                'tempest.lib.common.rest_client.RestClient.post',
+                self.FAKE_SECURITY_GROUP_RULE,
+                bytes_body,
+                status=201,
+                mock_args=['v2.0/security-group-rules', payload],
+                **kwargs)
 
     def _test_show_security_group_rule(self, bytes_body=False):
         self.check_service_client_function(
