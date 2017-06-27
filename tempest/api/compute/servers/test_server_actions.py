@@ -517,23 +517,33 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
+    @test.services('image')
     def test_shelve_unshelve_server(self):
+        if CONF.image_feature_enabled.api_v2:
+            glance_client = self.os_primary.image_client_v2
+        elif CONF.image_feature_enabled.api_v1:
+            glance_client = self.os_primary.image_client
+        else:
+            raise lib_exc.InvalidConfiguration(
+                'Either api_v1 or api_v2 must be True in '
+                '[image-feature-enabled].')
         compute.shelve_server(self.client, self.server_id,
                               force_shelve_offload=True)
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
-        images = self.compute_images_client.list_images(**params)['images']
+        if CONF.image_feature_enabled.api_v2:
+            images = glance_client.list_images(params)['images']
+        elif CONF.image_feature_enabled.api_v1:
+            images = glance_client.list_images(
+                detail=True, **params)['images']
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
         self.client.unshelve_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-
-        images = self.compute_images_client.list_images(**params)['images']
-        msg = ('After unshelve, shelved image is not deleted.')
-        self.assertEmpty(images, msg)
+        glance_client.wait_for_resource_deletion(images[0]['id'])
 
     @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
