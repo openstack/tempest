@@ -54,7 +54,8 @@ class BaseNetworkClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def create_resource(self, uri, post_data, expect_empty_body=False):
+    def create_resource(self, uri, post_data, expect_empty_body=False,
+                        expect_response_code=201):
         req_uri = self.uri_prefix + uri
         req_post_data = json.dumps(post_data)
         resp, body = self.post(req_uri, req_post_data)
@@ -65,10 +66,11 @@ class BaseNetworkClient(rest_client.RestClient):
             body = json.loads(body)
         else:
             body = None
-        self.expected_success(201, resp.status)
+        self.expected_success(expect_response_code, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def update_resource(self, uri, post_data, expect_empty_body=False):
+    def update_resource(self, uri, post_data, expect_empty_body=False,
+                        expect_response_code=200):
         req_uri = self.uri_prefix + uri
         req_post_data = json.dumps(post_data)
         resp, body = self.put(req_uri, req_post_data)
@@ -79,5 +81,5 @@ class BaseNetworkClient(rest_client.RestClient):
             body = json.loads(body)
         else:
             body = None
-        self.expected_success(200, resp.status)
+        self.expected_success(expect_response_code, resp.status)
         return rest_client.ResponseBody(resp, body)
