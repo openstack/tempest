@@ -255,6 +255,8 @@ class Manager(clients.ServiceClients):
             self.volume_v2.QuotaClassesClient()
         self.volumes_extension_client = self.volume_v1.ExtensionsClient()
         self.volumes_v2_extension_client = self.volume_v2.ExtensionsClient()
+        self.groups_v3_client = self.volume_v3.GroupsClient()
+        self.group_types_v3_client = self.volume_v3.GroupTypesClient()
         self.volume_availability_zone_client = \
             self.volume_v1.AvailabilityZoneClient()
         self.volume_v2_availability_zone_client = \

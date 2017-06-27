@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add groups and group_types clients for the volume service as library.
+    Add tempest tests for create group, delete group, show group, and
+    list group volume APIs.
