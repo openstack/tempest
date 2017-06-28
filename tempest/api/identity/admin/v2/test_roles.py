@@ -54,7 +54,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         """Return a list of all roles."""
         body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role in self.roles]
-        self.assertTrue(any(found))
+        self.assertNotEmpty(found)
         self.assertEqual(len(found), len(self.roles))
 
     @decorators.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
@@ -68,13 +68,13 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
         body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role['name'] == role_name]
-        self.assertTrue(any(found))
+        self.assertNotEmpty(found)
 
         body = self.roles_client.delete_role(found[0]['id'])
 
         body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role['name'] == role_name]
-        self.assertFalse(any(found))
+        self.assertEmpty(found)
 
     @decorators.idempotent_id('db6870bd-a6ed-43be-a9b1-2f10a5c9994f')
     def test_get_role_by_id(self):

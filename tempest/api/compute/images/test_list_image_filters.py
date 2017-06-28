@@ -129,9 +129,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'status': 'ACTIVE'}
         images = self.client.list_images(**params)['images']
 
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
+        self.assertNotEmpty([i for i in images if i['id'] == self.image1_id])
+        self.assertNotEmpty([i for i in images if i['id'] == self.image2_id])
+        self.assertNotEmpty([i for i in images if i['id'] == self.image3_id])
 
     @decorators.idempotent_id('33163b73-79f5-4d07-a7ea-9213bcc468ff')
     def test_list_images_filter_by_name(self):
@@ -140,9 +140,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'name': self.image1['name']}
         images = self.client.list_images(**params)['images']
 
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
+        self.assertNotEmpty([i for i in images if i['id'] == self.image1_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image2_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image3_id])
 
     @decorators.idempotent_id('9f238683-c763-45aa-b848-232ec3ce3105')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -152,14 +152,13 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'server': self.server1['id']}
         images = self.client.list_images(**params)['images']
 
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot1_id]),
-                        "Failed to find image %s in images. Got images %s" %
-                        (self.image1_id, images))
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot2_id]))
-        self.assertFalse(any([i for i in images
-                              if i['id'] == self.snapshot3_id]))
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot1_id],
+                            "Failed to find image %s in images. "
+                            "Got images %s" % (self.image1_id, images))
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot2_id])
+        self.assertEmpty([i for i in images if i['id'] == self.snapshot3_id])
 
     @decorators.idempotent_id('05a377b8-28cf-4734-a1e6-2ab5c38bf606')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -173,12 +172,12 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             params = {'server': link['href']}
             images = self.client.list_images(**params)['images']
 
-            self.assertFalse(any([i for i in images
-                                  if i['id'] == self.snapshot1_id]))
-            self.assertFalse(any([i for i in images
-                                  if i['id'] == self.snapshot2_id]))
-            self.assertTrue(any([i for i in images
-                                 if i['id'] == self.snapshot3_id]))
+            self.assertEmpty([i for i in images
+                              if i['id'] == self.snapshot1_id])
+            self.assertEmpty([i for i in images
+                              if i['id'] == self.snapshot2_id])
+            self.assertNotEmpty([i for i in images
+                                 if i['id'] == self.snapshot3_id])
 
     @decorators.idempotent_id('e3356918-4d3e-4756-81d5-abc4524ba29f')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -188,14 +187,13 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'type': 'snapshot'}
         images = self.client.list_images(**params)['images']
 
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot1_id]))
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot2_id]))
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot3_id]))
-        self.assertFalse(any([i for i in images
-                              if i['id'] == self.image_ref]))
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot1_id])
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot2_id])
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot3_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image_ref])
 
     @decorators.idempotent_id('3a484ca9-67ba-451e-b494-7fcf28d32d62')
     def test_list_images_limit_results(self):
@@ -212,8 +210,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter by the image's created time
         params = {'changes-since': self.image3['created']}
         images = self.client.list_images(**params)['images']
-        found = any([i for i in images if i['id'] == self.image3_id])
-        self.assertTrue(found)
+        found = [i for i in images if i['id'] == self.image3_id]
+        self.assertNotEmpty(found)
 
     @decorators.idempotent_id('9b0ea018-6185-4f71-948a-a123a107988e')
     def test_list_images_with_detail_filter_by_status(self):
@@ -222,9 +220,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'status': 'ACTIVE'}
         images = self.client.list_images(detail=True, **params)['images']
 
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
+        self.assertNotEmpty([i for i in images if i['id'] == self.image1_id])
+        self.assertNotEmpty([i for i in images if i['id'] == self.image2_id])
+        self.assertNotEmpty([i for i in images if i['id'] == self.image3_id])
 
     @decorators.idempotent_id('644ea267-9bd9-4f3b-af9f-dffa02396a17')
     def test_list_images_with_detail_filter_by_name(self):
@@ -233,9 +231,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'name': self.image1['name']}
         images = self.client.list_images(detail=True, **params)['images']
 
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
+        self.assertNotEmpty([i for i in images if i['id'] == self.image1_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image2_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image3_id])
 
     @decorators.idempotent_id('ba2fa9a9-b672-47cc-b354-3b4c0600e2cb')
     def test_list_images_with_detail_limit_results(self):
@@ -257,12 +255,12 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             params = {'server': link['href']}
             images = self.client.list_images(detail=True, **params)['images']
 
-            self.assertFalse(any([i for i in images
-                                  if i['id'] == self.snapshot1_id]))
-            self.assertFalse(any([i for i in images
-                                  if i['id'] == self.snapshot2_id]))
-            self.assertTrue(any([i for i in images
-                                 if i['id'] == self.snapshot3_id]))
+            self.assertEmpty([i for i in images
+                              if i['id'] == self.snapshot1_id])
+            self.assertEmpty([i for i in images
+                              if i['id'] == self.snapshot2_id])
+            self.assertNotEmpty([i for i in images
+                                 if i['id'] == self.snapshot3_id])
 
     @decorators.idempotent_id('888c0cc0-7223-43c5-9db0-b125fd0a393b')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
@@ -273,14 +271,13 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         images = self.client.list_images(detail=True, **params)['images']
         self.client.show_image(self.image_ref)
 
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot1_id]))
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot2_id]))
-        self.assertTrue(any([i for i in images
-                             if i['id'] == self.snapshot3_id]))
-        self.assertFalse(any([i for i in images
-                              if i['id'] == self.image_ref]))
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot1_id])
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot2_id])
+        self.assertNotEmpty([i for i in images
+                             if i['id'] == self.snapshot3_id])
+        self.assertEmpty([i for i in images if i['id'] == self.image_ref])
 
     @decorators.idempotent_id('7d439e18-ac2e-4827-b049-7e18004712c4')
     def test_list_images_with_detail_filter_by_changes_since(self):
@@ -290,4 +287,4 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter by the image's created time
         params = {'changes-since': self.image1['created']}
         images = self.client.list_images(detail=True, **params)['images']
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
+        self.assertNotEmpty([i for i in images if i['id'] == self.image1_id])

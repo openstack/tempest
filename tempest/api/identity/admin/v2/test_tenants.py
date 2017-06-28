@@ -37,7 +37,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         body = self.tenants_client.list_tenants()['tenants']
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
-        self.assertFalse(any(found), 'Tenants failed to delete')
+        self.assertEmpty(found, 'Tenants failed to delete')
 
     @decorators.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):

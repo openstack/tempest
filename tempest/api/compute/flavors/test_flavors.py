@@ -68,7 +68,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
 
         params = {'marker': flavor_id}
         flavors = self.flavors_client.list_flavors(**params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id],
                          'The list of flavors did not start after the marker.')
 
     @decorators.idempotent_id('6db2f0c0-ddee-4162-9c84-0703d3dd1107')
@@ -80,7 +80,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         params = {'marker': flavor_id}
         flavors = self.flavors_client.list_flavors(detail=True,
                                                    **params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id],
                          'The list of flavors did not start after the marker.')
 
     @decorators.idempotent_id('3df2743e-3034-4e57-a4cb-b6527f6eac79')
@@ -92,7 +92,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         params = {self._min_disk: flavor['disk'] + 1}
         flavors = self.flavors_client.list_flavors(detail=True,
                                                    **params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
 
     @decorators.idempotent_id('09fe7509-b4ee-4b34-bf8b-39532dc47292')
     def test_list_flavors_detailed_filter_by_min_ram(self):
@@ -103,7 +103,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         params = {self._min_ram: flavor['ram'] + 1}
         flavors = self.flavors_client.list_flavors(detail=True,
                                                    **params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
 
     @decorators.idempotent_id('10645a4d-96f5-443f-831b-730711e11dd4')
     def test_list_flavors_filter_by_min_disk(self):
@@ -113,7 +113,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
 
         params = {self._min_disk: flavor['disk'] + 1}
         flavors = self.flavors_client.list_flavors(**params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
 
     @decorators.idempotent_id('935cf550-e7c8-4da6-8002-00f92d5edfaa')
     def test_list_flavors_filter_by_min_ram(self):
@@ -123,4 +123,4 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
 
         params = {self._min_ram: flavor['ram'] + 1}
         flavors = self.flavors_client.list_flavors(**params)['flavors']
-        self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
+        self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
