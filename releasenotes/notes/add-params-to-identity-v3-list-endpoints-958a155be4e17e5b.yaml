@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The ``list_endpoints`` method of the v3 ``EndPointsClient`` class now has
+    an additional ``**params`` argument that enables passing additional
+    information in the query string of the HTTP request.
