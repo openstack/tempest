@@ -14,6 +14,51 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+Verifies user's current tempest configuration.
+
+This command is used for updating or user's tempest configuration file based on
+api queries or replacing all option in a tempest configuration file for a full
+list of extensions.
+
+General Options
+===============
+
+-u, --update
+------------
+Update the config file with results from api queries. This assumes whatever is
+set in the config file is incorrect.
+
+-o FILE, --output=FILE
+----------------------
+Output file to write an updated config file to. This has to be a separate file
+from the original one. If one isn't specified with -u the values which should
+be changed will be printed to STDOUT.
+
+-r, --replace-ext
+-----------------
+If specified the all option will be replaced with a full list of extensions.
+
+Environment Variables
+=====================
+
+The command is workspace aware - it uses tempest config file tempest.conf
+located in ./etc/ directory.
+The path to the config file and it's name can be changed through environment
+variables.
+
+TEMPEST_CONFIG_DIR
+------------------
+Path to a directory where tempest configuration file is stored. If the variable
+is set, the default path (./etc/) is overridden.
+
+TEMPEST_CONFIG
+--------------
+Name of a tempest configuration file. If the variable is specified, the default
+name (tempest.conf) is overridden.
+
+"""
+
 import argparse
 import os
 import re
@@ -39,8 +84,8 @@ LOG = logging.getLogger(__name__)
 
 
 def _get_config_file():
-    default_config_dir = os.path.join(os.path.abspath(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "etc")
+    config_dir = os.getcwd()
+    default_config_dir = os.path.join(config_dir, "etc")
     default_config_file = "tempest.conf"
 
     conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
@@ -344,8 +389,8 @@ def _parser_add_args(parser):
                         help="Output file to write an updated config file to. "
                              "This has to be a separate file from the "
                              "original config file. If one isn't specified "
-                             "with -u the new config file will be printed to "
-                             "STDOUT")
+                             "with -u the values which should be changed "
+                             "will be printed to STDOUT")
     parser.add_argument('-r', '--replace-ext', action='store_true',
                         help="If specified the all option will be replaced "
                              "with a full list of extensions")
