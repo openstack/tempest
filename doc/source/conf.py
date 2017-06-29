@@ -160,10 +160,6 @@ except Exception:
     warnings.warn('Cannot get last updated time from git repository. '
                   'Not setting "html_last_updated_fmt".')
 
-# If true, SmartyPants will be used to convert quotes and dashes to
-# typographically correct entities.
-html_use_smartypants = False
-
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
