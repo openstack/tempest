@@ -200,6 +200,8 @@ class Manager(clients.ServiceClients):
             **params_v3)
         self.oauth_consumers_client = self.identity_v3.OAUTHConsumerClient(
             **params_v3)
+        self.oauth_token_client = self.identity_v3.OAUTHTokenClient(
+            **params_v3)
         self.domain_config_client = self.identity_v3.DomainConfigurationClient(
             **params_v3)
         self.endpoint_filter_client = \
