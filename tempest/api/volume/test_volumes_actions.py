@@ -115,12 +115,12 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
-        body = self.volumes_client.reserve_volume(self.volume['id'])
+        self.volumes_client.reserve_volume(self.volume['id'])
         # To get the volume info
         body = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertIn('attaching', body['status'])
         # Unmark volume as reserved.
-        body = self.volumes_client.unreserve_volume(self.volume['id'])
+        self.volumes_client.unreserve_volume(self.volume['id'])
         # To get the volume info
         body = self.volumes_client.show_volume(self.volume['id'])['volume']
         self.assertIn('available', body['status'])

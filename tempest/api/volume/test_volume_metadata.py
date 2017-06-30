@@ -45,6 +45,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
 
         body = self.volumes_client.create_volume_metadata(self.volume['id'],
                                                           metadata)['metadata']
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Get the metadata of the volume
         body = self.volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
@@ -54,6 +55,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
         # Update metadata
         body = self.volumes_client.update_volume_metadata(
             self.volume['id'], update)['metadata']
+        self.assertEqual(update, body)
         body = self.volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertEqual(update, body, 'Update metadata failed')
@@ -85,6 +87,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
         # Update metadata item
         body = self.volumes_client.update_volume_metadata_item(
             self.volume['id'], "key3", update_item)['meta']
+        self.assertEqual(update_item, body)
         # Get the metadata of the volume
         body = self.volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
