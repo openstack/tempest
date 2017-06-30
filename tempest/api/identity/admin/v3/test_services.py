@@ -77,17 +77,26 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         service_ids = list()
+        service_types = list()
         for _ in range(3):
-            name = data_utils.rand_name('service')
-            serv_type = data_utils.rand_name('type')
+            name = data_utils.rand_name(self.__class__.__name__ + '-Service')
+            serv_type = data_utils.rand_name(self.__class__.__name__ + '-Type')
             create_service = self.services_client.create_service(
                 type=serv_type, name=name)['service']
             self.addCleanup(self.services_client.delete_service,
                             create_service['id'])
             service_ids.append(create_service['id'])
+            service_types.append(serv_type)
 
         # List and Verify Services
         services = self.services_client.list_services()['services']
         fetched_ids = [service['id'] for service in services]
         found = [s for s in fetched_ids if s in service_ids]
         self.assertEqual(len(found), len(service_ids))
+
+        # Check that filtering by service type works.
+        for serv_type in service_types:
+            fetched_services = self.services_client.list_services(
+                type=serv_type)['services']
+            self.assertEqual(1, len(fetched_services))
+            self.assertEqual(serv_type, fetched_services[0]['type'])
