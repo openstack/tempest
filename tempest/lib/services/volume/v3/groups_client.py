@@ -97,6 +97,18 @@ class GroupsClient(base_client.BaseClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def update_group(self, group_id, **kwargs):
+        """Updates the specified group.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#update-group
+        """
+        put_body = json.dumps({'group': kwargs})
+        resp, body = self.put('groups/%s' % group_id, put_body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def is_resource_deleted(self, id):
         try:
             self.show_group(id)
