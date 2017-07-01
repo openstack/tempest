@@ -84,6 +84,19 @@ class GroupsClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def create_group_from_source(self, **kwargs):
+        """Creates a group from source.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-from-source
+        """
+        post_body = json.dumps({'create-from-src': kwargs})
+        resp, body = self.post('groups/action', post_body)
+        body = json.loads(body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def is_resource_deleted(self, id):
         try:
             self.show_group(id)
