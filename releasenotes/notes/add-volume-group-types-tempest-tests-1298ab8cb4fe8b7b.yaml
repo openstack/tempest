@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add list_group_type and show_group_type in the group_types client for
+    the volume service. Add tests for create/delete/show/list group types.

@@ -14,6 +14,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 from tempest.lib.services.volume import base_client
@@ -45,4 +46,32 @@ class GroupTypesClient(base_client.BaseClient):
         """Deletes the specified group_type."""
         resp, body = self.delete("group_types/%s" % group_type_id)
         self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_group_types(self, **params):
+        """List all the group_types created.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#list-group-types
+        """
+        url = 'group_types'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_group_type(self, group_type_id):
+        """Returns the details of a single group_type.
+
+        For more information, please refer to the official API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#show-group-type-details
+        """
+        url = "group_types/%s" % group_type_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
