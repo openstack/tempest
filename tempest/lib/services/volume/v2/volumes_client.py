@@ -283,6 +283,14 @@ class VolumesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_volume_metadata_item(self, volume_id, id):
+        """Show metadata item for the volume."""
+        url = "volumes/%s/metadata/%s" % (volume_id, id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def update_volume_metadata_item(self, volume_id, id, meta_item):
         """Update metadata item for the volume."""
         put_body = json.dumps({'meta': meta_item})
