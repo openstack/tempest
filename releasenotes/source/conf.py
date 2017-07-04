@@ -37,9 +37,17 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'oslosphinx',
+    'openstackdocstheme',
     'reno.sphinxext',
 ]
+
+# openstackdocstheme options
+repository_name = 'openstack/tempest'
+bug_project = 'tempest'
+bug_tag = ''
+
+# Must set this variable to include year, month, day, hours, and minutes.
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -119,9 +127,6 @@ html_theme = 'openstackdocs'
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-import openstackdocstheme
-
-html_theme_path = [openstackdocstheme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
