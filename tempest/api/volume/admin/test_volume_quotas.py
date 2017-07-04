@@ -155,7 +155,7 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
         # Accepts a volume transfer
         self.alt_transfer_client.accept_volume_transfer(
-            transfer_id, auth_key=auth_key)['transfer']
+            transfer_id, auth_key=auth_key)
 
         # Verify volume transferred is available
         waiters.wait_for_volume_resource_status(

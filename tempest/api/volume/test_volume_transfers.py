@@ -59,6 +59,8 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
+        for key in ['id', 'name', 'links', 'volume_id']:
+            self.assertIn(key, body)
         waiters.wait_for_volume_resource_status(self.alt_volumes_client,
                                                 volume['id'], 'available')
         accepted_volume = self.alt_volumes_client.show_volume(
