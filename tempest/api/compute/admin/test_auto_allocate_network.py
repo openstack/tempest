@@ -111,10 +111,12 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             LOG.info('(%s) Found more than one router for tenant.',
                      test_utils.find_test_caller())
 
-        # Let's just blindly remove any networks, duplicate or otherwise, that
-        # the test might have created even though Neutron will cleanup
-        # duplicate resources automatically (so ignore 404s).
-        networks = cls.networks_client.list_networks().get('networks', [])
+        # Remove any networks, duplicate or otherwise, that these tests
+        # created. All such networks will be in the current tenant. Neutron
+        # will cleanup duplicate resources automatically, so ignore 404s.
+        search_opts = {'tenant_id': cls.networks_client.tenant_id}
+        networks = cls.networks_client.list_networks(
+            **search_opts).get('networks', [])
 
         for router in routers:
             # Disassociate the subnets from the router. Because of the race
