@@ -55,7 +55,7 @@ def setup(app):
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
-              'oslosphinx',
+              'openstackdocstheme',
               'oslo_config.sphinxconfiggen',
              ]
 
@@ -63,6 +63,14 @@ config_generator_config_file = '../../tempest/cmd/config-generator.tempest.conf'
 sample_config_basename = '_static/tempest'
 
 todo_include_todos = True
+
+# openstackdocstheme options
+repository_name = 'openstack/tempest'
+bug_project = 'tempest'
+bug_tag = ''
+
+# Must set this variable to include year, month, day, hours, and minutes.
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -127,7 +135,7 @@ html_theme = 'openstackdocs'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [openstackdocstheme.get_html_theme_path()]
+#html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -152,13 +160,6 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
-   "-n1"]
-try:
-    html_last_updated_fmt = subprocess.check_output(git_cmd).decode('utf-8')
-except Exception:
-    warnings.warn('Cannot get last updated time from git repository. '
-                  'Not setting "html_last_updated_fmt".')
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
