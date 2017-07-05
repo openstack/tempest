@@ -97,8 +97,9 @@ def _get_api_versions(os, service):
         'keystone': os.identity_client,
         'cinder': os.volumes_client,
     }
-    if service != 'keystone':
-        # Since keystone may be listening on a path, do not remove the path.
+    if service != 'keystone' and service != 'cinder':
+        # Since keystone and cinder may be listening on a path,
+        # do not remove the path.
         client_dict[service].skip_path()
     endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
 
