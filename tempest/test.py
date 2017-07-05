@@ -247,6 +247,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def tearDownClass(cls):
+        # insert pdb breakpoint when pause_teardown is enabled
+        if CONF.pause_teardown:
+            cls.insert_pdb_breakpoint()
         at_exit_set.discard(cls)
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
@@ -282,6 +285,22 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 six.reraise(etype, value, trace)
             finally:
                 del trace  # to avoid circular refs
+
+    def tearDown(self):
+        super(BaseTestCase, self).tearDown()
+        # insert pdb breakpoint when pause_teardown is enabled
+        if CONF.pause_teardown:
+            BaseTestCase.insert_pdb_breakpoint()
+
+    @classmethod
+    def insert_pdb_breakpoint(cls):
+        """Add pdb breakpoint.
+
+        This can help in debugging process, cleaning of resources is
+        paused, so they can be examined.
+        """
+        import pdb
+        pdb.set_trace()
 
     @classmethod
     def skip_checks(cls):

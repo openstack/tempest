@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Pause teardown
+    When pause_teardown flag in tempest.conf is set to True a pdb breakpoint
+    is added to tearDown and tearDownClass methods in test.py.
+    This allows to pause cleaning resources process, so that used resources
+    can be examined. Closer examination of used resources may lead to faster
+    debugging.
