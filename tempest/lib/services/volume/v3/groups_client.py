@@ -18,11 +18,12 @@ from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
-from tempest.lib.services.volume.v3 import base_client
+from tempest.lib.services.volume import base_client
 
 
 class GroupsClient(base_client.BaseClient):
     """Client class to send CRUD Volume Group API requests"""
+    api_version = 'v3'
 
     def create_group(self, **kwargs):
         """Creates a group.

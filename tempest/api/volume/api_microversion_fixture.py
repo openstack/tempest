@@ -13,7 +13,7 @@
 
 import fixtures
 
-from tempest.lib.services.volume.v3 import base_client
+from tempest.lib.services.volume import base_client
 
 
 class APIMicroversionFixture(fixtures.Fixture):

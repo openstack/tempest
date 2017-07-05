@@ -17,11 +17,12 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
-from tempest.lib.services.volume.v3 import base_client
+from tempest.lib.services.volume import base_client
 
 
 class MessagesClient(base_client.BaseClient):
     """Client class to send user messages API requests."""
+    api_version = 'v3'
 
     def show_message(self, message_id):
         """Show details for a single message."""
