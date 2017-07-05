@@ -40,7 +40,7 @@ class BaseServiceTest(base.TestCase):
                function.
         :param body: Expected response body returned by the service client
                function.
-        :param to_utf: Whether to use UTF-8 encoding for request.
+        :param to_utf: Whether to use UTF-8 encoding for response.
         :param status: Expected response status returned by the service client
                function.
         :param headers: Expected headers returned by the service client
