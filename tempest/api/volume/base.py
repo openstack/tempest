@@ -69,11 +69,14 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if CONF.service_available.glance:
             cls.images_client = cls.os_primary.image_client_v2
 
-        cls.snapshots_client = cls.os_primary.snapshots_v2_client
-        cls.volumes_client = cls.os_primary.volumes_v2_client
         if cls._api_version == 3:
+            cls.backups_client = cls.os_primary.backups_v3_client
             cls.volumes_client = cls.os_primary.volumes_v3_client
-        cls.backups_client = cls.os_primary.backups_v2_client
+        else:
+            cls.backups_client = cls.os_primary.backups_v2_client
+            cls.volumes_client = cls.os_primary.volumes_v2_client
+
+        cls.snapshots_client = cls.os_primary.snapshots_v2_client
         cls.volumes_extension_client =\
             cls.os_primary.volumes_v2_extension_client
         cls.availability_zone_client = (

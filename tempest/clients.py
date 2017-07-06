@@ -235,6 +235,7 @@ class Manager(clients.ServiceClients):
         self.volume_services_v2_client = self.volume_v2.ServicesClient()
         self.backups_client = self.volume_v1.BackupsClient()
         self.backups_v2_client = self.volume_v2.BackupsClient()
+        self.backups_v3_client = self.volume_v3.BackupsClient()
         self.encryption_types_client = self.volume_v1.EncryptionTypesClient()
         self.encryption_types_v2_client = \
             self.volume_v2.EncryptionTypesClient()

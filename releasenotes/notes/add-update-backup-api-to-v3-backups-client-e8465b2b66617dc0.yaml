@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Define v3 backups_client for the volume service as a library interface,
+    allowing other projects to use this module as a stable library without
+    maintenance changes.
+    Add update backup API to v3 backups_client library, min_microversion
+    of this API is 3.9.
+
+    * backups_client(v3)

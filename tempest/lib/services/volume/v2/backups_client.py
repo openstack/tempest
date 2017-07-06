@@ -17,9 +17,10 @@ from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.volume import base_client
 
 
-class BackupsClient(rest_client.RestClient):
+class BackupsClient(base_client.BaseClient):
     """Volume V2 Backups client"""
     api_version = "v2"
 
