@@ -72,6 +72,12 @@ class TestSnapshotsClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_SNAPSHOT_METADATA_ITEM = {
+        "meta": {
+            "key1": "value1"
+        }
+    }
+
     def setUp(self):
         super(TestSnapshotsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -142,6 +148,15 @@ class TestSnapshotsClient(base.BaseServiceTest):
             self.FAKE_INFO_SNAPSHOT,
             bytes_body, volume_type_id="cbc36478b0bd8e67e89")
 
+    def _test_show_snapshot_metadata_item(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_snapshot_metadata_item,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_SNAPSHOT_METADATA_ITEM,
+            bytes_body,
+            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5",
+            id="key1")
+
     def test_create_snapshot_with_str_body(self):
         self._test_create_snapshot()
 
@@ -183,6 +198,12 @@ class TestSnapshotsClient(base.BaseServiceTest):
 
     def test_update_snapshot_metadata_with_bytes_body(self):
         self._test_update_snapshot_metadata(bytes_body=True)
+
+    def test_show_snapshot_metadata_item_with_str_body(self):
+        self._test_show_snapshot_metadata_item()
+
+    def test_show_snapshot_metadata_item_with_bytes_body(self):
+        self._test_show_snapshot_metadata_item(bytes_body=True)
 
     def test_force_delete_snapshot(self):
         self.check_service_client_function(

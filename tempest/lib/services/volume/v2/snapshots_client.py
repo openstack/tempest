@@ -164,6 +164,14 @@ class SnapshotsClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_snapshot_metadata_item(self, snapshot_id, id):
+        """Show metadata item for the snapshot."""
+        url = "snapshots/%s/metadata/%s" % (snapshot_id, id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def update_snapshot_metadata_item(self, snapshot_id, id, **kwargs):
         """Update metadata item for the snapshot."""
         # TODO(piyush): Current api-site doesn't contain this API description.
