@@ -97,15 +97,19 @@ import threading
 from cliff import command
 from os_testr import regex_builder
 from os_testr import subunit_trace
+from oslo_serialization import jsonutils as json
 import six
 from testrepository.commands import run_argv
 
+from tempest.cmd import cleanup_service
 from tempest.cmd import init
 from tempest.cmd import workspace
+from tempest.common import credentials_factory as credentials
 from tempest import config
 
 
 CONF = config.CONF
+SAVED_STATE_JSON = "saved_state.json"
 
 
 class TempestRun(command.Command):
@@ -174,6 +178,11 @@ class TempestRun(command.Command):
         else:
             print("No .testr.conf file was found for local execution")
             sys.exit(2)
+        if parsed_args.state:
+            self._init_state()
+        else:
+            pass
+
         if parsed_args.combine:
             temp_stream = tempfile.NamedTemporaryFile()
             return_code = run_argv(['tempest', 'last', '--subunit'], sys.stdin,
@@ -202,6 +211,25 @@ class TempestRun(command.Command):
 
     def get_description(self):
         return 'Run tempest'
+
+    def _init_state(self):
+        print("Initializing saved state.")
+        data = {}
+        self.global_services = cleanup_service.get_global_cleanup_services()
+        self.admin_mgr = credentials.AdminManager()
+        admin_mgr = self.admin_mgr
+        kwargs = {'data': data,
+                  'is_dry_run': False,
+                  'saved_state_json': data,
+                  'is_preserve': False,
+                  'is_save_state': True}
+        for service in self.global_services:
+            svc = service(admin_mgr, **kwargs)
+            svc.run()
+
+        with open(SAVED_STATE_JSON, 'w+') as f:
+            f.write(json.dumps(data,
+                    sort_keys=True, indent=2, separators=(',', ': ')))
 
     def get_parser(self, prog_name):
         parser = super(TempestRun, self).get_parser(prog_name)
@@ -253,6 +281,10 @@ class TempestRun(command.Command):
         parallel.add_argument('--serial', '-t', dest='parallel',
                               action='store_false',
                               help='Run tests serially')
+        parser.add_argument('--save-state', dest='state',
+                            action='store_true',
+                            help="To save the state of the cloud before "
+                                 "running tempest.")
         # output args
         parser.add_argument("--subunit", action='store_true',
                             help='Enable subunit v2 output')
