@@ -212,7 +212,8 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         num_vol = self._count_volumes(server)
         self._shelve_server(server)
         attachment = self.attach_volume(server, volume,
-                                        device=('/dev/%s' % self.device))
+                                        device=('/dev/%s' % self.device),
+                                        check_reserved=True)
 
         # Unshelve the instance and check that attached volume exists
         self._unshelve_server_and_check_volumes(server, num_vol + 1)
@@ -239,7 +240,8 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         self._shelve_server(server)
 
         # Attach and then detach the volume
-        self.attach_volume(server, volume, device=('/dev/%s' % self.device))
+        self.attach_volume(server, volume, device=('/dev/%s' % self.device),
+                           check_reserved=True)
         self.servers_client.detach_volume(server['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
