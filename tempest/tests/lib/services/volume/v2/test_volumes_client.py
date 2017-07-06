@@ -20,6 +20,12 @@ from tempest.tests.lib.services import base
 
 class TestVolumesClient(base.BaseServiceTest):
 
+    FAKE_VOLUME_METADATA_ITEM = {
+        "meta": {
+            "key1": "value1"
+        }
+    }
+
     def setUp(self):
         super(TestVolumesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -45,8 +51,23 @@ class TestVolumesClient(base.BaseServiceTest):
             **kwargs
         )
 
+    def _test_show_volume_metadata_item(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_volume_metadata_item,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_VOLUME_METADATA_ITEM,
+            to_utf=bytes_body,
+            volume_id="a3be971b-8de5-4bdf-bdb8-3d8eb0fb69f8",
+            id="key1")
+
     def test_force_detach_volume_with_str_body(self):
         self._test_force_detach_volume()
 
     def test_force_detach_volume_with_bytes_body(self):
         self._test_force_detach_volume(bytes_body=True)
+
+    def test_show_volume_metadata_item_with_str_body(self):
+        self._test_show_volume_metadata_item()
+
+    def test_show_volume_metadata_item_with_bytes_body(self):
+        self._test_show_volume_metadata_item(bytes_body=True)
