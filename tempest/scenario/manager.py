@@ -238,6 +238,23 @@ class ScenarioTest(tempest.test.BaseTestCase):
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
 
+    def create_volume_snapshot(self, volume_id, name=None, description=None,
+                               metadata=None, force=False):
+        name = name or data_utils.rand_name(
+            self.__class__.__name__ + '-snapshot')
+        snapshot = self.snapshots_client.create_snapshot(
+            volume_id=volume_id,
+            force=force,
+            display_name=name,
+            description=description,
+            metadata=metadata)['snapshot']
+        self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
+                        snapshot['id'])
+        self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot['id'], 'available')
+        return snapshot
+
     def create_volume_type(self, client=None, name=None, backend_name=None):
         if not client:
             client = self.admin_volume_types_client
