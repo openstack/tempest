@@ -48,15 +48,6 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
 
         return self.create_server(image_id=image, key_name=keypair['name'])
 
-    def create_encrypted_volume(self, encryption_provider, volume_type):
-        volume_type = self.create_volume_type(name=volume_type)
-        self.create_encryption_type(type_id=volume_type['id'],
-                                    provider=encryption_provider,
-                                    key_size=256,
-                                    cipher='aes-xts-plain64',
-                                    control_location='front-end')
-        return self.create_volume(volume_type=volume_type['name'])
-
     def attach_detach_volume(self, server, volume):
         attached_volume = self.nova_volume_attach(server, volume)
         self.nova_volume_detach(server, attached_volume)
