@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The ``list_backups`` method of the v2 ``BackupsClient`` class now has
+    an additional ``**params`` argument that enables passing additional
+    information in the query string of the HTTP request.
