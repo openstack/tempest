@@ -95,7 +95,7 @@ def _get_api_versions(os, service):
     client_dict = {
         'nova': os.servers_client,
         'keystone': os.identity_client,
-        'cinder': os.volumes_client,
+        'cinder': os.volumes_client_latest,
     }
     if service != 'keystone' and service != 'cinder':
         # Since keystone and cinder may be listening on a path,
