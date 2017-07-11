@@ -23,10 +23,10 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
     @classmethod
     def skip_checks(cls):
-        super(LiveBlockMigrationNegativeTestJSON, cls).skip_checks()
+        super(LiveMigrationNegativeTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.live_migration:
             raise cls.skipException("Live migration is not enabled")
 
@@ -47,3 +47,17 @@ class LiveBlockMigrationNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           server['id'], target_host)
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('6e2f94f5-2ee8-4830-bef5-5bc95bb0795b')
+    def test_live_block_migration_suspended(self):
+        server = self.create_test_server(wait_until="ACTIVE")
+
+        self.admin_servers_client.suspend_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'SUSPENDED')
+
+        destination_host = self.get_host_other_than(server['id'])
+
+        self.assertRaises(lib_exc.Conflict, self._migrate_server_to,
+                          server['id'], destination_host)
