@@ -44,6 +44,13 @@ class IdentityClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def check_token_existence(self, resp_token):
+        """Validates a token."""
+        headers = {'X-Subject-Token': resp_token}
+        resp, body = self.head("auth/tokens", headers=headers)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def list_auth_projects(self):
         """Get available project scopes."""
         resp, body = self.get("auth/projects")
