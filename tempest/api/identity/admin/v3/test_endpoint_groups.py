@@ -54,17 +54,17 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
         super(EndPointGroupsTest, cls).resource_cleanup()
 
     @classmethod
-    def _create_service(self):
+    def _create_service(cls):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
         service_data = (
-            self.services_client.create_service(name=s_name,
-                                                type=s_type,
-                                                description=s_description))
+            cls.services_client.create_service(name=s_name,
+                                               type=s_type,
+                                               description=s_description))
 
         service_id = service_data['service']['id']
-        self.service_ids.append(service_id)
+        cls.service_ids.append(service_id)
         return service_id
 
     @decorators.idempotent_id('7c69e7a1-f865-402d-a2ea-44493017315a')
