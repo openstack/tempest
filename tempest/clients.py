@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
-
 from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
@@ -23,7 +21,6 @@ from tempest.services import object_storage
 from tempest.services import orchestration
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class Manager(clients.ServiceClients):
