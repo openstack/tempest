@@ -318,6 +318,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-retype': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
 
     def force_detach_volume(self, volume_id, **kwargs):
         """Force detach a volume.
