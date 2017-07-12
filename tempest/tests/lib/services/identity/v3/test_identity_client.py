@@ -60,6 +60,34 @@ class TestIdentityClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_AUTH_DOMAINS = {
+        "domains": [
+            {
+                "description": "my domain description",
+                "enabled": True,
+                "id": "1789d1",
+                "links": {
+                    "self": "https://example.com/identity/v3/domains/1789d1"
+                },
+                "name": "my domain"
+            },
+            {
+                "description": "description of my other domain",
+                "enabled": True,
+                "id": "43e8da",
+                "links": {
+                    "self": "https://example.com/identity/v3/domains/43e8da"
+                },
+                "name": "another domain"
+            }
+        ],
+        "links": {
+            "self": "https://example.com/identity/v3/auth/domains",
+            "previous": None,
+            "next": None
+        }
+    }
+
     def setUp(self):
         super(TestIdentityClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -87,6 +115,13 @@ class TestIdentityClient(base.BaseServiceTest):
             self.client.list_auth_projects,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_AUTH_PROJECTS,
+            bytes_body)
+
+    def _test_list_auth_domains(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_auth_domains,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_AUTH_DOMAINS,
             bytes_body)
 
     def test_show_api_description_with_str_body(self):
@@ -122,3 +157,9 @@ class TestIdentityClient(base.BaseServiceTest):
 
     def test_list_auth_projects_with_bytes_body(self):
         self._test_list_auth_projects(bytes_body=True)
+
+    def test_list_auth_domains_with_str_body(self):
+        self._test_list_auth_domains()
+
+    def test_list_auth_domains_with_bytes_body(self):
+        self._test_list_auth_domains(bytes_body=True)
