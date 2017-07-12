@@ -61,13 +61,6 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
-    @classmethod
-    def resource_setup(cls):
-        super(RoutersAdminTest, cls).resource_setup()
-        cls.tenant_cidr = (CONF.network.project_network_cidr
-                           if cls._ip_version == 4 else
-                           CONF.network.project_network_v6_cidr)
-
     @decorators.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
     def test_create_router_setting_project_id(self):
         # Test creating router from admin user setting project_id.
