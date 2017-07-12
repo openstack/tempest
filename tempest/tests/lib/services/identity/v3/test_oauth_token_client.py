@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslotest import mockpatch
+import fixtures
 
 from tempest.lib.services.identity.v3 import oauth_token_client
 from tempest.tests.lib import fake_auth_provider
@@ -137,7 +137,7 @@ class TestOAUTHTokenClient(base.BaseServiceTest):
     def test_create_request_token(self):
         mock_resp = self._mock_token_response(self.FAKE_CREATE_REQUEST_TOKEN)
         resp = fake_http.fake_http_response(None, status=201), mock_resp
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.common.rest_client.RestClient.post',
             return_value=resp))
 
@@ -157,7 +157,7 @@ class TestOAUTHTokenClient(base.BaseServiceTest):
         mock_resp = self._mock_token_response(self.FAKE_CREATE_ACCESS_TOKEN)
         req_secret = self.FAKE_CREATE_REQUEST_TOKEN['oauth_token_secret']
         resp = fake_http.fake_http_response(None, status=201), mock_resp
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.common.rest_client.RestClient.post',
             return_value=resp))
 
