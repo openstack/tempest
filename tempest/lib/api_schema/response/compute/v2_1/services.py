@@ -65,3 +65,25 @@ enable_disable_service = {
         'required': ['service']
     }
 }
+
+disable_log_reason = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'service': {
+                'type': 'object',
+                'properties': {
+                    'disabled_reason': {'type': 'string'},
+                    'binary': {'type': 'string'},
+                    'host': {'type': 'string'},
+                    'status': {'type': 'string'}
+                },
+                'additionalProperties': False,
+                'required': ['disabled_reason', 'binary', 'host', 'status']
+            }
+        },
+        'additionalProperties': False,
+        'required': ['service']
+    }
+}
