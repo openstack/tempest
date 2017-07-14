@@ -30,7 +30,7 @@ class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(VolumeTypesAccessTest, cls).setup_clients()
-        cls.alt_client = cls.os_alt.volumes_client
+        cls.alt_client = cls.os_alt.volumes_client_latest
 
     @decorators.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')
     def test_volume_type_access_add(self):

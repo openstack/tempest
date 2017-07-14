@@ -36,7 +36,7 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
-        cls.alt_client = cls.os_alt.volumes_client
+        cls.alt_client = cls.os_alt.volumes_client_latest
 
     @classmethod
     def setup_clients(cls):
