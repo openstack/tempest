@@ -420,8 +420,13 @@ instance_action_events = {
         'properties': {
             'event': {'type': 'string'},
             'start_time': parameter_types.date_time,
-            'finish_time': parameter_types.date_time,
-            'result': {'type': 'string'},
+            # The finish_time, result and optionally traceback are all
+            # possibly None (null) until the event is actually finished.
+            # The traceback would only be set if there was an error, but
+            # when the event is complete both finish_time and result will
+            # be set.
+            'finish_time': parameter_types.date_time_or_null,
+            'result': {'type': ['string', 'null']},
             'traceback': {'type': ['string', 'null']}
         },
         'additionalProperties': False,
