@@ -213,7 +213,9 @@ class ServerGroupService(ServerService):
 class StackService(BaseService):
     def __init__(self, manager, **kwargs):
         super(StackService, self).__init__(kwargs)
-        self.client = manager.orchestration_client
+        params = config.service_client_config('orchestration')
+        self.client = manager.orchestration.OrchestrationClient(
+            manager.auth_provider, **params)
 
     def list(self):
         client = self.client

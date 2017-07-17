@@ -18,7 +18,6 @@ from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
 from tempest.services import object_storage
-from tempest.services import orchestration
 
 CONF = config.CONF
 
@@ -48,15 +47,6 @@ class Manager(clients.ServiceClients):
         self._set_object_storage_clients()
         self._set_image_clients()
         self._set_network_clients()
-
-        self.orchestration_client = orchestration.OrchestrationClient(
-            self.auth_provider,
-            CONF.orchestration.catalog_type,
-            CONF.orchestration.region or CONF.identity.region,
-            endpoint_type=CONF.orchestration.endpoint_type,
-            build_interval=CONF.orchestration.build_interval,
-            build_timeout=CONF.orchestration.build_timeout,
-            **self.default_params)
 
     def _set_network_clients(self):
         self.network_agents_client = self.network.AgentsClient()
