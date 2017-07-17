@@ -17,8 +17,8 @@ import mock
 from oslo_config import cfg
 
 from tempest.common import credentials_factory as credentials
-from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib.common import dynamic_creds
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.identity.v2 import identity_client as v2_iden_client
@@ -659,7 +659,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         creds.creds_client = mock.MagicMock()
         creds.creds_client.create_user_role.side_effect = lib_exc.Conflict
-        with mock.patch('tempest.common.dynamic_creds.LOG') as log_mock:
+        with mock.patch('tempest.lib.common.dynamic_creds.LOG') as log_mock:
             creds._create_creds()
             log_mock.warning.assert_called_once_with(
                 "Member role already exists, ignoring conflict.")
