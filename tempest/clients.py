@@ -205,6 +205,7 @@ class Manager(clients.ServiceClients):
             self.identity_v3.EndPointsFilterClient(**params_v3)
         self.endpoint_groups_client = self.identity_v3.EndPointGroupsClient(
             **params_v3)
+        self.catalog_client = self.identity_v3.CatalogClient(**params_v3)
 
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding

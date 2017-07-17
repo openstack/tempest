@@ -187,6 +187,7 @@ class BaseIdentityV3Test(BaseIdentityTest):
         cls.non_admin_users_client = cls.os_primary.users_v3_client
         cls.non_admin_token = cls.os_primary.token_v3_client
         cls.non_admin_projects_client = cls.os_primary.projects_client
+        cls.non_admin_catalog_client = cls.os_primary.catalog_client
         cls.non_admin_versions_client =\
             cls.os_primary.identity_versions_v3_client
 
