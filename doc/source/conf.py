@@ -36,7 +36,8 @@ def build_plugin_registry(app):
     subprocess.call(['tools/generate-tempest-plugins-list.sh'], cwd=root_dir)
 
 def setup(app):
-    app.connect('builder-inited', build_plugin_registry)
+    if os.getenv('GENERATE_TEMPEST_PLUGIN_LIST', 'true').lower() == 'true':
+        app.connect('builder-inited', build_plugin_registry)
 
 
 
