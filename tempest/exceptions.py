@@ -52,12 +52,5 @@ class ServerUnreachable(exceptions.TempestException):
                "the configured network")
 
 
-# NOTE(andreaf) This exception is added here to facilitate the migration
-# of get_network_from_name and preprov_creds to tempest.lib, and it should
-# be migrated along with them
-class InvalidTestResource(exceptions.TempestException):
-    message = "%(name)s is not a valid %(type)s, or the name is ambiguous"
-
-
 class RFCViolation(exceptions.RestClientException):
     message = "RFC Violation"

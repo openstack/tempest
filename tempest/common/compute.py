@@ -25,9 +25,9 @@ from six.moves.urllib import parse as urlparse
 from oslo_log import log as logging
 from oslo_utils import excutils
 
-from tempest.common import fixed_network
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import fixed_network
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
 

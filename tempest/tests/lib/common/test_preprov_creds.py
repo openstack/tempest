@@ -24,10 +24,10 @@ import fixtures
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_config import cfg
 
-from tempest.common import preprov_creds
 from tempest import config
 from tempest.lib import auth
 from tempest.lib.common import cred_provider
+from tempest.lib.common import preprov_creds
 from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -88,7 +88,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         self.useFixture(lockutils_fixtures.ExternalLockFixture())
         self.test_accounts = self._fake_accounts(cfg.CONF.identity.admin_role)
         self.accounts_mock = self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
         self.useFixture(fixtures.MockPatch(
             'os.path.isfile', return_value=True))
@@ -271,7 +271,7 @@ class TestPreProvisionedCredentials(base.TestCase):
     def test_is_not_multi_user(self):
         self.test_accounts = [self.test_accounts[0]]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=self.test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -335,7 +335,7 @@ class TestPreProvisionedCredentials(base.TestCase):
              'password': 'p', 'roles': ['role-7', 'role-11'],
              'resources': {'network': 'network-2'}}]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -363,7 +363,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         admin_accounts = [x for x in self.test_accounts if 'test_admin'
                           in x['username']]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=admin_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -381,7 +381,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         admin_accounts = [x for x in self.test_accounts if 'test_admin'
                           in x['username']]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=admin_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -402,7 +402,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             {'username': 'test_admin1', 'tenant_name': 'test_tenant11',
              'password': 'p', 'types': ['admin']}]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -416,7 +416,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             {'username': 'test_admin1', 'tenant_name': 'test_tenant11',
              'password': 'p', 'roles': [cfg.CONF.identity.admin_role]}]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
@@ -427,7 +427,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         non_admin_accounts = [x for x in self.test_accounts if 'test_admin'
                               not in x['username']]
         self.useFixture(fixtures.MockPatch(
-            'tempest.common.preprov_creds.read_accounts_yaml',
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
             return_value=non_admin_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)

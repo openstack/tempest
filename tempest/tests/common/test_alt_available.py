@@ -40,7 +40,7 @@ class TestAltAvailable(base.TestCase):
                              project_name="t%s" % ii,
                              password="p") for ii in creds]
             self.useFixture(fixtures.MockPatch(
-                'tempest.common.preprov_creds.read_accounts_yaml',
+                'tempest.lib.common.preprov_creds.read_accounts_yaml',
                 return_value=accounts))
             cfg.CONF.set_default('test_accounts_file',
                                  use_accounts_file, group='auth')

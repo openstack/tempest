@@ -15,9 +15,9 @@
 import testtools
 
 from tempest.api.compute import base
-from tempest.common import fixed_network
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import fixed_network
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 

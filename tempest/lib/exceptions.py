@@ -269,3 +269,7 @@ class VolumeBackupException(TempestException):
 class DeleteErrorException(TempestException):
     message = ("Resource %(resource_id)s failed to delete "
                "and is in ERROR status")
+
+
+class InvalidTestResource(TempestException):
+    message = "%(name)s is not a valid %(type)s, or the name is ambiguous"
