@@ -48,7 +48,6 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(LiveMigrationTest, cls).setup_clients()
-        cls.admin_hosts_client = cls.os_admin.hosts_client
         cls.admin_migration_client = cls.os_admin.migrations_client
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
