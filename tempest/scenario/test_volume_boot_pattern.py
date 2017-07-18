@@ -229,9 +229,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self._delete_server(instance)
 
     @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
-    @testtools.skipIf(CONF.volume.storage_protocol.lower() in ['ceph', 'nfs'],
-                      'Currently, {} does not support volume encryption'
-                      .format(CONF.volume.storage_protocol))
+    @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
+                          'Encrypted volume attach is not supported')
     @test.services('compute', 'volume')
     def test_boot_server_from_encrypted_volume_luks(self):
         # Create an encrypted volume
