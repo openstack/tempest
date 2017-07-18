@@ -22,8 +22,9 @@ from tempest.lib import exceptions
 
 @six.add_metaclass(abc.ABCMeta)
 class CredentialProvider(object):
-    def __init__(self, identity_version, name=None, network_resources=None,
-                 credentials_domain=None, admin_role=None):
+    def __init__(self, identity_version, name=None,
+                 network_resources=None, credentials_domain=None,
+                 admin_role=None, identity_uri=None):
         """A CredentialProvider supplies credentials to test classes.
 
         :param identity_version: Identity version of the credentials provided
@@ -33,8 +34,11 @@ class CredentialProvider(object):
                                   credentials
         :param credentials_domain: Domain credentials belong to
         :param admin_role: Name of the role of the admin account
+        :param identity_uri: Identity URI of the target cloud. This *must* be
+                             specified for anything to work.
         """
         self.identity_version = identity_version
+        self.identity_uri = identity_uri
         self.name = name or "test_creds"
         self.network_resources = network_resources
         self.credentials_domain = credentials_domain or 'Default'
