@@ -87,7 +87,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # project and domain APIs
         projects_list = self.projects_client.list_projects(
             params={'is_domain': True})['projects']
-        self.assertIn(project, projects_list)
+        project_ids = [p['id'] for p in projects_list]
+        self.assertIn(project['id'], project_ids)
 
         # The domains API return different attributes for the entity, so we
         # compare the entities IDs
