@@ -147,12 +147,16 @@ def get_credentials_provider(name, network_resources=None,
                 'A valid credential provider is needed')
 
 
-# We want a helper function here to check and see if admin credentials
-# are available so we can do a single call from skip_checks if admin
-# creds area available.
-# This depends on identity_version as there may be admin credentials
-# available for v2 but not for v3.
 def is_admin_available(identity_version):
+    """Helper to check for admin credentials
+
+    Helper function to check if a set of admin credentials is available so we
+    can do a single call from skip_checks.
+    This helper depends on identity_version as there may be admin credentials
+    available for v2 but not for v3.
+
+    :param identity_version: 'v2' or 'v3'
+    """
     is_admin = True
     # If dynamic credentials is enabled admin will be available
     if CONF.auth.use_dynamic_credentials:
@@ -173,12 +177,16 @@ def is_admin_available(identity_version):
     return is_admin
 
 
-# We want a helper function here to check and see if alt credentials
-# are available so we can do a single call from skip_checks if alt
-# creds area available.
-# This depends on identity_version as there may be alt credentials
-# available for v2 but not for v3.
 def is_alt_available(identity_version):
+    """Helper to check for alt credentials
+
+    Helper function to check if a second set of credentials is available (aka
+    alt credentials) so we can do a single call from skip_checks.
+    This helper depends on identity_version as there may be alt credentials
+    available for v2 but not for v3.
+
+    :param identity_version: 'v2' or 'v3'
+    """
     # If dynamic credentials is enabled alt will be available
     if CONF.auth.use_dynamic_credentials:
         return True
@@ -216,9 +224,19 @@ DEFAULT_PARAMS = {
 }
 
 
-# Read credentials from configuration, builds a Credentials object
-# based on the specified or configured version
 def get_configured_admin_credentials(fill_in=True, identity_version=None):
+    """Get admin credentials from the config file
+
+    Read credentials from configuration, builds a Credentials object based on
+    the specified or configured version
+
+    :param fill_in: If True, a request to the Token API is submitted, and the
+                    credential object is filled in with all names and IDs from
+                    the token API response.
+    :param identity_version: The identity version to talk to and the type of
+                             credentials object to be created. 'v2' or 'v3'.
+    :returns: An object of a sub-type of `auth.Credentials`
+    """
     identity_version = identity_version or CONF.identity.auth_version
 
     if identity_version not in ('v2', 'v3'):
@@ -250,6 +268,19 @@ def get_configured_admin_credentials(fill_in=True, identity_version=None):
 # Wrapper around auth.get_credentials to use the configured identity version
 # if none is specified
 def get_credentials(fill_in=True, identity_version=None, **kwargs):
+    """Get credentials from dict based on config
+
+    Wrapper around auth.get_credentials to use the configured identity version
+    if none is specified.
+
+    :param fill_in: If True, a request to the Token API is submitted, and the
+                    credential object is filled in with all names and IDs from
+                    the token API response.
+    :param identity_version: The identity version to talk to and the type of
+                             credentials object to be created. 'v2' or 'v3'.
+    :param kwargs: Attributes to be used to build the Credentials object.
+    :returns: An object of a sub-type of `auth.Credentials`
+    """
     params = dict(DEFAULT_PARAMS, **kwargs)
     identity_version = identity_version or CONF.identity.auth_version
     # In case of "v3" add the domain from config if not specified
