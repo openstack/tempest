@@ -16,9 +16,7 @@
 from oslo_log import log as logging
 import testtools
 
-from tempest.common import waiters
 from tempest import config
-from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -56,20 +54,6 @@ class TestStampPattern(manager.ScenarioTest):
         super(TestStampPattern, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
-
-    def _create_volume_snapshot(self, volume):
-        snapshot_name = data_utils.rand_name('scenario-snapshot')
-        snapshot = self.snapshots_client.create_snapshot(
-            volume_id=volume['id'], display_name=snapshot_name)['snapshot']
-        self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
-                        snapshot['id'])
-        self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-        waiters.wait_for_volume_resource_status(self.snapshots_client,
-                                                snapshot['id'], 'available')
-        self.assertEqual(snapshot_name, snapshot['name'])
-        return snapshot
 
     def _wait_for_volume_available_on_the_system(self, ip_address,
                                                  private_key):
@@ -116,7 +100,7 @@ class TestStampPattern(manager.ScenarioTest):
         self.nova_volume_detach(server, volume)
 
         # snapshot the volume
-        volume_snapshot = self._create_volume_snapshot(volume)
+        volume_snapshot = self.create_volume_snapshot(volume['id'])
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)

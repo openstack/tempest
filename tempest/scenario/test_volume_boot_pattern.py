@@ -69,21 +69,6 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         return self.create_server(image_id='', **create_kwargs)
 
-    def _create_snapshot_from_volume(self, vol_id):
-        snap_name = data_utils.rand_name(
-            self.__class__.__name__ + '-snapshot')
-        snap = self.snapshots_client.create_snapshot(
-            volume_id=vol_id,
-            force=True,
-            display_name=snap_name)['snapshot']
-        self.addCleanup(
-            self.snapshots_client.wait_for_resource_deletion, snap['id'])
-        self.addCleanup(self.snapshots_client.delete_snapshot, snap['id'])
-        waiters.wait_for_volume_resource_status(self.snapshots_client,
-                                                snap['id'], 'available')
-        self.assertEqual(snap_name, snap['name'])
-        return snap
-
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
@@ -147,7 +132,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         # snapshot a volume
         LOG.info("Creating snapshot from volume: %s", volume_origin['id'])
-        snapshot = self._create_snapshot_from_volume(volume_origin['id'])
+        snapshot = self.create_volume_snapshot(volume_origin['id'], force=True)
 
         # create a 3rd instance from snapshot
         LOG.info("Creating third instance from snapshot: %s", snapshot['id'])
@@ -177,7 +162,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         boot_volume = self._create_volume_from_image()
 
         # Create a snapshot
-        boot_snapshot = self._create_snapshot_from_volume(boot_volume['id'])
+        boot_snapshot = self.create_volume_snapshot(boot_volume['id'])
 
         # Create a server from a volume snapshot
         server = self._boot_instance_from_resource(
