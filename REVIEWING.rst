@@ -91,7 +91,7 @@ deprecation), CLI additions or deprecations, major feature additions, and
 anything backwards incompatible or would require a user to take note or do
 something extra.
 
-.. _reno: http://docs.openstack.org/developer/reno/
+.. _reno: https://docs.openstack.org/reno/latest/
 
 Deprecated Code
 ---------------

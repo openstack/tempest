@@ -24,7 +24,7 @@ class BulkMiddlewareClient(rest_client.RestClient):
 
         To extract containers and objects on Swift cluster from
         uploaded archived file. For More information please check:
-        http://docs.openstack.org/developer/swift/middleware.html#module-swift.common.middleware.bulk
+        https://docs.openstack.org/swift/latest/middleware.html#module-swift.common.middleware.bulk
         """
         url = '%s?extract-archive=%s' % (upload_path, archive_file_format)
         if headers is None:
@@ -37,7 +37,7 @@ class BulkMiddlewareClient(rest_client.RestClient):
         """Delete multiple objects or containers from their account.
 
         For More information please check:
-        http://docs.openstack.org/developer/swift/middleware.html#module-swift.common.middleware.bulk
+        https://docs.openstack.org/swift/latest/middleware.html#module-swift.common.middleware.bulk
         """
         url = '?bulk-delete'
 
@@ -51,7 +51,7 @@ class BulkMiddlewareClient(rest_client.RestClient):
         """Delete multiple objects or containers with POST request.
 
         For More information please check:
-        http://docs.openstack.org/developer/swift/middleware.html#module-swift.common.middleware.bulk
+        https://docs.openstack.org/swift/latest/middleware.html#module-swift.common.middleware.bulk
         """
         url = '?bulk-delete'
 

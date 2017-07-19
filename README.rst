@@ -11,7 +11,7 @@ Tempest - The OpenStack Integration Test Suite
 ==============================================
 
 The documentation for Tempest is officially hosted at:
-http://docs.openstack.org/developer/tempest/
+https://docs.openstack.org/tempest/latest/
 
 This is a set of integration tests to be run against a live OpenStack
 cluster. Tempest has batteries of tests for OpenStack API validation,
@@ -117,7 +117,7 @@ as it is simpler, and quicker to work with.
    will run the same set of tests as the default gate jobs.
 
 .. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
-.. _ostestr: http://docs.openstack.org/developer/os-testr/
+.. _ostestr: https://docs.openstack.org/os-testr/latest/
 
 Library
 -------
