@@ -5,7 +5,7 @@ prelude: |
     it lives directly in the tempest project. For more information refer to
     the `library docs`_.
 
-    .. _library docs: http://docs.openstack.org/developer/tempest/library.html#library
+    .. _library docs: https://docs.openstack.org/tempest/latest/library.html#current-library-apis
 
 features:
   - Tempest library interface

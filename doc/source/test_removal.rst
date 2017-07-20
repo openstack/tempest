@@ -171,7 +171,7 @@ removed assuming there is equivalent testing elsewhere. Preferably using the
 `tempest plugin mechanism`_
 to maintain continuity after migrating the tests out of tempest.
 
-.. _tempest plugin mechanism: http://docs.openstack.org/developer/tempest/plugin.html
+.. _tempest plugin mechanism: https://docs.openstack.org/tempest/latest/plugin.html
 
 API Compatibility
 """""""""""""""""

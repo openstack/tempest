@@ -111,7 +111,7 @@ For Details, see: `API Microversion testing Framework`_
 This document explains how to implement Microversion tests using those
 interfaces.
 
-.. _API Microversion testing Framework: http://docs.openstack.org/developer/tempest/library/api_microversion_testing.html
+.. _API Microversion testing Framework: https://docs.openstack.org/tempest/latest/library/api_microversion_testing.html
 
 
 Step1: Add skip logic based on configured Microversion range
@@ -296,46 +296,46 @@ Microversion tests implemented in Tempest
 
  * `2.1`_
 
- .. _2.1:  http://docs.openstack.org/developer/nova/api_microversion_history.html#id1
+ .. _2.1:  https://docs.openstack.org/nova/latest/api_microversion_history.html#id1
 
  * `2.2`_
 
- .. _2.2: http://docs.openstack.org/developer/nova/api_microversion_history.html#id2
+ .. _2.2: http://docs.openstack.org/nova/latest/api_microversion_history.html#id2
 
  * `2.10`_
 
- .. _2.10: http://docs.openstack.org/developer/nova/api_microversion_history.html#id9
+ .. _2.10: http://docs.openstack.org/nova/latest/api_microversion_history.html#id9
 
  * `2.20`_
 
- .. _2.20: http://docs.openstack.org/developer/nova/api_microversion_history.html#id18
+ .. _2.20: http://docs.openstack.org/nova/latest/api_microversion_history.html#id18
 
  * `2.25`_
 
- .. _2.25: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-mitaka
+ .. _2.25: http://docs.openstack.org/nova/latest/api_microversion_history.html#maximum-in-mitaka
 
  * `2.32`_
 
- .. _2.32: http://docs.openstack.org/developer/nova/api_microversion_history.html#id29
+ .. _2.32: http://docs.openstack.org/nova/latest/api_microversion_history.html#id29
 
  * `2.37`_
 
- .. _2.37: http://docs.openstack.org/developer/nova/api_microversion_history.html#id34
+ .. _2.37: http://docs.openstack.org/nova/latest/api_microversion_history.html#id34
 
  * `2.42`_
 
- .. _2.42: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-ocata
+ .. _2.42: http://docs.openstack.org/nova/latest/api_microversion_history.html#maximum-in-ocata
 
  * `2.47`_
 
- .. _2.47: http://docs.openstack.org/developer/nova/api_microversion_history.html#id42
+ .. _2.47: http://docs.openstack.org/nova/latest/api_microversion_history.html#id42
 
  * `2.48`_
 
- .. _2.48: http://docs.openstack.org/developer/nova/api_microversion_history.html#id43
+ .. _2.48: http://docs.openstack.org/nova/latest/api_microversion_history.html#id43
 
 * Volume
 
  * `3.3`_
 
- .. _3.3:  https://docs.openstack.org/developer/cinder/devref/api_microversion_history.html#id4
+ .. _3.3:  https://docs.openstack.org/cinder/latest/devref/api_microversion_history.html#id4
