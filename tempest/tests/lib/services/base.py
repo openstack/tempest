@@ -32,6 +32,7 @@ class BaseServiceTest(base.TestCase):
     def check_service_client_function(self, function, function2mock,
                                       body, to_utf=False, status=200,
                                       headers=None, mock_args=None,
+                                      resp_as_string=False,
                                       **kwargs):
         """Mock a service client function for unit testing.
 
@@ -53,6 +54,9 @@ class BaseServiceTest(base.TestCase):
                  ``assert_called_once_with(foo='bar')`` is called.
                * If mock_args='foo' then ``assert_called_once_with('foo')``
                  is called.
+        :param resp_as_string: Whether response body is retruned as string.
+               This is for service client methods which return ResponseBodyData
+               object.
         :param kwargs: kwargs that are passed to function.
         """
         mocked_response = self.create_response(body, to_utf, status, headers)
@@ -62,8 +66,9 @@ class BaseServiceTest(base.TestCase):
             resp = function(**kwargs)
         else:
             resp = function()
+        if resp_as_string:
+            resp = resp.data
         self.assertEqual(body, resp)
-
         if isinstance(mock_args, list):
             fixture.mock.assert_called_once_with(*mock_args)
         elif isinstance(mock_args, dict):
