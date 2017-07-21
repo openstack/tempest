@@ -28,6 +28,7 @@ CONF = config.CONF
 
 class ServersTestJSON(base.BaseV2ComputeTest):
     disk_config = 'AUTO'
+    volume_backed = False
 
     @classmethod
     def setup_credentials(cls):
@@ -57,7 +58,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             accessIPv4=cls.accessIPv4,
             accessIPv6=cls.accessIPv6,
             disk_config=disk_config,
-            adminPass=cls.password)
+            adminPass=cls.password,
+            volume_backed=cls.volume_backed)
         cls.server = (cls.client.show_server(server_initial['id'])
                       ['server'])
 
@@ -71,7 +73,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server['accessIPv6'],
                          str(netaddr.IPAddress(self.accessIPv6)))
         self.assertEqual(self.name, self.server['name'])
-        self.assertEqual(self.image_ref, self.server['image']['id'])
+        if self.volume_backed:
+            # Image is an empty string as per documentation
+            self.assertEqual("", self.server['image'])
+        else:
+            self.assertEqual(self.image_ref, self.server['image']['id'])
         self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
@@ -151,4 +157,16 @@ class ServersTestManualDisk(ServersTestJSON):
         super(ServersTestManualDisk, cls).skip_checks()
         if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
+            raise cls.skipException(msg)
+
+
+class ServersTestBootFromVolume(ServersTestJSON):
+    """Run the `ServersTestJSON` tests with a volume backed VM"""
+    volume_backed = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(ServersTestBootFromVolume, cls).skip_checks()
+        if not test.get_service_list()['volume']:
+            msg = "Volume service not enabled."
             raise cls.skipException(msg)
