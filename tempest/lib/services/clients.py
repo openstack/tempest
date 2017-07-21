@@ -161,7 +161,7 @@ class ClientsFactory(object):
         :param kwargs: Parameters to be passed to all clients. Parameters
             values can be overwritten when clients are initialised, but
             parameters cannot be deleted.
-        :raise ImportError if the specified module_path cannot be imported
+        :raise ImportError: if the specified module_path cannot be imported
 
         Example::
 

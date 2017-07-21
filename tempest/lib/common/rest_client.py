@@ -371,7 +371,7 @@ class RestClient(object):
         on the endpoint in the catalog will return a list of supported API
         versions.
 
-        :return tuple with response headers and list of version numbers
+        :return: tuple with response headers and list of version numbers
         :rtype: tuple
         """
         resp, body = self.get('')
