@@ -39,19 +39,56 @@ to avoid circular dependencies."""
 
 
 # Subset of the parameters of credential providers that depend on configuration
-def get_common_provider_params():
+def _get_common_provider_params(identity_version):
     return {
+        'identity_version': identity_version,
         'credentials_domain': CONF.auth.default_credentials_domain_name,
         'admin_role': CONF.identity.admin_role
     }
 
 
-def get_dynamic_provider_params():
-    return get_common_provider_params()
+def get_dynamic_provider_params(identity_version, admin_creds=None):
+    """Dynamic provider parameters setup from config
+
+    This helper returns a dict of parameter that can be used to initialise
+    a `DynamicCredentialProvider` according to tempest configuration.
+    Parameters that are not configuration specific (name, network_resources)
+    are not returned.
+
+    :param identity_version: 'v2' or 'v3'
+    :param admin_creds: An object of type `auth.Credentials`. If None, it
+                        is built from the configuration file as well.
+    :returns A dict with the parameters
+    """
+    _common_params = _get_common_provider_params(identity_version)
+    admin_creds = admin_creds or get_configured_admin_credentials(
+        fill_in=True, identity_version=identity_version)
+    return dict(_common_params, **dict([
+        ('admin_creds', admin_creds),
+        ('identity_admin_domain_scope', CONF.identity.admin_domain_scope),
+        ('identity_admin_role', CONF.identity.admin_role),
+        ('extra_roles', CONF.auth.tempest_roles),
+        ('neutron_available', CONF.service_available.neutron),
+        ('project_network_cidr', CONF.network.project_network_cidr),
+        ('project_network_mask_bits', CONF.network.project_network_mask_bits),
+        ('public_network_id', CONF.network.public_network_id),
+        ('create_networks', (CONF.auth.create_isolated_networks and not
+                             CONF.network.shared_physical_network)),
+        ('resource_prefix', CONF.resources_prefix)
+    ]))
 
 
-def get_preprov_provider_params():
-    _common_params = get_common_provider_params()
+def get_preprov_provider_params(identity_version):
+    """Pre-provisioned provider parameters setup from config
+
+    This helper returns a dict of parameter that can be used to initialise
+    a `PreProvisionedCredentialProvider` according to tempest configuration.
+    Parameters that are not configuration specific (name) are not returned.
+
+    :param identity_version: 'v2' or 'v3'
+    :returns A dict with the parameters
+    """
+    _common_params = _get_common_provider_params(identity_version)
     reseller_admin_role = CONF.object_storage.reseller_admin_role
     return dict(_common_params, **dict([
         ('accounts_lock_dir', lockutils.get_lock_path(CONF)),
@@ -61,42 +98,40 @@ def get_preprov_provider_params():
     ]))
 
 
-# Return the right implementation of CredentialProvider based on config
-# Dropping interface and password, as they are never used anyways
-# TODO(andreaf) Drop them from the CredentialsProvider interface completely
 def get_credentials_provider(name, network_resources=None,
                              force_tenant_isolation=False,
                              identity_version=None):
+    """Return the right implementation of CredentialProvider based on config
+
+    This helper returns the right implementation of CredentialProvider based on
+    config and on the value of force_tenant_isolation.
+
+    :param name: When provided, it makes it possible to associate credential
+                 artifacts back to the owner (test class).
+    :param network_resources: Dictionary of network resources to be allocated
+                              for each test account. Only valid for the dynamic
+                              credentials provider.
+    :param force_tenant_isolation: Always return a `DynamicCredentialProvider`,
+                                   regardless of the configuration.
+    :param identity_version: Use the specified identity API version, regardless
+                             of the configuration. Valid values are 'v2', 'v3'.
+    """
     # If a test requires a new account to work, it can have it via forcing
     # dynamic credentials. A new account will be produced only for that test.
     # In case admin credentials are not available for the account creation,
     # the test should be skipped else it would fail.
     identity_version = identity_version or CONF.identity.auth_version
     if CONF.auth.use_dynamic_credentials or force_tenant_isolation:
-        admin_creds = get_configured_admin_credentials(
-            fill_in=True, identity_version=identity_version)
         return dynamic_creds.DynamicCredentialProvider(
             name=name,
             network_resources=network_resources,
-            identity_version=identity_version,
-            admin_creds=admin_creds,
-            identity_admin_domain_scope=CONF.identity.admin_domain_scope,
-            identity_admin_role=CONF.identity.admin_role,
-            extra_roles=CONF.auth.tempest_roles,
-            neutron_available=CONF.service_available.neutron,
-            project_network_cidr=CONF.network.project_network_cidr,
-            project_network_mask_bits=CONF.network.project_network_mask_bits,
-            public_network_id=CONF.network.public_network_id,
-            create_networks=(CONF.auth.create_isolated_networks and not
-                             CONF.network.shared_physical_network),
-            resource_prefix=CONF.resources_prefix,
-            **get_dynamic_provider_params())
+            **get_dynamic_provider_params(identity_version))
     else:
         if CONF.auth.test_accounts_file:
             # Most params are not relevant for pre-created accounts
             return preprov_creds.PreProvisionedCredentialProvider(
-                name=name, identity_version=identity_version,
-                **get_preprov_provider_params())
+                name=name,
+                **get_preprov_provider_params(identity_version))
         else:
             raise exceptions.InvalidConfiguration(
                 'A valid credential provider is needed')
@@ -115,8 +150,8 @@ def is_admin_available(identity_version):
     # Check whether test accounts file has the admin specified or not
     elif CONF.auth.test_accounts_file:
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
-            identity_version=identity_version, name='check_admin',
-            **get_preprov_provider_params())
+            name='check_admin',
+            **get_preprov_provider_params(identity_version))
         if not check_accounts.admin_available():
             is_admin = False
     else:
@@ -140,8 +175,8 @@ def is_alt_available(identity_version):
     # Check whether test accounts file has the admin specified or not
     if CONF.auth.test_accounts_file:
         check_accounts = preprov_creds.PreProvisionedCredentialProvider(
-            identity_version=identity_version, name='check_alt',
-            **get_preprov_provider_params())
+            name='check_alt',
+            **get_preprov_provider_params(identity_version))
     else:
         raise exceptions.InvalidConfiguration(
             'A valid credential provider is needed')
