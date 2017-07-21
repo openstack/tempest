@@ -200,7 +200,7 @@ def verify_extensions(os, service, results):
     if service != 'swift':
         resp = extensions_client.list_extensions()
     else:
-        __, resp = extensions_client.list_capabilities()
+        resp = extensions_client.list_capabilities()
     # For Nova, Cinder and Neutron we use the alias name rather than the
     # 'name' field because the alias is considered to be the canonical
     # name.

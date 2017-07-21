@@ -28,4 +28,4 @@ class CapabilitiesClient(rest_client.RestClient):
             self.reset_path()
         body = json.loads(body)
         self.expected_success(200, resp.status)
-        return resp, body
+        return rest_client.ResponseBody(resp, body)

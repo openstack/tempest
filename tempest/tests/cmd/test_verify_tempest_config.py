@@ -392,10 +392,10 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_swift(self):
         def fake_list_extensions():
-            return (None, {'fake1': 'metadata',
-                           'fake2': 'metadata',
-                           'not_fake': 'metadata',
-                           'swift': 'metadata'})
+            return {'fake1': 'metadata',
+                    'fake2': 'metadata',
+                    'not_fake': 'metadata',
+                    'swift': 'metadata'}
         fake_os = mock.MagicMock()
         fake_os.capabilities_client.list_capabilities = fake_list_extensions
         self.useFixture(fixtures.MockPatchObject(
@@ -414,10 +414,10 @@ class TestDiscovery(base.TestCase):
 
     def test_verify_extensions_swift_all(self):
         def fake_list_extensions():
-            return (None, {'fake1': 'metadata',
-                           'fake2': 'metadata',
-                           'not_fake': 'metadata',
-                           'swift': 'metadata'})
+            return {'fake1': 'metadata',
+                    'fake2': 'metadata',
+                    'not_fake': 'metadata',
+                    'swift': 'metadata'}
         fake_os = mock.MagicMock()
         fake_os.capabilities_client.list_capabilities = fake_list_extensions
         self.useFixture(fixtures.MockPatchObject(

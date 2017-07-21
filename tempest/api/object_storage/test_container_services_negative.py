@@ -32,7 +32,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
 
         if CONF.object_storage_feature_enabled.discoverability:
             # use /info to get default constraints
-            _, body = cls.capabilities_client.list_capabilities()
+            body = cls.capabilities_client.list_capabilities()
             cls.constraints = body['swift']
 
     @decorators.attr(type=["negative"])
