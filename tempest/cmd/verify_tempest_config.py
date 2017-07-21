@@ -30,6 +30,8 @@ from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest import config
 import tempest.lib.common.http
+from tempest.lib import exceptions as lib_exc
+from tempest.services import object_storage
 
 
 CONF = config.CONF
@@ -69,7 +71,25 @@ def contains_version(prefix, versions):
 
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    _, versions = os.image_client.get_versions()
+    # Since we want to verify that the configuration is correct, we cannot
+    # rely on a specific version of the API being available.
+    try:
+        _, versions = os.image_v1.ImagesClient().get_versions()
+    except lib_exc.NotFound:
+        # If not found, we use v2. The assumption is that either v1 or v2
+        # are available, since glance is marked as available in the catalog.
+        # If not, glance should be disabled in Tempest conf.
+        try:
+            versions = os.image_v2.VersionsClient().list_versions()['versions']
+            versions = [x['id'] for x in versions]
+        except lib_exc.NotFound:
+            msg = ('Glance is available in the catalog, but no known version, '
+                   '(v1.x or v2.x) of Glance could be found, so Glance should '
+                   'be configured as not available')
+            LOG.warn(msg)
+            print_and_or_update('glance', 'service-available', False, update)
+            return
+
     if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
         print_and_or_update('api_v1', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v1, update)
@@ -92,10 +112,15 @@ def _get_unversioned_endpoint(base_url):
 
 
 def _get_api_versions(os, service):
+    # Clients are used to obtain the base_url. Each client applies the
+    # appropriate filters to the catalog to extract a base_url which
+    # matches the configured region and endpoint_type.
+    # The base URL is used to obtain the list of versions available.
     client_dict = {
-        'nova': os.servers_client,
-        'keystone': os.identity_client,
-        'cinder': os.volumes_client_latest,
+        'nova': os.compute.ServersClient(),
+        'keystone': os.identity_v3.IdentityClient(
+            endpoint_type=CONF.identity.v3_endpoint_type),
+        'cinder': os.volume_v3.VolumesClient(),
     }
     if service != 'keystone' and service != 'cinder':
         # Since keystone and cinder may be listening on a path,
@@ -166,14 +191,15 @@ def verify_api_versions(os, service, update):
 
 
 def get_extension_client(os, service):
+    params = config.service_client_config('object-storage')
     extensions_client = {
-        'nova': os.extensions_client,
-        'neutron': os.network_extensions_client,
-        'swift': os.capabilities_client,
+        'nova': os.compute.ExtensionsClient(),
+        'neutron': os.network.ExtensionsClient(),
+        'swift': object_storage.CapabilitiesClient(os.auth_provider, **params),
         # NOTE: Cinder v3 API is current and v2 and v1 are deprecated.
         # V3 extension API is the same as v2, so we reuse the v2 client
         # for v3 API also.
-        'cinder': os.volumes_v2_extension_client,
+        'cinder': os.volume_v2.ExtensionsClient(),
     }
 
     if service not in extensions_client:
