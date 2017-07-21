@@ -40,8 +40,13 @@ to avoid circular dependencies."""
 
 # Subset of the parameters of credential providers that depend on configuration
 def _get_common_provider_params(identity_version):
+    if identity_version == 'v3':
+        identity_uri = CONF.identity.uri_v3
+    elif identity_version == 'v2':
+        identity_uri = CONF.identity.uri
     return {
         'identity_version': identity_version,
+        'identity_uri': identity_uri,
         'credentials_domain': CONF.auth.default_credentials_domain_name,
         'admin_role': CONF.identity.admin_role
     }
@@ -63,6 +68,10 @@ def get_dynamic_provider_params(identity_version, admin_creds=None):
     _common_params = _get_common_provider_params(identity_version)
     admin_creds = admin_creds or get_configured_admin_credentials(
         fill_in=True, identity_version=identity_version)
+    if identity_version == 'v3':
+        endpoint_type = CONF.identity.v3_endpoint_type
+    elif identity_version == 'v2':
+        endpoint_type = CONF.identity.v2_admin_endpoint_type
     return dict(_common_params, **dict([
         ('admin_creds', admin_creds),
         ('identity_admin_domain_scope', CONF.identity.admin_domain_scope),
@@ -74,7 +83,8 @@ def get_dynamic_provider_params(identity_version, admin_creds=None):
         ('public_network_id', CONF.network.public_network_id),
         ('create_networks', (CONF.auth.create_isolated_networks and not
                              CONF.network.shared_physical_network)),
-        ('resource_prefix', CONF.resources_prefix)
+        ('resource_prefix', CONF.resources_prefix),
+        ('identity_admin_endpoint_type', endpoint_type)
     ]))
 
 

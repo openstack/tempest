@@ -38,6 +38,7 @@ class TestPreProvisionedCredentials(base.TestCase):
 
     fixed_params = {'name': 'test class',
                     'identity_version': 'v2',
+                    'identity_uri': 'fake_uri',
                     'test_accounts_file': 'fake_accounts_file',
                     'accounts_lock_dir': 'fake_locks_dir',
                     'admin_role': 'admin',
@@ -91,6 +92,9 @@ class TestPreProvisionedCredentials(base.TestCase):
             return_value=self.test_accounts))
         self.useFixture(fixtures.MockPatch(
             'os.path.isfile', return_value=True))
+        # NOTE(andreaf) Ensure config is loaded so service clients are
+        # registered in the registry before tests
+        config.service_client_config()
 
     def tearDown(self):
         super(TestPreProvisionedCredentials, self).tearDown()
@@ -436,6 +440,7 @@ class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
 
     fixed_params = {'name': 'test class',
                     'identity_version': 'v3',
+                    'identity_uri': 'fake_uri',
                     'test_accounts_file': 'fake_accounts_file',
                     'accounts_lock_dir': 'fake_locks_dir_v3',
                     'admin_role': 'admin',

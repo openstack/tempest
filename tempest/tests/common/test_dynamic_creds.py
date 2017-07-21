@@ -46,7 +46,8 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     fixed_params = {'name': 'test class',
                     'identity_version': 'v2',
-                    'admin_role': 'admin'}
+                    'admin_role': 'admin',
+                    'identity_uri': 'fake_uri'}
 
     token_client = v2_token_client
     iden_client = v2_iden_client
@@ -619,7 +620,8 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
 
     fixed_params = {'name': 'test class',
                     'identity_version': 'v3',
-                    'admin_role': 'admin'}
+                    'admin_role': 'admin',
+                    'identity_uri': 'fake_uri'}
 
     token_client = v3_token_client
     iden_client = v3_iden_client

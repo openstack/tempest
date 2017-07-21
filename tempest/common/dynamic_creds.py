@@ -18,11 +18,11 @@ import netaddr
 from oslo_log import log as logging
 import six
 
-from tempest import clients
 from tempest.lib.common import cred_client
 from tempest.lib.common import cred_provider
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services import clients
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +35,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                  identity_admin_role='admin', extra_roles=None,
                  neutron_available=False, create_networks=True,
                  project_network_cidr=None, project_network_mask_bits=None,
-                 public_network_id=None, resource_prefix=None):
+                 public_network_id=None, resource_prefix=None,
+                 identity_admin_endpoint_type='public', identity_uri=None):
         """Creates credentials dynamically for tests
 
         A credential provider that, based on an initial set of
@@ -69,10 +70,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         :param project_network_mask_bits: The network mask bits to use for
                                           created project networks
         :param public_network_id: The id for the public network to use
+        :param identity_admin_endpoint_type: The endpoint type for identity
+                                             admin clients. Defaults to public.
+        :param identity_uri: Identity URI of the target cloud
         """
         super(DynamicCredentialProvider, self).__init__(
-            identity_version=identity_version, admin_role=admin_role,
-            name=name, credentials_domain=credentials_domain,
+            identity_version=identity_version, identity_uri=identity_uri,
+            admin_role=admin_role, name=name,
+            credentials_domain=credentials_domain,
             network_resources=network_resources)
         self.network_resources = network_resources
         self._creds = {}
@@ -86,6 +91,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.default_admin_creds = admin_creds
         self.identity_admin_domain_scope = identity_admin_domain_scope
         self.identity_admin_role = identity_admin_role or 'admin'
+        self.identity_admin_endpoint_type = identity_admin_endpoint_type
         self.extra_roles = extra_roles or []
         (self.identity_admin_client,
          self.tenants_admin_client,
@@ -96,7 +102,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
          self.routers_admin_client,
          self.subnets_admin_client,
          self.ports_admin_client,
-         self.security_groups_admin_client) = self._get_admin_clients()
+         self.security_groups_admin_client) = self._get_admin_clients(
+            identity_admin_endpoint_type)
         # Domain where isolated credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
         self.creds_domain_name = None
@@ -112,32 +119,43 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.domains_admin_client,
             self.creds_domain_name)
 
-    def _get_admin_clients(self):
+    def _get_admin_clients(self, endpoint_type):
         """Returns a tuple with instances of the following admin clients
 
         (in this order):
             identity
             network
         """
-        os = clients.Manager(self.default_admin_creds)
+        os = clients.ServiceClients(self.default_admin_creds,
+                                    self.identity_uri)
+        params = {'endpoint_type': endpoint_type}
         if self.identity_version == 'v2':
-            return (os.identity_client, os.tenants_client, os.users_client,
-                    os.roles_client, None,
-                    os.networks_client, os.routers_client, os.subnets_client,
-                    os.ports_client, os.security_groups_client)
+            return (os.identity_v2.IdentityClient(**params),
+                    os.identity_v2.TenantsClient(**params),
+                    os.identity_v2.UsersClient(**params),
+                    os.identity_v2.RolesClient(**params), None,
+                    os.network.NetworksClient(),
+                    os.network.RoutersClient(),
+                    os.network.SubnetsClient(),
+                    os.network.PortsClient(),
+                    os.network.SecurityGroupsClient())
         else:
             # We use a dedicated client manager for identity client in case we
             # need a different token scope for them.
             scope = 'domain' if self.identity_admin_domain_scope else 'project'
-            identity_os = clients.Manager(self.default_admin_creds,
-                                          scope=scope)
-            return (identity_os.identity_v3_client,
-                    identity_os.projects_client,
-                    identity_os.users_v3_client, identity_os.roles_v3_client,
-                    identity_os.domains_client,
-                    os.networks_client, os.routers_client,
-                    os.subnets_client, os.ports_client,
-                    os.security_groups_client)
+            identity_os = clients.ServiceClients(self.default_admin_creds,
+                                                 self.identity_uri,
+                                                 scope=scope)
+            return (identity_os.identity_v3.IdentityClient(**params),
+                    identity_os.identity_v3.ProjectsClient(**params),
+                    identity_os.identity_v3.UsersClient(**params),
+                    identity_os.identity_v3.RolesClient(**params),
+                    identity_os.identity_v3.DomainsClient(**params),
+                    os.network.NetworksClient(),
+                    os.network.RoutersClient(),
+                    os.network.SubnetsClient(),
+                    os.network.PortsClient(),
+                    os.network.SecurityGroupsClient())
 
     def _create_creds(self, admin=False, roles=None):
         """Create credentials with random name.

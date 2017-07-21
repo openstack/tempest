@@ -20,12 +20,12 @@ from oslo_log import log as logging
 import six
 import yaml
 
-from tempest import clients
 from tempest.common import fixed_network
 from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib.common import cred_provider
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services import clients
 
 LOG = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     def __init__(self, identity_version, test_accounts_file,
                  accounts_lock_dir, name=None, credentials_domain=None,
                  admin_role=None, object_storage_operator_role=None,
-                 object_storage_reseller_admin_role=None):
+                 object_storage_reseller_admin_role=None, identity_uri=None):
         """Credentials provider using pre-provisioned accounts
 
         This credentials provider loads the details of pre-provisioned
@@ -79,10 +79,12 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                                    (if no domain is configured)
         :param object_storage_operator_role: name of the role
         :param object_storage_reseller_admin_role: name of the role
+        :param identity_uri: Identity URI of the target cloud
         """
         super(PreProvisionedCredentialProvider, self).__init__(
             identity_version=identity_version, name=name,
-            admin_role=admin_role, credentials_domain=credentials_domain)
+            admin_role=admin_role, credentials_domain=credentials_domain,
+            identity_uri=identity_uri)
         self.test_accounts_file = test_accounts_file
         if test_accounts_file:
             accounts = read_accounts_yaml(self.test_accounts_file)
@@ -341,8 +343,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             auth_url=None, fill_in=False,
             identity_version=self.identity_version, **creds_dict)
         net_creds = cred_provider.TestResources(credential)
-        net_clients = clients.Manager(credentials=credential)
-        compute_network_client = net_clients.compute_networks_client
+        net_clients = clients.ServiceClients(credentials=credential,
+                                             identity_uri=self.identity_uri)
+        compute_network_client = net_clients.compute.NetworksClient()
         net_name = self.hash_dict['networks'].get(hash, None)
         try:
             network = fixed_network.get_network_from_name(
