@@ -28,7 +28,7 @@ can be used to:
 - Run tests for admin APIs
 - Generate test credentials on the fly (see `Dynamic Credentials`_)
 
-When keystone uses a policy that requires domain scoped tokens for admin
+When Keystone uses a policy that requires domain scoped tokens for admin
 actions, the flag ``admin_domain_scope`` must be set to ``True``.
 The admin user configured, if any, must have a role assigned to the domain to
 be usable.
@@ -39,7 +39,7 @@ This can be done using the accounts.yaml file (see
 number of users available to run tests with.
 You can specify the location of the file in the ``auth`` section in the
 tempest.conf file. To see the specific format used in the file please refer to
-the accounts.yaml.sample file included in Tempest.
+the ``accounts.yaml.sample`` file included in Tempest.
 
 Keystone Connection Info
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,17 +47,16 @@ In order for Tempest to be able to talk to your OpenStack deployment you need
 to provide it with information about how it communicates with keystone.
 This involves configuring the following options in the ``identity`` section:
 
- #. ``auth_version``
- #. ``uri``
- #. ``uri_v3``
+ - ``auth_version``
+ - ``uri``
+ - ``uri_v3``
 
 The ``auth_version`` option is used to tell Tempest whether it should be using
-keystone's v2 or v3 api for communicating with keystone. The two uri options are
+Keystone's v2 or v3 api for communicating with Keystone. The two uri options are
 used to tell Tempest the url of the keystone endpoint. The ``uri`` option is
-used for keystone v2 request and ``uri_v3`` is used for keystone v3. You want to
+used for Keystone v2 request and ``uri_v3`` is used for Keystone v3. You want to
 ensure that which ever version you set for ``auth_version`` has its uri option
 defined.
-
 
 Credential Provider Mechanisms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,7 +94,7 @@ configured to use dynamic credentials.
 When the ``admin_domain_scope`` option is set to ``True``, provisioned admin
 accounts will be assigned a role on domain configured in
 ``default_credentials_domain_name``. This will make the accounts provisioned
-usable in a cloud where domain scoped tokens are required by keystone for
+usable in a cloud where domain scoped tokens are required by Keystone for
 admin operations. Note that the initial pre-provision admin accounts,
 configured in tempest.conf, must have a role on the same domain as well, for
 Dynamic Credentials to work.
@@ -140,10 +139,10 @@ used do not have any pre-existing resources created. Tempest assumes all
 tenants it's using are empty and may sporadically fail if there are unexpected
 resources present.
 
-When the keystone in the target cloud requires domain scoped tokens to
+When the Keystone in the target cloud requires domain scoped tokens to
 perform admin actions, all pre-provisioned admin users must have a role
 assigned on the domain where test accounts a provisioned.
-The option ``admin_domain_scope`` is used to tell tempest that domain scoped
+The option ``admin_domain_scope`` is used to tell Tempest that domain scoped
 tokens shall be used. ``default_credentials_domain_name`` is the domain where
 test accounts are expected to be provisioned if no domain is specified.
 
@@ -167,7 +166,7 @@ for doing this:
  #. ``flavor_ref_alt``
 
 Both of these options are in the ``compute`` section of the config file and take
-in the flavor id (not the name) from nova. The ``flavor_ref`` option is what
+in the flavor id (not the name) from Nova. The ``flavor_ref`` option is what
 will be used for booting almost all of the guests; ``flavor_ref_alt`` is only
 used in tests where two different-sized servers are required (for example, a
 resize test).
@@ -185,7 +184,7 @@ servers. There are two options in the compute section just like with flavors:
  #. ``image_ref``
  #. ``image_ref_alt``
 
-Both options are expecting an image id (not name) from nova. The ``image_ref``
+Both options are expecting an image id (not name) from Nova. The ``image_ref``
 option is what will be used for booting the majority of servers in Tempest.
 ``image_ref_alt`` is used for tests that require two images such as rebuild. If
 two images are not available you can set both options to the same image id and
@@ -224,7 +223,7 @@ small footprint.
 Networking
 ----------
 OpenStack has a myriad of different networking configurations possible and
-depending on which of the two network backends, nova-network or neutron, you are
+depending on which of the two network backends, nova-network or Neutron, you are
 using things can vary drastically. Due to this complexity Tempest has to provide
 a certain level of flexibility in its configuration to ensure it will work
 against any cloud. This ends up causing a large number of permutations in
@@ -302,21 +301,21 @@ cases it shouldn't matter because nova-network should have no problem booting a
 server with multiple networks. If this is not the case for your cloud then using
 an accounts file is recommended because it provides the necessary flexibility to
 describe your configuration. Dynamic credentials is not able to dynamically
-allocate things as necessary if neutron is not enabled.
+allocate things as necessary if Neutron is not enabled.
 
-With neutron and dynamic credentials enabled there should not be any additional
+With Neutron and dynamic credentials enabled there should not be any additional
 configuration necessary to enable Tempest to create servers with working
 networking, assuming you have properly configured the ``network`` section to
-work for your cloud. Tempest will dynamically create the neutron resources
+work for your cloud. Tempest will dynamically create the Neutron resources
 necessary to enable using servers with that network. Also, just as with the
-accounts file, if you specify a fixed network name while using neutron and
+accounts file, if you specify a fixed network name while using Neutron and
 dynamic credentials it will enable running tests which require a static network
 and it will additionally be used as a fallback for server creation. However,
 unlike accounts.yaml this should never be triggered.
 
 However, there is an option ``create_isolated_networks`` to disable dynamic
 credentials's automatic provisioning of network resources. If this option is set
-to False you will have to either rely on there only being a single/default
+to ``False`` you will have to either rely on there only being a single/default
 network available for the server creation, or use ``fixed_network_name`` to
 inform Tempest which network to use.
 
@@ -336,16 +335,16 @@ To enable remote access to servers, there are 3 options at a minimum that are us
 
 The ``run_validation`` is used to enable or disable ssh connectivity for
 all tests (with the exception of scenario tests which do not have a flag for
-enabling or disabling ssh) To enable ssh connectivity this needs be set to ``true``.
+enabling or disabling ssh) To enable ssh connectivity this needs be set to ``True``.
 
-The ``connect_method`` option is used to tell tempest what kind of IP to use for
+The ``connect_method`` option is used to tell Tempest what kind of IP to use for
 establishing a connection to the server. Two methods are available: ``fixed``
 and ``floating``, the later being set by default. If this is set to floating
-tempest will create a floating ip for the server before attempted to connect
+Tempest will create a floating ip for the server before attempted to connect
 to it. The IP for the floating ip is what is used for the connection.
 
 For the ``auth_method`` option there is currently, only one valid option,
-``keypair``. With this set to ``keypair`` tempest will create an ssh keypair
+``keypair``. With this set to ``keypair`` Tempest will create an ssh keypair
 and use that for authenticating against the created server.
 
 Configuring Available Services
@@ -359,8 +358,8 @@ on the available services.
 
 The ``service_available`` section of the config file is used to set which
 services are available. It contains a boolean option for each service (except
-for keystone which is a hard requirement) set it to True if the service is
-available or False if it is not.
+for Keystone which is a hard requirement) set it to ``True`` if the service is
+available or ``False`` if it is not.
 
 Service Catalog
 ^^^^^^^^^^^^^^^
@@ -382,17 +381,18 @@ has multiple regions available and you need to specify a particular one to use a
 service you can set the ``region`` option in that service's section.
 
 It should also be noted that the default values for these options are set
-to what devstack uses (which is a de facto standard for service catalog
+to what DevStack uses (which is a de facto standard for service catalog
 entries). So often nothing actually needs to be set on these options to enable
 communication to a particular service. It is only if you are either not using
-the same ``catalog_type`` as devstack or you want Tempest to talk to a different
-endpoint type instead of publicURL for a service that these need to be changed.
+the same ``catalog_type`` as DevStack or you want Tempest to talk to a different
+endpoint type instead of ``publicURL`` for a service that these need to be
+changed.
 
 .. note::
 
     Tempest does not serve all kinds of fancy URLs in the service catalog.  The
     service catalog should be in a standard format (which is going to be
-    standardized at the keystone level).
+    standardized at the Keystone level).
     Tempest expects URLs in the Service catalog in the following format:
 
     * ``http://example.com:1234/<version-info>``
@@ -420,7 +420,7 @@ for a feature (assuming one exists). Instead Tempest has to be explicitly
 configured as to which optional features are enabled. This is in order to
 prevent bugs in the discovery mechanisms from masking failures.
 
-The service feature-enabled config sections are how Tempest addresses the
+The service ``feature-enabled`` config sections are how Tempest addresses the
 optional feature question. Each service that has tests for optional features
 contains one of these sections. The only options in it are boolean options
 with the name of a feature which is used. If it is set to false any test which
@@ -431,7 +431,7 @@ options refer to the sample config file.
 API Extensions
 ^^^^^^^^^^^^^^
 The service feature-enabled sections often contain an ``api-extensions`` option
-(or in the case of swift a ``discoverable_apis`` option). This is used to tell
+(or in the case of Swift a ``discoverable_apis`` option). This is used to tell
 Tempest which api extensions (or configurable middleware) is used in your
 deployment. It has two valid config states: either it contains a single value
 ``all`` (which is the default) which means that every api extension is assumed
