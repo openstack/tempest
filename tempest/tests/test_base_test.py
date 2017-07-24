@@ -16,8 +16,8 @@ import mock
 
 from tempest import clients
 from tempest.common import credentials_factory as credentials
-from tempest.common import fixed_network
 from tempest import config
+from tempest.lib.common import fixed_network
 from tempest import test
 from tempest.tests import base
 from tempest.tests import fake_config

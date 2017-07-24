@@ -14,3 +14,10 @@ The dynamic credentials module
 
 .. automodule:: tempest.lib.common.dynamic_creds
    :members:
+
+--------------------------------------
+The pre-provisioned credentials module
+--------------------------------------
+
+.. automodule:: tempest.lib.common.preprov_creds
+   :members:

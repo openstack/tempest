@@ -20,10 +20,9 @@ from oslo_log import log as logging
 import six
 import yaml
 
-from tempest.common import fixed_network
-from tempest import exceptions
 from tempest.lib import auth
 from tempest.lib.common import cred_provider
+from tempest.lib.common import fixed_network
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
 
@@ -350,7 +349,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         try:
             network = fixed_network.get_network_from_name(
                 net_name, compute_network_client)
-        except exceptions.InvalidTestResource:
+        except lib_exc.InvalidTestResource:
             network = {}
         net_creds.set_resources(network=network)
         return net_creds

@@ -14,10 +14,10 @@
 from oslo_concurrency import lockutils
 
 from tempest import clients
-from tempest.common import preprov_creds
 from tempest import config
 from tempest.lib import auth
 from tempest.lib.common import dynamic_creds
+from tempest.lib.common import preprov_creds
 from tempest.lib import exceptions
 
 CONF = config.CONF
