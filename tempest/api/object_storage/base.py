@@ -98,7 +98,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.policies = None
 
         if CONF.object_storage_feature_enabled.discoverability:
-            _, body = cls.capabilities_client.list_capabilities()
+            body = cls.capabilities_client.list_capabilities()
 
             if 'swift' in body and 'policies' in body['swift']:
                 cls.policies = body['swift']['policies']
