@@ -140,7 +140,8 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
     cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
-    dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
+    dynamic_creds = ('tempest.lib.common.dynamic_creds.'
+                     'DynamicCredentialProvider')
 
     def setUp(self):
         super(TestGenerateResourcesV2, self).setUp()
@@ -245,7 +246,8 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
     cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
-    dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
+    dynamic_creds = ('tempest.lib.common.dynamic_creds.'
+                     'DynamicCredentialProvider')
     domain_is_in = False
 
     def setUp(self):

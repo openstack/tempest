@@ -102,8 +102,8 @@ from oslo_log import log as logging
 import yaml
 
 from tempest.common import credentials_factory
-from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib.common import dynamic_creds
 
 
 LOG = None
