@@ -31,7 +31,7 @@ class BulkMiddlewareClient(rest_client.RestClient):
             headers = {}
         resp, body = self.put(url, data, headers)
         self.expected_success(200, resp.status)
-        return resp, body
+        return rest_client.ResponseBodyData(resp, body)
 
     def delete_bulk_data(self, data=None, headers=None):
         """Delete multiple objects or containers from their account.
@@ -43,9 +43,9 @@ class BulkMiddlewareClient(rest_client.RestClient):
 
         if headers is None:
             headers = {}
-        resp, body = self.delete(url, headers=headers, body=data)
+        resp, body = self.delete(url, headers, data)
         self.expected_success(200, resp.status)
-        return resp, body
+        return rest_client.ResponseBodyData(resp, body)
 
     def delete_bulk_data_with_post(self, data=None, headers=None):
         """Delete multiple objects or containers with POST request.
@@ -57,6 +57,6 @@ class BulkMiddlewareClient(rest_client.RestClient):
 
         if headers is None:
             headers = {}
-        resp, body = self.post(url, headers=headers, body=data)
+        resp, body = self.post(url, data, headers)
         self.expected_success([200, 204], resp.status)
-        return resp, body
+        return rest_client.ResponseBodyData(resp, body)

@@ -58,9 +58,9 @@ class BulkTest(base.BaseObjectTest):
         # upload an archived file
         with open(filepath) as fh:
             mydata = fh.read()
-            resp, body = self.bulk_client.upload_archive(
+            resp = self.bulk_client.upload_archive(
                 upload_path='', data=mydata, archive_file_format='tar')
-        return resp, body
+        return resp
 
     def _check_contents_deleted(self, container_name):
         param = {'format': 'txt'}
@@ -73,21 +73,20 @@ class BulkTest(base.BaseObjectTest):
     def test_extract_archive(self):
         # Test bulk operation of file upload with an archived file
         filepath, container_name, object_name = self._create_archive()
-        resp, _ = self._upload_archive(filepath)
-
+        resp = self._upload_archive(filepath)
         self.containers.append(container_name)
 
         # When uploading an archived file with the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
         # therefore the existence of response headers is checked without
         # custom matcher.
-        self.assertIn('transfer-encoding', resp)
-        self.assertIn('content-type', resp)
-        self.assertIn('x-trans-id', resp)
-        self.assertIn('date', resp)
+        self.assertIn('transfer-encoding', resp.response)
+        self.assertIn('content-type', resp.response)
+        self.assertIn('x-trans-id', resp.response)
+        self.assertIn('date', resp.response)
 
         # Check only the format of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+        self.assertThat(resp.response, custom_matchers.AreAllWellFormatted())
 
         param = {'format': 'json'}
         resp, body = self.account_client.list_account_containers(param)
@@ -112,19 +111,19 @@ class BulkTest(base.BaseObjectTest):
         self._upload_archive(filepath)
 
         data = '%s/%s\n%s' % (container_name, object_name, container_name)
-        resp, _ = self.bulk_client.delete_bulk_data(data=data)
+        resp = self.bulk_client.delete_bulk_data(data=data)
 
         # When deleting multiple files using the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
         # therefore the existence of response headers is checked without
         # custom matcher.
-        self.assertIn('transfer-encoding', resp)
-        self.assertIn('content-type', resp)
-        self.assertIn('x-trans-id', resp)
-        self.assertIn('date', resp)
+        self.assertIn('transfer-encoding', resp.response)
+        self.assertIn('content-type', resp.response)
+        self.assertIn('x-trans-id', resp.response)
+        self.assertIn('date', resp.response)
 
         # Check only the format of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+        self.assertThat(resp.response, custom_matchers.AreAllWellFormatted())
 
         # Check if uploaded contents are completely deleted
         self._check_contents_deleted(container_name)
@@ -138,19 +137,19 @@ class BulkTest(base.BaseObjectTest):
 
         data = '%s/%s\n%s' % (container_name, object_name, container_name)
 
-        resp, _ = self.bulk_client.delete_bulk_data_with_post(data=data)
+        resp = self.bulk_client.delete_bulk_data_with_post(data=data)
 
         # When deleting multiple files using the bulk operation, the response
         # does not contain 'content-length' header. This is the special case,
         # therefore the existence of response headers is checked without
         # custom matcher.
-        self.assertIn('transfer-encoding', resp)
-        self.assertIn('content-type', resp)
-        self.assertIn('x-trans-id', resp)
-        self.assertIn('date', resp)
+        self.assertIn('transfer-encoding', resp.response)
+        self.assertIn('content-type', resp.response)
+        self.assertIn('x-trans-id', resp.response)
+        self.assertIn('date', resp.response)
 
         # Check only the format of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+        self.assertThat(resp.response, custom_matchers.AreAllWellFormatted())
 
         # Check if uploaded contents are completely deleted
         self._check_contents_deleted(container_name)
