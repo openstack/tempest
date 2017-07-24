@@ -25,8 +25,7 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
         if disable_ssl_certificate_validation:
             urllib3.disable_warnings()
             kwargs['cert_reqs'] = 'CERT_NONE'
-
-        if ca_certs:
+        elif ca_certs:
             kwargs['cert_reqs'] = 'CERT_REQUIRED'
             kwargs['ca_certs'] = ca_certs
 
