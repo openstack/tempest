@@ -44,11 +44,6 @@ idempotent_id = debtcollector.moves.moved_function(
     version='Mitaka', removal_version='?')
 
 
-related_bug = debtcollector.moves.moved_function(
-    decorators.related_bug, 'related_bug', __name__,
-    version='Pike', removal_version='?')
-
-
 attr = debtcollector.moves.moved_function(
     decorators.attr, 'attr', __name__,
     version='Pike', removal_version='?')
