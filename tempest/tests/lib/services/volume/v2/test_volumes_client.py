@@ -33,6 +33,22 @@ class TestVolumesClient(base.BaseServiceTest):
                                                    'volume',
                                                    'regionOne')
 
+    def _test_retype_volume(self, bytes_body=False):
+        kwargs = {
+            "new_type": "dedup-tier-replication",
+            "migration_policy": "never"
+        }
+
+        self.check_service_client_function(
+            self.client.retype_volume,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {},
+            to_utf=bytes_body,
+            status=202,
+            volume_id="a3be971b-8de5-4bdf-bdb8-3d8eb0fb69f8",
+            **kwargs
+        )
+
     def _test_force_detach_volume(self, bytes_body=False):
         kwargs = {
             'attachment_id': '6980e295-920f-412e-b189-05c50d605acd',
@@ -71,3 +87,9 @@ class TestVolumesClient(base.BaseServiceTest):
 
     def test_show_volume_metadata_item_with_bytes_body(self):
         self._test_show_volume_metadata_item(bytes_body=True)
+
+    def test_retype_volume_with_str_body(self):
+        self._test_retype_volume()
+
+    def test_retype_volume_with_bytes_body(self):
+        self._test_retype_volume(bytes_body=True)
