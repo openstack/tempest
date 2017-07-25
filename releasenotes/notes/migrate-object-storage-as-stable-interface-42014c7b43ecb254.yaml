@@ -6,3 +6,4 @@ features:
     any maintenance changes.
 
       * bulk_middleware_client
+      * capabilities_client
