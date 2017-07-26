@@ -44,6 +44,9 @@ def _get_common_provider_params(identity_version):
         identity_uri = CONF.identity.uri_v3
     elif identity_version == 'v2':
         identity_uri = CONF.identity.uri
+    else:
+        raise exceptions.InvalidIdentityVersion(
+            identity_version=identity_version)
     return {
         'identity_version': identity_version,
         'identity_uri': identity_uri,
