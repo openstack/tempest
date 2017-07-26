@@ -14,7 +14,7 @@
 #    under the License.
 
 
-from tempest.services.object_storage import capabilities_client
+from tempest.lib.services.object_storage import capabilities_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
