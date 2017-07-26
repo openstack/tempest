@@ -15,7 +15,6 @@
 import time
 
 from oslo_serialization import jsonutils as json
-from six.moves import urllib
 
 from tempest.lib.services.network import base
 
@@ -25,9 +24,7 @@ class NetworkVersionsClient(base.BaseNetworkClient):
     def list_versions(self):
         """Do a GET / to fetch available API version information."""
 
-        endpoint = self.base_url
-        url = urllib.parse.urlparse(endpoint)
-        version_url = '%s://%s/' % (url.scheme, url.netloc)
+        version_url = self._get_base_version_url()
 
         # Note: we do a raw_request here because we want to use
         # an unversioned URL, not "v2/$project_id/".
