@@ -31,6 +31,10 @@ class BaseDecoratorsTest(base.TestCase):
                          fake_config.FakePrivate)
 
 
+# NOTE: The test module is for tempest.test.idempotent_id.
+# After all projects switch to use decorators.idempotent_id,
+# we can remove tempest.test.idempotent_id as well as this
+# test module
 class TestIdempotentIdDecorator(BaseDecoratorsTest):
 
     def _test_helper(self, _id, **decorator_args):
