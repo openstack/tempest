@@ -63,7 +63,7 @@ def get_dynamic_provider_params(identity_version, admin_creds=None):
     :param identity_version: 'v2' or 'v3'
     :param admin_creds: An object of type `auth.Credentials`. If None, it
                         is built from the configuration file as well.
-    :returns A dict with the parameters
+    :return: A dict with the parameters
     """
     _common_params = _get_common_provider_params(identity_version)
     admin_creds = admin_creds or get_configured_admin_credentials(
@@ -96,7 +96,7 @@ def get_preprov_provider_params(identity_version):
     Parameters that are not configuration specific (name) are not returned.
 
     :param identity_version: 'v2' or 'v3'
-    :returns A dict with the parameters
+    :return: A dict with the parameters
     """
     _common_params = _get_common_provider_params(identity_version)
     reseller_admin_role = CONF.object_storage.reseller_admin_role
