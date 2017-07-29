@@ -13,6 +13,7 @@
 #    under the License.
 
 from oslo_config import cfg
+import six
 import testtools
 
 from tempest.api.compute import base as compute_base
@@ -74,7 +75,7 @@ class TestMicroversionsTestsClass(base.TestCase):
                 self.assertRaises(testtools.TestCase.skipException,
                                   test_class.skip_checks)
         except testtools.TestCase.skipException as e:
-            raise testtools.TestCase.failureException(e.message)
+            raise testtools.TestCase.failureException(six.text_type(e))
 
     def test_config_version_none_none(self):
         expected_pass_tests = [VersionTestNoneTolatest, VersionTestNoneTo2_2]
