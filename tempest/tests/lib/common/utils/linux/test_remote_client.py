@@ -34,7 +34,7 @@ class TestRemoteClient(base.TestCase):
         client = remote_client.RemoteClient('192.168.1.10', 'username')
         client.exec_command('ls')
         mock_ssh_exec_command.assert_called_once_with(
-            'set -eu -o pipefail; PATH=$$PATH:/sbin; ls')
+            'set -eu -o pipefail; PATH=$PATH:/sbin; ls')
 
     @mock.patch.object(ssh.Client, 'test_connection_auth')
     def test_validate_authentication(self, mock_test_connection_auth):
