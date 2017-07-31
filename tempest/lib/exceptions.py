@@ -44,6 +44,9 @@ class TempestException(Exception):
     def __str__(self):
         return self._error_string
 
+    def __repr__(self):
+        return self._error_string
+
 
 class RestClientException(TempestException,
                           testtools.TestCase.failureException):
