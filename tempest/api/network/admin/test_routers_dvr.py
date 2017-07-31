@@ -24,7 +24,8 @@ from tempest import test
 class RoutersTestDVR(base.BaseAdminNetworkTest):
 
     @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(RoutersTestDVR, cls).skip_checks()
         for ext in ['router', 'dvr']:
             if not test.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
@@ -35,6 +36,9 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         # admin credentials to create router with distributed=True attribute
         # and checking for BadRequest exception and that the resulting router
         # has a distributed attribute.
+
+    @classmethod
+    def resource_setup(cls):
         super(RoutersTestDVR, cls).resource_setup()
         name = data_utils.rand_name('pretest-check')
         router = cls.admin_routers_client.create_router(name=name)

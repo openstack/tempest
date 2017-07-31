@@ -28,12 +28,15 @@ CONF = config.CONF
 
 class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
+    @classmethod
+    def skip_checks(cls):
+        super(BaseTrustsV3Test, cls).skip_checks()
+        if not CONF.identity_feature_enabled.trust:
+            raise cls.skipException("Trusts aren't enabled")
+
     def setUp(self):
         super(BaseTrustsV3Test, self).setUp()
         # Use alt_username as the trustee
-        if not CONF.identity_feature_enabled.trust:
-            raise self.skipException("Trusts aren't enabled")
-
         self.trust_id = None
 
     def tearDown(self):
