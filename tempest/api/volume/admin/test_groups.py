@@ -27,6 +27,11 @@ class GroupsTest(base.BaseVolumeAdminTest):
     min_microversion = '3.14'
     max_microversion = 'latest'
 
+    @classmethod
+    def setup_clients(cls):
+        super(GroupsTest, cls).setup_clients()
+        cls.volumes_client = cls.admin_volume_client
+
     def _delete_group(self, grp_id, delete_volumes=True):
         self.admin_groups_client.delete_group(grp_id, delete_volumes)
         vols = self.admin_volume_client.list_volumes(detail=True)['volumes']
@@ -34,6 +39,21 @@ class GroupsTest(base.BaseVolumeAdminTest):
             if vol['group_id'] == grp_id:
                 self.admin_volume_client.wait_for_resource_deletion(vol['id'])
         self.admin_groups_client.wait_for_resource_deletion(grp_id)
+
+    def _delete_group_snapshot(self, group_snapshot_id, grp_id):
+        self.admin_group_snapshots_client.delete_group_snapshot(
+            group_snapshot_id)
+        vols = self.admin_volume_client.list_volumes(detail=True)['volumes']
+        snapshots = self.admin_snapshots_client.list_snapshots(
+            detail=True)['snapshots']
+        for vol in vols:
+            for snap in snapshots:
+                if (vol['group_id'] == grp_id and
+                        vol['id'] == snap['volume_id']):
+                    self.admin_snapshots_client.wait_for_resource_deletion(
+                        snap['id'])
+        self.admin_group_snapshots_client.wait_for_resource_deletion(
+            group_snapshot_id)
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
@@ -107,3 +127,62 @@ class GroupsTest(base.BaseVolumeAdminTest):
         grps = self.admin_groups_client.list_groups(
             detail=True)['groups']
         self.assertEmpty(grps)
+
+    @decorators.idempotent_id('1298e537-f1f0-47a3-a1dd-8adec8168897')
+    def test_group_snapshot_create_show_list_delete(self):
+        # Create volume type
+        volume_type = self.create_volume_type()
+
+        # Create group type
+        group_type = self.create_group_type()
+
+        # Create group
+        grp_name = data_utils.rand_name('Group')
+        grp = self.admin_groups_client.create_group(
+            group_type=group_type['id'],
+            volume_types=[volume_type['id']],
+            name=grp_name)['group']
+        waiters.wait_for_volume_resource_status(
+            self.admin_groups_client, grp['id'], 'available')
+        self.addCleanup(self._delete_group, grp['id'])
+        self.assertEqual(grp_name, grp['name'])
+
+        # Create volume
+        vol = self.create_volume(volume_type=volume_type['id'],
+                                 group_id=grp['id'])
+
+        # Create group snapshot
+        group_snapshot_name = data_utils.rand_name('group_snapshot')
+        group_snapshot = (
+            self.admin_group_snapshots_client.create_group_snapshot(
+                group_id=grp['id'],
+                name=group_snapshot_name)['group_snapshot'])
+        snapshots = self.admin_snapshots_client.list_snapshots(
+            detail=True)['snapshots']
+        for snap in snapshots:
+            if vol['id'] == snap['volume_id']:
+                waiters.wait_for_volume_resource_status(
+                    self.admin_snapshots_client, snap['id'], 'available')
+        waiters.wait_for_volume_resource_status(
+            self.admin_group_snapshots_client,
+            group_snapshot['id'], 'available')
+        self.assertEqual(group_snapshot_name, group_snapshot['name'])
+
+        # Get a given group snapshot
+        group_snapshot = self.admin_group_snapshots_client.show_group_snapshot(
+            group_snapshot['id'])['group_snapshot']
+        self.assertEqual(group_snapshot_name, group_snapshot['name'])
+
+        # Get all group snapshots with detail
+        group_snapshots = (
+            self.admin_group_snapshots_client.list_group_snapshots(
+                detail=True)['group_snapshots'])
+        self.assertIn((group_snapshot['name'], group_snapshot['id']),
+                      [(m['name'], m['id']) for m in group_snapshots])
+
+        # Delete group snapshot
+        self._delete_group_snapshot(group_snapshot['id'], grp['id'])
+        group_snapshots = (
+            self.admin_group_snapshots_client.list_group_snapshots(
+                detail=True)['group_snapshots'])
+        self.assertEmpty(group_snapshots)
