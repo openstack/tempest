@@ -35,7 +35,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(AccountQuotasNegativeTest, cls).resource_setup()
-        cls.container_name = cls.create_container()
+        cls.create_container()
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account

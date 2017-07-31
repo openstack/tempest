@@ -27,7 +27,7 @@ class StaticWebTest(base.BaseObjectTest):
         super(StaticWebTest, cls).resource_setup()
 
         # This header should be posted on the container before every test
-        cls.headers_public_read_acl = {'Read': '.r:*,.rlistings'}
+        headers_public_read_acl = {'Read': '.r:*,.rlistings'}
 
         # Create test container and create one object in it
         cls.container_name = cls.create_container()
@@ -36,7 +36,7 @@ class StaticWebTest(base.BaseObjectTest):
 
         cls.container_client.update_container_metadata(
             cls.container_name,
-            metadata=cls.headers_public_read_acl,
+            metadata=headers_public_read_acl,
             metadata_prefix="X-Container-")
 
     @classmethod
