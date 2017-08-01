@@ -41,7 +41,6 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIsNotNone(service_data['id'])
         self.addCleanup(self._del_service, service_data['id'])
         # Verifying response body of create service
-        self.assertIn('id', service_data)
         self.assertIn('name', service_data)
         self.assertEqual(name, service_data['name'])
         self.assertIn('type', service_data)

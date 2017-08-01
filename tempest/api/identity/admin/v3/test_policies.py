@@ -52,7 +52,6 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         policy = self.policies_client.create_policy(blob=blob,
                                                     type=policy_type)['policy']
         self.addCleanup(self._delete_policy, policy['id'])
-        self.assertIn('id', policy)
         self.assertIn('type', policy)
         self.assertIn('blob', policy)
         self.assertIsNotNone(policy['id'])

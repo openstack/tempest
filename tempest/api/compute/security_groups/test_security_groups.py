@@ -131,7 +131,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Update security group name and description
         # Create a security group
         securitygroup = self.create_security_group()
-        self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update the name and description
         s_new_name = data_utils.rand_name('sg-hth')

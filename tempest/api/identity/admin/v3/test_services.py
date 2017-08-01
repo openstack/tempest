@@ -69,7 +69,6 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         service = self.services_client.create_service(
             type=serv_type, name=name)['service']
         self.addCleanup(self.services_client.delete_service, service['id'])
-        self.assertIn('id', service)
         expected_data = {'name': name, 'type': serv_type}
         self.assertDictContainsSubset(expected_data, service)
 
