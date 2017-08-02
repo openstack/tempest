@@ -117,7 +117,6 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
         self.setup_endpoint_ids.append(endpoint['id'])
         # Asserting Create Endpoint response body
-        self.assertIn('id', endpoint)
         self.assertEqual(region, endpoint['region'])
         self.assertEqual(url, endpoint['url'])
 
