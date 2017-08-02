@@ -78,7 +78,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#log-disabled-compute-service-information
+        https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service-and-log-disabled-reason
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/disable-log-reason', post_body)
