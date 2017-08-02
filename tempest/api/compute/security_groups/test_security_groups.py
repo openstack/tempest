@@ -69,7 +69,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # leading and trailing spaces
         s_name = ' %s ' % data_utils.rand_name('securitygroup ')
         securitygroup = self.create_security_group(name=s_name)
-        self.assertIn('name', securitygroup)
         securitygroup_name = securitygroup['name']
         self.assertEqual(securitygroup_name, s_name,
                          "The created Security Group name is "
@@ -131,7 +130,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # Update security group name and description
         # Create a security group
         securitygroup = self.create_security_group()
-        self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update the name and description
         s_new_name = data_utils.rand_name('sg-hth')

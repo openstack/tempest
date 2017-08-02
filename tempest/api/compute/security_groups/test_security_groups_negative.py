@@ -154,7 +154,6 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_update_security_group_with_invalid_sg_name(self):
         # Update security_group with invalid sg_name should fail
         securitygroup = self.create_security_group()
-        self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update Security Group with group name longer than 255 chars
         s_new_name = 'securitygroup-'.ljust(260, '0')
@@ -170,7 +169,6 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_update_security_group_with_invalid_sg_des(self):
         # Update security_group with invalid sg_des should fail
         securitygroup = self.create_security_group()
-        self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
         # Update Security Group with group description longer than 255 chars
         s_new_des = 'des-'.ljust(260, '0')
