@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_serialization import jsonutils as json
+
 from tempest.lib.services.volume.v2 import volumes_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -23,6 +25,19 @@ class TestVolumesClient(base.BaseServiceTest):
     FAKE_VOLUME_METADATA_ITEM = {
         "meta": {
             "key1": "value1"
+        }
+    }
+
+    FAKE_VOLUME_IMAGE_METADATA = {
+        "metadata": {
+            "container_format": "bare",
+            "min_ram": "0",
+            "disk_format": "raw",
+            "image_name": "xly-ubuntu16-server",
+            "image_id": "3e087b0c-10c5-4255-b147-6e8e9dbad6fc",
+            "checksum": "008f5d22fe3cb825d714da79607a90f9",
+            "min_disk": "0",
+            "size": "8589934592"
         }
     }
 
@@ -76,6 +91,17 @@ class TestVolumesClient(base.BaseServiceTest):
             volume_id="a3be971b-8de5-4bdf-bdb8-3d8eb0fb69f8",
             id="key1")
 
+    def _test_show_volume_image_metadata(self, bytes_body=False):
+        fake_volume_id = "a3be971b-8de5-4bdf-bdb8-3d8eb0fb69f8"
+        self.check_service_client_function(
+            self.client.show_volume_image_metadata,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_VOLUME_IMAGE_METADATA,
+            to_utf=bytes_body,
+            mock_args=['volumes/%s/action' % fake_volume_id,
+                       json.dumps({"os-show_image_metadata": {}})],
+            volume_id=fake_volume_id)
+
     def test_force_detach_volume_with_str_body(self):
         self._test_force_detach_volume()
 
@@ -87,6 +113,12 @@ class TestVolumesClient(base.BaseServiceTest):
 
     def test_show_volume_metadata_item_with_bytes_body(self):
         self._test_show_volume_metadata_item(bytes_body=True)
+
+    def test_show_volume_image_metadata_with_str_body(self):
+        self._test_show_volume_image_metadata()
+
+    def test_show_volume_image_metadata_with_bytes_body(self):
+        self._test_show_volume_image_metadata(bytes_body=True)
 
     def test_retype_volume_with_str_body(self):
         self._test_retype_volume()
