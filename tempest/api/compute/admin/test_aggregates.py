@@ -125,7 +125,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
             name=aggregate_name, availability_zone=az_name)
 
         self.assertEqual(az_name, aggregate['availability_zone'])
-        self.assertIsNotNone(aggregate['id'])
 
         aggregate_id = aggregate['id']
         new_aggregate_name = aggregate_name + '_new'

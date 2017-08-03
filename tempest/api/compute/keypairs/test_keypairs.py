@@ -51,13 +51,10 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         # Keypair should be created, verified and deleted
         k_name = data_utils.rand_name('keypair')
         keypair = self.create_keypair(k_name)
-        private_key = keypair['private_key']
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
                          "The created keypair name is not equal "
                          "to the requested name")
-        self.assertIsNotNone(private_key,
-                             "Field private_key is empty or not found.")
 
     @decorators.idempotent_id('a4233d5d-52d8-47cc-9a25-e1864527e3df')
     def test_get_keypair_detail(self):
@@ -68,9 +65,6 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         self.assertEqual(keypair_detail['name'], k_name,
                          "The created keypair name is not equal "
                          "to requested name")
-        public_key = keypair_detail['public_key']
-        self.assertIsNotNone(public_key,
-                             "Field public_key is empty or not found.")
 
     @decorators.idempotent_id('39c90c6a-304a-49dd-95ec-2366129def05')
     def test_keypair_create_with_pub_key(self):
