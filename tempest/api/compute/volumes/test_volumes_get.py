@@ -52,8 +52,6 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         volume = self.create_volume(size=CONF.volume.volume_size,
                                     display_name=v_name,
                                     metadata=metadata)
-        self.assertIn('id', volume)
-        self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")

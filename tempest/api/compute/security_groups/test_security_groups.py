@@ -69,7 +69,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         # leading and trailing spaces
         s_name = ' %s ' % data_utils.rand_name('securitygroup ')
         securitygroup = self.create_security_group(name=s_name)
-        self.assertIn('name', securitygroup)
         securitygroup_name = securitygroup['name']
         self.assertEqual(securitygroup_name, s_name,
                          "The created Security Group name is "

@@ -65,8 +65,6 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         k_name = data_utils.rand_name('keypair')
         self.create_keypair(k_name)
         keypair_detail = self.client.show_keypair(k_name)['keypair']
-        self.assertIn('name', keypair_detail)
-        self.assertIn('public_key', keypair_detail)
         self.assertEqual(keypair_detail['name'], k_name,
                          "The created keypair name is not equal "
                          "to requested name")

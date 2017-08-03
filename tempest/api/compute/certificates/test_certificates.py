@@ -31,14 +31,9 @@ class CertificatesV2TestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('c070a441-b08e-447e-a733-905909535b1b')
     def test_create_root_certificate(self):
         # create certificates
-        body = self.certificates_client.create_certificate()['certificate']
-        self.assertIn('data', body)
-        self.assertIn('private_key', body)
+        self.certificates_client.create_certificate()
 
     @decorators.idempotent_id('3ac273d0-92d2-4632-bdfc-afbc21d4606c')
     def test_get_root_certificate(self):
         # get the root certificate
-        body = (self.certificates_client.show_certificate('root')
-                ['certificate'])
-        self.assertIn('data', body)
-        self.assertIn('private_key', body)
+        self.certificates_client.show_certificate('root')

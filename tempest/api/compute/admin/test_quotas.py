@@ -169,7 +169,6 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         LOG.debug("get the current 'default' quota class values")
         body = (self.adm_client.show_quota_class_set('default')
                 ['quota_class_set'])
-        self.assertIn('id', body)
         self.assertEqual('default', body.pop('id'))
         # restore the defaults when the test is done
         self.addCleanup(self._restore_default_quotas, body.copy())
