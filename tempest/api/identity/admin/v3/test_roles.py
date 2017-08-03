@@ -33,7 +33,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             role_name = data_utils.rand_name(name='role')
             role = cls.roles_client.create_role(name=role_name)['role']
             cls.roles.append(role)
-        cls.fetched_role_ids = list()
         u_name = data_utils.rand_name('user')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
@@ -66,10 +65,6 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         for role in cls.roles:
             cls.roles_client.delete_role(role['id'])
         super(RolesV3TestJSON, cls).resource_cleanup()
-
-    def _list_assertions(self, body, fetched_role_ids, role_id):
-        self.assertEqual(len(body), 1)
-        self.assertIn(role_id, fetched_role_ids)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('18afc6c0-46cf-4911-824e-9989cc056c3a')
@@ -104,11 +99,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = self.roles_client.list_user_roles_on_project(
             self.project['id'], self.user_body['id'])['roles']
 
-        for i in roles:
-            self.fetched_role_ids.append(i['id'])
-
-        self._list_assertions(roles, self.fetched_role_ids,
-                              self.role['id'])
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
 
         self.roles_client.check_user_role_existence_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
@@ -124,11 +116,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = self.roles_client.list_user_roles_on_domain(
             self.domain['id'], self.user_body['id'])['roles']
 
-        for i in roles:
-            self.fetched_role_ids.append(i['id'])
-
-        self._list_assertions(roles, self.fetched_role_ids,
-                              self.role['id'])
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
 
         self.roles_client.check_user_role_existence_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
@@ -145,11 +134,9 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = self.roles_client.list_group_roles_on_project(
             self.project['id'], self.group_body['id'])['roles']
 
-        for i in roles:
-            self.fetched_role_ids.append(i['id'])
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
 
-        self._list_assertions(roles, self.fetched_role_ids,
-                              self.role['id'])
         # Add user to group, and insure user has role on project
         self.groups_client.add_group_user(self.group_body['id'],
                                           self.user_body['id'])
@@ -179,11 +166,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         roles = self.roles_client.list_group_roles_on_domain(
             self.domain['id'], self.group_body['id'])['roles']
 
-        for i in roles:
-            self.fetched_role_ids.append(i['id'])
-
-        self._list_assertions(roles, self.fetched_role_ids,
-                              self.role['id'])
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
 
         self.roles_client.check_role_from_group_on_domain_existence(
             self.domain['id'], self.group_body['id'], self.role['id'])
