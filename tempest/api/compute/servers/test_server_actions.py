@@ -166,8 +166,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                .format(image_ref, rebuilt_server['image']['id']))
         self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
 
-    @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
-    def test_rebuild_server(self):
+    def _test_rebuild_server(self):
         # Get the IPs the server has before rebuilding it
         original_addresses = (self.client.show_server(self.server_id)['server']
                               ['addresses'])
@@ -218,6 +217,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             linux_client.validate_authentication()
 
+    @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
+    def test_rebuild_server(self):
+        self._test_rebuild_server()
+
     @decorators.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
@@ -260,7 +263,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.attach_volume(server, volume)
 
         # run general rebuild test
-        self.test_rebuild_server()
+        self._test_rebuild_server()
 
         # make sure the volume is attached to the instance after rebuild
         vol_after_rebuild = self.volumes_client.show_volume(volume['id'])
