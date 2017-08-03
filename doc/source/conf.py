@@ -25,8 +25,6 @@
 import os
 import subprocess
 
-import openstackdocstheme
-
 # Build the plugin registry
 def build_plugin_registry(app):
     root_dir = os.path.dirname(
