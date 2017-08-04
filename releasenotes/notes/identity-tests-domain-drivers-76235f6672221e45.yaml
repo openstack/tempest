@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new boolean config option ``domain_specific_drivers``
+    is added to the section ``identity-feature-enabled``.
+    This option must be enabled when testing an environment that
+    is configured to use domain-specific identity drivers.
