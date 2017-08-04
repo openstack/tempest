@@ -973,7 +973,7 @@ class PublicObjectTest(base.BaseObjectTest):
     @classmethod
     def setup_clients(cls):
         super(PublicObjectTest, cls).setup_clients()
-        cls.identity_client_alt = cls.os_alt.identity_client
+        cls.object_client_alt = cls.os_alt.object_client
 
     def setUp(self):
         super(PublicObjectTest, self).setUp()
@@ -1047,7 +1047,7 @@ class PublicObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
 
         # get auth token of alternative user
-        alt_auth_data = self.identity_client_alt.auth_provider.auth_data
+        alt_auth_data = self.object_client_alt.auth_provider.auth_data
         self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=alt_auth_data
