@@ -265,8 +265,6 @@ def get_configured_admin_credentials(fill_in=True, identity_version=None):
     return credentials
 
 
-# Wrapper around auth.get_credentials to use the configured identity version
-# if none is specified
 def get_credentials(fill_in=True, identity_version=None, **kwargs):
     """Get credentials from dict based on config
 
