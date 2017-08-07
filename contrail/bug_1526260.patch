@@ -1,0 +1,21 @@
+diff --git a/tempest/api/network/test_ports.py b/tempest/api/network/test_ports.py
+index caf7f142b6..49a1311aac 100644
+--- a/tempest/api/network/test_ports.py
++++ b/tempest/api/network/test_ports.py
+@@ -24,6 +24,7 @@
+ from tempest import config
+ from tempest import exceptions
+ from tempest import test
++from tempest.lib import decorators
+ 
+ CONF = config.CONF
+ 
+@@ -225,6 +227,8 @@ def test_list_ports_fields(self):
+         for port in ports:
+             self.assertEqual(sorted(fields), sorted(port.keys()))
+ 
++    @decorators.skip_because(bug='1526260')
++    @test.attr(type='smoke')
+     @test.idempotent_id('63aeadd4-3b49-427f-a3b1-19ca81f06270')
+     def test_create_update_port_with_second_ip(self):
+         # Create a network with two subnets

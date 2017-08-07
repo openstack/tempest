@@ -1,0 +1,40 @@
+diff --git a/tempest/api/network/test_ports.py b/tempest/api/network/test_ports.py
+index caf7f142b6..49a1311aac 100644
+--- a/tempest/api/network/test_ports.py
++++ b/tempest/api/network/test_ports.py
+@@ -24,6 +24,7 @@
+ from tempest import config
+ from tempest import exceptions
+ from tempest import test
++from tempest.lib import decorators
+ 
+ CONF = config.CONF
+ 
+@@ -50,6 +51,7 @@ def _delete_port(self, port_id):
+         ports_list = body['ports']
+         self.assertFalse(port_id in [n['id'] for n in ports_list])
+ 
++    @decorators.skip_because(bug='1474804')
+     @test.attr(type='smoke')
+     @test.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
+     def test_create_update_delete_port(self):
+diff --git a/tempest/api/network/test_security_groups.py b/tempest/api/network/test_security_groups.py
+index 53129793f3..35b83fe22d 100644
+--- a/tempest/api/network/test_security_groups.py
++++ b/tempest/api/network/test_security_groups.py
+@@ -19,6 +19,7 @@
+ from tempest.common.utils import data_utils
+ from tempest import config
+ from tempest import test
++from tempest.lib import decorators
+ 
+ CONF = config.CONF
+ 
+@@ -81,6 +82,7 @@ def test_list_security_groups(self):
+         msg = "Security-group list doesn't contain default security-group"
+         self.assertIsNotNone(found, msg)
+ 
++    @decorators.skip_because(bug='1474804')
+     @test.attr(type='smoke')
+     @test.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
+     def test_create_list_update_show_delete_security_group(self):

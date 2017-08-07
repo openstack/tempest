@@ -24,7 +24,6 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest import test
-from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -51,7 +50,6 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
-    @decorators.skip_because(bug='1474804')
     @test.attr(type='smoke')
     @test.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
     def test_create_update_delete_port(self):
@@ -227,8 +225,6 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         for port in ports:
             self.assertEqual(sorted(fields), sorted(port.keys()))
 
-    @decorators.skip_because(bug='1526260')
-    @test.attr(type='smoke')
     @test.idempotent_id('63aeadd4-3b49-427f-a3b1-19ca81f06270')
     def test_create_update_port_with_second_ip(self):
         # Create a network with two subnets
