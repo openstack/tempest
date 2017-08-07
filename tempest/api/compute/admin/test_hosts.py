@@ -65,9 +65,4 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
             resources = self.client.show_host(hostname)['host']
             self.assertNotEmpty(resources)
             host_resource = resources[0]['resource']
-            self.assertIsNotNone(host_resource)
-            self.assertIsNotNone(host_resource['cpu'])
-            self.assertIsNotNone(host_resource['disk_gb'])
-            self.assertIsNotNone(host_resource['memory_mb'])
-            self.assertIsNotNone(host_resource['project'])
             self.assertEqual(hostname, host_resource['host'])
