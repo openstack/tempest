@@ -17,6 +17,7 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -134,7 +135,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
     @testtools.skipUnless(
-        test.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
+        compute.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
         'ServerGroupAffinityFilter is not available.')
     def test_create_server_with_scheduler_hint_group(self):
         # Create a server with the scheduler hint "group".
