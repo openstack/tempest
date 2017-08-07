@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add show volume image metadata API to v2 volumes_client library.
+    This feature enables the possibility to show volume's image metadata.

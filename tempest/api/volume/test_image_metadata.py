@@ -40,7 +40,7 @@ class VolumesImageMetadata(base.BaseVolumeTest):
 
     @decorators.idempotent_id('03efff0b-5c75-4822-8f10-8789ac15b13e')
     @test.services('image')
-    def test_update_image_metadata(self):
+    def test_update_show_delete_image_metadata(self):
         # Update image metadata
         image_metadata = {'image_id': '5137a025-3c5f-43c1-bc64-5f41270040a5',
                           'image_name': 'image',
@@ -49,7 +49,7 @@ class VolumesImageMetadata(base.BaseVolumeTest):
         self.volumes_client.update_volume_image_metadata(self.volume['id'],
                                                          **image_metadata)
 
-        # Fetch image metadata from the volume
+        # Fetch volume's image metadata by show_volume method
         volume_image_metadata = self.volumes_client.show_volume(
             self.volume['id'])['volume']['volume_image_metadata']
 
@@ -62,9 +62,9 @@ class VolumesImageMetadata(base.BaseVolumeTest):
                                                          'ramdisk_id')
         del image_metadata['ramdisk_id']
 
-        # Fetch the new image metadata from the volume
-        volume_image_metadata = self.volumes_client.show_volume(
-            self.volume['id'])['volume']['volume_image_metadata']
+        # Fetch volume's image metadata by show_volume_image_metadata method
+        volume_image_metadata = self.volumes_client.show_volume_image_metadata(
+            self.volume['id'])['metadata']
 
         # Verify image metadata was updated after item deletion
         self.assertThat(volume_image_metadata.items(),

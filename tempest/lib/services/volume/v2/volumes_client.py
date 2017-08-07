@@ -355,6 +355,15 @@ class VolumesClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_volume_image_metadata(self, volume_id):
+        """Show image metadata for the volume."""
+        post_body = json.dumps({'os-show_image_metadata': {}})
+        url = "volumes/%s/action" % volume_id
+        resp, body = self.post(url, post_body)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     @removals.remove(message="use list_pools from tempest.lib.services."
                              "volume.v2.scheduler_stats_client")
     def show_pools(self, detail=False):
