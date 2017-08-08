@@ -330,13 +330,9 @@ Microversion tests implemented in Tempest
 
  .. _2.47: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id42
 
- * `2.52`_
+ * `2.48`_
 
- .. _2.52: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id47
-
- * `2.53`_
-
- .. _2.53: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id48
+ .. _2.48: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id43
 
 * Volume
 
