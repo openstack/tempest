@@ -28,6 +28,22 @@ class TestGroupsClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_CREATE_GROUP_FROM_GROUP_SNAPSHOT = {
+        "create-from-src": {
+            "name": "group-002",
+            "description": "Test group 2",
+            "group_snapshot_id": "79c9afdb-7e46-4d71-9249-1f022886963c",
+        }
+    }
+
+    FAKE_CREATE_GROUP_FROM_GROUP = {
+        "create-from-src": {
+            "name": "group-003",
+            "description": "Test group 3",
+            "source_group_id": "e92f9dc7-0b20-492d-8ab2-3ad8fdac270e",
+        }
+    }
+
     FAKE_INFO_GROUP = {
         "group": {
             "id": "0e701ab8-1bec-4b9f-b026-a7ba4af13578",
@@ -133,4 +149,18 @@ class TestGroupsClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.post',
             {},
             group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
+            status=202)
+
+    def test_create_group_from_group_snapshot(self):
+        self.check_service_client_function(
+            self.client.create_group_from_source,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_CREATE_GROUP_FROM_GROUP_SNAPSHOT,
+            status=202)
+
+    def test_create_group_from_group(self):
+        self.check_service_client_function(
+            self.client.create_group_from_source,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_CREATE_GROUP_FROM_GROUP,
             status=202)
