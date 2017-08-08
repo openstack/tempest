@@ -101,6 +101,7 @@ from oslo_serialization import jsonutils as json
 import six
 from testrepository.commands import run_argv
 
+from tempest import clients
 from tempest.cmd import cleanup_service
 from tempest.cmd import init
 from tempest.cmd import workspace
@@ -216,7 +217,8 @@ class TempestRun(command.Command):
         print("Initializing saved state.")
         data = {}
         self.global_services = cleanup_service.get_global_cleanup_services()
-        self.admin_mgr = credentials.AdminManager()
+        self.admin_mgr = clients.Manager(
+            credentials.get_configured_admin_credentials())
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,
                   'is_dry_run': False,
