@@ -263,6 +263,7 @@ class Manager(clients.ServiceClients):
 
             # Set default client for users that don't need explicit version
             self.volumes_client_latest = self.volumes_v2_client
+            self.snapshots_client_latest = self.snapshots_v2_client
 
         if CONF.volume_feature_enabled.api_v3:
             self.backups_v3_client = self.volume_v3.BackupsClient()
@@ -277,6 +278,7 @@ class Manager(clients.ServiceClients):
 
             # Set default client for users that don't need explicit version
             self.volumes_client_latest = self.volumes_v3_client
+            self.snapshots_client_latest = self.snapshots_v3_client
 
     def _set_object_storage_clients(self):
         # NOTE(andreaf) Load configuration from config. Once object storage

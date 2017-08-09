@@ -97,8 +97,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.security_group_default_rules_client = (
             cls.os_primary.security_group_default_rules_client)
         cls.versions_client = cls.os_primary.compute_versions_client
-
-        cls.volumes_client = cls.os_primary.volumes_v2_client
+        if CONF.service_available.cinder:
+            cls.volumes_client = cls.os_primary.volumes_client_latest
 
     @classmethod
     def resource_setup(cls):
