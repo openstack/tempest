@@ -180,3 +180,15 @@ class HackingTestCase(base.TestCase):
             'from oslo_config import cfg', './tempest/lib/decorators.py')))
         self.assertTrue(list(checks.dont_use_config_in_tempest_lib(
             'import tempest.config', './tempest/lib/common/rest_client.py')))
+
+    def test_unsupported_exception_attribute_PY3(self):
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(e.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(ex.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(exc.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(exception.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(ee.message)"))), 0)

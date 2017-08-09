@@ -24,6 +24,7 @@ Tempest Specific Commandments
 - [T114] Check that tempest.lib does not use tempest config
 - [T115] Check that admin tests should exist under admin path
 - [N322] Method's default argument shouldn't be mutable
+- [T116] Unsupported 'message' Exception attribute in PY3
 
 Test Data/Configuration
 -----------------------
