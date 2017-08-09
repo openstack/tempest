@@ -258,3 +258,49 @@ class GroupsTest(base.BaseVolumeAdminTest):
                     self.volumes_client, vol['id'], 'available')
         waiters.wait_for_volume_resource_status(
             self.groups_client, grp2['id'], 'available')
+
+    @decorators.idempotent_id('4a8a6fd2-8b3b-4641-8f54-6a6f99320006')
+    def test_group_update(self):
+        # Create volume type
+        volume_type = self.create_volume_type()
+
+        # Create group type
+        group_type = self.create_group_type()
+
+        # Create Group
+        grp = self._create_group(group_type, volume_type)
+
+        # Create a volume in the group
+        vol1 = self.create_volume(volume_type=volume_type['id'],
+                                  group_id=grp['id'])
+        # Create a volume not in the group
+        vol2 = self.create_volume(volume_type=volume_type['id'])
+
+        # Remove a volume from group and update name and description
+        new_grp_name = 'new_group'
+        new_desc = 'This is a new group'
+        grp_params = {'name': new_grp_name,
+                      'description': new_desc,
+                      'remove_volumes': vol1['id'],
+                      'add_volumes': vol2['id']}
+        self.groups_client.update_group(grp['id'], **grp_params)
+
+        # Wait for group status to become available
+        waiters.wait_for_volume_resource_status(
+            self.groups_client, grp['id'], 'available')
+
+        # Get the updated Group
+        grp = self.groups_client.show_group(grp['id'])['group']
+        self.assertEqual(new_grp_name, grp['name'])
+        self.assertEqual(new_desc, grp['description'])
+
+        # Get volumes in the group
+        vols = self.volumes_client.list_volumes(
+            detail=True)['volumes']
+        grp_vols = []
+        for vol in vols:
+            if vol['group_id'] == grp['id']:
+                grp_vols.append(vol)
+        self.assertEqual(1, len(grp_vols))
+        self.assertEqual(vol2['id'], grp_vols[0]['id'])
+        self.assertNotEqual(vol1['id'], grp_vols[0]['id'])
