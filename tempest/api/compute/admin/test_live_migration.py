@@ -163,7 +163,7 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.serial_console,
                           'Serial console not supported.')
     @testtools.skipUnless(
-        test.is_scheduler_filter_enabled("DifferentHostFilter"),
+        compute.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_live_migration_serial_console(self):
         """Test the live-migration of an instance which has a serial console

@@ -15,6 +15,7 @@
 from oslo_log import log
 import testtools
 
+from tempest.common import compute
 from tempest.common.utils import net_info
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -162,7 +163,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).resource_setup()
 
         cls.multi_node = CONF.compute.min_compute_nodes > 1 and \
-            test.is_scheduler_filter_enabled("DifferentHostFilter")
+            compute.is_scheduler_filter_enabled("DifferentHostFilter")
         if cls.multi_node:
             LOG.info("Working in Multi Node mode")
         else:
