@@ -13,20 +13,14 @@
 
 from oslo_log import log as logging
 
-from tempest import config
-
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 
-CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-def _create_neutron_sec_group_rules(os, sec_group):
+def _create_neutron_sec_group_rules(os, sec_group, ethertype='IPv4'):
     sec_group_rules_client = os.security_group_rules_client
-    ethertype = 'IPv4'
-    if CONF.validation.ip_version_for_ssh == 6:
-        ethertype = 'IPv6'
 
     sec_group_rules_client.create_security_group_rule(
         security_group_id=sec_group['id'],
@@ -42,7 +36,8 @@ def _create_neutron_sec_group_rules(os, sec_group):
         direction='ingress')
 
 
-def create_ssh_security_group(os, add_rule=False):
+def create_ssh_security_group(os, add_rule=False, ethertype='IPv4',
+                              use_neutron=True):
     security_groups_client = os.compute_security_groups_client
     security_group_rules_client = os.compute_security_group_rules_client
     sg_name = data_utils.rand_name('securitygroup-')
@@ -50,8 +45,9 @@ def create_ssh_security_group(os, add_rule=False):
     security_group = security_groups_client.create_security_group(
         name=sg_name, description=sg_description)['security_group']
     if add_rule:
-        if CONF.service_available.neutron:
-            _create_neutron_sec_group_rules(os, security_group)
+        if use_neutron:
+            _create_neutron_sec_group_rules(os, security_group,
+                                            ethertype=ethertype)
         else:
             security_group_rules_client.create_security_group_rule(
                 parent_group_id=security_group['id'], ip_protocol='tcp',
@@ -64,7 +60,10 @@ def create_ssh_security_group(os, add_rule=False):
     return security_group
 
 
-def create_validation_resources(os, validation_resources=None):
+def create_validation_resources(os, validation_resources=None,
+                                ethertype='IPv4', use_neutron=True,
+                                floating_network_id=None,
+                                floating_network_name=None):
     # Create and Return the validation resources required to validate a VM
     validation_data = {}
     if validation_resources:
@@ -78,11 +77,12 @@ def create_validation_resources(os, validation_resources=None):
             if validation_resources['security_group_rules']:
                 add_rule = True
             validation_data['security_group'] = \
-                create_ssh_security_group(os, add_rule)
+                create_ssh_security_group(
+                    os, add_rule, use_neutron=use_neutron, ethertype=ethertype)
         if validation_resources['floating_ip']:
-            if CONF.service_available.neutron:
+            if use_neutron:
                 floatingip = os.floating_ips_client.create_floatingip(
-                    floating_network_id=CONF.network.public_network_id)
+                    floating_network_id=floating_network_id)
                 # validation_resources['floating_ip'] has historically looked
                 # like a compute API POST /os-floating-ips response, so we need
                 # to mangle it a bit for a Neutron response with different
@@ -96,7 +96,7 @@ def create_validation_resources(os, validation_resources=None):
                 # floating IPs using the compute API should be capped at 2.35.
                 validation_data.update(
                     os.compute_floating_ips_client.create_floating_ip(
-                        pool=CONF.network.floating_network_name))
+                        pool=floating_network_name))
     return validation_data
 
 
