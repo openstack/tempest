@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from io import StringIO
 import socket
 
 import mock
 import six
+from six import StringIO
 import testtools
 
 from tempest.lib.common import ssh
