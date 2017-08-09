@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.network import base
 
 
@@ -66,3 +67,10 @@ class SecurityGroupsClient(base.BaseNetworkClient):
         """
         uri = '/security-groups'
         return self.list_resources(uri, **filters)
+
+    def is_resource_deleted(self, id):
+        try:
+            self.show_security_group(id)
+        except lib_exc.NotFound:
+            return True
+        return False
