@@ -384,12 +384,14 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             raise lib_exc.InvalidConfiguration(
                 msg % CONF.validation.ip_version_for_ssh)
         if hasattr(cls, "os_primary"):
+            vr = cls.validation_resources
             cls.validation_resources = vresources.create_validation_resources(
-                cls.os_primary, cls.validation_resources,
+                cls.os_primary,
                 use_neutron=CONF.service_available.neutron,
                 ethertype='IPv' + str(CONF.validation.ip_version_for_ssh),
                 floating_network_id=CONF.network.public_network_id,
-                floating_network_name=CONF.network.floating_network_name)
+                floating_network_name=CONF.network.floating_network_name,
+                **vr)
         else:
             LOG.warning("Client manager not found, validation resources not"
                         " created")
@@ -403,9 +405,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if cls.validation_resources:
             if hasattr(cls, "os_primary"):
+                vr = cls.validation_resources
                 vresources.clear_validation_resources(
-                    cls.os_primary, cls.validation_resources,
-                    use_neutron=CONF.service_available.neutron)
+                    cls.os_primary,
+                    use_neutron=CONF.service_available.neutron, **vr)
                 cls.validation_resources = {}
             else:
                 LOG.warning("Client manager not found, validation resources "
