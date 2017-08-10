@@ -128,6 +128,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                    "this stage.")
             raise ValueError(msg)
 
+        LOG.debug("Provisioning test server with validation resources %s",
+                  validation_resources)
         if 'security_groups' in kwargs:
             kwargs['security_groups'].append(
                 {'name': validation_resources['security_group']['name']})

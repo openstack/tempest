@@ -181,6 +181,9 @@ def create_validation_resources(clients, keypair=False, floating_ip=False,
         floating_ip = resources['floating_ip']['ip']
     """
     # Create and Return the validation resources required to validate a VM
+    msg = ('Requested validation resources keypair %s, floating IP %s, '
+           'security group %s')
+    LOG.debug(msg, keypair, floating_ip, security_group)
     validation_data = {}
     try:
         if keypair:
@@ -429,6 +432,9 @@ class ValidationResourcesFixture(fixtures.Fixture):
         self._validation_resources = None
 
     def _setUp(self):
+        msg = ('Requested setup of ValidationResources keypair %s, floating '
+               'IP %s, security group %s')
+        LOG.debug(msg, self._keypair, self._floating_ip, self._security_group)
         self._validation_resources = create_validation_resources(
             self._clients, keypair=self._keypair,
             floating_ip=self._floating_ip,
@@ -441,9 +447,9 @@ class ValidationResourcesFixture(fixtures.Fixture):
         # cleanup here, so we don't need a try-finally around provisioning
         vr = self._validation_resources
         self.addCleanup(clear_validation_resources, self._clients,
-                        keypair=vr['keypair'],
-                        floating_ip=vr['floating_ip'],
-                        security_group=vr['security_group'],
+                        keypair=vr.get('keypair', None),
+                        floating_ip=vr.get('floating_ip', None),
+                        security_group=vr.get('security_group', None),
                         use_neutron=self._use_neutron)
 
     @property

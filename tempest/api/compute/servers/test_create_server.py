@@ -42,8 +42,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_validation_resources()
         super(ServersTestJSON, cls).resource_setup()
+        validation_resources = cls.get_class_validation_resources(
+            cls.os_primary)
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -52,6 +53,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         disk_config = cls.disk_config
         server_initial = cls.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE',
             name=cls.name,
             metadata=cls.meta,
@@ -105,11 +107,13 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
+            self.get_server_ip(self.server, validation_resources),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
         output = linux_client.exec_command('grep -c ^processor /proc/cpuinfo')
@@ -120,11 +124,13 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                           'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
+            self.get_server_ip(self.server, validation_resources),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
         hostname = linux_client.exec_command("hostname").rstrip()

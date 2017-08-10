@@ -44,8 +44,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                            self.server_id, 'ACTIVE')
         except lib_exc.NotFound:
             # The server was deleted by previous test, create a new one
+            # Use class level validation resources to avoid them being
+            # deleted once a test is over
+            validation_resources = self.get_class_validation_resources(
+                self.os_primary)
             server = self.create_test_server(
                 validatable=True,
+                validation_resources=validation_resources,
                 wait_until='ACTIVE')
             self.__class__.server_id = server['id']
         except Exception:
@@ -69,8 +74,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_validation_resources()
-
         super(ServerActionsTestJSON, cls).resource_setup()
         cls.server_id = cls.rebuild_server(None, validatable=True)
 
@@ -80,8 +83,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_change_server_password(self):
         # Since this test messes with the password and makes the
         # server unreachable, it should create its own server
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
         newserver = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE')
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
@@ -92,7 +98,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # Verify that the user can authenticate with the new password
             server = self.client.show_server(newserver['id'])['server']
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.ssh_user,
                 new_password,
                 server=server,
@@ -101,13 +107,15 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     def _test_reboot_server(self, reboot_type):
         if CONF.validation.run_validation:
+            validation_resources = self.get_class_validation_resources(
+                self.os_primary)
             # Get the time the server was last rebooted,
             server = self.client.show_server(self.server_id)['server']
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.ssh_user,
                 self.password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=server,
                 servers_client=self.client)
             boot_time = linux_client.get_boot_time()
@@ -122,10 +130,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         if CONF.validation.run_validation:
             # Log in and verify the boot time has changed
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.ssh_user,
                 self.password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=server,
                 servers_client=self.client)
             new_boot_time = linux_client.get_boot_time()
@@ -201,6 +209,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(original_addresses, server['addresses'])
 
         if CONF.validation.run_validation:
+            validation_resources = self.get_class_validation_resources(
+                self.os_primary)
             # Authentication is attempted in the following order of priority:
             # 1.The key passed in, if one was passed in.
             # 2.Any key we can find through an SSH agent (if allowed).
@@ -208,10 +218,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             #   ~/.ssh/ (if allowed).
             # 4.Plain username/password auth, if a password was given.
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(rebuilt_server),
+                self.get_server_ip(rebuilt_server, validation_resources),
                 self.ssh_user,
                 password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=rebuilt_server,
                 servers_client=self.client)
             linux_client.validate_authentication()

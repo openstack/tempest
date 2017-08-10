@@ -26,7 +26,7 @@ import testtools
 from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import utils
-import tempest.common.validation_resources as vresources
+import tempest.common.validation_resources as vr
 from tempest import config
 from tempest.lib.common import cred_client
 from tempest.lib.common import fixed_network
@@ -105,12 +105,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # a list of roles - the first element of the list being a label, and the
     # rest the actual roles
     credentials = []
-    # Resources required to validate a server using ssh
-    validation_resources = {}
     network_resources = {}
 
     # Stack of resource cleanups
     _class_cleanups = []
+
+    # Resources required to validate a server using ssh
+    _validation_resources = {}
 
     # NOTE(sdague): log_format is defined inline here instead of using the oslo
     # default because going through the config path recouples config to the
@@ -379,29 +380,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                             servers.delete_server,
                             cls.shared_server2['id'])
         """
-        if (CONF.validation.ip_version_for_ssh not in (4, 6) and
-            CONF.service_available.neutron):
-            msg = "Invalid IP version %s in ip_version_for_ssh. Use 4 or 6"
-            raise lib_exc.InvalidConfiguration(
-                msg % CONF.validation.ip_version_for_ssh)
-        if hasattr(cls, "os_primary"):
-            vr = cls.validation_resources
-            cls.validation_resources = vresources.create_validation_resources(
-                cls.os_primary,
-                use_neutron=CONF.service_available.neutron,
-                ethertype='IPv' + str(CONF.validation.ip_version_for_ssh),
-                floating_network_id=CONF.network.public_network_id,
-                floating_network_name=CONF.network.floating_network_name,
-                **vr)
-        else:
-            LOG.warning("Client manager not found, validation resources not"
-                        " created")
+        pass
 
     @classmethod
     def resource_cleanup(cls):
         """Class level resource cleanup for test cases.
 
-        Resource cleanup processes the stack or cleanups produced by
+        Resource cleanup processes the stack of cleanups produced by
         `addClassResourceCleanup` and then cleans up validation resources
         if any were provisioned.
 
@@ -440,16 +425,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 fn(*args, **kwargs)
             except Exception:
                 cleanup_errors.append(sys.exc_info())
-        if cls.validation_resources:
-            if hasattr(cls, "os_primary"):
-                vr = cls.validation_resources
-                vresources.clear_validation_resources(
-                    cls.os_primary,
-                    use_neutron=CONF.service_available.neutron, **vr)
-                cls.validation_resources = {}
-            else:
-                LOG.warning("Client manager not found, validation resources "
-                            "not deleted")
         if cleanup_errors:
             raise testtools.MultipleExceptions(*cleanup_errors)
 
@@ -610,45 +585,83 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if hasattr(cls, '_creds_provider'):
             cls._creds_provider.clear_creds()
 
+    @staticmethod
+    def _validation_resources_params_from_conf():
+        return dict(
+            keypair=(CONF.validation.auth_method.lower() == "keypair"),
+            floating_ip=(CONF.validation.connect_method.lower() == "floating"),
+            security_group=CONF.validation.security_group,
+            security_group_rules=CONF.validation.security_group_rules,
+            use_neutron=CONF.service_available.neutron,
+            ethertype='IPv' + str(CONF.validation.ip_version_for_ssh),
+            floating_network_id=CONF.network.public_network_id,
+            floating_network_name=CONF.network.floating_network_name)
+
     @classmethod
-    def set_validation_resources(cls, keypair=None, floating_ip=None,
-                                 security_group=None,
-                                 security_group_rules=None):
-        """Specify which ssh server validation resources should be created.
+    def get_class_validation_resources(cls, os_clients):
+        """Provision validation resources according to configuration
 
-        Each of the argument must be set to either None, True or False, with
-        None - use default from config (security groups and security group
-               rules get created when set to None)
-        False - Do not create the validation resource
-        True - create the validation resource
+        This is a wrapper around `create_validation_resources` from
+        `tempest.common.validation_resources` that passes parameters from
+        Tempest configuration. Only one instance of class level
+        validation resources is managed by the helper, so If resources
+        were already provisioned before, existing ones will be returned.
 
-        @param keypair
-        @param security_group
-        @param security_group_rules
-        @param floating_ip
+        Resources are returned as a dictionary. They are also scheduled for
+        automatic cleanup during class teardown using
+        `addClassResourcesCleanup`.
+
+        If `CONF.validation.run_validation` is False no resource will be
+        provisioned at all.
+
+        @param os_clients: Clients to be used to provision the resources.
         """
         if not CONF.validation.run_validation:
             return
 
-        if keypair is None:
-            keypair = (CONF.validation.auth_method.lower() == "keypair")
+        if os_clients in cls._validation_resources:
+            return cls._validation_resources[os_clients]
 
-        if floating_ip is None:
-            floating_ip = (CONF.validation.connect_method.lower() ==
-                           "floating")
+        if (CONF.validation.ip_version_for_ssh not in (4, 6) and
+                CONF.service_available.neutron):
+            msg = "Invalid IP version %s in ip_version_for_ssh. Use 4 or 6"
+            raise lib_exc.InvalidConfiguration(
+                msg % CONF.validation.ip_version_for_ssh)
 
-        if security_group is None:
-            security_group = CONF.validation.security_group
+        resources = vr.create_validation_resources(
+            os_clients,
+            **cls._validation_resources_params_from_conf())
 
-        if security_group_rules is None:
-            security_group_rules = CONF.validation.security_group_rules
+        cls.addClassResourceCleanup(
+            vr.clear_validation_resources, os_clients,
+            use_neutron=CONF.service_available.neutron,
+            **resources)
+        cls._validation_resources[os_clients] = resources
+        return resources
 
-        if not cls.validation_resources:
-            cls.validation_resources = {
-                'keypair': keypair,
-                'security_group': security_group,
-                'security_group_rules': security_group_rules,
-                'floating_ip': floating_ip}
+    def get_test_validation_resources(self, os_clients):
+        """Returns a dict of validation resources according to configuration
+
+        Initialise a validation resources fixture based on configuration.
+        Start the fixture and returns the validation resources.
+
+        If `CONF.validation.run_validation` is False no resource will be
+        provisioned at all.
+
+        @param os_clients: Clients to be used to provision the resources.
+        """
+
+        params = {}
+        # Test will try to use the fixture, so for this to be useful
+        # we must return a fixture. If validation is disabled though
+        # we don't need to provision anything, which is the default
+        # behavior for the fixture.
+        if CONF.validation.run_validation:
+            params = self._validation_resources_params_from_conf()
+
+        validation = self.useFixture(
+            vr.ValidationResourcesFixture(os_clients, **params))
+        return validation.resources
 
     @classmethod
     def set_network_resources(cls, network=False, router=False, subnet=False,
