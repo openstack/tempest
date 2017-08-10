@@ -41,31 +41,26 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             email=u_email, enabled=False)['user']
         # Delete the User at the end of this method
         self.addCleanup(self.users_client.delete_user, user['id'])
+
         # Creating second project for updation
         project = self.setup_test_project()
+
         # Updating user details with new values
-        u_name2 = data_utils.rand_name('user2')
-        u_email2 = u_name2 + '@testmail.tm'
-        u_description2 = u_name2 + ' description'
-        update_user = self.users_client.update_user(
-            user['id'], name=u_name2, description=u_description2,
-            project_id=project['id'],
-            email=u_email2, enabled=False)['user']
-        self.assertEqual(u_name2, update_user['name'])
-        self.assertEqual(u_description2, update_user['description'])
-        self.assertEqual(project['id'],
-                         update_user['project_id'])
-        self.assertEqual(u_email2, update_user['email'])
-        self.assertEqual(False, update_user['enabled'])
-        # GET by id after updation
+        update_kwargs = {'name': data_utils.rand_name('user2'),
+                         'description': data_utils.rand_name('desc2'),
+                         'project_id': project['id'],
+                         'email': 'user2@testmail.tm',
+                         'enabled': False}
+        updated_user = self.users_client.update_user(
+            user['id'], **update_kwargs)['user']
+        for field in update_kwargs:
+            self.assertEqual(update_kwargs[field], updated_user[field])
+
+        # GET by id after updating
         new_user_get = self.users_client.show_user(user['id'])['user']
         # Assert response body of GET after updation
-        self.assertEqual(u_name2, new_user_get['name'])
-        self.assertEqual(u_description2, new_user_get['description'])
-        self.assertEqual(project['id'],
-                         new_user_get['project_id'])
-        self.assertEqual(u_email2, new_user_get['email'])
-        self.assertEqual(False, new_user_get['enabled'])
+        for field in update_kwargs:
+            self.assertEqual(update_kwargs[field], new_user_get[field])
 
     @decorators.idempotent_id('2d223a0e-e457-4a70-9fb1-febe027a0ff9')
     def test_update_user_password(self):
