@@ -33,8 +33,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
-    run_ssh = CONF.validation.run_validation
-
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
