@@ -143,6 +143,10 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(server['id'], body['serverId'])
             self.assertEqual(attachment['volumeId'], body['volumeId'])
             self.assertEqual(attachment['id'], body['id'])
+            self.servers_client.detach_volume(server['id'],
+                                              attachment['volumeId'])
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, attachment['volumeId'], 'available')
 
 
 class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
