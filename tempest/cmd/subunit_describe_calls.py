@@ -102,8 +102,8 @@ class UrlParser(testtools.TestResult):
     response_re = re.compile(r'.* Response - Headers: (?P<headers>.*)')
     body_re = re.compile(r'.*Body: (?P<body>.*)')
 
-    # Based on mitaka defaults:
-    # http://docs.openstack.org/mitaka/config-reference/
+    # Based on newton defaults:
+    # http://docs.openstack.org/newton/config-reference/
     # firewalls-default-ports.html
     services = {
         "8776": "Block Storage",
@@ -122,7 +122,8 @@ class UrlParser(testtools.TestResult):
         "873": "rsync",
         "3260": "iSCSI",
         "3306": "MySQL",
-        "5672": "AMQP"}
+        "5672": "AMQP",
+        "8082": "murano"}
 
     def __init__(self, services=None):
         super(UrlParser, self).__init__()
