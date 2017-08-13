@@ -25,8 +25,6 @@ CONF = config.CONF
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
-    disk_config = 'AUTO'
-
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
