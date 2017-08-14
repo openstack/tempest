@@ -13,8 +13,8 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
@@ -22,7 +22,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(DHCPAgentSchedulersTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('dhcp_agent_scheduler', 'network'):
+        if not utils.is_extension_enabled('dhcp_agent_scheduler', 'network'):
             msg = "dhcp_agent_scheduler extension not enabled."
             raise cls.skipException(msg)
 

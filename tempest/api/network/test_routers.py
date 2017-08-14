@@ -17,10 +17,10 @@ import netaddr
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -55,7 +55,7 @@ class RoutersTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(RoutersTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
@@ -167,7 +167,7 @@ class RoutersTest(base.BaseNetworkTest):
             self.assertIn(subnet_id, public_subnet_ids)
 
     @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     @decorators.skip_because(bug='1676207')
@@ -198,7 +198,7 @@ class RoutersTest(base.BaseNetworkTest):
                          fixed_ip['ip_address'])
 
     @decorators.idempotent_id('c86ac3a8-50bd-4b00-a6b8-62af84a0765c')
-    @test.requires_ext(extension='extraroute', service='network')
+    @utils.requires_ext(extension='extraroute', service='network')
     def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
         # The cidr starts from project_cidr

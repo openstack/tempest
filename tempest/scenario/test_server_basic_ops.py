@@ -16,6 +16,7 @@
 import json
 import re
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -23,7 +24,6 @@ from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -132,7 +132,7 @@ class TestServerBasicOps(manager.ScenarioTest):
 
     @decorators.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
     @decorators.attr(type='smoke')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_basic_ops(self):
         keypair = self.create_keypair()
         security_group = self._create_security_group()

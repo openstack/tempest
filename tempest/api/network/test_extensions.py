@@ -15,8 +15,8 @@
 
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ExtensionsTestJSON(base.BaseNetworkTest):
@@ -40,7 +40,7 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
                           'allowed-address-pairs', 'extra_dhcp_opt',
                           'metering', 'dvr']
         expected_alias = [ext for ext in expected_alias if
-                          test.is_extension_enabled(ext, 'network')]
+                          utils.is_extension_enabled(ext, 'network')]
         actual_alias = list()
         extensions = self.network_extensions_client.list_extensions()
         list_extensions = extensions['extensions']
@@ -66,5 +66,5 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
         # of extensions returned, but only for those that have been
         # enabled via configuration
         for e in expected_alias:
-            if test.is_extension_enabled(e, 'network'):
+            if utils.is_extension_enabled(e, 'network'):
                 self.assertIn(e, actual_alias)

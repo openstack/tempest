@@ -13,12 +13,12 @@
 from oslo_log import log as logging
 import testtools
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
-    @test.services('compute', 'volume', 'image')
+    @utils.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
 
         """This test case attempts to reproduce the following steps:
@@ -156,7 +156,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
     @decorators.attr(type='slow')
-    @test.services('compute', 'image', 'volume')
+    @utils.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image
         boot_volume = self._create_volume_from_image()
@@ -192,7 +192,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                          created_volume_info['attachments'][0]['volume_id'])
 
     @decorators.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
-    @test.services('compute', 'volume', 'image')
+    @utils.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
         # create an instance from volume
         volume_origin = self._create_volume_from_image()
@@ -216,7 +216,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
     @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
                           'Encrypted volume attach is not supported')
-    @test.services('compute', 'volume')
+    @utils.services('compute', 'volume')
     def test_boot_server_from_encrypted_volume_luks(self):
         # Create an encrypted volume
         volume = self.create_encrypted_volume('nova.volume.encryptors.'

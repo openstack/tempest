@@ -86,13 +86,13 @@ class HackingTestCase(base.TestCase):
     def test_scenario_tests_need_service_tags(self):
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake:', './tempest/scenario/test_fake.py',
-            "@test.services('compute')"))
+            "@utils.services('compute')"))
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/api/compute/test_fake.py',
-            "@test.services('image')"))
+            "@utils.services('image')"))
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake:', './tempest/scenario/orchestration/test_fake.py',
-            "@test.services('compute')"))
+            "@utils.services('compute')"))
         self.assertTrue(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/scenario/test_fake.py',
             '\n'))
@@ -113,12 +113,13 @@ class HackingTestCase(base.TestCase):
 
     def test_service_tags_not_in_module_path(self):
         self.assertTrue(checks.service_tags_not_in_module_path(
-            "@test.services('compute')", './tempest/api/compute/fake_test.py'))
+            "@utils.services('compute')",
+            './tempest/api/compute/fake_test.py'))
         self.assertFalse(checks.service_tags_not_in_module_path(
-            "@test.services('compute')",
+            "@utils.services('compute')",
             './tempest/scenario/compute/fake_test.py'))
         self.assertFalse(checks.service_tags_not_in_module_path(
-            "@test.services('compute')", './tempest/api/image/fake_test.py'))
+            "@utils.services('compute')", './tempest/api/image/fake_test.py'))
 
     def test_no_hyphen_at_end_of_rand_name(self):
         self.assertIsNone(checks.no_hyphen_at_end_of_rand_name(

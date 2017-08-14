@@ -17,11 +17,11 @@ import testtools
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -97,7 +97,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                         matchers.ContainsAll(metadata.items()))
 
     @decorators.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
-    @test.services('compute')
+    @utils.services('compute')
     def test_backup_create_attached_volume(self):
         """Test backup create using force flag.
 
@@ -119,7 +119,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         self.assertEqual(backup_name, backup['name'])
 
     @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
-    @test.services('image')
+    @utils.services('image')
     def test_bootable_volume_backup_and_restore(self):
         # Create volume from image
         img_uuid = CONF.compute.image_ref

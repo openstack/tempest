@@ -16,7 +16,9 @@ import fixtures
 from oslo_config import cfg
 import testtools
 
+from tempest.common import utils
 from tempest import config
+from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest import test
 from tempest.tests import base
@@ -75,7 +77,7 @@ class TestIdempotentIdDecorator(BaseDecoratorsTest):
 class TestServicesDecorator(BaseDecoratorsTest):
     def _test_services_helper(self, *decorator_args):
         class TestFoo(test.BaseTestCase):
-            @test.services(*decorator_args)
+            @utils.services(*decorator_args)
             def test_bar(self):
                 return 0
 
@@ -94,7 +96,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
         self._test_services_helper('compute', 'compute')
 
     def test_services_decorator_with_invalid_service(self):
-        self.assertRaises(test.InvalidServiceTag,
+        self.assertRaises(exceptions.InvalidServiceTag,
                           self._test_services_helper, 'compute',
                           'bad_service')
 
@@ -106,11 +108,11 @@ class TestServicesDecorator(BaseDecoratorsTest):
                           'volume')
 
     def test_services_list(self):
-        service_list = test.get_service_list()
+        service_list = utils.get_service_list()
         for service in service_list:
             try:
                 self._test_services_helper(service)
-            except test.InvalidServiceTag:
+            except exceptions.InvalidServiceTag:
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:
@@ -137,7 +139,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
     def _test_requires_ext_helper(self, expected_to_skip=True,
                                   **decorator_args):
         class TestFoo(test.BaseTestCase):
-            @test.requires_ext(**decorator_args)
+            @utils.requires_ext(**decorator_args)
             def test_bar(self):
                 return 0
 

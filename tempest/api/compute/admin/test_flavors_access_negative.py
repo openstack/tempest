@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -30,7 +30,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def skip_checks(cls):
         super(FlavorsAccessNegativeTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
+        if not utils.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 

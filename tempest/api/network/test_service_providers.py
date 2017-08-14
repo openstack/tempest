@@ -13,15 +13,15 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ServiceProvidersTest(base.BaseNetworkTest):
 
     @decorators.idempotent_id('2cbbeea9-f010-40f6-8df5-4eaa0c918ea6')
     @testtools.skipUnless(
-        test.is_extension_enabled('service-type', 'network'),
+        utils.is_extension_enabled('service-type', 'network'),
         'service-type extension not enabled.')
     def test_service_providers_list(self):
         body = self.service_providers_client.list_service_providers()

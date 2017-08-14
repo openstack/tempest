@@ -54,3 +54,7 @@ class ServerUnreachable(exceptions.TempestException):
 
 class RFCViolation(exceptions.RestClientException):
     message = "RFC Violation"
+
+
+class InvalidServiceTag(exceptions.TempestException):
+    message = "Invalid service tag"

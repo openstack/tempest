@@ -16,11 +16,11 @@
 import netaddr
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -30,7 +30,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(RoutersNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
@@ -124,7 +124,7 @@ class DvrRoutersNegativeTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(DvrRoutersNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('dvr', 'network'):
+        if not utils.is_extension_enabled('dvr', 'network'):
             msg = "DVR extension not enabled."
             raise cls.skipException(msg)
 

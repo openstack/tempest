@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -49,17 +49,17 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
                 break
 
     @decorators.idempotent_id('16b7d848-2f7c-4709-85a3-2dfb4576cc52')
-    @test.services('network')
+    @utils.services('network')
     def test_list_fixed_ip_details(self):
         fixed_ip = self.client.show_fixed_ip(self.ip)
         self.assertEqual(fixed_ip['fixed_ip']['address'], self.ip)
 
     @decorators.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
-    @test.services('network')
+    @utils.services('network')
     def test_set_reserve(self):
         self.client.reserve_fixed_ip(self.ip, reserve="None")
 
     @decorators.idempotent_id('7476e322-b9ff-4710-bf82-49d51bac6e2e')
-    @test.services('network')
+    @utils.services('network')
     def test_set_unreserve(self):
         self.client.reserve_fixed_ip(self.ip, unreserve="None")

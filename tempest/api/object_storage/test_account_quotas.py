@@ -13,10 +13,10 @@
 # under the License.
 
 from tempest.api.object_storage import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -77,7 +77,7 @@ class AccountQuotasTest(base.BaseObjectTest):
 
     @decorators.attr(type="smoke")
     @decorators.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
-    @test.requires_ext(extension='account_quotas', service='object')
+    @utils.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
         object_name = data_utils.rand_name(name="TestObject")
         data = data_utils.arbitrary_string()
@@ -88,7 +88,7 @@ class AccountQuotasTest(base.BaseObjectTest):
 
     @decorators.attr(type=["smoke"])
     @decorators.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
-    @test.requires_ext(extension='account_quotas', service='object')
+    @utils.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):
         """Test ResellerAdmin can modify/remove the quota on a user's account
 

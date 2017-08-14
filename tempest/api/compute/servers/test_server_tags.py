@@ -16,9 +16,9 @@
 import six
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ServerTagsTestJSON(base.BaseV2ComputeTest):
@@ -29,7 +29,7 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(ServerTagsTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('os-server-tags', 'compute'):
+        if not utils.is_extension_enabled('os-server-tags', 'compute'):
             msg = "os-server-tags extension is not enabled."
             raise cls.skipException(msg)
 

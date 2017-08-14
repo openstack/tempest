@@ -19,13 +19,13 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -252,7 +252,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.start_server(self.server_id)
 
     @decorators.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
-    @test.services('volume')
+    @utils.services('volume')
     def test_rebuild_server_with_volume_attached(self):
         # create a new volume and attach it to the server
         volume = self.create_volume()
@@ -333,7 +333,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
-    @test.services('image')
+    @utils.services('image')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
@@ -518,7 +518,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
-    @test.services('image')
+    @utils.services('image')
     def test_shelve_unshelve_server(self):
         if CONF.image_feature_enabled.api_v2:
             glance_client = self.os_primary.image_client_v2

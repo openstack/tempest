@@ -20,10 +20,10 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -122,7 +122,7 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
 
     @decorators.skip_because(bug="1524898")
     @decorators.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
-    @test.services('volume')
+    @utils.services('volume')
     def test_volume_backed_live_migration(self):
         self._test_live_migration(volume_backed=True)
 

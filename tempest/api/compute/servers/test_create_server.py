@@ -17,11 +17,11 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -151,6 +151,6 @@ class ServersTestBootFromVolume(ServersTestJSON):
     @classmethod
     def skip_checks(cls):
         super(ServersTestBootFromVolume, cls).skip_checks()
-        if not test.get_service_list()['volume']:
+        if not utils.get_service_list()['volume']:
             msg = "Volume service not enabled."
             raise cls.skipException(msg)

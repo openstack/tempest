@@ -17,10 +17,10 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -104,7 +104,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_termination(self.client, server['id'])
 
     @decorators.idempotent_id('d0f3f0d6-d9b6-4a32-8da4-23015dcab23c')
-    @test.services('volume')
+    @utils.services('volume')
     def test_delete_server_while_in_attached_volume(self):
         # Delete a server while a volume is attached to it
         device = '/dev/%s' % CONF.compute.volume_device_name

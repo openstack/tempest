@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -36,7 +36,7 @@ class TestServerMultinode(manager.ScenarioTest):
 
     @decorators.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
     @decorators.attr(type='smoke')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
         available_zone = \
             self.os_admin.availability_zone_client.list_availability_zones(

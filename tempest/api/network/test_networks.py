@@ -18,12 +18,12 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -209,7 +209,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
+        if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
         body = self.networks_client.show_network(self.network['id'],
                                                  fields=fields)
@@ -233,7 +233,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
+        if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
         body = self.networks_client.list_networks(fields=fields)
         networks = body['networks']
@@ -370,7 +370,7 @@ class NetworksTest(BaseNetworkTestResources):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
-    @test.requires_ext(extension='external-net', service='network')
+    @utils.requires_ext(extension='external-net', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_external_network_visibility(self):
@@ -392,8 +392,8 @@ class NetworksTest(BaseNetworkTestResources):
         self.assertEmpty(body['subnets'], "Public subnets visible")
 
     @decorators.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
-    @test.requires_ext(extension="standard-attr-description",
-                       service="network")
+    @utils.requires_ext(extension="standard-attr-description",
+                        service="network")
     def test_create_update_network_description(self):
         body = self.create_network(description='d1')
         self.assertEqual('d1', body['description'])

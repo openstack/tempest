@@ -19,10 +19,10 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
@@ -109,7 +109,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         return body, content_type
 
     @decorators.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
-    @test.requires_ext(extension='formpost', service='object')
+    @utils.requires_ext(extension='formpost', service='object')
     @decorators.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
@@ -126,7 +126,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         self.assertIn('FormPost: Form Expired', str(exc))
 
     @decorators.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
-    @test.requires_ext(extension='formpost', service='object')
+    @utils.requires_ext(extension='formpost', service='object')
     @decorators.attr(type=['negative'])
     def test_post_object_using_form_invalid_signature(self):
         self.key = "Wrong"

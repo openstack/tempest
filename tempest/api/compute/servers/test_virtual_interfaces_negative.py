@@ -14,10 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
@@ -35,7 +35,7 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
-    @test.services('network')
+    @utils.services('network')
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
