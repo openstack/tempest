@@ -161,6 +161,73 @@ class TestValidationResources(base.TestCase):
         self.assertEqual(0, mock_clean_vr.call_count)
 
 
+class TestSetNetworkResources(base.TestCase):
+
+    def setUp(self):
+        super(TestSetNetworkResources, self).setUp()
+
+        class ParentTest(test.BaseTestCase):
+
+            @classmethod
+            def setup_credentials(cls):
+                cls.set_network_resources(dhcp=True)
+                super(ParentTest, cls).setup_credentials()
+
+            def runTest(self):
+                pass
+
+        self.parent_class = ParentTest
+
+    def test_set_network_resources_child_only(self):
+
+        class ChildTest(self.parent_class):
+
+            @classmethod
+            def setup_credentials(cls):
+                cls.set_network_resources(router=True)
+                super(ChildTest, cls).setup_credentials()
+
+        child_test = ChildTest()
+        child_test.setUpClass()
+        # Assert that the parents network resources are not set
+        self.assertFalse(child_test._network_resources['dhcp'])
+        # Assert that the child network resources are set
+        self.assertTrue(child_test._network_resources['router'])
+
+    def test_set_network_resources_right_order(self):
+
+        class ChildTest(self.parent_class):
+
+            @classmethod
+            def setup_credentials(cls):
+                super(ChildTest, cls).setup_credentials()
+                cls.set_network_resources(router=True)
+
+        child_test = ChildTest()
+        with testtools.ExpectedException(RuntimeError,
+                                         value_re='set_network_resources'):
+            child_test.setUpClass()
+
+    def test_set_network_resources_children(self):
+
+        class ChildTest(self.parent_class):
+
+            @classmethod
+            def setup_credentials(cls):
+                cls.set_network_resources(router=True)
+                super(ChildTest, cls).setup_credentials()
+
+        class GrandChildTest(ChildTest):
+            pass
+
+        # Invoke setupClass on both and check that the setup_credentials
+        # call check mechanism does not report any false negative.
+        child_test = ChildTest()
+        child_test.setUpClass()
+        grandchild_test = GrandChildTest()
+        grandchild_test.setUpClass()
+
+
 class TestTempestBaseTestClass(base.TestCase):
 
     def setUp(self):

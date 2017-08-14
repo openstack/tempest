@@ -105,7 +105,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # a list of roles - the first element of the list being a label, and the
     # rest the actual roles
     credentials = []
-    network_resources = {}
+
+    # Network resources to be provisioned for the requested test credentials.
+    # Only used with the dynamic credentials provider.
+    _network_resources = {}
 
     # Stack of resource cleanups
     _class_cleanups = []
@@ -127,6 +130,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def _reset_class(cls):
+        cls.__setup_credentials_called = False
         cls.__resource_cleaup_called = False
         cls._class_cleanups = []
 
@@ -272,6 +276,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         set_network_resources() method, otherwise it will create
         network resources(network resources are created in a later step).
         """
+        cls.__setup_credentials_called = True
         for credentials_type in cls.credentials:
             # This may raise an exception in case credentials are not available
             # In that case we want to let the exception through and the test
@@ -530,7 +535,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                              False)
 
             cls._creds_provider = credentials.get_credentials_provider(
-                name=cls.__name__, network_resources=cls.network_resources,
+                name=cls.__name__, network_resources=cls._network_resources,
                 force_tenant_isolation=force_tenant_isolation)
         return cls._creds_provider
 
@@ -668,17 +673,45 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                               dhcp=False):
         """Specify which network resources should be created
 
+        The dynamic credentials provider by default provisions network
+        resources for each user/project that is provisioned. This behavior
+        can be altered using this method, which allows tests to define which
+        specific network resources to be provisioned - none if no parameter
+        is specified.
+
+        Credentials are provisioned as part of the class setup fixture,
+        during the `setup_credentials` step. For this to be effective this
+        helper must be invoked before super's `setup_credentials` is executed.
+
         @param network
         @param router
         @param subnet
         @param dhcp
+
+        Example::
+
+            @classmethod
+            def setup_credentials(cls):
+                # Do not setup network resources for this test
+                cls.set_network_resources()
+                super(MyTest, cls).setup_credentials()
         """
-        # network resources should be set only once from callers
+        # If this is invoked after the credentials are setup, it won't take
+        # any effect. To avoid this situation, fail the test in case this was
+        # invoked too late in the test lifecycle.
+        if cls.__setup_credentials_called:
+            raise RuntimeError(
+                "set_network_resources invoked after setup_credentials on the "
+                "super class has been already invoked. For "
+                "set_network_resources to have effect please invoke it before "
+                "the call to super().setup_credentials")
+
+        # Network resources should be set only once from callers
         # in order to ensure that even if it's called multiple times in
         # a chain of overloaded methods, the attribute is set only
-        # in the leaf class
-        if not cls.network_resources:
-            cls.network_resources = {
+        # in the leaf class.
+        if not cls._network_resources:
+            cls._network_resources = {
                 'network': network,
                 'router': router,
                 'subnet': subnet,
