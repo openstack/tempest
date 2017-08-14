@@ -128,13 +128,6 @@ class DvrRoutersNegativeTest(base.BaseNetworkTest):
             msg = "DVR extension not enabled."
             raise cls.skipException(msg)
 
-    @classmethod
-    def resource_setup(cls):
-        super(DvrRoutersNegativeTest, cls).resource_setup()
-        cls.router = cls.create_router()
-        cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
-
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
     def test_router_create_tenant_distributed_returns_forbidden(self):
