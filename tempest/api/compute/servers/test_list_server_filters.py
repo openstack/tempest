@@ -262,7 +262,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # so as to ensure only one server is returned.
         ip_list = {}
         self.s1 = self.client.show_server(self.s1['id'])['server']
-        # Get first ip address inspite of v4 or v6
+        # Get first ip address in spite of v4 or v6
         ip_addr = self.s1['addresses'][self.fixed_network_name][0]['addr']
         ip_list[ip_addr] = self.s1['id']
 

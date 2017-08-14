@@ -6,7 +6,7 @@ Credential Providers
 These library interfaces are used to deal with allocating credentials on demand
 either dynamically by calling keystone to allocate new credentials, or from
 a list of preprovisioned credentials. These 2 modules are implementations of
-the same abstract credential providers class and can be used interchangably.
+the same abstract credential providers class and can be used interchangeably.
 However, each implementation has some additional parameters that are used to
 influence the behavior of the modules. The API reference at the bottom of this
 doc shows the interface definitions for both modules, however that may be a bit
