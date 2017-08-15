@@ -76,3 +76,38 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
                                            wait_until='ACTIVE')['id']
         host02 = self._get_host(server02)
         self.assertNotEqual(self.host01, host02)
+
+    @decorators.idempotent_id('f8bd0867-e459-45f5-ba53-59134552fe04')
+    @testtools.skipUnless(
+        compute.is_scheduler_filter_enabled("ServerGroupAntiAffinityFilter"),
+        'ServerGroupAntiAffinityFilter is not available.')
+    def test_create_server_with_scheduler_hint_group_anti_affinity(self):
+        """Tests the ServerGroupAntiAffinityFilter
+
+        Creates two servers in an anti-affinity server group and
+        asserts the servers are in the group and on different hosts.
+        """
+        group_id = self.create_test_server_group(
+            policy=['anti-affinity'])['id']
+        hints = {'group': group_id}
+        reservation_id = self.create_test_server(
+            scheduler_hints=hints, wait_until='ACTIVE', min_count=2,
+            return_reservation_id=True)['reservation_id']
+
+        # Get the servers using the reservation_id.
+        servers = self.servers_client.list_servers(
+            detail=True, reservation_id=reservation_id)['servers']
+        self.assertEqual(2, len(servers))
+
+        # Assert the servers are in the group.
+        server_group = self.server_groups_client.show_server_group(
+            group_id)['server_group']
+        hosts = {}
+        for server in servers:
+            self.assertIn(server['id'], server_group['members'])
+            hosts[server['id']] = self._get_host(server['id'])
+
+        # Assert the servers are on different hosts.
+        hostnames = list(hosts.values())
+        self.assertNotEqual(hostnames[0], hostnames[1],
+                            'Servers are on the same host: %s' % hosts)
