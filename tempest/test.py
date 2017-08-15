@@ -373,9 +373,18 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def resource_setup(cls):
         """Class level resource setup for test cases."""
+        if (CONF.validation.ip_version_for_ssh not in (4, 6) and
+            CONF.service_available.neutron):
+            msg = "Invalid IP version %s in ip_version_for_ssh. Use 4 or 6"
+            raise lib_exc.InvalidConfiguration(
+                msg % CONF.validation.ip_version_for_ssh)
         if hasattr(cls, "os_primary"):
             cls.validation_resources = vresources.create_validation_resources(
-                cls.os_primary, cls.validation_resources)
+                cls.os_primary, cls.validation_resources,
+                use_neutron=CONF.service_available.neutron,
+                ethertype='IPv' + str(CONF.validation.ip_version_for_ssh),
+                floating_network_id=CONF.network.public_network_id,
+                floating_network_name=CONF.network.floating_network_name)
         else:
             LOG.warning("Client manager not found, validation resources not"
                         " created")
