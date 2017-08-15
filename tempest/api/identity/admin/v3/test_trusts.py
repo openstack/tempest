@@ -26,25 +26,27 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
+class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(BaseTrustsV3Test, cls).skip_checks()
+        super(TrustsV3TestJSON, cls).skip_checks()
         if not CONF.identity_feature_enabled.trust:
             raise cls.skipException("Trusts aren't enabled")
 
     def setUp(self):
-        super(BaseTrustsV3Test, self).setUp()
+        super(TrustsV3TestJSON, self).setUp()
         # Use alt_username as the trustee
         self.trust_id = None
+        self.create_trustor_and_roles()
+        self.addCleanup(self.cleanup_user_and_roles)
 
     def tearDown(self):
         if self.trust_id:
             # Do the delete in tearDown not addCleanup - we want the test to
             # fail in the event there is a bug which causes undeletable trusts
             self.delete_trust()
-        super(BaseTrustsV3Test, self).tearDown()
+        super(TrustsV3TestJSON, self).tearDown()
 
     def create_trustor_and_roles(self):
         # create a project that trusts will be granted on
@@ -192,14 +194,6 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
                           self.trustor_client.show_trust,
                           self.trust_id)
         self.trust_id = None
-
-
-class TrustsV3TestJSON(BaseTrustsV3Test):
-
-    def setUp(self):
-        super(TrustsV3TestJSON, self).setUp()
-        self.create_trustor_and_roles()
-        self.addCleanup(self.cleanup_user_and_roles)
 
     @decorators.idempotent_id('5a0a91a4-baef-4a14-baba-59bf4d7fcace')
     def test_trust_impersonate(self):
