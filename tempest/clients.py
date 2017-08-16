@@ -25,8 +25,6 @@ CONF = config.CONF
 class Manager(clients.ServiceClients):
     """Top level manager for OpenStack tempest clients"""
 
-    default_params = config.service_client_config()
-
     def __init__(self, credentials, scope='project'):
         """Initialization of Manager class.
 
@@ -47,6 +45,10 @@ class Manager(clients.ServiceClients):
         self._set_object_storage_clients()
         self._set_image_clients()
         self._set_network_clients()
+        # TODO(andreaf) This is maintained for backward compatibility
+        # with plugins, but it should removed eventually, since it was
+        # never a stable interface and it's not useful anyways
+        self.default_params = config.service_client_config()
 
     def _set_network_clients(self):
         self.network_agents_client = self.network.AgentsClient()
