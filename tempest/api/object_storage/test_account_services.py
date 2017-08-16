@@ -36,7 +36,6 @@ class AccountTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountTest, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
         cls.os_operator = cls.os_roles_operator_alt
 
     @classmethod

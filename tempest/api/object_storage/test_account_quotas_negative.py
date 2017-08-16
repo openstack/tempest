@@ -29,7 +29,6 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(AccountQuotasNegativeTest, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
         cls.os_reselleradmin = cls.os_roles_reseller
 
     @classmethod
