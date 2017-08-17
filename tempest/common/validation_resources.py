@@ -19,35 +19,39 @@ from tempest.lib import exceptions as lib_exc
 LOG = logging.getLogger(__name__)
 
 
-def _create_neutron_sec_group_rules(os, sec_group, ethertype='IPv4'):
-    sec_group_rules_client = os.security_group_rules_client
-
-    sec_group_rules_client.create_security_group_rule(
-        security_group_id=sec_group['id'],
-        protocol='tcp',
-        ethertype=ethertype,
-        port_range_min=22,
-        port_range_max=22,
-        direction='ingress')
-    sec_group_rules_client.create_security_group_rule(
-        security_group_id=sec_group['id'],
-        protocol='icmp',
-        ethertype=ethertype,
-        direction='ingress')
+def _network_service(os, use_neutron):
+    if use_neutron:
+        return os.network
+    else:
+        return os.compute
 
 
 def create_ssh_security_group(os, add_rule=False, ethertype='IPv4',
                               use_neutron=True):
-    security_groups_client = os.compute_security_groups_client
-    security_group_rules_client = os.compute_security_group_rules_client
+    network_service = _network_service(os, use_neutron)
+    security_groups_client = network_service.SecurityGroupsClient()
+    security_group_rules_client = network_service.SecurityGroupRulesClient()
+    # Security Group clients for nova and neutron behave the same
     sg_name = data_utils.rand_name('securitygroup-')
     sg_description = data_utils.rand_name('description-')
     security_group = security_groups_client.create_security_group(
         name=sg_name, description=sg_description)['security_group']
+    # Security Group Rules clients require different parameters depending on
+    # the network service in use
     if add_rule:
         if use_neutron:
-            _create_neutron_sec_group_rules(os, security_group,
-                                            ethertype=ethertype)
+            security_group_rules_client.create_security_group_rule(
+                security_group_id=security_group['id'],
+                protocol='tcp',
+                ethertype=ethertype,
+                port_range_min=22,
+                port_range_max=22,
+                direction='ingress')
+            security_group_rules_client.create_security_group_rule(
+                security_group_id=security_group['id'],
+                protocol='icmp',
+                ethertype=ethertype,
+                direction='ingress')
         else:
             security_group_rules_client.create_security_group_rule(
                 parent_group_id=security_group['id'], ip_protocol='tcp',
@@ -69,7 +73,7 @@ def create_validation_resources(os, validation_resources=None,
     if validation_resources:
         if validation_resources['keypair']:
             keypair_name = data_utils.rand_name('keypair')
-            validation_data.update(os.keypairs_client.create_keypair(
+            validation_data.update(os.compute.KeyPairsClient().create_keypair(
                 name=keypair_name))
             LOG.debug("Validation resource key %s created", keypair_name)
         add_rule = False
@@ -80,8 +84,10 @@ def create_validation_resources(os, validation_resources=None,
                 create_ssh_security_group(
                     os, add_rule, use_neutron=use_neutron, ethertype=ethertype)
         if validation_resources['floating_ip']:
+            floating_ip_client = _network_service(
+                os, use_neutron).FloatingIPsClient()
             if use_neutron:
-                floatingip = os.floating_ips_client.create_floatingip(
+                floatingip = floating_ip_client.create_floatingip(
                     floating_network_id=floating_network_id)
                 # validation_resources['floating_ip'] has historically looked
                 # like a compute API POST /os-floating-ips response, so we need
@@ -94,18 +100,17 @@ def create_validation_resources(os, validation_resources=None,
                 # NOTE(mriedem): The os-floating-ips compute API was deprecated
                 # in the 2.36 microversion. Any tests for CRUD operations on
                 # floating IPs using the compute API should be capped at 2.35.
-                validation_data.update(
-                    os.compute_floating_ips_client.create_floating_ip(
-                        pool=floating_network_name))
+                validation_data.update(floating_ip_client.create_floating_ip(
+                    pool=floating_network_name))
     return validation_data
 
 
-def clear_validation_resources(os, validation_data=None):
+def clear_validation_resources(os, validation_data=None, use_neutron=True):
     # Cleanup the vm validation resources
     has_exception = None
     if validation_data:
         if 'keypair' in validation_data:
-            keypair_client = os.keypairs_client
+            keypair_client = os.compute.KeyPairsClient()
             keypair_name = validation_data['keypair']['name']
             try:
                 keypair_client.delete_keypair(keypair_name)
@@ -119,8 +124,9 @@ def clear_validation_resources(os, validation_data=None):
                               keypair_name)
                 if not has_exception:
                     has_exception = exc
+        network_service = _network_service(os, use_neutron)
         if 'security_group' in validation_data:
-            security_group_client = os.compute_security_groups_client
+            security_group_client = network_service.SecurityGroupsClient()
             sec_id = validation_data['security_group']['id']
             try:
                 security_group_client.delete_security_group(sec_id)
@@ -139,10 +145,13 @@ def clear_validation_resources(os, validation_data=None):
                 if not has_exception:
                     has_exception = exc
         if 'floating_ip' in validation_data:
-            floating_client = os.compute_floating_ips_client
+            floating_ip_client = network_service.FloatingIPsClient()
             fip_id = validation_data['floating_ip']['id']
             try:
-                floating_client.delete_floating_ip(fip_id)
+                if use_neutron:
+                    floating_ip_client.delete_floatingip(fip_id)
+                else:
+                    floating_ip_client.delete_floating_ip(fip_id)
             except lib_exc.NotFound:
                 LOG.warning('Floating ip %s not found while attempting to '
                             'delete', fip_id)

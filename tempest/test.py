@@ -398,8 +398,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if cls.validation_resources:
             if hasattr(cls, "os_primary"):
-                vresources.clear_validation_resources(cls.os_primary,
-                                                      cls.validation_resources)
+                vresources.clear_validation_resources(
+                    cls.os_primary, cls.validation_resources,
+                    use_neutron=CONF.service_available.neutron)
                 cls.validation_resources = {}
             else:
                 LOG.warning("Client manager not found, validation resources "
