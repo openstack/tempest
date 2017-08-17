@@ -18,9 +18,8 @@ import time
 from testtools import matchers
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 class UsersTestJSON(base.BaseIdentityV2AdminTest):
@@ -29,49 +28,35 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def resource_setup(cls):
         super(UsersTestJSON, cls).resource_setup()
         cls.alt_user = data_utils.rand_name('test_user')
-        cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('2d55a71e-da1d-4b43-9c03-d269fd93d905')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('2d55a71e-da1d-4b43-9c03-d269fd93d905')
     def test_create_user(self):
         # Create a user
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=self.alt_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=self.alt_user, tenantId=tenant['id'])
         self.assertEqual(self.alt_user, user['name'])
 
-    @test.idempotent_id('89d9fdb8-15c2-4304-a429-48715d0af33d')
+    @decorators.idempotent_id('89d9fdb8-15c2-4304-a429-48715d0af33d')
     def test_create_user_with_enabled(self):
         # Create a user with enabled : False
         tenant = self.setup_test_tenant()
         name = data_utils.rand_name('test_user')
-        user = self.users_client.create_user(name=name,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email,
-                                             enabled=False)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=name,
+                                     tenantId=tenant['id'],
+                                     email=self.alt_email,
+                                     enabled=False)
         self.assertEqual(name, user['name'])
         self.assertEqual(False, user['enabled'])
         self.assertEqual(self.alt_email, user['email'])
 
-    @test.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
+    @decorators.idempotent_id('39d05857-e8a5-4ed4-ba83-0b52d3ab97ee')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
-        test_user = data_utils.rand_name('test_user')
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=test_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of this method
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(tenantId=tenant['id'])
+
         # Updating user details with new values
         u_name2 = data_utils.rand_name('user2')
         u_email2 = u_name2 + '@testmail.tm'
@@ -88,21 +73,14 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(u_email2, updated_user['email'])
         self.assertEqual(False, update_user['enabled'])
 
-    @test.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
+    @decorators.idempotent_id('29ed26f4-a74e-4425-9a85-fdb49fa269d2')
     def test_delete_user(self):
         # Delete a user
-        test_user = data_utils.rand_name('test_user')
         tenant = self.setup_test_tenant()
-        user = self.users_client.create_user(name=test_user,
-                                             password=self.alt_password,
-                                             tenantId=tenant['id'],
-                                             email=self.alt_email)['user']
-        # Delete the User at the end of the test
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.users_client.delete_user, user['id'])
+        user = self.create_test_user(tenantId=tenant['id'])
         self.users_client.delete_user(user['id'])
 
-    @test.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
+    @decorators.idempotent_id('aca696c3-d645-4f45-b728-63646045beb1')
     def test_user_authentication(self):
         # Valid user's token is authenticated
         password = data_utils.rand_password()
@@ -117,7 +95,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                password,
                                tenant['name'])
 
-    @test.idempotent_id('5d1fa498-4c2d-4732-a8fe-2b054598cfdd')
+    @decorators.idempotent_id('5d1fa498-4c2d-4732-a8fe-2b054598cfdd')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
         password = data_utils.rand_password()
@@ -136,7 +114,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                tenant['name'])
         self.client.auth_provider.clear_auth()
 
-    @test.idempotent_id('a149c02e-e5e0-4b89-809e-7e8faf33ccda')
+    @decorators.idempotent_id('a149c02e-e5e0-4b89-809e-7e8faf33ccda')
     def test_get_users(self):
         # Get a list of users and find the test user
         user = self.setup_test_user()
@@ -145,30 +123,16 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                         matchers.Contains(user['name']),
                         "Could not find %s" % user['name'])
 
-    @test.idempotent_id('6e317209-383a-4bed-9f10-075b7c82c79a')
+    @decorators.idempotent_id('6e317209-383a-4bed-9f10-075b7c82c79a')
     def test_list_users_for_tenant(self):
         # Return a list of all users for a tenant
         tenant = self.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
-        password1 = data_utils.rand_password()
-        alt_tenant_user1 = data_utils.rand_name('tenant_user1')
-        user1 = self.users_client.create_user(name=alt_tenant_user1,
-                                              password=password1,
-                                              tenantId=tenant['id'],
-                                              email='user1@123')['user']
+        user1 = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(user1['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user1['id'])
-        password2 = data_utils.rand_password()
-        alt_tenant_user2 = data_utils.rand_name('tenant_user2')
-        user2 = self.users_client.create_user(name=alt_tenant_user2,
-                                              password=password2,
-                                              tenantId=tenant['id'],
-                                              email='user2@123')['user']
+        user2 = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(user2['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, user2['id'])
         # List of users for the respective tenant ID
         body = (self.tenants_client.list_tenant_users(tenant['id'])
                 ['users'])
@@ -177,11 +141,11 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # verifying the user Id in the list
         missing_users =\
             [user for user in user_ids if user not in fetched_user_ids]
-        self.assertEqual(0, len(missing_users),
+        self.assertEmpty(missing_users,
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @test.idempotent_id('a8b54974-40e1-41c0-b812-50fc90827971')
+    @decorators.idempotent_id('a8b54974-40e1-41c0-b812-50fc90827971')
     def test_list_users_with_roles_for_tenant(self):
         # Return list of users on tenant when roles are assigned to users
         user = self.setup_test_user()
@@ -194,16 +158,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         role = self.roles_client.create_user_role_on_project(
             tenant['id'], user['id'], role['id'])['role']
 
-        alt_user2 = data_utils.rand_name('second_user')
-        alt_password2 = data_utils.rand_password()
-        second_user = self.users_client.create_user(
-            name=alt_user2,
-            password=alt_password2,
-            tenantId=tenant['id'],
-            email='user2@123')['user']
+        second_user = self.create_test_user(tenantId=tenant['id'])
         user_ids.append(second_user['id'])
-        # Delete the User at the end of the test
-        self.addCleanup(self.users_client.delete_user, second_user['id'])
         role = self.roles_client.create_user_role_on_project(
             tenant['id'], second_user['id'], role['id'])['role']
         # List of users with roles for the respective tenant ID
@@ -213,11 +169,11 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # verifying the user Id in the list
         missing_users = [missing_user for missing_user in user_ids
                          if missing_user not in fetched_user_ids]
-        self.assertEqual(0, len(missing_users),
+        self.assertEmpty(missing_users,
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @test.idempotent_id('1aeb25ac-6ec5-4d8b-97cb-7ac3567a989f')
+    @decorators.idempotent_id('1aeb25ac-6ec5-4d8b-97cb-7ac3567a989f')
     def test_update_user_password(self):
         # Test case to check if updating of user password is successful.
         user = self.setup_test_user()
@@ -234,4 +190,4 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Validate the updated password through getting a token.
         body = self.token_client.auth(user['name'], new_pass,
                                       tenant['name'])
-        self.assertTrue('id' in body['token'])
+        self.assertIn('id', body['token'])

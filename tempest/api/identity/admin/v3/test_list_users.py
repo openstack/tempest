@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
@@ -62,7 +62,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.domains_client.delete_domain(cls.domain['id'])
         super(UsersV3TestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
+    @decorators.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
     def test_list_user_domains(self):
         # List users with domain
         params = {'domain_id': self.domain['id']}
@@ -70,7 +70,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                      self.domain_enabled_user,
                                      self.non_domain_enabled_user)
 
-    @test.idempotent_id('bff8bf2f-9408-4ef5-b63a-753c8c2124eb')
+    @decorators.idempotent_id('bff8bf2f-9408-4ef5-b63a-753c8c2124eb')
     def test_list_users_with_not_enabled(self):
         # List the users with not enabled
         params = {'enabled': False}
@@ -78,7 +78,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                      self.non_domain_enabled_user,
                                      self.domain_enabled_user)
 
-    @test.idempotent_id('c285bb37-7325-4c02-bff3-3da5d946d683')
+    @decorators.idempotent_id('c285bb37-7325-4c02-bff3-3da5d946d683')
     def test_list_users_with_name(self):
         # List users with name
         params = {'name': self.domain_enabled_user['name']}
@@ -86,18 +86,18 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                      self.domain_enabled_user,
                                      self.non_domain_enabled_user)
 
-    @test.idempotent_id('b30d4651-a2ea-4666-8551-0c0e49692635')
+    @decorators.idempotent_id('b30d4651-a2ea-4666-8551-0c0e49692635')
     def test_list_users(self):
         # List users
         body = self.users_client.list_users()['users']
         fetched_ids = [u['id'] for u in body]
         missing_users = [u['id'] for u in self.users
                          if u['id'] not in fetched_ids]
-        self.assertEqual(0, len(missing_users),
+        self.assertEmpty(missing_users,
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @test.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
+    @decorators.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
         # Get a user detail
         user = self.users_client.show_user(self.users[0]['id'])['user']

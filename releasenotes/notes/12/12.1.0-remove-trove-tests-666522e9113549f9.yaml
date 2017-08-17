@@ -1,0 +1,4 @@
+---
+upgrade:
+  - All tests for the Trove project have been removed from tempest. They now
+    live as a tempest plugin in the trove project.

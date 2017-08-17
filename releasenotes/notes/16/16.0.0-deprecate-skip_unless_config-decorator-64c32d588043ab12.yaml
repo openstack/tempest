@@ -1,0 +1,5 @@
+---
+deprecations:
+  - The ``skip_unless_config`` and ``skip_if_config`` decorators in the
+    ``config`` module have been deprecated and will be removed in the Queens
+    dev cycle. Use the ``testtools.skipUnless`` (or a variation of) instead.

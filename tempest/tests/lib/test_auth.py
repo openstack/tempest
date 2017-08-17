@@ -15,9 +15,9 @@
 
 import copy
 import datetime
-import testtools
 
-from oslotest import mockpatch
+import fixtures
+import testtools
 
 from tempest.lib import auth
 from tempest.lib import exceptions
@@ -82,9 +82,9 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
 
     def test_auth_data_property_when_cache_exists(self):
         self.auth_provider.cache = 'foo'
-        self.useFixture(mockpatch.PatchObject(self.auth_provider,
-                                              'is_expired',
-                                              return_value=False))
+        self.useFixture(fixtures.MockPatchObject(self.auth_provider,
+                                                 'is_expired',
+                                                 return_value=False))
         self.assertEqual('foo', getattr(self.auth_provider, 'auth_data'))
 
     def test_delete_auth_data_property_through_deleter(self):
@@ -458,6 +458,56 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         expected = 'http://fake_url/v2.0'
         self._test_base_url_helper(expected, filters, ('token', auth_data))
 
+    def test_base_url_with_extra_path_endpoint(self):
+        auth_data = {
+            'serviceCatalog': [
+                {
+                    'type': 'compute',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'publicURL': 'http://fake_url/some_path/v2.0'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v2.0'
+        }
+
+        expected = 'http://fake_url/some_path/v2.0'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
+
+    def test_base_url_with_unversioned_extra_path_endpoint(self):
+        auth_data = {
+            'serviceCatalog': [
+                {
+                    'type': 'compute',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'publicURL': 'http://fake_url/some_path'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v2.0'
+        }
+
+        expected = 'http://fake_url/some_path/v2.0'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
+
     def test_token_not_expired(self):
         expiry_data = datetime.datetime.utcnow() + datetime.timedelta(days=1)
         self._verify_expiry(expiry_data=expiry_data, should_be_expired=False)
@@ -590,6 +640,58 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         }
 
         expected = 'http://fake_url/v3'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
+
+    def test_base_url_with_extra_path_endpoint(self):
+        auth_data = {
+            'catalog': [
+                {
+                    'type': 'compute',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'url': 'http://fake_url/some_path/v2.0',
+                            'interface': 'public'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v2.0'
+        }
+
+        expected = 'http://fake_url/some_path/v2.0'
+        self._test_base_url_helper(expected, filters, ('token', auth_data))
+
+    def test_base_url_with_unversioned_extra_path_endpoint(self):
+        auth_data = {
+            'catalog': [
+                {
+                    'type': 'compute',
+                    'endpoints': [
+                        {
+                            'region': 'FakeRegion',
+                            'url': 'http://fake_url/some_path',
+                            'interface': 'public'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        filters = {
+            'service': 'compute',
+            'endpoint_type': 'publicURL',
+            'region': 'FakeRegion',
+            'api_version': 'v2.0'
+        }
+
+        expected = 'http://fake_url/some_path/v2.0'
         self._test_base_url_helper(expected, filters, ('token', auth_data))
 
     # Base URL test with scope only for V3

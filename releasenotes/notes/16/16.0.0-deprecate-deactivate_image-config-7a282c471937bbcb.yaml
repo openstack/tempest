@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    The ``deactivate_image`` configuration switch from the ``config`` module
+    is deprecated. It was added to support the older-than-kilo releases
+    which we don't support anymore.

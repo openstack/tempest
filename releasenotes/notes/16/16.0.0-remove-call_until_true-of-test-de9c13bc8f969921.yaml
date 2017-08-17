@@ -1,0 +1,6 @@
+---
+upgrade:
+  - The *call_until_true* of *test* module is removed because it was marked
+    as deprecated and Tempest provides it from *test_utils* as a stable
+    interface instead. Please switch to use *test_utils.call_until_true* if
+    necessary.

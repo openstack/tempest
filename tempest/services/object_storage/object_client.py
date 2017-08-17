@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
 
@@ -39,12 +38,6 @@ class ObjectClient(rest_client.RestClient):
             url += '?%s' % urlparse.urlencode(params)
 
         resp, body = self.put(url, data, headers)
-        self.expected_success(201, resp.status)
-        return resp, body
-
-    def update_object(self, container, object_name, data):
-        """Upload data to replace current storage object."""
-        resp, body = self.create_object(container, object_name, data)
         self.expected_success(201, resp.status)
         return resp, body
 
@@ -170,7 +163,7 @@ class ObjectClient(rest_client.RestClient):
             chunked=True
         )
 
-        self._error_checker('PUT', None, headers, contents, resp, body)
+        self._error_checker(resp, body)
         self.expected_success(201, resp.status)
         return resp.status, resp.reason, resp
 
@@ -195,13 +188,12 @@ class ObjectClient(rest_client.RestClient):
         # Send the PUT request and the headers including the "Expect" header
         conn.putrequest('PUT', path)
 
-        for header, value in six.iteritems(headers):
+        for header, value in headers.items():
             conn.putheader(header, value)
         conn.endheaders()
 
         # Read the 100 status prior to sending the data
         response = conn.response_class(conn.sock,
-                                       strict=conn.strict,
                                        method=conn._method)
         _, status, _ = response._read_status()
 

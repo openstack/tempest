@@ -15,12 +15,11 @@
 
 
 import mock
-import six
 
 from tempest.lib import exceptions
 from tempest.services.object_storage import object_client
 from tempest.tests import base
-from tempest.tests import fake_auth_provider
+from tempest.tests.lib import fake_auth_provider
 
 
 class TestObjectClient(base.TestCase):
@@ -85,7 +84,7 @@ class TestObjectClient(base.TestCase):
         # Verify that headers were written, including "Expect:100-continue"
         calls = []
 
-        for header, value in six.iteritems(expected_hdrs):
+        for header, value in expected_hdrs.items():
             calls.append(mock.call(header, value))
 
         mock_poc.return_value.putheader.assert_has_calls(calls, False)

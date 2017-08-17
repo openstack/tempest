@@ -14,13 +14,13 @@
 
 import os
 import shutil
-import subprocess
 import sys
 
 from cliff import command
 from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
+from testrepository import commands
 
 from tempest.cmd import workspace
 
@@ -69,7 +69,10 @@ class TempestInit(command.Command):
 
     def get_parser(self, prog_name):
         parser = super(TempestInit, self).get_parser(prog_name)
-        parser.add_argument('dir', nargs='?', default=os.getcwd())
+        parser.add_argument('dir', nargs='?', default=os.getcwd(),
+                            help="The path to the workspace directory. If you "
+                            "omit this argument, the workspace directory is "
+                            "your current directory")
         parser.add_argument('--config-dir', '-c', default=None)
         parser.add_argument('--show-global-config-dir', '-s',
                             action='store_true', dest='show_global_dir',
@@ -78,7 +81,7 @@ class TempestInit(command.Command):
         parser.add_argument('--name', help="The workspace name", default=None)
         parser.add_argument('--workspace-path', default=None,
                             help="The path to the workspace file, the default "
-                                 "is ~/.tempest/workspace")
+                                 "is ~/.tempest/workspace.yaml")
         return parser
 
     def generate_testr_conf(self, local_path):
@@ -90,7 +93,7 @@ class TempestInit(command.Command):
             testr_conf_file.write(testr_conf)
 
     def get_configparser(self, conf_path):
-        config_parse = moves.configparser.SafeConfigParser()
+        config_parse = moves.configparser.ConfigParser()
         config_parse.optionxform = str
         # get any existing values if a config file already exists
         if os.path.isfile(conf_path):
@@ -117,7 +120,7 @@ class TempestInit(command.Command):
         if os.path.isdir(config_dir):
             shutil.copytree(config_dir, etc_dir)
         else:
-            LOG.warning("Global config dir %s can't be found" % config_dir)
+            LOG.warning("Global config dir %s can't be found", config_dir)
 
     def generate_sample_config(self, local_dir):
         conf_generator = os.path.join(os.path.dirname(__file__),
@@ -128,14 +131,14 @@ class TempestInit(command.Command):
                             output_file])
         else:
             LOG.warning("Skipping sample config generation because global "
-                        "config file %s can't be found" % conf_generator)
+                        "config file %s can't be found", conf_generator)
 
     def create_working_dir(self, local_dir, config_dir):
         # make sure we are working with abspath however tempest init is called
         local_dir = os.path.abspath(local_dir)
         # Create local dir if missing
         if not os.path.isdir(local_dir):
-            LOG.debug('Creating local working dir: %s' % local_dir)
+            LOG.debug('Creating local working dir: %s', local_dir)
             os.mkdir(local_dir)
         elif not os.listdir(local_dir) == []:
             raise OSError("Directory you are trying to initialize already "
@@ -148,11 +151,11 @@ class TempestInit(command.Command):
         testr_dir = os.path.join(local_dir, '.testrepository')
         # Create lock dir
         if not os.path.isdir(lock_dir):
-            LOG.debug('Creating lock dir: %s' % lock_dir)
+            LOG.debug('Creating lock dir: %s', lock_dir)
             os.mkdir(lock_dir)
         # Create log dir
         if not os.path.isdir(log_dir):
-            LOG.debug('Creating log dir: %s' % log_dir)
+            LOG.debug('Creating log dir: %s', log_dir)
             os.mkdir(log_dir)
         # Create and copy local etc dir
         self.copy_config(etc_dir, config_dir)
@@ -164,16 +167,17 @@ class TempestInit(command.Command):
         self.generate_testr_conf(local_dir)
         # setup local testr working dir
         if not os.path.isdir(testr_dir):
-            subprocess.call(['testr', 'init'], cwd=local_dir)
+            commands.run_argv(['testr', 'init', '-d', local_dir], sys.stdin,
+                              sys.stdout, sys.stderr)
 
     def take_action(self, parsed_args):
         workspace_manager = workspace.WorkspaceManager(
             parsed_args.workspace_path)
         name = parsed_args.name or parsed_args.dir.split(os.path.sep)[-1]
-        workspace_manager.register_new_workspace(
-            name, parsed_args.dir, init=True)
         config_dir = parsed_args.config_dir or get_tempest_default_config_dir()
         if parsed_args.show_global_dir:
             print("Global config dir is located at: %s" % config_dir)
             sys.exit(0)
         self.create_working_dir(parsed_args.dir, config_dir)
+        workspace_manager.register_new_workspace(
+            name, parsed_args.dir, init=True)

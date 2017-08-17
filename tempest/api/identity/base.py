@@ -13,14 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 import tempest.test
 
 CONF = config.CONF
 
 
 class BaseIdentityTest(tempest.test.BaseTestCase):
+
+    @classmethod
+    def setup_credentials(cls):
+        # Create no network resources for these test.
+        cls.set_network_resources()
+        super(BaseIdentityTest, cls).setup_credentials()
 
     @classmethod
     def disable_user(cls, user_name):
@@ -40,7 +47,7 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         else:
             users = cls.users_client.list_users()['users']
         user = [u for u in users if u['name'] == name]
-        if len(user) > 0:
+        if user:
             return user[0]
 
     @classmethod
@@ -50,31 +57,42 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         except AttributeError:
             tenants = cls.projects_client.list_projects()['projects']
         tenant = [t for t in tenants if t['name'] == name]
-        if len(tenant) > 0:
+        if tenant:
             return tenant[0]
 
     @classmethod
     def get_role_by_name(cls, name):
         roles = cls.roles_client.list_roles()['roles']
         role = [r for r in roles if r['name'] == name]
-        if len(role) > 0:
+        if role:
             return role[0]
 
-    def _create_test_user(self, **kwargs):
-        if kwargs['password'] is None:
-            user_password = data_utils.rand_password()
-            kwargs['password'] = user_password
+    def create_test_user(self, **kwargs):
+        if kwargs.get('password', None) is None:
+            kwargs['password'] = data_utils.rand_password()
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_user')
+        if 'email' not in kwargs:
+            kwargs['email'] = kwargs['name'] + '@testmail.tm'
+
         user = self.users_client.create_user(**kwargs)['user']
         # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.users_client.delete_user, user['id'])
         return user
 
-    def setup_test_role(self):
+    def setup_test_role(self, name=None, domain_id=None):
         """Set up a test role."""
-        role = self.roles_client.create_role(
-            name=data_utils.rand_name('test_role'))['role']
+        params = {'name': name or data_utils.rand_name('test_role')}
+        if domain_id:
+            params['domain_id'] = domain_id
+
+        role = self.roles_client.create_role(**params)['role']
         # Delete the role at the end of the test
-        self.addCleanup(self.roles_client.delete_role, role['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.roles_client.delete_role, role['id'])
         return role
 
 
@@ -89,56 +107,68 @@ class BaseIdentityV2Test(BaseIdentityTest):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2Test, cls).setup_clients()
-        cls.non_admin_client = cls.os.identity_public_client
-        cls.non_admin_token_client = cls.os.token_client
-        cls.non_admin_tenants_client = cls.os.tenants_public_client
-        cls.non_admin_users_client = cls.os.users_public_client
+        cls.non_admin_client = cls.os_primary.identity_public_client
+        cls.non_admin_token_client = cls.os_primary.token_client
+        cls.non_admin_tenants_client = cls.os_primary.tenants_public_client
+        cls.non_admin_users_client = cls.os_primary.users_public_client
 
 
 class BaseIdentityV2AdminTest(BaseIdentityV2Test):
 
     credentials = ['primary', 'admin']
 
+    # NOTE(andreaf) Identity tests work with credentials, so it is safer
+    # for them to always use disposable credentials. Forcing dynamic creds
+    # on regular identity tests would be however to restrictive, since it
+    # would prevent any identity test from being executed against clouds where
+    # admin credentials are not available.
+    # Since All admin tests require admin credentials to be
+    # executed, so this will not impact the ability to execute tests.
+    force_tenant_isolation = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseIdentityV2AdminTest, cls).skip_checks()
+        if not CONF.identity_feature_enabled.api_v2_admin:
+            raise cls.skipException('Identity v2 admin not available')
+
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV2AdminTest, cls).setup_clients()
-        cls.client = cls.os_adm.identity_client
-        cls.non_admin_client = cls.os.identity_client
-        cls.token_client = cls.os_adm.token_client
-        cls.tenants_client = cls.os_adm.tenants_client
-        cls.non_admin_tenants_client = cls.os.tenants_client
-        cls.roles_client = cls.os_adm.roles_client
-        cls.non_admin_roles_client = cls.os.roles_client
-        cls.users_client = cls.os_adm.users_client
-        cls.non_admin_users_client = cls.os.users_client
-        cls.services_client = cls.os_adm.identity_services_client
-        cls.endpoints_client = cls.os_adm.endpoints_client
+        cls.client = cls.os_admin.identity_client
+        cls.non_admin_client = cls.os_primary.identity_client
+        cls.token_client = cls.os_admin.token_client
+        cls.tenants_client = cls.os_admin.tenants_client
+        cls.non_admin_tenants_client = cls.os_primary.tenants_client
+        cls.roles_client = cls.os_admin.roles_client
+        cls.non_admin_roles_client = cls.os_primary.roles_client
+        cls.users_client = cls.os_admin.users_client
+        cls.non_admin_users_client = cls.os_primary.users_client
+        cls.services_client = cls.os_admin.identity_services_client
+        cls.endpoints_client = cls.os_admin.endpoints_client
 
     @classmethod
     def resource_setup(cls):
         super(BaseIdentityV2AdminTest, cls).resource_setup()
         cls.projects_client = cls.tenants_client
 
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV2AdminTest, cls).resource_cleanup()
-
     def setup_test_user(self, password=None):
         """Set up a test user."""
         tenant = self.setup_test_tenant()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        user = self._create_test_user(name=username, email=email,
-                                      tenantId=tenant['id'], password=password)
+        user = self.create_test_user(tenantId=tenant['id'], password=password)
         return user
 
-    def setup_test_tenant(self):
+    def setup_test_tenant(self, **kwargs):
         """Set up a test tenant."""
-        tenant = self.projects_client.create_tenant(
-            name=data_utils.rand_name('test_tenant'),
-            description=data_utils.rand_name('desc'))['tenant']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_tenant')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('desc')
+        tenant = self.projects_client.create_tenant(**kwargs)['tenant']
         # Delete the tenant at the end of the test
-        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.tenants_client.delete_tenant, tenant['id'])
         return tenant
 
 
@@ -153,46 +183,58 @@ class BaseIdentityV3Test(BaseIdentityTest):
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV3Test, cls).setup_clients()
-        cls.non_admin_client = cls.os.identity_v3_client
-        cls.non_admin_users_client = cls.os.users_v3_client
-        cls.non_admin_token = cls.os.token_v3_client
-        cls.non_admin_projects_client = cls.os.projects_client
+        cls.non_admin_client = cls.os_primary.identity_v3_client
+        cls.non_admin_users_client = cls.os_primary.users_v3_client
+        cls.non_admin_token = cls.os_primary.token_v3_client
+        cls.non_admin_projects_client = cls.os_primary.projects_client
+        cls.non_admin_catalog_client = cls.os_primary.catalog_client
+        cls.non_admin_versions_client =\
+            cls.os_primary.identity_versions_v3_client
 
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 
     credentials = ['primary', 'admin']
 
+    # NOTE(andreaf) Identity tests work with credentials, so it is safer
+    # for them to always use disposable credentials. Forcing dynamic creds
+    # on regular identity tests would be however to restrictive, since it
+    # would prevent any identity test from being executed against clouds where
+    # admin credentials are not available.
+    # Since All admin tests require admin credentials to be
+    # executed, so this will not impact the ability to execute tests.
+    force_tenant_isolation = True
+
     @classmethod
     def setup_clients(cls):
         super(BaseIdentityV3AdminTest, cls).setup_clients()
-        cls.client = cls.os_adm.identity_v3_client
-        cls.domains_client = cls.os_adm.domains_client
-        cls.users_client = cls.os_adm.users_v3_client
-        cls.trusts_client = cls.os_adm.trusts_client
-        cls.roles_client = cls.os_adm.roles_v3_client
-        cls.token = cls.os_adm.token_v3_client
-        cls.endpoints_client = cls.os_adm.endpoints_v3_client
-        cls.regions_client = cls.os_adm.regions_client
-        cls.services_client = cls.os_adm.identity_services_v3_client
-        cls.policies_client = cls.os_adm.policies_client
-        cls.creds_client = cls.os_adm.credentials_client
-        cls.groups_client = cls.os_adm.groups_client
-        cls.projects_client = cls.os_adm.projects_client
+        cls.client = cls.os_admin.identity_v3_client
+        cls.domains_client = cls.os_admin.domains_client
+        cls.users_client = cls.os_admin.users_v3_client
+        cls.trusts_client = cls.os_admin.trusts_client
+        cls.roles_client = cls.os_admin.roles_v3_client
+        cls.inherited_roles_client = cls.os_admin.inherited_roles_client
+        cls.token = cls.os_admin.token_v3_client
+        cls.endpoints_client = cls.os_admin.endpoints_v3_client
+        cls.regions_client = cls.os_admin.regions_client
+        cls.services_client = cls.os_admin.identity_services_v3_client
+        cls.policies_client = cls.os_admin.policies_client
+        cls.creds_client = cls.os_admin.credentials_client
+        cls.groups_client = cls.os_admin.groups_client
+        cls.projects_client = cls.os_admin.projects_client
+        cls.role_assignments = cls.os_admin.role_assignments_client
+        cls.oauth_consumers_client = cls.os_admin.oauth_consumers_client
+        cls.oauth_token_client = cls.os_admin.oauth_token_client
+        cls.domain_config_client = cls.os_admin.domain_config_client
+        cls.endpoint_filter_client = cls.os_admin.endpoint_filter_client
+        cls.endpoint_groups_client = cls.os_admin.endpoint_groups_client
+
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity
             # admin clients for these tests shall use 'domain' scoped tokens.
             # As the client manager is already created by the base class,
             # we set the scope for the inner auth provider.
-            cls.os_adm.auth_provider.scope = 'domain'
-
-    @classmethod
-    def resource_setup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_setup()
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(BaseIdentityV3AdminTest, cls).resource_cleanup()
+            cls.os_admin.auth_provider.scope = 'domain'
 
     @classmethod
     def disable_user(cls, user_name, domain_id=None):
@@ -200,11 +242,13 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.users_client.update_user(user['id'], name=user_name, enabled=False)
 
     @classmethod
-    def create_domain(cls):
+    def create_domain(cls, **kwargs):
         """Create a domain."""
-        domain = cls.domains_client.create_domain(
-            name=data_utils.rand_name('test_domain'),
-            description=data_utils.rand_name('desc'))['domain']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_domain')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('desc')
+        domain = cls.domains_client.create_domain(**kwargs)['domain']
         return domain
 
     def delete_domain(self, domain_id):
@@ -216,25 +260,28 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def setup_test_user(self, password=None):
         """Set up a test user."""
         project = self.setup_test_project()
-        username = data_utils.rand_name('test_user')
-        email = username + '@testmail.tm'
-        user = self._create_test_user(name=username, email=email,
-                                      project_id=project['id'],
-                                      password=password)
+        user = self.create_test_user(project_id=project['id'],
+                                     password=password)
         return user
 
-    def setup_test_project(self):
+    def setup_test_project(self, **kwargs):
         """Set up a test project."""
-        project = self.projects_client.create_project(
-            name=data_utils.rand_name('test_project'),
-            description=data_utils.rand_name('desc'))['project']
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name('test_project')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name('test_description')
+        project = self.projects_client.create_project(**kwargs)['project']
         # Delete the project at the end of the test
-        self.addCleanup(self.projects_client.delete_project, project['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.projects_client.delete_project, project['id'])
         return project
 
     def setup_test_domain(self):
         """Set up a test domain."""
         domain = self.create_domain()
         # Delete the domain at the end of the test
-        self.addCleanup(self.delete_domain, domain['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.delete_domain, domain['id'])
         return domain

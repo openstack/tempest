@@ -18,6 +18,7 @@ from oslo_log import log as logging
 
 from tempest.common import credentials_factory as credentials
 from tempest.common import identity
+from tempest.common.utils import net_info
 from tempest import config
 from tempest import test
 
@@ -104,7 +105,7 @@ class BaseService(object):
 
     def _filter_by_tenant_id(self, item_list):
         if (item_list is None
-                or len(item_list) == 0
+                or not item_list
                 or not hasattr(self, 'tenant_id')
                 or self.tenant_id is None
                 or 'tenant_id' not in item_list[0]):
@@ -143,7 +144,7 @@ class SnapshotService(BaseService):
     def list(self):
         client = self.client
         snaps = client.list_snapshots()['snapshots']
-        LOG.debug("List count, %s Snapshots" % len(snaps))
+        LOG.debug("List count, %s Snapshots", len(snaps))
         return snaps
 
     def delete(self):
@@ -170,7 +171,7 @@ class ServerService(BaseService):
         client = self.client
         servers_body = client.list_servers()
         servers = servers_body['servers']
-        LOG.debug("List count, %s Servers" % len(servers))
+        LOG.debug("List count, %s Servers", len(servers))
         return servers
 
     def delete(self):
@@ -192,7 +193,7 @@ class ServerGroupService(ServerService):
     def list(self):
         client = self.server_groups_client
         sgs = client.list_server_groups()['server_groups']
-        LOG.debug("List count, %s Server Groups" % len(sgs))
+        LOG.debug("List count, %s Server Groups", len(sgs))
         return sgs
 
     def delete(self):
@@ -212,12 +213,14 @@ class ServerGroupService(ServerService):
 class StackService(BaseService):
     def __init__(self, manager, **kwargs):
         super(StackService, self).__init__(kwargs)
-        self.client = manager.orchestration_client
+        params = config.service_client_config('orchestration')
+        self.client = manager.orchestration.OrchestrationClient(
+            manager.auth_provider, **params)
 
     def list(self):
         client = self.client
         stacks = client.list_stacks()['stacks']
-        LOG.debug("List count, %s Stacks" % len(stacks))
+        LOG.debug("List count, %s Stacks", len(stacks))
         return stacks
 
     def delete(self):
@@ -242,7 +245,7 @@ class KeyPairService(BaseService):
     def list(self):
         client = self.client
         keypairs = client.list_keypairs()['keypairs']
-        LOG.debug("List count, %s Keypairs" % len(keypairs))
+        LOG.debug("List count, %s Keypairs", len(keypairs))
         return keypairs
 
     def delete(self):
@@ -269,7 +272,7 @@ class SecurityGroupService(BaseService):
         client = self.client
         secgrps = client.list_security_groups()['security_groups']
         secgrp_del = [grp for grp in secgrps if grp['name'] != 'default']
-        LOG.debug("List count, %s Security Groups" % len(secgrp_del))
+        LOG.debug("List count, %s Security Groups", len(secgrp_del))
         return secgrp_del
 
     def delete(self):
@@ -294,7 +297,7 @@ class FloatingIpService(BaseService):
     def list(self):
         client = self.client
         floating_ips = client.list_floating_ips()['floating_ips']
-        LOG.debug("List count, %s Floating IPs" % len(floating_ips))
+        LOG.debug("List count, %s Floating IPs", len(floating_ips))
         return floating_ips
 
     def delete(self):
@@ -319,7 +322,7 @@ class VolumeService(BaseService):
     def list(self):
         client = self.client
         vols = client.list_volumes()['volumes']
-        LOG.debug("List count, %s Volumes" % len(vols))
+        LOG.debug("List count, %s Volumes", len(vols))
         return vols
 
     def delete(self):
@@ -401,7 +404,7 @@ class NetworkService(BaseService):
         if self.is_preserve:
             networks = [network for network in networks
                         if network['id'] not in CONF_NETWORKS]
-        LOG.debug("List count, %s Networks" % networks)
+        LOG.debug("List count, %s Networks", networks)
         return networks
 
     def delete(self):
@@ -424,7 +427,7 @@ class NetworkFloatingIpService(NetworkService):
         client = self.floating_ips_client
         flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
-        LOG.debug("List count, %s Network Floating IPs" % len(flips))
+        LOG.debug("List count, %s Network Floating IPs", len(flips))
         return flips
 
     def delete(self):
@@ -451,7 +454,7 @@ class NetworkRouterService(NetworkService):
             routers = [router for router in routers
                        if router['id'] != CONF_PUB_ROUTER]
 
-        LOG.debug("List count, %s Routers" % len(routers))
+        LOG.debug("List count, %s Routers", len(routers))
         return routers
 
     def delete(self):
@@ -463,7 +466,7 @@ class NetworkRouterService(NetworkService):
                 rid = router['id']
                 ports = [port for port
                          in ports_client.list_ports(device_id=rid)['ports']
-                         if port["device_owner"] == "network:router_interface"]
+                         if net_info.is_router_interface_port(port)]
                 for port in ports:
                     client.remove_router_interface(rid, port_id=port['id'])
                 client.delete_router(rid)
@@ -482,7 +485,7 @@ class NetworkHealthMonitorService(NetworkService):
         hms = client.list_health_monitors()
         hms = hms['health_monitors']
         hms = self._filter_by_tenant_id(hms)
-        LOG.debug("List count, %s Health Monitors" % len(hms))
+        LOG.debug("List count, %s Health Monitors", len(hms))
         return hms
 
     def delete(self):
@@ -506,7 +509,7 @@ class NetworkMemberService(NetworkService):
         members = client.list_members()
         members = members['members']
         members = self._filter_by_tenant_id(members)
-        LOG.debug("List count, %s Members" % len(members))
+        LOG.debug("List count, %s Members", len(members))
         return members
 
     def delete(self):
@@ -530,7 +533,7 @@ class NetworkVipService(NetworkService):
         vips = client.list_vips()
         vips = vips['vips']
         vips = self._filter_by_tenant_id(vips)
-        LOG.debug("List count, %s VIPs" % len(vips))
+        LOG.debug("List count, %s VIPs", len(vips))
         return vips
 
     def delete(self):
@@ -554,7 +557,7 @@ class NetworkPoolService(NetworkService):
         pools = client.list_pools()
         pools = pools['pools']
         pools = self._filter_by_tenant_id(pools)
-        LOG.debug("List count, %s Pools" % len(pools))
+        LOG.debug("List count, %s Pools", len(pools))
         return pools
 
     def delete(self):
@@ -578,7 +581,7 @@ class NetworkMeteringLabelRuleService(NetworkService):
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
-        LOG.debug("List count, %s Metering Label Rules" % len(rules))
+        LOG.debug("List count, %s Metering Label Rules", len(rules))
         return rules
 
     def delete(self):
@@ -602,7 +605,7 @@ class NetworkMeteringLabelService(NetworkService):
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
-        LOG.debug("List count, %s Metering Labels" % len(labels))
+        LOG.debug("List count, %s Metering Labels", len(labels))
         return labels
 
     def delete(self):
@@ -631,7 +634,7 @@ class NetworkPortService(NetworkService):
         if self.is_preserve:
             ports = self._filter_by_conf_networks(ports)
 
-        LOG.debug("List count, %s Ports" % len(ports))
+        LOG.debug("List count, %s Ports", len(ports))
         return ports
 
     def delete(self):
@@ -659,7 +662,7 @@ class NetworkSecGroupService(NetworkService):
 
         if self.is_preserve:
             secgroups = self._filter_by_conf_networks(secgroups)
-        LOG.debug("List count, %s security_groups" % len(secgroups))
+        LOG.debug("List count, %s security_groups", len(secgroups))
         return secgroups
 
     def delete(self):
@@ -684,7 +687,7 @@ class NetworkSubnetService(NetworkService):
         subnets = subnets['subnets']
         if self.is_preserve:
             subnets = self._filter_by_conf_networks(subnets)
-        LOG.debug("List count, %s Subnets" % len(subnets))
+        LOG.debug("List count, %s Subnets", len(subnets))
         return subnets
 
     def delete(self):
@@ -718,7 +721,7 @@ class FlavorService(BaseService):
         if self.is_preserve:
             flavors = [flavor for flavor in flavors
                        if flavor['id'] not in CONF_FLAVORS]
-        LOG.debug("List count, %s Flavors after reconcile" % len(flavors))
+        LOG.debug("List count, %s Flavors after reconcile", len(flavors))
         return flavors
 
     def delete(self):
@@ -755,7 +758,7 @@ class ImageService(BaseService):
         if self.is_preserve:
             images = [image for image in images
                       if image['id'] not in CONF_IMAGES]
-        LOG.debug("List count, %s Images after reconcile" % len(images))
+        LOG.debug("List count, %s Images after reconcile", len(images))
         return images
 
     def delete(self):
@@ -805,7 +808,7 @@ class UserService(BaseService):
             users = [user for user in users if user['name'] !=
                      CONF.auth.admin_username]
 
-        LOG.debug("List count, %s Users after reconcile" % len(users))
+        LOG.debug("List count, %s Users after reconcile", len(users))
         return users
 
     def delete(self):
@@ -842,7 +845,7 @@ class RoleService(BaseService):
                          (role['id'] not in
                           self.saved_state_json['roles'].keys()
                           and role['name'] != CONF.identity.admin_role)]
-                LOG.debug("List count, %s Roles after reconcile" % len(roles))
+                LOG.debug("List count, %s Roles after reconcile", len(roles))
             return roles
         except Exception:
             LOG.exception("Cannot retrieve Roles.")
@@ -884,7 +887,7 @@ class TenantService(BaseService):
             tenants = [tenant for tenant in tenants if tenant['name']
                        not in CONF_TENANTS]
 
-        LOG.debug("List count, %s Tenants after reconcile" % len(tenants))
+        LOG.debug("List count, %s Tenants after reconcile", len(tenants))
         return tenants
 
     def delete(self):
@@ -919,7 +922,7 @@ class DomainService(BaseService):
             domains = [domain for domain in domains if domain['id']
                        not in self.saved_state_json['domains'].keys()]
 
-        LOG.debug("List count, %s Domains after reconcile" % len(domains))
+        LOG.debug("List count, %s Domains after reconcile", len(domains))
         return domains
 
     def delete(self):

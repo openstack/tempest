@@ -1,0 +1,3 @@
+---
+features:
+  - Add a new client to handle the OAUTH token feature from the identity API.

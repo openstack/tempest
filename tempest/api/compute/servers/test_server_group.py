@@ -14,17 +14,19 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
 class ServerGroupTestJSON(base.BaseV2ComputeTest):
-    """These tests check for the server-group APIs
+    """These tests check for the server-group APIs.
 
     They create/delete server-groups with different policies.
     policies = affinity/anti-affinity
     It also adds the tests for list and get details of server-groups
     """
+
     @classmethod
     def skip_checks(cls):
         super(ServerGroupTestJSON, cls).skip_checks()
@@ -40,12 +42,10 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ServerGroupTestJSON, cls).resource_setup()
-        server_group_name = data_utils.rand_name('server-group')
         cls.policy = ['affinity']
 
         cls.created_server_group = cls.create_test_server_group(
-            server_group_name,
-            cls.policy)
+            policy=cls.policy)
 
     def _create_server_group(self, name, policy):
         # create the test server-group with given policy
@@ -68,23 +68,23 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         server_group = self._create_server_group(name, policy)
         self._delete_server_group(server_group)
 
-    @test.idempotent_id('5dc57eda-35b7-4af7-9e5f-3c2be3d2d68b')
+    @decorators.idempotent_id('5dc57eda-35b7-4af7-9e5f-3c2be3d2d68b')
     def test_create_delete_server_group_with_affinity_policy(self):
         # Create and Delete the server-group with affinity policy
         self._create_delete_server_group(self.policy)
 
-    @test.idempotent_id('3645a102-372f-4140-afad-13698d850d23')
+    @decorators.idempotent_id('3645a102-372f-4140-afad-13698d850d23')
     def test_create_delete_server_group_with_anti_affinity_policy(self):
         # Create and Delete the server-group with anti-affinity policy
         policy = ['anti-affinity']
         self._create_delete_server_group(policy)
 
-    @test.idempotent_id('154dc5a4-a2fe-44b5-b99e-f15806a4a113')
+    @decorators.idempotent_id('154dc5a4-a2fe-44b5-b99e-f15806a4a113')
     def test_create_delete_multiple_server_groups_with_same_name_policy(self):
         # Create and Delete the server-groups with same name and same policy
         server_groups = []
         server_group_name = data_utils.rand_name('server-group')
-        for i in range(0, 2):
+        for _ in range(0, 2):
             server_groups.append(self._create_server_group(server_group_name,
                                                            self.policy))
         for key in ['name', 'policies']:
@@ -94,14 +94,14 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         for i in range(0, 2):
             self._delete_server_group(server_groups[i])
 
-    @test.idempotent_id('b3545034-dd78-48f0-bdc2-a4adfa6d0ead')
+    @decorators.idempotent_id('b3545034-dd78-48f0-bdc2-a4adfa6d0ead')
     def test_show_server_group(self):
         # Get the server-group
         body = self.client.show_server_group(
             self.created_server_group['id'])['server_group']
         self.assertEqual(self.created_server_group, body)
 
-    @test.idempotent_id('d4874179-27b4-4d7d-80e4-6c560cdfe321')
+    @decorators.idempotent_id('d4874179-27b4-4d7d-80e4-6c560cdfe321')
     def test_list_server_groups(self):
         # List the server-group
         body = self.client.list_server_groups()['server_groups']

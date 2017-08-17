@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import base
-from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 class KeyPairsV210TestJSON(base.BaseKeypairTest):
@@ -25,16 +25,16 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
     @classmethod
     def setup_clients(cls):
         super(KeyPairsV210TestJSON, cls).setup_clients()
-        cls.client = cls.os_adm.keypairs_client
-        cls.non_admin_client = cls.os.keypairs_client
+        cls.client = cls.os_admin.keypairs_client
+        cls.non_admin_client = cls.os_primary.keypairs_client
 
     def _create_and_check_keypairs(self, user_id):
         key_list = list()
-        for i in range(2):
+        for _ in range(2):
             k_name = data_utils.rand_name('keypair')
-            keypair = self._create_keypair(k_name,
-                                           keypair_type='ssh',
-                                           user_id=user_id)
+            keypair = self.create_keypair(k_name,
+                                          keypair_type='ssh',
+                                          user_id=user_id)
             self.assertEqual(k_name, keypair['name'],
                              "The created keypair name is not equal "
                              "to the requested name!")
@@ -45,7 +45,7 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
             key_list.append(keypair)
         return key_list
 
-    @test.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
+    @decorators.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
     def test_admin_manage_keypairs_for_other_users(self):
         user_id = self.non_admin_client.user_id
         key_list = self._create_and_check_keypairs(user_id)
@@ -56,8 +56,7 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
         self.assertEqual(user_id, keypair_detail['user_id'],
                          "The fetched keypair is not for requested user!")
         # Create a admin keypair
-        admin_k_name = data_utils.rand_name('keypair')
-        admin_keypair = self._create_keypair(admin_k_name, keypair_type='ssh')
+        admin_keypair = self.create_keypair(keypair_type='ssh')
         admin_keypair.pop('private_key', None)
         admin_keypair.pop('user_id')
 

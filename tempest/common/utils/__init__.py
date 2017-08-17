@@ -19,10 +19,6 @@ from tempest.lib.common.utils import data_utils as lib_data_utils
 
 CONF = config.CONF
 
-PING_IPV4_COMMAND = 'ping -c 3 '
-PING_IPV6_COMMAND = 'ping6 -c 3 '
-PING_PACKET_LOSS_REGEX = '(\d{1,3})\.?\d*\% packet loss'
-
 
 class DataUtils(object):
     def __getattr__(self, attr):

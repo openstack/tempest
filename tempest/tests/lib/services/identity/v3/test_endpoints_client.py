@@ -53,6 +53,8 @@ class TestEndpointsClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_SERVICE_ID = "a4dc5060-f757-4662-b658-edd2aefbb41d"
+
     def setUp(self):
         super(TestEndpointsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -72,12 +74,15 @@ class TestEndpointsClient(base.BaseServiceTest):
             adminurl="https://compute.north.internal.com/v1",
             internalurl="https://compute.north.internal.com/v1")
 
-    def _test_list_endpoints(self, bytes_body=False):
+    def _test_list_endpoints(self, bytes_body=False, mock_args='endpoints',
+                             **params):
         self.check_service_client_function(
             self.client.list_endpoints,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_ENDPOINTS,
-            bytes_body)
+            bytes_body,
+            mock_args=[mock_args],
+            **params)
 
     def test_create_endpoint_with_str_body(self):
         self._test_create_endpoint()
@@ -90,6 +95,16 @@ class TestEndpointsClient(base.BaseServiceTest):
 
     def test_list_endpoints_with_bytes_body(self):
         self._test_list_endpoints(bytes_body=True)
+
+    def test_list_endpoints_with_params(self):
+        # Run the test separately for each param, to avoid assertion error
+        # resulting from randomized params order.
+        mock_args = 'endpoints?service_id=%s' % self.FAKE_SERVICE_ID
+        self._test_list_endpoints(mock_args=mock_args,
+                                  service_id=self.FAKE_SERVICE_ID)
+
+        mock_args = 'endpoints?interface=public'
+        self._test_list_endpoints(mock_args=mock_args, interface='public')
 
     def test_delete_endpoint(self):
         self.check_service_client_function(

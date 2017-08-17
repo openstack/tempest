@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -26,9 +26,21 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
+    def skip_checks(cls):
+        super(FloatingIPAdminTestJSON, cls).skip_checks()
+        if not test.is_extension_enabled('router', 'network'):
+            msg = "router extension not enabled."
+            raise cls.skipException(msg)
+        if not CONF.network.public_network_id:
+            msg = "The public_network_id option must be specified."
+            raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
+    @classmethod
     def setup_clients(cls):
         super(FloatingIPAdminTestJSON, cls).setup_clients()
-        cls.alt_floating_ips_client = cls.alt_manager.floating_ips_client
+        cls.alt_floating_ips_client = cls.os_alt.floating_ips_client
 
     @classmethod
     def resource_setup(cls):
@@ -36,13 +48,12 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         cls.ext_net_id = CONF.network.public_network_id
         cls.floating_ip = cls.create_floatingip(cls.ext_net_id)
         cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router(data_utils.rand_name('router-'),
-                                       external_network_id=cls.ext_net_id)
-        cls.create_router_interface(cls.router['id'], cls.subnet['id'])
+        subnet = cls.create_subnet(cls.network)
+        router = cls.create_router(external_network_id=cls.ext_net_id)
+        cls.create_router_interface(router['id'], subnet['id'])
         cls.port = cls.create_port(cls.network)
 
-    @test.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')
+    @decorators.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')
     def test_list_floating_ips_from_admin_and_nonadmin(self):
         # Create floating ip from admin user
         floating_ip_admin = self.admin_floating_ips_client.create_floatingip(
@@ -73,7 +84,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
                          floating_ip_ids)
         self.assertNotIn(floating_ip_alt['id'], floating_ip_ids)
 
-    @test.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
+    @decorators.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
     def test_create_list_show_floating_ip_with_tenant_id_by_admin(self):
         # Creates a floating IP
         body = self.admin_floating_ips_client.create_floatingip(

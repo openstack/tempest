@@ -14,14 +14,11 @@
 #    under the License.
 import functools
 
-import six
-
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
-
 
 CONF = config.CONF
 
@@ -51,9 +48,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
-        if CONF.baremetal.driver_enabled:
-            msg = ('Baremetal does not currently support network isolation')
+        if CONF.network.shared_physical_network:
+            msg = 'Deployment uses a shared physical network'
             raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
 
     @classmethod
     def setup_credentials(cls):
@@ -64,7 +63,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def setUp(self):
         super(TestGettingAddress, self).setUp()
         self.keypair = self.create_keypair()
-        self.sec_grp = self._create_security_group(tenant_id=self.tenant_id)
+        self.sec_grp = self._create_security_group()
 
     def prepare_network(self, address6_mode, n_subnets6=1, dualnet=False):
         """Prepare network
@@ -75,15 +74,15 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet - create IPv6 subnets on a different network
         :return: list of created networks
         """
-        self.network = self._create_network(tenant_id=self.tenant_id)
+        network = self._create_network()
         if dualnet:
-            self.network_v6 = self._create_network(tenant_id=self.tenant_id)
+            network_v6 = self._create_network()
 
-        sub4 = self._create_subnet(network=self.network,
+        sub4 = self._create_subnet(network=network,
                                    namestart='sub4',
                                    ip_version=4)
 
-        router = self._get_router(tenant_id=self.tenant_id)
+        router = self._get_router()
         self.routers_client.add_router_interface(router['id'],
                                                  subnet_id=sub4['id'])
 
@@ -93,7 +92,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         self.subnets_v6 = []
         for _ in range(n_subnets6):
-            net6 = self.network_v6 if dualnet else self.network
+            net6 = network_v6 if dualnet else network
             sub6 = self._create_subnet(network=net6,
                                        namestart='sub6',
                                        ip_version=6,
@@ -108,12 +107,12 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                             router['id'], subnet_id=sub6['id'])
 
             self.subnets_v6.append(sub6)
-        return [self.network, self.network_v6] if dualnet else [self.network]
+        return [network, network_v6] if dualnet else [network]
 
     @staticmethod
     def define_server_ips(srv):
         ips = {'4': None, '6': []}
-        for net_name, nics in six.iteritems(srv['addresses']):
+        for nics in srv['addresses'].values():
             for nic in nics:
                 if nic['version'] == 6:
                     ips['6'].append(nic['addr'])
@@ -124,21 +123,18 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def prepare_server(self, networks=None):
         username = CONF.validation.image_ssh_user
 
-        networks = networks or [self.network]
-
         srv = self.create_server(
             key_name=self.keypair['name'],
             security_groups=[{'name': self.sec_grp['name']}],
-            networks=[{'uuid': n['id']} for n in networks],
-            wait_until='ACTIVE')
+            networks=[{'uuid': n['id']} for n in networks])
         fip = self.create_floating_ip(thing=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
             ip_address=fip['floating_ip_address'],
-            username=username)
+            username=username, server=srv)
         return ssh, ips, srv["id"]
 
-    def turn_nic6_on(self, ssh, sid):
+    def turn_nic6_on(self, ssh, sid, network_id):
         """Turns the IPv6 vNIC on
 
         Required because guest images usually set only the first vNIC on boot.
@@ -146,16 +142,21 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
         @param ssh: RemoteClient ssh instance to server
         @param sid: server uuid
+        @param network_id: the network id the NIC is connected to
         """
-        ports = [p["mac_address"] for p in
-                 self._list_ports(device_id=sid,
-                                  network_id=self.network_v6['id'])]
+        ports = [
+            p["mac_address"] for p in
+            self.os_admin.ports_client.list_ports(
+                device_id=sid, network_id=network_id)['ports']
+        ]
+
         self.assertEqual(1, len(ports),
                          message=("Multiple IPv6 ports found on network %s. "
                                   "ports: %s")
-                         % (self.network_v6, ports))
+                         % (network_id, ports))
         mac6 = ports[0]
-        ssh.set_nic_state(ssh.get_nic_name_by_mac(mac6))
+        nic = ssh.get_nic_name_by_mac(mac6)
+        ssh.exec_command("sudo ip link set %s up" % nic)
 
     def _prepare_and_test(self, address6_mode, n_subnets6=1, dualnet=False):
         net_list = self.prepare_network(address6_mode=address6_mode,
@@ -166,16 +167,17 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         sshv4_2, ips_from_api_2, sid2 = self.prepare_server(networks=net_list)
 
         def guest_has_address(ssh, addr):
-            return addr in ssh.get_ip_list()
+            return addr in ssh.exec_command("ip address")
 
         # Turn on 2nd NIC for Cirros when dualnet
         if dualnet:
-            self.turn_nic6_on(sshv4_1, sid1)
-            self.turn_nic6_on(sshv4_2, sid2)
+            _, network_v6 = net_list
+            self.turn_nic6_on(sshv4_1, sid1, network_v6['id'])
+            self.turn_nic6_on(sshv4_2, sid2, network_v6['id'])
 
         # get addresses assigned to vNIC as reported by 'ip address' utility
-        ips_from_ip_1 = sshv4_1.get_ip_list()
-        ips_from_ip_2 = sshv4_2.get_ip_list()
+        ips_from_ip_1 = sshv4_1.exec_command("ip address")
+        ips_from_ip_2 = sshv4_2.exec_command("ip address")
         self.assertIn(ips_from_api_1['4'], ips_from_ip_1)
         self.assertIn(ips_from_api_2['4'], ips_from_ip_2)
         for i in range(n_subnets6):
@@ -187,76 +189,69 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             srv2_v6_addr_assigned = functools.partial(
                 guest_has_address, sshv4_2, ips_from_api_2['6'][i])
 
-            self.assertTrue(test.call_until_true(srv1_v6_addr_assigned,
+            self.assertTrue(test_utils.call_until_true(srv1_v6_addr_assigned,
                             CONF.validation.ping_timeout, 1))
 
-            self.assertTrue(test.call_until_true(srv2_v6_addr_assigned,
+            self.assertTrue(test_utils.call_until_true(srv2_v6_addr_assigned,
                             CONF.validation.ping_timeout, 1))
 
-        self._check_connectivity(sshv4_1, ips_from_api_2['4'])
-        self._check_connectivity(sshv4_2, ips_from_api_1['4'])
+        self.check_remote_connectivity(sshv4_1, ips_from_api_2['4'])
+        self.check_remote_connectivity(sshv4_2, ips_from_api_1['4'])
 
         for i in range(n_subnets6):
-            self._check_connectivity(sshv4_1,
-                                     ips_from_api_2['6'][i])
-            self._check_connectivity(sshv4_1,
-                                     self.subnets_v6[i]['gateway_ip'])
-            self._check_connectivity(sshv4_2,
-                                     ips_from_api_1['6'][i])
-            self._check_connectivity(sshv4_2,
-                                     self.subnets_v6[i]['gateway_ip'])
+            self.check_remote_connectivity(sshv4_1,
+                                           ips_from_api_2['6'][i])
+            self.check_remote_connectivity(sshv4_1,
+                                           self.subnets_v6[i]['gateway_ip'])
+            self.check_remote_connectivity(sshv4_2,
+                                           ips_from_api_1['6'][i])
+            self.check_remote_connectivity(sshv4_2,
+                                           self.subnets_v6[i]['gateway_ip'])
 
-    def _check_connectivity(self, source, dest):
-        self.assertTrue(
-            self._check_remote_connectivity(source, dest),
-            "Timed out waiting for %s to become reachable from %s" %
-            (dest, source.ssh_client.host)
-        )
-
-    @test.attr(type='slow')
-    @test.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
     @test.services('compute', 'network')
     def test_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac')
 
-    @test.attr(type='slow')
-    @test.idempotent_id('d7e1f858-187c-45a6-89c9-bdafde619a9f')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('d7e1f858-187c-45a6-89c9-bdafde619a9f')
     @test.services('compute', 'network')
     def test_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless')
 
-    @test.attr(type='slow')
-    @test.idempotent_id('7ab23f41-833b-4a16-a7c9-5b42fe6d4123')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('7ab23f41-833b-4a16-a7c9-5b42fe6d4123')
     @test.services('compute', 'network')
     def test_multi_prefix_dhcpv6_stateless(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2)
 
-    @test.attr(type='slow')
-    @test.idempotent_id('dec222b1-180c-4098-b8c5-cc1b8342d611')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('dec222b1-180c-4098-b8c5-cc1b8342d611')
     @test.services('compute', 'network')
     def test_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2)
 
-    @test.attr(type='slow')
-    @test.idempotent_id('b6399d76-4438-4658-bcf5-0d6c8584fde2')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('b6399d76-4438-4658-bcf5-0d6c8584fde2')
     @test.services('compute', 'network')
     def test_dualnet_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac', dualnet=True)
 
-    @test.attr(type='slow')
-    @test.idempotent_id('76f26acd-9688-42b4-bc3e-cd134c4cb09e')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('76f26acd-9688-42b4-bc3e-cd134c4cb09e')
     @test.services('compute', 'network')
     def test_dualnet_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', dualnet=True)
 
-    @test.idempotent_id('cf1c4425-766b-45b8-be35-e2959728eb00')
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('cf1c4425-766b-45b8-be35-e2959728eb00')
     @test.services('compute', 'network')
     def test_dualnet_multi_prefix_dhcpv6_stateless(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2,
                                dualnet=True)
 
-    @decorators.skip_because(bug="1540983")
-    @test.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
+    @decorators.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
     @test.services('compute', 'network')
     def test_dualnet_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2,

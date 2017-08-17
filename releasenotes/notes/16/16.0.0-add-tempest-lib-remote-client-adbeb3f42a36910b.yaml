@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Add remote_client under tempest.lib.
+    This remote_client under tempest.lib is defined as stable
+    interface, and now this module provides the following
+    essential methods.
+
+    - exec_command
+    - validate_authentication
+    - ping_host

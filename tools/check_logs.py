@@ -19,12 +19,11 @@ import argparse
 import gzip
 import os
 import re
-import six
-import six.moves.urllib.request as urlreq
 import sys
 
+import six
+import six.moves.urllib.request as urlreq
 import yaml
-
 
 # DEVSTACK_GATE_GRENADE is either unset if grenade is not running
 # or a string describing what type of grenade run to perform.
@@ -137,7 +136,7 @@ def main(opts):
     with open(WHITELIST_FILE) as stream:
         loaded = yaml.safe_load(stream)
         if loaded:
-            for (name, l) in loaded.iteritems():
+            for (name, l) in six.iteritems(loaded):
                 for w in l:
                     assert 'module' in w, 'no module in %s' % name
                     assert 'message' in w, 'no message in %s' % name

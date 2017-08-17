@@ -1,0 +1,10 @@
+---
+deprecations:
+  - |
+    Glance v1 APIs are deprecated and v2 are current.
+    Tempest should tests only v2 APIs.
+    Below API version selection config options
+    for glance have been deprecated and will be removed in future.
+
+    * CONF.image_feature_enabled.api_v2
+    * CONF.image_feature_enabled.api_v1

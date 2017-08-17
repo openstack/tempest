@@ -17,28 +17,36 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
+from tempest.lib.api_schema.response.compute.v2_13 import servers as schemav213
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class ServerGroupsClient(base_compute_client.BaseComputeClient):
 
+    schema_versions_info = [
+        {'min': None, 'max': '2.12', 'schema': schema},
+        {'min': '2.13', 'max': None, 'schema': schemav213}]
+
     def create_server_group(self, **kwargs):
         """Create the server group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createServerGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#create-server-group
         """
         post_body = json.dumps({'server_group': kwargs})
         resp, body = self.post('os-server-groups', post_body)
 
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_show_server_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_server_group(self, server_group_id):
         """Delete the given server-group."""
         resp, body = self.delete("os-server-groups/%s" % server_group_id)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_server_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -46,6 +54,7 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
         """List the server-groups."""
         resp, body = self.get("os-server-groups")
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_server_groups, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -53,5 +62,6 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
         """Get the details of given server_group."""
         resp, body = self.get("os-server-groups/%s" % server_group_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_show_server_group, resp, body)
         return rest_client.ResponseBody(resp, body)

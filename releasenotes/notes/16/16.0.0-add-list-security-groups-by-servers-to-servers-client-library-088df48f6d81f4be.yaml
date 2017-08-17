@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add the list security groups by server API to the servers_client
+    library. This feature enables the possibility to list security
+    groups for a server instance.

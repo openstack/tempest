@@ -19,6 +19,7 @@ from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -34,21 +35,21 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         super(DeleteServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
-    @test.idempotent_id('9e6e0c87-3352-42f7-9faf-5d6210dbd159')
+    @decorators.idempotent_id('9e6e0c87-3352-42f7-9faf-5d6210dbd159')
     def test_delete_server_while_in_building_state(self):
         # Delete a server while it's VM state is Building
         server = self.create_test_server(wait_until='BUILD')
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('925fdfb4-5b13-47ea-ac8a-c36ae6fddb05')
+    @decorators.idempotent_id('925fdfb4-5b13-47ea-ac8a-c36ae6fddb05')
     def test_delete_active_server(self):
         # Delete a server while it's VM state is Active
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('546d368c-bb6c-4645-979a-83ed16f3a6be')
+    @decorators.idempotent_id('546d368c-bb6c-4645-979a-83ed16f3a6be')
     def test_delete_server_while_in_shutoff_state(self):
         # Delete a server while it's VM state is Shutoff
         server = self.create_test_server(wait_until='ACTIVE')
@@ -57,7 +58,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('943bd6e8-4d7a-4904-be83-7a6cc2d4213b')
+    @decorators.idempotent_id('943bd6e8-4d7a-4904-be83-7a6cc2d4213b')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_delete_server_while_in_pause_state(self):
@@ -68,7 +69,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('1f82ebd3-8253-4f4e-b93f-de9b7df56d8b')
+    @decorators.idempotent_id('1f82ebd3-8253-4f4e-b93f-de9b7df56d8b')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     def test_delete_server_while_in_suspended_state(self):
@@ -79,7 +80,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('bb0cb402-09dd-4947-b6e5-5e7e1cfa61ad')
+    @decorators.idempotent_id('bb0cb402-09dd-4947-b6e5-5e7e1cfa61ad')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
     def test_delete_server_while_in_shelved_state(self):
@@ -90,7 +91,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('ab0c38b4-cdd8-49d3-9b92-0cb898723c01')
+    @decorators.idempotent_id('ab0c38b4-cdd8-49d3-9b92-0cb898723c01')
     @testtools.skipIf(not CONF.compute_feature_enabled.resize,
                       'Resize not available.')
     def test_delete_server_while_in_verify_resize_state(self):
@@ -102,57 +103,17 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
 
-    @test.idempotent_id('d0f3f0d6-d9b6-4a32-8da4-23015dcab23c')
+    @decorators.idempotent_id('d0f3f0d6-d9b6-4a32-8da4-23015dcab23c')
     @test.services('volume')
     def test_delete_server_while_in_attached_volume(self):
         # Delete a server while a volume is attached to it
-        volumes_client = self.volumes_extensions_client
         device = '/dev/%s' % CONF.compute.volume_device_name
         server = self.create_test_server(wait_until='ACTIVE')
 
-        volume = (volumes_client.create_volume(size=CONF.volume.volume_size)
-                  ['volume'])
-        self.addCleanup(volumes_client.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['id'], 'available')
-        self.client.attach_volume(server['id'],
-                                  volumeId=volume['id'],
-                                  device=device)
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['id'], 'in-use')
+        volume = self.create_volume()
+        self.attach_volume(server, volume, device=device)
 
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])
-        waiters.wait_for_volume_status(volumes_client,
-                                       volume['id'], 'available')
-
-
-class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
-    # NOTE: Server creations of each test class should be under 10
-    # for preventing "Quota exceeded for instances".
-
-    @classmethod
-    def setup_clients(cls):
-        super(DeleteServersAdminTestJSON, cls).setup_clients()
-        cls.non_admin_client = cls.servers_client
-        cls.admin_client = cls.os_adm.servers_client
-
-    @test.idempotent_id('99774678-e072-49d1-9d2a-49a59bc56063')
-    def test_delete_server_while_in_error_state(self):
-        # Delete a server while it's VM state is error
-        server = self.create_test_server(wait_until='ACTIVE')
-        self.admin_client.reset_state(server['id'], state='error')
-        # Verify server's state
-        server = self.non_admin_client.show_server(server['id'])['server']
-        self.assertEqual(server['status'], 'ERROR')
-        self.non_admin_client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.servers_client,
-                                            server['id'],
-                                            ignore_error=True)
-
-    @test.idempotent_id('73177903-6737-4f27-a60c-379e8ae8cf48')
-    def test_admin_delete_servers_of_others(self):
-        # Administrator can delete servers of others
-        server = self.create_test_server(wait_until='ACTIVE')
-        self.admin_client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.servers_client, server['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')

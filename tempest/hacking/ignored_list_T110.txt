@@ -1,4 +1,1 @@
 ./tempest/services/object_storage/object_client.py
-./tempest/services/volume/base/base_qos_client.py
-./tempest/services/volume/base/base_backups_client.py
-./tempest/services/baremetal/base.py

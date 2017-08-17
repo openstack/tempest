@@ -1,0 +1,13 @@
+---
+prelude: >
+    This release is marking the start of Newton release support in Tempest
+other:
+  - |
+    OpenStack releases supported at this time are **Liberty**, **Mitaka**,
+    and **Newton**.
+
+    The release under current development as of this tag is Ocata,
+    meaning that every Tempest commit is also tested against master during
+    the Ocata cycle. However, this does not necessarily mean that using
+    Tempest as of this tag will work against a Ocata (or future releases)
+    cloud.

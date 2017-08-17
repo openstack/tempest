@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# tempest Release Notes documentation build configuration file, created by
+# Tempest Release Notes documentation build configuration file, created by
 # sphinx-quickstart on Tue Nov  3 17:40:50 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -38,9 +37,17 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'oslosphinx',
+    'openstackdocstheme',
     'reno.sphinxext',
 ]
+
+# openstackdocstheme options
+repository_name = 'openstack/tempest'
+bug_project = 'tempest'
+bug_tag = ''
+
+# Must set this variable to include year, month, day, hours, and minutes.
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -112,7 +119,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'openstackdocs'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -120,7 +127,6 @@ html_theme = 'default'
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -275,3 +281,6 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+
+# -- Options for Internationalization output ------------------------------
+locale_dirs = ['locale/']

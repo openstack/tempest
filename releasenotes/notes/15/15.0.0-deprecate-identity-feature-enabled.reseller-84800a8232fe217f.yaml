@@ -1,0 +1,8 @@
+---
+upgrade:
+  - The default value for the ``reseller`` option in the
+    ``identity-feature-enabled`` section has been changed from ``False``
+    to ``True``.
+deprecations:
+  - The ``reseller`` option in the ``identity-feature-enabled`` section is now
+    deprecated.

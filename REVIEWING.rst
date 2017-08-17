@@ -13,6 +13,22 @@ that the first thing to check with any change is that a gate job actually runs
 it. Tests which aren't executed either because of configuration or skips should
 not be accepted.
 
+If a new test is added that depends on a new config option (like a feature
+flag), the commit message must reference a change in DevStack or DevStack-Gate
+that enables the execution of this newly introduced test. This reference could
+either be a `Cross-Repository Dependency <http://docs.openstack.org/infra/
+manual/developers.html#cross-repository-dependencies>`_ or a simple link
+to a Gerrit review.
+
+
+Execution time
+--------------
+While checking in the job logs that a new test is actually executed, also
+pay attention to the execution time of that test. Keep in mind that each test
+is going to be executed hundreds of time each day, because Tempest tests
+run in many OpenStack projects. It's worth considering how important/critical
+the feature under test is with how costly the new test is.
+
 
 Unit Tests
 ----------
@@ -41,6 +57,17 @@ the maintenance burden. Such changes should not be approved if it is easy to
 abstract the duplicated code into a function or method.
 
 
+Tests overlap
+-------------
+When a new test is being proposed, question whether this feature is not already
+tested with Tempest. Tempest has more than 1200 tests, spread amongst many
+directories, so it's easy to introduce test duplication. For example, testing
+volume attachment to a server could be a compute test or a volume test, depending
+on how you see it. So one must look carefully in the entire code base for possible
+overlap. As a rule of thumb, the older a feature is, the more likely it's
+already tested.
+
+
 Being explicit
 --------------
 When tests are being added that depend on a configurable feature or extension,
@@ -53,8 +80,8 @@ whether to skip or not.
 
 Configuration Options
 ---------------------
-With the introduction of the tempest external test plugin interface we needed
-to provide a stable contract for tempest's configuration options. This means
+With the introduction of the Tempest external test plugin interface we needed
+to provide a stable contract for Tempest's configuration options. This means
 we can no longer simply remove a configuration option when it's no longer used.
 Patches proposed that remove options without a deprecation cycle should not
 be approved. Similarly when changing default values with configuration we need
@@ -84,7 +111,13 @@ deprecation), CLI additions or deprecations, major feature additions, and
 anything backwards incompatible or would require a user to take note or do
 something extra.
 
-.. _reno: http://docs.openstack.org/developer/reno/
+.. _reno: https://docs.openstack.org/reno/latest/
+
+Deprecated Code
+---------------
+Sometimes we have some bugs in deprecated code. Basically, we leave it. Because
+we don't need to maintain it. However, if the bug is critical, we might need to
+fix it. When it will happen, we will deal with it on a case-by-case basis.
 
 When to approve
 ---------------

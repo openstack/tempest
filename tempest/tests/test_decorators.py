@@ -12,13 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
+import fixtures
 from oslo_config import cfg
-from oslotest import mockpatch
 import testtools
 
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest import test
 from tempest.tests import base
@@ -31,34 +29,6 @@ class BaseDecoratorsTest(base.TestCase):
         self.config_fixture = self.useFixture(fake_config.ConfigFixture())
         self.patchobject(config, 'TempestConfigPrivate',
                          fake_config.FakePrivate)
-
-
-class TestAttrDecorator(BaseDecoratorsTest):
-    def _test_attr_helper(self, expected_attrs, **decorator_args):
-        @test.attr(**decorator_args)
-        def foo():
-            pass
-
-        # By our test.attr decorator the attribute __testtools_attrs will be
-        # set only for 'type' argument, so we test it first.
-        if 'type' in decorator_args:
-            # this is what testtools sets
-            self.assertEqual(getattr(foo, '__testtools_attrs'),
-                             set(expected_attrs))
-
-    def test_attr_without_type(self):
-        self._test_attr_helper(expected_attrs='baz', bar='baz')
-
-    def test_attr_decorator_with_list_type(self):
-        # if type is 'smoke' we'll get the original list of types
-        self._test_attr_helper(expected_attrs=['smoke', 'foo'],
-                               type=['smoke', 'foo'])
-
-    def test_attr_decorator_with_unknown_type(self):
-        self._test_attr_helper(expected_attrs=['foo'], type='foo')
-
-    def test_attr_decorator_with_duplicated_type(self):
-        self._test_attr_helper(expected_attrs=['foo'], type=['foo', 'foo'])
 
 
 class TestIdempotentIdDecorator(BaseDecoratorsTest):
@@ -120,13 +90,13 @@ class TestServicesDecorator(BaseDecoratorsTest):
         self._test_services_helper('compute', 'compute')
 
     def test_services_decorator_with_invalid_service(self):
-        self.assertRaises(exceptions.InvalidServiceTag,
+        self.assertRaises(test.InvalidServiceTag,
                           self._test_services_helper, 'compute',
                           'bad_service')
 
     def test_services_decorator_with_service_valid_and_unavailable(self):
-        self.useFixture(mockpatch.PatchObject(test.CONF.service_available,
-                                              'cinder', False))
+        self.useFixture(fixtures.MockPatchObject(test.CONF.service_available,
+                                                 'cinder', False))
         self.assertRaises(testtools.TestCase.skipException,
                           self._test_services_helper, 'compute',
                           'volume')
@@ -136,7 +106,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
         for service in service_list:
             try:
                 self._test_services_helper(service)
-            except exceptions.InvalidServiceTag:
+            except test.InvalidServiceTag:
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:
@@ -152,36 +122,6 @@ class TestServicesDecorator(BaseDecoratorsTest):
                 # Test didn't raise an exception because of an incorrect list
                 # entry so move onto the next entry
                 continue
-
-
-class TestStressDecorator(BaseDecoratorsTest):
-    def _test_stresstest_helper(self, expected_frequency='process',
-                                expected_inheritance=False,
-                                **decorator_args):
-        @test.stresstest(**decorator_args)
-        def foo():
-            pass
-        self.assertEqual(getattr(foo, 'st_class_setup_per'),
-                         expected_frequency)
-        self.assertEqual(getattr(foo, 'st_allow_inheritance'),
-                         expected_inheritance)
-        self.assertEqual(set(['stress']), getattr(foo, '__testtools_attrs'))
-
-    def test_stresstest_decorator_default(self):
-        self._test_stresstest_helper()
-
-    def test_stresstest_decorator_class_setup_frequency(self):
-        self._test_stresstest_helper('process', class_setup_per='process')
-
-    def test_stresstest_decorator_class_setup_frequency_non_default(self):
-        self._test_stresstest_helper(expected_frequency='application',
-                                     class_setup_per='application')
-
-    def test_stresstest_decorator_set_frequency_and_inheritance(self):
-        self._test_stresstest_helper(expected_frequency='application',
-                                     expected_inheritance=True,
-                                     class_setup_per='application',
-                                     allow_inheritance=True)
 
 
 class TestRequiresExtDecorator(BaseDecoratorsTest):
@@ -230,22 +170,6 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                           self._test_requires_ext_helper,
                           extension='enabled_ext',
                           service='bad_service')
-
-
-class TestSimpleNegativeDecorator(BaseDecoratorsTest):
-    @test.SimpleNegativeAutoTest
-    class FakeNegativeJSONTest(test.NegativeAutoTest):
-        _schema = {}
-
-    def test_testfunc_exist(self):
-        self.assertIn("test_fake_negative", dir(self.FakeNegativeJSONTest))
-
-    @mock.patch('tempest.test.NegativeAutoTest.execute')
-    def test_testfunc_calls_execute(self, mock):
-        obj = self.FakeNegativeJSONTest("test_fake_negative")
-        self.assertIn("test_fake_negative", dir(obj))
-        obj.test_fake_negative()
-        mock.assert_called_once_with(self.FakeNegativeJSONTest._schema)
 
 
 class TestConfigDecorators(BaseDecoratorsTest):

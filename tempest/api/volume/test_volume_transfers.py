@@ -13,39 +13,39 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools import matchers
-
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import test
+from tempest.lib import decorators
 
 
-class VolumesV2TransfersTest(base.BaseVolumeTest):
+class VolumesTransfersTest(base.BaseVolumeTest):
 
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
     def setup_clients(cls):
-        super(VolumesV2TransfersTest, cls).setup_clients()
+        super(VolumesTransfersTest, cls).setup_clients()
 
-        cls.client = cls.volumes_client
-        cls.alt_client = cls.os_alt.volumes_client
-        cls.alt_tenant_id = cls.alt_client.tenant_id
-        cls.adm_client = cls.os_adm.volumes_client
+        cls.client = cls.os_primary.volume_transfers_v2_client
+        cls.alt_client = cls.os_alt.volume_transfers_v2_client
+        cls.alt_volumes_client = cls.os_alt.volumes_v2_client
+        cls.adm_volumes_client = cls.os_admin.volumes_v2_client
 
-    @test.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
+    @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.adm_volumes_client,
+                        volume['id'])
 
         # Create a volume transfer
         transfer = self.client.create_volume_transfer(
             volume_id=volume['id'])['transfer']
         transfer_id = transfer['id']
         auth_key = transfer['auth_key']
-        waiters.wait_for_volume_status(self.client,
-                                       volume['id'], 'awaiting-transfer')
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume['id'], 'awaiting-transfer')
 
         # Get a volume transfer
         body = self.client.show_volume_transfer(transfer_id)['transfer']
@@ -54,39 +54,47 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
         # List volume transfers, the result should be greater than
         # or equal to 1
         body = self.client.list_volume_transfers()['transfers']
-        self.assertThat(len(body), matchers.GreaterThan(0))
+        self.assertNotEmpty(body)
 
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
-        waiters.wait_for_volume_status(self.alt_client,
-                                       volume['id'], 'available')
+        for key in ['id', 'name', 'links', 'volume_id']:
+            self.assertIn(key, body)
+        waiters.wait_for_volume_resource_status(self.alt_volumes_client,
+                                                volume['id'], 'available')
+        accepted_volume = self.alt_volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual(self.os_alt.credentials.user_id,
+                         accepted_volume['user_id'])
+        self.assertEqual(self.os_alt.credentials.project_id,
+                         accepted_volume['os-vol-tenant-attr:tenant_id'])
 
-    @test.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
+    @decorators.idempotent_id('ab526943-b725-4c07-b875-8e8ef87a2c30')
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
-        self.addCleanup(self.delete_volume, self.adm_client, volume['id'])
+        self.addCleanup(self.delete_volume,
+                        self.adm_volumes_client,
+                        volume['id'])
 
         # Create a volume transfer
-        body = self.client.create_volume_transfer(
-            volume_id=volume['id'])['transfer']
-        transfer_id = body['id']
-        waiters.wait_for_volume_status(self.client,
-                                       volume['id'], 'awaiting-transfer')
+        transfer_id = self.client.create_volume_transfer(
+            volume_id=volume['id'])['transfer']['id']
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume['id'], 'awaiting-transfer')
 
-        # List all volume transfers (looking for the one we created)
-        body = self.client.list_volume_transfers()['transfers']
-        for transfer in body:
-            if volume['id'] == transfer['volume_id']:
-                break
-        else:
-            self.fail('Transfer not found for volume %s' % volume['id'])
+        # List all volume transfers with details, check the detail-specific
+        # elements, and look for the created transfer.
+        transfers = self.client.list_volume_transfers(detail=True)['transfers']
+        self.assertNotEmpty(transfers)
+        for transfer in transfers:
+            self.assertIn('created_at', transfer)
+        volume_list = [transfer['volume_id'] for transfer in transfers]
+        self.assertIn(volume['id'], volume_list,
+                      'Transfer not found for volume %s' % volume['id'])
 
         # Delete a volume transfer
         self.client.delete_volume_transfer(transfer_id)
-        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
-
-
-class VolumesV1TransfersTest(VolumesV2TransfersTest):
-    _api_version = 1
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume['id'], 'available')

@@ -14,6 +14,8 @@
 
 import copy
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 
 base = {
     'status_code': [200],
@@ -49,7 +51,7 @@ base = {
 }
 
 detail = {
-    'type': 'object',
+    'type': ['object', 'null'],
     'patternProperties': {
         # NOTE: Here is for a hostname
         '^[a-zA-Z0-9-_.]+$': {
@@ -61,7 +63,7 @@ detail = {
                     'properties': {
                         'available': {'type': 'boolean'},
                         'active': {'type': 'boolean'},
-                        'updated_at': {'type': ['string', 'null']}
+                        'updated_at': parameter_types.date_time_or_null
                     },
                     'additionalProperties': False,
                     'required': ['available', 'active', 'updated_at']

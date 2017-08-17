@@ -18,6 +18,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest import test
 
@@ -40,10 +41,9 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(VirtualInterfacesTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @test.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
+    @decorators.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
     @test.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
@@ -53,12 +53,11 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
             # TODO(mriedem): After a microversion implements the API for
             # neutron, a 400 should be a failure for nova-network and neutron.
             with testtools.ExpectedException(exceptions.BadRequest):
-                self.client.list_virtual_interfaces(self.server_id)
+                self.client.list_virtual_interfaces(self.server['id'])
         else:
-            output = self.client.list_virtual_interfaces(self.server_id)
-            self.assertIsNotNone(output)
+            output = self.client.list_virtual_interfaces(self.server['id'])
             virt_ifaces = output
-            self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
+            self.assertNotEmpty(virt_ifaces['virtual_interfaces'],
                                 'Expected virtual interfaces, got 0 '
                                 'interfaces.')
             for virt_iface in virt_ifaces['virtual_interfaces']:

@@ -13,49 +13,72 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+from testtools import matchers
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
 
 
-class VolumesBackupsV2Test(base.BaseVolumeTest):
+class VolumesBackupsTest(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesBackupsV2Test, cls).skip_checks()
+        super(VolumesBackupsTest, cls).skip_checks()
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
-    @classmethod
-    def resource_setup(cls):
-        super(VolumesBackupsV2Test, cls).resource_setup()
+    def restore_backup(self, backup_id):
+        # Restore a backup
+        restored_volume = self.backups_client.restore_backup(
+            backup_id)['restore']
 
-    @test.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
+        # Delete backup
+        self.addCleanup(self.volumes_client.delete_volume,
+                        restored_volume['volume_id'])
+        self.assertEqual(backup_id, restored_volume['backup_id'])
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup_id, 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                restored_volume['volume_id'],
+                                                'available')
+        return restored_volume
+
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'ceph does not support arbitrary container names')
+    @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
-        # Create backup
-        volume = self.create_volume()
+        # Create a volume with metadata
+        metadata = {"vol-meta1": "value1",
+                    "vol-meta2": "value2",
+                    "vol-meta3": "value3"}
+        volume = self.create_volume(metadata=metadata)
         self.addCleanup(self.volumes_client.delete_volume,
                         volume['id'])
+
+        # Create a backup
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        create_backup = self.backups_client.create_backup
-        backup = create_backup(volume_id=volume['id'],
-                               name=backup_name)['backup']
-        self.addCleanup(self.backups_client.delete_backup,
-                        backup['id'])
+        description = data_utils.rand_name("volume-backup-description")
+        backup = self.create_backup(volume_id=volume['id'],
+                                    name=backup_name,
+                                    description=description,
+                                    container='container')
         self.assertEqual(backup_name, backup['name'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Get a given backup
         backup = self.backups_client.show_backup(backup['id'])['backup']
         self.assertEqual(backup_name, backup['name'])
+        self.assertEqual(description, backup['description'])
+        self.assertEqual('container', backup['container'])
 
         # Get all backups with detail
         backups = self.backups_client.list_backups(
@@ -63,20 +86,17 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
-        # Restore backup
-        restore = self.backups_client.restore_backup(
-            backup['id'])['restore']
+        restored_volume = self.restore_backup(backup['id'])
 
-        # Delete backup
-        self.addCleanup(self.volumes_client.delete_volume,
-                        restore['volume_id'])
-        self.assertEqual(backup['id'], restore['backup_id'])
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       restore['volume_id'], 'available')
+        restored_volume_metadata = self.volumes_client.show_volume(
+            restored_volume['volume_id'])['volume']['metadata']
 
-    @test.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
+        # Verify the backups has been restored successfully
+        # with the metadata of the source volume.
+        self.assertThat(restored_volume_metadata.items(),
+                        matchers.ContainsAll(metadata.items()))
+
+    @decorators.idempotent_id('07af8f6d-80af-44c9-a5dc-c8427b1b62e6')
     @test.services('compute')
     def test_backup_create_attached_volume(self):
         """Test backup create using force flag.
@@ -88,30 +108,71 @@ class VolumesBackupsV2Test(base.BaseVolumeTest):
         volume = self.create_volume()
         self.addCleanup(self.volumes_client.delete_volume,
                         volume['id'])
-        server_name = data_utils.rand_name(
-            self.__class__.__name__ + '-instance')
-        server = self.create_server(name=server_name, wait_until='ACTIVE')
-        self.addCleanup(self.servers_client.delete_server, server['id'])
+        server = self.create_server()
         # Attach volume to instance
-        self.servers_client.attach_volume(server['id'],
-                                          volumeId=volume['id'])
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'in-use')
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        volume['id'], 'available')
-        self.addCleanup(self.servers_client.detach_volume, server['id'],
-                        volume['id'])
+        self.attach_volume(server['id'], volume['id'])
         # Create backup using force flag
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        backup = self.backups_client.create_backup(
-            volume_id=volume['id'],
-            name=backup_name, force=True)['backup']
-        self.addCleanup(self.backups_client.delete_backup, backup['id'])
-        self.backups_client.wait_for_backup_status(backup['id'],
-                                                   'available')
+        backup = self.create_backup(volume_id=volume['id'],
+                                    name=backup_name, force=True)
         self.assertEqual(backup_name, backup['name'])
 
+    @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
+    @test.services('image')
+    def test_bootable_volume_backup_and_restore(self):
+        # Create volume from image
+        img_uuid = CONF.compute.image_ref
+        volume = self.create_volume(imageRef=img_uuid)
 
-class VolumesBackupsV1Test(VolumesBackupsV2Test):
-    _api_version = 1
+        volume_details = self.volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual('true', volume_details['bootable'])
+
+        # Create a backup
+        backup = self.create_backup(volume_id=volume['id'])
+
+        # Restore the backup
+        restored_volume_id = self.restore_backup(backup['id'])['volume_id']
+
+        # Verify the restored backup volume is bootable
+        restored_volume_info = self.volumes_client.show_volume(
+            restored_volume_id)['volume']
+
+        self.assertEqual('true', restored_volume_info['bootable'])
+
+
+class VolumesBackupsV39Test(base.BaseVolumeTest):
+
+    _api_version = 3
+    min_microversion = '3.9'
+    max_microversion = 'latest'
+
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesBackupsV39Test, cls).skip_checks()
+        if not CONF.volume_feature_enabled.backup:
+            raise cls.skipException("Cinder backup feature disabled")
+
+    @decorators.idempotent_id('9b374cbc-be5f-4d37-8848-7efb8a873dcc')
+    def test_update_backup(self):
+        # Create volume and backup
+        volume = self.create_volume()
+        backup = self.create_backup(volume_id=volume['id'])
+
+        # Update backup and assert response body for update_backup method
+        update_kwargs = {
+            'name': data_utils.rand_name(self.__class__.__name__ + '-Backup'),
+            'description': data_utils.rand_name("volume-backup-description")
+        }
+        update_backup = self.backups_client.update_backup(
+            backup['id'], **update_kwargs)['backup']
+        self.assertEqual(backup['id'], update_backup['id'])
+        self.assertEqual(update_kwargs['name'], update_backup['name'])
+        self.assertIn('links', update_backup)
+
+        # Assert response body for show_backup method
+        retrieved_backup = self.backups_client.show_backup(
+            backup['id'])['backup']
+        for key in update_kwargs:
+            self.assertEqual(update_kwargs[key], retrieved_backup[key])

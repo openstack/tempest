@@ -17,16 +17,23 @@
 import copy
 import importlib
 import inspect
-import logging
+import sys
+import warnings
+
+from debtcollector import removals
+from oslo_log import log as logging
+import testtools
 
 from tempest.lib import auth
 from tempest.lib.common.utils import misc
 from tempest.lib import exceptions
 from tempest.lib.services import compute
+from tempest.lib.services import identity
 from tempest.lib.services import image
 from tempest.lib.services import network
+from tempest.lib.services import volume
 
-
+warnings.simplefilter("once")
 LOG = logging.getLogger(__name__)
 
 
@@ -38,9 +45,14 @@ def tempest_modules():
     """
     return {
         'compute': compute,
+        'identity.v2': identity.v2,
+        'identity.v3': identity.v3,
         'image.v1': image.v1,
         'image.v2': image.v2,
-        'network': network
+        'network': network,
+        'volume.v1': volume.v1,
+        'volume.v2': volume.v2,
+        'volume.v3': volume.v3
     }
 
 
@@ -49,8 +61,7 @@ def _tempest_internal_modules():
     # NOTE(andreaf) This list will exists only as long the remain clients
     # are migrated to tempest.lib, and it will then be deleted without
     # deprecation or advance notice
-    return set(['identity.v2', 'identity.v3', 'object-storage', 'volume.v1',
-                'volume.v2', 'volume.v3'])
+    return set(['object-storage'])
 
 
 def available_modules():
@@ -63,19 +74,20 @@ def available_modules():
     :raise PluginRegistrationException: if a plugin exposes a service_version
         already defined by Tempest or another plugin.
 
-    Examples:
+    Examples::
 
-        >>> from tempest import config
-        >>> params = {}
-        >>> for service_version in available_modules():
-        >>>     service = service_version.split('.')[0]
-        >>>     params[service] = config.service_client_config(service)
-        >>> service_clients = ServiceClients(creds, identity_uri,
-        >>>                                  client_parameters=params)
+        from tempest import config
+        params = {}
+        for service_version in available_modules():
+            service = service_version.split('.')[0]
+            params[service] = config.service_client_config(service)
+        service_clients = ServiceClients(creds, identity_uri,
+                                         client_parameters=params)
     """
     extra_service_versions = set([])
     _tempest_modules = set(tempest_modules())
     plugin_services = ClientsRegistry().get_service_clients()
+    name_conflicts = []
     for plugin_name in plugin_services:
         plug_service_versions = set([x['service_version'] for x in
                                      plugin_services[plugin_name]])
@@ -87,8 +99,8 @@ def available_modules():
                     'claimed by another one' % (plugin_name,
                                                 extra_service_versions &
                                                 plug_service_versions))
-                raise exceptions.PluginRegistrationException(
-                    name=plugin_name, detailed_error=detailed_error)
+                name_conflicts.append(exceptions.PluginRegistrationException(
+                    name=plugin_name, detailed_error=detailed_error))
             # NOTE(andreaf) Once all tempest clients are stable, the following
             # if will have to be removed.
             if not plug_service_versions.isdisjoint(
@@ -98,9 +110,14 @@ def available_modules():
                     'claimed by a Tempest one' % (plugin_name,
                                                   _tempest_internal_modules() &
                                                   plug_service_versions))
-                raise exceptions.PluginRegistrationException(
-                    name=plugin_name, detailed_error=detailed_error)
+                name_conflicts.append(exceptions.PluginRegistrationException(
+                    name=plugin_name, detailed_error=detailed_error))
         extra_service_versions |= plug_service_versions
+    if name_conflicts:
+        LOG.error(
+            'Failed to list available modules due to name conflicts: %s',
+            name_conflicts)
+        raise testtools.MultipleExceptions(*name_conflicts)
     return _tempest_modules | extra_service_versions
 
 
@@ -118,6 +135,9 @@ class ClientsRegistry(object):
                 name=plugin_name,
                 detailed_error=detailed_error % plugin_name)
         self._service_clients[plugin_name] = service_client_data
+        LOG.debug("Successfully registered plugin %s in the service client "
+                  "registry with configuration: %s", plugin_name,
+                  service_client_data)
 
     def get_service_clients(self):
         return self._service_clients
@@ -149,19 +169,19 @@ class ClientsFactory(object):
         :param kwargs: Parameters to be passed to all clients. Parameters
             values can be overwritten when clients are initialised, but
             parameters cannot be deleted.
-        :raise ImportError if the specified module_path cannot be imported
+        :raise ImportError: if the specified module_path cannot be imported
 
-        Example:
+        Example::
 
-            >>> # Get credentials and an auth_provider
-            >>> clients = ClientsFactory(
-            >>>     module_path='my_service.my_service_clients',
-            >>>     client_names=['ServiceClient1', 'ServiceClient2'],
-            >>>     auth_provider=auth_provider,
-            >>>     service='my_service',
-            >>>     region='region1')
-            >>> my_api_client = clients.MyApiClient()
-            >>> my_api_client_region2 = clients.MyApiClient(region='region2')
+            # Get credentials and an auth_provider
+            clients = ClientsFactory(
+                module_path='my_service.my_service_clients',
+                client_names=['ServiceClient1', 'ServiceClient2'],
+                auth_provider=auth_provider,
+                service='my_service',
+                region='region1')
+            my_api_client = clients.MyApiClient()
+            my_api_client_region2 = clients.MyApiClient(region='region2')
 
         """
         # Import the module. If it's not importable, the raised exception
@@ -232,13 +252,19 @@ class ServiceClients(object):
     It hides some of the complexity from the authorization and configuration
     layers.
 
-    Examples:
+    Examples::
 
-        >>> from tempest.lib.services import clients
-        >>> johndoe = cred_provider.get_creds_by_role(['johndoe'])
-        >>> johndoe_clients = clients.ServiceClients(johndoe,
-        >>>                                                  identity_uri)
-        >>> johndoe_servers = johndoe_clients.servers_client.list_servers()
+        # johndoe is a tempest.lib.auth.Credentials type instance
+        johndoe_clients = clients.ServiceClients(johndoe, identity_uri)
+
+        # List servers in default region
+        johndoe_servers_client = johndoe_clients.compute.ServersClient()
+        johndoe_servers = johndoe_servers_client.list_servers()
+
+        # List servers in Region B
+        johndoe_servers_client_B = johndoe_clients.compute.ServersClient(
+            region='B')
+        johndoe_servers = johndoe_servers_client_B.list_servers()
 
     """
     # NOTE(andreaf) This class does not depend on tempest configuration
@@ -247,6 +273,7 @@ class ServiceClients(object):
     # initialises this class using values from tempest CONF object. The wrapper
     # class should only be used by tests hosted in Tempest.
 
+    @removals.removed_kwarg('client_parameters')
     def __init__(self, credentials, identity_uri, region=None, scope='project',
                  disable_ssl_certificate_validation=True, ca_certs=None,
                  trace_requests='', client_parameters=None):
@@ -262,7 +289,12 @@ class ServiceClients(object):
         Parameters dscv, ca_certs and trace_requests all apply to the auth
         provider as well as any service clients provided by this manager.
 
-        Any other client parameter must be set via client_parameters.
+        Any other client parameter should be set via ClientsRegistry.
+
+        Client parameter used to be set via client_parameters, but this is
+        deprecated, and it is actually already not honoured
+        anymore: https://launchpad.net/bugs/1680915.
+
         The list of available parameters is defined in the service clients
         interfaces. For reference, most clients will accept 'region',
         'service', 'endpoint_type', 'build_timeout' and 'build_interval', which
@@ -273,18 +305,22 @@ class ServiceClients(object):
         a dictionary ready to be injected in kwargs.
 
         Exceptions are:
-        - Token clients for 'identity' have a very different interface
+        - Token clients for 'identity' must be given an 'auth_url' parameter
         - Volume client for 'volume' accepts 'default_volume_size'
         - Servers client from 'compute' accepts 'enable_instance_password'
 
-        Examples:
+        If Tempest configuration is used, parameters will be loaded in the
+        Registry automatically for all service client (Tempest stable ones
+        and plugins).
 
-            >>> identity_params = config.service_client_config('identity')
-            >>> params = {
-            >>>     'identity': identity_params,
-            >>>     'compute': {'region': 'region2'}}
-            >>> manager = lib_manager.Manager(
-            >>>     my_creds, identity_uri, client_parameters=params)
+        Examples::
+
+            identity_params = config.service_client_config('identity')
+            params = {
+                'identity': identity_params,
+                'compute': {'region': 'region2'}}
+            manager = lib_manager.Manager(
+                my_creds, identity_uri, client_parameters=params)
 
         :param credentials: An instance of `auth.Credentials`
         :param identity_uri: URI of the identity API. This should be a
@@ -300,15 +336,6 @@ class ServiceClients(object):
             name, as declared in `service_clients.available_modules()` except
             for the version. Values are dictionaries of parameters that are
             going to be passed to all clients in the service client module.
-
-        Examples:
-
-            >>> params_service_x = {'param_name': 'param_value'}
-            >>> client_parameters = { 'service_x': params_service_x }
-
-            >>> params_service_y = config.service_client_config('service_y')
-            >>> client_parameters['service_y'] = params_service_y
-
         """
         self._registered_services = set([])
         self.credentials = credentials
@@ -356,6 +383,7 @@ class ServiceClients(object):
         # Register service clients from the registry (__tempest__ and plugins)
         clients_registry = ClientsRegistry()
         plugin_service_clients = clients_registry.get_service_clients()
+        registration_errors = []
         for plugin in plugin_service_clients:
             service_clients = plugin_service_clients[plugin]
             # Each plugin returns a list of service client parameters
@@ -366,10 +394,12 @@ class ServiceClients(object):
                 try:
                     self.register_service_client_module(**service_client)
                 except Exception:
+                    registration_errors.append(sys.exc_info())
                     LOG.exception(
                         'Failed to register service client from plugin %s '
-                        'with parameters %s' % (plugin, service_client))
-                    raise
+                        'with parameters %s', plugin, service_client)
+        if registration_errors:
+            raise testtools.MultipleExceptions(*registration_errors)
 
     def register_service_client_module(self, name, service_version,
                                        module_path, client_names, **kwargs):

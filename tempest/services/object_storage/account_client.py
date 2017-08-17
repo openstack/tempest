@@ -23,39 +23,30 @@ from tempest.lib.common import rest_client
 
 class AccountClient(rest_client.RestClient):
 
-    def create_account(self, data=None,
-                       params=None,
-                       metadata=None,
-                       remove_metadata=None,
-                       metadata_prefix='X-Account-Meta-',
-                       remove_metadata_prefix='X-Remove-Account-Meta-'):
-        """Create an account."""
-        if metadata is None:
-            metadata = {}
-        if remove_metadata is None:
-            remove_metadata = {}
-        url = ''
-        if params:
-            url += '?%s' % urllib.urlencode(params)
+    def create_update_or_delete_account_metadata(
+            self,
+            create_update_metadata=None,
+            delete_metadata=None,
+            create_update_metadata_prefix='X-Account-Meta-',
+            delete_metadata_prefix='X-Remove-Account-Meta-'):
+        """Creates, Updates or deletes an account metadata entry.
 
+        Account Metadata can be created, updated or deleted based on
+        metadata header or value. For detailed info, please refer to the
+        official API reference:
+        http://developer.openstack.org/api-ref/object-storage/?expanded=create-update-or-delete-account-metadata-detail
+        """
         headers = {}
-        for key in metadata:
-            headers[metadata_prefix + key] = metadata[key]
-        for key in remove_metadata:
-            headers[remove_metadata_prefix + key] = remove_metadata[key]
+        if create_update_metadata:
+            for key in create_update_metadata:
+                metadata_header_name = create_update_metadata_prefix + key
+                headers[metadata_header_name] = create_update_metadata[key]
+        if delete_metadata:
+            for key in delete_metadata:
+                headers[delete_metadata_prefix + key] = delete_metadata[key]
 
-        resp, body = self.put(url, data, headers)
-        self.expected_success(200, resp.status)
-        return resp, body
-
-    def delete_account(self, data=None, params=None):
-        """Delete an account."""
-        url = ''
-        if params:
-            url = '?%s%s' % (url, urllib.urlencode(params))
-
-        resp, body = self.delete(url, headers={}, body=data)
-        self.expected_success(200, resp.status)
+        resp, body = self.post('', headers=headers, body=None)
+        self.expected_success([200, 204], resp.status)
         return resp, body
 
     def list_account_metadata(self):
@@ -64,51 +55,6 @@ class AccountClient(rest_client.RestClient):
         Returns all account metadata headers
         """
         resp, body = self.head('')
-        self.expected_success(204, resp.status)
-        return resp, body
-
-    def create_account_metadata(self, metadata,
-                                metadata_prefix='X-Account-Meta-',
-                                data=None, params=None):
-        """Creates an account metadata entry."""
-        headers = {}
-        if metadata:
-            for key in metadata:
-                headers[metadata_prefix + key] = metadata[key]
-
-        url = ''
-        if params:
-            url = '?%s%s' % (url, urllib.urlencode(params))
-
-        resp, body = self.post(url, headers=headers, body=data)
-        self.expected_success([200, 204], resp.status)
-        return resp, body
-
-    def delete_account_metadata(self, metadata,
-                                metadata_prefix='X-Remove-Account-Meta-'):
-        """Deletes an account metadata entry."""
-
-        headers = {}
-        for item in metadata:
-            headers[metadata_prefix + item] = metadata[item]
-        resp, body = self.post('', headers=headers, body=None)
-        self.expected_success(204, resp.status)
-        return resp, body
-
-    def create_and_delete_account_metadata(
-            self,
-            create_metadata=None,
-            delete_metadata=None,
-            create_metadata_prefix='X-Account-Meta-',
-            delete_metadata_prefix='X-Remove-Account-Meta-'):
-        """Creates and deletes an account metadata entry."""
-        headers = {}
-        for key in create_metadata:
-            headers[create_metadata_prefix + key] = create_metadata[key]
-        for key in delete_metadata:
-            headers[delete_metadata_prefix + key] = delete_metadata[key]
-
-        resp, body = self.post('', headers=headers, body=None)
         self.expected_success(204, resp.status)
         return resp, body
 
@@ -128,6 +74,13 @@ class AccountClient(rest_client.RestClient):
             than the specified marker.
             DEFAULT: No Marker
 
+        prefix=[string value Y]
+            Given string value Y, return object names starting with that prefix
+
+        reverse=[boolean value Z]
+            Reverse the result order based on the boolean value Z
+            DEFAULT: False
+
         format=[string value, either 'json' or 'xml']
             Specify either json or xml to return the respective serialized
             response.
@@ -143,14 +96,4 @@ class AccountClient(rest_client.RestClient):
         else:
             body = body.strip().splitlines()
         self.expected_success([200, 204], resp.status)
-        return resp, body
-
-    def list_extensions(self):
-        self.skip_path()
-        try:
-            resp, body = self.get('info')
-        finally:
-            self.reset_path()
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
         return resp, body

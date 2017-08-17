@@ -10,10 +10,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.network import base
-from tempest.common.utils import data_utils
+from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest import test
+from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
@@ -33,7 +38,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
             self.admin_networks_client.delete_network, network['id'])
         return network
 
-    @test.idempotent_id('462be770-b310-4df9-9c42-773217e4c8b1')
+    @decorators.idempotent_id('462be770-b310-4df9-9c42-773217e4c8b1')
     def test_create_external_network(self):
         # Create a network as an admin user specifying the
         # external network extension attribute
@@ -42,7 +47,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertIsNotNone(ext_network['id'])
         self.assertTrue(ext_network['router:external'])
 
-    @test.idempotent_id('4db5417a-e11c-474d-a361-af00ebef57c5')
+    @decorators.idempotent_id('4db5417a-e11c-474d-a361-af00ebef57c5')
     def test_update_external_network(self):
         # Update a network as an admin user specifying the
         # external network extension attribute
@@ -55,7 +60,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         # Verify that router:external parameter was updated
         self.assertTrue(updated_network['router:external'])
 
-    @test.idempotent_id('39be4c9b-a57e-4ff9-b7c7-b218e209dfcc')
+    @decorators.idempotent_id('39be4c9b-a57e-4ff9-b7c7-b218e209dfcc')
     def test_list_external_networks(self):
         # Create external_net
         external_network = self._create_network()
@@ -72,7 +77,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
             elif net['id'] == external_network['id']:
                 self.assertTrue(net['router:external'])
 
-    @test.idempotent_id('2ac50ab2-7ebd-4e27-b3ce-a9e399faaea2')
+    @decorators.idempotent_id('2ac50ab2-7ebd-4e27-b3ce-a9e399faaea2')
     def test_show_external_networks_attribute(self):
         # Create external_net
         external_network = self._create_network()
@@ -90,7 +95,9 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
 
-    @test.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
+    @decorators.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
+    @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
+                          'Floating ips are not availabled')
     def test_delete_external_networks_with_floating_ip(self):
         # Verifies external network can be deleted while still holding
         # (unassociated) floating IPs

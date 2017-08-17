@@ -14,7 +14,8 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -26,7 +27,7 @@ class StaticWebTest(base.BaseObjectTest):
         super(StaticWebTest, cls).resource_setup()
 
         # This header should be posted on the container before every test
-        cls.headers_public_read_acl = {'Read': '.r:*,.rlistings'}
+        headers_public_read_acl = {'Read': '.r:*,.rlistings'}
 
         # Create test container and create one object in it
         cls.container_name = cls.create_container()
@@ -35,7 +36,7 @@ class StaticWebTest(base.BaseObjectTest):
 
         cls.container_client.update_container_metadata(
             cls.container_name,
-            metadata=cls.headers_public_read_acl,
+            metadata=headers_public_read_acl,
             metadata_prefix="X-Container-")
 
     @classmethod
@@ -43,7 +44,7 @@ class StaticWebTest(base.BaseObjectTest):
         cls.delete_containers()
         super(StaticWebTest, cls).resource_cleanup()
 
-    @test.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
+    @decorators.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_index(self):
         headers = {'web-index': self.object_name}
@@ -74,7 +75,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
-    @test.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
+    @decorators.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
@@ -96,7 +97,7 @@ class StaticWebTest(base.BaseObjectTest):
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-        self.assertIn(self.object_name, body)
+        self.assertIn(self.object_name, body.decode())
 
         # clean up before exiting
         self.container_client.update_container_metadata(self.container_name,
@@ -106,7 +107,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
 
-    @test.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
+    @decorators.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_listing_css(self):
         headers = {'web-listings': 'true',
@@ -123,14 +124,13 @@ class StaticWebTest(base.BaseObjectTest):
 
         # test GET on http://account_url/container_name
         # we should retrieve a listing of objects
-        resp, body = self.account_client.request("GET",
-                                                 self.container_name,
-                                                 headers={})
-        self.assertIn(self.object_name, body)
+        _, body = self.account_client.request("GET", self.container_name,
+                                              headers={})
+        self.assertIn(self.object_name, body.decode())
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
-        self.assertIn(css, body)
+        self.assertIn(css, body.decode())
 
-    @test.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
+    @decorators.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
     @test.requires_ext(extension='staticweb', service='object')
     def test_web_error(self):
         headers = {'web-listings': 'true',

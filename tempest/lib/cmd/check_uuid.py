@@ -23,12 +23,13 @@ import sys
 import unittest
 import uuid
 
+from oslo_utils import uuidutils
 import six.moves.urllib.parse as urlparse
 
-DECORATOR_MODULE = 'test'
+DECORATOR_MODULE = 'decorators'
 DECORATOR_NAME = 'idempotent_id'
 DECORATOR_IMPORT = 'tempest.%s' % DECORATOR_MODULE
-IMPORT_LINE = 'from tempest import %s' % DECORATOR_MODULE
+IMPORT_LINE = 'from tempest.lib import %s' % DECORATOR_MODULE
 DECORATOR_TEMPLATE = "@%s.%s('%%s')" % (DECORATOR_MODULE,
                                         DECORATOR_NAME)
 UNIT_TESTS_EXCLUDE = 'tempest.tests'
@@ -61,7 +62,7 @@ class SourcePatcher(object):
         if filename not in self.source_files:
             with open(filename) as f:
                 self.source_files[filename] = self._quote(f.read())
-        patch_id = str(uuid.uuid4())
+        patch_id = uuidutils.generate_uuid()
         if not patch.endswith('\n'):
             patch += '\n'
         self.patches[patch_id] = self._quote(patch)
@@ -69,7 +70,8 @@ class SourcePatcher(object):
         lines[line_no - 1] = ''.join(('{%s:s}' % patch_id, lines[line_no - 1]))
         self.source_files[filename] = self._quote('\n').join(lines)
 
-    def _save_changes(self, filename, source):
+    @staticmethod
+    def _save_changes(filename, source):
         print('%s fixed' % filename)
         with open(filename, 'w') as f:
             f.write(source)
@@ -115,7 +117,7 @@ class TestChecker(object):
 
     @staticmethod
     def _get_idempotent_id(test_node):
-        """Return key-value dict with all metadata from @test.idempotent_id"""
+        "Return key-value dict with metadata from @decorators.idempotent_id"
         idempotent_id = None
         for decorator in test_node.decorator_list:
             if (hasattr(decorator, 'func') and
@@ -302,7 +304,8 @@ class TestChecker(object):
         Returns true if untagged tests exist.
         """
         def report(module_name, test_name, tests):
-            error_str = "%s:%s\nmissing @test.idempotent_id('...')\n%s\n" % (
+            error_str = ("%s:%s\nmissing @decorators.idempotent_id"
+                         "('...')\n%s\n") % (
                 tests[module_name]['source_path'],
                 tests[module_name]['tests'][test_name].lineno,
                 test_name
@@ -350,9 +353,10 @@ def run():
     else:
         errors = checker.report_untagged(untagged) or errors
     if errors:
-        sys.exit("@test.idempotent_id existence and uniqueness checks failed\n"
-                 "Run 'tox -v -euuidgen' to automatically fix tests with\n"
-                 "missing @test.idempotent_id decorators.")
+        sys.exit("@decorators.idempotent_id existence and uniqueness checks "
+                 "failed\n"
+                 "Run 'tox -v -e uuidgen' to automatically fix tests with\n"
+                 "missing @decorators.idempotent_id decorators.")
 
 if __name__ == '__main__':
     run()

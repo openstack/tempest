@@ -15,6 +15,7 @@
 
 from tempest.api.volume import base
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -23,7 +24,25 @@ CONF = config.CONF
 
 class VolumesCloneTest(base.BaseVolumeTest):
 
-    @test.idempotent_id('9adae371-a257-43a5-9555-dc7c88e66e0e')
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesCloneTest, cls).skip_checks()
+        if not CONF.volume_feature_enabled.clone:
+            raise cls.skipException("Cinder volume clones are disabled")
+
+    def _verify_volume_clone(self, source_volume, cloned_volume,
+                             bootable='false', extra_size=0):
+
+        cloned_vol_details = self.volumes_client.show_volume(
+            cloned_volume['id'])['volume']
+
+        self.assertEqual(source_volume['id'],
+                         cloned_vol_details['source_volid'])
+        self.assertEqual(source_volume['size'] + extra_size,
+                         cloned_vol_details['size'])
+        self.assertEqual(bootable, cloned_vol_details['bootable'])
+
+    @decorators.idempotent_id('9adae371-a257-43a5-9555-dc7c88e66e0e')
     def test_create_from_volume(self):
         # Creates a volume from another volume passing a size different from
         # the source volume.
@@ -34,11 +53,16 @@ class VolumesCloneTest(base.BaseVolumeTest):
         dst_vol = self.create_volume(source_volid=src_vol['id'],
                                      size=src_size + 1)
 
-        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
-        # Should allow
-        self.assertEqual(volume['source_volid'], src_vol['id'])
-        self.assertEqual(int(volume['size']), src_size + 1)
+        self._verify_volume_clone(src_vol, dst_vol, extra_size=1)
 
+    @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
+    @test.services('image')
+    def test_create_from_bootable_volume(self):
+        # Create volume from image
+        img_uuid = CONF.compute.image_ref
+        src_vol = self.create_volume(imageRef=img_uuid)
 
-class VolumesV1CloneTest(VolumesCloneTest):
-    _api_version = 1
+        # Create a volume from the bootable volume
+        cloned_vol = self.create_volume(source_volid=src_vol['id'])
+
+        self._verify_volume_clone(src_vol, cloned_vol, bootable='true')

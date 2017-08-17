@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
@@ -27,14 +27,14 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
-        cls.service_data = cls.services_client.create_service(
+        service_data = cls.services_client.create_service(
             name=s_name, type=s_type,
             description=s_description)['OS-KSADM:service']
-        cls.service_id = cls.service_data['id']
+        cls.service_id = service_data['id']
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
-        for i in range(2):
+        for _ in range(2):
             region = data_utils.rand_name('region')
             url = data_utils.rand_url()
             endpoint = cls.endpoints_client.create_endpoint(
@@ -55,18 +55,18 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
             cls.services_client.delete_service(s)
         super(EndPointsTestJSON, cls).resource_cleanup()
 
-    @test.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
+    @decorators.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
     def test_list_endpoints(self):
         # Get a list of endpoints
         fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
         # Asserting LIST endpoints
         missing_endpoints =\
             [e for e in self.setup_endpoints if e not in fetched_endpoints]
-        self.assertEqual(0, len(missing_endpoints),
+        self.assertEmpty(missing_endpoints,
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @test.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
+    @decorators.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()

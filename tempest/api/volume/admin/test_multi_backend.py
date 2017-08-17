@@ -12,41 +12,39 @@
 
 import six
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 CONF = config.CONF
 
 
-class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
+class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeMultiBackendV2Test, cls).skip_checks()
+        super(VolumeMultiBackendTest, cls).skip_checks()
 
         if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeMultiBackendV2Test, cls).resource_setup()
+        super(VolumeMultiBackendTest, cls).resource_setup()
 
         # read backend name from a list .
-        cls.backend_names = set(CONF.volume.backend_names)
+        backend_names = set(CONF.volume.backend_names)
 
-        cls.name_field = cls.special_fields['name_field']
-        cls.volume_type_id_list = []
         cls.volume_id_list_with_prefix = []
         cls.volume_id_list_without_prefix = []
 
         # Volume/Type creation (uses volume_backend_name)
         # It is not allowed to create the same backend name twice
-        if len(cls.backend_names) < 2:
+        if len(backend_names) < 2:
             raise cls.skipException("Requires at least two different "
                                     "backend names")
-        for backend_name in cls.backend_names:
+        for backend_name in backend_names:
             # Volume/Type creation (uses backend_name)
             cls._create_type_and_volume(backend_name, False)
             # Volume/Type creation (uses capabilities:volume_backend_name)
@@ -63,11 +61,11 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        cls.type = cls.create_volume_type(name=type_name,
-                                          extra_specs=extra_specs)
+        cls.create_volume_type(name=type_name,
+                               extra_specs=extra_specs)
 
-        params = {cls.name_field: vol_name, 'volume_type': type_name}
-
+        params = {'name': vol_name, 'volume_type': type_name,
+                  'size': CONF.volume.volume_size}
         cls.volume = cls.admin_volume_client.create_volume(
             **params)['volume']
         if with_prefix:
@@ -75,8 +73,8 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         else:
             cls.volume_id_list_without_prefix.append(
                 cls.volume['id'])
-        waiters.wait_for_volume_status(cls.admin_volume_client,
-                                       cls.volume['id'], 'available')
+        waiters.wait_for_volume_resource_status(cls.admin_volume_client,
+                                                cls.volume['id'], 'available')
 
     @classmethod
     def resource_cleanup(cls):
@@ -91,26 +89,26 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
             cls.admin_volume_client.delete_volume(volume_id)
             cls.admin_volume_client.wait_for_resource_deletion(volume_id)
 
-        super(VolumeMultiBackendV2Test, cls).resource_cleanup()
+        super(VolumeMultiBackendTest, cls).resource_cleanup()
 
-    @test.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
+    @decorators.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):
         # get volume id which created by type without prefix
         for volume_id in self.volume_id_list_without_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
-    @test.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
+    @decorators.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
     def test_backend_name_reporting_with_prefix(self):
         # get volume id which created by type with prefix
         for volume_id in self.volume_id_list_with_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
-    @test.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
+    @decorators.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
     def test_backend_name_distinction(self):
         # get volume ids which created by type without prefix
         self._test_backend_name_distinction(self.volume_id_list_without_prefix)
 
-    @test.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
+    @decorators.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
     def test_backend_name_distinction_with_prefix(self):
         # get volume ids which created by type without prefix
         self._test_backend_name_distinction(self.volume_id_list_with_prefix)
@@ -129,7 +127,7 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
                volume_id)
-        self.assertTrue(len(volume1_host.split("@")) > 1, msg)
+        self.assertGreater(len(volume1_host.split("@")), 1, msg)
 
     def _test_backend_name_distinction(self, volume_id_list):
         # this test checks that the volumes created at setUp don't
@@ -141,7 +139,3 @@ class VolumeMultiBackendV2Test(base.BaseVolumeAdminTest):
         msg = ("volumes %s were created in the same backend" % ", "
                .join(volume_hosts))
         six.assertCountEqual(self, volume_hosts, set(volume_hosts), msg)
-
-
-class VolumeMultiBackendV1Test(VolumeMultiBackendV2Test):
-    _api_version = 1

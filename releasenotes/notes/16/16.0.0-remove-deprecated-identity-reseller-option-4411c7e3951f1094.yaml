@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    The deprecated config option 'reseller' from identity_feature_enabled group has been removed.

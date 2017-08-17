@@ -13,7 +13,8 @@ portion of Tempest code is devoted to test cases that do exactly this.
 
 It's also important to test not only the expected positive path on
 APIs, but also to provide them with invalid data to ensure they fail
-in expected and documented ways. Over the course of the OpenStack
+in expected and documented ways. The latter type of tests is called
+``negative tests`` in Tempest source code. Over the course of the OpenStack
 project Tempest has discovered many fundamental bugs by doing just
 this.
 
@@ -22,7 +23,7 @@ enough data in the system. This means these tests might start by
 spinning up a server, image, etc, then operating on it.
 
 
-Why are these tests in tempest?
+Why are these tests in Tempest?
 -------------------------------
 
 This is one of the core missions for the Tempest project, and where it

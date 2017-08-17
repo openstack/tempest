@@ -1,4 +1,5 @@
 # Copyright 2016 IBM Corp.
+# Copyright 2017 AT&T Corp.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -45,3 +46,36 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 # list response schema wasn't changed for v2.26 so use v2.1
 
 list_servers = copy.deepcopy(servers21.list_servers)
+
+list_tags = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'tags': tag_items,
+        },
+        'additionalProperties': False,
+        'required': ['tags']
+    }
+}
+
+update_all_tags = copy.deepcopy(list_tags)
+
+delete_all_tags = {'status_code': [204]}
+
+check_tag_existence = {'status_code': [204]}
+
+update_tag = {
+    'status_code': [201, 204],
+    'response_header': {
+        'type': 'object',
+        'properties': {
+            'location': {
+                'type': 'string'
+            }
+        },
+        'required': ['location']
+    }
+}
+
+delete_tag = {'status_code': [204]}

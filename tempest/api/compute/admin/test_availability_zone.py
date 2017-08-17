@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
@@ -25,14 +25,14 @@ class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
         super(AZAdminV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_admin_client
 
-    @test.idempotent_id('d3431479-8a09-4f76-aa2d-26dc580cb27c')
+    @decorators.idempotent_id('d3431479-8a09-4f76-aa2d-26dc580cb27c')
     def test_get_availability_zone_list(self):
         # List of availability zone
         availability_zone = self.client.list_availability_zones()
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertNotEmpty(availability_zone['availabilityZoneInfo'])
 
-    @test.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')
+    @decorators.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         availability_zone = self.client.list_availability_zones(detail=True)
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertNotEmpty(availability_zone['availabilityZoneInfo'])

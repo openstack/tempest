@@ -12,10 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import re
+import time
 
 from oslo_serialization import jsonutils as json
-from six.moves import urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import versions as schema
 from tempest.lib.common import rest_client
@@ -24,22 +23,16 @@ from tempest.lib.services.compute import base_compute_client
 
 class VersionsClient(base_compute_client.BaseComputeClient):
 
-    def _get_base_version_url(self):
-        # NOTE: The URL which is got from keystone's catalog contains
-        # API version and project-id like "/app-name/v2/{project-id}" or
-        # "/v2/{project-id}", but we need to access the URL which doesn't
-        # contain API version for getting API versions. For that, here
-        # should use raw_request() instead of get().
-        endpoint = self.base_url
-        url = urllib.parse.urlsplit(endpoint)
-        new_path = re.split(r'(^|/)+v\d+(\.\d+)?', url.path)[0]
-        url = list(url)
-        url[2] = new_path + '/'
-        return urllib.parse.urlunsplit(url)
-
     def list_versions(self):
         version_url = self._get_base_version_url()
+
+        start = time.time()
         resp, body = self.raw_request(version_url, 'GET')
+        end = time.time()
+        self._log_request('GET', version_url, resp, secs=(end - start),
+                          resp_body=body)
+
+        self._error_checker(resp, body)
         body = json.loads(body)
         self.validate_response(schema.list_versions, resp, body)
         return rest_client.ResponseBody(resp, body)
@@ -56,6 +49,7 @@ class VersionsClient(base_compute_client.BaseComputeClient):
         # we need a token for this request
         resp, body = self.raw_request(version_url, 'GET',
                                       {'X-Auth-Token': self.token})
+        self._error_checker(resp, body)
         body = json.loads(body)
         self.validate_response(schema.get_one_version, resp, body)
         return rest_client.ResponseBody(resp, body)

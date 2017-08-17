@@ -13,8 +13,9 @@
 # under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -53,8 +54,8 @@ class AccountQuotasTest(base.BaseObjectTest):
         # Set a quota of 20 bytes on the user's account before each test
         headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        self.os_roles_operator.account_client.request(
+            "POST", url="", headers=headers, body="")
 
     def tearDown(self):
         # Set the reselleradmin auth in headers for next account_client
@@ -66,8 +67,8 @@ class AccountQuotasTest(base.BaseObjectTest):
         # remove the quota from the container
         headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        self.os_roles_operator.account_client.request(
+            "POST", url="", headers=headers, body="")
         super(AccountQuotasTest, self).tearDown()
 
     @classmethod
@@ -75,8 +76,8 @@ class AccountQuotasTest(base.BaseObjectTest):
         cls.delete_containers()
         super(AccountQuotasTest, cls).resource_cleanup()
 
-    @test.attr(type="smoke")
-    @test.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
+    @decorators.attr(type="smoke")
+    @decorators.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
         object_name = data_utils.rand_name(name="TestObject")
@@ -86,8 +87,8 @@ class AccountQuotasTest(base.BaseObjectTest):
 
         self.assertHeaders(resp, 'Object', 'PUT')
 
-    @test.attr(type=["smoke"])
-    @test.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
+    @decorators.attr(type=["smoke"])
+    @decorators.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_admin_modify_quota(self):
         """Test ResellerAdmin can modify/remove the quota on a user's account
@@ -107,9 +108,8 @@ class AccountQuotasTest(base.BaseObjectTest):
             )
             headers = {"X-Account-Meta-Quota-Bytes": quota}
 
-            resp, _ = self.os.account_client.request("POST", url="",
-                                                     headers=headers,
-                                                     body="")
+            resp, _ = self.os_roles_operator.account_client.request(
+                "POST", url="", headers=headers, body="")
 
             self.assertEqual(resp["status"], "204")
             self.assertHeaders(resp, 'Account', 'POST')

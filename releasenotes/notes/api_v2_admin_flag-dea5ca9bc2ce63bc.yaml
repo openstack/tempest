@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new configuration flag api_v2_admin is introduced in the identity
+    feature flag group to allow for enabling/disabling all identity v2
+    admin tests. The new flag only applies when the existing api_v2 flag
+    is set to True

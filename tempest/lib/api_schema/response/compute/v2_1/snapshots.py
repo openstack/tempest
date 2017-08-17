@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 common_snapshot_info = {
     'type': 'object',
     'properties': {
@@ -20,7 +22,7 @@ common_snapshot_info = {
         'volumeId': {'type': 'string'},
         'status': {'type': 'string'},
         'size': {'type': 'integer'},
-        'createdAt': {'type': 'string'},
+        'createdAt': parameter_types.date_time,
         'displayName': {'type': ['string', 'null']},
         'displayDescription': {'type': ['string', 'null']}
     },

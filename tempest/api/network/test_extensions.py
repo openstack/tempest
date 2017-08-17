@@ -15,6 +15,7 @@
 
 
 from tempest.api.network import base
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -23,13 +24,13 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
 
         List all available extensions
 
-    v2.0 of the Neutron API is assumed. It is also assumed that the following
-    options are defined in the [network] section of etc/tempest.conf:
-
+    v2.0 of the Neutron API is assumed. It is also assumed that api-extensions
+    option is defined in the [network-feature-enabled] section of
+    etc/tempest.conf.
     """
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
     def test_list_show_extensions(self):
         # List available extensions for the project
         expected_alias = ['security-group', 'l3_agent_scheduler',

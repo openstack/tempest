@@ -13,9 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from tempest import config
-from tempest import exceptions
+from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -34,23 +34,21 @@ class TestServerMultinode(manager.ScenarioTest):
             raise cls.skipException(
                 "Less than 2 compute nodes, skipping multinode tests.")
 
-    @classmethod
-    def setup_clients(cls):
-        super(TestServerMultinode, cls).setup_clients()
-        # Use admin client by default
-        cls.manager = cls.admin_manager
-        # this is needed so that we can use the availability_zone:host
-        # scheduler hint, which is admin_only by default
-        cls.servers_client = cls.admin_manager.servers_client
-        super(TestServerMultinode, cls).resource_setup()
-
-    @test.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
-    @test.attr(type='smoke')
+    @decorators.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
+    @decorators.attr(type='smoke')
     @test.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
-        host_client = self.manager.hosts_client
-        hosts = host_client.list_hosts()['hosts']
-        hosts = [x for x in hosts if x['service'] == 'compute']
+        available_zone = \
+            self.os_admin.availability_zone_client.list_availability_zones(
+                detail=True)['availabilityZoneInfo']
+        hosts = []
+        for zone in available_zone:
+            if zone['zoneState']['available']:
+                for host in zone['hosts']:
+                    if 'nova-compute' in zone['hosts'][host] and \
+                        zone['hosts'][host]['nova-compute']['available']:
+                        hosts.append({'zone': zone['zoneName'],
+                                      'host_name': host})
 
         # ensure we have at least as many compute hosts as we expect
         if len(hosts) < CONF.compute.min_compute_nodes:
@@ -66,10 +64,15 @@ class TestServerMultinode(manager.ScenarioTest):
         for host in hosts[:CONF.compute.min_compute_nodes]:
             # by getting to active state here, this means this has
             # landed on the host in question.
+            # in order to use the availability_zone:host scheduler hint,
+            # admin client is need here.
             inst = self.create_server(
-                availability_zone='%(zone)s:%(host_name)s' % host,
-                wait_until='ACTIVE')
-            server = self.servers_client.show_server(inst['id'])['server']
+                clients=self.os_admin,
+                availability_zone='%(zone)s:%(host_name)s' % host)
+            server = self.os_admin.servers_client.show_server(
+                inst['id'])['server']
+            # ensure server is located on the requested host
+            self.assertEqual(host['host_name'], server['OS-EXT-SRV-ATTR:host'])
             servers.append(server)
 
         # make sure we really have the number of servers we think we should

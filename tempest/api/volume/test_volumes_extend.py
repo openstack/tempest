@@ -13,29 +13,43 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.volume import base
 from tempest.common import waiters
-from tempest import test
+from tempest import config
+from tempest.lib import decorators
+
+CONF = config.CONF
 
 
-class VolumesV2ExtendTest(base.BaseVolumeTest):
+class VolumesExtendTest(base.BaseVolumeTest):
 
-    @classmethod
-    def setup_clients(cls):
-        super(VolumesV2ExtendTest, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @test.idempotent_id('9a36df71-a257-43a5-9555-dc7c88e66e0e')
+    @decorators.idempotent_id('9a36df71-a257-43a5-9555-dc7c88e66e0e')
     def test_volume_extend(self):
         # Extend Volume Test.
-        self.volume = self.create_volume()
-        extend_size = int(self.volume['size']) + 1
-        self.client.extend_volume(self.volume['id'], new_size=extend_size)
-        waiters.wait_for_volume_status(self.client,
-                                       self.volume['id'], 'available')
-        volume = self.client.show_volume(self.volume['id'])['volume']
-        self.assertEqual(int(volume['size']), extend_size)
+        volume = self.create_volume()
+        extend_size = volume['size'] + 1
+        self.volumes_client.extend_volume(volume['id'],
+                                          new_size=extend_size)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        self.assertEqual(volume['size'], extend_size)
 
+    @decorators.idempotent_id('86be1cba-2640-11e5-9c82-635fb964c912')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          "Cinder volume snapshots are disabled")
+    @decorators.skip_because(bug='1687044')
+    def test_volume_extend_when_volume_has_snapshot(self):
+        volume = self.create_volume()
+        self.create_snapshot(volume['id'])
 
-class VolumesV1ExtendTest(VolumesV2ExtendTest):
-    _api_version = 1
+        extend_size = volume['size'] + 1
+        self.volumes_client.extend_volume(volume['id'], new_size=extend_size)
+
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        resized_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
+        self.assertEqual(extend_size, resized_volume['size'])

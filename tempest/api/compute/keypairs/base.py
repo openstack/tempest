@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.lib.common.utils import data_utils
 
 
 class BaseKeypairTest(base.BaseV2ComputeTest):
@@ -27,9 +28,12 @@ class BaseKeypairTest(base.BaseV2ComputeTest):
     def _delete_keypair(self, keypair_name, **params):
         self.client.delete_keypair(keypair_name, **params)
 
-    def _create_keypair(self, keypair_name,
-                        pub_key=None, keypair_type=None,
-                        user_id=None):
+    def create_keypair(self, keypair_name=None,
+                       pub_key=None, keypair_type=None,
+                       user_id=None):
+        if keypair_name is None:
+            keypair_name = data_utils.rand_name(
+                self.__class__.__name__ + '-keypair')
         kwargs = {'name': keypair_name}
         delete_params = {}
         if pub_key:

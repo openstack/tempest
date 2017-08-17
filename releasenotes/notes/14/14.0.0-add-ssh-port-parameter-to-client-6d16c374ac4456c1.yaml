@@ -1,0 +1,4 @@
+---
+features:
+  - A new optional parameter `port` for ssh client (`tempest.lib.common.ssh.Client`)
+    to specify destination port for a host. The default value is 22.

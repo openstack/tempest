@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add server tags APIs to the servers_client library.
+    This feature enables the possibility of upating, deleting
+    and checking existence of a tag on a server, as well
+    as updating and deleting all tags on a server.
+

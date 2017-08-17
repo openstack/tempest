@@ -16,8 +16,12 @@
 import json
 import re
 
+from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -39,10 +43,14 @@ class TestServerBasicOps(manager.ScenarioTest):
      * Terminate the instance
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestServerBasicOps, cls).skip_checks()
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
     def setUp(self):
         super(TestServerBasicOps, self).setUp()
-        self.image_ref = CONF.compute.image_ref
-        self.flavor_ref = CONF.compute.flavor_ref
         self.run_ssh = CONF.validation.run_validation
         self.ssh_user = CONF.validation.image_ssh_user
 
@@ -54,7 +62,8 @@ class TestServerBasicOps(manager.ScenarioTest):
             self.ssh_client = self.get_remote_client(
                 ip_address=self.fip,
                 username=self.ssh_user,
-                private_key=keypair['private_key'])
+                private_key=keypair['private_key'],
+                server=self.instance)
 
     def verify_metadata(self):
         if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
@@ -70,12 +79,20 @@ class TestServerBasicOps(manager.ScenarioTest):
                     self.assertEqual(self.fip, result, msg)
                     return 'Verification is successful!'
 
-            if not test.call_until_true(exec_cmd_and_verify_output,
-                                        CONF.compute.build_timeout,
-                                        CONF.compute.build_interval):
+            if not test_utils.call_until_true(exec_cmd_and_verify_output,
+                                              CONF.compute.build_timeout,
+                                              CONF.compute.build_interval):
                 raise exceptions.TimeoutException('Timed out while waiting to '
                                                   'verify metadata on server. '
                                                   '%s is empty.' % md_url)
+
+            # Also, test a POST
+            md_url = 'http://169.254.169.254/openstack/2013-10-17/password'
+            data = data_utils.arbitrary_string(100)
+            cmd = 'curl -X POST -d ' + data + ' ' + md_url
+            self.ssh_client.exec_command(cmd)
+            result = self.servers_client.show_password(self.instance['id'])
+            self.assertEqual(data, result['password'])
 
     def _mount_config_drive(self):
         cmd_blkid = 'blkid | grep -i config-2'
@@ -113,24 +130,22 @@ class TestServerBasicOps(manager.ScenarioTest):
             # TODO(clarkb) construct network_data from known network
             # instance info and do direct comparison.
 
-    @test.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
-    @test.attr(type='smoke')
+    @decorators.idempotent_id('7fff3fb3-91d8-4fd0-bd7d-0204f1f180ba')
+    @decorators.attr(type='smoke')
     @test.services('compute', 'network')
     def test_server_basic_ops(self):
         keypair = self.create_keypair()
-        self.security_group = self._create_security_group()
-        security_groups = [{'name': self.security_group['name']}]
+        security_group = self._create_security_group()
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
-            image_id=self.image_ref,
-            flavor=self.flavor_ref,
             key_name=keypair['name'],
-            security_groups=security_groups,
+            security_groups=[{'name': security_group['name']}],
             config_drive=CONF.compute_feature_enabled.config_drive,
-            metadata=self.md,
-            wait_until='ACTIVE')
+            metadata=self.md)
         self.verify_ssh(keypair)
         self.verify_metadata()
         self.verify_metadata_on_config_drive()
         self.verify_networkdata_on_config_drive()
         self.servers_client.delete_server(self.instance['id'])
+        waiters.wait_for_server_termination(
+            self.servers_client, self.instance['id'], ignore_error=False)

@@ -19,7 +19,8 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest import test
 
 
@@ -36,7 +37,8 @@ class ObjectFormPostTest(base.BaseObjectTest):
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
-        cls.account_client.create_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=cls.metadata)
 
     def setUp(self):
         super(ObjectFormPostTest, self).setUp()
@@ -52,7 +54,8 @@ class ObjectFormPostTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.account_client.delete_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            delete_metadata=cls.metadata)
         cls.delete_containers()
         super(ObjectFormPostTest, cls).resource_cleanup()
 
@@ -72,7 +75,9 @@ class ObjectFormPostTest(base.BaseObjectTest):
                                             max_file_count,
                                             expires)
 
-        signature = hmac.new(self.key, hmac_body, hashlib.sha1).hexdigest()
+        signature = hmac.new(
+            self.key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         fields = {'redirect': redirect,
                   'max_file_size': str(max_file_size),
@@ -102,7 +107,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @test.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
+    @decorators.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @test.requires_ext(extension='formpost', service='object')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
@@ -119,4 +124,4 @@ class ObjectFormPostTest(base.BaseObjectTest):
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
         self.assertHeaders(resp, "Object", "GET")
-        self.assertEqual(body, "hello world")
+        self.assertEqual(body.decode(), "hello world")

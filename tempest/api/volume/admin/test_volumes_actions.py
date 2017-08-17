@@ -14,90 +14,87 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils as utils
 from tempest.common import waiters
+from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
+CONF = config.CONF
 
-class VolumesActionsV2Test(base.BaseVolumeAdminTest):
 
-    @classmethod
-    def setup_clients(cls):
-        super(VolumesActionsV2Test, cls).setup_clients()
-        cls.client = cls.volumes_client
-
-    @classmethod
-    def resource_setup(cls):
-        super(VolumesActionsV2Test, cls).resource_setup()
-
-        # Create a test shared volume for tests
-        vol_name = utils.rand_name(cls.__name__ + '-Volume')
-        cls.name_field = cls.special_fields['name_field']
-        params = {cls.name_field: vol_name}
-
-        cls.volume = cls.client.create_volume(**params)['volume']
-        waiters.wait_for_volume_status(cls.client,
-                                       cls.volume['id'], 'available')
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Delete the test volume
-        cls.delete_volume(cls.client, cls.volume['id'])
-
-        super(VolumesActionsV2Test, cls).resource_cleanup()
-
-    def _reset_volume_status(self, volume_id, status):
-        # Reset the volume status
-        body = self.admin_volume_client.reset_volume_status(volume_id,
-                                                            status=status)
-        return body
-
-    def tearDown(self):
-        # Set volume's status to available after test
-        self._reset_volume_status(self.volume['id'], status='available')
-        super(VolumesActionsV2Test, self).tearDown()
-
-    def _create_temp_volume(self):
-        # Create a temp volume for force delete tests
-        vol_name = utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: vol_name}
-        temp_volume = self.client.create_volume(**params)['volume']
-        waiters.wait_for_volume_status(self.client,
-                                       temp_volume['id'], 'available')
-
-        return temp_volume
+class VolumesActionsTest(base.BaseVolumeAdminTest):
 
     def _create_reset_and_force_delete_temp_volume(self, status=None):
         # Create volume, reset volume status, and force delete temp volume
-        temp_volume = self._create_temp_volume()
+        temp_volume = self.create_volume()
         if status:
-            self._reset_volume_status(temp_volume['id'], status)
+            self.admin_volume_client.reset_volume_status(
+                temp_volume['id'], status=status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
-        self.client.wait_for_resource_deletion(temp_volume['id'])
+        self.volumes_client.wait_for_resource_deletion(temp_volume['id'])
 
-    @test.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
+    @decorators.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
-        self._reset_volume_status(self.volume['id'], 'error')
-        volume_get = self.admin_volume_client.show_volume(
-            self.volume['id'])['volume']
-        self.assertEqual('error', volume_get['status'])
+        volume = self.create_volume()
+        self.addCleanup(self.admin_volume_client.reset_volume_status,
+                        volume['id'], status='available')
+        for status in ['error', 'available', 'maintenance']:
+            self.admin_volume_client.reset_volume_status(
+                volume['id'], status=status)
+            volume_get = self.admin_volume_client.show_volume(
+                volume['id'])['volume']
+            self.assertEqual(status, volume_get['status'])
 
-    @test.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
+    @decorators.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
     def test_volume_force_delete_when_volume_is_creating(self):
         # test force delete when status of volume is creating
         self._create_reset_and_force_delete_temp_volume('creating')
 
-    @test.idempotent_id('db8d607a-aa2e-4beb-b51d-d4005c232011')
+    @decorators.idempotent_id('db8d607a-aa2e-4beb-b51d-d4005c232011')
     def test_volume_force_delete_when_volume_is_attaching(self):
         # test force delete when status of volume is attaching
         self._create_reset_and_force_delete_temp_volume('attaching')
 
-    @test.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
+    @decorators.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error
         self._create_reset_and_force_delete_temp_volume('error')
 
+    @decorators.idempotent_id('b957cabd-1486-4e21-90cf-a9ed3c39dfb2')
+    def test_volume_force_delete_when_volume_is_maintenance(self):
+        # test force delete when status of volume is maintenance
+        self._create_reset_and_force_delete_temp_volume('maintenance')
 
-class VolumesActionsV1Test(VolumesActionsV2Test):
-    _api_version = 1
+    @decorators.idempotent_id('d38285d9-929d-478f-96a5-00e66a115b81')
+    @test.services('compute')
+    def test_force_detach_volume(self):
+        # Create a server and a volume
+        server_id = self.create_server()['id']
+        volume_id = self.create_volume()['id']
+
+        # Attach volume
+        self.volumes_client.attach_volume(
+            volume_id,
+            instance_uuid=server_id,
+            mountpoint='/dev/%s' % CONF.compute.volume_device_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'in-use')
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client, volume_id, 'available')
+        self.addCleanup(self.volumes_client.detach_volume, volume_id)
+        attachment = self.volumes_client.show_volume(
+            volume_id)['volume']['attachments'][0]
+
+        # Reset volume's status to error
+        self.admin_volume_client.reset_volume_status(volume_id, status='error')
+
+        # Force detach volume
+        self.admin_volume_client.force_detach_volume(
+            volume_id, connector=None,
+            attachment_id=attachment['attachment_id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'available')
+        vol_info = self.volumes_client.show_volume(volume_id)['volume']
+        self.assertIn('attachments', vol_info)
+        self.assertEmpty(vol_info['attachments'])

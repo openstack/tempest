@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add missing API call, list all role inference rules,
+    to the roles_client library. This feature enables the
+    possibility of listing all role inference rules in the
+    system.

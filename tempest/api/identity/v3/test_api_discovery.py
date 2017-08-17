@@ -14,14 +14,28 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class TestApiDiscovery(base.BaseIdentityV3Test):
     """Tests for API discovery features."""
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('b9232f5e-d9e5-4d97-b96c-28d3db4de1bd')
+    @decorators.idempotent_id('721f480f-35b6-46c7-846e-047e6acea0dc')
+    @decorators.attr(type='smoke')
+    def test_list_api_versions(self):
+        # NOTE: Actually this API doesn't depend on v3 API at all, because
+        # the API operation is "GET /" without v3's endpoint. The reason of
+        # this test path is just v3 API is CURRENT on Keystone side.
+        versions = self.non_admin_versions_client.list_versions()
+        expected_resources = ('id', 'links', 'media-types', 'status',
+                              'updated')
+
+        for version in versions['versions']["values"]:
+            for res in expected_resources:
+                self.assertIn(res, version)
+
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('b9232f5e-d9e5-4d97-b96c-28d3db4de1bd')
     def test_api_version_resources(self):
         descr = self.non_admin_client.show_api_description()['version']
         expected_resources = ('id', 'links', 'media-types', 'status',
@@ -31,8 +45,8 @@ class TestApiDiscovery(base.BaseIdentityV3Test):
         for res in expected_resources:
             self.assertIn(res, keys)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('657c1970-4722-4189-8831-7325f3bc4265')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('657c1970-4722-4189-8831-7325f3bc4265')
     def test_api_media_types(self):
         descr = self.non_admin_client.show_api_description()['version']
         # Get MIME type bases and descriptions
@@ -46,8 +60,8 @@ class TestApiDiscovery(base.BaseIdentityV3Test):
         for s_type in supported_types:
             self.assertIn(s_type, media_types)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('8879a470-abfb-47bb-bb8d-5a7fd279ad1e')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('8879a470-abfb-47bb-bb8d-5a7fd279ad1e')
     def test_api_version_statuses(self):
         descr = self.non_admin_client.show_api_description()['version']
         status = descr['status'].lower()

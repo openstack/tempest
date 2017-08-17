@@ -20,7 +20,6 @@ from tempest.cmd import account_generator
 from tempest import config
 from tempest.tests import base
 from tempest.tests import fake_config
-from tempest.tests.lib import fake_identity
 
 
 class FakeOpts(object):
@@ -75,7 +74,7 @@ class MockHelpersMixin(object):
         fake_domain_list = {'domains': [{'id': 'fake_domain',
                                          'name': 'Fake_Domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
         self.useFixture(fixtures.MockPatch(
@@ -85,14 +84,10 @@ class MockHelpersMixin(object):
 class TestAccountGeneratorV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
-    identity_response = fake_identity._fake_v2_response
 
     def setUp(self):
         super(TestAccountGeneratorV2, self).setUp()
         self.mock_config_and_opts(self.identity_version)
-        self.useFixture(fixtures.MockPatch(
-            'tempest.lib.auth.AuthProvider.set_auth',
-            return_value=self.identity_response))
 
     def test_get_credential_provider(self):
         cp = account_generator.get_credential_provider(self.opts)
@@ -115,13 +110,12 @@ class TestAccountGeneratorV2(base.TestCase, MockHelpersMixin):
 class TestAccountGeneratorV3(TestAccountGeneratorV2):
 
     identity_version = 3
-    identity_response = fake_identity._fake_v3_response
 
     def setUp(self):
         super(TestAccountGeneratorV3, self).setUp()
         fake_domain_list = {'domains': [{'id': 'fake_domain'}]}
         self.useFixture(fixtures.MockPatch(''.join([
-            'tempest.services.identity.v3.json.domains_client.'
+            'tempest.lib.services.identity.v3.domains_client.'
             'DomainsClient.list_domains']),
             return_value=fake_domain_list))
 
@@ -145,16 +139,13 @@ class TestAccountGeneratorV3(TestAccountGeneratorV2):
 class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
-    identity_response = fake_identity._fake_v2_response
-    cred_client = 'tempest.common.cred_client.V2CredsClient'
-    dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
+    cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
+    dynamic_creds = ('tempest.lib.common.dynamic_creds.'
+                     'DynamicCredentialProvider')
 
     def setUp(self):
         super(TestGenerateResourcesV2, self).setUp()
         self.mock_config_and_opts(self.identity_version)
-        self.useFixture(fixtures.MockPatch(
-            'tempest.lib.auth.AuthProvider.set_auth',
-            return_value=self.identity_response))
         self.cred_provider = account_generator.get_credential_provider(
             self.opts)
         self.mock_resource_creation()
@@ -244,8 +235,7 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
 class TestGenerateResourcesV3(TestGenerateResourcesV2):
 
     identity_version = 3
-    identity_response = fake_identity._fake_v3_response
-    cred_client = 'tempest.common.cred_client.V3CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
 
     def setUp(self):
         self.mock_domains()
@@ -255,17 +245,14 @@ class TestGenerateResourcesV3(TestGenerateResourcesV2):
 class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
 
     identity_version = 2
-    identity_response = fake_identity._fake_v2_response
-    cred_client = 'tempest.common.cred_client.V2CredsClient'
-    dynamic_creds = 'tempest.common.dynamic_creds.DynamicCredentialProvider'
+    cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
+    dynamic_creds = ('tempest.lib.common.dynamic_creds.'
+                     'DynamicCredentialProvider')
     domain_is_in = False
 
     def setUp(self):
         super(TestDumpAccountsV2, self).setUp()
         self.mock_config_and_opts(self.identity_version)
-        self.useFixture(fixtures.MockPatch(
-            'tempest.lib.auth.AuthProvider.set_auth',
-            return_value=self.identity_response))
         self.cred_provider = account_generator.get_credential_provider(
             self.opts)
         self.mock_resource_creation()
@@ -337,8 +324,7 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
 class TestDumpAccountsV3(TestDumpAccountsV2):
 
     identity_version = 3
-    identity_response = fake_identity._fake_v3_response
-    cred_client = 'tempest.common.cred_client.V3CredsClient'
+    cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
     domain_is_in = True
 
     def setUp(self):

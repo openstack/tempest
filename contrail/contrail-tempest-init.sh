@@ -20,6 +20,7 @@ export API_SERVER_HOST_USER=${API_SERVER_HOST_USER:-root}
 export API_SERVER_HOST_PASSWORD=${API_SERVER_HOST_PASSWORD:-c0ntrail123}
 export PUBLIC_NETWORK_SUBNET=${PUBLIC_NETWORK_SUBNET:-10.1.1.0/24}
 export HTTP_IMAGE_PATH=${HTTP_IMAGE_PATH:-http://10.204.216.50/images/cirros/cirros-0.3.1-x86_64-disk.img}
+export PUBLIC_ACCESS_AVAILABLE=${PUBLIC_ACCESS_AVAILABLE:-0}
 
 FLAVOR_ID=7
 SERVICE_HOST=$KEYSTONE_SERVICE_HOST
@@ -55,10 +56,11 @@ create_public_network $PUBLIC_NETWORK_NAME $PUBLIC_NETWORK_SUBNET
 create_flavor $FLAVOR_ID
 
 #DASHBOARD
-iniset $TEMPEST_CONFIG dashboard dashboard_url "http://$SERVICE_HOST/"
-iniset $TEMPEST_CONFIG dashboard login_url "http://$SERVICE_HOST/auth/login/"
+iniset $TEMPEST_CONFIG dashboard dashboard_url "http://$SERVICE_HOST/horizon"
+iniset $TEMPEST_CONFIG dashboard login_url "http://$SERVICE_HOST/horizon/auth/login/"
 
 iniset $TEMPEST_CONFIG DEFAULT debug True
+iniset $TEMPEST_CONFIG DEFAULT log_file ./tempest.log
 
 #IDENTITY
 iniset $TEMPEST_CONFIG identity uri "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_SERVICE_HOST:5000/v2.0/"
@@ -66,13 +68,11 @@ iniset $TEMPEST_CONFIG identity uri_v3 "$KEYSTONE_SERVICE_PROTOCOL://$KEYSTONE_S
 iniset $TEMPEST_CONFIG identity username $USERNAME
 iniset $TEMPEST_CONFIG identity password $PASSWORD
 iniset $TEMPEST_CONFIG identity tenant_name $TENANT_NAME
-if [[ $KEYSTONE_SERVICE_PROTOCOL -eq 'https' ]]; then
-    iniset $TEMPEST_CONFIG identity disable_ssl_certificate_validation False
-fi
-
+iniset $TEMPEST_CONFIG identity disable_ssl_certificate_validation True
 iniset $TEMPEST_CONFIG identity alt_username $ALT_USERNAME
 iniset $TEMPEST_CONFIG identity alt_password $password
 iniset $TEMPEST_CONFIG identity alt_tenant_name $ALT_TENANT_NAME
+iniset $TEMPEST_CONFIG identity auth_version v2 #ToDo: Forcing it to V2 for now
 
 #AUTH
 iniset $TEMPEST_CONFIG auth admin_username $ADMIN_USERNAME
@@ -103,11 +103,24 @@ iniset $TEMPEST_CONFIG compute allow_tenant_isolation ${TENANT_ISOLATION:-false}
 iniset $TEMPEST_CONFIG network public_network_id "$public_network_id"
 
 # Disable IPv6 tests
-iniset $TEMPEST_CONFIG network-feature-enabled ipv6 false
+iniset $TEMPEST_CONFIG network-feature-enabled ipv6 true
+iniset $TEMPEST_CONFIG network-feature-enabled port_security false
+iniset $TEMPEST_CONFIG network-feature-enabled floating_ips false
+if [ $PUBLIC_ACCESS_AVAILABLE -eq 1 ];
+then
+    iniset $TEMPEST_CONFIG network-feature-enabled floating_ips true
+fi
 
 iniset $TEMPEST_CONFIG service_available "neutron" "True"
+iniset $TEMPEST_CONFIG service_available "nova" "True"
+iniset $TEMPEST_CONFIG service_available "heat" "True"
+iniset $TEMPEST_CONFIG service_available "glance" "False"
+iniset $TEMPEST_CONFIG service_available "horizon" "False"
 iniset $TEMPEST_CONFIG service_available "cinder" "False"
 iniset $TEMPEST_CONFIG service_available "swift" "False"
-iniset $TEMPEST_CONFIG service_available "heat" "False"
-
+iniset $TEMPEST_CONFIG service_available "sahara" "False"
+iniset $TEMPEST_CONFIG service_available "trove" "False"
+iniset $TEMPEST_CONFIG service_available "ceilometer" "False"
+iniset $TEMPEST_CONFIG service_available "ironic" "False"
+iniset $TEMPEST_CONFIG service_available "manila" "False"
 

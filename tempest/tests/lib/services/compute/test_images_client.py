@@ -14,8 +14,7 @@
 
 import copy
 
-from oslotest import mockpatch
-
+import fixtures
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import images_client
 from tempest.tests.lib import fake_auth_provider
@@ -187,15 +186,15 @@ class TestImagesClient(base.BaseServiceTest):
     def _test_resource_deleted(self, bytes_body=False):
         params = {"id": self.FAKE_IMAGE_ID}
         expected_op = self.FAKE_IMAGE_DATA['show']
-        self.useFixture(mockpatch.Patch('tempest.lib.services.compute'
+        self.useFixture(fixtures.MockPatch('tempest.lib.services.compute'
                         '.images_client.ImagesClient.show_image',
-                                        side_effect=lib_exc.NotFound))
+                                           side_effect=lib_exc.NotFound))
         self.assertEqual(True, self.client.is_resource_deleted(**params))
         tempdata = copy.deepcopy(self.FAKE_IMAGE_DATA['show'])
         tempdata['image']['id'] = None
-        self.useFixture(mockpatch.Patch('tempest.lib.services.compute'
+        self.useFixture(fixtures.MockPatch('tempest.lib.services.compute'
                         '.images_client.ImagesClient.show_image',
-                                        return_value=expected_op))
+                                           return_value=expected_op))
         self.assertEqual(False, self.client.is_resource_deleted(**params))
 
     def test_list_images_with_str_body(self):

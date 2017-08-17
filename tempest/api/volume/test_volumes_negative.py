@@ -13,290 +13,310 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
+from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
+CONF = config.CONF
 
-class VolumesV2NegativeTest(base.BaseVolumeTest):
 
-    @classmethod
-    def setup_clients(cls):
-        super(VolumesV2NegativeTest, cls).setup_clients()
-        cls.client = cls.volumes_client
+class VolumesNegativeTest(base.BaseVolumeTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2NegativeTest, cls).resource_setup()
-
-        cls.name_field = cls.special_fields['name_field']
+        super(VolumesNegativeTest, cls).resource_setup()
 
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()
         cls.mountpoint = "/dev/vdc"
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('f131c586-9448-44a4-a8b0-54ca838aa43e')
+    def create_image(self):
+        # Create image
+        image_name = data_utils.rand_name(self.__class__.__name__ + "-image")
+        image = self.images_client.create_image(
+            name=image_name,
+            container_format=CONF.image.container_formats[0],
+            disk_format=CONF.image.disk_formats[0],
+            visibility='private',
+            min_disk=CONF.volume.volume_size + 1)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.images_client.delete_image, image['id'])
+
+        # Upload image with 1KB data
+        image_file = six.BytesIO(data_utils.random_bytes())
+        self.images_client.store_image_file(image['id'], image_file)
+        waiters.wait_for_image_status(self.images_client,
+                                      image['id'], 'active')
+        return image
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('f131c586-9448-44a4-a8b0-54ca838aa43e')
     def test_volume_get_nonexistent_volume_id(self):
         # Should not be able to get a non-existent volume
-        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.show_volume,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('555efa6e-efcd-44ef-8a3b-4a7ca4837a29')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('555efa6e-efcd-44ef-8a3b-4a7ca4837a29')
     def test_volume_delete_nonexistent_volume_id(self):
         # Should not be able to delete a non-existent Volume
-        self.assertRaises(lib_exc.NotFound, self.client.delete_volume,
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.delete_volume,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('1ed83a8a-682d-4dfb-a30e-ee63ffd6c049')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('1ed83a8a-682d-4dfb-a30e-ee63ffd6c049')
     def test_create_volume_with_invalid_size(self):
-        # Should not be able to create volume with invalid size
-        # in request
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
-                          size='#$%', display_name=v_name, metadata=metadata)
+        # Should not be able to create volume with invalid size in request
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume, size='#$%')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('9387686f-334f-4d31-a439-33494b9e2683')
-    def test_create_volume_with_out_passing_size(self):
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('9387686f-334f-4d31-a439-33494b9e2683')
+    def test_create_volume_without_passing_size(self):
         # Should not be able to create volume without passing size
         # in request
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
-                          size='', display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume, size='')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('41331caa-eaf4-4001-869d-bc18c1869360')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('41331caa-eaf4-4001-869d-bc18c1869360')
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
-                          size='0', display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume, size='0')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('8b472729-9eba-446e-a83b-916bdb34bef7')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('8b472729-9eba-446e-a83b-916bdb34bef7')
     def test_create_volume_with_size_negative(self):
         # Should not be able to create volume with size negative
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
-                          size='-1', display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume, size='-1')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('10254ed8-3849-454e-862e-3ab8e6aa01d2')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('10254ed8-3849-454e-862e-3ab8e6aa01d2')
     def test_create_volume_with_nonexistent_volume_type(self):
         # Should not be able to create volume with non-existent volume type
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
-                          size='1', volume_type=data_utils.rand_uuid(),
-                          display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
+                          size='1', volume_type=data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('0c36f6ae-4604-4017-b0a9-34fdc63096f9')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('0c36f6ae-4604-4017-b0a9-34fdc63096f9')
     def test_create_volume_with_nonexistent_snapshot_id(self):
         # Should not be able to create volume with non-existent snapshot
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
-                          size='1', snapshot_id=data_utils.rand_uuid(),
-                          display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
+                          size='1', snapshot_id=data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('47c73e08-4be8-45bb-bfdf-0c4e79b88344')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('47c73e08-4be8-45bb-bfdf-0c4e79b88344')
     def test_create_volume_with_nonexistent_source_volid(self):
         # Should not be able to create volume with non-existent source volume
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.create_volume,
-                          size='1', source_volid=data_utils.rand_uuid(),
-                          display_name=v_name, metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
+                          size='1', source_volid=data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
     def test_update_volume_with_nonexistent_volume_id(self):
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
-                          volume_id=data_utils.rand_uuid(),
-                          display_name=v_name,
-                          metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
+                          volume_id=data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
     def test_update_volume_with_invalid_volume_id(self):
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
-                          volume_id='#$%%&^&^', display_name=v_name,
-                          metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
+                          volume_id=data_utils.rand_name('invalid'))
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
     def test_update_volume_with_empty_volume_id(self):
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        metadata = {'Type': 'work'}
-        self.assertRaises(lib_exc.NotFound, self.client.update_volume,
-                          volume_id='', display_name=v_name,
-                          metadata=metadata)
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
+                          volume_id='')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('30799cfd-7ee4-446c-b66c-45b383ed211b')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('30799cfd-7ee4-446c-b66c-45b383ed211b')
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
-        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
-                          '#$%%&^&^')
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.show_volume,
+                          data_utils.rand_name('invalid'))
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('c6c3db06-29ad-4e91-beb0-2ab195fe49e3')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('c6c3db06-29ad-4e91-beb0-2ab195fe49e3')
     def test_get_volume_without_passing_volume_id(self):
         # Should not be able to get volume when empty ID is passed
-        self.assertRaises(lib_exc.NotFound, self.client.show_volume, '')
+        self.assertRaises(lib_exc.NotFound,
+                          self.volumes_client.show_volume, '')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('1f035827-7c32-4019-9240-b4ec2dbd9dfd')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('1f035827-7c32-4019-9240-b4ec2dbd9dfd')
     def test_delete_invalid_volume_id(self):
         # Should not be able to delete volume when invalid ID is passed
-        self.assertRaises(lib_exc.NotFound, self.client.delete_volume,
-                          '!@#$%^&*()')
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.delete_volume,
+                          data_utils.rand_name('invalid'))
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('441a1550-5d44-4b30-af0f-a6d402f52026')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('441a1550-5d44-4b30-af0f-a6d402f52026')
     def test_delete_volume_without_passing_volume_id(self):
         # Should not be able to delete volume when empty ID is passed
-        self.assertRaises(lib_exc.NotFound, self.client.delete_volume, '')
+        self.assertRaises(lib_exc.NotFound,
+                          self.volumes_client.delete_volume, '')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('f5e56b0a-5d02-43c1-a2a7-c9b792c2e3f6')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('f5e56b0a-5d02-43c1-a2a7-c9b792c2e3f6')
     @test.services('compute')
     def test_attach_volumes_with_nonexistent_volume_id(self):
-        srv_name = data_utils.rand_name(self.__class__.__name__ + '-Instance')
-        server = self.create_server(
-            name=srv_name,
-            wait_until='ACTIVE')
-        self.addCleanup(waiters.wait_for_server_termination,
-                        self.servers_client, server['id'])
-        self.addCleanup(self.servers_client.delete_server, server['id'])
+        server = self.create_server()
 
         self.assertRaises(lib_exc.NotFound,
-                          self.client.attach_volume,
+                          self.volumes_client.attach_volume,
                           data_utils.rand_uuid(),
                           instance_uuid=server['id'],
                           mountpoint=self.mountpoint)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('9f9c24e4-011d-46b5-b992-952140ce237a')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('9f9c24e4-011d-46b5-b992-952140ce237a')
     def test_detach_volumes_with_invalid_volume_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.detach_volume,
+                          self.volumes_client.detach_volume,
                           'xxx')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('e0c75c74-ee34-41a9-9288-2a2051452854')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('e0c75c74-ee34-41a9-9288-2a2051452854')
     def test_volume_extend_with_size_smaller_than_original_size(self):
         # Extend volume with smaller size than original size.
         extend_size = 0
-        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.extend_volume,
                           self.volume['id'], new_size=extend_size)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('5d0b480d-e833-439f-8a5a-96ad2ed6f22f')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('5d0b480d-e833-439f-8a5a-96ad2ed6f22f')
     def test_volume_extend_with_non_number_size(self):
         # Extend volume when size is non number.
         extend_size = 'abc'
-        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.extend_volume,
                           self.volume['id'], new_size=extend_size)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('355218f1-8991-400a-a6bb-971239287d92')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('355218f1-8991-400a-a6bb-971239287d92')
     def test_volume_extend_with_None_size(self):
         # Extend volume with None size.
         extend_size = None
-        self.assertRaises(lib_exc.BadRequest, self.client.extend_volume,
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.extend_volume,
                           self.volume['id'], new_size=extend_size)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('8f05a943-013c-4063-ac71-7baf561e82eb')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('8f05a943-013c-4063-ac71-7baf561e82eb')
     def test_volume_extend_with_nonexistent_volume_id(self):
         # Extend volume size when volume is nonexistent.
-        extend_size = int(self.volume['size']) + 1
-        self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
+        extend_size = self.volume['size'] + 1
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.extend_volume,
                           data_utils.rand_uuid(), new_size=extend_size)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('aff8ba64-6d6f-4f2e-bc33-41a08ee9f115')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('aff8ba64-6d6f-4f2e-bc33-41a08ee9f115')
     def test_volume_extend_without_passing_volume_id(self):
         # Extend volume size when passing volume id is None.
-        extend_size = int(self.volume['size']) + 1
-        self.assertRaises(lib_exc.NotFound, self.client.extend_volume,
+        extend_size = self.volume['size'] + 1
+        self.assertRaises(lib_exc.NotFound, self.volumes_client.extend_volume,
                           None, new_size=extend_size)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('ac6084c0-0546-45f9-b284-38a367e0e0e2')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('ac6084c0-0546-45f9-b284-38a367e0e0e2')
     def test_reserve_volume_with_nonexistent_volume_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.reserve_volume,
+                          self.volumes_client.reserve_volume,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('eb467654-3dc1-4a72-9b46-47c29d22654c')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('eb467654-3dc1-4a72-9b46-47c29d22654c')
     def test_unreserve_volume_with_nonexistent_volume_id(self):
         self.assertRaises(lib_exc.NotFound,
-                          self.client.unreserve_volume,
+                          self.volumes_client.unreserve_volume,
                           data_utils.rand_uuid())
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('449c4ed2-ecdd-47bb-98dc-072aeccf158c')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('449c4ed2-ecdd-47bb-98dc-072aeccf158c')
     def test_reserve_volume_with_negative_volume_status(self):
         # Mark volume as reserved.
-        self.client.reserve_volume(self.volume['id'])
+        self.volumes_client.reserve_volume(self.volume['id'])
         # Mark volume which is marked as reserved before
         self.assertRaises(lib_exc.BadRequest,
-                          self.client.reserve_volume,
+                          self.volumes_client.reserve_volume,
                           self.volume['id'])
         # Unmark volume as reserved.
-        self.client.unreserve_volume(self.volume['id'])
+        self.volumes_client.unreserve_volume(self.volume['id'])
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('0f4aa809-8c7b-418f-8fb3-84c7a5dfc52f')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('0f4aa809-8c7b-418f-8fb3-84c7a5dfc52f')
     def test_list_volumes_with_nonexistent_name(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
-        fetched_volume = self.client.list_volumes(params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        params = {'name': v_name}
+        fetched_volume = self.volumes_client.list_volumes(
+            params=params)['volumes']
+        self.assertEmpty(fetched_volume)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('9ca17820-a0e7-4cbd-a7fa-f4468735e359')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('9ca17820-a0e7-4cbd-a7fa-f4468735e359')
     def test_list_volumes_detail_with_nonexistent_name(self):
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
-        params = {self.name_field: v_name}
+        params = {'name': v_name}
         fetched_volume = \
-            self.client.list_volumes(detail=True, params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+            self.volumes_client.list_volumes(
+                detail=True, params=params)['volumes']
+        self.assertEmpty(fetched_volume)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('143b279b-7522-466b-81be-34a87d564a7c')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('143b279b-7522-466b-81be-34a87d564a7c')
     def test_list_volumes_with_invalid_status(self):
         params = {'status': 'null'}
-        fetched_volume = self.client.list_volumes(params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+        fetched_volume = self.volumes_client.list_volumes(
+            params=params)['volumes']
+        self.assertEmpty(fetched_volume)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('ba94b27b-be3f-496c-a00e-0283b373fa75')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('ba94b27b-be3f-496c-a00e-0283b373fa75')
     def test_list_volumes_detail_with_invalid_status(self):
         params = {'status': 'null'}
         fetched_volume = \
-            self.client.list_volumes(detail=True, params=params)['volumes']
-        self.assertEqual(0, len(fetched_volume))
+            self.volumes_client.list_volumes(detail=True,
+                                             params=params)['volumes']
+        self.assertEmpty(fetched_volume)
 
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('5b810c91-0ad1-47ce-aee8-615f789be78f')
+    @test.services('image')
+    def test_create_volume_from_image_with_decreasing_size(self):
+        # Create image
+        image = self.create_image()
 
-class VolumesV1NegativeTest(VolumesV2NegativeTest):
-    _api_version = 1
-    _name = 'display_name'
+        # Note(jeremyZ): To shorten the test time (uploading a big size image
+        # is time-consuming), here just consider the scenario that volume size
+        # is smaller than the min_disk of image.
+        self.assertRaises(lib_exc.BadRequest,
+                          self.volumes_client.create_volume,
+                          size=CONF.volume.volume_size,
+                          imageRef=image['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('d15e7f35-2cfc-48c8-9418-c8223a89bcbb')
+    @test.services('image')
+    def test_create_volume_from_deactivated_image(self):
+        # Create image
+        image = self.create_image()
+
+        # Deactivate the image
+        self.images_client.deactivate_image(image['id'])
+        body = self.images_client.show_image(image['id'])
+        self.assertEqual("deactivated", body['status'])
+        # Try creating a volume from deactivated image
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_volume,
+                          imageRef=image['id'])

@@ -13,20 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from tempest.api.volume import base
-from tempest import config
-from tempest import test
-
-
-CONF = config.CONF
+from tempest.lib import decorators
 
 
 def _get_host(host):
-    if CONF.volume_feature_enabled.volume_services:
-        host = host.split('@')[0]
-    return host
+    return host.split('@')[0]
 
 
-class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
+class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
     """Tests Volume Services API.
 
     volume service list requires admin privileges.
@@ -34,7 +28,7 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesServicesV2TestJSON, cls).resource_setup()
+        super(VolumesServicesTestJSON, cls).resource_setup()
         cls.services = (cls.admin_volume_services_client.list_services()
                         ['services'])
         # NOTE: Cinder service-list API returns the list contains
@@ -43,21 +37,21 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         cls.host_name = _get_host(cls.services[0]['host'])
         cls.binary_name = cls.services[0]['binary']
 
-    @test.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
+    @decorators.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
     def test_list_services(self):
         services = (self.admin_volume_services_client.list_services()
                     ['services'])
-        self.assertNotEqual(0, len(services))
+        self.assertNotEmpty(services)
 
-    @test.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
+    @decorators.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
         services = (self.admin_volume_services_client.list_services(
             binary=self.binary_name)['services'])
-        self.assertNotEqual(0, len(services))
+        self.assertNotEmpty(services)
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
 
-    @test.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
+    @decorators.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
     def test_get_service_by_host_name(self):
         services_on_host = [service for service in self.services if
                             _get_host(service['host']) == self.host_name]
@@ -73,16 +67,26 @@ class VolumesServicesV2TestJSON(base.BaseVolumeAdminTest):
         # on order.
         self.assertEqual(sorted(s1), sorted(s2))
 
-    @test.idempotent_id('ffa6167c-4497-4944-a464-226bbdb53908')
+    @decorators.idempotent_id('67ec6902-f91d-4dec-91fa-338523208bbc')
+    def test_get_service_by_volume_host_name(self):
+        volume_id = self.create_volume()['id']
+        volume = self.admin_volume_client.show_volume(volume_id)['volume']
+        hostname = _get_host(volume['os-vol-host-attr:host'])
+
+        services = (self.admin_volume_services_client.list_services(
+            host=hostname, binary='cinder-volume')['services'])
+
+        self.assertNotEmpty(services,
+                            'cinder-volume not found on host %s' % hostname)
+        self.assertEqual(hostname, _get_host(services[0]['host']))
+        self.assertEqual('cinder-volume', services[0]['binary'])
+
+    @decorators.idempotent_id('ffa6167c-4497-4944-a464-226bbdb53908')
     def test_get_service_by_service_and_host_name(self):
 
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name, binary=self.binary_name))['services']
 
-        self.assertEqual(1, len(services))
+        self.assertNotEmpty(services)
         self.assertEqual(self.host_name, _get_host(services[0]['host']))
         self.assertEqual(self.binary_name, services[0]['binary'])
-
-
-class VolumesServicesV1TestJSON(VolumesServicesV2TestJSON):
-    _api_version = 1

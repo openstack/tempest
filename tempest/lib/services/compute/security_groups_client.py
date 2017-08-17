@@ -28,8 +28,9 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
     def list_security_groups(self, **params):
         """List all security groups for a user.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#listSecGroups
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#list-security-groups
         """
 
         url = 'os-security-groups'
@@ -44,8 +45,9 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
     def show_security_group(self, security_group_id):
         """Get the details of a Security Group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#showSecGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#show-security-group-details
         """
         url = "os-security-groups/%s" % security_group_id
         resp, body = self.get(url)
@@ -56,8 +58,9 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
     def create_security_group(self, **kwargs):
         """Create a new security group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#createSecGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#create-security-group
         """
         post_body = json.dumps({'security_group': kwargs})
         resp, body = self.post('os-security-groups', post_body)
@@ -68,8 +71,9 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
     def update_security_group(self, security_group_id, **kwargs):
         """Update a security group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updateSecGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#update-security-group
         """
         post_body = json.dumps({'security_group': kwargs})
         resp, body = self.put('os-security-groups/%s' % security_group_id,
@@ -81,8 +85,9 @@ class SecurityGroupsClient(base_compute_client.BaseComputeClient):
     def delete_security_group(self, security_group_id):
         """Delete the provided Security Group.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#deleteSecGroup
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#delete-security-group
         """
         resp, body = self.delete(
             'os-security-groups/%s' % security_group_id)

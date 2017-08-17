@@ -1,5 +1,16 @@
-# -*- coding: utf-8 -*-
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Tempest documentation build configuration file, created by
 # sphinx-quickstart on Tue May 21 17:43:32 2013.
 #
@@ -11,7 +22,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
 import subprocess
 
@@ -22,7 +32,8 @@ def build_plugin_registry(app):
     subprocess.call(['tools/generate-tempest-plugins-list.sh'], cwd=root_dir)
 
 def setup(app):
-    app.connect('builder-inited', build_plugin_registry)
+    if os.getenv('GENERATE_TEMPEST_PLUGIN_LIST', 'true').lower() == 'true':
+        app.connect('builder-inited', build_plugin_registry)
 
 
 
@@ -41,7 +52,7 @@ def setup(app):
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
-              'oslosphinx',
+              'openstackdocstheme',
               'oslo_config.sphinxconfiggen',
              ]
 
@@ -49,6 +60,14 @@ config_generator_config_file = '../../tempest/cmd/config-generator.tempest.conf'
 sample_config_basename = '_static/tempest'
 
 todo_include_todos = True
+
+# openstackdocstheme options
+repository_name = 'openstack/tempest'
+bug_project = 'tempest'
+bug_tag = ''
+
+# Must set this variable to include year, month, day, hours, and minutes.
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -105,7 +124,7 @@ modindex_common_prefix = ['tempest.']
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'nature'
+html_theme = 'openstackdocs'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -138,11 +157,6 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
-   "-n1"]
-html_last_updated_fmt = subprocess.Popen(git_cmd,
-                                         stdout=subprocess.PIPE).\
-                                         communicate()[0]
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -181,123 +195,5 @@ html_use_index = False
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = None
 
-# Output file base name for HTML help builder.
-htmlhelp_basename = 'Tempestdoc'
-
-
-# -- Options for LaTeX output --------------------------------------------------
-
-latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
-
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
-
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'Tempest.tex', u'Tempest Documentation',
-   u'OpenStack QA Team', 'manual'),
-]
-
-# The name of an image file (relative to this directory) to place at the top of
-# the title page.
-#latex_logo = None
-
-# For "manual" documents, if this is true, then toplevel headings are parts,
-# not chapters.
-#latex_use_parts = False
-
-# If true, show page references after internal links.
-#latex_show_pagerefs = False
-
-# If true, show URL addresses after external links.
-#latex_show_urls = False
-
-# Documents to append as an appendix to all manuals.
-#latex_appendices = []
-
-# If false, no module index is generated.
-#latex_domain_indices = True
-
-
-# -- Options for manual page output --------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'tempest', u'Tempest Documentation',
-     [u'OpenStack QA Team'], 1)
-]
-
-# If true, show URL addresses after external links.
-#man_show_urls = False
-
-
-# -- Options for Texinfo output ------------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-  ('index', 'Tempest', u'Tempest Documentation',
-   u'OpenStack QA Team', 'Tempest', 'One line description of project.',
-   'Miscellaneous'),
-]
-
-# Documents to append as an appendix to all manuals.
-#texinfo_appendices = []
-
-# If false, no module index is generated.
-#texinfo_domain_indices = True
-
-# How to display URL addresses: 'footnote', 'no', or 'inline'.
-#texinfo_show_urls = 'footnote'
-
-
-# -- Options for Epub output ---------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = u'Tempest'
-epub_author = u'Sean Dague'
-epub_publisher = u'OpenStack QA Team'
-epub_copyright = u'2013, OpenStack QA Team'
-
-# The language of the text. It defaults to the language option
-# or en if the language is not set.
-#epub_language = ''
-
-# The scheme of the identifier. Typical schemes are ISBN or URL.
-#epub_scheme = ''
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#epub_identifier = ''
-
-# A unique identification for the text.
-#epub_uid = ''
-
-# A tuple containing the cover image and cover page html template filenames.
-#epub_cover = ()
-
-# HTML files that should be inserted before the pages created by sphinx.
-# The format is a list of tuples containing the path and title.
-#epub_pre_files = []
-
-# HTML files shat should be inserted after the pages created by sphinx.
-# The format is a list of tuples containing the path and title.
-#epub_post_files = []
-
-# A list of files that should not be packed into the epub file.
-#epub_exclude_files = []
-
-# The depth of the table of contents in toc.ncx.
-#epub_tocdepth = 3
-
-# Allow duplicate toc entries.
-#epub_tocdup = True
+# A list of warning types to suppress arbitrary warning messages.
+suppress_warnings = ['image.nonlocal_uri']

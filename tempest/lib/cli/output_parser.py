@@ -15,8 +15,9 @@
 
 """Collection of utilities for parsing CLI clients output."""
 
-import logging
 import re
+
+from oslo_log import log as logging
 
 from tempest.lib import exceptions
 
@@ -112,8 +113,8 @@ def tables(output_lines):
             if label is None:
                 label = line
             else:
-                LOG.warning('Invalid line between tables: %s' % line)
-    if len(table_) > 0:
+                LOG.warning('Invalid line between tables: %s', line)
+    if table_:
         LOG.warning('Missing end of table')
 
     return tables_
@@ -140,7 +141,7 @@ def table(output_lines):
             columns = _table_columns(line)
             continue
         if '|' not in line:
-            LOG.warning('skipping invalid table line: %s' % line)
+            LOG.warning('skipping invalid table line: %s', line)
             continue
         row = []
         for col in columns:

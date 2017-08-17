@@ -77,7 +77,7 @@ server_detail = {
         'OS-EXT-AZ:availability_zone': {'type': 'string'},
         'OS-EXT-STS:task_state': {'type': ['string', 'null']},
         'OS-EXT-STS:vm_state': {'type': 'string'},
-        'OS-EXT-STS:power_state': {'type': 'integer'},
+        'OS-EXT-STS:power_state': parameter_types.power_state,
         'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
         'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
         'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},

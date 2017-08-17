@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
 from oslo_config import cfg
-from oslotest import mockpatch
 
 from tempest.common import credentials_factory as credentials
 from tempest import config
@@ -52,16 +52,16 @@ class TestAdminAvailable(base.TestCase):
                                  'project_name': 'admin',
                                  'password': 'p',
                                  'types': ['admin']})
-            self.useFixture(mockpatch.Patch(
-                'tempest.common.preprov_creds.read_accounts_yaml',
+            self.useFixture(fixtures.MockPatch(
+                'tempest.lib.common.preprov_creds.read_accounts_yaml',
                 return_value=accounts))
             cfg.CONF.set_default('test_accounts_file',
                                  use_accounts_file, group='auth')
-            self.useFixture(mockpatch.Patch('os.path.isfile',
-                                            return_value=True))
+            self.useFixture(fixtures.MockPatch('os.path.isfile',
+                                               return_value=True))
         else:
-            self.useFixture(mockpatch.Patch('os.path.isfile',
-                                            return_value=False))
+            self.useFixture(fixtures.MockPatch('os.path.isfile',
+                                               return_value=False))
             if admin_creds:
                 username = 'u'
                 project = 't'

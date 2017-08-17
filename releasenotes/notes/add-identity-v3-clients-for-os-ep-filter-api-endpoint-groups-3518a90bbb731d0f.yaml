@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Defines the identity v3 OS-EP-FILTER EndPoint Groups API client.
+    This client manages Create, Get, Update, Check, List, and Delete
+    of EndPoint Group.
+

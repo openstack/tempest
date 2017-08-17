@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -30,9 +30,9 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(NetworksTest, cls).setup_clients()
-        cls.client = cls.os_adm.compute_networks_client
+        cls.client = cls.os_admin.compute_networks_client
 
-    @test.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
+    @decorators.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):
         networks = self.client.list_networks()['networks']
         if CONF.compute.fixed_network_name:
@@ -42,14 +42,18 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
                              "{0} networks with label {1}".format(
                                  len(configured_network),
                                  CONF.compute.fixed_network_name))
+        elif CONF.network.public_network_id:
+            configured_network = [x for x in networks if x['id'] ==
+                                  CONF.network.public_network_id]
         else:
-            configured_network = networks
+            raise self.skipException(
+                "Environment has no known-for-sure existing network.")
         configured_network = configured_network[0]
         network = (self.client.show_network(configured_network['id'])
                    ['network'])
         self.assertEqual(configured_network['label'], network['label'])
 
-    @test.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
+    @decorators.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
     def test_list_all_networks(self):
         networks = self.client.list_networks()['networks']
         # Check the configured network is in the list
@@ -57,5 +61,5 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
             configured_network = CONF.compute.fixed_network_name
             self.assertIn(configured_network, [x['label'] for x in networks])
         else:
-            network_name = map(lambda x: x['label'], networks)
-            self.assertGreaterEqual(len(network_name), 1)
+            network_labels = [x['label'] for x in networks]
+            self.assertNotEmpty(network_labels)

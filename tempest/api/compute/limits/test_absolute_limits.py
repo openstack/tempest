@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
@@ -24,7 +24,7 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
         super(AbsoluteLimitsTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
 
-    @test.idempotent_id('b54c66af-6ab6-4cf0-a9e5-a0cb58d75e0b')
+    @decorators.idempotent_id('b54c66af-6ab6-4cf0-a9e5-a0cb58d75e0b')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
         limits = self.client.show_limits()['limits']
@@ -35,12 +35,13 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
                              'maxTotalFloatingIps', 'maxSecurityGroups',
                              'maxSecurityGroupRules', 'maxTotalInstances',
                              'maxTotalKeypairs', 'maxTotalRAMSize',
+                             'maxServerGroups', 'maxServerGroupMembers',
                              'totalCoresUsed', 'totalFloatingIpsUsed',
                              'totalSecurityGroupsUsed', 'totalInstancesUsed',
-                             'totalRAMUsed']
+                             'totalRAMUsed', 'totalServerGroupsUsed']
         # check whether all expected elements exist
         missing_elements =\
             [ele for ele in expected_elements if ele not in absolute_limits]
-        self.assertEqual(0, len(missing_elements),
+        self.assertEmpty(missing_elements,
                          "Failed to find element %s in absolute limits list"
                          % ', '.join(ele for ele in missing_elements))

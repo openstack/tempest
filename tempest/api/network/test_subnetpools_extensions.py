@@ -13,9 +13,10 @@
 # under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -45,8 +46,8 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
             msg = "subnet_allocation extension not enabled."
             raise cls.skipException(msg)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
     def test_create_list_show_update_delete_subnetpools(self):
         subnetpool_name = data_utils.rand_name('subnetpools')
         # create subnet pool

@@ -17,86 +17,71 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
 
-class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
+class SnapshotMetadataTestJSON(base.BaseVolumeTest):
     @classmethod
     def skip_checks(cls):
-        super(SnapshotV2MetadataTestJSON, cls).skip_checks()
+        super(SnapshotMetadataTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder snapshot feature disabled")
 
     @classmethod
-    def setup_clients(cls):
-        super(SnapshotV2MetadataTestJSON, cls).setup_clients()
-        cls.client = cls.snapshots_client
-
-    @classmethod
     def resource_setup(cls):
-        super(SnapshotV2MetadataTestJSON, cls).resource_setup()
+        super(SnapshotMetadataTestJSON, cls).resource_setup()
         # Create a volume
         cls.volume = cls.create_volume()
         # Create a snapshot
         cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
-        cls.snapshot_id = cls.snapshot['id']
 
     def tearDown(self):
         # Update the metadata to {}
-        self.client.update_snapshot_metadata(self.snapshot_id, metadata={})
-        super(SnapshotV2MetadataTestJSON, self).tearDown()
+        self.snapshots_client.update_snapshot_metadata(
+            self.snapshot['id'], metadata={})
+        super(SnapshotMetadataTestJSON, self).tearDown()
 
-    @test.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
-    def test_create_get_delete_snapshot_metadata(self):
+    @decorators.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
+    def test_crud_snapshot_metadata(self):
         # Create metadata for the snapshot
-        metadata = {"key1": "value1",
-                    "key2": "value2",
-                    "key3": "value3"}
-        expected = {"key2": "value2",
-                    "key3": "value3"}
-        body = self.client.create_snapshot_metadata(
-            self.snapshot_id, metadata)['metadata']
-        # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
-        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
-
-        # Delete one item metadata of the snapshot
-        self.client.delete_snapshot_metadata_item(
-            self.snapshot_id, "key1")
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
-        self.assertThat(body.items(), matchers.ContainsAll(expected.items()))
-        self.assertNotIn("key1", body)
-
-    @test.idempotent_id('bd2363bc-de92-48a4-bc98-28943c6e4be1')
-    def test_update_snapshot_metadata(self):
-        # Update metadata for the snapshot
         metadata = {"key1": "value1",
                     "key2": "value2",
                     "key3": "value3"}
         update = {"key3": "value3_update",
                   "key4": "value4"}
-        # Create metadata for the snapshot
-        body = self.client.create_snapshot_metadata(
-            self.snapshot_id, metadata)['metadata']
-        # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
+        expect = {"key4": "value4"}
+        # Create metadata
+        body = self.snapshots_client.create_snapshot_metadata(
+            self.snapshot['id'], metadata)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
-        # Update metadata item
-        body = self.client.update_snapshot_metadata(
-            self.snapshot_id, metadata=update)['metadata']
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
-        self.assertEqual(update, body)
+        body = self.snapshots_client.show_snapshot_metadata(
+            self.snapshot['id'])['metadata']
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()),
+                        'Create snapshot metadata failed')
 
-    @test.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
-    def test_update_snapshot_metadata_item(self):
+        # Update metadata
+        body = self.snapshots_client.update_snapshot_metadata(
+            self.snapshot['id'], metadata=update)['metadata']
+        self.assertEqual(update, body)
+        body = self.snapshots_client.show_snapshot_metadata(
+            self.snapshot['id'])['metadata']
+        self.assertEqual(update, body, 'Update snapshot metadata failed')
+
+        # Delete one item metadata of the snapshot
+        self.snapshots_client.delete_snapshot_metadata_item(
+            self.snapshot['id'], "key3")
+        body = self.snapshots_client.show_snapshot_metadata(
+            self.snapshot['id'])['metadata']
+        self.assertThat(body.items(), matchers.ContainsAll(expect.items()),
+                        'Delete one item metadata of the snapshot failed')
+        self.assertNotIn("key3", body)
+
+    @decorators.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
+    def test_update_show_snapshot_metadata_item(self):
         # Update metadata item for the snapshot
         metadata = {"key1": "value1",
                     "key2": "value2",
@@ -106,20 +91,23 @@ class SnapshotV2MetadataTestJSON(base.BaseVolumeTest):
                   "key2": "value2",
                   "key3": "value3_update"}
         # Create metadata for the snapshot
-        body = self.client.create_snapshot_metadata(
-            self.snapshot_id, metadata)['metadata']
+        self.snapshots_client.create_snapshot_metadata(
+            self.snapshot['id'], metadata)
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
+        body = self.snapshots_client.show_snapshot_metadata(
+            self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
-        body = self.client.update_snapshot_metadata_item(
-            self.snapshot_id, "key3", meta=update_item)['meta']
+        body = self.snapshots_client.update_snapshot_metadata_item(
+            self.snapshot['id'], "key3", meta=update_item)['meta']
+        self.assertEqual(update_item, body)
+
+        # Get a specific metadata item of the snapshot
+        body = self.snapshots_client.show_snapshot_metadata_item(
+            self.snapshot['id'], "key3")['meta']
+        self.assertEqual({"key3": expect['key3']}, body)
+
         # Get the metadata of the snapshot
-        body = self.client.show_snapshot_metadata(
-            self.snapshot_id)['metadata']
+        body = self.snapshots_client.show_snapshot_metadata(
+            self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
-
-
-class SnapshotV1MetadataTestJSON(SnapshotV2MetadataTestJSON):
-    _api_version = 1

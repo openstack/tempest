@@ -16,10 +16,11 @@ from oslo_log import log
 
 from tempest.api.compute import base
 from tempest.common import compute
-from tempest.common import waiters
+from tempest.common import credentials_factory as credentials
 from tempest import config
-from tempest import exceptions
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_excs
 from tempest import test
 
 CONF = config.CONF
@@ -45,6 +46,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(AutoAllocateNetworkTest, cls).skip_checks()
+        identity_version = cls.get_identity_version()
+        if not credentials.is_admin_available(
+                identity_version=identity_version):
+            msg = "Missing Identity Admin API credentials in configuration."
+            raise cls.skipException(msg)
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
         if not test.is_extension_enabled('auto-allocated-topology', 'network'):
@@ -60,11 +66,10 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AutoAllocateNetworkTest, cls).setup_clients()
-        cls.servers_client = cls.servers_client
-        cls.networks_client = cls.os.networks_client
-        cls.routers_client = cls.os.routers_client
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
+        cls.networks_client = cls.os_primary.networks_client
+        cls.routers_client = cls.os_primary.routers_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -77,14 +82,14 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found tenant networks: %s' % nets)
         # (2) Retrieve shared network list.
         search_opts = {'shared': True}
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise exceptions.TempestException(
+            raise lib_excs.TempestException(
                 'Found shared networks: %s' % nets)
 
     @classmethod
@@ -106,10 +111,12 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             LOG.info('(%s) Found more than one router for tenant.',
                      test_utils.find_test_caller())
 
-        # Let's just blindly remove any networks, duplicate or otherwise, that
-        # the test might have created even though Neutron will cleanup
-        # duplicate resources automatically (so ignore 404s).
-        networks = cls.networks_client.list_networks().get('networks', [])
+        # Remove any networks, duplicate or otherwise, that these tests
+        # created. All such networks will be in the current tenant. Neutron
+        # will cleanup duplicate resources automatically, so ignore 404s.
+        search_opts = {'tenant_id': cls.networks_client.tenant_id}
+        networks = cls.networks_client.list_networks(
+            **search_opts).get('networks', [])
 
         for router in routers:
             # Disassociate the subnets from the router. Because of the race
@@ -141,22 +148,20 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             test_utils.call_and_ignore_notfound_exc(
                 cls.networks_client.delete_network, network['id'])
 
-    @test.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
+    @decorators.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
     def test_server_create_no_allocate(self):
         """Tests that no networking is allocated for the server."""
         # create the server with no networking
         server, _ = compute.create_test_server(
-            self.os, networks='none', wait_until='ACTIVE')
-        self.addCleanup(waiters.wait_for_server_termination,
-                        self.servers_client, server['id'])
-        self.addCleanup(self.servers_client.delete_server, server['id'])
+            self.os_primary, networks='none', wait_until='ACTIVE')
+        self.addCleanup(self.delete_server, server['id'])
         # get the server ips
         addresses = self.servers_client.list_addresses(
             server['id'])['addresses']
         # assert that there is no networking
         self.assertEqual({}, addresses)
 
-    @test.idempotent_id('2e6cf129-9e28-4e8a-aaaa-045ea826b2a6')
+    @decorators.idempotent_id('2e6cf129-9e28-4e8a-aaaa-045ea826b2a6')
     def test_server_multi_create_auto_allocate(self):
         """Tests that networking is auto-allocated for multiple servers."""
 
@@ -173,13 +178,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # - Third request sees net1 and net2 for the tenant and fails with a
         #   NetworkAmbiguous 400 error.
         _, servers = compute.create_test_server(
-            self.os, networks='auto', wait_until='ACTIVE',
+            self.os_primary, networks='auto', wait_until='ACTIVE',
             min_count=3)
         server_nets = set()
         for server in servers:
-            self.addCleanup(waiters.wait_for_server_termination,
-                            self.servers_client, server['id'])
-            self.addCleanup(self.servers_client.delete_server, server['id'])
+            self.addCleanup(self.delete_server, server['id'])
             # get the server ips
             addresses = self.servers_client.list_addresses(
                 server['id'])['addresses']

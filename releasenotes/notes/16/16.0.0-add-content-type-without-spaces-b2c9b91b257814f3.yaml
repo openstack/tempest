@@ -1,0 +1,9 @@
+---
+upgrade:
+  - The ``JSON_ENC`` and ``TXT_ENC`` option in the ``_error_checker``
+    section have been added with additional content-type which are
+    defined in RFC7231 but missing in the currnt rest_client.py file.
+    The lack of these additional content-type will cause defcore test
+    to fail for OpenStack public cloud which uses tomcat module in the
+    api gateway. The additions are ``application/json;charset=utf-8``,
+    ``text/html;charset=utf-8``,``text/plain;charset=utf-8``

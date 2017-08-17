@@ -1,0 +1,18 @@
+---
+features:
+  - The Tempest plugin interface contains a new optional method, which allows
+    plugins to declare and automatically register any service client defined
+    in the plugin.
+  - tempest.lib exposes a new stable interface, the clients module and
+    ServiceClients class, which provides a convenient way for plugin tests to
+    access service clients defined in Tempest as well as service clients
+    defined in all loaded plugins.
+    The new ServiceClients class only exposes for now the service clients
+    which are in tempest.lib, i.e. compute, network and image. The remaining
+    service clients (identity, volume and object-storage) will be added in
+    future updates.
+deprecations:
+  - The new clients module provides a stable alternative to tempest classes
+    manager.Manager and clients.Manager. manager.Manager only exists now
+    to smoothen the transition of plugins to the new interface, but it will
+    be removed shortly without further notice.

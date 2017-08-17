@@ -16,7 +16,6 @@
 
 import collections
 import email.utils
-import logging as real_logging
 import re
 import time
 
@@ -24,8 +23,10 @@ import jsonschema
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 import six
+from six.moves import urllib
 
 from tempest.lib.common import http
+from tempest.lib.common import jsonschema_validator
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
@@ -39,8 +40,8 @@ HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 HTTP_REDIRECTION = (300, 301, 302, 303, 304, 305, 306, 307)
 
 # JSON Schema validator and format checker used for JSON Schema validation
-JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
-FORMAT_CHECKER = jsonschema.draft4_format_checker
+JSONSCHEMA_VALIDATOR = jsonschema_validator.JSONSCHEMA_VALIDATOR
+FORMAT_CHECKER = jsonschema_validator.FORMAT_CHECKER
 
 
 class RestClient(object):
@@ -69,7 +70,6 @@ class RestClient(object):
     :param str http_timeout: Timeout in seconds to wait for the http request to
                              return
     """
-    TYPE = "json"
 
     # The version of the API this client implements
     api_version = None
@@ -104,12 +104,6 @@ class RestClient(object):
             disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
             timeout=http_timeout)
 
-    def _get_type(self):
-        if self.TYPE != "json":
-            self.LOG.warning("Tempest has dropped XML support and the TYPE "
-                             "became meaningless")
-        return self.TYPE
-
     def get_headers(self, accept_type=None, send_type=None):
         """Return the default headers which will be used with outgoing requests
 
@@ -124,9 +118,9 @@ class RestClient(object):
                  dict for outgoing request
         """
         if accept_type is None:
-            accept_type = self._get_type()
+            accept_type = 'json'
         if send_type is None:
-            send_type = self._get_type()
+            send_type = 'json'
         return {'Content-Type': 'application/%s' % send_type,
                 'Accept': 'application/%s' % accept_type}
 
@@ -235,8 +229,8 @@ class RestClient(object):
             raise TypeError("'read_code' must be an int instead of (%s)"
                             % type(read_code))
 
-        assert_msg = ("This function only allowed to use for HTTP status"
-                      "codes which explicitly defined in the RFC 7231 & 4918."
+        assert_msg = ("This function only allowed to use for HTTP status "
+                      "codes which explicitly defined in the RFC 7231 & 4918. "
                       "{0} is not a defined Success Code!"
                       ).format(expected_code)
         if isinstance(expected_code, list):
@@ -248,8 +242,8 @@ class RestClient(object):
         # NOTE(afazekas): the http status code above 400 is processed by
         # the _error_checker method
         if read_code < 400:
-            pattern = """Unexpected http success status code {0},
-                         The expected status code is {1}"""
+            pattern = ("Unexpected http success status code {0}, "
+                       "The expected status code is {1}")
             if ((not isinstance(expected_code, list) and
                  (read_code != expected_code)) or
                 (isinstance(expected_code, list) and
@@ -377,7 +371,7 @@ class RestClient(object):
         on the endpoint in the catalog will return a list of supported API
         versions.
 
-        :return tuple with response headers and list of version numbers
+        :return: tuple with response headers and list of version numbers
         :rtype: tuple
         """
         resp, body = self.get('')
@@ -406,8 +400,8 @@ class RestClient(object):
     def _log_request_start(self, method, req_url):
         caller_name = test_utils.find_test_caller()
         if self.trace_requests and re.search(self.trace_requests, caller_name):
-            self.LOG.debug('Starting Request (%s): %s %s' %
-                           (caller_name, method, req_url))
+            self.LOG.debug('Starting Request (%s): %s %s', caller_name,
+                           method, req_url)
 
     def _log_request_full(self, resp, req_headers=None, req_body=None,
                           resp_body=None, extra=None):
@@ -423,11 +417,11 @@ class RestClient(object):
         Body: %s"""
 
         self.LOG.debug(
-            log_fmt % (
-                str(req_headers),
-                self._safe_body(req_body),
-                str(resp_log),
-                self._safe_body(resp_body)),
+            log_fmt,
+            str(req_headers),
+            self._safe_body(req_body),
+            str(resp_log),
+            self._safe_body(resp_body),
             extra=extra)
 
     def _log_request(self, method, req_url, resp,
@@ -445,17 +439,17 @@ class RestClient(object):
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
-            'Request (%s): %s %s %s%s' % (
-                caller_name,
-                resp['status'],
-                method,
-                req_url,
-                secs),
+            'Request (%s): %s %s %s%s',
+            caller_name,
+            resp['status'],
+            method,
+            req_url,
+            secs,
             extra=extra)
 
         # Also look everything at DEBUG if you want to filter this
         # out, don't run at debug.
-        if self.LOG.isEnabledFor(real_logging.DEBUG):
+        if self.LOG.isEnabledFor(logging.DEBUG):
             self._log_request_full(resp, req_headers, req_body,
                                    resp_body, extra)
 
@@ -480,7 +474,7 @@ class RestClient(object):
             # Ensure there are not more than one top-level keys
             # NOTE(freerunner): Ensure, that JSON is not nullable to
             # to prevent StopIteration Exception
-            if len(body.keys()) != 1:
+            if not hasattr(body, "keys") or len(body.keys()) != 1:
                 return body
             # Just return the "wrapped" element
             first_key, first_item = six.next(six.iteritems(body))
@@ -617,6 +611,7 @@ class RestClient(object):
         :raises BadRequest: If a 400 response code is received
         :raises Gone: If a 410 response code is received
         :raises Conflict: If a 409 response code is received
+        :raises PreconditionFailed: If a 412 response code is received
         :raises OverLimit: If a 413 response code is received and over_limit is
                           not in the response body
         :raises RateLimitExceeded: If a 413 response code is received and
@@ -661,8 +656,7 @@ class RestClient(object):
             time.sleep(delay)
             resp, resp_body = self._request(method, url,
                                             headers=headers, body=body)
-        self._error_checker(method, url, headers, body,
-                            resp, resp_body)
+        self._error_checker(resp, resp_body)
         return resp, resp_body
 
     def _get_retry_after_delay(self, resp):
@@ -710,8 +704,7 @@ class RestClient(object):
             raise ValueError("Failed to parse date %s" % val)
         return time.mktime(parts)
 
-    def _error_checker(self, method, url,
-                       headers, body, resp, resp_body):
+    def _error_checker(self, resp, resp_body):
 
         # NOTE(mtreinish): Check for httplib response from glance_http. The
         # object can't be used here because importing httplib breaks httplib2.
@@ -732,12 +725,21 @@ class RestClient(object):
         if resp.status < 400:
             return
 
-        JSON_ENC = ['application/json', 'application/json; charset=utf-8']
+        # NOTE(zhipengh): There is a purposefully duplicate of content-type
+        # with the only difference is with or without spaces, as specified
+        # in RFC7231.
+        JSON_ENC = ['application/json', 'application/json; charset=utf-8',
+                    'application/json;charset=utf-8']
+
         # NOTE(mtreinish): This is for compatibility with Glance and swift
         # APIs. These are the return content types that Glance api v1
         # (and occasionally swift) are using.
+        # NOTE(zhipengh): There is a purposefully duplicate of content-type
+        # with the only difference is with or without spaces, as specified
+        # in RFC7231.
         TXT_ENC = ['text/plain', 'text/html', 'text/html; charset=utf-8',
-                   'text/plain; charset=utf-8']
+                   'text/plain; charset=utf-8', 'text/html;charset=utf-8',
+                   'text/plain;charset=utf-8']
 
         if ctype.lower() in JSON_ENC:
             parse_resp = True
@@ -776,6 +778,11 @@ class RestClient(object):
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
             raise exceptions.Conflict(resp_body, resp=resp)
+
+        if resp.status == 412:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+            raise exceptions.PreconditionFailed(resp_body, resp=resp)
 
         if resp.status == 413:
             if parse_resp:
@@ -893,11 +900,11 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response body is invalid (%s)") % ex
+                    msg = ("HTTP response body is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseBody(msg)
             else:
                 if body:
-                    msg = ("HTTP response body should not exist (%s)") % body
+                    msg = ("HTTP response body should not exist (%s)" % body)
                     raise exceptions.InvalidHTTPResponseBody(msg)
 
             # Check the header of a response
@@ -908,8 +915,18 @@ class RestClient(object):
                                         cls=JSONSCHEMA_VALIDATOR,
                                         format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
-                    msg = ("HTTP response header is invalid (%s)") % ex
+                    msg = ("HTTP response header is invalid (%s)" % ex)
                     raise exceptions.InvalidHTTPResponseHeader(msg)
+
+    def _get_base_version_url(self):
+        # TODO(oomichi): This method can be used for auth's replace_version().
+        # So it is nice to have common logic for the maintenance.
+        endpoint = self.base_url
+        url = urllib.parse.urlsplit(endpoint)
+        new_path = re.split(r'(^|/)+v\d+(\.\d+)?', url.path)[0]
+        url = list(url)
+        url[2] = new_path + '/'
+        return urllib.parse.urlunsplit(url)
 
 
 class ResponseBody(dict):

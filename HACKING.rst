@@ -2,7 +2,7 @@ Tempest Coding Guide
 ====================
 
 - Step 1: Read the OpenStack Style Commandments
-  http://docs.openstack.org/developer/hacking/
+  https://docs.openstack.org/hacking/latest/
 - Step 2: Read on
 
 Tempest Specific Commandments
@@ -22,6 +22,7 @@ Tempest Specific Commandments
 - [T112] Check that tempest.lib should not import local tempest code
 - [T113] Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
 - [T114] Check that tempest.lib does not use tempest config
+- [T115] Check that admin tests should exist under admin path
 - [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
@@ -101,20 +102,20 @@ to work even if just one ``test_method`` is selected for execution.
 Service Tagging
 ---------------
 Service tagging is used to specify which services are exercised by a particular
-test method. You specify the services with the tempest.test.services decorator.
-For example:
+test method. You specify the services with the ``tempest.test.services``
+decorator. For example:
 
 @services('compute', 'image')
 
 Valid service tag names are the same as the list of directories in tempest.api
 that have tests.
 
-For scenario tests having a service tag is required. For the api tests service
-tags are only needed if the test method makes an api call (either directly or
+For scenario tests having a service tag is required. For the API tests service
+tags are only needed if the test method makes an API call (either directly or
 indirectly through another service) that differs from the parent directory
-name. For example, any test that make an api call to a service other than nova
-in tempest.api.compute would require a service tag for those services, however
-they do not need to be tagged as compute.
+name. For example, any test that make an API call to a service other than Nova
+in ``tempest.api.compute`` would require a service tag for those services,
+however they do not need to be tagged as ``compute``.
 
 Test fixtures and resources
 ---------------------------
@@ -166,13 +167,38 @@ invalid or unexpected input. However, as a black box integration test
 suite, Tempest is not suitable for handling all negative test cases, as
 the wide variety and complexity of negative tests can lead to long test
 runs and knowledge of internal implementation details. The bulk of
-negative testing should be handled with project function tests. The
-exception to this rule is API tests used for interoperability testing.
+negative testing should be handled with project function tests.
+All negative tests should be based on `API-WG guideline`_ . Such negative
+tests can block any changes from accurate failure code to invalid one.
+
+.. _API-WG guideline: http://specs.openstack.org/openstack/api-wg/guidelines/http.html#failure-code-clarifications
+
+If facing some gray area which is not clarified on the above guideline, propose
+a new guideline to the API-WG. With a proposal to the API-WG we will be able to
+build a consensus across all OpenStack projects and improve the quality and
+consistency of all the APIs.
+
+In addition, we have some guidelines for additional negative tests.
+
+- About BadRequest(HTTP400) case: We can add a single negative tests of
+  BadRequest for each resource and method(POST, PUT).
+  Please don't implement more negative tests on the same combination of
+  resource and method even if API request parameters are different from
+  the existing test.
+- About NotFound(HTTP404) case: We can add a single negative tests of
+  NotFound for each resource and method(GET, PUT, DELETE, HEAD).
+  Please don't implement more negative tests on the same combination
+  of resource and method.
+
+The above guidelines don't cover all cases and we will grow these guidelines
+organically over time. Patches outside of the above guidelines are left up to
+the reviewers' discretion and if we face some conflicts between reviewers, we
+will expand the guideline based on our discussion and experience.
 
 Test skips because of Known Bugs
 --------------------------------
 If a test is broken because of a bug it is appropriate to skip the test until
-bug has been fixed. You should use the skip_because decorator so that
+bug has been fixed. You should use the ``skip_because`` decorator so that
 Tempest's skip tracking tool can watch the bug status.
 
 Example::
@@ -203,40 +229,17 @@ parallel.
   require admin privileges are outside of projects.
 
 - Races between methods in the same class are not a problem because
-  parallelization in tempest is at the test class level, but if there is a json
+  parallelization in Tempest is at the test class level, but if there is a json
   and xml version of the same test class there could still be a race between
   methods.
 
-- The rand_name() function from tempest.common.utils.data_utils should be used
-  anywhere a resource is created with a name. Static naming should be avoided
-  to prevent resource conflicts.
+- The rand_name() function from tempest.lib.common.utils.data_utils should be
+  used anywhere a resource is created with a name. Static naming should be
+  avoided to prevent resource conflicts.
 
 - If the execution of a set of tests is required to be serialized then locking
-  can be used to perform this. See AggregatesAdminTest in
-  tempest.api.compute.admin for an example of using locking.
-
-Stress Tests in Tempest
------------------------
-Any tempest test case can be flagged as a stress test. With this flag it will
-be automatically discovery and used in the stress test runs. The stress test
-framework itself is a facility to spawn and control worker processes in order
-to find race conditions (see ``tempest/stress/`` for more information). Please
-note that these stress tests can't be used for benchmarking purposes since they
-don't measure any performance characteristics.
-
-Example::
-
-  @stresstest(class_setup_per='process')
-  def test_this_and_that(self):
-    ...
-
-This will flag the test ``test_this_and_that`` as a stress test. The parameter
-``class_setup_per`` gives control when the setUpClass function should be called.
-
-Good candidates for stress tests are:
-
-- Scenario tests
-- API tests that have a wide focus
+  can be used to perform this. See usage of ``LockFixture`` for examples of
+  using locking.
 
 Sample Configuration File
 -------------------------
@@ -244,11 +247,11 @@ The sample config file is autogenerated using a script. If any changes are made
 to the config variables in tempest/config.py then the sample config file must be
 regenerated. This can be done running::
 
-  tox -egenconfig
+  tox -e genconfig
 
 Unit Tests
 ----------
-Unit tests are a separate class of tests in tempest. They verify tempest
+Unit tests are a separate class of tests in Tempest. They verify Tempest
 itself, and thus have a different set of guidelines around them:
 
 1. They can not require anything running externally. All you should need to
@@ -311,15 +314,15 @@ that is a unique ``uuid-4`` instance. This ID is used to complement the fully
 qualified test name and track test functionality through refactoring. The
 format of the metadata looks like::
 
-    @test.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
+    @decorators.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
         ...
 
 Tempest.lib includes a ``check-uuid`` tool that will test for the existence
 and uniqueness of idempotent_id metadata for every test. If you have
-tempest installed you run the tool against Tempest by calling from the
-tempest repo::
+Tempest installed you run the tool against Tempest by calling from the
+Tempest repo::
 
     check-uuid
 
@@ -334,7 +337,7 @@ one::
 
     check-uuid --fix
 
-The ``check-uuid`` tool is used as part of the tempest gate job
+The ``check-uuid`` tool is used as part of the Tempest gate job
 to ensure that all tests have an ``idempotent_id`` decorator.
 
 Branchless Tempest Considerations
@@ -347,7 +350,7 @@ branches are also gated by the Tempest master branch, which also means that
 proposed commits to Tempest must work against both the master and all the
 currently supported stable branches of the projects. As such there are a few
 special considerations that have to be accounted for when pushing new changes
-to tempest.
+to Tempest.
 
 1. New Tests for new features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -367,13 +370,21 @@ be able to merge.
 When trying to land a bug fix which changes a tested API you'll have to use the
 following procedure::
 
-    - Propose change to the project, get a +2 on the change even with failing
-    - Propose skip on Tempest which will only be approved after the
+    1. Propose change to the project, get a +2 on the change even with failing
+    2. Propose skip on Tempest which will only be approved after the
       corresponding change in the project has a +2 on change
-    - Land project change in master and all open stable branches (if required)
-    - Land changed test in Tempest
+    3. Land project change in master and all open stable branches (if required)
+    4. Land changed test in Tempest
 
 Otherwise the bug fix won't be able to land in the project.
+
+Handily, `Zuul’s cross-repository dependencies
+<https://docs.openstack.org/infra/zuul/gating.html#cross-repository-dependencies>`_.
+can be leveraged to do without step 2 and to have steps 3 and 4 happen
+"atomically". To do that, make the patch written in step 1 to depend (refer to
+Zuul's documentation above) on the patch written in step 4. The commit message
+for the Tempest change should have a link to the Gerrit review that justifies
+that change.
 
 3. New Tests for existing features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

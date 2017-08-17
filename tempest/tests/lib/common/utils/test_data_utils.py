@@ -37,16 +37,20 @@ class TestDataUtils(base.TestCase):
         actual2 = data_utils.rand_uuid_hex()
         self.assertNotEqual(actual, actual2)
 
-    def test_rand_name(self):
-        actual = data_utils.rand_name()
+    def test_rand_name_with_default_prefix(self):
+        actual = data_utils.rand_name('foo')
         self.assertIsInstance(actual, str)
-        actual2 = data_utils.rand_name()
+        self.assertTrue(actual.startswith('tempest-foo'))
+        actual2 = data_utils.rand_name('foo')
+        self.assertTrue(actual2.startswith('tempest-foo'))
         self.assertNotEqual(actual, actual2)
 
-        actual = data_utils.rand_name('foo')
+    def test_rand_name_with_none_prefix(self):
+        actual = data_utils.rand_name('foo', prefix=None)
+        self.assertIsInstance(actual, str)
         self.assertTrue(actual.startswith('foo'))
-        actual2 = data_utils.rand_name('foo')
-        self.assertTrue(actual.startswith('foo'))
+        actual2 = data_utils.rand_name('foo', prefix=None)
+        self.assertTrue(actual2.startswith('foo'))
         self.assertNotEqual(actual, actual2)
 
     def test_rand_name_with_prefix(self):
@@ -125,13 +129,13 @@ class TestDataUtils(base.TestCase):
 
     def test_random_bytes(self):
         actual = data_utils.random_bytes()  # default size=1024
-        self.assertIsInstance(actual, str)
-        self.assertRegex(actual, "^[\x00-\xFF]{1024}")
+        self.assertIsInstance(actual, bytes)
+        self.assertEqual(1024, len(actual))
         actual2 = data_utils.random_bytes()
         self.assertNotEqual(actual, actual2)
 
         actual = data_utils.random_bytes(size=2048)
-        self.assertRegex(actual, "^[\x00-\xFF]{2048}")
+        self.assertEqual(2048, len(actual))
 
     def test_get_ipv6_addr_by_EUI64(self):
         actual = data_utils.get_ipv6_addr_by_EUI64('2001:db8::',

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+
 list_migrations = {
     'status_code': [200],
     'response_body': {
@@ -32,8 +34,8 @@ list_migrations = {
                         'dest_host': {'type': ['string', 'null']},
                         'old_instance_type_id': {'type': ['integer', 'null']},
                         'new_instance_type_id': {'type': ['integer', 'null']},
-                        'created_at': {'type': 'string'},
-                        'updated_at': {'type': ['string', 'null']}
+                        'created_at': parameter_types.date_time,
+                        'updated_at': parameter_types.date_time_or_null
                     },
                     'additionalProperties': False,
                     'required': [

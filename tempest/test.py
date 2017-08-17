@@ -16,28 +16,20 @@
 import atexit
 import functools
 import os
-import re
 import sys
-import time
 
+import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
-from oslo_serialization import jsonutils as json
-from oslo_utils import importutils
 import six
-from six.moves import urllib
-import testscenarios
 import testtools
 
 from tempest import clients
-from tempest.common import cred_client
 from tempest.common import credentials_factory as credentials
-from tempest.common import fixed_network
-import tempest.common.generator.valid_generator as valid
 import tempest.common.validation_resources as vresources
 from tempest import config
-from tempest import exceptions
-from tempest.lib.common.utils import data_utils
+from tempest.lib.common import cred_client
+from tempest.lib.common import fixed_network
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -45,34 +37,40 @@ LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
 
-idempotent_id = decorators.idempotent_id
+# TODO(oomichi): This test.idempotent_id should be removed after all projects
+# switch to use decorators.idempotent_id.
+idempotent_id = debtcollector.moves.moved_function(
+    decorators.idempotent_id, 'idempotent_id', __name__,
+    version='Mitaka', removal_version='?')
 
 
-def attr(**kwargs):
-    """A decorator which applies the testtools attr decorator
+related_bug = debtcollector.moves.moved_function(
+    decorators.related_bug, 'related_bug', __name__,
+    version='Pike', removal_version='?')
 
-    This decorator applies the testtools.testcase.attr if it is in the list of
-    attributes to testtools we want to apply.
-    """
 
-    def decorator(f):
-        if 'type' in kwargs and isinstance(kwargs['type'], str):
-            f = testtools.testcase.attr(kwargs['type'])(f)
-        elif 'type' in kwargs and isinstance(kwargs['type'], list):
-            for attr in kwargs['type']:
-                f = testtools.testcase.attr(attr)(f)
-        return f
+attr = debtcollector.moves.moved_function(
+    decorators.attr, 'attr', __name__,
+    version='Pike', removal_version='?')
 
-    return decorator
+
+class InvalidServiceTag(lib_exc.TempestException):
+    message = "Invalid service tag"
 
 
 def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
         'image': CONF.service_available.glance,
-        'baremetal': CONF.service_available.ironic,
         'volume': CONF.service_available.cinder,
+        # NOTE(masayukig): We have two network services which are neutron and
+        # nova-network. And we have no way to know whether nova-network is
+        # available or not. After the pending removal of nova-network from
+        # nova, we can treat the network/neutron case in the same manner as
+        # the other services.
         'network': True,
+        # NOTE(masayukig): Tempest tests always require the identity service.
+        # So we should set this True here.
         'identity': True,
         'object_storage': CONF.service_available.swift,
     }
@@ -86,13 +84,12 @@ def services(*args):
     exercised by a test case.
     """
     def decorator(f):
-        services = ['compute', 'image', 'baremetal', 'volume',
-                    'network', 'identity', 'object_storage']
+        known_services = get_service_list()
+
         for service in args:
-            if service not in services:
-                raise exceptions.InvalidServiceTag('%s is not a valid '
-                                                   'service' % service)
-        attr(type=list(args))(f)
+            if service not in known_services:
+                raise InvalidServiceTag('%s is not a valid service' % service)
+        decorators.attr(type=list(args))(f)
 
         @functools.wraps(f)
         def wrapper(self, *func_args, **func_kwargs):
@@ -105,32 +102,6 @@ def services(*args):
                     raise testtools.TestCase.skipException(msg)
             return f(self, *func_args, **func_kwargs)
         return wrapper
-    return decorator
-
-
-def stresstest(**kwargs):
-    """Add stress test decorator
-
-    For all functions with this decorator a attr stress will be
-    set automatically.
-
-    @param class_setup_per: allowed values are application, process, action
-           ``application``: once in the stress job lifetime
-           ``process``: once in the worker process lifetime
-           ``action``: on each action
-    @param allow_inheritance: allows inheritance of this attribute
-    """
-    def decorator(f):
-        if 'class_setup_per' in kwargs:
-            setattr(f, "st_class_setup_per", kwargs['class_setup_per'])
-        else:
-            setattr(f, "st_class_setup_per", 'process')
-        if 'allow_inheritance' in kwargs:
-            setattr(f, "st_allow_inheritance", kwargs['allow_inheritance'])
-        else:
-            setattr(f, "st_allow_inheritance", False)
-        attr(type='stress')(f)
-        return f
     return decorator
 
 
@@ -164,7 +135,7 @@ def is_extension_enabled(extension_name, service):
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
         'identity': CONF.identity_feature_enabled.api_extensions
     }
-    if len(config_dict[service]) == 0:
+    if not config_dict[service]:
         return False
     if config_dict[service][0] == 'all':
         return True
@@ -174,10 +145,18 @@ def is_extension_enabled(extension_name, service):
 
 
 def is_scheduler_filter_enabled(filter_name):
-    """Check the list of enabled compute scheduler filters from config. """
+    """Check the list of enabled compute scheduler filters from config.
+
+    This function checks whether the given compute scheduler filter is
+    available and configured in the config file. If the
+    scheduler_available_filters option is set to 'all' (Default value. which
+    means default filters are configured in nova) in tempest.conf then, this
+    function returns True with assumption that requested filter 'filter_name'
+    is one of available filter in nova ("nova.scheduler.filters.all_filters").
+    """
 
     filters = CONF.compute_feature_enabled.scheduler_available_filters
-    if len(filters) == 0:
+    if not filters:
         return False
     if 'all' in filters:
         return True
@@ -222,7 +201,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     """
 
     setUpClassCalled = False
-    _service = None
 
     # NOTE(andreaf) credentials holds a list of the credentials to be allocated
     # at class setup time. Credential types can be 'primary', 'alt', 'admin' or
@@ -266,8 +244,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls.resource_setup()
         except Exception:
             etype, value, trace = sys.exc_info()
-            LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass." % (
-                     etype, cls.__name__))
+            LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass.",
+                     etype, cls.__name__)
             cls.tearDownClass()
             try:
                 six.reraise(etype, value, trace)
@@ -276,6 +254,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def tearDownClass(cls):
+        # insert pdb breakpoint when pause_teardown is enabled
+        if CONF.pause_teardown:
+            cls.insert_pdb_breakpoint()
         at_exit_set.discard(cls)
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
@@ -299,9 +280,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 # resources that were successfully setup in resource_cleanup,
                 # log AttributeError as info instead of exception.
                 if tetype is AttributeError and name == 'resources':
-                    LOG.info("tearDownClass of %s failed: %s" % (name, te))
+                    LOG.info("tearDownClass of %s failed: %s", name, te)
                 else:
-                    LOG.exception("teardown of %s failed: %s" % (name, te))
+                    LOG.exception("teardown of %s failed: %s", name, te)
                 if not etype:
                     etype, value, trace = sys_exec_info
         # If exceptions were raised during teardown, and not before, re-raise
@@ -311,6 +292,22 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 six.reraise(etype, value, trace)
             finally:
                 del trace  # to avoid circular refs
+
+    def tearDown(self):
+        super(BaseTestCase, self).tearDown()
+        # insert pdb breakpoint when pause_teardown is enabled
+        if CONF.pause_teardown:
+            BaseTestCase.insert_pdb_breakpoint()
+
+    @classmethod
+    def insert_pdb_breakpoint(cls):
+        """Add pdb breakpoint.
+
+        This can help in debugging process, cleaning of resources is
+        paused, so they can be examined.
+        """
+        import pdb
+        pdb.set_trace()
 
     @classmethod
     def skip_checks(cls):
@@ -360,16 +357,32 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 manager = cls.get_client_manager(
                     credential_type=credentials_type)
                 setattr(cls, 'os_%s' % credentials_type, manager)
+                # NOTE(jordanP): Tempest should use os_primary, os_admin
+                # and os_alt throughout its code base but we keep the aliases
+                # around for a while for Tempest plugins. Aliases should be
+                # removed eventually.
                 # Setup some common aliases
-                # TODO(andreaf) The aliases below are a temporary hack
-                # to avoid changing too much code in one patch. They should
-                # be removed eventually
                 if credentials_type == 'primary':
-                    cls.os = cls.manager = cls.os_primary
+                    cls.os = debtcollector.moves.moved_read_only_property(
+                        'os', 'os_primary', version='Pike',
+                        removal_version='Queens')
+                    cls.manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'manager', 'os_primary', version='Pike',
+                            removal_version='Queens')
                 if credentials_type == 'admin':
-                    cls.os_adm = cls.admin_manager = cls.os_admin
+                    cls.os_adm = debtcollector.moves.moved_read_only_property(
+                        'os_adm', 'os_admin', version='Pike',
+                        removal_version='Queens')
+                    cls.admin_manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'admin_manager', 'os_admin', version='Pike',
+                            removal_version='Queens')
                 if credentials_type == 'alt':
-                    cls.alt_manager = cls.os_alt
+                    cls.alt_manager =\
+                        debtcollector.moves.moved_read_only_property(
+                            'alt_manager', 'os_alt', version='Pike',
+                            removal_version='Queens')
             elif isinstance(credentials_type, list):
                 manager = cls.get_client_manager(roles=credentials_type[1:],
                                                  force_new=True)
@@ -386,9 +399,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def resource_setup(cls):
         """Class level resource setup for test cases."""
-        if hasattr(cls, "os"):
+        if hasattr(cls, "os_primary"):
             cls.validation_resources = vresources.create_validation_resources(
-                cls.os, cls.validation_resources)
+                cls.os_primary, cls.validation_resources)
         else:
             LOG.warning("Client manager not found, validation resources not"
                         " created")
@@ -401,8 +414,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         resources, in case a failure during `resource_setup` should happen.
         """
         if cls.validation_resources:
-            if hasattr(cls, "os"):
-                vresources.clear_validation_resources(cls.os,
+            if hasattr(cls, "os_primary"):
+                vresources.clear_validation_resources(cls.os_primary,
                                                       cls.validation_resources)
                 cls.validation_resources = {}
             else:
@@ -484,7 +497,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """Returns a credentials provider
 
         If no credential provider exists yet creates one.
-        It uses self.identity_version if defined, or the configuration value
+        It always use the configuration value from identity.auth_version,
+        since we always want to provision accounts with the current version
+        of the identity API.
         """
         if (not hasattr(cls, '_creds_provider') or not cls._creds_provider or
                 not cls._creds_provider.name == cls.__name__):
@@ -493,8 +508,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
             cls._creds_provider = credentials.get_credentials_provider(
                 name=cls.__name__, network_resources=cls.network_resources,
-                force_tenant_isolation=force_tenant_isolation,
-                identity_version=cls.get_identity_version())
+                force_tenant_isolation=force_tenant_isolation)
         return cls._creds_provider
 
     @classmethod
@@ -536,8 +550,11 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 raise lib_exc.InvalidCredentials(
                     "Invalid credentials type %s" % credential_type)
-        return cls.client_manager(credentials=creds.credentials,
-                                  service=cls._service)
+        manager = cls.client_manager(credentials=creds.credentials)
+        # NOTE(andreaf) Ensure credentials have user and project id fields.
+        # It may not be the case when using pre-provisioned credentials.
+        manager.auth_provider.set_auth()
+        return manager
 
     @classmethod
     def clear_credentials(cls):
@@ -564,18 +581,17 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         if not CONF.validation.run_validation:
             return
+
         if keypair is None:
-            if CONF.validation.auth_method.lower() == "keypair":
-                keypair = True
-            else:
-                keypair = False
+            keypair = (CONF.validation.auth_method.lower() == "keypair")
+
         if floating_ip is None:
-            if CONF.validation.connect_method.lower() == "floating":
-                floating_ip = True
-            else:
-                floating_ip = False
+            floating_ip = (CONF.validation.connect_method.lower() ==
+                           "floating")
+
         if security_group is None:
             security_group = CONF.validation.security_group
+
         if security_group_rules is None:
             security_group_rules = CONF.validation.security_group_rules
 
@@ -641,247 +657,24 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         return fixed_network.get_tenant_network(
             cred_provider, networks_client, CONF.compute.fixed_network_name)
 
-    def assertEmpty(self, list, msg=None):
-        self.assertTrue(len(list) == 0, msg)
+    def assertEmpty(self, items, msg=None):
+        """Asserts whether a sequence or collection is empty
 
-    def assertNotEmpty(self, list, msg=None):
-        self.assertTrue(len(list) > 0, msg)
-
-
-class NegativeAutoTest(BaseTestCase):
-
-    _resources = {}
-
-    @classmethod
-    def setUpClass(cls):
-        super(NegativeAutoTest, cls).setUpClass()
-        os = cls.get_client_manager(credential_type='primary')
-        cls.client = os.negative_client
-
-    @staticmethod
-    def load_tests(*args):
-        """Wrapper for testscenarios
-
-        To set the mandatory scenarios variable only in case a real test
-        loader is in place. Will be automatically called in case the variable
-        "load_tests" is set.
+        :param items: sequence or collection to be tested
+        :param msg: message to be passed to the AssertionError
+        :raises AssertionError: when items is not empty
         """
-        if getattr(args[0], 'suiteClass', None) is not None:
-            loader, standard_tests, pattern = args
-        else:
-            standard_tests, module, loader = args
-        for test in testtools.iterate_tests(standard_tests):
-            schema = getattr(test, '_schema', None)
-            if schema is not None:
-                setattr(test, 'scenarios',
-                        NegativeAutoTest.generate_scenario(schema))
-        return testscenarios.load_tests_apply_scenarios(*args)
+        if msg is None:
+            msg = "sequence or collection is not empty: %s" % items
+        self.assertFalse(items, msg)
 
-    @staticmethod
-    def generate_scenario(description):
-        """Generates the test scenario list for a given description.
+    def assertNotEmpty(self, items, msg=None):
+        """Asserts whether a sequence or collection is not empty
 
-        :param description: A file or dictionary with the following entries:
-            name (required) name for the api
-            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
-            url (required) the url to be appended to the catalog url with '%s'
-                for each resource mentioned
-            resources: (optional) A list of resource names such as "server",
-                "flavor", etc. with an element for each '%s' in the url. This
-                method will call self.get_resource for each element when
-                constructing the positive test case template so negative
-                subclasses are expected to return valid resource ids when
-                appropriate.
-            json-schema (optional) A valid json schema that will be used to
-                create invalid data for the api calls. For "GET" and "HEAD",
-                the data is used to generate query strings appended to the url,
-                otherwise for the body of the http call.
+        :param items: sequence or collection to be tested
+        :param msg: message to be passed to the AssertionError
+        :raises AssertionError: when items is empty
         """
-        LOG.debug(description)
-        generator = importutils.import_class(
-            CONF.negative.test_generator)()
-        generator.validate_schema(description)
-        schema = description.get("json-schema", None)
-        resources = description.get("resources", [])
-        scenario_list = []
-        expected_result = None
-        for resource in resources:
-            if isinstance(resource, dict):
-                expected_result = resource['expected_result']
-                resource = resource['name']
-            LOG.debug("Add resource to test %s" % resource)
-            scn_name = "inv_res_%s" % (resource)
-            scenario_list.append((scn_name, {
-                "resource": (resource, data_utils.rand_uuid()),
-                "expected_result": expected_result
-            }))
-        if schema is not None:
-            for scenario in generator.generate_scenarios(schema):
-                scenario_list.append((scenario['_negtest_name'],
-                                      scenario))
-        LOG.debug(scenario_list)
-        return scenario_list
-
-    def execute(self, description):
-        """Execute a http call
-
-        Execute a http call on an api that are expected to
-        result in client errors. First it uses invalid resources that are part
-        of the url, and then invalid data for queries and http request bodies.
-
-        :param description: A json file or dictionary with the following
-        entries:
-            name (required) name for the api
-            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
-            url (required) the url to be appended to the catalog url with '%s'
-                for each resource mentioned
-            resources: (optional) A list of resource names such as "server",
-                "flavor", etc. with an element for each '%s' in the url. This
-                method will call self.get_resource for each element when
-                constructing the positive test case template so negative
-                subclasses are expected to return valid resource ids when
-                appropriate.
-            json-schema (optional) A valid json schema that will be used to
-                create invalid data for the api calls. For "GET" and "HEAD",
-                the data is used to generate query strings appended to the url,
-                otherwise for the body of the http call.
-
-        """
-        LOG.info("Executing %s" % description["name"])
-        LOG.debug(description)
-        generator = importutils.import_class(
-            CONF.negative.test_generator)()
-        schema = description.get("json-schema", None)
-        method = description["http-method"]
-        url = description["url"]
-        expected_result = None
-        if "default_result_code" in description:
-            expected_result = description["default_result_code"]
-
-        resources = [self.get_resource(r) for
-                     r in description.get("resources", [])]
-
-        if hasattr(self, "resource"):
-            # Note(mkoderer): The resources list already contains an invalid
-            # entry (see get_resource).
-            # We just send a valid json-schema with it
-            valid_schema = None
-            if schema:
-                valid_schema = \
-                    valid.ValidTestGenerator().generate_valid(schema)
-            new_url, body = self._http_arguments(valid_schema, url, method)
-        elif hasattr(self, "_negtest_name"):
-            schema_under_test = \
-                valid.ValidTestGenerator().generate_valid(schema)
-            local_expected_result = \
-                generator.generate_payload(self, schema_under_test)
-            if local_expected_result is not None:
-                expected_result = local_expected_result
-            new_url, body = \
-                self._http_arguments(schema_under_test, url, method)
-        else:
-            raise Exception("testscenarios are not active. Please make sure "
-                            "that your test runner supports the load_tests "
-                            "mechanism")
-
-        if "admin_client" in description and description["admin_client"]:
-            if not credentials.is_admin_available(
-                    identity_version=self.get_identity_version()):
-                msg = ("Missing Identity Admin API credentials in"
-                       "configuration.")
-                raise self.skipException(msg)
-            creds = self.credentials_provider.get_admin_creds()
-            os_adm = clients.Manager(credentials=creds)
-            client = os_adm.negative_client
-        else:
-            client = self.client
-        resp, resp_body = client.send_request(method, new_url,
-                                              resources, body=body)
-        self._check_negative_response(expected_result, resp.status, resp_body)
-
-    def _http_arguments(self, json_dict, url, method):
-        LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
-        if not json_dict:
-            return url, None
-        elif method in ["GET", "HEAD", "PUT", "DELETE"]:
-            return "%s?%s" % (url, urllib.parse.urlencode(json_dict)), None
-        else:
-            return url, json.dumps(json_dict)
-
-    def _check_negative_response(self, expected_result, result, body):
-        self.assertTrue(result >= 400 and result < 500 and result != 413,
-                        "Expected client error, got %s:%s" %
-                        (result, body))
-        self.assertTrue(expected_result is None or expected_result == result,
-                        "Expected %s, got %s:%s" %
-                        (expected_result, result, body))
-
-    @classmethod
-    def set_resource(cls, name, resource):
-        """Register a resource for a test
-
-        This function can be used in setUpClass context to register a resource
-        for a test.
-
-        :param name: The name of the kind of resource such as "flavor", "role",
-            etc.
-        :resource: The id of the resource
-        """
-        cls._resources[name] = resource
-
-    def get_resource(self, name):
-        """Return a valid uuid for a type of resource.
-
-        If a real resource is needed as part of a url then this method should
-        return one. Otherwise it can return None.
-
-        :param name: The name of the kind of resource such as "flavor", "role",
-            etc.
-        """
-        if isinstance(name, dict):
-            name = name['name']
-        if hasattr(self, "resource") and self.resource[0] == name:
-            LOG.debug("Return invalid resource (%s) value: %s" %
-                      (self.resource[0], self.resource[1]))
-            return self.resource[1]
-        if name in self._resources:
-            return self._resources[name]
-        return None
-
-
-def SimpleNegativeAutoTest(klass):
-    """This decorator registers a test function on basis of the class name."""
-    @attr(type=['negative'])
-    def generic_test(self):
-        if hasattr(self, '_schema'):
-            self.execute(self._schema)
-
-    cn = klass.__name__
-    cn = cn.replace('JSON', '')
-    cn = cn.replace('Test', '')
-    # NOTE(mkoderer): replaces uppercase chars inside the class name with '_'
-    lower_cn = re.sub('(?<!^)(?=[A-Z])', '_', cn).lower()
-    func_name = 'test_%s' % lower_cn
-    setattr(klass, func_name, generic_test)
-    return klass
-
-
-def call_until_true(func, duration, sleep_for):
-    """Call the given function until it returns True (and return True)
-
-    or until the specified duration (in seconds) elapses (and return False).
-
-    :param func: A zero argument callable that returns True on success.
-    :param duration: The number of seconds for which to attempt a
-        successful call of the function.
-    :param sleep_for: The number of seconds to sleep after an unsuccessful
-                      invocation of the function.
-    """
-    now = time.time()
-    timeout = now + duration
-    while now < timeout:
-        if func():
-            return True
-        time.sleep(sleep_for)
-        now = time.time()
-    return False
+        if msg is None:
+            msg = "sequence or collection is empty."
+        self.assertTrue(items, msg)

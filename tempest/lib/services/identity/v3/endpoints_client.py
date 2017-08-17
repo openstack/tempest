@@ -14,10 +14,11 @@
 #    under the License.
 
 """
-http://developer.openstack.org/api-ref-identity-v3.html#endpoints-v3
+https://developer.openstack.org/api-ref/identity/v3/index.html#service-catalog-and-endpoints
 """
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 
@@ -25,9 +26,17 @@ from tempest.lib.common import rest_client
 class EndPointsClient(rest_client.RestClient):
     api_version = "v3"
 
-    def list_endpoints(self):
-        """GET endpoints."""
-        resp, body = self.get('endpoints')
+    def list_endpoints(self, **params):
+        """List endpoints.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/#list-endpoints
+        """
+        url = 'endpoints'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
@@ -35,8 +44,9 @@ class EndPointsClient(rest_client.RestClient):
     def create_endpoint(self, **kwargs):
         """Create endpoint.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#createEndpoint
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#create-endpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.post('endpoints', post_body)
@@ -47,8 +57,9 @@ class EndPointsClient(rest_client.RestClient):
     def update_endpoint(self, endpoint_id, **kwargs):
         """Updates an endpoint with given parameters.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-identity-v3.html#updateEndpoint
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref/identity/v3/index.html#update-endpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)

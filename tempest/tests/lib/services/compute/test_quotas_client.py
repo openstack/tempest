@@ -49,22 +49,35 @@ class TestQuotasClient(base.BaseServiceTest):
         self.client = quotas_client.QuotasClient(
             fake_auth, 'compute', 'regionOne')
 
-    def _test_show_quota_set(self, bytes_body=False, user_id=None):
+    def _get_quota_set(self, detail):
+        if not detail:
+            return self.FAKE_QUOTA_SET
+        fake_quota_set = {"quota_set": {}}
+        for key, val in self.FAKE_QUOTA_SET['quota_set'].items():
+            fake_quota_set['quota_set'][key] = \
+                {'limit': val, 'reserved': 0, 'in_use': 0}
+        fake_quota_set['quota_set']['id'] = "8421f7be61064f50b680465c07f334af"
+        return fake_quota_set
+
+    def _test_show_quota_set(self, bytes_body=False, detail=False,
+                             user_id=None):
         if user_id:
             self.check_service_client_function(
                 self.client.show_quota_set,
                 'tempest.lib.common.rest_client.RestClient.get',
-                self.FAKE_QUOTA_SET,
+                self._get_quota_set(detail),
                 to_utf=bytes_body,
                 tenant_id=self.project_id,
+                detail=detail,
                 user_id=user_id)
         else:
             self.check_service_client_function(
                 self.client.show_quota_set,
                 'tempest.lib.common.rest_client.RestClient.get',
-                self.FAKE_QUOTA_SET,
+                self._get_quota_set(detail),
                 to_utf=bytes_body,
-                tenant_id=self.project_id)
+                tenant_id=self.project_id,
+                detail=detail)
 
     def test_show_quota_set_with_str_body(self):
         self._test_show_quota_set()
@@ -77,6 +90,9 @@ class TestQuotasClient(base.BaseServiceTest):
 
     def test_show_quota_set_for_user_with_bytes_body(self):
         self._test_show_quota_set(bytes_body=True, user_id=self.fake_user_id)
+
+    def test_show_quota_set_with_details(self):
+        self._test_show_quota_set(detail=True)
 
     def _test_show_default_quota_set(self, bytes_body=False):
         self.check_service_client_function(

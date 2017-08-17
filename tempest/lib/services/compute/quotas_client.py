@@ -14,6 +14,7 @@
 #    under the License.
 
 from oslo_serialization import jsonutils as json
+from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import quotas as schema
 from tempest.lib.common import rest_client
@@ -22,15 +23,29 @@ from tempest.lib.services.compute import base_compute_client
 
 class QuotasClient(base_compute_client.BaseComputeClient):
 
-    def show_quota_set(self, tenant_id, user_id=None):
-        """List the quota set for a tenant."""
+    def show_quota_set(self, tenant_id, user_id=None, detail=False):
+        """List the quota set for a tenant.
 
+        For a full list of available parameters, please refer to the official
+        API reference:
+        http://developer.openstack.org/api-ref-compute-v2.1.html/#show-a-quota
+        http://developer.openstack.org/api-ref-compute-v2.1.html/#show-the-detail-of-quota
+        """
+
+        params = {}
         url = 'os-quota-sets/%s' % tenant_id
+        if detail:
+            url += '/detail'
         if user_id:
-            url += '?user_id=%s' % user_id
+            params.update({'user_id': user_id})
+        if params:
+            url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.get_quota_set, resp, body)
+        if detail:
+            self.validate_response(schema.get_quota_set_details, resp, body)
+        else:
+            self.validate_response(schema.get_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_default_quota_set(self, tenant_id):
@@ -45,8 +60,9 @@ class QuotasClient(base_compute_client.BaseComputeClient):
     def update_quota_set(self, tenant_id, user_id=None, **kwargs):
         """Updates the tenant's quota limits for one or more resources.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updateQuota
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#update-quotas
         """
 
         post_body = json.dumps({'quota_set': kwargs})

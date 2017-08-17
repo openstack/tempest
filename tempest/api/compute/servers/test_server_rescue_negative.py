@@ -16,9 +16,10 @@
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -60,20 +61,6 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(cls.servers_client,
                                        cls.server_id, 'ACTIVE')
 
-    def _create_volume(self):
-        volume = self.volumes_extensions_client.create_volume(
-            size=CONF.volume.volume_size, display_name=data_utils.rand_name(
-                self.__class__.__name__ + '_volume'))['volume']
-        self.addCleanup(self.delete_volume, volume['id'])
-        waiters.wait_for_volume_status(self.volumes_extensions_client,
-                                       volume['id'], 'available')
-        return volume
-
-    def _detach(self, server_id, volume_id):
-        self.servers_client.detach_volume(server_id, volume_id)
-        waiters.wait_for_volume_status(self.volumes_extensions_client,
-                                       volume_id, 'available')
-
     def _unrescue(self, server_id):
         self.servers_client.unrescue_server(server_id)
         waiters.wait_for_server_status(self.servers_client,
@@ -84,10 +71,10 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server_id, 'ACTIVE')
 
-    @test.idempotent_id('cc3a883f-43c0-4fb6-a9bb-5579d64984ed')
+    @decorators.idempotent_id('cc3a883f-43c0-4fb6-a9bb-5579d64984ed')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     def test_rescue_paused_instance(self):
         # Rescue a paused server
         self.servers_client.pause_server(self.server_id)
@@ -98,14 +85,14 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.servers_client.rescue_server,
                           self.server_id)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot_server,
                           self.rescue_id, type='HARD')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')
     def test_rescue_non_existent_server(self):
         # Rescue a non-existing server
         non_existent_server = data_utils.rand_uuid()
@@ -113,19 +100,19 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.servers_client.rescue_server,
                           non_existent_server)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
     def test_rescued_vm_rebuild(self):
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rebuild_server,
                           self.rescue_id,
                           self.image_ref_alt)
 
-    @test.idempotent_id('d0ccac79-0091-4cf4-a1ce-26162d0cc55f')
+    @decorators.idempotent_id('d0ccac79-0091-4cf4-a1ce-26162d0cc55f')
     @test.services('volume')
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     def test_rescued_vm_attach_volume(self):
-        volume = self._create_volume()
+        volume = self.create_volume()
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id,
@@ -141,18 +128,15 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           volumeId=volume['id'],
                           device='/dev/%s' % self.device)
 
-    @test.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
+    @decorators.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
     @test.services('volume')
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     def test_rescued_vm_detach_volume(self):
-        volume = self._create_volume()
+        volume = self.create_volume()
 
         # Attach the volume to the server
-        self.servers_client.attach_volume(self.server_id,
-                                          volumeId=volume['id'],
-                                          device='/dev/%s' % self.device)
-        waiters.wait_for_volume_status(self.volumes_extensions_client,
-                                       volume['id'], 'in-use')
+        server = self.servers_client.show_server(self.server_id)['server']
+        self.attach_volume(server, volume, device='/dev/%s' % self.device)
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id,
@@ -160,7 +144,6 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.servers_client,
                                        self.server_id, 'RESCUE')
         # addCleanup is a LIFO queue
-        self.addCleanup(self._detach, self.server_id, volume['id'])
         self.addCleanup(self._unrescue, self.server_id)
 
         # Detach the volume from the server expecting failure

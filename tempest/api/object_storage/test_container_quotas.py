@@ -14,7 +14,8 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -47,9 +48,9 @@ class ContainerQuotasTest(base.BaseObjectTest):
         self.delete_containers()
         super(ContainerQuotasTest, self).tearDown()
 
-    @test.idempotent_id('9a0fb034-86af-4df0-86fa-f8bd7db21ae0')
+    @decorators.idempotent_id('9a0fb034-86af-4df0-86fa-f8bd7db21ae0')
     @test.requires_ext(extension='container_quotas', service='object')
-    @test.attr(type="smoke")
+    @decorators.attr(type="smoke")
     def test_upload_valid_object(self):
         """Attempts to uploads an object smaller than the bytes quota."""
         object_name = data_utils.rand_name(name="TestObject")
@@ -64,9 +65,9 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
-    @test.idempotent_id('22eeeb2b-3668-4160-baef-44790f65a5a0')
+    @decorators.idempotent_id('22eeeb2b-3668-4160-baef-44790f65a5a0')
     @test.requires_ext(extension='container_quotas', service='object')
-    @test.attr(type="smoke")
+    @decorators.attr(type="smoke")
     def test_upload_large_object(self):
         """Attempts to upload an object larger than the bytes quota."""
         object_name = data_utils.rand_name(name="TestObject")
@@ -81,9 +82,9 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
-    @test.idempotent_id('3a387039-697a-44fc-a9c0-935de31f426b')
+    @decorators.idempotent_id('3a387039-697a-44fc-a9c0-935de31f426b')
     @test.requires_ext(extension='container_quotas', service='object')
-    @test.attr(type="smoke")
+    @decorators.attr(type="smoke")
     def test_upload_too_many_objects(self):
         """Attempts to upload many objects that exceeds the count limit."""
         for _ in range(QUOTA_COUNT):

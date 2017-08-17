@@ -24,8 +24,12 @@ class HostsClient(rest_client.RestClient):
     api_version = "v2"
 
     def list_hosts(self, **params):
-        """Lists all hosts."""
+        """Lists all hosts.
 
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#list-all-hosts
+        """
         url = 'os-hosts'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -33,4 +37,12 @@ class HostsClient(rest_client.RestClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_host(self, host_name):
+        """Show host details."""
+        url = 'os-hosts/%s' % host_name
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
         return rest_client.ResponseBody(resp, body)

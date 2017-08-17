@@ -23,8 +23,9 @@ class EndpointsClient(rest_client.RestClient):
     def create_endpoint(self, **kwargs):
         """Create an endpoint for service.
 
-        Available params: http://developer.openstack.org/
-                          api-ref-identity-v2-ext.html#createEndpoint
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#create-endpoint-template
         """
 
         post_body = json.dumps({'endpoint': kwargs})

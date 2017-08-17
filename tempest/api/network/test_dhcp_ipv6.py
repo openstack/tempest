@@ -13,16 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import random
 
-import six
+import netaddr
+from oslo_utils import netutils
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
+from tempest.common.utils import net_info
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -30,7 +31,7 @@ CONF = config.CONF
 class NetworksTestDHCPv6(base.BaseNetworkTest):
     _ip_version = 6
 
-    """ Test DHCPv6 specific features using SLAAC, stateless and
+    """Test DHCPv6 specific features using SLAAC, stateless and
     stateful settings for subnets. Also it shall check dual-stack
     functionality (IPv4 + IPv6 together).
     The tests include:
@@ -66,7 +67,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         body = self.ports_client.list_ports()
         ports = body['ports']
         for port in ports:
-            if (port['device_owner'].startswith('network:router_interface') and
+            if (net_info.is_router_interface_port(port) and
                 port['device_id'] in [r['id'] for r in self.routers]):
                 self.routers_client.remove_router_interface(port['device_id'],
                                                             port_id=port['id'])
@@ -92,11 +93,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         port_mac = data_utils.rand_mac_address()
         port = self.create_port(self.network, mac_address=port_mac)
         real_ip = next(iter(port['fixed_ips']), None)['ip_address']
-        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
-                                                   port_mac).format()
+        eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+            subnet['cidr'], port_mac))
         return real_ip, eui_ip
 
-    @test.idempotent_id('e5517e62-6f16-430d-a672-f80875493d4c')
+    @decorators.idempotent_id('e5517e62-6f16-430d-a672-f80875493d4c')
     def test_dhcpv6_stateless_eui64(self):
         # NOTE: When subnets configured with RAs SLAAC (AOM=100) and DHCP
         # stateless (AOM=110) both for radvd and dnsmasq, port shall receive
@@ -114,7 +115,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                               'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
                                  real_ip, eui_ip, ra_mode, add_mode))
 
-    @test.idempotent_id('ae2f4a5d-03ff-4c42-a3b0-ce2fcb7ea832')
+    @decorators.idempotent_id('ae2f4a5d-03ff-4c42-a3b0-ce2fcb7ea832')
     def test_dhcpv6_stateless_no_ra(self):
         # NOTE: When subnets configured with dnsmasq SLAAC and DHCP stateless
         # and there is no radvd, port shall receive IP address calculated
@@ -125,7 +126,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
+            kwargs = dict((k, v) for k, v in kwargs.items() if v)
             real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
@@ -135,7 +136,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                  ra_mode if ra_mode else "Off",
                                  add_mode if add_mode else "Off"))
 
-    @test.idempotent_id('81f18ef6-95b5-4584-9966-10d480b7496a')
+    @decorators.idempotent_id('81f18ef6-95b5-4584-9966-10d480b7496a')
     def test_dhcpv6_invalid_options(self):
         """Different configurations for radvd and dnsmasq are not allowed"""
         for ra_mode, add_mode in (
@@ -153,7 +154,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                               self.network,
                               **kwargs)
 
-    @test.idempotent_id('21635b6f-165a-4d42-bf49-7d195e47342f')
+    @decorators.idempotent_id('21635b6f-165a-4d42-bf49-7d195e47342f')
     def test_dhcpv6_stateless_no_ra_no_dhcp(self):
         # NOTE: If no radvd option and no dnsmasq option is configured
         # port shall receive IP from fixed IPs list of subnet.
@@ -165,7 +166,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                              'but shall be taken from fixed IPs') % (
                                 real_ip, eui_ip))
 
-    @test.idempotent_id('4544adf7-bb5f-4bdc-b769-b3e77026cef2')
+    @decorators.idempotent_id('4544adf7-bb5f-4bdc-b769-b3e77026cef2')
     def test_dhcpv6_two_subnets(self):
         # NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
         # stateless and other IPv6 is with DHCP stateful, port shall receive
@@ -188,10 +189,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, **kwargs_dhcp)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
-                    subnet_slaac['cidr'],
-                    port_mac
-                ).format()
+                eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+                    subnet_slaac['cidr'], port_mac))
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
@@ -214,7 +213,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 self.assertIn(netaddr.IPAddress(real_dhcp_ip),
                               netaddr.IPNetwork(subnet_dhcp['cidr']), msg)
 
-    @test.idempotent_id('4256c61d-c538-41ea-9147-3c450c36669e')
+    @decorators.idempotent_id('4256c61d-c538-41ea-9147-3c450c36669e')
     def test_dhcpv6_64_subnets(self):
         # NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
         # stateless and other IPv4 is with DHCP of IPv4, port shall receive
@@ -236,10 +235,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                         self.network, ip_version=4)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
-                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
-                    subnet_slaac['cidr'],
-                    port_mac
-                ).format()
+                eui_ip = str(netutils.get_ipv6_addr_by_EUI64(
+                    subnet_slaac['cidr'], port_mac))
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
@@ -257,7 +254,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 self.assertIn(netaddr.IPAddress(real_dhcp_ip),
                               netaddr.IPNetwork(subnet_dhcp['cidr']), msg)
 
-    @test.idempotent_id('4ab211a0-276f-4552-9070-51e27f58fecf')
+    @decorators.idempotent_id('4ab211a0-276f-4552-9070-51e27f58fecf')
     def test_dhcp_stateful(self):
         # NOTE: With all options below, DHCPv6 shall allocate address from
         # subnet pool to port.
@@ -268,7 +265,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
+            kwargs = dict((k, v) for k, v in kwargs.items() if v)
             subnet = self.create_subnet(self.network, **kwargs)
             port = self.create_port(self.network)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
@@ -278,7 +275,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             self.assertIn(netaddr.IPAddress(port_ip),
                           netaddr.IPNetwork(subnet['cidr']), msg)
 
-    @test.idempotent_id('51a5e97f-f02e-4e4e-9a17-a69811d300e3')
+    @decorators.idempotent_id('51a5e97f-f02e-4e4e-9a17-a69811d300e3')
     def test_dhcp_stateful_fixedips(self):
         # NOTE: With all options below, port shall be able to get
         # requested IP from fixed IP range not depending on
@@ -290,7 +287,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
+            kwargs = dict((k, v) for k, v in kwargs.items() if v)
             subnet = self.create_subnet(self.network, **kwargs)
             ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
                                        subnet["allocation_pools"][0]["end"])
@@ -306,7 +303,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                               "port create request: %s") % (
                                  port_ip, ip))
 
-    @test.idempotent_id('98244d88-d990-4570-91d4-6b25d70d08af')
+    @decorators.idempotent_id('98244d88-d990-4570-91d4-6b25d70d08af')
     def test_dhcp_stateful_fixedips_outrange(self):
         # NOTE: When port gets IP address from fixed IP range it
         # shall be checked if it's from subnets range.
@@ -323,7 +320,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                           fixed_ips=[{'subnet_id': subnet['id'],
                                       'ip_address': ip}])
 
-    @test.idempotent_id('57b8302b-cba9-4fbb-8835-9168df029051')
+    @decorators.idempotent_id('57b8302b-cba9-4fbb-8835-9168df029051')
     def test_dhcp_stateful_fixedips_duplicate(self):
         # NOTE: When port gets IP address from fixed IP range it
         # shall be checked if it's not duplicate.
@@ -339,7 +336,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                              {'subnet_id': subnet['id'],
                               'ip_address': ip}])
         self.assertRaisesRegex(lib_exc.Conflict,
-                               "object with that identifier already exists",
+                               "IpAddressAlreadyAllocated|IpAddressInUse",
                                self.create_port,
                                self.network,
                                fixed_ips=[{'subnet_id': subnet['id'],
@@ -347,15 +344,13 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     def _create_subnet_router(self, kwargs):
         subnet = self.create_subnet(self.network, **kwargs)
-        router = self.create_router(
-            router_name=data_utils.rand_name("routerv6-"),
-            admin_state_up=True)
+        router = self.create_router(admin_state_up=True)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
         body = self.ports_client.show_port(port['port_id'])
         return subnet, body['port']
 
-    @test.idempotent_id('e98f65db-68f4-4330-9fea-abd8c5192d4d')
+    @decorators.idempotent_id('e98f65db-68f4-4330-9fea-abd8c5192d4d')
     def test_dhcp_stateful_router(self):
         # NOTE: With all options below the router interface shall
         # receive DHCPv6 IP address from allocation pool.
@@ -365,7 +360,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         ):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
-            kwargs = dict((k, v) for k, v in six.iteritems(kwargs) if v)
+            kwargs = dict((k, v) for k, v in kwargs.items() if v)
             subnet, port = self._create_subnet_router(kwargs)
             port_ip = next(iter(port['fixed_ips']), None)['ip_address']
             self._clean_network()

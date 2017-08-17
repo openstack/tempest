@@ -1,0 +1,5 @@
+---
+upgrade:
+  - the already deprecated tempest-cleanup standalone command has been
+    removed. The corresponding functionalities can be accessed through
+    the unified `tempest` command (`tempest cleanup`).

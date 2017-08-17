@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    When receiving nullable list as a response body, tempest.lib
+    rest_client module raised an exception without valid json
+    deserialization. A new release fixes this bug.

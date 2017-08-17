@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
+import six
 
 from tempest.common import image as common_image
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 import tempest.test
 
@@ -60,7 +60,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
         """Wrapper that returns a test image."""
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + "-instance")
+            name = data_utils.rand_name(cls.__name__ + "-image")
             kwargs['name'] = name
 
         params = cls._get_create_params(**kwargs)
@@ -94,7 +94,7 @@ class BaseV1ImageTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageTest, cls).setup_clients()
-        cls.client = cls.os.image_client
+        cls.client = cls.os_primary.image_client
 
     @classmethod
     def _get_create_params(cls, **kwargs):
@@ -108,7 +108,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageMembersTest, cls).setup_clients()
-        cls.image_member_client = cls.os.image_member_client
+        cls.image_member_client = cls.os_primary.image_member_client
         cls.alt_image_member_client = cls.os_alt.image_member_client
         cls.alt_img_cli = cls.os_alt.image_client
 
@@ -118,13 +118,12 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         cls.alt_tenant_id = cls.alt_image_member_client.tenant_id
 
     def _create_image(self):
-        image_file = moves.cStringIO(data_utils.random_bytes())
+        image_file = six.BytesIO(data_utils.random_bytes())
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   is_public=False,
                                   data=image_file)
-        image_id = image['id']
-        return image_id
+        return image['id']
 
 
 class BaseV2ImageTest(BaseImageTest):
@@ -139,10 +138,27 @@ class BaseV2ImageTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2ImageTest, cls).setup_clients()
-        cls.client = cls.os.image_client_v2
-        cls.namespaces_client = cls.os.namespaces_client
-        cls.resource_types_client = cls.os.resource_types_client
-        cls.schemas_client = cls.os.schemas_client
+        cls.client = cls.os_primary.image_client_v2
+        cls.namespaces_client = cls.os_primary.namespaces_client
+        cls.resource_types_client = cls.os_primary.resource_types_client
+        cls.namespace_properties_client =\
+            cls.os_primary.namespace_properties_client
+        cls.namespace_objects_client = cls.os_primary.namespace_objects_client
+        cls.namespace_tags_client = cls.os_primary.namespace_tags_client
+        cls.schemas_client = cls.os_primary.schemas_client
+        cls.versions_client = cls.os_primary.image_versions_client
+
+    def create_namespace(cls, namespace_name=None, visibility='public',
+                         description='Tempest', protected=False,
+                         **kwargs):
+        if not namespace_name:
+            namespace_name = data_utils.rand_name('test-ns')
+        kwargs.setdefault('display_name', namespace_name)
+        namespace = cls.namespaces_client.create_namespace(
+            namespace=namespace_name, visibility=visibility,
+            description=description, protected=protected, **kwargs)
+        cls.addCleanup(cls.namespaces_client.delete_namespace, namespace_name)
+        return namespace
 
 
 class BaseV2MemberImageTest(BaseV2ImageTest):
@@ -152,7 +168,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2MemberImageTest, cls).setup_clients()
-        cls.image_member_client = cls.os.image_member_client_v2
+        cls.image_member_client = cls.os_primary.image_member_client_v2
         cls.alt_image_member_client = cls.os_alt.image_member_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
 
@@ -171,9 +187,8 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         image = self.client.create_image(name=name,
                                          container_format='bare',
                                          disk_format='raw')
-        image_id = image['id']
-        self.addCleanup(self.client.delete_image, image_id)
-        return image_id
+        self.addCleanup(self.client.delete_image, image['id'])
+        return image['id']
 
 
 class BaseV1ImageAdminTest(BaseImageTest):
@@ -182,8 +197,8 @@ class BaseV1ImageAdminTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV1ImageAdminTest, cls).setup_clients()
-        cls.client = cls.os.image_client
-        cls.admin_client = cls.os_adm.image_client
+        cls.client = cls.os_primary.image_client
+        cls.admin_client = cls.os_admin.image_client
 
 
 class BaseV2ImageAdminTest(BaseImageTest):
@@ -192,5 +207,5 @@ class BaseV2ImageAdminTest(BaseImageTest):
     @classmethod
     def setup_clients(cls):
         super(BaseV2ImageAdminTest, cls).setup_clients()
-        cls.client = cls.os.image_client_v2
-        cls.admin_client = cls.os_adm.image_client_v2
+        cls.client = cls.os_primary.image_client_v2
+        cls.admin_client = cls.os_admin.image_client_v2

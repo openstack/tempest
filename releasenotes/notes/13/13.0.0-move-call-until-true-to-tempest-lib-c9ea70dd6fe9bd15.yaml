@@ -1,0 +1,5 @@
+---
+deprecations:
+  - The ``call_until_true`` function is moved from the ``tempest.test`` module
+   to the ``tempest.lib.common.utils.test_utils`` module. Backward
+   compatibility is preserved until Ocata.

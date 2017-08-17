@@ -14,29 +14,28 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
-from tempest import test
+from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
-    @test.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
-    def test_create_get_delete_token(self):
+    @decorators.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
+    def test_create_check_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
         # first:create a tenant
-        tenant_name = data_utils.rand_name(name='tenant')
-        tenant = self.tenants_client.create_tenant(name=tenant_name)['tenant']
-        # Delete the tenant at the end of the test
-        self.addCleanup(self.tenants_client.delete_tenant, tenant['id'])
+        tenant = self.setup_test_tenant()
         # second:create a user
-        user = self.users_client.create_user(name=user_name,
-                                             password=user_password,
-                                             tenantId=tenant['id'],
-                                             email='')['user']
-        # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=user_name,
+                                     password=user_password,
+                                     tenantId=tenant['id'],
+                                     email='')
         # then get a token for the user
         body = self.token_client.auth(user_name,
                                       user_password,
@@ -45,6 +44,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                          tenant['name'])
         # Perform GET Token
         token_id = body['token']['id']
+        self.client.check_token_existence(token_id)
         token_details = self.client.show_token(token_id)['access']
         self.assertEqual(token_id, token_details['token']['id'])
         self.assertEqual(user['id'], token_details['user']['id'])
@@ -53,8 +53,11 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                          token_details['token']['tenant']['name'])
         # then delete the token
         self.client.delete_token(token_id)
+        self.assertRaises(lib_exc.NotFound,
+                          self.client.check_token_existence,
+                          token_id)
 
-    @test.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
+    @decorators.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
     def test_rescope_token(self):
         """An unscoped token can be requested
 
@@ -65,32 +68,20 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
         tenant_id = None  # No default tenant so will get unscoped token.
-        email = ''
-        user = self.users_client.create_user(name=user_name,
-                                             password=user_password,
-                                             tenantId=tenant_id,
-                                             email=email)['user']
-        # Delete the user at the end of the test
-        self.addCleanup(self.users_client.delete_user, user['id'])
+        user = self.create_test_user(name=user_name,
+                                     password=user_password,
+                                     tenantId=tenant_id,
+                                     email='')
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant')
-        tenant1 = self.tenants_client.create_tenant(
-            name=tenant1_name)['tenant']
-        # Delete the tenant at the end of the test
-        self.addCleanup(self.tenants_client.delete_tenant, tenant1['id'])
+        tenant1 = self.setup_test_tenant(name=tenant1_name)
 
         tenant2_name = data_utils.rand_name(name='tenant')
-        tenant2 = self.tenants_client.create_tenant(
-            name=tenant2_name)['tenant']
-        # Delete the tenant at the end of the test
-        self.addCleanup(self.tenants_client.delete_tenant, tenant2['id'])
+        tenant2 = self.setup_test_tenant(name=tenant2_name)
 
         # Create a role
-        role_name = data_utils.rand_name(name='role')
-        role = self.roles_client.create_role(name=role_name)['role']
-        # Delete the role at the end of the test
-        self.addCleanup(self.roles_client.delete_role, role['id'])
+        role = self.setup_test_role()
 
         # Grant the user the role on the tenants.
         self.roles_client.create_user_role_on_project(tenant1['id'],
@@ -118,3 +109,25 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         # Use the unscoped token to get a token scoped to tenant2
         body = self.token_client.auth_token(token_id,
                                             tenant=tenant2_name)
+
+    @decorators.idempotent_id('ca3ea6f7-ed08-4a61-adbd-96906456ad31')
+    def test_list_endpoints_for_token(self):
+        # get a token for the user
+        creds = self.os_primary.credentials
+        username = creds.username
+        password = creds.password
+        tenant_name = creds.tenant_name
+        token = self.token_client.auth(username,
+                                       password,
+                                       tenant_name)['token']
+        endpoints = self.client.list_endpoints_for_token(
+            token['id'])['endpoints']
+        self.assertIsInstance(endpoints, list)
+        # Store list of service names
+        service_names = [e['name'] for e in endpoints]
+        # Get the list of available services.
+        available_services = [s[0] for s in list(
+            CONF.service_available.items()) if s[1] is True]
+        # Verify that all available services are present.
+        for service in available_services:
+            self.assertIn(service, service_names)

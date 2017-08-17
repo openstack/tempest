@@ -7,16 +7,16 @@ What are these tests?
 ---------------------
 
 Unit tests are the self checks for Tempest. They provide functional
-verification and regression checking for the internal components of tempest.
-They should be used to just verify that the individual pieces of tempest are
+verification and regression checking for the internal components of Tempest.
+They should be used to just verify that the individual pieces of Tempest are
 working as expected. They should not require an external service to be running
-and should be able to run solely from the tempest tree.
+and should be able to run solely from the Tempest tree.
 
-Why are these tests in tempest?
+Why are these tests in Tempest?
 -------------------------------
 These tests exist to make sure that the mechanisms that we use inside of
-tempest to are valid and remain functional. They are only here for self
-validation of tempest.
+Tempest are valid and remain functional. They are only here for self
+validation of Tempest.
 
 
 Scope of these tests

@@ -19,7 +19,7 @@ import pep8
 
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
-                  'ironic', 'savanna', 'heat', 'sahara']
+                  'ironic', 'heat', 'sahara']
 
 PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
@@ -273,6 +273,27 @@ def dont_use_config_in_tempest_lib(logical_line, filename):
         yield(0, msg)
 
 
+def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
+                                          filename):
+    """Check admin tests should exist under admin path
+
+    T115
+    """
+
+    if 'tempest/api/' not in filename:
+        return
+
+    if pep8.noqa(physical_line):
+        return
+
+    if not re.match('class .*Test.*\(.*Admin.*\):', logical_line):
+        return
+
+    if not re.match('.\/tempest\/api\/.*\/admin\/.*', filename):
+        msg = 'T115: All admin tests should exist under admin path.'
+        yield(0, msg)
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -287,3 +308,4 @@ def factory(register):
     register(dont_import_local_tempest_into_lib)
     register(dont_use_config_in_tempest_lib)
     register(use_rand_uuid_instead_of_uuid4)
+    register(dont_put_admin_tests_on_nonadmin_path)

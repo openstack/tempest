@@ -13,12 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ServicesTestJSON(base.BaseIdentityV2AdminTest):
@@ -30,7 +28,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
                           service_id)
 
-    @test.idempotent_id('84521085-c6e6-491c-9a08-ec9f70f90110')
+    @decorators.idempotent_id('84521085-c6e6-491c-9a08-ec9f70f90110')
     def test_create_get_delete_service(self):
         # GET Service
         # Creating a Service
@@ -40,10 +38,9 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         service_data = self.services_client.create_service(
             name=name, type=s_type,
             description=description)['OS-KSADM:service']
-        self.assertFalse(service_data['id'] is None)
+        self.assertIsNotNone(service_data['id'])
         self.addCleanup(self._del_service, service_data['id'])
         # Verifying response body of create service
-        self.assertIn('id', service_data)
         self.assertIn('name', service_data)
         self.assertEqual(name, service_data['name'])
         self.assertIn('type', service_data)
@@ -65,7 +62,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(fetched_service['description'],
                          service_data['description'])
 
-    @test.idempotent_id('5d3252c8-e555-494b-a6c8-e11d7335da42')
+    @decorators.idempotent_id('5d3252c8-e555-494b-a6c8-e11d7335da42')
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
@@ -79,12 +76,12 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIn('type', service)
         self.assertEqual(s_type, service['type'])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('34ea6489-012d-4a86-9038-1287cadd5eca')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('34ea6489-012d-4a86-9038-1287cadd5eca')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         services = []
-        for _ in moves.xrange(3):
+        for _ in range(3):
             name = data_utils.rand_name('service')
             s_type = data_utils.rand_name('type')
             description = data_utils.rand_name('description')

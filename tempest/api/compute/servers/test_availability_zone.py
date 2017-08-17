@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import test
+from tempest.lib import decorators
 
 
 class AZV2TestJSON(base.BaseV2ComputeTest):
@@ -25,8 +25,8 @@ class AZV2TestJSON(base.BaseV2ComputeTest):
         super(AZV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_client
 
-    @test.idempotent_id('a8333aa2-205c-449f-a828-d38c2489bf25')
+    @decorators.idempotent_id('a8333aa2-205c-449f-a828-d38c2489bf25')
     def test_get_availability_zone_list_with_non_admin_user(self):
         # List of availability zone with non-administrator user
         availability_zone = self.client.list_availability_zones()
-        self.assertTrue(len(availability_zone['availabilityZoneInfo']) > 0)
+        self.assertNotEmpty(availability_zone['availabilityZoneInfo'])

@@ -13,7 +13,7 @@
 
 import fixtures
 
-from tempest.services.volume.base import base_v3_client
+from tempest.lib.services.volume import base_client
 
 
 class APIMicroversionFixture(fixtures.Fixture):
@@ -23,8 +23,8 @@ class APIMicroversionFixture(fixtures.Fixture):
 
     def _setUp(self):
         super(APIMicroversionFixture, self)._setUp()
-        base_v3_client.VOLUME_MICROVERSION = self.volume_microversion
+        base_client.VOLUME_MICROVERSION = self.volume_microversion
         self.addCleanup(self._reset_volume_microversion)
 
     def _reset_volume_microversion(self):
-        base_v3_client.VOLUME_MICROVERSION = None
+        base_client.VOLUME_MICROVERSION = None

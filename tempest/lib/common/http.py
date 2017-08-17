@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 import urllib3
 
 
@@ -39,7 +40,9 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
         class Response(dict):
             def __init__(self, info):
                 for key, value in info.getheaders().items():
-                    self[key.lower()] = value
+                    # We assume HTTP header name to be string, not random
+                    # bytes, thus ensure we have string keys.
+                    self[six.u(key).lower()] = value
                 self.status = info.status
                 self['status'] = str(self.status)
                 self.reason = info.reason

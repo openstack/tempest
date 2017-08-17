@@ -13,20 +13,21 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils import data_utils as utils
-from tempest import test
+from tempest.common import waiters
+from tempest.lib.common.utils import data_utils as utils
+from tempest.lib import decorators
 
 
-class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
+class QosSpecsTestJSON(base.BaseVolumeAdminTest):
     """Test the Cinder QoS-specs.
 
     Tests for  create, list, delete, show, associate,
-    disassociate, set/unset key V2 APIs.
+    disassociate, set/unset key APIs.
     """
 
     @classmethod
     def resource_setup(cls):
-        super(QosSpecsV2TestJSON, cls).resource_setup()
+        super(QosSpecsTestJSON, cls).resource_setup()
         # Create admin qos client
         # Create a test shared qos-specs for tests
         cls.qos_name = utils.rand_name(cls.__name__ + '-QoS')
@@ -54,17 +55,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.associate_qos(
             self.created_qos['id'], vol_type_id)
 
-    def _test_get_association_qos(self):
-        body = self.admin_volume_qos_client.show_association_qos(
-            self.created_qos['id'])['qos_associations']
-
-        associations = []
-        for association in body:
-            associations.append(association['id'])
-
-        return associations
-
-    @test.idempotent_id('7e15f883-4bef-49a9-95eb-f94209a1ced1')
+    @decorators.idempotent_id('7e15f883-4bef-49a9-95eb-f94209a1ced1')
     def test_create_delete_qos_with_front_end_consumer(self):
         """Tests the creation and deletion of QoS specs
 
@@ -72,7 +63,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         """
         self._create_delete_test_qos_with_given_consumer('front-end')
 
-    @test.idempotent_id('b115cded-8f58-4ee4-aab5-9192cfada08f')
+    @decorators.idempotent_id('b115cded-8f58-4ee4-aab5-9192cfada08f')
     def test_create_delete_qos_with_back_end_consumer(self):
         """Tests the creation and deletion of QoS specs
 
@@ -80,7 +71,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         """
         self._create_delete_test_qos_with_given_consumer('back-end')
 
-    @test.idempotent_id('f88d65eb-ea0d-487d-af8d-71f4011575a4')
+    @decorators.idempotent_id('f88d65eb-ea0d-487d-af8d-71f4011575a4')
     def test_create_delete_qos_with_both_consumer(self):
         """Tests the creation and deletion of QoS specs
 
@@ -88,7 +79,7 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         """
         self._create_delete_test_qos_with_given_consumer('both')
 
-    @test.idempotent_id('7aa214cc-ac1a-4397-931f-3bb2e83bb0fd')
+    @decorators.idempotent_id('7aa214cc-ac1a-4397-931f-3bb2e83bb0fd')
     def test_get_qos(self):
         """Tests the detail of a given qos-specs"""
         body = self.admin_volume_qos_client.show_qos(
@@ -96,13 +87,13 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.assertEqual(self.qos_name, body['name'])
         self.assertEqual(self.qos_consumer, body['consumer'])
 
-    @test.idempotent_id('75e04226-bcf7-4595-a34b-fdf0736f38fc')
+    @decorators.idempotent_id('75e04226-bcf7-4595-a34b-fdf0736f38fc')
     def test_list_qos(self):
         """Tests the list of all qos-specs"""
         body = self.admin_volume_qos_client.list_qos()['qos_specs']
         self.assertIn(self.created_qos, body)
 
-    @test.idempotent_id('ed00fd85-4494-45f2-8ceb-9e2048919aed')
+    @decorators.idempotent_id('ed00fd85-4494-45f2-8ceb-9e2048919aed')
     def test_set_unset_qos_key(self):
         """Test the addition of a specs key to qos-specs"""
         args = {'iops_bytes': '500'}
@@ -119,13 +110,14 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.unset_qos_key(self.created_qos['id'],
                                                    keys)
         operation = 'qos-key-unset'
-        self.admin_volume_qos_client.wait_for_qos_operations(
-            self.created_qos['id'], operation, keys)
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'],
+                                        operation, keys)
         body = self.admin_volume_qos_client.show_qos(
             self.created_qos['id'])['qos_specs']
         self.assertNotIn(keys[0], body['specs'])
 
-    @test.idempotent_id('1dd93c76-6420-485d-a771-874044c416ac')
+    @decorators.idempotent_id('1dd93c76-6420-485d-a771-874044c416ac')
     def test_associate_disassociate_qos(self):
         """Test the following operations :
 
@@ -145,8 +137,9 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
             self._test_associate_qos(vol_type[i]['id'])
 
         # get the association of the qos-specs
-        associations = self._test_get_association_qos()
-
+        body = self.admin_volume_qos_client.show_association_qos(
+            self.created_qos['id'])['qos_associations']
+        associations = [association['id'] for association in body]
         for i in range(0, 3):
             self.assertIn(vol_type[i]['id'], associations)
 
@@ -154,20 +147,13 @@ class QosSpecsV2TestJSON(base.BaseVolumeAdminTest):
         self.admin_volume_qos_client.disassociate_qos(
             self.created_qos['id'], vol_type[0]['id'])
         operation = 'disassociate'
-        self.admin_volume_qos_client.wait_for_qos_operations(
-            self.created_qos['id'], operation, vol_type[0]['id'])
-        associations = self._test_get_association_qos()
-        self.assertNotIn(vol_type[0]['id'], associations)
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'], operation,
+                                        vol_type[0]['id'])
 
         # disassociate all volume-types from qos-specs
         self.admin_volume_qos_client.disassociate_all_qos(
             self.created_qos['id'])
         operation = 'disassociate-all'
-        self.admin_volume_qos_client.wait_for_qos_operations(
-            self.created_qos['id'], operation)
-        associations = self._test_get_association_qos()
-        self.assertEmpty(associations)
-
-
-class QosSpecsV1TestJSON(QosSpecsV2TestJSON):
-    _api_version = 1
+        waiters.wait_for_qos_operations(self.admin_volume_qos_client,
+                                        self.created_qos['id'], operation)

@@ -69,12 +69,60 @@ class TestSshClient(base.TestCase):
             mock.sentinel.aa)
         expected_connect = [mock.call(
             'localhost',
+            port=22,
             username='root',
             pkey=None,
             key_filename=None,
             look_for_keys=False,
             timeout=10.0,
-            password=None
+            password=None,
+            sock=None
+        )]
+        self.assertEqual(expected_connect, client_mock.connect.mock_calls)
+        self.assertEqual(0, s_mock.call_count)
+
+    def test_get_ssh_connection_over_ssh(self):
+        c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
+        proxy_client_mock = mock.MagicMock()
+        proxy_client_mock.connect.return_value = True
+        s_mock = self.patch('time.sleep')
+
+        c_mock.side_effect = [client_mock, proxy_client_mock]
+        aa_mock.return_value = mock.sentinel.aa
+
+        proxy_client = ssh.Client('proxy-host', 'proxy-user', timeout=2)
+        client = ssh.Client('localhost', 'root', timeout=2,
+                            proxy_client=proxy_client)
+        client._get_ssh_connection(sleep=1)
+
+        aa_mock.assert_has_calls([mock.call(), mock.call()])
+        proxy_client_mock.set_missing_host_key_policy.assert_called_once_with(
+            mock.sentinel.aa)
+        proxy_expected_connect = [mock.call(
+            'proxy-host',
+            port=22,
+            username='proxy-user',
+            pkey=None,
+            key_filename=None,
+            look_for_keys=False,
+            timeout=10.0,
+            password=None,
+            sock=None
+        )]
+        self.assertEqual(proxy_expected_connect,
+                         proxy_client_mock.connect.mock_calls)
+        client_mock.set_missing_host_key_policy.assert_called_once_with(
+            mock.sentinel.aa)
+        expected_connect = [mock.call(
+            'localhost',
+            port=22,
+            username='root',
+            pkey=None,
+            key_filename=None,
+            look_for_keys=False,
+            timeout=10.0,
+            password=None,
+            sock=proxy_client_mock.get_transport().open_session()
         )]
         self.assertEqual(expected_connect, client_mock.connect.mock_calls)
         self.assertEqual(0, s_mock.call_count)

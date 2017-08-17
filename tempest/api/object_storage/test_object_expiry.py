@@ -16,8 +16,8 @@
 import time
 
 from tempest.api.object_storage import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -54,8 +54,8 @@ class ObjectExpiryTest(base.BaseObjectTest):
         # actually expire, so figure out how many secs in the future that is.
         sleepy_time = int(resp['x-delete-at']) - int(time.time())
         sleepy_time = sleepy_time if sleepy_time > 0 else 0
-        resp, body = self.object_client.get_object(self.container_name,
-                                                   self.object_name)
+        resp, _ = self.object_client.get_object(self.container_name,
+                                                self.object_name)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 
@@ -81,14 +81,14 @@ class ObjectExpiryTest(base.BaseObjectTest):
                           self.container_name,
                           self.object_name)
 
-    @test.idempotent_id('fb024a42-37f3-4ba5-9684-4f40a7910b41')
+    @decorators.idempotent_id('fb024a42-37f3-4ba5-9684-4f40a7910b41')
     def test_get_object_after_expiry_time(self):
         # the 10s is important, because the get calls can take 3s each
         # some times
         metadata = {'X-Delete-After': '10'}
         self._test_object_expiry(metadata)
 
-    @test.idempotent_id('e592f18d-679c-48fe-9e36-4be5f47102c5')
+    @decorators.idempotent_id('e592f18d-679c-48fe-9e36-4be5f47102c5')
     def test_get_object_at_expiry_time(self):
         metadata = {'X-Delete-At': str(int(time.time()) + 10)}
         self._test_object_expiry(metadata)

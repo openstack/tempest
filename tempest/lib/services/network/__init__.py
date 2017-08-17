@@ -27,12 +27,16 @@ from tempest.lib.services.network.security_group_rules_client import \
     SecurityGroupRulesClient
 from tempest.lib.services.network.security_groups_client import \
     SecurityGroupsClient
+from tempest.lib.services.network.service_providers_client import \
+    ServiceProvidersClient
 from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
 from tempest.lib.services.network.subnets_client import SubnetsClient
+from tempest.lib.services.network.tags_client import TagsClient
 from tempest.lib.services.network.versions_client import NetworkVersionsClient
 
 __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'MeteringLabelRulesClient', 'MeteringLabelsClient',
-           'NetworksClient', 'PortsClient', 'QuotasClient', 'RoutersClient',
-           'SecurityGroupRulesClient', 'SecurityGroupsClient',
-           'SubnetpoolsClient', 'SubnetsClient', 'NetworkVersionsClient']
+           'NetworksClient', 'NetworkVersionsClient', 'PortsClient',
+           'QuotasClient', 'RoutersClient', 'SecurityGroupRulesClient',
+           'SecurityGroupsClient', 'ServiceProvidersClient',
+           'SubnetpoolsClient', 'SubnetsClient', 'TagsClient']

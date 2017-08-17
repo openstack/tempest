@@ -13,15 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from oslo_log import log as logging
 import testtools
 
-from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
@@ -59,45 +55,27 @@ class TestStampPattern(manager.ScenarioTest):
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
-    def _create_volume_snapshot(self, volume):
-        snapshot_name = data_utils.rand_name('scenario-snapshot')
-        snapshot = self.snapshots_client.create_snapshot(
-            volume_id=volume['id'], display_name=snapshot_name)['snapshot']
-
-        def cleaner():
-            self.snapshots_client.delete_snapshot(snapshot['id'])
-            try:
-                while self.snapshots_client.show_snapshot(
-                        snapshot['id'])['snapshot']:
-                    time.sleep(1)
-            except lib_exc.NotFound:
-                pass
-        self.addCleanup(cleaner)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume['id'], 'available')
-        waiters.wait_for_snapshot_status(self.snapshots_client,
-                                         snapshot['id'], 'available')
-        self.assertEqual(snapshot_name, snapshot['display_name'])
-        return snapshot
-
     def _wait_for_volume_available_on_the_system(self, ip_address,
                                                  private_key):
         ssh = self.get_remote_client(ip_address, private_key=private_key)
 
         def _func():
-            part = ssh.get_partitions()
-            LOG.debug("Partitions:%s" % part)
-            return CONF.compute.volume_device_name in part
+            disks = ssh.get_disks()
+            LOG.debug("Disks: %s", disks)
+            return CONF.compute.volume_device_name in disks
 
-        if not test.call_until_true(_func,
-                                    CONF.compute.build_timeout,
-                                    CONF.compute.build_interval):
-            raise exceptions.TimeoutException
+        if not test_utils.call_until_true(_func,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
+            raise lib_exc.TimeoutException
 
-    @decorators.skip_because(bug="1205344")
-    @test.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
+    @decorators.attr(type='slow')
+    @decorators.skip_because(bug="1664793")
+    @decorators.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
     @test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting an instance
@@ -107,10 +85,8 @@ class TestStampPattern(manager.ScenarioTest):
         # boot an instance and create a timestamp file in it
         volume = self.create_volume()
         server = self.create_server(
-            image_id=CONF.compute.image_ref,
             key_name=keypair['name'],
-            security_groups=security_group,
-            wait_until='ACTIVE')
+            security_groups=[{'name': security_group['name']}])
 
         # create and add floating IP to server1
         ip_for_server = self.get_server_ip(server)
@@ -124,7 +100,7 @@ class TestStampPattern(manager.ScenarioTest):
         self.nova_volume_detach(server, volume)
 
         # snapshot the volume
-        volume_snapshot = self._create_volume_snapshot(volume)
+        volume_snapshot = self.create_volume_snapshot(volume['id'])
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
@@ -137,7 +113,7 @@ class TestStampPattern(manager.ScenarioTest):
         server_from_snapshot = self.create_server(
             image_id=snapshot_image['id'],
             key_name=keypair['name'],
-            security_groups=security_group)
+            security_groups=[{'name': security_group['name']}])
 
         # create and add floating IP to server_from_snapshot
         ip_for_snapshot = self.get_server_ip(server_from_snapshot)

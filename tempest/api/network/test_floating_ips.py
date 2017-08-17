@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils import data_utils
 from tempest.common.utils import net_utils
 from tempest import config
+from tempest.lib import decorators
 from tempest import test
 
 CONF = config.CONF
@@ -46,6 +46,11 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+        if not CONF.network.public_network_id:
+            msg = "The public_network_id option must be specified."
+            raise cls.skipException(msg)
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
 
     @classmethod
     def resource_setup(cls):
@@ -55,15 +60,14 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         # Create network, subnet, router and add interface
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network, enable_dhcp=False)
-        cls.router = cls.create_router(data_utils.rand_name('router-'),
-                                       external_network_id=cls.ext_net_id)
+        cls.router = cls.create_router(external_network_id=cls.ext_net_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         # Create two ports one each for Creation and Updating of floatingIP
         for i in range(2):
             cls.create_port(cls.network)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e8718')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e8718')
     def test_create_list_show_update_delete_floating_ip(self):
         # Creates a floating IP
         body = self.floating_ips_client.create_floatingip(
@@ -118,7 +122,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(updated_floating_ip['fixed_ip_address'])
         self.assertIsNone(updated_floating_ip['router_id'])
 
-    @test.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
+    @decorators.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
     def test_floating_ip_delete_port(self):
         # Create a floating IP
         body = self.floating_ips_client.create_floatingip(
@@ -144,7 +148,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(shown_floating_ip['fixed_ip_address'])
         self.assertIsNone(shown_floating_ip['router_id'])
 
-    @test.idempotent_id('1bb2f731-fe5a-4b8c-8409-799ade1bed4d')
+    @decorators.idempotent_id('1bb2f731-fe5a-4b8c-8409-799ade1bed4d')
     def test_floating_ip_update_different_router(self):
         # Associate a floating IP to a port on a router
         body = self.floating_ips_client.create_floatingip(
@@ -156,8 +160,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(created_floating_ip['router_id'], self.router['id'])
         network2 = self.create_network()
         subnet2 = self.create_subnet(network2)
-        router2 = self.create_router(data_utils.rand_name('router-'),
-                                     external_network_id=self.ext_net_id)
+        router2 = self.create_router(external_network_id=self.ext_net_id)
         self.create_router_interface(router2['id'], subnet2['id'])
         port_other_router = self.create_port(network2)
         # Associate floating IP to the other port on another router
@@ -170,8 +173,8 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
                          port_other_router['id'])
         self.assertIsNotNone(updated_floating_ip['fixed_ip_address'])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('36de4bd0-f09c-43e3-a8e1-1decc1ffd3a5')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('36de4bd0-f09c-43e3-a8e1-1decc1ffd3a5')
     def test_create_floating_ip_specifying_a_fixed_ip_address(self):
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
@@ -188,7 +191,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             port_id=None)
         self.assertIsNone(floating_ip['floatingip']['port_id'])
 
-    @test.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
+    @decorators.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
     def test_create_update_floatingip_with_port_multiple_ip_address(self):
         # Find out ips that can be used for tests
         list_ips = net_utils.get_unused_ip_addresses(

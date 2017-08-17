@@ -100,8 +100,10 @@ common_show_server = {
                 'id': {'type': 'string'},
                 'links': parameter_types.links
             },
-            'additionalProperties': False,
-            'required': ['id', 'links']
+            # NOTE(gmann): This will be empty object if there is no
+            # flavor info present in DB. This can happen when flavor info is
+            # deleted after server creation.
+            'additionalProperties': False
         },
         'fault': {
             'type': 'object',
@@ -118,8 +120,8 @@ common_show_server = {
         },
         'user_id': {'type': 'string'},
         'tenant_id': {'type': 'string'},
-        'created': {'type': 'string'},
-        'updated': {'type': 'string'},
+        'created': parameter_types.date_time,
+        'updated': parameter_types.date_time,
         'progress': {'type': 'integer'},
         'metadata': {'type': 'object'},
         'links': parameter_types.links,
@@ -170,7 +172,7 @@ server_detail['properties'].update({
     # attributes.
     'OS-EXT-STS:task_state': {'type': ['string', 'null']},
     'OS-EXT-STS:vm_state': {'type': 'string'},
-    'OS-EXT-STS:power_state': {'type': 'integer'},
+    'OS-EXT-STS:power_state': parameter_types.power_state,
     'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
     'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
     'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
@@ -238,13 +240,16 @@ rescue_server = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
-        'properties': {
-            'adminPass': {'type': 'string'}
-        },
         'additionalProperties': False,
-        'required': ['adminPass']
     }
 }
+
+rescue_server_with_admin_pass = copy.deepcopy(rescue_server)
+rescue_server_with_admin_pass['response_body'].update(
+    {'properties': {'adminPass': {'type': 'string'}}})
+rescue_server_with_admin_pass['response_body'].update(
+    {'required': ['adminPass']})
+
 
 list_virtual_interfaces = {
     'status_code': [200],
@@ -399,7 +404,7 @@ instance_actions = {
         'request_id': {'type': 'string'},
         'user_id': {'type': 'string'},
         'project_id': {'type': 'string'},
-        'start_time': {'type': 'string'},
+        'start_time': parameter_types.date_time,
         'message': {'type': ['string', 'null']},
         'instance_uuid': {'type': 'string'}
     },
@@ -414,9 +419,14 @@ instance_action_events = {
         'type': 'object',
         'properties': {
             'event': {'type': 'string'},
-            'start_time': {'type': 'string'},
-            'finish_time': {'type': 'string'},
-            'result': {'type': 'string'},
+            'start_time': parameter_types.date_time,
+            # The finish_time, result and optionally traceback are all
+            # possibly None (null) until the event is actually finished.
+            # The traceback would only be set if there was an error, but
+            # when the event is complete both finish_time and result will
+            # be set.
+            'finish_time': parameter_types.date_time_or_null,
+            'result': {'type': ['string', 'null']},
             'traceback': {'type': ['string', 'null']}
         },
         'additionalProperties': False,
@@ -560,4 +570,27 @@ server_actions_confirm_resize = copy.deepcopy(
 
 update_attached_volume = {
     'status_code': [202]
+}
+
+evacuate_server = {
+    'status_code': [200]
+}
+
+evacuate_server_with_admin_pass = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'adminPass': {'type': 'string'}
+        },
+        'additionalProperties': False,
+        'required': ['adminPass']
+    }
+}
+
+show_server_diagnostics = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object'
+    }
 }

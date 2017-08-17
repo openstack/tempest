@@ -11,10 +11,10 @@
 #    under the License.
 from tempest.api.identity import base
 from tempest import clients
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest.lib import auth
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -32,22 +32,20 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.domains_client.update_domain(domain_id, enabled=False)
         self.domains_client.delete_domain(domain_id)
 
-    @test.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
+    @decorators.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
         dom_name = data_utils.rand_name('dom')
-        domain_body = self.domains_client.create_domain(dom_name)['domain']
+        domain_body = self.domains_client.create_domain(
+            name=dom_name)['domain']
         dom_id = domain_body['id']
         self.addCleanup(self._delete_domain, dom_id)
 
         # create a project in the domain
-        proj_name = data_utils.rand_name('proj')
-        proj_body = self.projects_client.create_project(
-            proj_name, domain_id=dom_id)['project']
+        proj_body = self.setup_test_project(domain_id=dom_id)
         proj_id = proj_body['id']
-        self.addCleanup(self.projects_client.delete_project, proj_id)
         self.assertEqual(proj_body['domain_id'], dom_id,
-                         "project " + proj_name +
+                         "project " + proj_body['name'] +
                          "doesn't have domain id " + dom_id)
 
         # create a user in the domain, with the previous project as his
@@ -69,7 +67,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         admin_role_id = admin_role['id']
 
         # grant the admin role to the user on his project
-        self.roles_client.assign_user_role_on_project(proj_id, user_id,
+        self.roles_client.create_user_role_on_project(proj_id, user_id,
                                                       admin_role_id)
 
         # create a new client with user's credentials (NOTE: unscoped token!)
@@ -81,7 +79,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         admin_client = clients.Manager(credentials=creds)
 
         # verify the user's token and see that it is scoped to the project
-        token, auth_data = admin_client.auth_provider.get_auth()
+        token, _ = admin_client.auth_provider.get_auth()
         result = admin_client.identity_v3_client.show_token(token)['token']
         self.assertEqual(result['project']['domain']['id'], dom_id)
         self.assertEqual(result['project']['id'], proj_id)

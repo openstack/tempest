@@ -1,0 +1,8 @@
+---
+upgrade:
+  - The default value for the ``volume_services`` option in the
+    ``volume_feature_enabled`` section has been changed from ``False``
+    to ``True``.
+deprecations:
+  - The ``volume_services`` option in the ``volume_feature_enabled`` section
+    is now deprecated.

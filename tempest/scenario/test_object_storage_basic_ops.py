@@ -13,28 +13,27 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
 
 class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
-    """Test swift basic ops.
-
-     * get swift stat.
-     * create container.
-     * upload a file to the created container.
-     * list container's objects and assure that the uploaded file is present.
-     * download the object and check the content
-     * delete object from container.
-     * list container's objects and assure that the deleted file is gone.
-     * delete a container.
-     * list containers and assure that the deleted container is gone.
-     * change ACL of the container and make sure it works successfully
-    """
-
-    @test.idempotent_id('b920faf1-7b8a-4657-b9fe-9c4512bfb381')
+    @decorators.idempotent_id('b920faf1-7b8a-4657-b9fe-9c4512bfb381')
     @test.services('object_storage')
     def test_swift_basic_ops(self):
+        """Test swift basic ops.
+
+         * get swift stat.
+         * create container.
+         * upload a file to the created container.
+         * list container's objects and assure that the uploaded file is
+         present.
+         * download the object and check the content
+         * delete object from container.
+         * list container's objects and assure that the deleted file is gone.
+         * delete a container.
+        """
         self.get_swift_stat()
         container_name = self.create_container()
         obj_name, obj_data = self.upload_object_to_container(container_name)
@@ -46,7 +45,8 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
                                               not_present_obj=[obj_name])
         self.delete_container(container_name)
 
-    @test.idempotent_id('916c7111-cb1f-44b2-816d-8f760e4ea910')
+    @decorators.idempotent_id('916c7111-cb1f-44b2-816d-8f760e4ea910')
+    @decorators.attr(type='slow')
     @test.services('object_storage')
     def test_swift_acl_anonymous_download(self):
         """This test will cover below steps:

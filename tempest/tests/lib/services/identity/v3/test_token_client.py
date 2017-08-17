@@ -20,7 +20,7 @@ from tempest.lib.common import rest_client
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v3 import token_client
 from tempest.tests import base
-from tempest.tests.lib import fake_http
+from tempest.tests.lib import fake_identity
 
 
 class TestTokenClientV3(base.TestCase):
@@ -31,10 +31,8 @@ class TestTokenClientV3(base.TestCase):
 
     def test_auth(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        response = fake_http.fake_http_response(
-            None, status=201,
-        )
-        body = {'access': {'token': 'fake_token'}}
+        response, body_text = fake_identity._fake_v3_response(None, None)
+        body = json.loads(body_text)
 
         with mock.patch.object(token_client_v3, 'post') as post_mock:
             post_mock.return_value = response, body
@@ -60,10 +58,8 @@ class TestTokenClientV3(base.TestCase):
 
     def test_auth_with_project_id_and_domain_id(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        response = fake_http.fake_http_response(
-            None, status=201,
-        )
-        body = {'access': {'token': 'fake_token'}}
+        response, body_text = fake_identity._fake_v3_response(None, None)
+        body = json.loads(body_text)
 
         with mock.patch.object(token_client_v3, 'post') as post_mock:
             post_mock.return_value = response, body
@@ -103,10 +99,8 @@ class TestTokenClientV3(base.TestCase):
 
     def test_auth_with_tenant(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        response = fake_http.fake_http_response(
-            None, status=201,
-        )
-        body = {'access': {'token': 'fake_token'}}
+        response, body_text = fake_identity._fake_v3_response(None, None)
+        body = json.loads(body_text)
 
         with mock.patch.object(token_client_v3, 'post') as post_mock:
             post_mock.return_value = response, body
@@ -138,13 +132,10 @@ class TestTokenClientV3(base.TestCase):
 
     def test_request_with_str_body(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
-        response = fake_http.fake_http_response(
-            None, status=200,
-        )
-        body = str('{"access": {"token": "fake_token"}}')
 
         with mock.patch.object(token_client_v3, 'raw_request') as mock_raw_r:
-            mock_raw_r.return_value = response, body
+            mock_raw_r.return_value = (
+                fake_identity._fake_v3_response(None, None))
             resp, body = token_client_v3.request('GET', 'fake_uri')
 
         self.assertIsInstance(body, dict)
@@ -152,10 +143,8 @@ class TestTokenClientV3(base.TestCase):
     def test_request_with_bytes_body(self):
         token_client_v3 = token_client.V3TokenClient('fake_url')
 
-        response = fake_http.fake_http_response(
-            None, status=200,
-        )
-        body = b'{"access": {"token": "fake_token"}}'
+        response, body_text = fake_identity._fake_v3_response(None, None)
+        body = body_text.encode('utf-8')
 
         with mock.patch.object(token_client_v3, 'raw_request') as mock_raw_r:
             mock_raw_r.return_value = response, body

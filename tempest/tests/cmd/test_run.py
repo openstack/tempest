@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import tempfile
 
+import fixtures
 import mock
 
 from tempest.cmd import run
@@ -122,3 +123,32 @@ class TestRunReturnCode(base.TestCase):
         # too.
         subprocess.call(['git', 'init'], stderr=DEVNULL)
         self.assertRunExit(['tempest', 'run'], 1)
+
+
+class TestTakeAction(base.TestCase):
+    def test_workspace_not_registered(self):
+        class Exception_(Exception):
+            pass
+
+        m_exit = self.useFixture(fixtures.MockPatch('sys.exit')).mock
+        # sys.exit must not continue (or exit)
+        m_exit.side_effect = Exception_
+
+        workspace = self.getUniqueString()
+
+        tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
+        parsed_args = mock.Mock()
+        parsed_args.config_file = []
+
+        # Override $HOME so that empty workspace gets created in temp dir.
+        self.useFixture(fixtures.TempHomeDir())
+
+        # Force use of the temporary home directory.
+        parsed_args.workspace_path = None
+
+        # Simulate --workspace argument.
+        parsed_args.workspace = workspace
+
+        self.assertRaises(Exception_, tempest_run.take_action, parsed_args)
+        exit_msg = m_exit.call_args[0][0]
+        self.assertIn(workspace, exit_msg)

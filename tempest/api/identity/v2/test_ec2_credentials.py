@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -30,9 +31,9 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @classmethod
     def resource_setup(cls):
         super(EC2CredentialsTest, cls).resource_setup()
-        cls.creds = cls.os.credentials
+        cls.creds = cls.os_primary.credentials
 
-    @test.idempotent_id('b580fab9-7ae9-46e8-8138-417260cb6f9f')
+    @decorators.idempotent_id('b580fab9-7ae9-46e8-8138-417260cb6f9f')
     def test_create_ec2_credential(self):
         """Create user ec2 credential."""
         resp = self.non_admin_users_client.create_user_ec2_credential(
@@ -47,7 +48,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         self.assertEqual(self.creds.user_id, resp['user_id'])
         self.assertEqual(self.creds.tenant_id, resp['tenant_id'])
 
-    @test.idempotent_id('9e2ea42f-0a4f-468c-a768-51859ce492e0')
+    @decorators.idempotent_id('9e2ea42f-0a4f-468c-a768-51859ce492e0')
     def test_list_ec2_credentials(self):
         """Get the list of user ec2 credentials."""
         created_creds = []
@@ -79,7 +80,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
                          "Failed to find ec2_credentials %s in fetched list" %
                          ', '.join(cred for cred in missing))
 
-    @test.idempotent_id('cb284075-b613-440d-83ca-fe0b33b3c2b8')
+    @decorators.idempotent_id('cb284075-b613-440d-83ca-fe0b33b3c2b8')
     def test_show_ec2_credential(self):
         """Get the definite user ec2 credential."""
         resp = self.non_admin_users_client.create_user_ec2_credential(
@@ -95,7 +96,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
         for key in ['access', 'secret', 'user_id', 'tenant_id']:
             self.assertEqual(ec2_creds[key], resp[key])
 
-    @test.idempotent_id('6aba0d4c-b76b-4e46-aa42-add79bc1551d')
+    @decorators.idempotent_id('6aba0d4c-b76b-4e46-aa42-add79bc1551d')
     def test_delete_ec2_credential(self):
         """Delete user ec2 credential."""
         resp = self.non_admin_users_client.create_user_ec2_credential(

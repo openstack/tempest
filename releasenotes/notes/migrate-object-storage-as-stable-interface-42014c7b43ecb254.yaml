@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Define below object storage service clients as libraries.
+    Add new service clients to the library interface so the
+    other projects can use these modules as stable libraries
+    without any maintenance changes.
+
+      * bulk_middleware_client
+      * capabilities_client

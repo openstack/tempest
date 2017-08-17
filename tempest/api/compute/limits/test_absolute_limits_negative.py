@@ -15,8 +15,8 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
@@ -31,8 +31,8 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         super(AbsoluteLimitsNegativeTestJSON, cls).setup_clients()
         cls.client = cls.limits_client
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('215cd465-d8ae-49c9-bf33-9c911913a5c8')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('215cd465-d8ae-49c9-bf33-9c911913a5c8')
     def test_max_image_meta_exceed_limit(self):
         # We should not create vm with image meta over maxImageMeta limit
         # Get max limit value
@@ -40,11 +40,11 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
         max_meta = limits['absolute']['maxImageMeta']
 
         # No point in running this test if there is no limit.
-        if int(max_meta) == -1:
+        if max_meta == -1:
             raise self.skipException('no limit for maxImageMeta')
 
         # Create server should fail, since we are passing > metadata Limit!
-        max_meta_data = int(max_meta) + 1
+        max_meta_data = max_meta + 1
 
         meta_data = {}
         for xx in range(max_meta_data):

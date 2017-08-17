@@ -14,24 +14,20 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest import test
+from tempest.lib import decorators
 
 
-class AvailabilityZoneV2TestJSON(base.BaseVolumeTest):
-    """Tests Availability Zone V2 API List"""
+class AvailabilityZoneTestJSON(base.BaseVolumeTest):
+    """Tests Availability Zone API List"""
 
     @classmethod
     def setup_clients(cls):
-        super(AvailabilityZoneV2TestJSON, cls).setup_clients()
+        super(AvailabilityZoneTestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_client
 
-    @test.idempotent_id('01f1ae88-eba9-4c6b-a011-6f7ace06b725')
+    @decorators.idempotent_id('01f1ae88-eba9-4c6b-a011-6f7ace06b725')
     def test_get_availability_zone_list(self):
         # List of availability zone
         availability_zone = (self.client.list_availability_zones()
                              ['availabilityZoneInfo'])
-        self.assertTrue(len(availability_zone) > 0)
-
-
-class AvailabilityZoneV1TestJSON(AvailabilityZoneV2TestJSON):
-    _api_version = 1
+        self.assertNotEmpty(availability_zone)

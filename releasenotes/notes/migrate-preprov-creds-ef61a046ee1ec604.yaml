@@ -1,0 +1,11 @@
+---
+features:
+  - The tempest module tempest.common.preprov_creds which is used to provide
+    credentials from a list of preprovisioned resources has been migrated into
+    tempest lib at tempest.lib.common.preprov_creds.
+  - The InvalidTestResource exception class from tempest.exceptions has been
+    migrated into tempest.lib.exceptions
+  - The tempest module tempest.common.fixed_network which provided utilities for
+    finding fixed networks by and helpers for picking the network to use when
+    multiple tenant networks are available has been migrated into tempest lib
+    at tempest.lib.common.fixed_network.

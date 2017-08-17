@@ -1,0 +1,13 @@
+---
+prelude: >
+  This release is marking the end of Liberty release support in Tempest
+upgrade:
+  - The Stress tests framework and all the stress tests have been removed.
+other:
+  - |
+    OpenStack releases supported at this time are **Mitaka** and **Newton**.
+
+    The release under current development as of this tag is Ocata, meaning that
+    every Tempest commit is also tested against master during the Ocata cycle.
+    However, this does not necessarily mean that using Tempest as of this tag
+    will work against a Ocata (or future releases) cloud.

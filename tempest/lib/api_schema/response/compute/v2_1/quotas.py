@@ -60,6 +60,124 @@ get_quota_set['response_body']['properties']['quota_set']['properties'][
 get_quota_set['response_body']['properties']['quota_set']['required'].extend([
     'id'])
 
+get_quota_set_details = copy.deepcopy(get_quota_set)
+get_quota_set_details['response_body']['properties']['quota_set'][
+    'properties'] = {
+    'id': {'type': 'string'},
+    'instances': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'cores': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'ram': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'floating_ips': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'fixed_ips': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'metadata_items': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'key_pairs': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'security_groups': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'security_group_rules': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'server_group_members': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'server_groups': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'injected_files': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'injected_file_content_bytes': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    },
+    'injected_file_path_bytes': {
+        'type': 'object',
+        'properties': {
+            'reserved': {'type': 'integer'},
+            'limit': {'type': 'integer'},
+            'in_use': {'type': 'integer'}
+        }
+    }
+}
+
 delete_quota = {
     'status_code': [202]
 }

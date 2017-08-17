@@ -16,9 +16,9 @@
 import testtools
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -44,7 +44,7 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
-    @test.idempotent_id('a151e158-dcbf-4a1f-a1e7-46cd65895a6f')
+    @decorators.idempotent_id('a151e158-dcbf-4a1f-a1e7-46cd65895a6f')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.object_versioning,
         'Object-versioning is disabled')
@@ -69,22 +69,24 @@ class ContainerTest(base.BaseObjectTest):
                              vers_container_name)
         object_name = data_utils.rand_name(name='TestObject')
         # create object
+        data_1 = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(base_container_name,
-                                                   object_name, '1')
+                                                   object_name, data_1)
         # create 2nd version of object
+        data_2 = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(base_container_name,
-                                                   object_name, '2')
+                                                   object_name, data_2)
         resp, body = self.object_client.get_object(base_container_name,
                                                    object_name)
-        self.assertEqual(body, '2')
+        self.assertEqual(body, data_2)
         # delete object version 2
         resp, _ = self.object_client.delete_object(base_container_name,
                                                    object_name)
-        self.assertContainer(base_container_name, '1', '1',
+        self.assertContainer(base_container_name, '1', '1024',
                              vers_container_name)
         resp, body = self.object_client.get_object(base_container_name,
                                                    object_name)
-        self.assertEqual(body, '1')
+        self.assertEqual(body, data_1)
         # delete object version 1
         resp, _ = self.object_client.delete_object(base_container_name,
                                                    object_name)

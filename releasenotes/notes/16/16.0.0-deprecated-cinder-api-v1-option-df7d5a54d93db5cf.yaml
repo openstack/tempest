@@ -1,0 +1,12 @@
+---
+deprecations:
+  - |
+    Volume v1 API is deprecated and the v3 are CURRENT.
+    Tempest doesn't need to test the v1 API as the default.
+    The volume config option 'api_v1' has been marked as
+    deprecated.
+upgrade:
+  - |
+    The volume config option 'api_v1' default is changed to
+    ``False`` because the volume v1 API has been deprecated
+    since Juno release.

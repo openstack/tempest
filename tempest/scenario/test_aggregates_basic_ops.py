@@ -14,7 +14,8 @@
 #    under the License.
 
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.scenario import manager
 from tempest import test
 
@@ -35,10 +36,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     def setup_clients(cls):
         super(TestAggregatesBasicOps, cls).setup_clients()
         # Use admin client by default
-        cls.manager = cls.admin_manager
-        super(TestAggregatesBasicOps, cls).resource_setup()
-        cls.aggregates_client = cls.manager.aggregates_client
-        cls.hosts_client = cls.manager.hosts_client
+        cls.aggregates_client = cls.os_admin.aggregates_client
+        cls.hosts_client = cls.os_admin.hosts_client
 
     def _create_aggregate(self, **kwargs):
         aggregate = (self.aggregates_client.create_aggregate(**kwargs)
@@ -53,7 +52,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
 
     def _get_host_name(self):
         hosts = self.hosts_client.list_hosts()['hosts']
-        self.assertTrue(len(hosts) >= 1)
+        self.assertNotEmpty(hosts)
         computes = [x for x in hosts if x['service'] == 'compute']
         return computes[0]['host_name']
 
@@ -83,7 +82,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         aggregate = self.aggregates_client.set_metadata(aggregate['id'],
                                                         metadata=meta)
 
-        for key, value in meta.items():
+        for key in meta.keys():
             self.assertEqual(meta[key],
                              aggregate['aggregate']['metadata'][key])
 
@@ -96,7 +95,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
 
-    @test.idempotent_id('cb2b4c4f-0c7c-4164-bdde-6285b302a081')
+    @decorators.idempotent_id('cb2b4c4f-0c7c-4164-bdde-6285b302a081')
+    @decorators.attr(type='slow')
     @test.services('compute')
     def test_aggregate_basic_ops(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))

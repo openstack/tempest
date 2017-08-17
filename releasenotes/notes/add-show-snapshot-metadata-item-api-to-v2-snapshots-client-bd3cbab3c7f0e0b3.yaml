@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show snapshot metadata item API to v2 snapshots_client library.
+    This feature enables the possibility to show a snapshot's metadata for
+    a specific key.

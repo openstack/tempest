@@ -1,0 +1,15 @@
+features:
+  - |
+    Move base_client from tempest.lib.services.volume.v3 to
+    tempest.lib.services.volume, so if we want to add new
+    interfaces based on a v2 client, we can make that v2
+    client inherit from volume.base_client.BaseClient to
+    get microversion support, and then to make the new v3
+    client inherit from the v2 client, thus to avoid the
+    multiple inheritance.
+deprecations:
+  - |
+    Deprecate class BaseClient from volume.v3.base_client
+    and move it to volume.base_client.
+    ``tempest.lib.services.volume.v3.base_client.BaseClient``
+    (new ``tempest.lib.services.volume.base_client.BaseClient``)

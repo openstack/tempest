@@ -14,6 +14,9 @@
 
 import copy
 
+import mock
+
+from tempest.lib.services.compute import base_compute_client
 from tempest.lib.services.compute import services_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -44,11 +47,21 @@ class TestServicesClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_UPDATE_FORCED_DOWN = {
+        "service":
+        {
+            "forced_down": True,
+            "binary": "nova-conductor",
+            "host": "controller"
+        }
+    }
+
     def setUp(self):
         super(TestServicesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = services_client.ServicesClient(
             fake_auth, 'compute', 'regionOne')
+        self.addCleanup(mock.patch.stopall)
 
     def test_list_services_with_str_body(self):
         self.check_service_client_function(
@@ -68,7 +81,7 @@ class TestServicesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.put',
             self.FAKE_SERVICE,
             bytes_body,
-            host_name="nova-conductor", binary="controller")
+            host="nova-conductor", binary="controller")
 
     def test_enable_service_with_str_body(self):
         self._test_enable_service()
@@ -85,10 +98,49 @@ class TestServicesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.put',
             fake_service,
             bytes_body,
-            host_name="nova-conductor", binary="controller")
+            host="nova-conductor", binary="controller")
 
     def test_disable_service_with_str_body(self):
         self._test_disable_service()
 
     def test_disable_service_with_bytes_body(self):
         self._test_disable_service(bytes_body=True)
+
+    def _test_log_reason_disabled_service(self, bytes_body=False):
+        resp_body = copy.deepcopy(self.FAKE_SERVICE)
+        resp_body['service']['disabled_reason'] = 'test reason'
+
+        self.check_service_client_function(
+            self.client.disable_log_reason,
+            'tempest.lib.common.rest_client.RestClient.put',
+            resp_body,
+            bytes_body,
+            host="nova-conductor",
+            binary="controller",
+            disabled_reason='test reason')
+
+    def test_log_reason_disabled_service_with_str_body(self):
+        self._test_log_reason_disabled_service()
+
+    def test_log_reason_disabled_service_with_bytes_body(self):
+        self._test_log_reason_disabled_service(bytes_body=True)
+
+    def _test_update_forced_down(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.update_forced_down,
+            'tempest.lib.common.rest_client.RestClient.put',
+            self.FAKE_UPDATE_FORCED_DOWN,
+            bytes_body,
+            host="nova-conductor",
+            binary="controller",
+            forced_down=True)
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.11'))
+    def test_update_forced_down_with_str_body(self, _):
+        self._test_update_forced_down()
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.11'))
+    def test_update_forced_down_with_bytes_body(self, _):
+        self._test_update_forced_down(bytes_body=True)

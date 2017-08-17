@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    When registering service clients from installed plugins, all registrations
+    are now processed, even if one or more fails. All exceptions encountered
+    during the registration process are recorded.  If at least one exception
+    was encountered, the registration process fails and all interim errors are
+    reported.
+  - |
+    The __repr__ method is now implemented for the base `tempest.Exception`
+    class, its implementation is identical to __str__: it reports the error
+    message merged with input parameters.

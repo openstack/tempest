@@ -20,7 +20,6 @@ from tempest.common import compute
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -47,37 +46,9 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(AttachInterfacesTestJSON, cls).setup_clients()
-        cls.client = cls.os.interfaces_client
-        cls.networks_client = cls.os.networks_client
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
-        cls.servers_client = cls.servers_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
 
-    def wait_for_interface_status(self, server, port_id, status):
-        """Waits for an interface to reach a given status."""
-        body = (self.client.show_interface(server, port_id)
-                ['interfaceAttachment'])
-        interface_status = body['port_state']
-        start = int(time.time())
-
-        while(interface_status != status):
-            time.sleep(self.build_interval)
-            body = (self.client.show_interface(server, port_id)
-                    ['interfaceAttachment'])
-            interface_status = body['port_state']
-
-            timed_out = int(time.time()) - start >= self.build_timeout
-
-            if interface_status != status and timed_out:
-                message = ('Interface %s failed to reach %s status '
-                           '(current %s) within the required time (%s s).' %
-                           (port_id, status, interface_status,
-                            self.build_timeout))
-                raise exceptions.TimeoutException(message)
-
-        return body
-
-    # TODO(mriedem): move this into a common waiters utility module
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
 
@@ -101,13 +72,12 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                 message = ('Port %s failed to detach (device_id %s) within '
                            'the required time (%s s).' %
                            (port_id, device_id, self.build_timeout))
-                raise exceptions.TimeoutException(message)
+                raise lib_exc.TimeoutException(message)
 
         return port
 
     def _check_interface(self, iface, port_id=None, network_id=None,
                          fixed_ip=None, mac_addr=None):
-        self.assertIn('port_state', iface)
         if port_id:
             self.assertEqual(iface['port_id'], port_id)
         if network_id:
@@ -119,27 +89,27 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _create_server_get_interfaces(self):
         server = self.create_test_server(wait_until='ACTIVE')
-        ifs = (self.client.list_interfaces(server['id'])
+        ifs = (self.interfaces_client.list_interfaces(server['id'])
                ['interfaceAttachments'])
-        body = self.wait_for_interface_status(
-            server['id'], ifs[0]['port_id'], 'ACTIVE')
+        body = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
         ifs[0]['port_state'] = body['port_state']
         return server, ifs
 
     def _test_create_interface(self, server):
-        iface = (self.client.create_interface(server['id'])
+        iface = (self.interfaces_client.create_interface(server['id'])
                  ['interfaceAttachment'])
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface)
         return iface
 
     def _test_create_interface_by_network_id(self, server, ifs):
         network_id = ifs[0]['net_id']
-        iface = self.client.create_interface(
+        iface = self.interfaces_client.create_interface(
             server['id'], net_id=network_id)['interfaceAttachment']
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, network_id=network_id)
         return iface
 
@@ -148,10 +118,10 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         port = self.ports_client.create_port(network_id=network_id)
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
-        iface = self.client.create_interface(
+        iface = self.interfaces_client.create_interface(
             server['id'], port_id=port_id)['interfaceAttachment']
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, port_id=port_id)
         return iface
 
@@ -165,18 +135,18 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                                                     1)
 
         fixed_ips = [{'ip_address': ip_list[0]}]
-        iface = self.client.create_interface(
+        iface = self.interfaces_client.create_interface(
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
         self.addCleanup(self.ports_client.delete_port, iface['port_id'])
-        iface = self.wait_for_interface_status(
-            server['id'], iface['port_id'], 'ACTIVE')
+        iface = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, fixed_ip=ip_list[0])
         return iface
 
     def _test_show_interface(self, server, ifs):
         iface = ifs[0]
-        _iface = self.client.show_interface(
+        _iface = self.interfaces_client.show_interface(
             server['id'], iface['port_id'])['interfaceAttachment']
         self._check_interface(iface, port_id=_iface['port_id'],
                               network_id=_iface['net_id'],
@@ -186,20 +156,20 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     def _test_delete_interface(self, server, ifs):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
-        self.client.delete_interface(server['id'], iface['port_id'])
-        _ifs = (self.client.list_interfaces(server['id'])
+        self.interfaces_client.delete_interface(server['id'], iface['port_id'])
+        _ifs = (self.interfaces_client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         start = int(time.time())
 
         while len(ifs) == len(_ifs):
             time.sleep(self.build_interval)
-            _ifs = (self.client.list_interfaces(server['id'])
+            _ifs = (self.interfaces_client.list_interfaces(server['id'])
                     ['interfaceAttachments'])
             timed_out = int(time.time()) - start >= self.build_timeout
             if len(ifs) == len(_ifs) and timed_out:
                 message = ('Failed to delete interface within '
                            'the required time: %s sec.' % self.build_timeout)
-                raise exceptions.TimeoutException(message)
+                raise lib_exc.TimeoutException(message)
 
         self.assertNotIn(iface['port_id'], [i['port_id'] for i in _ifs])
         return _ifs
@@ -212,12 +182,12 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
-    @test.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
+    @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @test.services('network')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
-        self.assertTrue(interface_count > 0)
+        self.assertGreater(interface_count, 0)
         self._check_interface(ifs[0])
 
         try:
@@ -239,7 +209,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         iface = self._test_create_interface_by_fixed_ips(server, ifs)
         ifs.append(iface)
 
-        _ifs = (self.client.list_interfaces(server['id'])
+        _ifs = (self.interfaces_client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         self._compare_iface_list(ifs, _ifs)
 
@@ -248,19 +218,19 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @test.services('network')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
-        self.assertTrue(interface_count > 0)
+        self.assertGreater(interface_count, 0)
         self._check_interface(ifs[0])
         network_id = ifs[0]['net_id']
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Remove the fixed IP from server.
-        server_detail = self.os.servers_client.show_server(
+        server_detail = self.os_primary.servers_client.show_server(
             server['id'])['server']
         # Get the Fixed IP from server.
         fixed_ip = None
@@ -274,7 +244,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
 
     @decorators.skip_because(bug='1607714')
-    @test.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
+    @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
         """Tests the following:
 
@@ -293,20 +263,19 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         # create two servers
         _, servers = compute.create_test_server(
-            self.os, tenant_network=network, wait_until='ACTIVE', min_count=2)
+            self.os_primary, tenant_network=network,
+            wait_until='ACTIVE', min_count=2)
         # add our cleanups for the servers since we bypassed the base class
         for server in servers:
-            self.addCleanup(waiters.wait_for_server_termination,
-                            self.servers_client, server['id'])
-            self.addCleanup(self.servers_client.delete_server, server['id'])
+            self.addCleanup(self.delete_server, server['id'])
 
         for server in servers:
             # attach the port to the server
-            iface = self.client.create_interface(
+            iface = self.interfaces_client.create_interface(
                 server['id'], port_id=port_id)['interfaceAttachment']
             self._check_interface(iface, port_id=port_id)
 
             # detach the port from the server; this is a cast in the compute
             # API so we have to poll the port until the device_id is unset.
-            self.client.delete_interface(server['id'], port_id)
+            self.interfaces_client.delete_interface(server['id'], port_id)
             self.wait_for_port_detach(port_id)

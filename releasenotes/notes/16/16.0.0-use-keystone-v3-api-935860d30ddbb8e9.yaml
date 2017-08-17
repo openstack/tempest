@@ -1,0 +1,5 @@
+---
+upgrade:
+  - Tempest now defaults to using Keystone v3 API for the
+    authentication, because Keystone v3 API is CURRENT and
+    the v2 API is deprecated.

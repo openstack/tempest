@@ -68,3 +68,4 @@ Current Library APIs
    library/api_microversion_testing
    library/auth
    library/clients
+   library/credential_providers

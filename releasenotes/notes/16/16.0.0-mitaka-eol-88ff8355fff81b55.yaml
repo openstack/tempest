@@ -1,0 +1,13 @@
+---
+prelude: >
+    This release indicates end of support for Mitaka in Tempest.
+other:
+  - |
+    OpenStack Releases Supported after this release are **Newton**
+    and **Ocata**
+
+    The release under current development as of this tag is Pike,
+    meaning that every Tempest commit is also tested against master branch
+    during the Pike cycle. However, this does not necessarily mean that
+    using Tempest as of this tag will work against Pike (or future
+    releases) cloud.

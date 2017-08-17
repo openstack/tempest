@@ -1,0 +1,4 @@
+---
+deprecations:
+  - Oslo.utils provides same method get_ipv6_addr_by_EUI64,
+    so deprecate it in Newton and remove it in Ocata.

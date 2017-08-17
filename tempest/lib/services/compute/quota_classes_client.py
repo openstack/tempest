@@ -35,8 +35,8 @@ class QuotaClassesClient(base_compute_client.BaseComputeClient):
     def update_quota_class_set(self, quota_class_id, **kwargs):
         """Update the quota class's limits for one or more resources.
 
-        Available params: see http://developer.openstack.org/
-                              api-ref-compute-v2.1.html#updatequota
+        # NOTE: Current api-site doesn't contain this API description.
+        # LP: https://bugs.launchpad.net/nova/+bug/1602400
         """
         post_body = json.dumps({'quota_class_set': kwargs})
 

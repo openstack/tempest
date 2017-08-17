@@ -10,98 +10,83 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+from testtools import matchers
+
 from tempest.api.volume import base
-from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
 
 
-class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
+class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(VolumesV2SnapshotTestJSON, cls).skip_checks()
+        super(VolumesSnapshotTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
     @classmethod
     def resource_setup(cls):
-        super(VolumesV2SnapshotTestJSON, cls).resource_setup()
+        super(VolumesSnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
 
-        cls.name_field = cls.special_fields['name_field']
-        cls.descrip_field = cls.special_fields['descrip_field']
-        # Create 2 snapshots
-        for _ in xrange(2):
-            cls.create_snapshot(cls.volume_origin['id'])
-
-    def _detach(self, volume_id):
-        """Detach volume."""
-        self.volumes_client.detach_volume(volume_id)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       volume_id, 'available')
-
-    def _list_by_param_values_and_assert(self, with_detail=False, **params):
-        """list or list_details with given params and validates result."""
-
-        if with_detail:
-            fetched_snap_list = self.snapshots_client.list_snapshots(
-                detail=True, **params)['snapshots']
-        else:
-            fetched_snap_list = self.snapshots_client.list_snapshots(
-                **params)['snapshots']
-
-        # Validating params of fetched snapshots
-        for snap in fetched_snap_list:
-            for key in params:
-                msg = "Failed to list snapshots %s by %s" % \
-                      ('details' if with_detail else '', key)
-                self.assertEqual(params[key], snap[key], msg)
-
-    def _list_snapshots_by_param_limit(self, limit, expected_elements):
-        """list snapshots by limit param"""
-        # Get snapshots list using limit parameter
-        fetched_snap_list = self.snapshots_client.list_snapshots(
-            limit=limit)['snapshots']
-        # Validating filtered snapshots length equals to expected_elements
-        self.assertEqual(expected_elements, len(fetched_snap_list))
-
-    @test.idempotent_id('b467b54c-07a4-446d-a1cf-651dedcc3ff1')
+    @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @test.services('compute')
-    def test_snapshot_create_with_volume_in_use(self):
-        # Create a snapshot when volume status is in-use
+    def test_snapshot_create_delete_with_volume_in_use(self):
         # Create a test instance
-        server_name = data_utils.rand_name(
-            self.__class__.__name__ + '-instance')
-        server = self.create_server(
-            name=server_name,
-            wait_until='ACTIVE')
-        self.addCleanup(self.servers_client.delete_server, server['id'])
-        self.servers_client.attach_volume(
-            server['id'], volumeId=self.volume_origin['id'],
-            device='/dev/%s' % CONF.compute.volume_device_name)
-        waiters.wait_for_volume_status(self.volumes_client,
-                                       self.volume_origin['id'], 'in-use')
-        self.addCleanup(waiters.wait_for_volume_status, self.volumes_client,
-                        self.volume_origin['id'], 'available')
-        self.addCleanup(self.servers_client.detach_volume, server['id'],
-                        self.volume_origin['id'])
-        # Snapshot a volume even if it's attached to an instance
-        snapshot = self.create_snapshot(self.volume_origin['id'],
-                                        force=True)
-        # Delete the snapshot
-        self.cleanup_snapshot(snapshot)
+        server = self.create_server()
+        self.attach_volume(server['id'], self.volume_origin['id'])
 
-    @test.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
+        # Snapshot a volume which attached to an instance with force=False
+        self.assertRaises(lib_exc.BadRequest, self.create_snapshot,
+                          self.volume_origin['id'], force=False)
+
+        # Snapshot a volume attached to an instance
+        snapshot1 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
+
+        # Delete the snapshots. Some snapshot implementations can take
+        # different paths according to order they are deleted.
+        self.delete_snapshot(snapshot1['id'])
+        self.delete_snapshot(snapshot3['id'])
+        self.delete_snapshot(snapshot2['id'])
+
+    @decorators.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
+    @test.services('compute')
+    def test_snapshot_create_offline_delete_online(self):
+
+        # Create a snapshot while it is not attached
+        snapshot1 = self.create_snapshot(self.volume_origin['id'])
+
+        # Create a server and attach it
+        server = self.create_server()
+        self.attach_volume(server['id'], self.volume_origin['id'])
+
+        # Now that the volume is attached, create another snapshots
+        snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
+
+        # Delete the snapshots. Some snapshot implementations can take
+        # different paths according to order they are deleted.
+        self.delete_snapshot(snapshot3['id'])
+        self.delete_snapshot(snapshot1['id'])
+        self.delete_snapshot(snapshot2['id'])
+
+    @decorators.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
-        # Create a snapshot
-        s_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
-        params = {self.name_field: s_name}
-        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
+        # Create a snapshot with metadata
+        metadata = {"snap-meta1": "value1",
+                    "snap-meta2": "value2",
+                    "snap-meta3": "value3"}
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        metadata=metadata)
 
         # Get the snap and check for some of its details
         snap_get = self.snapshots_client.show_snapshot(
@@ -109,78 +94,42 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
+        self.assertEqual(self.volume_origin['size'], snap_get['size'])
+
+        # Verify snapshot metadata
+        self.assertThat(snap_get['metadata'].items(),
+                        matchers.ContainsAll(metadata.items()))
 
         # Compare also with the output from the list action
-        tracking_data = (snapshot['id'], snapshot[self.name_field])
+        tracking_data = (snapshot['id'], snapshot['name'])
         snaps_list = self.snapshots_client.list_snapshots()['snapshots']
-        snaps_data = [(f['id'], f[self.name_field]) for f in snaps_list]
+        snaps_data = [(f['id'], f['name']) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
         new_s_name = data_utils.rand_name(
             self.__class__.__name__ + '-new-snap')
         new_desc = 'This is the new description of snapshot.'
-        params = {self.name_field: new_s_name,
-                  self.descrip_field: new_desc}
+        params = {'name': new_s_name,
+                  'description': new_desc}
         update_snapshot = self.snapshots_client.update_snapshot(
             snapshot['id'], **params)['snapshot']
         # Assert response body for update_snapshot method
-        self.assertEqual(new_s_name, update_snapshot[self.name_field])
-        self.assertEqual(new_desc, update_snapshot[self.descrip_field])
+        self.assertEqual(new_s_name, update_snapshot['name'])
+        self.assertEqual(new_desc, update_snapshot['description'])
         # Assert response body for show_snapshot method
         updated_snapshot = self.snapshots_client.show_snapshot(
             snapshot['id'])['snapshot']
-        self.assertEqual(new_s_name, updated_snapshot[self.name_field])
-        self.assertEqual(new_desc, updated_snapshot[self.descrip_field])
+        self.assertEqual(new_s_name, updated_snapshot['name'])
+        self.assertEqual(new_desc, updated_snapshot['description'])
 
         # Delete the snapshot
-        self.cleanup_snapshot(snapshot)
+        self.delete_snapshot(snapshot['id'])
 
-    @test.idempotent_id('59f41f43-aebf-48a9-ab5d-d76340fab32b')
-    def test_snapshots_list_with_params(self):
-        """list snapshots with params."""
-        # Create a snapshot
-        display_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
-        params = {self.name_field: display_name}
-        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
-        self.addCleanup(self.cleanup_snapshot, snapshot)
-
-        # Verify list snapshots by display_name filter
-        params = {self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(**params)
-
-        # Verify list snapshots by status filter
-        params = {'status': 'available'}
-        self._list_by_param_values_and_assert(**params)
-
-        # Verify list snapshots by status and display name filter
-        params = {'status': 'available',
-                  self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(**params)
-
-    @test.idempotent_id('220a1022-1fcd-4a74-a7bd-6b859156cda2')
-    def test_snapshots_list_details_with_params(self):
-        """list snapshot details with params."""
-        # Create a snapshot
-        display_name = data_utils.rand_name(self.__class__.__name__ + '-snap')
-        params = {self.name_field: display_name}
-        snapshot = self.create_snapshot(self.volume_origin['id'], **params)
-        self.addCleanup(self.cleanup_snapshot, snapshot)
-
-        # Verify list snapshot details by display_name filter
-        params = {self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(with_detail=True, **params)
-        # Verify list snapshot details by status filter
-        params = {'status': 'available'}
-        self._list_by_param_values_and_assert(with_detail=True, **params)
-        # Verify list snapshot details by status and display name filter
-        params = {'status': 'available',
-                  self.name_field: snapshot[self.name_field]}
-        self._list_by_param_values_and_assert(with_detail=True, **params)
-
-    @test.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
+    @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
-        # Creates a volume a snapshot passing a size different from the source
+        # Creates a volume from a snapshot passing a size
+        # different from the source
         src_size = CONF.volume.volume_size
 
         src_vol = self.create_volume(size=src_size)
@@ -188,37 +137,29 @@ class VolumesV2SnapshotTestJSON(base.BaseVolumeTest):
         # Destination volume bigger than source snapshot
         dst_vol = self.create_volume(snapshot_id=src_snap['id'],
                                      size=src_size + 1)
+        # NOTE(zhufl): dst_vol is created based on snapshot, so dst_vol
+        # should be deleted before deleting snapshot, otherwise deleting
+        # snapshot will end with status 'error-deleting'. This depends on
+        # the implementation mechanism of vendors, generally speaking,
+        # some verdors will use "virtual disk clone" which will promote
+        # disk clone speed, and in this situation the "disk clone"
+        # is just a relationship between volume and snapshot.
+        self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
 
         volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
         # Should allow
         self.assertEqual(volume['snapshot_id'], src_snap['id'])
-        self.assertEqual(int(volume['size']), src_size + 1)
+        self.assertEqual(volume['size'], src_size + 1)
 
-    @test.idempotent_id('db4d8e0a-7a2e-41cc-a712-961f6844e896')
-    def test_snapshot_list_param_limit(self):
-        # List returns limited elements
-        self._list_snapshots_by_param_limit(limit=1, expected_elements=1)
+    @decorators.idempotent_id('bbcfa285-af7f-479e-8c1a-8c34fc16543c')
+    @testtools.skipUnless(CONF.volume_feature_enabled.backup,
+                          "Cinder backup is disabled")
+    def test_snapshot_backup(self):
+        # Create a snapshot
+        snapshot = self.create_snapshot(volume_id=self.volume_origin['id'])
 
-    @test.idempotent_id('a1427f61-420e-48a5-b6e3-0b394fa95400')
-    def test_snapshot_list_param_limit_equals_infinite(self):
-        # List returns all elements when request limit exceeded
-        # snapshots number
-        snap_list = self.snapshots_client.list_snapshots()['snapshots']
-        self._list_snapshots_by_param_limit(limit=100000,
-                                            expected_elements=len(snap_list))
-
-    @decorators.skip_because(bug='1540893')
-    @test.idempotent_id('e3b44b7f-ae87-45b5-8a8c-66110eb24d0a')
-    def test_snapshot_list_param_limit_equals_zero(self):
-        # List returns zero elements
-        self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
-
-    def cleanup_snapshot(self, snapshot):
-        # Delete the snapshot
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
-
-
-class VolumesV1SnapshotTestJSON(VolumesV2SnapshotTestJSON):
-    _api_version = 1
+        backup = self.create_backup(volume_id=self.volume_origin['id'],
+                                    snapshot_id=snapshot['id'])
+        backup_info = self.backups_client.show_backup(backup['id'])['backup']
+        self.assertEqual(self.volume_origin['id'], backup_info['volume_id'])
+        self.assertEqual(snapshot['id'], backup_info['snapshot_id'])

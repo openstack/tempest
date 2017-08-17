@@ -16,16 +16,20 @@
 from testtools import matchers
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
-from tempest.common import waiters
 from tempest import config
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 CONF = config.CONF
 
 
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
+
+    # These tests will fail with a 404 starting from microversion 2.36. For
+    # more information, see:
+    # https://developer.openstack.org/api-ref/compute/#volume-extension-os-volumes-os-snapshots-deprecated
+    max_microversion = '2.35'
 
     @classmethod
     def skip_checks(cls):
@@ -37,29 +41,23 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(VolumesGetTestJSON, cls).setup_clients()
-        cls.client = cls.volumes_extensions_client
+        cls.volumes_client = cls.volumes_extensions_client
 
-    @test.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
+    @decorators.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         # Create volume
-        volume = self.client.create_volume(size=CONF.volume.volume_size,
-                                           display_name=v_name,
-                                           metadata=metadata)['volume']
-        self.assertIn('id', volume)
-        self.addCleanup(self.delete_volume, volume['id'])
-        self.assertIn('displayName', volume)
+        volume = self.create_volume(size=CONF.volume.volume_size,
+                                    display_name=v_name,
+                                    metadata=metadata)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
-        self.assertTrue(volume['id'] is not None,
-                        "Field volume id is empty or not found.")
-        # Wait for Volume status to become ACTIVE
-        waiters.wait_for_volume_status(self.client, volume['id'], 'available')
         # GET Volume
-        fetched_volume = self.client.show_volume(volume['id'])['volume']
+        fetched_volume = self.volumes_client.show_volume(
+            volume['id'])['volume']
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],

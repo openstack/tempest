@@ -13,8 +13,8 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -28,8 +28,8 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(QuotasAdminNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.os.quotas_client
-        cls.adm_client = cls.os_adm.quotas_client
+        cls.client = cls.os_primary.quotas_client
+        cls.adm_client = cls.os_admin.quotas_client
         cls.sg_client = cls.security_groups_client
         cls.sgr_client = cls.security_group_rules_client
 
@@ -40,8 +40,19 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # tenant most of them should be skipped if we can't do that
         cls.demo_tenant_id = cls.client.tenant_id
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
+    def _update_quota(self, quota_item, quota_value):
+        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
+                     ['quota_set'])
+        default_quota_value = quota_set[quota_item]
+
+        self.adm_client.update_quota_set(self.demo_tenant_id,
+                                         force=True,
+                                         **{quota_item: quota_value})
+        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
+                        **{quota_item: default_quota_value})
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
     def test_update_quota_normal_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.client.update_quota_set,
@@ -50,81 +61,41 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     # TODO(afazekas): Add dedicated tenant to the skipped quota tests.
     # It can be moved into the setUpClass as well.
-    @test.attr(type=['negative'])
-    @test.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
-        default_vcpu_quota = quota_set['cores']
-        vcpu_quota = 0  # Set the quota to zero to conserve resources
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         cores=vcpu_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        cores=default_vcpu_quota)
+        self._update_quota('cores', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
-        default_mem_quota = quota_set['ram']
-        mem_quota = 0  # Set the quota to zero to conserve resources
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         ram=mem_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        ram=default_mem_quota)
+        self._update_quota('ram', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
-        default_instances_quota = quota_set['instances']
-        instances_quota = 0  # Set quota to zero to disallow server creation
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         instances=instances_quota)
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        instances=default_instances_quota)
+        self._update_quota('instances', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
-    @test.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
     @test.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
-
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
-        default_sg_quota = quota_set['security_groups']
-
         # Set the quota to number of used security groups
         sg_quota = self.limits_client.show_limits()['limits']['absolute'][
             'totalSecurityGroupsUsed']
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         security_groups=sg_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_groups=default_sg_quota)
+        self._update_quota('security_groups', sg_quota)
 
         # Check we cannot create anymore
         # A 403 Forbidden or 413 Overlimit (old behaviour) exception
@@ -135,25 +106,13 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)
-    @test.attr(type=['negative'])
-    @test.idempotent_id('6e9f436d-f1ed-4f8e-a493-7275dfaa4b4d')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('6e9f436d-f1ed-4f8e-a493-7275dfaa4b4d')
     @test.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules
-
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
-        default_sg_rules_quota = quota_set['security_group_rules']
-        sg_rules_quota = 0  # Set the quota to zero to conserve resources
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         security_group_rules=sg_rules_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_group_rules=default_sg_rules_quota)
+        self._update_quota('security_group_rules', 0)
 
         s_name = data_utils.rand_name('securitygroup')
         s_description = data_utils.rand_name('description')

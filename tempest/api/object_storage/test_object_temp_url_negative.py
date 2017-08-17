@@ -19,7 +19,8 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -38,14 +39,15 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
         # update account metadata
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
-        cls.account_client.create_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=cls.metadata)
         cls.account_client_metadata, _ = \
             cls.account_client.list_account_metadata()
 
     @classmethod
     def resource_cleanup(cls):
-        resp, _ = cls.account_client.delete_account_metadata(
-            metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            delete_metadata=cls.metadata)
 
         cls.delete_containers()
 
@@ -63,10 +65,10 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         # create object
         self.object_name = data_utils.rand_name(name='ObjectTemp')
-        self.content = data_utils.arbitrary_string(size=len(self.object_name),
-                                                   base_text=self.object_name)
+        content = data_utils.arbitrary_string(size=len(self.object_name),
+                                              base_text=self.object_name)
         self.object_client.create_object(self.container_name,
-                                         self.object_name, self.content)
+                                         self.object_name, content)
 
     def _get_expiry_date(self, expiration_time=1000):
         return int(time.time() + expiration_time)
@@ -80,7 +82,9 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
             container, object_name)
 
         hmac_body = '%s\n%s\n%s' % (method, expires, path)
-        sig = hmac.new(key, hmac_body, hashlib.sha1).hexdigest()
+        sig = hmac.new(
+            key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
                                                              object_name,
@@ -88,8 +92,8 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         return url
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
     @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
 

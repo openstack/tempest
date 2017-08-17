@@ -18,50 +18,22 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
 CONF = config.CONF
 
 
-class NetworksTest(base.BaseNetworkTest):
-    """Tests the following operations in the Neutron API:
-
-        create a network for a project
-        list project's networks
-        show a project network details
-        create a subnet for a project
-        list project's subnets
-        show a project subnet details
-        network update
-        subnet update
-        delete a network also deletes its subnets
-        list external networks
-
-        All subnet tests are run once with ipv4 and once with ipv6.
-
-    v2.0 of the Neutron API is assumed. It is also assumed that the following
-    options are defined in the [network] section of etc/tempest.conf:
-
-        project_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for project ipv4 subnets
-
-        project_network_v6_cidr is the equivalent for ipv6 subnets
-
-        project_network_mask_bits with the mask bits to be used to partition
-        the block defined by project_network_cidr
-
-        project_network_v6_mask_bits is the equivalent for ipv6 subnets
-    """
+class BaseNetworkTestResources(base.BaseNetworkTest):
 
     @classmethod
     def resource_setup(cls):
-        super(NetworksTest, cls).resource_setup()
+        super(BaseNetworkTestResources, cls).resource_setup()
         cls.network = cls.create_network()
-        cls.name = cls.network['name']
         cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
                                                                cls._ip_version)
         cls._subnet_data = {6: {'gateway':
@@ -158,7 +130,7 @@ class NetworksTest(base.BaseNetworkTest):
                                     **kwargs)
         compare_args_full = dict(gateway_ip=gateway, cidr=cidr,
                                  mask_bits=mask_bits, **kwargs)
-        compare_args = dict((k, v) for k, v in six.iteritems(compare_args_full)
+        compare_args = dict((k, v) for k, v in compare_args_full.items()
                             if v is not None)
 
         if 'dns_nameservers' in set(subnet).intersection(compare_args):
@@ -171,12 +143,42 @@ class NetworksTest(base.BaseNetworkTest):
         self.networks.pop()
         self.subnets.pop()
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
+
+class NetworksTest(BaseNetworkTestResources):
+    """Tests the following operations in the Neutron API:
+
+        create a network for a project
+        list project's networks
+        show a project network details
+        create a subnet for a project
+        list project's subnets
+        show a project subnet details
+        network update
+        subnet update
+        delete a network also deletes its subnets
+        list external networks
+
+        All subnet tests are run once with ipv4 and once with ipv6.
+
+    v2.0 of the Neutron API is assumed. It is also assumed that the following
+    options are defined in the [network] section of etc/tempest.conf:
+
+        project_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for project ipv4 subnets
+
+        project_network_v6_cidr is the equivalent for ipv6 subnets
+
+        project_network_mask_bits with the mask bits to be used to partition
+        the block defined by project_network_cidr
+
+        project_network_v6_mask_bits is the equivalent for ipv6 subnets
+    """
+
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
     def test_create_update_delete_network_subnet(self):
         # Create a network
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         self.addCleanup(self._delete_network, network)
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
@@ -194,8 +196,8 @@ class NetworksTest(base.BaseNetworkTest):
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('2bf13842-c93f-4a69-83ed-717d2ec3b44e')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('2bf13842-c93f-4a69-83ed-717d2ec3b44e')
     def test_show_network(self):
         # Verify the details of a network
         body = self.networks_client.show_network(self.network['id'])
@@ -203,19 +205,23 @@ class NetworksTest(base.BaseNetworkTest):
         for key in ['id', 'name']:
             self.assertEqual(network[key], self.network[key])
 
-    @test.idempotent_id('867819bb-c4b6-45f7-acf9-90edcf70aa5e')
+    @decorators.idempotent_id('867819bb-c4b6-45f7-acf9-90edcf70aa5e')
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
+        if test.is_extension_enabled('net-mtu', 'network'):
+            fields.append('mtu')
         body = self.networks_client.show_network(self.network['id'],
                                                  fields=fields)
         network = body['network']
         self.assertEqual(sorted(network.keys()), sorted(fields))
         for field_name in fields:
             self.assertEqual(network[field_name], self.network[field_name])
+        self.assertNotIn('tenant_id', network)
+        self.assertNotIn('project_id', network)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         body = self.networks_client.list_networks()
@@ -223,18 +229,20 @@ class NetworksTest(base.BaseNetworkTest):
                     if network['id'] == self.network['id']]
         self.assertNotEmpty(networks, "Created network not found in the list")
 
-    @test.idempotent_id('6ae6d24f-9194-4869-9c85-c313cb20e080')
+    @decorators.idempotent_id('6ae6d24f-9194-4869-9c85-c313cb20e080')
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
+        if test.is_extension_enabled('net-mtu', 'network'):
+            fields.append('mtu')
         body = self.networks_client.list_networks(fields=fields)
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
         for network in networks:
             self.assertEqual(sorted(network.keys()), sorted(fields))
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
     def test_show_subnet(self):
         # Verify the details of a subnet
         body = self.subnets_client.show_subnet(self.subnet['id'])
@@ -244,7 +252,7 @@ class NetworksTest(base.BaseNetworkTest):
             self.assertIn(key, subnet)
             self.assertEqual(subnet[key], self.subnet[key])
 
-    @test.idempotent_id('270fff0b-8bfc-411f-a184-1e8fd35286f0')
+    @decorators.idempotent_id('270fff0b-8bfc-411f-a184-1e8fd35286f0')
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
         fields = ['id', 'network_id']
@@ -255,8 +263,8 @@ class NetworksTest(base.BaseNetworkTest):
         for field_name in fields:
             self.assertEqual(subnet[field_name], self.subnet[field_name])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
         body = self.subnets_client.list_subnets()
@@ -264,7 +272,7 @@ class NetworksTest(base.BaseNetworkTest):
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
 
-    @test.idempotent_id('842589e3-9663-46b0-85e4-7f01273b0412')
+    @decorators.idempotent_id('842589e3-9663-46b0-85e4-7f01273b0412')
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
         fields = ['id', 'network_id']
@@ -274,61 +282,54 @@ class NetworksTest(base.BaseNetworkTest):
         for subnet in subnets:
             self.assertEqual(sorted(subnet.keys()), sorted(fields))
 
-    @test.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
+    @decorators.idempotent_id('f04f61a9-b7f3-4194-90b2-9bcf660d1bfe')
     def test_delete_network_with_subnet(self):
         # Creates a network
-        name = data_utils.rand_name('network-')
-        body = self.networks_client.create_network(name=name)
-        network = body['network']
+        network = self.create_network()
         net_id = network['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.networks_client.delete_network, net_id)
+                        self._delete_network, network)
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)
         subnet_id = subnet['id']
 
         # Delete network while the subnet still exists
-        body = self.networks_client.delete_network(net_id)
+        self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
         self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
                           subnet_id)
 
-        # Since create_subnet adds the subnet to the delete list, and it is
-        # is actually deleted here - this will create and issue, hence remove
-        # it from the list.
-        self.subnets.pop()
-
-    @test.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
+    @decorators.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
     def test_create_delete_subnet_without_gateway(self):
         self._create_verify_delete_subnet()
 
-    @test.idempotent_id('9393b468-186d-496d-aa36-732348cd76e7')
+    @decorators.idempotent_id('9393b468-186d-496d-aa36-732348cd76e7')
     def test_create_delete_subnet_with_gw(self):
         self._create_verify_delete_subnet(
             **self.subnet_dict(['gateway']))
 
-    @test.idempotent_id('bec949c4-3147-4ba6-af5f-cd2306118404')
+    @decorators.idempotent_id('bec949c4-3147-4ba6-af5f-cd2306118404')
     def test_create_delete_subnet_with_allocation_pools(self):
         self._create_verify_delete_subnet(
             **self.subnet_dict(['allocation_pools']))
 
-    @test.idempotent_id('8217a149-0c6c-4cfb-93db-0486f707d13f')
+    @decorators.idempotent_id('8217a149-0c6c-4cfb-93db-0486f707d13f')
     def test_create_delete_subnet_with_gw_and_allocation_pools(self):
         self._create_verify_delete_subnet(**self.subnet_dict(
             ['gateway', 'allocation_pools']))
 
-    @test.idempotent_id('d830de0a-be47-468f-8f02-1fd996118289')
+    @decorators.idempotent_id('d830de0a-be47-468f-8f02-1fd996118289')
     def test_create_delete_subnet_with_host_routes_and_dns_nameservers(self):
         self._create_verify_delete_subnet(
             **self.subnet_dict(['host_routes', 'dns_nameservers']))
 
-    @test.idempotent_id('94ce038d-ff0a-4a4c-a56b-09da3ca0b55d')
+    @decorators.idempotent_id('94ce038d-ff0a-4a4c-a56b-09da3ca0b55d')
     def test_create_delete_subnet_with_dhcp_enabled(self):
         self._create_verify_delete_subnet(enable_dhcp=True)
 
-    @test.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
+    @decorators.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
         self.addCleanup(self._delete_network, network)
@@ -361,14 +362,14 @@ class NetworksTest(base.BaseNetworkTest):
 
         self._compare_resource_attrs(updated_subnet, kwargs)
 
-    @test.idempotent_id('a4d9ec4c-0306-4111-a75c-db01a709030b')
+    @decorators.idempotent_id('a4d9ec4c-0306-4111-a75c-db01a709030b')
     def test_create_delete_subnet_all_attributes(self):
         self._create_verify_delete_subnet(
             enable_dhcp=True,
             **self.subnet_dict(['gateway', 'host_routes', 'dns_nameservers']))
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
     @test.requires_ext(extension='external-net', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
@@ -389,6 +390,21 @@ class NetworksTest(base.BaseNetworkTest):
         body = self.subnets_client.list_subnets(
             network_id=CONF.network.public_network_id)
         self.assertEmpty(body['subnets'], "Public subnets visible")
+
+    @decorators.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
+    @test.requires_ext(extension="standard-attr-description",
+                       service="network")
+    def test_create_update_network_description(self):
+        body = self.create_network(description='d1')
+        self.assertEqual('d1', body['description'])
+        net_id = body['id']
+        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        self.assertEqual('d1', body['description'])
+        body = self.networks_client.update_network(body['id'],
+                                                   description='d2')
+        self.assertEqual('d2', body['network']['description'])
+        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        self.assertEqual('d2', body['description'])
 
 
 class BulkNetworkOpsTest(base.BaseNetworkTest):
@@ -436,8 +452,8 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('d4f9024d-1e28-4fc1-a6b1-25dbc6fa11e2')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('d4f9024d-1e28-4fc1-a6b1-25dbc6fa11e2')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
         network_list = [{'name': data_utils.rand_name('network-')},
@@ -452,8 +468,8 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], networks_list)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('8936533b-c0aa-4f29-8e53-6cc873aec489')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('8936533b-c0aa-4f29-8e53-6cc873aec489')
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
@@ -487,8 +503,8 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], subnets_list)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('48037ff2-e889-4c3b-b86a-8e3f34d2d060')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('48037ff2-e889-4c3b-b86a-8e3f34d2d060')
     def test_bulk_create_delete_port(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 ports in one request
@@ -521,30 +537,27 @@ class BulkNetworkOpsIpV6Test(BulkNetworkOpsTest):
 class NetworksIpV6Test(NetworksTest):
     _ip_version = 6
 
-    @test.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
+    @decorators.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
     def test_create_delete_subnet_with_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway = str(netaddr.IPAddress(net.first + 2))
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         subnet = self.create_subnet(network, gateway)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway)
 
-    @test.idempotent_id('ebb4fd95-524f-46af-83c1-0305b239338f')
+    @decorators.idempotent_id('ebb4fd95-524f-46af-83c1-0305b239338f')
     def test_create_delete_subnet_with_default_gw(self):
         net = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
         gateway_ip = str(netaddr.IPAddress(net.first + 1))
-        name = data_utils.rand_name('network-')
-        network = self.create_network(network_name=name)
+        network = self.create_network()
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], gateway_ip)
 
-    @test.idempotent_id('a9653883-b2a4-469b-8c3c-4518430a7e55')
+    @decorators.idempotent_id('a9653883-b2a4-469b-8c3c-4518430a7e55')
     def test_create_list_subnet_with_no_gw64_one_network(self):
-        name = data_utils.rand_name('network-')
-        network = self.create_network(name)
+        network = self.create_network()
         ipv6_gateway = self.subnet_dict(['gateway'])['gateway']
         subnet1 = self.create_subnet(network,
                                      ip_version=6,
@@ -570,7 +583,9 @@ class NetworksIpV6Test(NetworksTest):
                              'Subnet are not in the same network')
 
 
-class NetworksIpV6TestAttrs(NetworksIpV6Test):
+class NetworksIpV6TestAttrs(BaseNetworkTestResources):
+
+    _ip_version = 6
 
     @classmethod
     def skip_checks(cls):
@@ -579,20 +594,20 @@ class NetworksIpV6TestAttrs(NetworksIpV6Test):
             raise cls.skipException("IPv6 extended attributes for "
                                     "subnets not available")
 
-    @test.idempotent_id('da40cd1b-a833-4354-9a85-cd9b8a3b74ca')
+    @decorators.idempotent_id('da40cd1b-a833-4354-9a85-cd9b8a3b74ca')
     def test_create_delete_subnet_with_v6_attributes_stateful(self):
         self._create_verify_delete_subnet(
             gateway=self._subnet_data[self._ip_version]['gateway'],
             ipv6_ra_mode='dhcpv6-stateful',
             ipv6_address_mode='dhcpv6-stateful')
 
-    @test.idempotent_id('176b030f-a923-4040-a755-9dc94329e60c')
+    @decorators.idempotent_id('176b030f-a923-4040-a755-9dc94329e60c')
     def test_create_delete_subnet_with_v6_attributes_slaac(self):
         self._create_verify_delete_subnet(
             ipv6_ra_mode='slaac',
             ipv6_address_mode='slaac')
 
-    @test.idempotent_id('7d410310-8c86-4902-adf9-865d08e31adb')
+    @decorators.idempotent_id('7d410310-8c86-4902-adf9-865d08e31adb')
     def test_create_delete_subnet_with_v6_attributes_stateless(self):
         self._create_verify_delete_subnet(
             ipv6_ra_mode='dhcpv6-stateless',
@@ -618,7 +633,7 @@ class NetworksIpV6TestAttrs(NetworksIpV6Test):
             self.networks_client.delete_network,
             slaac_network['id'])
 
-    @test.idempotent_id('88554555-ebf8-41ef-9300-4926d45e06e9')
+    @decorators.idempotent_id('88554555-ebf8-41ef-9300-4926d45e06e9')
     def test_create_delete_slaac_subnet_with_ports(self):
         """Test deleting subnet with SLAAC ports
 
@@ -628,7 +643,7 @@ class NetworksIpV6TestAttrs(NetworksIpV6Test):
         """
         self._test_delete_subnet_with_ports("slaac")
 
-    @test.idempotent_id('2de6ab5a-fcf0-4144-9813-f91a940291f1')
+    @decorators.idempotent_id('2de6ab5a-fcf0-4144-9813-f91a940291f1')
     def test_create_delete_stateless_subnet_with_ports(self):
         """Test deleting subnet with DHCPv6 stateless ports
 

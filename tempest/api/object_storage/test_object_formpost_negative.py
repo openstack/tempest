@@ -19,7 +19,8 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -37,7 +38,8 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
-        cls.account_client.create_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            create_update_metadata=cls.metadata)
 
     def setUp(self):
         super(ObjectFormPostNegativeTest, self).setUp()
@@ -53,7 +55,8 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.account_client.delete_account_metadata(metadata=cls.metadata)
+        cls.account_client.create_update_or_delete_account_metadata(
+            delete_metadata=cls.metadata)
         cls.delete_containers()
         super(ObjectFormPostNegativeTest, cls).resource_cleanup()
 
@@ -73,7 +76,9 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
                                             max_file_count,
                                             expires)
 
-        signature = hmac.new(self.key, hmac_body, hashlib.sha1).hexdigest()
+        signature = hmac.new(
+            self.key.encode(), hmac_body.encode(), hashlib.sha1
+        ).hexdigest()
 
         fields = {'redirect': redirect,
                   'max_file_size': str(max_file_size),
@@ -103,9 +108,9 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @test.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
+    @decorators.idempotent_id('d3fb3c4d-e627-48ce-9379-a1631f21336d')
     @test.requires_ext(extension='formpost', service='object')
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)
@@ -120,8 +125,9 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
             url, body, headers=headers)
         self.assertIn('FormPost: Form Expired', str(exc))
 
-    @test.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
+    @decorators.idempotent_id('b277257f-113c-4499-b8d1-5fead79f7360')
     @test.requires_ext(extension='formpost', service='object')
+    @decorators.attr(type=['negative'])
     def test_post_object_using_form_invalid_signature(self):
         self.key = "Wrong"
         body, content_type = self.get_multipart_form()

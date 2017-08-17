@@ -22,7 +22,7 @@ user for each tenant. The **accounts.yaml** file will be valid and contain
 credentials for created users, so each user will be in separate tenant and
 have the username, tenant_name, password and roles.
 
-**Usage:** ``tempest-account-generator [-h] [OPTIONS] accounts_file.yaml``.
+**Usage:** ``tempest account-generator [-h] [OPTIONS] accounts_file.yaml``.
 
 Positional Arguments
 --------------------
@@ -90,7 +90,7 @@ running in parallel.
 **-i VERSION**, **--identity-version VERSION** (Optional) Provisions accounts
 using the specified version of the identity API. (default: '3').
 
-To see help on specific argument, please do: ``tempest-account-generator
+To see help on specific argument, please do: ``tempest account-generator
 [OPTIONS] <accounts_file.yaml> -h``.
 """
 import argparse
@@ -102,8 +102,8 @@ from oslo_log import log as logging
 import yaml
 
 from tempest.common import credentials_factory
-from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib.common import dynamic_creds
 
 
 LOG = None
@@ -141,11 +141,10 @@ def get_credential_provider(opts):
     admin_creds = credentials_factory.get_credentials(
         fill_in=False, identity_version=identity_version, **admin_creds_dict)
     return dynamic_creds.DynamicCredentialProvider(
-        identity_version=identity_version,
         name=opts.tag,
         network_resources=network_resources,
-        admin_creds=admin_creds,
-        **credentials_factory.get_dynamic_provider_params())
+        **credentials_factory.get_dynamic_provider_params(
+            identity_version, admin_creds=admin_creds))
 
 
 def generate_resources(cred_provider, admin):
@@ -198,7 +197,7 @@ def dump_accounts(resources, identity_version, account_file):
         os.rename(account_file, '.'.join((account_file, 'bak')))
     with open(account_file, 'w') as f:
         yaml.safe_dump(accounts, f, default_flow_style=False)
-    LOG.info('%s generated successfully!' % account_file)
+    LOG.info('%s generated successfully!', account_file)
 
 
 def _parser_add_args(parser):
@@ -255,9 +254,9 @@ def _parser_add_args(parser):
 
 
 def get_options():
-    usage_string = ('tempest-account-generator [-h] <ARG> ...\n\n'
+    usage_string = ('tempest account-generator [-h] <ARG> ...\n\n'
                     'To see help on specific argument, do:\n'
-                    'tempest-account-generator <ARG> -h')
+                    'tempest account-generator <ARG> -h')
     parser = argparse.ArgumentParser(
         description=DESCRIPTION,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,

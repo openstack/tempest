@@ -13,10 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common import custom_matchers
 from tempest.common import waiters
 from tempest import config
-from tempest import exceptions
+from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest.scenario import manager
 from tempest import test
 
@@ -46,12 +50,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     10. Check SSH connection to instance after reboot
 
     """
-
-    def nova_list(self):
-        servers = self.servers_client.list_servers()
-        # The list servers in the compute client is inconsistent...
-        return servers['servers']
-
     def nova_show(self, server):
         got_server = (self.servers_client.show_server(server['id'])
                       ['server'])
@@ -71,10 +69,10 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
 
-    def check_partitions(self):
+    def check_disks(self):
         # NOTE(andreaf) The device name may be different on different guest OS
-        partitions = self.linux_client.get_partitions()
-        self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
+        disks = self.linux_client.get_disks()
+        self.assertEqual(1, disks.count(CONF.compute.volume_device_name))
 
     def create_and_add_security_group_to_server(self, server):
         secgroup = self._create_security_group()
@@ -88,23 +86,32 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                     ['server'])
             return {'name': secgroup['name']} in body['security_groups']
 
-        if not test.call_until_true(wait_for_secgroup_add,
-                                    CONF.compute.build_timeout,
-                                    CONF.compute.build_interval):
+        if not test_utils.call_until_true(wait_for_secgroup_add,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
             msg = ('Timed out waiting for adding security group %s to server '
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
-    @test.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
+    def _get_floating_ip_in_server_addresses(self, floating_ip, server):
+        for addresses in server['addresses'].values():
+            for address in addresses:
+                if (address['OS-EXT-IPS:type'] == 'floating' and
+                        address['addr'] == floating_ip['ip']):
+                    return address
+
+    @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
+    @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
+                          'Floating ips are not available')
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         image = self.glance_image_create()
         keypair = self.create_keypair()
 
-        server = self.create_server(image_id=image,
-                                    key_name=keypair['name'],
-                                    wait_until='ACTIVE')
-        servers = self.nova_list()
+        server = self.create_server(image_id=image, key_name=keypair['name'])
+        servers = self.servers_client.list_servers()['servers']
         self.assertIn(server['id'], [x['id'] for x in servers])
 
         self.nova_show(server)
@@ -120,17 +127,47 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.cinder_show(volume)
 
         floating_ip = self.create_floating_ip(server)
+        # fetch the server again to make sure the addresses were refreshed
+        # after associating the floating IP
+        server = self.servers_client.show_server(server['id'])['server']
+        address = self._get_floating_ip_in_server_addresses(
+            floating_ip, server)
+        self.assertIsNotNone(
+            address,
+            "Failed to find floating IP '%s' in server addresses: %s" %
+            (floating_ip['ip'], server['addresses']))
+
         self.create_and_add_security_group_to_server(server)
 
         # check that we can SSH to the server before reboot
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'])
+            floating_ip['ip'], private_key=keypair['private_key'],
+            server=server)
 
         self.nova_reboot(server)
 
         # check that we can SSH to the server after reboot
         # (both connections are part of the scenario)
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'])
+            floating_ip['ip'], private_key=keypair['private_key'],
+            server=server)
 
-        self.check_partitions()
+        self.check_disks()
+
+        # delete the floating IP, this should refresh the server addresses
+        self.compute_floating_ips_client.delete_floating_ip(floating_ip['id'])
+
+        def is_floating_ip_detached_from_server():
+            server_info = self.servers_client.show_server(
+                server['id'])['server']
+            address = self._get_floating_ip_in_server_addresses(
+                floating_ip, server_info)
+            return (not address)
+
+        if not test_utils.call_until_true(
+            is_floating_ip_detached_from_server,
+            CONF.compute.build_timeout,
+            CONF.compute.build_interval):
+            msg = ("Floating IP '%s' should not be in server addresses: %s" %
+                   (floating_ip['ip'], server['addresses']))
+            raise exceptions.TimeoutException(msg)

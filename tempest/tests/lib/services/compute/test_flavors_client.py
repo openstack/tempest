@@ -14,8 +14,8 @@
 
 import copy
 
+import fixtures
 from oslo_serialization import jsonutils as json
-from oslotest import mockpatch
 
 from tempest.lib.services.compute import flavors_client
 from tempest.tests.lib import fake_auth_provider
@@ -118,7 +118,7 @@ class TestFlavorsClient(base.BaseServiceTest):
         if bytes_body:
             body = body.encode('utf-8')
         response = fake_http.fake_http_response({}, status=200), body
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'tempest.lib.common.rest_client.RestClient.get',
             return_value=response))
         self.assertEqual(is_deleted,

@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add cascade parameter to volumes_client.
+    This option provides the ability to delete a volume and have Cinder
+    handle deletion of snapshots associated with that volume by passing
+    an additional argument to volume delete, "cascade=True".

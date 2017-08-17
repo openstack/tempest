@@ -16,10 +16,10 @@
 from __future__ import print_function
 
 import functools
-import logging as std_logging
 import os
 import tempfile
 
+import debtcollector.removals
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -133,7 +133,7 @@ IdentityGroup = [
     cfg.StrOpt('uri_v3',
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('auth_version',
-               default='v2',
+               default='v3',
                help="Identity API version to be used for authentication "
                     "for API tests."),
     cfg.StrOpt('region',
@@ -161,7 +161,9 @@ IdentityGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for OpenStack Identity "
-                    "(Keystone) API v3"),
+                    "(Keystone) API v3. The default value adminURL is "
+                    "deprecated and will be modified to publicURL in "
+                    "the next release."),
     cfg.StrOpt('admin_role',
                default='admin',
                help="Role required to administrate keystone."),
@@ -171,7 +173,20 @@ IdentityGroup = [
     cfg.BoolOpt('admin_domain_scope',
                 default=False,
                 help="Whether keystone identity v3 policy required "
-                     "a domain scoped token to use admin APIs")
+                     "a domain scoped token to use admin APIs"),
+    # Security Compliance (PCI-DSS)
+    cfg.IntOpt('user_lockout_failure_attempts',
+               default=2,
+               help="The number of unsuccessful login attempts the user is "
+                    "allowed before having the account locked."),
+    cfg.IntOpt('user_lockout_duration',
+               default=5,
+               help="The number of seconds a user account will remain "
+                    "locked."),
+    cfg.IntOpt('user_unique_last_password_count',
+               default=2,
+               help="The number of passwords for a user that must be unique "
+                    "before an old password can be reused."),
 ]
 
 service_clients_group = cfg.OptGroup(name='service-clients',
@@ -195,6 +210,10 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
                 help='Is the v2 identity API enabled'),
+    cfg.BoolOpt('api_v2_admin',
+                default=True,
+                help="Is the v2 identity admin API available? This setting "
+                     "only applies if api_v2 is set to True."),
     cfg.BoolOpt('api_v3',
                 default=True,
                 help='Is the v3 identity API enabled'),
@@ -204,11 +223,21 @@ IdentityFeatureGroup = [
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
                      "To get the list of extensions run: 'keystone discover'"),
-    # TODO(rodrigods): Remove the reseller flag when Kilo and Liberty is end
-    # of life.
-    cfg.BoolOpt('reseller',
+    # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
+    # in Newton and Ocata. This option can be removed after Mitaka is end of
+    # life.
+    cfg.BoolOpt('forbid_global_implied_dsr',
                 default=False,
-                help='Does the environment support reseller?')
+                help='Does the environment forbid global roles implying '
+                     'domain specific ones?',
+                deprecated_for_removal=True,
+                deprecated_reason="This feature flag was introduced to "
+                                  "support testing of old OpenStack versions, "
+                                  "which are not supported anymore"),
+    cfg.BoolOpt('security_compliance',
+                default=False,
+                help='Does the environment have the security compliance '
+                     'settings enabled?')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
@@ -245,7 +274,7 @@ ComputeGroup = [
                     "projects. If multiple networks are available for a "
                     "project, this is the network which will be used for "
                     "creating servers if tempest does not create a network or "
-                    "s network is not specified elsewhere. It may be used for "
+                    "a network is not specified elsewhere. It may be used for "
                     "ssh validation only if floating IPs are disabled."),
     cfg.StrOpt('catalog_type',
                default='compute',
@@ -264,7 +293,9 @@ ComputeGroup = [
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
-                    "an instance"),
+                    "an instance. Not all hypervisors guarantee that they "
+                    "will respect the user defined device name, tests may "
+                    "fail if inappropriate device name is set."),
     cfg.IntOpt('shelved_offload_time',
                default=0,
                help='Time in seconds before a shelved instance is eligible '
@@ -278,6 +309,11 @@ ComputeGroup = [
                      'be utilized by some multinode specific tests to ensure '
                      'that requests match the expected size of the cluster '
                      'you are testing with.')),
+    cfg.StrOpt('hypervisor_type',
+               default=None,
+               help="Hypervisor type of the test target on heterogeneous "
+                    "compute environment. The value can be 'QEMU', 'xen' or "
+                    "something."),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
@@ -286,8 +322,7 @@ ComputeGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'",
-                    deprecated_group='compute-feature-enabled'),
+                    "with format 'X.Y' or string 'latest'"),
     cfg.StrOpt('max_microversion',
                default=None,
                help="Upper version of the test target microversion range. "
@@ -296,8 +331,7 @@ ComputeGroup = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'",
-                    deprecated_group='compute-feature-enabled'),
+                    "with format 'X.Y' or string 'latest'"),
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
@@ -312,7 +346,13 @@ ComputeFeaturesGroup = [
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Each extension should be specified with alias name. '
-                     'Empty list indicates all extensions are disabled'),
+                     'Empty list indicates all extensions are disabled',
+                     deprecated_for_removal=True,
+                     deprecated_reason='The Nova extensions API and mechanism '
+                                       'is deprecated. This option will be '
+                                       'removed when all releases supported '
+                                       'by tempest no longer contain the Nova '
+                                       'extensions API and mechanism.'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
@@ -323,7 +363,10 @@ ComputeFeaturesGroup = [
                      "serial console output?"),
     cfg.BoolOpt('resize',
                 default=False,
-                help="Does the test environment support resizing?"),
+                help="Does the test environment support resizing? When you "
+                     "enable this feature, 'flavor_ref_alt' should be set and "
+                     "it should refer to a larger flavor than 'flavor_ref' "
+                     "one."),
     cfg.BoolOpt('pause',
                 default=True,
                 help="Does the test environment support pausing?"),
@@ -333,10 +376,17 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('suspend',
                 default=True,
                 help="Does the test environment support suspend/resume?"),
+    cfg.BoolOpt('cold_migration',
+                default=True,
+                help="Does the test environment support cold migration?"),
     cfg.BoolOpt('live_migration',
                 default=True,
-                help="Does the test environment support live migration "
-                     "available?"),
+                help="Does the test environment support live migration?"),
+    cfg.BoolOpt('live_migrate_back_and_forth',
+                default=False,
+                help="Does the test environment support live migrating "
+                     "VM back and forth between different versions of "
+                     "nova-compute?"),
     cfg.BoolOpt('metadata_service',
                 default=True,
                 help="Does the test environment support metadata service? "
@@ -347,9 +397,9 @@ ComputeFeaturesGroup = [
                      "migration"),
     cfg.BoolOpt('block_migrate_cinder_iscsi',
                 default=False,
-                help="Does the test environment block migration support "
-                "cinder iSCSI volumes. Note, libvirt doesn't support this, "
-                "see https://bugs.launchpad.net/nova/+bug/1398999"),
+                help="Does the test environment support block migration with "
+                "Cinder iSCSI volumes. Note: libvirt >= 1.2.17 is required "
+                "to support this if using the libvirt compute driver."),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
@@ -362,6 +412,11 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Enable RDP console. This configuration value should '
                      'be same as [nova.rdp]->enabled in nova.conf'),
+    cfg.BoolOpt('serial_console',
+                default=False,
+                help='Enable serial console. This configuration value '
+                     'should be the same as [nova.serial_console]->enabled '
+                     'in nova.conf'),
     cfg.BoolOpt('rescue',
                 default=True,
                 help='Does the test environment support instance rescue '
@@ -370,7 +425,8 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enables returning of the instance password by the '
                      'relevant server API calls such as create, rebuild '
-                     'or rescue.'),
+                     'or rescue. This configuration value should be same as '
+                     'nova.conf: DEFAULT.enable_instance_password'),
     cfg.BoolOpt('interface_attach',
                 default=True,
                 help='Does the test environment support dynamic network '
@@ -382,7 +438,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('nova_cert',
                 default=False,
                 help='Does the test environment have the nova cert running?',
-                deprecated_for_removal=True),
+                deprecated_for_removal=True,
+                deprecated_reason="On Nova side, the nova-cert service is "
+                                  "deprecated and the service will be removed "
+                                  "as early as Ocata."),
     cfg.BoolOpt('personality',
                 default=False,
                 help='Does the test environment support server personality'),
@@ -399,11 +458,20 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help="A list of enabled filters that nova will accept as hints"
                      " to the scheduler when creating a server. A special "
-                     "entry 'all' indicates all filters are enabled. Empty "
-                     "list indicates all filters are disabled. The full "
-                     "available list of filters is in nova.conf: "
-                     "DEFAULT.scheduler_available_filters"),
-
+                     "entry 'all' indicates all filters that are included "
+                     "with nova are enabled. Empty list indicates all filters "
+                     "are disabled. The full list of available filters is in "
+                     "nova.conf: DEFAULT.scheduler_available_filters. If the "
+                     "default value is overridden in nova.conf by the test "
+                     "environment (which means that a different set of "
+                     "filters is enabled than what is included in Nova by "
+                     "default) then, this option must be configured to "
+                     "contain the same filters that Nova uses in the test "
+                     "environment."),
+    cfg.BoolOpt('swap_volume',
+                default=False,
+                help='Does the test environment support in-place swapping of '
+                     'volumes attached to a server instance?'),
 ]
 
 
@@ -443,7 +511,7 @@ ImageGroup = [
                      "users can specify."),
     cfg.ListOpt('disk_formats',
                 default=['ami', 'ari', 'aki', 'vhd', 'vmdk', 'raw', 'qcow2',
-                         'vdi', 'iso'],
+                         'vdi', 'iso', 'vhdx'],
                 help="A list of image's disk formats "
                      "users can specify.")
 ]
@@ -454,14 +522,27 @@ image_feature_group = cfg.OptGroup(name='image-feature-enabled',
 ImageFeaturesGroup = [
     cfg.BoolOpt('api_v2',
                 default=True,
-                help="Is the v2 image API enabled"),
+                help="Is the v2 image API enabled",
+                deprecated_for_removal=True,
+                deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
+                                  'are current one. In future, Tempest will '
+                                  'test v2 APIs only so this config option '
+                                  'will be removed.'),
     cfg.BoolOpt('api_v1',
                 default=True,
-                help="Is the v1 image API enabled"),
+                help="Is the v1 image API enabled",
+                deprecated_for_removal=True,
+                deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
+                                  'are current one. In future, Tempest will '
+                                  'test v2 APIs only so this config option '
+                                  'will be removed.'),
     cfg.BoolOpt('deactivate_image',
                 default=False,
                 help="Is the deactivate-image feature enabled."
-                     " The feature has been integrated since Kilo."),
+                     " The feature has been integrated since Kilo.",
+                deprecated_for_removal=True,
+                deprecated_reason="All supported versions of OpenStack now "
+                                  "support the 'deactivate_image' feature"),
 ]
 
 network_group = cfg.OptGroup(name='network',
@@ -483,23 +564,18 @@ NetworkGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the network service."),
     cfg.StrOpt('project_network_cidr',
-               deprecated_name='tenant_network_cidr',
                default="10.100.0.0/16",
                help="The cidr block to allocate project ipv4 subnets from"),
     cfg.IntOpt('project_network_mask_bits',
-               deprecated_name='tenant_network_mask_bits',
                default=28,
                help="The mask bits for project ipv4 subnets"),
     cfg.StrOpt('project_network_v6_cidr',
-               deprecated_name='tenant_network_v6_cidr',
                default="2003::/48",
                help="The cidr block to allocate project ipv6 subnets from"),
     cfg.IntOpt('project_network_v6_mask_bits',
-               deprecated_name='tenant_network_v6_mask_bits',
                default=64,
                help="The mask bits for project ipv6 subnets"),
     cfg.BoolOpt('project_networks_reachable',
-                deprecated_name='tenant_networks_reachable',
                 default=False,
                 help="Whether project networks can be reached directly from "
                      "the test client. This must be set to True when the "
@@ -539,6 +615,10 @@ NetworkGroup = [
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
                      " for subnetpools creation"),
+    cfg.BoolOpt('shared_physical_network',
+                default=False,
+                help="The environment does not support network separation "
+                     "between tenants."),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -564,6 +644,12 @@ NetworkFeaturesGroup = [
                 default=True,
                 help="Does the test environment support changing"
                      " port admin state"),
+    cfg.BoolOpt('port_security',
+                default=False,
+                help="Does the test environment support port security?"),
+    cfg.BoolOpt('floating_ips',
+                default=True,
+                help='Does the test environment support floating_ips')
 ]
 
 validation_group = cfg.OptGroup(name='validation',
@@ -585,25 +671,19 @@ ValidationGroup = [
                choices=['fixed', 'floating'],
                help='Default IP type used for validation: '
                     '-fixed: uses the first IP belonging to the fixed network '
-                    '-floating: creates and uses a floating IP',
-               deprecated_opts=[cfg.DeprecatedOpt('use_floatingip_for_ssh',
-                                                  group='compute')]),
+                    '-floating: creates and uses a floating IP'),
     cfg.StrOpt('auth_method',
                default='keypair',
                choices=['keypair'],
                help='Default authentication method to the instance. '
                     'Only ssh via keypair is supported for now. '
-                    'Additional methods will be handled in a separate spec.',
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_auth_method',
-                                                  group='compute')]),
+                    'Additional methods will be handled in a separate spec.'),
     cfg.IntOpt('ip_version_for_ssh',
                default=4,
                help='Default IP version for ssh connections.'),
     cfg.IntOpt('ping_timeout',
                default=120,
-               help='Timeout in seconds to wait for ping to succeed.',
-               deprecated_opts=[cfg.DeprecatedOpt('ping_timeout',
-                                                  group='compute')]),
+               help='Timeout in seconds to wait for ping to succeed.'),
     cfg.IntOpt('connect_timeout',
                default=60,
                help='Timeout in seconds to wait for the TCP connection to be '
@@ -613,50 +693,32 @@ ValidationGroup = [
                help='Timeout in seconds to wait for the ssh banner.'),
     cfg.StrOpt('image_ssh_user',
                default="root",
-               help="User name used to authenticate to an instance.",
-               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_user',
-                                                  group='compute'),
-                                cfg.DeprecatedOpt('ssh_user',
-                                                  group='compute'),
-                                cfg.DeprecatedOpt('ssh_user',
-                                                  group='scenario')]),
+               help="User name used to authenticate to an instance."),
     cfg.StrOpt('image_ssh_password',
                default="password",
-               help="Password used to authenticate to an instance.",
-               deprecated_opts=[cfg.DeprecatedOpt('image_ssh_password',
-                                                  group='compute')]),
+               help="Password used to authenticate to an instance."),
     cfg.StrOpt('ssh_shell_prologue',
                default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
                help="Shell fragments to use before executing a command "
-                    "when sshing to a guest.",
-               deprecated_opts=[cfg.DeprecatedOpt('ssh_shell_prologue',
-                                                  group='compute')]),
+                    "when sshing to a guest."),
     cfg.IntOpt('ping_size',
                default=56,
                help="The packet size for ping packets originating "
-                    "from remote linux hosts",
-               deprecated_opts=[cfg.DeprecatedOpt('ping_size',
-                                                  group='compute')]),
+                    "from remote linux hosts"),
     cfg.IntOpt('ping_count',
                default=1,
                help="The number of ping packets originating from remote "
-                    "linux hosts",
-               deprecated_opts=[cfg.DeprecatedOpt('ping_count',
-                                                  group='compute')]),
+                    "linux hosts"),
     cfg.StrOpt('floating_ip_range',
                default='10.0.0.0/29',
                help='Unallocated floating IP range, which will be used to '
                     'test the floating IP bulk feature for CRUD operation. '
                     'This block must not overlap an existing floating IP '
-                    'pool.',
-               deprecated_opts=[cfg.DeprecatedOpt('floating_ip_range',
-                                                  group='compute')]),
+                    'pool.'),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections. Ignored if "
-                    "connect_method=floating.",
-               deprecated_opts=[cfg.DeprecatedOpt('network_for_ssh',
-                                                  group='compute')]),
+                    "connect_method=floating."),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -700,6 +762,18 @@ VolumeGroup = [
     cfg.IntOpt('volume_size',
                default=1,
                help='Default size in GB for volumes created by volumes tests'),
+    cfg.ListOpt('manage_volume_ref',
+                default=['source-name', 'volume-%s'],
+                help="A reference to existing volume for volume manage. "
+                     "It contains two elements, the first is ref type "
+                     "(like 'source-name', 'source-id', etc), the second is "
+                     "volume name template used in storage backend"),
+    cfg.ListOpt('manage_snapshot_ref',
+                default=['source-name', '_snapshot-%s'],
+                help="A reference to existing snapshot for snapshot manage. "
+                     "It contains two elements, the first is ref type "
+                     "(like 'source-name', 'source-id', etc), the second is "
+                     "snapshot name template used in storage backend"),
     cfg.StrOpt('min_microversion',
                default=None,
                help="Lower version of the test target microversion range. "
@@ -736,29 +810,30 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('clone',
                 default=True,
                 help='Runs Cinder volume clone test'),
+    cfg.BoolOpt('manage_snapshot',
+                default=False,
+                help='Runs Cinder manage snapshot tests'),
+    cfg.BoolOpt('manage_volume',
+                default=False,
+                help='Runs Cinder manage volume tests'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('api_v1',
-                default=True,
-                help="Is the v1 volume API enabled"),
+                default=False,
+                help="Is the v1 volume API enabled",
+                deprecated_for_removal=True,
+                deprecated_reason="The v1 volume API has been deprecated "
+                                  "since Juno release, and the API will be "
+                                  "removed."),
     cfg.BoolOpt('api_v2',
                 default=True,
                 help="Is the v2 volume API enabled"),
     cfg.BoolOpt('api_v3',
-                default=False,
-                help="Is the v3 volume API enabled"),
-    cfg.BoolOpt('bootable',
                 default=True,
-                help='Update bootable status of a volume '
-                     'Not implemented on icehouse ',
-                deprecated_for_removal=True),
-    # TODO(ynesenenko): Remove volume_services once liberty-eol happens.
-    cfg.BoolOpt('volume_services',
-                default=False,
-                help='Extract correct host info from host@backend')
+                help="Is the v3 volume API enabled")
 ]
 
 
@@ -835,104 +910,58 @@ orchestration_group = cfg.OptGroup(name='orchestration',
 OrchestrationGroup = [
     cfg.StrOpt('catalog_type',
                default='orchestration',
-               help="Catalog type of the Orchestration service."),
+               help="Catalog type of the Orchestration service.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.StrOpt('region',
                default='',
                help="The orchestration region name to use. If empty, the "
                     "value of identity.region is used instead. If no such "
                     "region is found in the service catalog, the first found "
-                    "one is used."),
+                    "one is used.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the orchestration service."),
+               help="The endpoint type to use for the orchestration service.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.StrOpt('stack_owner_role', default='heat_stack_owner',
-               help='Role required for users to be able to manage stacks'),
+               help='Role required for users to be able to manage stacks',
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.IntOpt('build_interval',
                default=1,
-               help="Time in seconds between build status checks."),
+               help="Time in seconds between build status checks.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.IntOpt('build_timeout',
                default=1200,
-               help="Timeout in seconds to wait for a stack to build."),
+               help="Timeout in seconds to wait for a stack to build.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.StrOpt('instance_type',
                default='m1.micro',
                help="Instance type for tests. Needs to be big enough for a "
-                    "full OS plus the test workload"),
+                    "full OS plus the test workload",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.StrOpt('keypair_name',
-               help="Name of existing keypair to launch servers with."),
+               help="Name of existing keypair to launch servers with.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.IntOpt('max_template_size',
                default=524288,
-               help="Value must match heat configuration of the same name."),
+               help="Value must match heat configuration of the same name.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
     cfg.IntOpt('max_resources_per_stack',
                default=1000,
-               help="Value must match heat configuration of the same name."),
-]
-
-data_processing_group = cfg.OptGroup(name="data-processing",
-                                     title="Data Processing options")
-
-DataProcessingGroup = [
-    cfg.StrOpt('catalog_type',
-               default='data-processing',
-               deprecated_group="data_processing",
-               help="Catalog type of the data processing service."),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               deprecated_group="data_processing",
-               help="The endpoint type to use for the data processing "
-                    "service."),
-]
-
-
-data_processing_feature_group = cfg.OptGroup(
-    name="data-processing-feature-enabled",
-    title="Enabled Data Processing features")
-
-DataProcessingFeaturesGroup = [
-    cfg.ListOpt('plugins',
-                default=["vanilla", "cdh"],
-                deprecated_group="data_processing-feature-enabled",
-                help="List of enabled data processing plugins")
-]
-
-stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
-
-StressGroup = [
-    cfg.StrOpt('nova_logdir',
-               help='Directory containing log files on the compute nodes'),
-    cfg.IntOpt('max_instances',
-               default=16,
-               help='Maximum number of instances to create during test.'),
-    cfg.StrOpt('controller',
-               help='Controller host.'),
-    # new stress options
-    cfg.StrOpt('target_controller',
-               help='Controller host.'),
-    cfg.StrOpt('target_ssh_user',
-               help='ssh user.'),
-    cfg.StrOpt('target_private_key_path',
-               help='Path to private key.'),
-    cfg.StrOpt('target_logfiles',
-               help='regexp for list of log files.'),
-    cfg.IntOpt('log_check_interval',
-               default=60,
-               help='time (in seconds) between log file error checks.'),
-    cfg.IntOpt('default_thread_number_per_action',
-               default=4,
-               help='The number of threads created while stress test.'),
-    cfg.BoolOpt('leave_dirty_stack',
-                default=False,
-                help='Prevent the cleaning (tearDownClass()) between'
-                     ' each stress test run if an exception occurs'
-                     ' during this run.'),
-    cfg.BoolOpt('full_clean_stack',
-                default=False,
-                help='Allows a full cleaning process after a stress test.'
-                     ' Caution : this cleanup will remove every objects of'
-                     ' every project.')
+               help="Value must match heat configuration of the same name.",
+               deprecated_for_removal=True,
+               deprecated_reason='Heat support will be removed from Tempest'),
 ]
 
 
@@ -998,13 +1027,9 @@ ServiceAvailableGroup = [
                 help="Whether or not nova is expected to be available"),
     cfg.BoolOpt('heat',
                 default=False,
-                help="Whether or not Heat is expected to be available"),
-    cfg.BoolOpt('sahara',
-                default=False,
-                help="Whether or not Sahara is expected to be available"),
-    cfg.BoolOpt('ironic',
-                default=False,
-                help="Whether or not Ironic is expected to be available"),
+                help="Whether or not Heat is expected to be available",
+                deprecated_for_removal=True,
+                deprecated_reason='Heat support will be removed from Tempest'),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1033,97 +1058,27 @@ specify .* as the regex.
 """)
 ]
 
-input_scenario_group = cfg.OptGroup(name="input-scenario",
-                                    title="Filters and values for"
-                                          " input scenarios[DEPRECATED]")
-
-
-InputScenarioGroup = [
-    cfg.StrOpt('image_regex',
-               default='^cirros-0.3.1-x86_64-uec$',
-               help="Matching images become parameters for scenario tests",
-               deprecated_for_removal=True),
-    cfg.StrOpt('flavor_regex',
-               default='^m1.nano$',
-               help="Matching flavors become parameters for scenario tests",
-               deprecated_for_removal=True),
-    cfg.StrOpt('non_ssh_image_regex',
-               default='^.*[Ww]in.*$',
-               help="SSH verification in tests is skipped"
-                    "for matching images",
-               deprecated_for_removal=True),
-    cfg.StrOpt('ssh_user_regex',
-               default="[[\"^.*[Cc]irros.*$\", \"cirros\"]]",
-               help="List of user mapped to regex "
-                    "to matching image names.",
-               deprecated_for_removal=True),
-]
-
-
-baremetal_group = cfg.OptGroup(name='baremetal',
-                               title='Baremetal provisioning service options',
-                               help='When enabling baremetal tests, Nova '
-                                    'must be configured to use the Ironic '
-                                    'driver. The following parameters for the '
-                                    '[compute] section must be disabled: '
-                                    'console_output, interface_attach, '
-                                    'live_migration, pause, rescue, resize '
-                                    'shelve, snapshot, and suspend')
-
-
-# NOTE(deva): Ironic tests have been ported to tempest.lib. New config options
-#             should be added to ironic/ironic_tempest_plugin/config.py.
-#             However, these options need to remain here for testing stable
-#             branches until Liberty release reaches EOL.
-BaremetalGroup = [
-    cfg.StrOpt('catalog_type',
-               default='baremetal',
-               help="Catalog type of the baremetal provisioning service"),
-    cfg.BoolOpt('driver_enabled',
-                default=False,
-                help="Whether the Ironic nova-compute driver is enabled"),
-    cfg.StrOpt('driver',
-               default='fake',
-               help="Driver name which Ironic uses"),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the baremetal provisioning "
-                    "service"),
-    cfg.IntOpt('active_timeout',
-               default=300,
-               help="Timeout for Ironic node to completely provision"),
-    cfg.IntOpt('association_timeout',
-               default=30,
-               help="Timeout for association of Nova instance and Ironic "
-                    "node"),
-    cfg.IntOpt('power_timeout',
-               default=60,
-               help="Timeout for Ironic power transitions."),
-    cfg.IntOpt('unprovision_timeout',
-               default=300,
-               help="Timeout for unprovisioning an Ironic node. "
-                    "Takes longer since Kilo as Ironic performs an extra "
-                    "step in Node cleaning.")
-]
-
-negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
-
-NegativeGroup = [
-    cfg.StrOpt('test_generator',
-               default='tempest.common.' +
-               'generator.negative_generator.NegativeTestGenerator',
-               help="Test generator class for all negative tests"),
-]
-
 DefaultGroup = [
     cfg.StrOpt('resources_prefix',
                default='tempest',
                help="Prefix to be added when generating the name for "
                     "test resources. It can be used to discover all "
                     "resources associated with a specific test run when "
-                    "running tempest on a real-life cloud"),
+                    "running tempest on a real-life cloud",
+               deprecated_for_removal=True,
+               deprecated_reason="It is enough to add 'tempest' as this "
+                                 "prefix to ideintify resources which are "
+                                 "created by Tempest and no projects set "
+                                 "this option on OpenStack dev community."),
+    cfg.BoolOpt('pause_teardown',
+                default=False,
+                help="""Whether to pause a test in global teardown.
+
+The best use case is investigating used resources of one test.
+A test can be run as follows:
+ $ ostestr --pdb TEST_ID
+or
+ $ python -m testtools.run TEST_ID"""),
 ]
 
 _opts = [
@@ -1143,15 +1098,9 @@ _opts = [
     (object_storage_group, ObjectStoreGroup),
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (orchestration_group, OrchestrationGroup),
-    (data_processing_group, DataProcessingGroup),
-    (data_processing_feature_group, DataProcessingFeaturesGroup),
-    (stress_group, StressGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
     (debug_group, DebugGroup),
-    (baremetal_group, BaremetalGroup),
-    (input_scenario_group, InputScenarioGroup),
-    (negative_group, NegativeGroup),
     (None, DefaultGroup)
 ]
 
@@ -1193,6 +1142,12 @@ class TempestConfigPrivate(object):
         return getattr(_CONF, attr)
 
     def _set_attrs(self):
+        # This methods ensures that config options in Tempest as well as
+        # in Tempest plugins can be accessed via:
+        #     CONF.<normalised_group_name>.<key_name>
+        # where:
+        #     normalised_group_name = group_name.replace('-', '_')
+        # Attributes are set at __init__ time *only* for known option groups
         self.auth = _CONF.auth
         self.compute = _CONF.compute
         self.compute_feature_enabled = _CONF['compute-feature-enabled']
@@ -1210,17 +1165,27 @@ class TempestConfigPrivate(object):
         self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
         self.orchestration = _CONF.orchestration
-        self.data_processing = _CONF['data-processing']
-        self.data_processing_feature_enabled = _CONF[
-            'data-processing-feature-enabled']
-        self.stress = _CONF.stress
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
         self.debug = _CONF.debug
-        self.baremetal = _CONF.baremetal
-        self.input_scenario = _CONF['input-scenario']
-        self.negative = _CONF.negative
         logging.tempest_set_log_file('tempest.log')
+        # Setting attributes for plugins
+        # NOTE(andreaf) Plugins have no access to the TempestConfigPrivate
+        # instance at discovery time, so they have no way of setting these
+        # aliases themselves.
+        ext_plugins = plugins.TempestTestPluginManager()
+        for group, _ in ext_plugins.get_plugin_options_list():
+            if isinstance(group, cfg.OptGroup):
+                # If we have an OptGroup
+                group_name = group.name
+                group_dest = group.dest
+            else:
+                # If we have a group name as a string
+                group_name = group
+                group_dest = group.replace('-', '_')
+            # NOTE(andreaf) We can set the attribute safely here since in
+            # case of name conflict we would not have reached this point.
+            setattr(self, group_dest, _CONF[group_name])
 
     def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""
@@ -1261,11 +1226,11 @@ class TempestConfigPrivate(object):
 
         logging.setup(_CONF, 'tempest')
         LOG = logging.getLogger('tempest')
-        LOG.info("Using tempest config file %s" % path)
+        LOG.info("Using tempest config file %s", path)
         register_opts()
         self._set_attrs()
         if parse_conf:
-            _CONF.log_opt_values(LOG, std_logging.DEBUG)
+            _CONF.log_opt_values(LOG, logging.DEBUG)
 
 
 class TempestConfigProxy(object):
@@ -1273,14 +1238,14 @@ class TempestConfigProxy(object):
     _path = None
 
     _extra_log_defaults = [
-        ('paramiko.transport', std_logging.INFO),
-        ('requests.packages.urllib3.connectionpool', std_logging.WARN),
+        ('paramiko.transport', logging.INFO),
+        ('requests.packages.urllib3.connectionpool', logging.WARN),
     ]
 
     def _fix_log_levels(self):
         """Tweak the oslo log defaults."""
         for name, level in self._extra_log_defaults:
-            std_logging.getLogger(name).setLevel(level)
+            logging.getLogger(name).logger.setLevel(level)
 
     def __getattr__(self, attr):
         if not self._config:
@@ -1298,6 +1263,12 @@ class TempestConfigProxy(object):
             # loaded, options registered, and _config is set.
             _register_tempest_service_clients()
 
+            # Registering service clients and pushing their configuration to
+            # the service clients register. Doing this in the config module
+            # ensures that the configuration is available by the time we
+            # discover tests from plugins.
+            plugins.TempestTestPluginManager()._register_service_clients()
+
         return getattr(self._config, attr)
 
     def set_config_path(self, path):
@@ -1307,6 +1278,8 @@ class TempestConfigProxy(object):
 CONF = TempestConfigProxy()
 
 
+@debtcollector.removals.remove(
+    message='use testtools.skipUnless instead', removal_version='Queens')
 def skip_unless_config(*args):
     """Decorator to raise a skip if a config opt doesn't exist or is False
 
@@ -1345,6 +1318,8 @@ def skip_unless_config(*args):
     return decorator
 
 
+@debtcollector.removals.remove(
+    message='use testtools.skipIf instead', removal_version='Queens')
 def skip_if_config(*args):
     """Raise a skipException if a config exists and is True
 

@@ -13,12 +13,41 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import testtools
 
 from tempest.lib import base as test
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.tests import base
+
+
+class TestAttrDecorator(base.TestCase):
+    def _test_attr_helper(self, expected_attrs, **decorator_args):
+        @decorators.attr(**decorator_args)
+        def foo():
+            pass
+
+        # By our decorators.attr decorator the attribute __testtools_attrs
+        # will be set only for 'type' argument, so we test it first.
+        if 'type' in decorator_args:
+            # this is what testtools sets
+            self.assertEqual(getattr(foo, '__testtools_attrs'),
+                             set(expected_attrs))
+
+    def test_attr_without_type(self):
+        self._test_attr_helper(expected_attrs='baz', bar='baz')
+
+    def test_attr_decorator_with_list_type(self):
+        # if type is 'smoke' we'll get the original list of types
+        self._test_attr_helper(expected_attrs=['smoke', 'foo'],
+                               type=['smoke', 'foo'])
+
+    def test_attr_decorator_with_unknown_type(self):
+        self._test_attr_helper(expected_attrs=['foo'], type='foo')
+
+    def test_attr_decorator_with_duplicated_type(self):
+        self._test_attr_helper(expected_attrs=['foo'], type=['foo', 'foo'])
 
 
 class TestSkipBecauseDecorator(base.TestCase):
@@ -123,3 +152,33 @@ class TestSkipUnlessAttrDecorator(base.TestCase):
 
     def test_no_skip_for_attr_exist_and_true(self):
         self._test_skip_unless_attr('expected_attr', expected_to_skip=False)
+
+
+class TestRelatedBugDecorator(base.TestCase):
+    def test_relatedbug_when_no_exception(self):
+        f = mock.Mock()
+        sentinel = object()
+
+        @decorators.related_bug(bug="1234", status_code=500)
+        def test_foo(self):
+            f(self)
+
+        test_foo(sentinel)
+        f.assert_called_once_with(sentinel)
+
+    def test_relatedbug_when_exception(self):
+        class MyException(Exception):
+            def __init__(self, status_code):
+                self.status_code = status_code
+
+        def f(self):
+            raise MyException(status_code=500)
+
+        @decorators.related_bug(bug="1234", status_code=500)
+        def test_foo(self):
+            f(self)
+
+        with mock.patch.object(decorators.LOG, 'error') as m_error:
+            self.assertRaises(MyException, test_foo, object())
+
+        m_error.assert_called_once_with(mock.ANY, '1234', '1234')

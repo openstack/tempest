@@ -14,7 +14,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import test
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -29,9 +29,9 @@ class ComputeNetworksTest(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ComputeNetworksTest, cls).setup_clients()
-        cls.client = cls.os.compute_networks_client
+        cls.client = cls.os_primary.compute_networks_client
 
-    @test.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
+    @decorators.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
         networks = self.client.list_networks()['networks']
         self.assertNotEmpty(networks, "No networks found.")

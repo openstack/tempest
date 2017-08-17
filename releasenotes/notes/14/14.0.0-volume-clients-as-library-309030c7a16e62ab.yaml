@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Define volume service clients as libraries.
+    The following volume service clients are defined as library interface,
+    so the other projects can use these modules as stable libraries without
+    any maintenance changes.
+
+    * volumes_client(v1)
+    * volumes_client(v2)
+    * capabilities_client(v2)
+    * scheduler_stats_client(v2)

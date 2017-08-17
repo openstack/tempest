@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -38,12 +39,8 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 
-    @classmethod
-    def setup_clients(cls):
-        super(QuotasNegativeTest, cls).setup_clients()
-        cls.identity_admin_client = cls.os_adm.identity_client
-
-    @test.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
     def test_network_quota_exceeding(self):
         # Set the network quota to two
         self.admin_quotas_client.update_quotas(self.networks_client.tenant_id,
@@ -62,8 +59,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
         # Try to create a third network while the quota is two
         with self.assertRaisesRegex(
                 lib_exc.Conflict,
-                "An object with that identifier already exists\\n" +
-                "Details.*Quota exceeded for resources: \['network'\].*"):
+                "Quota exceeded for resources: \['network'\].*"):
             n3 = self.networks_client.create_network()
             self.addCleanup(self.networks_client.delete_network,
                             n3['network']['id'])

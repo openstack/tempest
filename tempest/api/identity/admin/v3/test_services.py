@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
@@ -28,8 +28,8 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
                           service_id)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
         # Creating a Service
         name = data_utils.rand_name('service')
@@ -61,7 +61,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_desc, resp3_desc)
         self.assertDictContainsSubset(update_service, fetched_service)
 
-    @test.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
+    @decorators.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service')
@@ -69,25 +69,33 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         service = self.services_client.create_service(
             type=serv_type, name=name)['service']
         self.addCleanup(self.services_client.delete_service, service['id'])
-        self.assertIn('id', service)
         expected_data = {'name': name, 'type': serv_type}
         self.assertDictContainsSubset(expected_data, service)
 
-    @test.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
+    @decorators.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         service_ids = list()
+        service_types = list()
         for _ in range(3):
-            name = data_utils.rand_name('service')
-            serv_type = data_utils.rand_name('type')
+            name = data_utils.rand_name(self.__class__.__name__ + '-Service')
+            serv_type = data_utils.rand_name(self.__class__.__name__ + '-Type')
             create_service = self.services_client.create_service(
                 type=serv_type, name=name)['service']
             self.addCleanup(self.services_client.delete_service,
                             create_service['id'])
             service_ids.append(create_service['id'])
+            service_types.append(serv_type)
 
         # List and Verify Services
         services = self.services_client.list_services()['services']
         fetched_ids = [service['id'] for service in services]
         found = [s for s in fetched_ids if s in service_ids]
         self.assertEqual(len(found), len(service_ids))
+
+        # Check that filtering by service type works.
+        for serv_type in service_types:
+            fetched_services = self.services_client.list_services(
+                type=serv_type)['services']
+            self.assertEqual(1, len(fetched_services))
+            self.assertEqual(serv_type, fetched_services[0]['type'])

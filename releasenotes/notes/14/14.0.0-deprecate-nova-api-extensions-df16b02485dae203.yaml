@@ -1,0 +1,7 @@
+---
+deprecations:
+  - The *api_extensions* config option in the *compute-feature-enabled* group is
+    now deprecated. This option will be removed from tempest when all the
+    OpenStack releases supported by tempest no longer support the API extensions
+    mechanism. This was removed from Nova during the Newton cycle, so this will
+    be removed at the Mitaka EOL.

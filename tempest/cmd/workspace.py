@@ -40,6 +40,8 @@ remove
 ------
 Deletes the entry for a given tempest workspace --name
 
+--rmdir Deletes the given tempest workspace directory
+
 General Options
 ===============
 
@@ -49,11 +51,12 @@ General Options
 """
 
 import os
+import shutil
 import sys
 
 from cliff import command
+from cliff import lister
 from oslo_concurrency import lockutils
-import prettytable
 import yaml
 
 from tempest import config
@@ -72,7 +75,10 @@ class WorkspaceManager(object):
 
     @lockutils.synchronized('workspaces', external=True)
     def get_workspace(self, name):
-        """Returns the workspace that has the given name"""
+        """Returns the workspace that has the given name
+
+        If the workspace isn't registered then `None` is returned.
+        """
         self._populate()
         return self.workspaces.get(name)
 
@@ -99,11 +105,16 @@ class WorkspaceManager(object):
             sys.exit(1)
 
     @lockutils.synchronized('workspaces', external=True)
-    def remove_workspace(self, name):
+    def remove_workspace_entry(self, name):
         self._populate()
         self._name_exists(name)
-        self.workspaces.pop(name)
+        workspace_path = self.workspaces.pop(name)
         self._write_file()
+        return workspace_path
+
+    @lockutils.synchronized('workspaces', external=True)
+    def remove_workspace_directory(self, workspace_path):
+        shutil.rmtree(workspace_path)
 
     @lockutils.synchronized('workspaces', external=True)
     def list_workspaces(self):
@@ -148,79 +159,104 @@ class WorkspaceManager(object):
         if not os.path.isfile(self.path):
             return
         with open(self.path, 'r') as f:
-            self.workspaces = yaml.load(f) or {}
+            self.workspaces = yaml.safe_load(f) or {}
 
 
-class TempestWorkspace(command.Command):
-    def take_action(self, parsed_args):
-        self.manager = WorkspaceManager(parsed_args.workspace_path)
-        if getattr(parsed_args, 'register', None):
-            self.manager.register_new_workspace(
-                parsed_args.name, parsed_args.path)
-        elif getattr(parsed_args, 'rename', None):
-            self.manager.rename_workspace(
-                parsed_args.old_name, parsed_args.new_name)
-        elif getattr(parsed_args, 'move', None):
-            self.manager.move_workspace(
-                parsed_args.name, parsed_args.path)
-        elif getattr(parsed_args, 'remove', None):
-            self.manager.remove_workspace(
-                parsed_args.name)
-        else:
-            self._print_workspaces()
-        sys.exit(0)
+def add_global_arguments(parser):
+    parser.add_argument(
+        '--workspace-path', required=False, default=None,
+        help="The path to the workspace file, the default is "
+             "~/.tempest/workspace.yaml")
+    return parser
 
+
+class TempestWorkspaceRegister(command.Command):
     def get_description(self):
-        return 'Tempest workspace actions'
+        return ('Registers a new tempest workspace via a given '
+                '--name and --path')
 
     def get_parser(self, prog_name):
-        parser = super(TempestWorkspace, self).get_parser(prog_name)
-
-        parser.add_argument(
-            '--workspace-path', required=False, default=None,
-            help="The path to the workspace file, the default is "
-                 "~/.tempest/workspace.yaml")
-
-        subparsers = parser.add_subparsers()
-
-        list_parser = subparsers.add_parser(
-            'list', help='Outputs the name and path of all known tempest '
-            'workspaces')
-        list_parser.set_defaults(list=True)
-
-        register_parser = subparsers.add_parser(
-            'register', help='Registers a new tempest workspace via a given '
-            '--name and --path')
-        register_parser.add_argument('--name', required=True)
-        register_parser.add_argument('--path', required=True)
-        register_parser.set_defaults(register=True)
-
-        update_parser = subparsers.add_parser(
-            'rename', help='Renames a tempest workspace from --old-name to '
-            '--new-name')
-        update_parser.add_argument('--old-name', required=True)
-        update_parser.add_argument('--new-name', required=True)
-        update_parser.set_defaults(rename=True)
-
-        move_parser = subparsers.add_parser(
-            'move', help='Changes the path of a given tempest workspace '
-            '--name to --path')
-        move_parser.add_argument('--name', required=True)
-        move_parser.add_argument('--path', required=True)
-        move_parser.set_defaults(move=True)
-
-        remove_parser = subparsers.add_parser(
-            'remove', help='Deletes the entry for a given tempest workspace '
-            '--name')
-        remove_parser.add_argument('--name', required=True)
-        remove_parser.set_defaults(remove=True)
+        parser = super(TempestWorkspaceRegister, self).get_parser(prog_name)
+        add_global_arguments(parser)
+        parser.add_argument('--name', required=True)
+        parser.add_argument('--path', required=True)
 
         return parser
 
-    def _print_workspaces(self):
-        output = prettytable.PrettyTable(["Name", "Path"])
-        if self.manager.list_workspaces() is not None:
-            for name, path in self.manager.list_workspaces().items():
-                output.add_row([name, path])
+    def take_action(self, parsed_args):
+        self.manager = WorkspaceManager(parsed_args.workspace_path)
+        self.manager.register_new_workspace(parsed_args.name, parsed_args.path)
+        sys.exit(0)
 
-        print(output)
+
+class TempestWorkspaceRename(command.Command):
+    def get_description(self):
+        return 'Renames a tempest workspace from --old-name to --new-name'
+
+    def get_parser(self, prog_name):
+        parser = super(TempestWorkspaceRename, self).get_parser(prog_name)
+        add_global_arguments(parser)
+        parser.add_argument('--old-name', required=True)
+        parser.add_argument('--new-name', required=True)
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.manager = WorkspaceManager(parsed_args.workspace_path)
+        self.manager.rename_workspace(
+            parsed_args.old_name, parsed_args.new_name)
+        sys.exit(0)
+
+
+class TempestWorkspaceMove(command.Command):
+    def get_description(self):
+        return 'Changes the path of a given tempest workspace --name to --path'
+
+    def get_parser(self, prog_name):
+        parser = super(TempestWorkspaceMove, self).get_parser(prog_name)
+        add_global_arguments(parser)
+        parser.add_argument('--name', required=True)
+        parser.add_argument('--path', required=True)
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.manager = WorkspaceManager(parsed_args.workspace_path)
+        self.manager.move_workspace(parsed_args.name, parsed_args.path)
+        sys.exit(0)
+
+
+class TempestWorkspaceRemove(command.Command):
+    def get_description(self):
+        return 'Deletes the entry for a given tempest workspace --name'
+
+    def get_parser(self, prog_name):
+        parser = super(TempestWorkspaceRemove, self).get_parser(prog_name)
+        add_global_arguments(parser)
+        parser.add_argument('--name', required=True)
+        parser.add_argument('--rmdir', action='store_true',
+                            help='Deletes the given workspace directory')
+
+        return parser
+
+    def take_action(self, parsed_args):
+        self.manager = WorkspaceManager(parsed_args.workspace_path)
+        workspace_path = self.manager.remove_workspace_entry(parsed_args.name)
+        if parsed_args.rmdir:
+            self.manager.remove_workspace_directory(workspace_path)
+        sys.exit(0)
+
+
+class TempestWorkspaceList(lister.Lister):
+    def get_description(self):
+        return 'Outputs the name and path of all known tempest workspaces'
+
+    def get_parser(self, prog_name):
+        parser = super(TempestWorkspaceList, self).get_parser(prog_name)
+        add_global_arguments(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        self.manager = WorkspaceManager(parsed_args.workspace_path)
+        return (("Name", "Path"),
+                ((n, p) for n, p in self.manager.list_workspaces().items()))

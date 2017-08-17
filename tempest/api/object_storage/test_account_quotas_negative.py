@@ -14,6 +14,7 @@
 
 from tempest.api.object_storage import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -34,7 +35,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
     @classmethod
     def resource_setup(cls):
         super(AccountQuotasNegativeTest, cls).resource_setup()
-        cls.container_name = cls.create_container()
+        cls.create_container()
 
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
@@ -52,8 +53,8 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         # Set a quota of 20 bytes on the user's account before each test
         headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        self.os_roles_operator.account_client.request(
+            "POST", url="", headers=headers, body="")
 
     def tearDown(self):
         # Set the reselleradmin auth in headers for next account_client
@@ -65,8 +66,8 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         # remove the quota from the container
         headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
-        self.os.account_client.request("POST", url="", headers=headers,
-                                       body="")
+        self.os_roles_operator.account_client.request(
+            "POST", url="", headers=headers, body="")
         super(AccountQuotasNegativeTest, self).tearDown()
 
     @classmethod
@@ -74,18 +75,20 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         cls.delete_containers()
         super(AccountQuotasNegativeTest, cls).resource_cleanup()
 
-    @test.attr(type=["negative"])
-    @test.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
+    @decorators.attr(type=["negative"])
+    @decorators.idempotent_id('d1dc5076-555e-4e6d-9697-28f1fe976324')
     @test.requires_ext(extension='account_quotas', service='object')
     def test_user_modify_quota(self):
         """Test that a user cannot modify or remove a quota on its account."""
 
         # Not able to remove quota
-        self.assertRaises(lib_exc.Forbidden,
-                          self.account_client.create_account_metadata,
-                          {"Quota-Bytes": ""})
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.account_client.create_update_or_delete_account_metadata,
+            create_update_metadata={"Quota-Bytes": ""})
 
         # Not able to modify quota
-        self.assertRaises(lib_exc.Forbidden,
-                          self.account_client.create_account_metadata,
-                          {"Quota-Bytes": "100"})
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.account_client.create_update_or_delete_account_metadata,
+            create_update_metadata={"Quota-Bytes": "100"})

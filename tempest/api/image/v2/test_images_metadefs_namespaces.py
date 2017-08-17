@@ -14,16 +14,16 @@
 #    under the License.
 
 from tempest.api.image import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class MetadataNamespacesTest(base.BaseV2ImageTest):
     """Test the Metadata definition Namespaces basic functionality"""
 
-    @test.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')
+    @decorators.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')
     def test_basic_metadata_definition_namespaces(self):
         # get the available resource types and use one resource_type
         body = self.resource_types_client.list_resource_types()
@@ -40,6 +40,10 @@ class MetadataNamespacesTest(base.BaseV2ImageTest):
             protected=True)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self._cleanup_namespace, namespace_name)
+        # list namespaces
+        bodys = self.namespaces_client.list_namespaces()['namespaces']
+        body = [namespace['namespace'] for namespace in bodys]
+        self.assertIn(namespace_name, body)
         # get namespace details
         body = self.namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])

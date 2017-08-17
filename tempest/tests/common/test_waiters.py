@@ -18,7 +18,8 @@ import mock
 
 from tempest.common import waiters
 from tempest import exceptions
-from tempest.services.volume.base import base_volumes_client
+from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.volume.v2 import volumes_client
 from tempest.tests import base
 import tempest.tests.utils as utils
 
@@ -36,14 +37,14 @@ class TestImageWaiters(base.TestCase):
         waiters.wait_for_image_status(self.client, 'fake_image_id', 'active')
         end_time = int(time.time())
         # Ensure waiter returns before build_timeout
-        self.assertTrue((end_time - start_time) < 10)
+        self.assertLess((end_time - start_time), 10)
 
     def test_wait_for_image_status_timeout(self):
         time_mock = self.patch('time.time')
         time_mock.side_effect = utils.generate_timeout_series(1)
 
         self.client.show_image.return_value = ({'status': 'saving'})
-        self.assertRaises(exceptions.TimeoutException,
+        self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
 
@@ -57,7 +58,8 @@ class TestImageWaiters(base.TestCase):
     def test_wait_for_volume_status_error_restoring(self, mock_sleep):
         # Tests that the wait method raises VolumeRestoreErrorException if
         # the volume status is 'error_restoring'.
-        client = mock.Mock(spec=base_volumes_client.BaseVolumesClient,
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
                            build_interval=1)
         volume1 = {'volume': {'status': 'restoring-backup'}}
         volume2 = {'volume': {'status': 'error_restoring'}}
@@ -65,7 +67,7 @@ class TestImageWaiters(base.TestCase):
         client.show_volume = mock_show
         volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
         self.assertRaises(exceptions.VolumeRestoreErrorException,
-                          waiters.wait_for_volume_status,
+                          waiters.wait_for_volume_resource_status,
                           client, volume_id, 'available')
         mock_show.assert_has_calls([mock.call(volume_id),
                                     mock.call(volume_id)])

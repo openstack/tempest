@@ -93,12 +93,6 @@ class ServiceClientsConfigFixture(conf_fixture.Config):
         self.conf.set_default('ca_certificates_file', '/fake/certificates',
                               group='identity')
         self.conf.set_default('region', 'fake_region', 'identity')
-        # Identity endpoints
-        self.conf.set_default('v3_endpoint_type', 'fake_v3_uri', 'identity')
-        self.conf.set_default('v2_public_endpoint_type', 'fake_v2_public_uri',
-                              'identity')
-        self.conf.set_default('v2_admin_endpoint_type', 'fake_v2_admin_uri',
-                              'identity')
         # Compute default values
         self.conf.set_default('build_interval', 88, group='compute')
         self.conf.set_default('build_timeout', 8, group='compute')
@@ -109,5 +103,4 @@ class ServiceClientsFakePrivate(config.TempestConfigPrivate):
         self._set_attrs()
         self.fake_service1 = cfg.CONF['fake-service1']
         self.fake_service2 = cfg.CONF['fake-service2']
-        print('Services registered')
         self.lock_path = cfg.CONF.oslo_concurrency.lock_path

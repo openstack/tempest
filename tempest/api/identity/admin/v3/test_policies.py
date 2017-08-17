@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils import data_utils
-from tempest import test
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 
 
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
@@ -23,7 +23,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
     def _delete_policy(self, policy_id):
         self.policies_client.delete_policy(policy_id)
 
-    @test.idempotent_id('1a0ad286-2d06-4123-ab0d-728893a76201')
+    @decorators.idempotent_id('1a0ad286-2d06-4123-ab0d-728893a76201')
     def test_list_policies(self):
         # Test to list policies
         policy_ids = list()
@@ -41,10 +41,10 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
-        self.assertEqual(0, len(missing_pols))
+        self.assertEmpty(missing_pols)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('e544703a-2f03-4cf2-9b0f-350782fdb0d3')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('e544703a-2f03-4cf2-9b0f-350782fdb0d3')
     def test_create_update_delete_policy(self):
         # Test to update policy
         blob = data_utils.rand_name('BlobName')
@@ -52,7 +52,6 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         policy = self.policies_client.create_policy(blob=blob,
                                                     type=policy_type)['policy']
         self.addCleanup(self._delete_policy, policy['id'])
-        self.assertIn('id', policy)
         self.assertIn('type', policy)
         self.assertIn('blob', policy)
         self.assertIsNotNone(policy['id'])

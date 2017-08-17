@@ -14,41 +14,61 @@
 # under the License.
 
 """
-Utility for cleaning up environment after Tempest run
+Utility for cleaning up environment after Tempest test run
+
+**Usage:** ``tempest cleanup [--help] [OPTIONS]``
+
+If run with no arguments, ``tempest cleanup`` will query your OpenStack
+deployment and build a list of resources to delete and destroy them. This list
+will exclude the resources from ``saved_state.json`` and will include the
+configured admin account if the ``--delete-tempest-conf-objects`` flag is
+specified. By default the admin project is not deleted and the admin user
+specified in ``tempest.conf`` is never deleted.
+
+Example Run
+-----------
+
+**WARNING: If step 1 is skipped in the example below, the cleanup procedure
+may delete resources that existed in the cloud before the test run. This
+may cause an unwanted destruction of cloud resources, so use caution with
+this command.**
+
+``$ tempest cleanup --init-saved-state``
+
+``$ # Actual running of Tempest tests``
+
+``$ tempest cleanup``
 
 Runtime Arguments
 -----------------
 
-**--init-saved-state**: Before you can execute cleanup you must initialize
-the saved state by running it with the **--init-saved-state** flag
-(creating ./saved_state.json), which protects your deployment from
-cleanup deleting objects you want to keep.  Typically you would run
-cleanup with **--init-saved-state** prior to a tempest run. If this is not
-the case saved_state.json must be edited, removing objects you want
-cleanup to delete.
+**--init-saved-state**: Initializes the saved state of the OpenStack deployment
+and will output a ``saved_state.json`` file containing resources from your
+deployment that will be preserved from the cleanup command. This should be
+done prior to running Tempest tests.
 
-**--dry-run**: Creates a report (dry_run.json) of the tenants that will be
-cleaned up (in the "_tenants_to_clean" array), and the global objects
-that will be removed (tenants, users, flavors and images).  Once
-cleanup is executed in normal mode, running it again with **--dry-run**
-should yield an empty report.
+**--delete-tempest-conf-objects**: If option is present, then the command will
+delete the admin project in addition to the resources associated with them on
+clean up. If option is not present, the command will delete the resources
+associated with the Tempest and alternate Tempest users and projects but will
+not delete the projects themselves.
 
-**NOTE**: The _tenants_to_clean array in dry-run.json lists the
-tenants that cleanup will loop through and delete child objects, not
-delete the tenant itself. This may differ from the tenants array as you
-can clean the tempest and alternate tempest tenants but by default,
-cleanup deletes the objects in the tempest and alternate tempest tenants
-but does not delete those tenants unless the **--delete-tempest-conf-objects**
-flag is used to force their deletion.
+**--dry-run**: Creates a report (``./dry_run.json``) of the projects that will
+be cleaned up (in the ``_tenants_to_clean`` dictionary [1]_) and the global
+objects that will be removed (domains, flavors, images, roles, projects,
+and users). Once the cleanup command is executed (e.g. run without
+parameters), running it again with **--dry-run** should yield an empty report.
 
-**Normal mode**: running with no arguments, will query your deployment and
-build a list of objects to delete after filtering out the objects found in
-saved_state.json and based on the **--delete-tempest-conf-objects** flag.
+**--help**: Print the help text for the command and parameters.
 
-By default the tempest and alternate tempest users and tenants are not
-deleted and the admin user specified in tempest.conf is never deleted.
+.. [1] The ``_tenants_to_clean`` dictionary in ``dry_run.json`` lists the
+    projects that ``tempest cleanup`` will loop through to delete child
+    objects, but the command will, by default, not delete the projects
+    themselves. This may differ from the ``tenants`` list as you can clean
+    the Tempest and alternate Tempest users and projects but they will not be
+    deleted unless the **--delete-tempest-conf-objects** flag is used to
+    force their deletion.
 
-Please run with **--help** to see full list of options.
 """
 import sys
 import traceback
@@ -149,8 +169,8 @@ class TempestCleanup(command.Command):
 
     def _remove_admin_user_roles(self):
         tenant_ids = self.admin_role_added
-        LOG.debug("Removing admin user roles where needed for tenants: %s"
-                  % tenant_ids)
+        LOG.debug("Removing admin user roles where needed for tenants: %s",
+                  tenant_ids)
         for tenant_id in tenant_ids:
             self._remove_admin_role(tenant_id)
 
@@ -236,13 +256,13 @@ class TempestCleanup(command.Command):
                 needs_role = False
                 LOG.debug("User already had admin privilege for this tenant")
         if needs_role:
-            LOG.debug("Adding admin privilege for : %s" % tenant_id)
+            LOG.debug("Adding admin privilege for : %s", tenant_id)
             rl_cl.create_user_role_on_project(tenant_id, self.admin_id,
                                               self.admin_role_id)
             self.admin_role_added.append(tenant_id)
 
     def _remove_admin_role(self, tenant_id):
-        LOG.debug("Remove admin user role for tenant: %s" % tenant_id)
+        LOG.debug("Remove admin user role for tenant: %s", tenant_id)
         # Must initialize AdminManager for each user role
         # Otherwise authentication exception is thrown, weird
         id_cl = credentials.AdminManager().identity_client
@@ -253,16 +273,16 @@ class TempestCleanup(command.Command):
                                                        self.admin_role_id)
             except Exception as ex:
                 LOG.exception("Failed removing role from tenant which still"
-                              "exists, exception: %s" % ex)
+                              "exists, exception: %s", ex)
 
     def _tenant_exists(self, tenant_id):
         tn_cl = self.admin_mgr.tenants_client
         try:
             t = tn_cl.show_tenant(tenant_id)
-            LOG.debug("Tenant is: %s" % str(t))
+            LOG.debug("Tenant is: %s", str(t))
             return True
         except Exception as ex:
-            LOG.debug("Tenant no longer exists? %s" % ex)
+            LOG.debug("Tenant no longer exists? %s", ex)
             return False
 
     def _init_state(self):
@@ -290,8 +310,8 @@ class TempestCleanup(command.Command):
         except IOError as ex:
             LOG.exception("Failed loading saved state, please be sure you"
                           " have first run cleanup with --init-saved-state "
-                          "flag prior to running tempest. Exception: %s" % ex)
+                          "flag prior to running tempest. Exception: %s", ex)
             sys.exit(ex)
         except Exception as ex:
-            LOG.exception("Exception parsing saved state json : %s" % ex)
+            LOG.exception("Exception parsing saved state json : %s", ex)
             sys.exit(ex)

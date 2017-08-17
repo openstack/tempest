@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show volume metadata item API to v2 volumes_client library.
+    This feature enables the possibility to show a volume's metadata for
+    a specific key.

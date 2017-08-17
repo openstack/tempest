@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
@@ -29,11 +29,10 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(InstanceActionsNegativeTestJSON, cls).resource_setup()
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('67e1fce6-7ec2-45c6-92d4-0a8f1a632910')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('67e1fce6-7ec2-45c6-92d4-0a8f1a632910')
     def test_list_instance_actions_non_existent_server(self):
         # List actions of the non-existent server id
         non_existent_server_id = data_utils.rand_uuid()
@@ -41,9 +40,9 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.list_instance_actions,
                           non_existent_server_id)
 
-    @test.attr(type=['negative'])
-    @test.idempotent_id('0269f40a-6f18-456c-b336-c03623c897f1')
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('0269f40a-6f18-456c-b336-c03623c897f1')
     def test_get_instance_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
         self.assertRaises(lib_exc.NotFound, self.client.show_instance_action,
-                          self.server_id, '999')
+                          self.server['id'], '999')

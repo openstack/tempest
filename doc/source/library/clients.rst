@@ -16,9 +16,18 @@ service client module from a set of shared parameters.
 The ``ServiceClients`` class provides a convenient way to get access to all
 available service clients initialized with a provided set of credentials.
 
-------------------
-The clients module
-------------------
+-----------------------------
+The clients management module
+-----------------------------
 
 .. automodule:: tempest.lib.services.clients
    :members:
+
+------------------------------
+Compute service client modules
+------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   service_clients/compute_clients

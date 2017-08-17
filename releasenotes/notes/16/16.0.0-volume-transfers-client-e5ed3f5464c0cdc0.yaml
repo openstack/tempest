@@ -1,0 +1,18 @@
+---
+features:
+  - |
+    Define volume transfers service clients as libraries.
+    The following volume transfers service clients are defined as library interface.
+
+    * transfers_client(v2)
+deprecations:
+  - |
+    Deprecate volume v2 transfers resource methods from volumes_client(v2) libraries.
+    Same methods are available in new transfers service client: transfers_client(v2)
+    The following methods of volume v2 volumes_clients have been deprecated:
+
+    * create_volume_transfer (v2.volumes_client)
+    * show_volume_transfer (v2.volumes_client)
+    * list_volume_transfers (v2.volumes_client)
+    * delete_volume_transfer (v2.volumes_client)
+    * accept_volume_transfer (v2.volumes_client)

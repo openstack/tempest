@@ -15,9 +15,9 @@
 
 import netaddr
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
@@ -26,7 +26,7 @@ CONF = config.CONF
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
-    """Base class for the Neutron tests
+    """Base class for the Neutron tests.
 
     Per the Neutron API Guide, API v1.x was removed from the source code tree
     (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)
@@ -68,19 +68,22 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_clients(cls):
         super(BaseNetworkTest, cls).setup_clients()
-        cls.agents_client = cls.os.network_agents_client
-        cls.network_extensions_client = cls.os.network_extensions_client
-        cls.networks_client = cls.os.networks_client
-        cls.routers_client = cls.os.routers_client
-        cls.subnetpools_client = cls.os.subnetpools_client
-        cls.subnets_client = cls.os.subnets_client
-        cls.ports_client = cls.os.ports_client
-        cls.quotas_client = cls.os.network_quotas_client
-        cls.floating_ips_client = cls.os.floating_ips_client
-        cls.security_groups_client = cls.os.security_groups_client
+        cls.agents_client = cls.os_primary.network_agents_client
+        cls.network_extensions_client =\
+            cls.os_primary.network_extensions_client
+        cls.networks_client = cls.os_primary.networks_client
+        cls.routers_client = cls.os_primary.routers_client
+        cls.subnetpools_client = cls.os_primary.subnetpools_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
+        cls.quotas_client = cls.os_primary.network_quotas_client
+        cls.floating_ips_client = cls.os_primary.floating_ips_client
+        cls.security_groups_client = cls.os_primary.security_groups_client
         cls.security_group_rules_client = (
-            cls.os.security_group_rules_client)
-        cls.network_versions_client = cls.os.network_versions_client
+            cls.os_primary.security_group_rules_client)
+        cls.network_versions_client = cls.os_primary.network_versions_client
+        cls.service_providers_client = cls.os_primary.service_providers_client
+        cls.tags_client = cls.os_primary.tags_client
 
     @classmethod
     def resource_setup(cls):
@@ -105,12 +108,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
             # Clean up metering label rules
             # Not all classes in the hierarchy have the client class variable
-            if len(cls.metering_label_rules) > 0:
+            if cls.metering_label_rules:
                 label_rules_client = cls.admin_metering_label_rules_client
-            for metering_label_rule in cls.metering_label_rules:
-                test_utils.call_and_ignore_notfound_exc(
-                    label_rules_client.delete_metering_label_rule,
-                    metering_label_rule['id'])
+                for metering_label_rule in cls.metering_label_rules:
+                    test_utils.call_and_ignore_notfound_exc(
+                        label_rules_client.delete_metering_label_rule,
+                        metering_label_rule['id'])
             # Clean up metering labels
             for metering_label in cls.metering_labels:
                 test_utils.call_and_ignore_notfound_exc(
@@ -135,11 +138,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         super(BaseNetworkTest, cls).resource_cleanup()
 
     @classmethod
-    def create_network(cls, network_name=None):
+    def create_network(cls, network_name=None, **kwargs):
         """Wrapper utility that returns a test network."""
-        network_name = network_name or data_utils.rand_name('test-network-')
+        network_name = network_name or data_utils.rand_name(
+            cls.__name__ + '-test-network')
 
-        body = cls.networks_client.create_network(name=network_name)
+        body = cls.networks_client.create_network(name=network_name, **kwargs)
         network = body['network']
         cls.networks.append(network)
         return network
@@ -148,7 +152,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
                       ip_version=None, client=None, **kwargs):
         """Wrapper utility that returns a test subnet."""
-
         # allow tests to use admin client
         if not client:
             client = cls.subnets_client
@@ -208,6 +211,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_router(cls, router_name=None, admin_state_up=False,
                       external_network_id=None, enable_snat=None,
                       **kwargs):
+        router_name = router_name or data_utils.rand_name(
+            cls.__name__ + "-router")
+
         ext_gw_info = {}
         if external_network_id:
             ext_gw_info['network_id'] = external_network_id
@@ -254,35 +260,13 @@ class BaseAdminNetworkTest(BaseNetworkTest):
     @classmethod
     def setup_clients(cls):
         super(BaseAdminNetworkTest, cls).setup_clients()
-        cls.admin_agents_client = cls.os_adm.network_agents_client
-        cls.admin_networks_client = cls.os_adm.networks_client
-        cls.admin_routers_client = cls.os_adm.routers_client
-        cls.admin_subnets_client = cls.os_adm.subnets_client
-        cls.admin_ports_client = cls.os_adm.ports_client
-        cls.admin_quotas_client = cls.os_adm.network_quotas_client
-        cls.admin_floating_ips_client = cls.os_adm.floating_ips_client
-        cls.admin_metering_labels_client = cls.os_adm.metering_labels_client
+        cls.admin_agents_client = cls.os_admin.network_agents_client
+        cls.admin_networks_client = cls.os_admin.networks_client
+        cls.admin_routers_client = cls.os_admin.routers_client
+        cls.admin_subnets_client = cls.os_admin.subnets_client
+        cls.admin_ports_client = cls.os_admin.ports_client
+        cls.admin_quotas_client = cls.os_admin.network_quotas_client
+        cls.admin_floating_ips_client = cls.os_admin.floating_ips_client
+        cls.admin_metering_labels_client = cls.os_admin.metering_labels_client
         cls.admin_metering_label_rules_client = (
-            cls.os_adm.metering_label_rules_client)
-
-    @classmethod
-    def create_metering_label(cls, name, description):
-        """Wrapper utility that returns a test metering label."""
-        body = cls.admin_metering_labels_client.create_metering_label(
-            description=description,
-            name=data_utils.rand_name("metering-label"))
-        metering_label = body['metering_label']
-        cls.metering_labels.append(metering_label)
-        return metering_label
-
-    @classmethod
-    def create_metering_label_rule(cls, remote_ip_prefix, direction,
-                                   metering_label_id):
-        """Wrapper utility that returns a test metering label rule."""
-        client = cls.admin_metering_label_rules_client
-        body = client.create_metering_label_rule(
-            remote_ip_prefix=remote_ip_prefix, direction=direction,
-            metering_label_id=metering_label_id)
-        metering_label_rule = body['metering_label_rule']
-        cls.metering_label_rules.append(metering_label_rule)
-        return metering_label_rule
+            cls.os_admin.metering_label_rules_client)

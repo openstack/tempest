@@ -15,8 +15,8 @@ function usage {
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Run tests with testtools instead of testr. This allows you to use PDB"
   echo "  -r, --result-xml         Path of Junitxml report to be generated"
-  echo "  -p, --populate-config         Populate config file and init contrail environment"
-  echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
+  echo "  -p, --populate-config    Populate config file and init contrail environment"
+  echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr"
 }
 
 testrargs=""
@@ -32,7 +32,7 @@ coverage=0
 wrapper=""
 config_file=""
 update=0
-result_xml="result.xml"
+result_xml=result.xml
 populate_config=0
 
 if ! options=$(getopt -o VNnfusthdC:pr: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,help,debug,config:,populate-config,result-xml: -- "$@")
@@ -54,7 +54,7 @@ while [ $# -gt 0 ]; do
     -u|--update) update=1;;
     -d|--debug) debug=1;;
     -C|--config) config_file=$2; shift;;
-    -s|--smoke) testrargs+="smoke";;
+    -s|--suite) testrargs+=$2;;
     -p|--populate-config) populate_config=1;;
     -r|--result-xml) result_xml=$2; shift;;
     -t|--serial) serial=1;;
@@ -82,6 +82,12 @@ function testr_init {
   fi
 }
 
+function gen_report {
+  last_entry=$(($(cat .testrepository/next-stream)-1))
+  rm -f $result_xml
+  ${wrapper} subunit-1to2 < .testrepository/$last_entry | subunit2junitxml -f -o $result_xml
+}
+
 function run_tests {
   testr_init
   ${wrapper} find . -type f -name "*.pyc" -delete
@@ -95,10 +101,11 @@ function run_tests {
   fi
 
   if [ $serial -eq 1 ]; then
-      ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit2junitxml -f -o $result_xml
+      ${wrapper} testr run --subunit $testrargs
   else
-      ${wrapper} testr run --parallel --subunit $testrargs | ${wrapper} subunit2junitxml -f -o $result_xml
+      ${wrapper} testr run --parallel --subunit $testrargs
   fi
+  gen_report
 }
 
 function apply_patches {
@@ -148,12 +155,11 @@ then
     fi
   fi
 fi
-
 if [ $populate_config -eq 1 ]; then
    (unset http_proxy && ./contrail/contrail-tempest-init.sh)
 fi
 
-apply_patches
+#apply_patches
 (unset http_proxy && run_tests)
 retval=$?
 

@@ -1,0 +1,10 @@
+---
+deprecations:
+  - |
+    Image APIs in compute are deprecated, Image native APIs are recommended.
+    And Glance v1 APIs are deprecated and v2 APIs are current. Image client
+    compute_images_client and Glance v1 APIs are removed in volume tests.
+upgrade:
+  - |
+    Switch to use Glance v2 APIs in volume tests, by adding the Glance v2
+    client images_client.

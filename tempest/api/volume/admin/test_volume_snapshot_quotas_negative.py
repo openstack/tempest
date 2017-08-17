@@ -15,30 +15,30 @@
 
 from tempest.api.volume import base
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
-class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
+class VolumeSnapshotQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
     def skip_checks(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).skip_checks()
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException('Cinder volume snapshots are disabled')
 
     @classmethod
     def setup_credentials(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.os.credentials.tenant_id
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).setup_credentials()
+        cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(VolumeSnapshotQuotasNegativeV2TestJSON, cls).resource_setup()
-        cls.default_volume_size = cls.volumes_client.default_volume_size
+        super(VolumeSnapshotQuotasNegativeTestJSON, cls).resource_setup()
+        cls.default_volume_size = CONF.volume.volume_size
         cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
                                 'volumes': 1, 'snapshots': 1}
 
@@ -53,15 +53,15 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         cls.volume = cls.create_volume()
         cls.snapshot = cls.create_snapshot(volume_id=cls.volume['id'])
 
-    @test.attr(type='negative')
-    @test.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('02bbf63f-6c05-4357-9d98-2926a94064ff')
     def test_quota_volume_snapshots(self):
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           volume_id=self.volume['id'])
 
-    @test.attr(type='negative')
-    @test.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('c99a1ca9-6cdf-498d-9fdf-25832babef27')
     def test_quota_volume_gigabytes_snapshots(self):
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,
@@ -74,7 +74,3 @@ class VolumeSnapshotQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.assertRaises(lib_exc.OverLimit,
                           self.snapshots_client.create_snapshot,
                           volume_id=self.volume['id'])
-
-
-class VolumeSnapshotNegativeV1TestJSON(VolumeSnapshotQuotasNegativeV2TestJSON):
-    _api_version = 1

@@ -13,16 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import socket
-
 import netaddr
+import testtools
 
-from tempest.api.network import base
 from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
+from tempest.lib.common.utils import data_utils
+from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -50,8 +49,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
     def test_create_update_delete_port(self):
         # Verify port creation
         body = self.ports_client.create_port(network_id=self.network['id'])
@@ -68,11 +67,10 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertEqual(updated_port['name'], new_name)
         self.assertFalse(updated_port['admin_state_up'])
 
-    @test.idempotent_id('67f1b811-f8db-43e2-86bd-72c074d4a42c')
+    @decorators.idempotent_id('67f1b811-f8db-43e2-86bd-72c074d4a42c')
     def test_create_bulk_port(self):
         network1 = self.network
-        name = data_utils.rand_name('network-')
-        network2 = self.create_network(network_name=name)
+        network2 = self.create_network()
         network_list = [network1['id'], network2['id']]
         port_list = [{'network_id': net_id} for net_id in network_list]
         body = self.ports_client.create_bulk_ports(ports=port_list)
@@ -99,8 +97,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
         return cidr
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
     def test_create_port_in_allowed_allocation_pools(self):
         network = self.create_network()
         net_id = network['id']
@@ -108,7 +106,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         if ((address.version == 4 and address.prefixlen >= 30) or
            (address.version == 6 and address.prefixlen >= 126)):
             msg = ("Subnet %s isn't large enough for the test" % address.cidr)
-            raise exceptions.InvalidConfiguration(message=msg)
+            raise exceptions.InvalidConfiguration(msg)
         allocation_pools = {'allocation_pools': [{'start': str(address[2]),
                                                   'end': str(address[-2])}]}
         subnet = self.create_subnet(network, cidr=address,
@@ -124,8 +122,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         ip_range = netaddr.IPRange(start_ip_address, end_ip_address)
         self.assertIn(ip_address, ip_range)
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
     def test_show_port(self):
         # Verify the details of port
         body = self.ports_client.show_port(self.port['id'])
@@ -141,7 +139,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                                               'created_at',
                                               'updated_at']))
 
-    @test.idempotent_id('45fcdaf2-dab0-4c13-ac6c-fcddfb579dbd')
+    @decorators.idempotent_id('45fcdaf2-dab0-4c13-ac6c-fcddfb579dbd')
     def test_show_port_fields(self):
         # Verify specific fields of a port
         fields = ['id', 'mac_address']
@@ -152,8 +150,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         for field_name in fields:
             self.assertEqual(port[field_name], self.port[field_name])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
     def test_list_ports(self):
         # Verify the port exists in the list of all ports
         body = self.ports_client.list_ports()
@@ -161,7 +159,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                  if port['id'] == self.port['id']]
         self.assertNotEmpty(ports, "Created port not found in the list")
 
-    @test.idempotent_id('e7fe260b-1e79-4dd3-86d9-bec6a7959fc5')
+    @decorators.idempotent_id('e7fe260b-1e79-4dd3-86d9-bec6a7959fc5')
     def test_port_list_filter_by_ip(self):
         # Create network and subnet
         network = self.create_network()
@@ -192,14 +190,14 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertIn(port_1_fixed_ip, port_ips)
         self.assertIn(network['id'], port_net_ids)
 
-    @test.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
+    @decorators.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
     def test_port_list_filter_by_router_id(self):
         # Create a router
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
         self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self.create_router()
         self.addCleanup(self.routers_client.delete_router, router['id'])
         port = self.ports_client.create_port(network_id=network['id'])
         # Add router interface to port created above
@@ -214,7 +212,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertEqual(ports[0]['id'], port['port']['id'])
         self.assertEqual(ports[0]['device_id'], router['id'])
 
-    @test.idempotent_id('ff7f117f-f034-4e0e-abff-ccef05c454b4')
+    @decorators.idempotent_id('ff7f117f-f034-4e0e-abff-ccef05c454b4')
     def test_list_ports_fields(self):
         # Verify specific fields of ports
         fields = ['id', 'mac_address']
@@ -225,7 +223,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         for port in ports:
             self.assertEqual(sorted(fields), sorted(port.keys()))
 
-    @test.idempotent_id('63aeadd4-3b49-427f-a3b1-19ca81f06270')
+    @decorators.idempotent_id('63aeadd4-3b49-427f-a3b1-19ca81f06270')
     def test_create_update_port_with_second_ip(self):
         # Create a network with two subnets
         network = self.create_network()
@@ -307,18 +305,24 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         for security_group in security_groups_list:
             self.assertIn(security_group, port_show['security_groups'])
 
-    @test.idempotent_id('58091b66-4ff4-4cc1-a549-05d60c7acd1a')
+    @decorators.idempotent_id('58091b66-4ff4-4cc1-a549-05d60c7acd1a')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_update_port_with_security_group_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup')])
 
-    @test.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
+    @decorators.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_update_port_with_two_security_groups_and_extra_attributes(self):
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup'),
              data_utils.rand_name('secgroup')])
 
-    @test.idempotent_id('13e95171-6cbd-489c-9d7c-3f9c58215c18')
+    @decorators.idempotent_id('13e95171-6cbd-489c-9d7c-3f9c58215c18')
     def test_create_show_delete_port_user_defined_mac(self):
         # Create a port for a legal mac
         body = self.ports_client.create_port(network_id=self.network['id'])
@@ -335,8 +339,11 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertEqual(free_mac_address,
                          show_port['mac_address'])
 
-    @test.attr(type='smoke')
-    @test.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
+    @testtools.skipUnless(
+        test.is_extension_enabled('security-group', 'network'),
+        'security-group extension not enabled.')
     def test_create_port_with_no_securitygroups(self):
         network = self.create_network()
         self.addCleanup(self.networks_client.delete_network, network['id'])
@@ -348,87 +355,5 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertEmpty(port['security_groups'])
 
 
-class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
-
-    @classmethod
-    def setup_clients(cls):
-        super(PortsAdminExtendedAttrsTestJSON, cls).setup_clients()
-        cls.identity_client = cls.os_adm.identity_client
-
-    @classmethod
-    def resource_setup(cls):
-        super(PortsAdminExtendedAttrsTestJSON, cls).resource_setup()
-        cls.network = cls.create_network()
-        cls.host_id = socket.gethostname()
-
-    @test.idempotent_id('8e8569c1-9ac7-44db-8bc1-f5fb2814f29b')
-    def test_create_port_binding_ext_attr(self):
-        post_body = {"network_id": self.network['id'],
-                     "binding:host_id": self.host_id}
-        body = self.admin_ports_client.create_port(**post_body)
-        port = body['port']
-        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
-        host_id = port['binding:host_id']
-        self.assertIsNotNone(host_id)
-        self.assertEqual(self.host_id, host_id)
-
-    @test.idempotent_id('6f6c412c-711f-444d-8502-0ac30fbf5dd5')
-    def test_update_port_binding_ext_attr(self):
-        post_body = {"network_id": self.network['id']}
-        body = self.admin_ports_client.create_port(**post_body)
-        port = body['port']
-        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
-        update_body = {"binding:host_id": self.host_id}
-        body = self.admin_ports_client.update_port(port['id'], **update_body)
-        updated_port = body['port']
-        host_id = updated_port['binding:host_id']
-        self.assertIsNotNone(host_id)
-        self.assertEqual(self.host_id, host_id)
-
-    @test.idempotent_id('1c82a44a-6c6e-48ff-89e1-abe7eaf8f9f8')
-    def test_list_ports_binding_ext_attr(self):
-        # Create a new port
-        post_body = {"network_id": self.network['id']}
-        body = self.admin_ports_client.create_port(**post_body)
-        port = body['port']
-        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
-
-        # Update the port's binding attributes so that is now 'bound'
-        # to a host
-        update_body = {"binding:host_id": self.host_id}
-        self.admin_ports_client.update_port(port['id'], **update_body)
-
-        # List all ports, ensure new port is part of list and its binding
-        # attributes are set and accurate
-        body = self.admin_ports_client.list_ports()
-        ports_list = body['ports']
-        pids_list = [p['id'] for p in ports_list]
-        self.assertIn(port['id'], pids_list)
-        listed_port = [p for p in ports_list if p['id'] == port['id']]
-        self.assertEqual(1, len(listed_port),
-                         'Multiple ports listed with id %s in ports listing: '
-                         '%s' % (port['id'], ports_list))
-        self.assertEqual(self.host_id, listed_port[0]['binding:host_id'])
-
-    @test.idempotent_id('b54ac0ff-35fc-4c79-9ca3-c7dbd4ea4f13')
-    def test_show_port_binding_ext_attr(self):
-        body = self.admin_ports_client.create_port(
-            network_id=self.network['id'])
-        port = body['port']
-        self.addCleanup(self.admin_ports_client.delete_port, port['id'])
-        body = self.admin_ports_client.show_port(port['id'])
-        show_port = body['port']
-        self.assertEqual(port['binding:host_id'],
-                         show_port['binding:host_id'])
-        self.assertEqual(port['binding:vif_type'],
-                         show_port['binding:vif_type'])
-        self.assertEqual(port['binding:vif_details'],
-                         show_port['binding:vif_details'])
-
-
 class PortsIpV6TestJSON(PortsTestJSON):
-    _ip_version = 6
-
-
-class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
     _ip_version = 6

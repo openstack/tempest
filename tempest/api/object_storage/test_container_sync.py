@@ -18,12 +18,10 @@ import time
 from six.moves.urllib import parse as urlparse
 import testtools
 
-
 from tempest.api.object_storage import base
-from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -92,11 +90,10 @@ class ContainerSyncTest(base.BaseObjectTest):
             cont_client = [self.clients[c][0] for c in cont]
             obj_client = [self.clients[c][1] for c in cont]
             headers = make_headers(cont[1], cont_client[1])
-            resp, body = \
-                cont_client[0].put(str(cont[0]), body=None, headers=headers)
+            cont_client[0].put(str(cont[0]), body=None, headers=headers)
             # create object in container
             object_name = data_utils.rand_name(name='TestSyncObject')
-            data = object_name[::-1]  # data_utils.arbitrary_string()
+            data = object_name[::-1].encode()  # Raw data, we need bytes
             resp, _ = obj_client[0].create_object(cont[0], object_name, data)
             self.objects.append(object_name)
 
@@ -127,11 +124,11 @@ class ContainerSyncTest(base.BaseObjectTest):
         for obj_client, cont in obj_clients:
             for obj_name in object_lists[0]:
                 resp, object_content = obj_client.get_object(cont, obj_name)
-                self.assertEqual(object_content, obj_name[::-1])
+                self.assertEqual(object_content, obj_name[::-1].encode())
 
-    @test.attr(type='slow')
+    @decorators.attr(type='slow')
     @decorators.skip_because(bug='1317133')
-    @test.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
+    @decorators.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.container_sync,
         'Old-style container sync function is disabled')

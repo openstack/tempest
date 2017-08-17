@@ -13,8 +13,8 @@
 # under the License.
 
 import abc
-import logging
 
+from oslo_log import log as logging
 import six
 import stevedore
 
@@ -46,10 +46,42 @@ class TempestPlugin(object):
         """Add additional configuration options to tempest.
 
         This method will be run for the plugin during the register_opts()
-        function in tempest.config
+        function in tempest.config.
 
         :param ConfigOpts conf: The conf object that can be used to register
             additional options on.
+
+        Example::
+
+            # Config options are defined in a config.py module
+            service_option = cfg.BoolOpt(
+                "my_service",
+                default=True,
+                help="Whether or not my service is available")
+
+            # Note: as long as the group is listed in get_opt_lists,
+            # it will be possible to access its optins in the plugin code
+            # via ("-" in the group name are replaces with "_"):
+            #     CONF.my_service.<option_name>
+            my_service_group = cfg.OptGroup(name="my-service",
+                                            title="My service options")
+
+            MyServiceGroup = [<list of options>]
+            # (...) More groups and options...
+
+            # Plugin is implemented in a plugin.py module
+            from my_plugin import config as my_config
+
+            def register_opts(self, conf):
+                conf.register_opt(my_config.service_option,
+                                  group='service_available')
+                conf.register_group(my_config.my_service_group)
+                conf.register_opts(my_config.MyService +
+                                   my_config.my_service_group)
+
+                conf.register_group(my_config.my_service_feature_group)
+                conf.register_opts(my_config.MyServiceFeaturesGroup,
+                                   my_config.my_service_feature_group)
         """
         return
 
@@ -60,6 +92,31 @@ class TempestPlugin(object):
         :return option_list: A list of tuples with the group name and options
                              in that group.
         :rtype: list
+
+        Example::
+
+            # Config options are defined in a config.py module
+            service_option = cfg.BoolOpt(
+                "my_service", default=True,
+                help="Whether or not my service is available")
+
+            my_service_group = cfg.OptGroup(name="my-service",
+                                            title="My service options")
+            my_service_features_group = cfg.OptGroup(
+                name="my-service-features",
+                title="My service available features")
+
+            MyServiceGroup = [<list of options>]
+            MyServiceFeaturesGroup = [<list of options>]
+
+            # Plugin is implemented in a plugin.py module
+            from my_plugin import config as my_config
+
+            def get_opt_lists(self, conf):
+                return [
+                    (my_service_group.name, MyServiceGroup),
+                    (my_service_features_group.name, MyServiceFeaturesGroup)
+                ]
         """
         return []
 
@@ -71,43 +128,46 @@ class TempestPlugin(object):
         in any ServiceClients object instantiated by tests.
         The default implementation returns an empty list.
 
-        :return list of dictionaries. Each element of the list represents
-            the service client for an API. Each dict must define all
-            parameters required for the invocation of
-            `service_clients.ServiceClients.register_service_client_module`.
-        :rtype: list
+        :returns: Each element of the list represents the service client for an
+          API. Each dict must define all parameters required for the invocation
+          of `service_clients.ServiceClients.register_service_client_module`.
+        :rtype: list of dictionaries
 
-        Example:
+        Example implementation with one service client::
 
-            >>>  # Example implementation with one service client
-            >>>  myservice_config = config.service_client_config('myservice')
-            >>>  params = {
-            >>>     'name': 'myservice',
-            >>>     'service_version': 'myservice',
-            >>>     'module_path': 'myservice_tempest_tests.services',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params.update(myservice_config)
-            >>>  return [params]
+            def get_service_clients(self):
+                # Example implementation with one service client
+                myservice_config = config.service_client_config('myservice')
+                params = {
+                    'name': 'myservice',
+                    'service_version': 'myservice',
+                    'module_path': 'myservice_tempest_tests.services',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params.update(myservice_config)
+                return [params]
 
-            >>>  # Example implementation with two service clients
-            >>>  foo1_config = config.service_client_config('foo')
-            >>>  params_foo1 = {
-            >>>     'name': 'foo_v1',
-            >>>     'service_version': 'foo.v1',
-            >>>     'module_path': 'bar_tempest_tests.services.foo.v1',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params_foo1.update(foo_config)
-            >>>  foo2_config = config.service_client_config('foo')
-            >>>  params_foo2 = {
-            >>>     'name': 'foo_v2',
-            >>>     'service_version': 'foo.v2',
-            >>>     'module_path': 'bar_tempest_tests.services.foo.v2',
-            >>>     'client_names': ['API1Client', 'API2Client'],
-            >>>  }
-            >>>  params_foo2.update(foo2_config)
-            >>>  return [params_foo1, params_foo2]
+        Example implementation with two service clients::
+
+            def get_service_clients(self):
+                # Example implementation with two service clients
+                foo1_config = config.service_client_config('foo')
+                params_foo1 = {
+                    'name': 'foo_v1',
+                    'service_version': 'foo.v1',
+                    'module_path': 'bar_tempest_tests.services.foo.v1',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params_foo1.update(foo_config)
+                foo2_config = config.service_client_config('foo')
+                params_foo2 = {
+                    'name': 'foo_v2',
+                    'service_version': 'foo.v2',
+                    'module_path': 'bar_tempest_tests.services.foo.v2',
+                    'client_names': ['API1Client', 'API2Client'],
+                }
+                params_foo2.update(foo2_config)
+                return [params_foo1, params_foo2]
         """
         return []
 
@@ -124,7 +184,6 @@ class TempestTestPluginManager(object):
             'tempest.test_plugins', invoke_on_load=True,
             propagate_map_exceptions=True,
             on_load_failure_callback=self.failure_hook)
-        self._register_service_clients()
 
     @staticmethod
     def failure_hook(_, ep, err):
@@ -143,7 +202,7 @@ class TempestTestPluginManager(object):
                 plug.obj.register_opts(conf)
             except Exception:
                 LOG.exception('Plugin %s raised an exception trying to run '
-                              'register_opts' % plug.name)
+                              'register_opts', plug.name)
 
     def get_plugin_options_list(self):
         plugin_options = []
@@ -157,8 +216,10 @@ class TempestTestPluginManager(object):
         registry = clients.ClientsRegistry()
         for plug in self.ext_plugins:
             try:
-                registry.register_service_client(
-                    plug.name, plug.obj.get_service_clients())
+                service_clients = plug.obj.get_service_clients()
+                if service_clients:
+                    registry.register_service_client(
+                        plug.name, service_clients)
             except Exception:
                 LOG.exception('Plugin %s raised an exception trying to run '
-                              'get_service_clients' % plug.name)
+                              'get_service_clients', plug.name)

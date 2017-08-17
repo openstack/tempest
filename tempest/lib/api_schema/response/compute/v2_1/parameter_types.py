@@ -81,6 +81,16 @@ addresses = {
     }
 }
 
+date_time = {
+    'type': 'string',
+    'format': 'iso8601-date-time'
+}
+
+date_time_or_null = {
+    'type': ['string', 'null'],
+    'format': 'iso8601-date-time'
+}
+
 response_header = {
     'connection': {'type': 'string'},
     'content-length': {'type': 'string'},
@@ -89,8 +99,24 @@ response_header = {
     'x-compute-request-id': {'type': 'string'},
     'vary': {'type': 'string'},
     'x-openstack-nova-api-version': {'type': 'string'},
+    # NOTE(gmann): Validating this as string only as this
+    # date in header is returned in different format than
+    # ISO 8601 date time format which is not consistent with
+    # other date-time format in nova.
+    # This API is already deprecated so not worth to fix
+    # on nova side.
     'date': {
-        'type': 'string',
-        'format': 'data-time'
+        'type': 'string'
     }
+}
+
+power_state = {
+    'type': 'integer',
+    # 0: NOSTATE
+    # 1: RUNNING
+    # 3: PAUSED
+    # 4: SHUTDOWN
+    # 6: CRASHED
+    # 7: SUSPENDED
+    'enum': [0, 1, 3, 4, 6, 7]
 }

@@ -17,20 +17,12 @@
 from tempest.lib import exceptions
 
 
-class InvalidConfiguration(exceptions.TempestException):
-    message = "Invalid Configuration"
-
-
-class InvalidServiceTag(exceptions.TempestException):
-    message = "Invalid service tag"
-
-
-class TimeoutException(exceptions.TempestException):
-    message = "Request timed out"
-
-
 class BuildErrorException(exceptions.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
+
+
+class SnapshotNotFoundException(exceptions.TempestException):
+    message = "Server snapshot image %(image_id)s not found."
 
 
 class ImageKilledException(exceptions.TempestException):
@@ -41,20 +33,13 @@ class AddImageException(exceptions.TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class VolumeBuildErrorException(exceptions.TempestException):
-    message = "Volume %(volume_id)s failed to build and is in ERROR status"
+class VolumeResourceBuildErrorException(exceptions.TempestException):
+    message = ("%(resource_name)s %(resource_id)s failed to build and is in "
+               "ERROR status")
 
 
 class VolumeRestoreErrorException(exceptions.TempestException):
     message = "Volume %(volume_id)s failed to restore and is in ERROR status"
-
-
-class SnapshotBuildErrorException(exceptions.TempestException):
-    message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
-
-
-class VolumeBackupException(exceptions.TempestException):
-    message = "Volume backup %(backup_id)s failed and is in ERROR status"
 
 
 class StackBuildErrorException(exceptions.TempestException):
@@ -65,13 +50,6 @@ class StackBuildErrorException(exceptions.TempestException):
 class ServerUnreachable(exceptions.TempestException):
     message = ("Server %(server_id)s is not reachable via "
                "the configured network")
-
-
-# NOTE(andreaf) This exception is added here to facilitate the migration
-# of get_network_from_name and preprov_creds to tempest.lib, and it should
-# be migrated along with them
-class InvalidTestResource(exceptions.TempestException):
-    message = "%(name)s is not a valid %(type)s, or the name is ambiguous"
 
 
 class RFCViolation(exceptions.RestClientException):

@@ -25,7 +25,12 @@ class BaremetalNodesClient(base_compute_client.BaseComputeClient):
     """Tests Baremetal API"""
 
     def list_baremetal_nodes(self, **params):
-        """List all baremetal nodes."""
+        """List all baremetal nodes.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#list-bare-metal-nodes
+        """
         url = 'os-baremetal-nodes'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -35,7 +40,11 @@ class BaremetalNodesClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_baremetal_node(self, baremetal_node_id):
-        """Return the details of a single baremetal node."""
+        """Show the details of a single baremetal node.
+
+        For more information, please refer to the official API reference:
+        https://developer.openstack.org/api-ref/compute/#show-bare-metal-node-details
+        """
         url = 'os-baremetal-nodes/%s' % baremetal_node_id
         resp, body = self.get(url)
         body = json.loads(body)

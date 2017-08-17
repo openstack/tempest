@@ -1,0 +1,25 @@
+---
+prelude: >
+    This release is marking the start of Ocata release support in Tempest
+upgrade:
+  - |
+    Below deprecated config options from compute group have been removed.
+    Corresponding config options already been available in validation group.
+
+    - ``compute.use_floatingip_for_ssh`` (available as ``validation.connect_method``)
+    - ``compute.ssh_auth_method`` (available as ``validation.auth_method``)
+    - ``compute.image_ssh_password`` (available as ``validation.image_ssh_password``)
+    - ``compute.ssh_shell_prologue`` (available as ``validation.ssh_shell_prologue``)
+    - ``compute.ping_size `` (available as ``validation.ping_size``)
+    - ``compute.ping_count `` (available as ``validation.ping_count``)
+    - ``compute.floating_ip_range `` (available as ``validation.floating_ip_range``)
+other:
+  - |
+    OpenStack releases supported at this time are **Mitaka**, **Newton**,
+    and **Ocata**.
+
+    The release under current development as of this tag is Pike,
+    meaning that every Tempest commit is also tested against master during
+    the Pike cycle. However, this does not necessarily mean that using
+    Tempest as of this tag will work against a Pike (or future releases)
+    cloud.

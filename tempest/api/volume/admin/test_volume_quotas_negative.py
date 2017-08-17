@@ -14,23 +14,25 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
+
+CONF = config.CONF
 
 
-class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
+class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).setup_credentials()
-        cls.demo_tenant_id = cls.os.credentials.tenant_id
+        super(BaseVolumeQuotasNegativeTestJSON, cls).setup_credentials()
+        cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(BaseVolumeQuotasNegativeV2TestJSON, cls).resource_setup()
-        cls.default_volume_size = cls.volumes_client.default_volume_size
-        cls.shared_quota_set = {'gigabytes': 2 * cls.default_volume_size,
+        super(BaseVolumeQuotasNegativeTestJSON, cls).resource_setup()
+        cls.shared_quota_set = {'gigabytes': 2 * CONF.volume.volume_size,
                                 'volumes': 1}
 
         # NOTE(gfidente): no need to restore original quota set
@@ -43,14 +45,15 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
 
-    @test.attr(type='negative')
-    @test.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
         self.assertRaises(lib_exc.OverLimit,
-                          self.volumes_client.create_volume)
+                          self.volumes_client.create_volume,
+                          size=CONF.volume.volume_size)
 
-    @test.attr(type='negative')
-    @test.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
         # NOTE(gfidente): quota set needs to be changed for this test
         # or we may be limited by the volumes or snaps quota number, not by
@@ -58,14 +61,11 @@ class BaseVolumeQuotasNegativeV2TestJSON(base.BaseVolumeAdminTest):
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id,
                         **self.shared_quota_set)
-        new_quota_set = {'gigabytes': self.default_volume_size,
+        new_quota_set = {'gigabytes': CONF.volume.volume_size,
                          'volumes': 2, 'snapshots': 1}
         self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id,
             **new_quota_set)
         self.assertRaises(lib_exc.OverLimit,
-                          self.volumes_client.create_volume)
-
-
-class VolumeQuotasNegativeV1TestJSON(BaseVolumeQuotasNegativeV2TestJSON):
-    _api_version = 1
+                          self.volumes_client.create_volume,
+                          size=CONF.volume.volume_size)
