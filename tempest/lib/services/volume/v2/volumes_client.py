@@ -197,10 +197,18 @@ class VolumesClient(base_client.BaseClient):
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
+        """Check the specified resource is deleted or not.
+
+        :param id: A checked resource id
+        :raises lib_exc.DeleteErrorException: If the specified resource is on
+        the status the delete was failed.
+        """
         try:
-            self.show_volume(id)
+            volume = self.show_volume(id)
         except lib_exc.NotFound:
             return True
+        if volume["volume"]["status"] == "error_deleting":
+            raise lib_exc.DeleteErrorException(resource_id=id)
         return False
 
     @property
