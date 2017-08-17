@@ -20,6 +20,7 @@ LOG = logging.getLogger(__name__)
 
 
 def _network_service(os, use_neutron):
+    # Internal helper to select the right network clients
     if use_neutron:
         return os.network
     else:
@@ -28,6 +29,36 @@ def _network_service(os, use_neutron):
 
 def create_ssh_security_group(os, add_rule=False, ethertype='IPv4',
                               use_neutron=True):
+    """Create a security group for ping/ssh testing
+
+    Create a security group to be attached to a VM using the nova or neutron
+    clients. If rules are added, the group can be attached to a VM to enable
+    connectivity validation over ICMP and further testing over SSH.
+
+    :param os: An instance of `tempest.lib.services.clients.ServiceClients` or
+        of a subclass of it. Resources are provisioned using clients from `os`.
+    :param add_rule: Whether security group rules are provisioned or not.
+        Defaults to `False`.
+    :param ethertype: 'IPv4' or 'IPv6'. Honoured only in case neutron is used.
+    :param use_neutron: When True resources are provisioned via neutron, when
+        False resources are provisioned via nova.
+    :returns: A dictionary with the security group as returned by the API.
+
+    Examples::
+
+        from tempest.common import validation_resources as vr
+        from tempest.lib import auth
+        from tempest.lib.services import clients
+
+        creds = auth.get_credentials('http://mycloud/identity/v3',
+                                     username='me', project_name='me',
+                                     password='secret', domain_name='Default')
+        os = clients.ServiceClients(creds, 'http://mycloud/identity/v3')
+        # Security group for IPv4 tests
+        sg4 = vr.create_ssh_security_group(os, add_rule=True)
+        # Security group for IPv6 tests
+        sg6 = vr.create_ssh_security_group(os, ethertype='IPv6', add_rule=True)
+    """
     network_service = _network_service(os, use_neutron)
     security_groups_client = network_service.SecurityGroupsClient()
     security_group_rules_client = network_service.SecurityGroupRulesClient()
@@ -68,6 +99,53 @@ def create_validation_resources(os, validation_resources=None,
                                 ethertype='IPv4', use_neutron=True,
                                 floating_network_id=None,
                                 floating_network_name=None):
+    """Provision resources for VM ping/ssh testing
+
+    Create resources required to be able to ping / ssh a virtual machine:
+    keypair, security group, security group rules and a floating IP.
+    Which of those resources are required may depend on the cloud setup and on
+    the specific test and it can be controlled via the validation_resources
+    dictionary.
+
+    Provisioned resources are returned in a dictionary.
+
+    :param os: An instance of `tempest.lib.services.clients.ServiceClients` or
+        of a subclass of it. Resources are provisioned using clients from `os`.
+    :param validation_resources: A dictionary that specifies which resources to
+        provision. Required keys are: 'keypair', 'security_group',
+        'security_group_rules' and 'floating_ip'.
+    :param ethertype: 'IPv4' or 'IPv6'. Honoured only in case neutron is used.
+    :param use_neutron: When True resources are provisioned via neutron, when
+        False resources are provisioned via nova.
+    :param floating_network_id: The id of the network used to provision a
+        floating IP. Only used if a floating IP is requested and with neutron.
+    :param floating_network_name: The name of the floating IP pool used to
+        provision the floating IP. Only used if a floating IP is requested and
+        with nova-net.
+    :returns: A dictionary with the same keys as the input
+        `validation_resources` and the resources for values in the format
+         they are returned by the API.
+
+    Examples::
+
+        from tempest.common import validation_resources as vr
+        from tempest.lib import auth
+        from tempest.lib.services import clients
+
+        creds = auth.get_credentials('http://mycloud/identity/v3',
+                                     username='me', project_name='me',
+                                     password='secret', domain_name='Default')
+        os = clients.ServiceClients(creds, 'http://mycloud/identity/v3')
+        # Request keypair and floating IP
+        resources = dict(keypair=True, security_group=False,
+                         security_group_rules=False, floating_ip=True)
+        resources = vr.create_validation_resources(
+            os, validation_resources=resources, use_neutron=True,
+            floating_network_id='4240E68E-23DA-4C82-AC34-9FEFAA24521C')
+
+        # The floating IP to be attached to the VM
+        floating_ip = resources['floating_ip']['ip']
+    """
     # Create and Return the validation resources required to validate a VM
     validation_data = {}
     if validation_resources:
@@ -106,7 +184,48 @@ def create_validation_resources(os, validation_resources=None,
 
 
 def clear_validation_resources(os, validation_data=None, use_neutron=True):
-    # Cleanup the vm validation resources
+    """Cleanup resources for VM ping/ssh testing
+
+    Cleanup a set of resources provisioned via `create_validation_resources`.
+    In case of errors during cleanup, the exception is logged and the cleanup
+    process is continued. The first exception that was raised is re-raised
+    after the cleanup is complete.
+
+    :param os: An instance of `tempest.lib.services.clients.ServiceClients` or
+        of a subclass of it. Resources are provisioned using clients from `os`.
+    :param validation_data: A dictionary that specifies resources to be
+        cleaned up in the format returned by `create_validation_resources`.
+        Required keys are: 'keypair', 'security_group', 'security_group_rules'
+        and 'floating_ip'.
+    :param use_neutron: When True resources are provisioned via neutron, when
+        False resources are provisioned via nova.
+    :returns: A dictionary with the same keys as the input
+        `validation_resources` and the resources for values in the format
+         they are returned by the API.
+
+    Examples::
+
+        from tempest.common import validation_resources as vr
+        from tempest.lib import auth
+        from tempest.lib.services import clients
+
+        creds = auth.get_credentials('http://mycloud/identity/v3',
+                                     username='me', project_name='me',
+                                     password='secret', domain_name='Default')
+        os = clients.ServiceClients(creds, 'http://mycloud/identity/v3')
+        # Request keypair and floating IP
+        resources = dict(keypair=True, security_group=False,
+                         security_group_rules=False, floating_ip=True)
+        resources = vr.create_validation_resources(
+            os, validation_resources=resources, use_neutron=True,
+            floating_network_id='4240E68E-23DA-4C82-AC34-9FEFAA24521C')
+
+        # Now cleanup the resources
+        try:
+            vr.clear_validation_resources(os, resources)
+        except Exception as e:
+            LOG.exception('Something went wrong during cleanup, ignoring')
+    """
     has_exception = None
     if validation_data:
         if 'keypair' in validation_data:
