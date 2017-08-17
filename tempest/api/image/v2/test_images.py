@@ -119,7 +119,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Update Image
         new_image_name = data_utils.rand_name('new-image')
-        body = self.client.update_image(image['id'], [
+        self.client.update_image(image['id'], [
             dict(replace='/name', value=new_image_name)])
 
         # Verifying updating

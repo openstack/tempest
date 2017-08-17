@@ -75,7 +75,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     def test_update_show_port_with_extra_dhcp_options(self):
         # Update port with extra dhcp options
         name = data_utils.rand_name('new-port-name')
-        body = self.ports_client.update_port(
+        self.ports_client.update_port(
             self.port['id'],
             name=name,
             extra_dhcp_opts=self.extra_dhcp_opts)
