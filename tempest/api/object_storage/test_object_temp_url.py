@@ -103,7 +103,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, self.content)
 
         # Testing a HEAD on this Temp URL
-        resp, body = self.object_client.head(url)
+        resp, _ = self.object_client.head(url)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @decorators.idempotent_id('671f9583-86bd-4128-a034-be282a68c5d8')
@@ -142,11 +142,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  expires, self.key)
 
         # trying to put random data in the object using temp url
-        resp, body = self.object_client.put(url, new_data, None)
+        resp, _ = self.object_client.put(url, new_data, None)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # Testing a HEAD on this Temp URL
-        resp, body = self.object_client.head(url)
+        resp, _ = self.object_client.head(url)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
         # Validate that the content of the object has been modified
