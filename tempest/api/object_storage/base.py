@@ -71,9 +71,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setup_credentials(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setup_credentials()
-        # credentials may be overwritten by children classes
-        if hasattr(cls, 'os_roles_operator'):
-            cls.os = cls.os_roles_operator
 
     @classmethod
     def setup_clients(cls):

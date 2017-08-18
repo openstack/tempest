@@ -41,7 +41,6 @@ class ContainerSyncTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(ContainerSyncTest, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
         cls.os_alt = cls.os_roles_operator_alt
 
     @classmethod
