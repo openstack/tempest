@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add reset group status API to v3 groups_client library, min_microversion
+    of this API is 3.20. This feature enables the possibility to reset group
+    status.

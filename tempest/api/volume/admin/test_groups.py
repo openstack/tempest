@@ -23,10 +23,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class GroupsTest(base.BaseVolumeAdminTest):
-    _api_version = 3
-    min_microversion = '3.14'
-    max_microversion = 'latest'
+class BaseGroupsTest(base.BaseVolumeAdminTest):
 
     def _delete_group(self, grp_id, delete_volumes=True):
         self.groups_client.delete_group(grp_id, delete_volumes)
@@ -64,6 +61,12 @@ class GroupsTest(base.BaseVolumeAdminTest):
             self.groups_client, grp['id'], 'available')
         self.assertEqual(grp_name, grp['name'])
         return grp
+
+
+class GroupsTest(BaseGroupsTest):
+    min_microversion = '3.14'
+    max_microversion = 'latest'
+    _api_version = 3
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
@@ -320,3 +323,30 @@ class GroupsTest(base.BaseVolumeAdminTest):
             if vol['group_id'] == grp['id']:
                 grp_vols.append(vol)
         self.assertEqual(2, len(grp_vols))
+
+
+class GroupsV320Test(BaseGroupsTest):
+    _api_version = 3
+    min_microversion = '3.20'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('b20c696b-0cbc-49a5-8b3a-b1fb9338f45c')
+    def test_reset_group_status(self):
+        # Create volume type
+        volume_type = self.create_volume_type()
+
+        # Create group type
+        group_type = self.create_group_type()
+
+        # Create group
+        group = self._create_group(group_type, volume_type)
+
+        # Reset group status
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.groups_client, group['id'], 'available')
+        self.addCleanup(self.admin_groups_client.reset_group_status,
+                        group['id'], 'available')
+        for status in ['creating', 'available', 'error']:
+            self.admin_groups_client.reset_group_status(group['id'], status)
+            waiters.wait_for_volume_resource_status(
+                self.groups_client, group['id'], status)
