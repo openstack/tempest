@@ -60,7 +60,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_group_snapshots(self, **params):
+    def list_group_snapshots(self, detail=False, **params):
         """Information for all the tenant's group snapshots.
 
         For more information, please refer to the official API reference:
@@ -68,6 +68,8 @@ class GroupSnapshotsClient(base_client.BaseClient):
         https://developer.openstack.org/api-ref/block-storage/v3/#list-group-snapshots-with-details
         """
         url = "group_snapshots"
+        if detail:
+            url += "/detail"
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)

@@ -93,7 +93,8 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
             bytes_body,
             group_snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
 
-    def _test_list_group_snapshots(self, bytes_body=False, detail=False):
+    def _test_list_group_snapshots(self, detail=False, bytes_body=False,
+                                   mock_args='group_snapshots', **params):
         resp_body = []
         if detail:
             resp_body = self.FAKE_LIST_GROUP_SNAPSHOTS
@@ -111,8 +112,10 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
             self.client.list_group_snapshots,
             'tempest.lib.common.rest_client.RestClient.get',
             resp_body,
-            bytes_body,
-            detail=detail)
+            to_utf=bytes_body,
+            mock_args=[mock_args],
+            detail=detail,
+            **params)
 
     def test_create_group_snapshot_with_str_body(self):
         self._test_create_group_snapshot()
@@ -131,6 +134,25 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
 
     def test_list_group_snapshots_with_bytes_body(self):
         self._test_list_group_snapshots(bytes_body=True)
+
+    def test_list_group_snapshots_with_detail_with_str_body(self):
+        mock_args = "group_snapshots/detail"
+        self._test_list_group_snapshots(detail=True, mock_args=mock_args)
+
+    def test_list_group_snapshots_with_detail_with_bytes_body(self):
+        mock_args = "group_snapshots/detail"
+        self._test_list_group_snapshots(detail=True, bytes_body=True,
+                                        mock_args=mock_args)
+
+    def test_list_group_snapshots_with_params(self):
+        # Run the test separately for each param, to avoid assertion error
+        # resulting from randomized params order.
+        mock_args = 'group_snapshots?sort_key=name'
+        self._test_list_group_snapshots(mock_args=mock_args, sort_key='name')
+
+        mock_args = 'group_snapshots/detail?limit=10'
+        self._test_list_group_snapshots(detail=True, bytes_body=True,
+                                        mock_args=mock_args, limit=10)
 
     def test_delete_group_snapshot(self):
         self.check_service_client_function(
