@@ -17,7 +17,6 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
-from tempest.common import compute
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -132,22 +131,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
         self.assertEqual(self.name.lower(), hostname, msg)
-
-    @decorators.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
-    @testtools.skipUnless(
-        compute.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
-        'ServerGroupAffinityFilter is not available.')
-    def test_create_server_with_scheduler_hint_group(self):
-        # Create a server with the scheduler hint "group".
-        group_id = self.create_test_server_group()['id']
-        hints = {'group': group_id}
-        server = self.create_test_server(scheduler_hints=hints,
-                                         wait_until='ACTIVE')
-
-        # Check a server is in the group
-        server_group = (self.server_groups_client.show_server_group(group_id)
-                        ['server_group'])
-        self.assertIn(server['id'], server_group['members'])
 
 
 class ServersTestManualDisk(ServersTestJSON):
