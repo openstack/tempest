@@ -1,0 +1,4 @@
+---
+fixes:
+  Add more accurate ip version check in addresses schema which will
+  limit the ip version value in [4, 6].

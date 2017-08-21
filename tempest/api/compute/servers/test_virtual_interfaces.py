@@ -56,11 +56,11 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
                 self.client.list_virtual_interfaces(self.server['id'])
         else:
             output = self.client.list_virtual_interfaces(self.server['id'])
-            virt_ifaces = output
-            self.assertNotEmpty(virt_ifaces['virtual_interfaces'],
+            virt_ifaces = output['virtual_interfaces']
+            self.assertNotEmpty(virt_ifaces,
                                 'Expected virtual interfaces, got 0 '
                                 'interfaces.')
-            for virt_iface in virt_ifaces['virtual_interfaces']:
+            for virt_iface in virt_ifaces:
                 mac_address = virt_iface['mac_address']
                 self.assertTrue(netaddr.valid_mac(mac_address),
                                 "Invalid mac address detected. mac address: %s"

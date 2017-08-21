@@ -51,9 +51,6 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         self.assertNotEmpty(addresses)
         for network_addresses in addresses.values():
             self.assertNotEmpty(network_addresses)
-            for address in network_addresses:
-                self.assertTrue(address['addr'])
-                self.assertTrue(address['version'])
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('87bbc374-5538-4f64-b673-2b0e4443cc30')
