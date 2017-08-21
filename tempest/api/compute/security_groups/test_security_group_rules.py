@@ -178,7 +178,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
             ip_protocol=self.ip_protocol,
             from_port=self.from_port,
             to_port=self.to_port,
-            group_id=sg2_id)['security_group_rule']
+            group_id=sg2_id)
 
         # Delete group2
         self.security_groups_client.delete_security_group(sg2_id)

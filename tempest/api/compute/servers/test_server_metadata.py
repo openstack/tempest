@@ -32,7 +32,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     def setUp(self):
         super(ServerMetadataTestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
-        self.client.set_server_metadata(self.server['id'], meta)['metadata']
+        self.client.set_server_metadata(self.server['id'], meta)
 
     @decorators.idempotent_id('479da087-92b3-4dcf-aeb3-fd293b2d14ce')
     def test_list_server_metadata(self):
@@ -49,8 +49,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         # The server's metadata should be replaced with the provided values
         # Create a new set of metadata for the server
         req_metadata = {'meta2': 'data2', 'meta3': 'data3'}
-        self.client.set_server_metadata(self.server['id'],
-                                        req_metadata)['metadata']
+        self.client.set_server_metadata(self.server['id'], req_metadata)
 
         # Verify the expected values are correct, and that the
         # previous values have been removed
