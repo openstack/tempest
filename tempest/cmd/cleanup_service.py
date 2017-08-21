@@ -16,6 +16,7 @@
 
 from oslo_log import log as logging
 
+from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import identity
 from tempest.common.utils import net_info
@@ -78,7 +79,8 @@ def init_conf():
 
 
 def _get_network_id(net_name, project_name):
-    am = credentials.AdminManager()
+    am = clients.Manager(
+        credentials.get_configured_admin_credentials())
     net_cl = am.networks_client
     tn_cl = am.tenants_client
 
