@@ -42,7 +42,7 @@ class AccountTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(AccountTest, cls).resource_setup()
         for i in range(ord('a'), ord('f') + 1):
-            name = data_utils.rand_name(name='%s-' % chr(i))
+            name = data_utils.rand_name(name='%s-' % six.int2byte(i))
             cls.container_client.create_container(name)
             cls.containers.append(name)
         cls.containers_count = len(cls.containers)
