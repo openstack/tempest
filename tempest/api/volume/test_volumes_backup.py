@@ -83,6 +83,9 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         # Get all backups with detail
         backups = self.backups_client.list_backups(
             detail=True)['backups']
+        for backup_info in backups:
+            self.assertIn('created_at', backup_info)
+            self.assertIn('links', backup_info)
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
