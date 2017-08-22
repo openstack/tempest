@@ -157,8 +157,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     def _restore_default_quotas(self, original_defaults):
         LOG.debug("restoring quota class defaults")
-        self.adm_client.update_quota_class_set(
-            'default', **original_defaults)['quota_class_set']
+        self.adm_client.update_quota_class_set('default', **original_defaults)
 
     # NOTE(sdague): this test is problematic as it changes
     # global state, and possibly needs to be part of a set of
