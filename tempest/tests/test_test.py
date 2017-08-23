@@ -377,3 +377,52 @@ class TestTempestBaseTestClass(base.TestCase):
                 RuntimeError,
                 value_re='^.* ' + SonOfBadSkipChecks.__name__):
             bad_class.setUpClass()
+
+    @mock.patch('tempest.common.credentials_factory.is_admin_available',
+                autospec=True, return_value=True)
+    def test_skip_checks_admin(self, mock_iaa):
+        identity_version = 'identity_version'
+
+        class NeedAdmin(self.parent_test):
+            credentials = ['admin']
+
+            @classmethod
+            def get_identity_version(cls):
+                return identity_version
+
+        NeedAdmin().skip_checks()
+        mock_iaa.assert_called_once_with('identity_version')
+
+    @mock.patch('tempest.common.credentials_factory.is_admin_available',
+                autospec=True, return_value=False)
+    def test_skip_checks_admin_not_available(self, mock_iaa):
+        identity_version = 'identity_version'
+
+        class NeedAdmin(self.parent_test):
+            credentials = ['admin']
+
+            @classmethod
+            def get_identity_version(cls):
+                return identity_version
+
+        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+            NeedAdmin().skip_checks()
+        mock_iaa.assert_called_once_with('identity_version')
+
+    def test_skip_checks_identity_v2_not_available(self):
+        cfg.CONF.set_default('api_v2', False, 'identity-feature-enabled')
+
+        class NeedV2(self.parent_test):
+            identity_version = 'v2'
+
+        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+            NeedV2().skip_checks()
+
+    def test_skip_checks_identity_v3_not_available(self):
+        cfg.CONF.set_default('api_v3', False, 'identity-feature-enabled')
+
+        class NeedV3(self.parent_test):
+            identity_version = 'v3'
+
+        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+            NeedV3().skip_checks()
