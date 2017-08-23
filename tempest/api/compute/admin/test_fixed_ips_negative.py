@@ -29,6 +29,8 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
 
     @classmethod
     def setup_clients(cls):
@@ -51,14 +53,12 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9f17f47d-daad-4adc-986e-12370c93e407')
-    @utils.services('network')
     def test_list_fixed_ip_details_with_non_admin_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.show_fixed_ip, self.ip)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ce60042c-fa60-4836-8d43-1c8e3359dc47')
-    @utils.services('network')
     def test_set_reserve_with_non_admin_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
@@ -66,7 +66,6 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f1f7a35b-0390-48c5-9803-5f27461439db')
-    @utils.services('network')
     def test_set_unreserve_with_non_admin_user(self):
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
@@ -74,7 +73,6 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f51cf464-7fc5-4352-bc3e-e75cfa2cb717')
-    @utils.services('network')
     def test_set_reserve_with_invalid_ip(self):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
@@ -87,7 +85,6 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('fd26ef50-f135-4232-9d32-281aab3f9176')
-    @utils.services('network')
     def test_fixed_ip_with_invalid_action(self):
         self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,

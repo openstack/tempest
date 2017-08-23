@@ -32,6 +32,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     @classmethod
     def skip_checks(cls):
         super(FloatingIPsTestJSON, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
         if not CONF.network_feature_enabled.floating_ips:
             raise cls.skipException("Floating ips are not available")
 
@@ -62,7 +64,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         super(FloatingIPsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
-    @utils.services('network')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
@@ -78,7 +79,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.assertIn(floating_ip_details, body)
 
     @decorators.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
-    @utils.services('network')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
@@ -93,7 +93,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
     @decorators.idempotent_id('307efa27-dc6f-48a0-8cd2-162ce3ef0b52')
-    @utils.services('network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_disassociate_floating_ip(self):
@@ -116,7 +115,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.server_id)
 
     @decorators.idempotent_id('6edef4b2-aaf1-4abc-bbe3-993e2561e0fe')
-    @utils.services('network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_already_associated_floating_ip(self):

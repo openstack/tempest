@@ -29,6 +29,8 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
         if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
 
     @classmethod
     def setup_clients(cls):
@@ -49,17 +51,14 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
                 break
 
     @decorators.idempotent_id('16b7d848-2f7c-4709-85a3-2dfb4576cc52')
-    @utils.services('network')
     def test_list_fixed_ip_details(self):
         fixed_ip = self.client.show_fixed_ip(self.ip)
         self.assertEqual(fixed_ip['fixed_ip']['address'], self.ip)
 
     @decorators.idempotent_id('5485077b-7e46-4cec-b402-91dc3173433b')
-    @utils.services('network')
     def test_set_reserve(self):
         self.client.reserve_fixed_ip(self.ip, reserve="None")
 
     @decorators.idempotent_id('7476e322-b9ff-4710-bf82-49d51bac6e2e')
-    @utils.services('network')
     def test_set_unreserve(self):
         self.client.reserve_fixed_ip(self.ip, unreserve="None")

@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute.security_groups import base
-from tempest.common import utils
 from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -30,7 +29,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('eb2b087d-633d-4d0d-a7bd-9e6ba35b32de')
-    @utils.services('network')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         # Create 3 Security Groups
@@ -62,7 +60,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                                             for m_group in deleted_sgs))
 
     @decorators.idempotent_id('ecc0da4a-2117-48af-91af-993cca39a615')
-    @utils.services('network')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
         # with char space between name along with
@@ -83,7 +80,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.wait_for_resource_deletion(securitygroup['id'])
 
     @decorators.idempotent_id('fe4abc0d-83f5-4c50-ad11-57a1127297a2')
-    @utils.services('network')
     def test_server_security_groups(self):
         # Checks that security groups may be added and linked to a server
         # and not deleted if the server is active.
@@ -125,7 +121,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.delete_security_group(sg2['id'])
 
     @decorators.idempotent_id('7d4e1d3c-3209-4d6d-b020-986304ebad1f')
-    @utils.services('network')
     def test_update_security_groups(self):
         # Update security group name and description
         # Create a security group
@@ -144,7 +139,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(s_new_des, fetched_group['description'])
 
     @decorators.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
-    @utils.services('network')
     def test_list_security_groups_by_server(self):
         # Create a couple security groups that we will use
         # for the server resource this test creates

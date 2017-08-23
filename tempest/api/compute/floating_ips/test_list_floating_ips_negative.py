@@ -28,6 +28,8 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(FloatingIPDetailsNegativeTestJSON, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
         if not CONF.network_feature_enabled.floating_ips:
             raise cls.skipException("Floating ips are not available")
 
@@ -38,7 +40,6 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
-    @utils.services('network')
     def test_get_nonexistent_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
         # of non-existent floating IP
