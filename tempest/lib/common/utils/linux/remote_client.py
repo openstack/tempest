@@ -67,7 +67,7 @@ class RemoteClient(object):
     def __init__(self, ip_address, username, password=None, pkey=None,
                  server=None, servers_client=None, ssh_timeout=300,
                  connect_timeout=60, console_output_enabled=True,
-                 ssh_shell_prologue="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+                 ssh_shell_prologue="set -eu -o pipefail; PATH=$PATH:/sbin;",
                  ping_count=1, ping_size=56):
         """Executes commands in a VM over ssh
 
