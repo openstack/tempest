@@ -50,7 +50,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             return
 
         def str_vol(vol):
-            return "%s:%s" % (vol['id'], vol[self.name])
+            return "%s:%s" % (vol['id'], vol['name'])
 
         raw_msg = "Could not find volumes %s in expected list %s; fetched %s"
         self.fail(raw_msg % ([str_vol(v) for v in missing_vols],
@@ -60,7 +60,6 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     @classmethod
     def resource_setup(cls):
         super(VolumesListTestJSON, cls).resource_setup()
-        cls.name = cls.VOLUME_FIELDS[1]
 
         existing_volumes = cls.volumes_client.list_volumes()['volumes']
         cls.volume_id_list = [vol['id'] for vol in existing_volumes]
@@ -117,22 +116,20 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     @decorators.idempotent_id('a28e8da4-0b56-472f-87a8-0f4d3f819c02')
     def test_volume_list_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
-        params = {self.name: volume[self.name]}
+        params = {'name': volume['name']}
         fetched_vol = self.volumes_client.list_volumes(
             params=params)['volumes']
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
-        self.assertEqual(fetched_vol[0][self.name],
-                         volume[self.name])
+        self.assertEqual(fetched_vol[0]['name'], volume['name'])
 
     @decorators.idempotent_id('2de3a6d4-12aa-403b-a8f2-fdeb42a89623')
     def test_volume_list_details_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
-        params = {self.name: volume[self.name]}
+        params = {'name': volume['name']}
         fetched_vol = self.volumes_client.list_volumes(
             detail=True, params=params)['volumes']
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
-        self.assertEqual(fetched_vol[0][self.name],
-                         volume[self.name])
+        self.assertEqual(fetched_vol[0]['name'], volume['name'])
 
     @decorators.idempotent_id('39654e13-734c-4dab-95ce-7613bf8407ce')
     def test_volumes_list_by_status(self):
@@ -213,7 +210,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volume_list_param_display_name_and_status(self):
         # Test to list volume when display name and status param is given
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
-        params = {self.name: volume[self.name],
+        params = {'name': volume['name'],
                   'status': 'available'}
         self._list_by_param_value_and_assert(params)
 
@@ -221,7 +218,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volume_list_with_detail_param_display_name_and_status(self):
         # Test to list volume when name and status param is given
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
-        params = {self.name: volume[self.name],
+        params = {'name': volume['name'],
                   'status': 'available'}
         self._list_by_param_value_and_assert(params, with_detail=True)
 
