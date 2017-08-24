@@ -1,5 +1,7 @@
 ---
 fixes:
-  Add a missing return statement to the retype_volume API in the v2 volumes_client library.
-  This changes the response body from None to an empty dictionary.
+  - |
+    Add a missing return statement to the retype_volume API in the v2
+    volumes_client library: Bug#1703997
 
+    This changes the response body from None to an empty dictionary.
