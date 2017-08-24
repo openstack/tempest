@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 
@@ -43,6 +44,8 @@ class SnapshotsActionsTest(base.BaseVolumeAdminTest):
         snapshot_id = self.snapshot['id']
         self.admin_snapshots_client.reset_snapshot_status(snapshot_id,
                                                           status)
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot_id, status)
         super(SnapshotsActionsTest, self).tearDown()
 
     def _create_reset_and_force_delete_temp_snapshot(self, status=None):
@@ -50,10 +53,11 @@ class SnapshotsActionsTest(base.BaseVolumeAdminTest):
         # and force delete temp snapshot
         temp_snapshot = self.create_snapshot(volume_id=self.volume['id'])
         if status:
-            self.admin_snapshots_client.\
-                reset_snapshot_status(temp_snapshot['id'], status)
-        self.admin_snapshots_client.\
-            force_delete_snapshot(temp_snapshot['id'])
+            self.admin_snapshots_client.reset_snapshot_status(
+                temp_snapshot['id'], status)
+            waiters.wait_for_volume_resource_status(
+                self.snapshots_client, temp_snapshot['id'], status)
+        self.admin_snapshots_client.force_delete_snapshot(temp_snapshot['id'])
         self.snapshots_client.wait_for_resource_deletion(temp_snapshot['id'])
 
     def _get_progress_alias(self):
@@ -63,18 +67,19 @@ class SnapshotsActionsTest(base.BaseVolumeAdminTest):
     def test_reset_snapshot_status(self):
         # Reset snapshot status to creating
         status = 'creating'
-        self.admin_snapshots_client.\
-            reset_snapshot_status(self.snapshot['id'], status)
-        snapshot_get = self.admin_snapshots_client.show_snapshot(
-            self.snapshot['id'])['snapshot']
-        self.assertEqual(status, snapshot_get['status'])
+        self.admin_snapshots_client.reset_snapshot_status(
+            self.snapshot['id'], status)
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                self.snapshot['id'], status)
 
     @decorators.idempotent_id('41288afd-d463-485e-8f6e-4eea159413eb')
     def test_update_snapshot_status(self):
         # Reset snapshot status to creating
         status = 'creating'
-        self.admin_snapshots_client.\
-            reset_snapshot_status(self.snapshot['id'], status)
+        self.admin_snapshots_client.reset_snapshot_status(
+            self.snapshot['id'], status)
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                self.snapshot['id'], status)
 
         # Update snapshot status to error
         progress = '80%'
