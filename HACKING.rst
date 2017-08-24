@@ -358,10 +358,10 @@ to Tempest.
 
 When adding tests for new features that were not in previous releases of the
 projects the new test has to be properly skipped with a feature flag. Whether
-this is just as simple as using the @test.requires_ext() decorator to check
-if the required extension (or discoverable optional API) is enabled or adding
-a new config option to the appropriate section. If there isn't a method of
-selecting the new **feature** from the config file then there won't be a
+this is just as simple as using the @utils.requires_ext() decorator to
+check if the required extension (or discoverable optional API) is enabled or
+adding a new config option to the appropriate section. If there isn't a method
+of selecting the new **feature** from the config file then there won't be a
 mechanism to disable the test with older stable releases and the new test won't
 be able to merge.
 

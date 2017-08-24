@@ -17,13 +17,13 @@ import json
 from oslo_log import log as logging
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 
 CONF = config.CONF
@@ -94,7 +94,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                                                       'other']))
 
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
-    @test.services('network', 'volume', 'image')
+    @utils.services('network', 'volume', 'image')
     def test_device_tagging(self):
         # Create volumes
         # The create_volume methods waits for the volumes to be available and

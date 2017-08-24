@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.api.compute.security_groups import base
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
@@ -55,7 +55,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('850795d7-d4d3-4e55-b527-a774c0123d3a')
-    @test.services('network')
+    @utils.services('network')
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successful
@@ -73,7 +73,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self._check_expected_response(rule)
 
     @decorators.idempotent_id('7a01873e-3c38-4f30-80be-31a043cfe2fd')
-    @test.services('network')
+    @utils.services('network')
     def test_security_group_rules_create_with_optional_cidr(self):
         # Positive test: Creation of Security Group rule
         # with optional argument cidr
@@ -96,7 +96,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self._check_expected_response(rule)
 
     @decorators.idempotent_id('7f5d2899-7705-4d4b-8458-4505188ffab6')
-    @test.services('network')
+    @utils.services('network')
     def test_security_group_rules_create_with_optional_group_id(self):
         # Positive test: Creation of Security Group rule
         # with optional argument group_id
@@ -125,7 +125,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('a6154130-5a55-4850-8be4-5e9e796dbf17')
-    @test.services('network')
+    @utils.services('network')
     def test_security_group_rules_list(self):
         # Positive test: Created Security Group rules should be
         # in the list of all rules
@@ -163,7 +163,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.assertNotEmpty([i for i in rules if i['id'] == rule2_id])
 
     @decorators.idempotent_id('fc5c5acf-2091-43a6-a6ae-e42760e9ffaf')
-    @test.services('network')
+    @utils.services('network')
     def test_security_group_rules_delete_when_peer_group_deleted(self):
         # Positive test:rule will delete when peer group deleting
         # Creating a Security Group to add rules to it

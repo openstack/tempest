@@ -14,10 +14,10 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class StaticWebTest(base.BaseObjectTest):
@@ -45,7 +45,7 @@ class StaticWebTest(base.BaseObjectTest):
         super(StaticWebTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_index(self):
         headers = {'web-index': self.object_name}
 
@@ -76,7 +76,7 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertNotIn('x-container-meta-web-index', body)
 
     @decorators.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
 
@@ -108,7 +108,7 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertNotIn('x-container-meta-web-listings', body)
 
     @decorators.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing_css(self):
         headers = {'web-listings': 'true',
                    'web-listings-css': 'listings.css'}
@@ -131,7 +131,7 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertIn(css, body.decode())
 
     @decorators.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_error(self):
         headers = {'web-listings': 'true',
                    'web-error': self.object_name}

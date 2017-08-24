@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -53,7 +53,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         super(FloatingIPDetailsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
-    @test.services('network')
+    @utils.services('network')
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
         body = self.client.list_floating_ips()['floating_ips']
@@ -64,7 +64,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
             self.assertIn(self.floating_ip[i], floating_ips)
 
     @decorators.idempotent_id('eef497e0-8ff7-43c8-85ef-558440574f84')
-    @test.services('network')
+    @utils.services('network')
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
@@ -86,7 +86,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(floating_ip_id, body['id'])
 
     @decorators.idempotent_id('df389fc8-56f5-43cc-b290-20eda39854d3')
-    @test.services('network')
+    @utils.services('network')
     def test_list_floating_ip_pools(self):
         # Positive test:Should return the list of floating IP Pools
         floating_ip_pools = self.pools_client.list_floating_ip_pools()

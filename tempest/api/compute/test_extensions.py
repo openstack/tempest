@@ -16,9 +16,9 @@
 from oslo_log import log as logging
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -48,7 +48,7 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
             raise self.skipException('There are not any extensions configured')
 
     @decorators.idempotent_id('05762f39-bdfa-4cdb-9b46-b78f8e78e2fd')
-    @test.requires_ext(extension='os-consoles', service='compute')
+    @utils.requires_ext(extension='os-consoles', service='compute')
     def test_get_extension(self):
         # get the specified extensions
         extension = self.extensions_client.show_extension('os-consoles')

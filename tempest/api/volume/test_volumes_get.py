@@ -17,11 +17,11 @@ import testtools
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -122,7 +122,7 @@ class VolumesGetTest(base.BaseVolumeTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
-    @test.services('image')
+    @utils.services('image')
     def test_volume_create_get_update_delete_from_image(self):
         image = self.images_client.show_image(CONF.compute.image_ref)
         min_disk = image['min_disk']

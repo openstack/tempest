@@ -15,8 +15,8 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class QuotasTestJSON(base.BaseV2ComputeTest):
@@ -24,7 +24,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(QuotasTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('os-quota-sets', 'compute'):
+        if not utils.is_extension_enabled('os-quota-sets', 'compute'):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 

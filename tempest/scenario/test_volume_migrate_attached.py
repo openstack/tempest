@@ -12,11 +12,11 @@
 
 from oslo_log import log as logging
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
-    @test.services('compute', 'volume')
+    @utils.services('compute', 'volume')
     def test_volume_migrate_attached(self):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()

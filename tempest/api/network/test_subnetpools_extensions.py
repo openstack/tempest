@@ -13,12 +13,12 @@
 # under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -42,7 +42,7 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(SubnetPoolsTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('subnet_allocation', 'network'):
+        if not utils.is_extension_enabled('subnet_allocation', 'network'):
             msg = "subnet_allocation extension not enabled."
             raise cls.skipException(msg)
 

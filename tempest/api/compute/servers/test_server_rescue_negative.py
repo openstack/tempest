@@ -16,12 +16,12 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -109,7 +109,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           self.image_ref_alt)
 
     @decorators.idempotent_id('d0ccac79-0091-4cf4-a1ce-26162d0cc55f')
-    @test.services('volume')
+    @utils.services('volume')
     @decorators.attr(type=['negative'])
     def test_rescued_vm_attach_volume(self):
         volume = self.create_volume()
@@ -129,7 +129,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           device='/dev/%s' % self.device)
 
     @decorators.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
-    @test.services('volume')
+    @utils.services('volume')
     @decorators.attr(type=['negative'])
     def test_rescued_vm_detach_volume(self):
         volume = self.create_volume()

@@ -11,9 +11,9 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
@@ -21,7 +21,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def skip_checks(cls):
         super(InheritsV3TestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('OS-INHERIT', 'identity'):
+        if not utils.is_extension_enabled('OS-INHERIT', 'identity'):
             raise cls.skipException("Inherits aren't enabled")
 
     @classmethod

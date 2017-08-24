@@ -16,9 +16,9 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class RoutersTestDVR(base.BaseAdminNetworkTest):
@@ -27,7 +27,7 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
     def skip_checks(cls):
         super(RoutersTestDVR, cls).skip_checks()
         for ext in ['router', 'dvr']:
-            if not test.is_extension_enabled(ext, 'network'):
+            if not utils.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
         # The check above will pass if api_extensions=all, which does
@@ -87,7 +87,7 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         self.assertFalse(router['router']['distributed'])
 
     @decorators.idempotent_id('acd43596-c1fb-439d-ada8-31ad48ae3c2e')
-    @testtools.skipUnless(test.is_extension_enabled('l3-ha', 'network'),
+    @testtools.skipUnless(utils.is_extension_enabled('l3-ha', 'network'),
                           'HA routers are not available.')
     def test_centralized_router_update_to_dvr(self):
         """Test centralized router update

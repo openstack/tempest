@@ -13,9 +13,9 @@
 #    under the License.
 
 from tempest.api.object_storage import test_container_sync
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -39,7 +39,7 @@ class ContainerSyncMiddlewareTest(test_container_sync.ContainerSyncTest):
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('ea4645a1-d147-4976-82f7-e5a7a3065f80')
-    @test.requires_ext(extension='container_sync', service='object')
+    @utils.requires_ext(extension='container_sync', service='object')
     def test_container_synchronization(self):
         def make_headers(cont, cont_client):
             # tell first container to synchronize to a second

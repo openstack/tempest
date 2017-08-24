@@ -14,10 +14,10 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -67,7 +67,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         self._create_reset_and_force_delete_temp_volume('maintenance')
 
     @decorators.idempotent_id('d38285d9-929d-478f-96a5-00e66a115b81')
-    @test.services('compute')
+    @utils.services('compute')
     def test_force_detach_volume(self):
         # Create a server and a volume
         server_id = self.create_server()['id']

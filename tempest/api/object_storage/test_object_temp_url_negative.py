@@ -19,10 +19,10 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ObjectTempUrlNegativeTest(base.BaseObjectTest):
@@ -94,7 +94,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
 
         expires = self._get_expiry_date(1)

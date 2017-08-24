@@ -17,11 +17,11 @@ from oslo_log import log
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import credentials_factory as credentials
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_excs
-from tempest import test
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -53,7 +53,8 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             raise cls.skipException(msg)
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
-        if not test.is_extension_enabled('auto-allocated-topology', 'network'):
+        if not utils.is_extension_enabled('auto-allocated-topology',
+                                          'network'):
             raise cls.skipException(
                 'auto-allocated-topology extension is not available')
 

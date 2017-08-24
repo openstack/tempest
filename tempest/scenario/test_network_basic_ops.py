@@ -19,13 +19,13 @@ import re
 from oslo_log import log as logging
 import testtools
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
         for ext in ['router', 'security-group']:
-            if not test.is_extension_enabled(ext, 'network'):
+            if not utils.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
         if not CONF.network_feature_enabled.floating_ips:
@@ -357,7 +357,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_network_basic_ops(self):
         """Basic network operation test
 
@@ -409,10 +409,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                    "floating ip")
 
     @decorators.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
-    @testtools.skipUnless(test.is_extension_enabled('net-mtu', 'network'),
+    @testtools.skipUnless(utils.is_extension_enabled('net-mtu', 'network'),
                           'No way to calculate MTU for networks')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_mtu_sized_frames(self):
         """Validate that network MTU sized frames fit through."""
         self._setup_network_and_servers()
@@ -425,7 +425,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'multitenant network environment')
     @decorators.skip_because(bug="1610994")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
         """Test connectivity between VMs on different networks
 
@@ -479,7 +479,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
                       'NIC hotplug not supported for '
                       'vnic_type direct or macvtap')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_hotplug_nic(self):
         """Test hotplug network interface
 
@@ -501,7 +501,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'Router state can be altered only with multitenant '
                       'networks capabilities')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_update_router_admin_state(self):
         """Test to update admin state up of router
 
@@ -535,7 +535,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_subnet_details(self):
         """Tests that subnet's extra configuration details are affecting VMs.
 
@@ -619,7 +619,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                           "Changing a port's admin state is not supported "
                           "by the test environment")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
         """Test to update admin_state_up attribute of instance port
 
@@ -666,7 +666,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_preserve_preexisting_port(self):
         """Test preserve pre-existing port
 
@@ -715,10 +715,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                          'server %s.' % server['id'])
         self.assertEqual(port['id'], port_list[0]['id'])
 
-    @test.requires_ext(service='network', extension='l3_agent_scheduler')
+    @utils.requires_ext(service='network', extension='l3_agent_scheduler')
     @decorators.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
 
@@ -793,12 +793,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True,
             msg='After router rescheduling')
 
-    @test.requires_ext(service='network', extension='port-security')
+    @utils.requires_ext(service='network', extension='port-security')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
     @decorators.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_port_security_macspoofing_port(self):
         """Tests port_security extension enforces mac spoofing
 

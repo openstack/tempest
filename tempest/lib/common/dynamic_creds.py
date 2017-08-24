@@ -451,7 +451,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                             creds.username)
             # NOTE(zhufl): Only when neutron's security_group ext is
             # enabled, _cleanup_default_secgroup will not raise error. But
-            # here cannot use test.is_extension_enabled for it will cause
+            # here cannot use test_utils.is_extension_enabled for it will cause
             # "circular dependency". So here just use try...except to
             # ensure tenant deletion without big changes.
             try:

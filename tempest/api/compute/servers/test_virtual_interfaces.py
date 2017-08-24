@@ -17,10 +17,10 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 CONF = config.CONF
 
@@ -44,7 +44,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @decorators.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
-    @test.services('network')
+    @utils.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id

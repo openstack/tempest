@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
@@ -35,7 +35,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(ExtraDHCPOptionsTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('extra_dhcp_opt', 'network'):
+        if not utils.is_extension_enabled('extra_dhcp_opt', 'network'):
             msg = "Extra DHCP Options extension not enabled."
             raise cls.skipException(msg)
 

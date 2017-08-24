@@ -16,12 +16,12 @@
 from oslo_log import log as logging
 import testtools
 
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class TestStampPattern(manager.ScenarioTest):
                           'Snapshotting is not available.')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
-    @test.services('compute', 'network', 'volume', 'image')
+    @utils.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting an instance
         keypair = self.create_keypair()

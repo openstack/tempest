@@ -19,9 +19,9 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ObjectFormPostTest(base.BaseObjectTest):
@@ -108,7 +108,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         return body, content_type
 
     @decorators.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
-    @test.requires_ext(extension='formpost', service='object')
+    @utils.requires_ext(extension='formpost', service='object')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
 
