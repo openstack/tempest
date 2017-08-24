@@ -402,10 +402,53 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def setup_clients(cls):
-        """Create links to the clients into the test object."""
-        # TODO(andreaf) There is a fair amount of code that could me moved from
-        # base / test classes in here. Ideally tests should be able to only
-        # specify which client is `client` and nothing else.
+        """Create aliases to the clients in the client managers.
+
+        `setup_clients` is invoked after the credential provisioning step.
+        Client manager objects are available to tests already. The purpose
+        of this helper is to setup shortcuts to specific clients that are
+        useful for the tests implemented in the test class.
+
+        Its purpose is mostly for code readability, however it should be used
+        carefully to avoid doing exactly the opposite, i.e. making the code
+        unreadable and hard to debug. If aliases are defined in a super class
+        it won't be obvious what they refer to, so it's good practice to define
+        all aliases used in the class. Aliases are meant to be shortcuts to
+        be used in tests, not shortcuts to avoid helper method attributes.
+        If an helper method starts relying on a client alias and a subclass
+        overrides that alias, it will become rather difficult to understand
+        what the helper method actually does.
+
+        Example::
+
+            class TestDoneItRight(test.BaseTestCase):
+
+                credentials = ['primary', 'alt']
+
+                @classmethod
+                def setup_clients(cls):
+                    super(TestDoneItRight, cls).setup_clients()
+                    cls.servers = cls.os_primary.ServersClient()
+                    cls.servers_alt = cls.os_alt.ServersClient()
+
+                def _a_good_helper(self, clients):
+                    # Some complex logic we're going to use many times
+                    servers = clients.ServersClient()
+                    vm = servers.create_server(...)
+
+                    def delete_server():
+                        test_utils.call_and_ignore_notfound_exc(
+                            servers.delete_server, vm['id'])
+
+                    self.addCleanup(self.delete_server)
+                    return vm
+
+                def test_with_servers(self):
+                    vm = self._a_good_helper(os.primary)
+                    vm_alt = self._a_good_helper(os.alt)
+                    cls.servers.show_server(vm['id'])
+                    cls.servers_alt.show_server(vm_alt['id'])
+        """
         pass
 
     @classmethod
