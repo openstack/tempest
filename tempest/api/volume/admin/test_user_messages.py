@@ -62,24 +62,22 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
         return message_id
 
     @decorators.idempotent_id('50f29e6e-f363-42e1-8ad1-f67ae7fd4d5a')
-    def test_list_messages(self):
-        self._create_user_message()
+    def test_list_show_messages(self):
+        message_id = self._create_user_message()
+        self.addCleanup(self.messages_client.delete_message, message_id)
+
+        # show message
+        message = self.messages_client.show_message(message_id)['message']
+        for key in MESSAGE_KEYS:
+            self.assertIn(key, message.keys(), 'Missing expected key %s' % key)
+
+        # list messages
         messages = self.messages_client.list_messages()['messages']
         self.assertIsInstance(messages, list)
         for message in messages:
             for key in MESSAGE_KEYS:
                 self.assertIn(key, message.keys(),
                               'Missing expected key %s' % key)
-
-    @decorators.idempotent_id('55a4a61e-c7b2-4ba0-a05d-b914bdef3070')
-    def test_show_message(self):
-        message_id = self._create_user_message()
-        self.addCleanup(self.messages_client.delete_message, message_id)
-
-        message = self.messages_client.show_message(message_id)['message']
-
-        for key in MESSAGE_KEYS:
-            self.assertIn(key, message.keys(), 'Missing expected key %s' % key)
 
     @decorators.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
     def test_delete_message(self):
