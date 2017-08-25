@@ -128,6 +128,12 @@ order.
 Test class level resources should be defined in the `resource_setup` method of
 the test class, except for any credential obtained from the credentials
 provider, which should be set-up in the `setup_credentials` method.
+Cleanup is best scheduled using `addClassResourceCleanup` which ensures that
+the cleanup code is always invoked, and in reverse order with respect to the
+creation order.
+
+In both cases - test level and class level cleanups - a wait loop should be
+scheduled before the actual delete of resources with an asynchronous delete.
 
 The test base class `BaseTestCase` defines Tempest framework for class level
 fixtures. `setUpClass` and `tearDownClass` are defined here and cannot be

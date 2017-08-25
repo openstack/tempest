@@ -143,6 +143,8 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             test_utils.call_and_ignore_notfound_exc(
                 cls.networks_client.delete_network, network['id'])
 
+        super(AutoAllocateNetworkTest, cls).resource_cleanup()
+
     @decorators.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
     def test_server_create_no_allocate(self):
         """Tests that no networking is allocated for the server."""
