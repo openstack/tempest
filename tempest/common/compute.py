@@ -198,9 +198,27 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         body = rest_client.ResponseBody(body.response, body['server'])
         servers = [body]
 
-    # The name of the method to associate a floating IP to as server is too
-    # long for PEP8 compliance so:
-    assoc = clients.compute_floating_ips_client.associate_floating_ip_to_server
+    def _setup_validation_fip():
+        if CONF.service_available.neutron:
+            ifaces = clients.interfaces_client.list_interfaces(server['id'])
+            validation_port = None
+            for iface in ifaces['interfaceAttachments']:
+                if iface['net_id'] == tenant_network['id']:
+                    validation_port = iface['port_id']
+                    break
+            if not validation_port:
+                # NOTE(artom) This will get caught by the catch-all clause in
+                # the wait_until loop below
+                raise ValueError('Unable to setup floating IP for validation: '
+                                 'port not found on tenant network')
+            clients.floating_ips_client.update_floatingip(
+                validation_resources['floating_ip']['id'],
+                port_id=validation_port)
+        else:
+            fip_client = clients.compute_floating_ips_client
+            fip_client.associate_floating_ip_to_server(
+                floating_ip=validation_resources['floating_ip']['ip'],
+                server_id=servers[0]['id'])
 
     if wait_until:
         for server in servers:
@@ -212,9 +230,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 # creation will fail with the condition above (l.58).
                 if CONF.validation.run_validation and validatable:
                     if CONF.validation.connect_method == 'floating':
-                        assoc(floating_ip=validation_resources[
-                              'floating_ip']['ip'],
-                              server_id=servers[0]['id'])
+                        _setup_validation_fip()
 
             except Exception:
                 with excutils.save_and_reraise_exception():
