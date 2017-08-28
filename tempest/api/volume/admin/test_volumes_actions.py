@@ -30,6 +30,8 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         if status:
             self.admin_volume_client.reset_volume_status(
                 temp_volume['id'], status=status)
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, temp_volume['id'], status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.volumes_client.wait_for_resource_deletion(temp_volume['id'])
 
@@ -37,14 +39,15 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
         volume = self.create_volume()
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client, volume['id'], 'available')
         self.addCleanup(self.admin_volume_client.reset_volume_status,
                         volume['id'], status='available')
         for status in ['error', 'available', 'maintenance']:
             self.admin_volume_client.reset_volume_status(
                 volume['id'], status=status)
-            volume_get = self.admin_volume_client.show_volume(
-                volume['id'])['volume']
-            self.assertEqual(status, volume_get['status'])
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, volume['id'], status)
 
     @decorators.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
     def test_volume_force_delete_when_volume_is_creating(self):
@@ -88,6 +91,8 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
 
         # Reset volume's status to error
         self.admin_volume_client.reset_volume_status(volume_id, status='error')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'error')
 
         # Force detach volume
         self.admin_volume_client.force_detach_volume(
