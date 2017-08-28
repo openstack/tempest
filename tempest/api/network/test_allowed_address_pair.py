@@ -41,6 +41,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         api_extensions
     """
 
+    _project_network_cidr = CONF.network.project_network_cidr
+
     @classmethod
     def skip_checks(cls):
         super(AllowedAddressPairTestJSON, cls).skip_checks()
@@ -103,7 +105,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('4d6d178f-34f6-4bff-a01c-0a2f8fe909e4')
     def test_update_port_with_cidr_address_pair(self):
         # Update allowed address pair with cidr
-        cidr = str(netaddr.IPNetwork(CONF.network.project_network_cidr))
+        cidr = str(netaddr.IPNetwork(self._project_network_cidr))
         self._update_port_with_address(cidr)
 
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
@@ -133,3 +135,4 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
 class AllowedAddressPairIpV6TestJSON(AllowedAddressPairTestJSON):
     _ip_version = 6
+    _project_network_cidr = CONF.network.project_network_v6_cidr
