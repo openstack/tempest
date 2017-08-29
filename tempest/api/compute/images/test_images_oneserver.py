@@ -74,7 +74,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
         # Verify the image was deleted correctly
         self.client.delete_image(image['id'])
-        self.images.remove(image['id'])
         self.client.wait_for_resource_deletion(image['id'])
 
     @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')

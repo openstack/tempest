@@ -20,6 +20,7 @@ from tempest.common import image as common_image
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 
@@ -70,7 +71,9 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         body = cls.glance_client.create_image(**params)
         body = body['image'] if 'image' in body else body
         cls.image_id = body['id']
-        cls.images.append(cls.image_id)
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.compute_images_client.delete_image,
+                                    cls.image_id)
         image_file = six.BytesIO((b'*' * 1024))
         if CONF.image_feature_enabled.api_v1:
             cls.glance_client.update_image(cls.image_id, data=image_file)

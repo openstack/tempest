@@ -117,15 +117,12 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.image_ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_password = CONF.validation.image_ssh_password
         cls.servers = []
-        cls.images = []
         cls.security_groups = []
         cls.server_groups = []
         cls.volumes = []
 
     @classmethod
     def resource_cleanup(cls):
-        cls.clear_resources('images', cls.images,
-                            cls.compute_images_client.delete_image)
         cls.clear_servers()
         cls.clear_resources('security groups', cls.security_groups,
                             cls.security_groups_client.delete_security_group)
@@ -293,7 +290,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         image = cls.compute_images_client.create_image(server_id, name=name,
                                                        **kwargs)
         image_id = data_utils.parse_image_id(image.response['location'])
-        cls.images.append(image_id)
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.compute_images_client.delete_image,
+                                    image_id)
 
         if wait_until is not None:
             try:

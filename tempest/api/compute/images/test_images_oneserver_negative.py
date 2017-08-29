@@ -107,7 +107,6 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         image_id = data_utils.parse_image_id(image.response['location'])
         self.client.delete_image(image_id)
-        self.images.remove(image_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
@@ -130,6 +129,5 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Do not wait, attempt to delete the image, ensure it's successful
         self.client.delete_image(image_id)
-        self.images.remove(image_id)
         self.assertRaises(lib_exc.NotFound,
                           self.client.show_image, image_id)
