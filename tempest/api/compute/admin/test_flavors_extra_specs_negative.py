@@ -55,12 +55,11 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
             ephemeral=ephemeral,
             swap=swap,
             rxtx_factor=rxtx)['flavor']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.admin_flavors_client.delete_flavor(cls.flavor['id'])
-        cls.admin_flavors_client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_cleanup()
+        cls.addClassResourceCleanup(
+            cls.admin_flavors_client.wait_for_resource_deletion,
+            cls.flavor['id'])
+        cls.addClassResourceCleanup(cls.admin_flavors_client.delete_flavor,
+                                    cls.flavor['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a00a3b81-5641-45a8-ab2b-4a8ec41e1d7d')

@@ -45,7 +45,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     @classmethod
     def resource_setup(cls):
         super(FloatingIPsTestJSON, cls).resource_setup()
-        cls.floating_ip_id = None
 
         # Server creation
         server = cls.create_test_server(wait_until='ACTIVE')
@@ -53,15 +52,9 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Floating IP creation
         body = cls.client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
+        cls.addClassResourceCleanup(cls.client.delete_floating_ip, body['id'])
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Deleting the floating IP which is created in this method
-        if cls.floating_ip_id:
-            cls.client.delete_floating_ip(cls.floating_ip_id)
-        super(FloatingIPsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
     def test_allocate_floating_ip(self):

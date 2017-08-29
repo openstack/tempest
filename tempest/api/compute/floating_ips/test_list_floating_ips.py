@@ -41,18 +41,12 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(FloatingIPDetailsTestJSON, cls).resource_setup()
         cls.floating_ip = []
-        cls.floating_ip_id = []
         for _ in range(3):
             body = cls.client.create_floating_ip(
                 pool=CONF.network.floating_network_name)['floating_ip']
+            cls.addClassResourceCleanup(cls.client.delete_floating_ip,
+                                        body['id'])
             cls.floating_ip.append(body)
-            cls.floating_ip_id.append(body['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        for f_id in cls.floating_ip_id:
-            cls.client.delete_floating_ip(f_id)
-        super(FloatingIPDetailsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
     def test_list_floating_ips(self):
