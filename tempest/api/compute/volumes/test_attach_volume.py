@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common.utils.linux import remote_client
@@ -155,6 +153,12 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
     min_microversion = '2.20'
     max_microversion = 'latest'
 
+    @classmethod
+    def skip_checks(cls):
+        super(AttachVolumeShelveTestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.shelve:
+            raise cls.skipException('Shelve is not available.')
+
     def _count_volumes(self, server):
         # Count number of volumes on an instance
         volumes = 0
@@ -202,8 +206,6 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
             self.assertEqual(number_of_volumes, counted_volumes)
 
     @decorators.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     def test_attach_volume_shelved_or_offload_server(self):
         # Create server, count number of volumes on it, shelve
         # server and attach pre-created volume to shelved server
@@ -229,8 +231,6 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         self.assertIsNotNone(volume_attachment['device'])
 
     @decorators.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     def test_detach_volume_shelved_or_offload_server(self):
         # Count number of volumes on instance, shelve
         # server and attach pre-created volume to shelved server
