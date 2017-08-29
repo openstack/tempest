@@ -26,7 +26,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ExtensionsTestJSON(base.BaseV2ComputeTest):
+class ExtensionsTest(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3bb27738-b759-4e0d-a5fa-37d7a6df07d1')
     def test_list_extensions(self):
