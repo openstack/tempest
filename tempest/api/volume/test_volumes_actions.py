@@ -112,6 +112,10 @@ class VolumesActionsTest(base.BaseVolumeTest):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'available')
 
+        image_info = self.images_client.show_image(image_id)
+        self.assertEqual(image_name, image_info['name'])
+        self.assertEqual(CONF.volume.disk_format, image_info['disk_format'])
+
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
