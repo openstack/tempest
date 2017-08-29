@@ -116,16 +116,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_password = CONF.validation.image_ssh_password
-        cls.security_groups = []
-        cls.server_groups = []
         cls.volumes = []
 
     @classmethod
     def resource_cleanup(cls):
-        cls.clear_resources('security groups', cls.security_groups,
-                            cls.security_groups_client.delete_security_group)
-        cls.clear_resources('server groups', cls.server_groups,
-                            cls.server_groups_client.delete_server_group)
         cls.clear_volumes()
         super(BaseV2ComputeTest, cls).resource_cleanup()
 
@@ -221,7 +215,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             description = data_utils.rand_name('description')
         body = cls.security_groups_client.create_security_group(
             name=name, description=description)['security_group']
-        cls.security_groups.append(body['id'])
+        cls.addClassResourceCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            cls.security_groups_client.delete_security_group,
+            body['id'])
 
         return body
 
@@ -233,7 +230,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             policy = ['affinity']
         body = cls.server_groups_client.create_server_group(
             name=name, policies=policy)['server_group']
-        cls.server_groups.append(body['id'])
+        cls.addClassResourceCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            cls.server_groups_client.delete_server_group,
+            body['id'])
         return body
 
     def wait_for(self, condition):
