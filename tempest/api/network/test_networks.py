@@ -374,22 +374,36 @@ class NetworksTest(BaseNetworkTestResources):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_external_network_visibility(self):
-        """Verifies user can see external networks but not subnets."""
+        public_network_id = CONF.network.public_network_id
+
+        # find external network matching public_network_id
         body = self.networks_client.list_networks(**{'router:external': True})
-        networks = [network['id'] for network in body['networks']]
-        self.assertNotEmpty(networks, "No external networks found")
+        external_network = next((network for network in body['networks']
+                                 if network['id'] == public_network_id), None)
+        self.assertIsNotNone(external_network, "Public network %s not found "
+                                               "in external network list"
+                             % public_network_id)
 
         nonexternal = [net for net in body['networks'] if
                        not net['router:external']]
         self.assertEmpty(nonexternal, "Found non-external networks"
                                       " in filtered list (%s)." % nonexternal)
-        self.assertIn(CONF.network.public_network_id, networks)
+
         # only check the public network ID because the other networks may
         # belong to other tests and their state may have changed during this
         # test
-        body = self.subnets_client.list_subnets(
-            network_id=CONF.network.public_network_id)
-        self.assertEmpty(body['subnets'], "Public subnets visible")
+        body = self.subnets_client.list_subnets(network_id=public_network_id)
+
+        # check subnet visibility of external_network
+        if external_network['shared']:
+            self.assertNotEmpty(body['subnets'], "Subnets should be visible "
+                                                 "for shared public network %s"
+                                % public_network_id)
+        else:
+            self.assertEmpty(body['subnets'], "Subnets should not be visible "
+                                              "for non-shared public "
+                                              "network %s"
+                             % public_network_id)
 
     @decorators.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
     @utils.requires_ext(extension="standard-attr-description",
