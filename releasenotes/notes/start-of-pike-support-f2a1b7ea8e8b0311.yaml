@@ -1,0 +1,11 @@
+---
+prelude: >
+    This release marks the start of support for the Pike release in Tempest.
+other:
+    - OpenStack Releases supported after this release are **Pike**, **Ocata**,
+      and **Newton**.
+
+      The release under current development of this tag is Queens, meaning
+      that every Tempest commit is also tested against master during the Queens
+      cycle. However, this does not necessarily mean that using Tempest as of
+      this tag will work against a Queens (or future release) cloud.
