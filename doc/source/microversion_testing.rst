@@ -338,4 +338,4 @@ Microversion tests implemented in Tempest
 
  * `3.3`_
 
- .. _3.3:  https://docs.openstack.org/cinder/ocata/devref/api_microversion_history.html#id4
+ .. _3.3:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id4
