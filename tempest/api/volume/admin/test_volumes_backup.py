@@ -99,8 +99,7 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
                                                 'available')
 
         # Verify Import Backup
-        backups = self.admin_backups_client.list_backups(
-            detail=True)['backups']
+        backups = self.admin_backups_client.list_backups()['backups']
         self.assertIn(new_id, [b['id'] for b in backups])
 
         # Restore backup
