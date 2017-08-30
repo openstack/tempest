@@ -24,6 +24,12 @@ CONF = config.CONF
 class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(BaseSecurityGroupsTest, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
+
+    @classmethod
     def setup_credentials(cls):
         # A network and a subnet will be created for these tests
         cls.set_network_resources(network=True, subnet=True)

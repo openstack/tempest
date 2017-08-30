@@ -30,6 +30,8 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     @classmethod
     def skip_checks(cls):
         super(FloatingIPsNegativeTestJSON, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
         if not CONF.network_feature_enabled.floating_ips:
             raise cls.skipException("Floating ips are not available")
 
@@ -58,7 +60,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e0f059b-e4dd-48fb-8207-06e3bba5b074')
-    @utils.services('network')
     def test_allocate_floating_ip_from_nonexistent_pool(self):
         # Negative test:Allocation of a new floating IP from a nonexistent_pool
         # to a project should fail
@@ -68,7 +69,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')
-    @utils.services('network')
     def test_delete_nonexistent_floating_ip(self):
         # Negative test:Deletion of a nonexistent floating IP
         # from project should fail
@@ -79,7 +79,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('595fa616-1a71-4670-9614-46564ac49a4c')
-    @utils.services('network')
     def test_associate_nonexistent_floating_ip(self):
         # Negative test:Association of a non existent floating IP
         # to specific server should fail
@@ -90,7 +89,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0a081a66-e568-4e6b-aa62-9587a876dca8')
-    @utils.services('network')
     def test_dissociate_nonexistent_floating_ip(self):
         # Negative test:Dissociation of a non existent floating IP should fail
         # Dissociating non existent floating IP
@@ -100,7 +98,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('804b4fcb-bbf5-412f-925d-896672b61eb3')
-    @utils.services('network')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
         # should raise NotFound or BadRequest(In case of Nova V2.1) exception.
@@ -110,7 +107,6 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('58a80596-ffb2-11e6-9393-fa163e4fa634')
-    @utils.services('network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_ip_to_server_with_floating_ip(self):
