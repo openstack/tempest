@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import random
-
 from tempest.api.volume import base
 from tempest.lib import decorators
 
@@ -42,20 +40,25 @@ class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
                                 "The count of volume hosts is < 2, "
                                 "response of list hosts is: %s" % hosts)
 
-        # Note(jeremyZ): Host in volume is always presented in two formats:
-        # <host-name> or <host-name>@<driver-name>. Since Mitaka is EOL,
-        # both formats can be chosen for test.
-        host_names = [host['host_name'] for host in hosts]
-        self.assertNotEmpty(host_names, "No available volume host is found, "
-                                        "all hosts that found are: %s" % hosts)
+        # Note(jeremyZ): The show host API is to show volume usage info on the
+        # specified cinder-volume host. If the host does not run cinder-volume
+        # service, or the cinder-volume service is disabled on the host, the
+        # show host API should fail (return code: 404). The cinder-volume host
+        # is presented in format: <host-name>@driver-name.
+        c_vol_hosts = [host['host_name'] for host in hosts
+                       if (host['service'] == 'cinder-volume'
+                           and host['service-state'] == 'enabled')]
+        self.assertNotEmpty(c_vol_hosts,
+                            "No available cinder-volume host is found, "
+                            "all hosts that found are: %s" % hosts)
 
-        # Choose a random host to get and check its elements
-        host_details = self.admin_hosts_client.show_host(
-            random.choice(host_names))['host']
-        self.assertNotEmpty(host_details)
+        # Check each cinder-volume host.
         host_detail_keys = ['project', 'volume_count', 'snapshot_count',
                             'host', 'total_volume_gb', 'total_snapshot_gb']
-        for detail in host_details:
-            self.assertIn('resource', detail)
-            for key in host_detail_keys:
-                self.assertIn(key, detail['resource'])
+        for host in c_vol_hosts:
+            host_details = self.admin_hosts_client.show_host(host)['host']
+            self.assertNotEmpty(host_details)
+            for detail in host_details:
+                self.assertIn('resource', detail)
+                for key in host_detail_keys:
+                    self.assertIn(key, detail['resource'])
