@@ -234,6 +234,12 @@ IdentityFeatureGroup = [
                 deprecated_reason="This feature flag was introduced to "
                                   "support testing of old OpenStack versions, "
                                   "which are not supported anymore"),
+    cfg.BoolOpt('domain_specific_drivers',
+                default=False,
+                help='Are domain specific drivers enabled? '
+                     'This configuration value should be same as '
+                     '[identity]->domain_specific_drivers_enabled '
+                     'in keystone.conf.'),
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
