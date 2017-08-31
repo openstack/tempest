@@ -609,10 +609,14 @@ NetworkGroup = [
                      " for subnet creation"),
     cfg.StrOpt('port_vnic_type',
                choices=[None, 'normal', 'direct', 'macvtap'],
-               help="vnic_type to use when Launching instances"
+               help="vnic_type to use when launching instances"
                     " with pre-configured ports."
                     " Supported ports are:"
                     " ['normal','direct','macvtap']"),
+    cfg.DictOpt('port_profile',
+                default={},
+                help="port profile to use when launching instances"
+                     " with pre-configured ports."),
     cfg.ListOpt('default_network',
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
