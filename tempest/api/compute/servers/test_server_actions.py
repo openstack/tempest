@@ -23,6 +23,7 @@ from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -369,7 +370,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                 "been successful as it should have been "
                                 "deleted during rotation.", oldest_backup)
 
-        image1_id = data_utils.parse_image_id(resp['location'])
+        if api_version_utils.compare_version_header_to_response(
+                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+            image1_id = resp['image_id']
+        else:
+            image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
         waiters.wait_for_image_status(glance_client,
                                       image1_id, 'active')
@@ -380,7 +385,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                          backup_type='daily',
                                          rotation=2,
                                          name=backup2).response
-        image2_id = data_utils.parse_image_id(resp['location'])
+        if api_version_utils.compare_version_header_to_response(
+                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+            image2_id = resp['image_id']
+        else:
+            image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(glance_client.delete_image, image2_id)
         waiters.wait_for_image_status(glance_client,
                                       image2_id, 'active')
@@ -419,7 +428,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                          backup_type='daily',
                                          rotation=2,
                                          name=backup3).response
-        image3_id = data_utils.parse_image_id(resp['location'])
+        if api_version_utils.compare_version_header_to_response(
+                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+            image3_id = resp['image_id']
+        else:
+            image3_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(glance_client.delete_image, image3_id)
         # the first back up should be deleted
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')

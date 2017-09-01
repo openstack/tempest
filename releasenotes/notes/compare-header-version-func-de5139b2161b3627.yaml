@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    Add a new function called ``compare_version_header_to_response`` to
+    ``tempest.lib.common.api_version_utils``, which compares the API
+    micoversion in the response header to another microversion using the
+    comparators defined in
+    ``tempest.lib.common.api_version_request.APIVersionRequest``.
+
+    It is now possible to determine how to retrieve an attribute from a
+    response body of an API call, depending on the returned microversion.
+
+    Add a new exception type called ``InvalidParam`` to
+    ``tempest.lib.exceptions``, allowing the possibility of raising an
+    exception if an invalid parameter is passed to a library function.
