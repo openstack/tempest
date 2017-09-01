@@ -96,6 +96,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.metering_labels = []
         cls.metering_label_rules = []
         cls.ethertype = "IPv" + str(cls._ip_version)
+        if cls._ip_version == 4:
+            cls.cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            cls.mask_bits = CONF.network.project_network_mask_bits
+        elif cls._ip_version == 6:
+            cls.cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            cls.mask_bits = CONF.network.project_network_v6_mask_bits
 
     @classmethod
     def resource_cleanup(cls):

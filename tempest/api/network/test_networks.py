@@ -34,8 +34,7 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
     def resource_setup(cls):
         super(BaseNetworkTestResources, cls).resource_setup()
         cls.network = cls.create_network()
-        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
-                                                               cls._ip_version)
+        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network)
         cls._subnet_data = {6: {'gateway':
                                 str(cls._get_gateway_from_tempest_conf(6)),
                                 'allocation_pools':
@@ -64,20 +63,13 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
                                 'new_dns_nameservers': ['7.8.8.8', '7.8.4.4']}}
 
     @classmethod
-    def _create_subnet_with_last_subnet_block(cls, network, ip_version):
+    def _create_subnet_with_last_subnet_block(cls, network):
         # Derive last subnet CIDR block from project CIDR and
         # create the subnet with that derived CIDR
-        if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            mask_bits = CONF.network.project_network_mask_bits
-        elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            mask_bits = CONF.network.project_network_v6_mask_bits
-
-        subnet_cidr = list(cidr.subnet(mask_bits))[-1]
+        subnet_cidr = list(cls.cidr.subnet(cls.mask_bits))[-1]
         gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
         return cls.create_subnet(network, gateway=gateway_ip,
-                                 cidr=subnet_cidr, mask_bits=mask_bits)
+                                 cidr=subnet_cidr, mask_bits=cls.mask_bits)
 
     @classmethod
     def _get_gateway_from_tempest_conf(cls, ip_version):
@@ -473,14 +465,8 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
-        if self._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            mask_bits = CONF.network.project_network_mask_bits
-        else:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            mask_bits = CONF.network.project_network_v6_mask_bits
-
-        cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
+        cidrs = [subnet_cidr
+                 for subnet_cidr in self.cidr.subnet(self.mask_bits)]
 
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []
