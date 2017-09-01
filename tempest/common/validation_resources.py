@@ -1,4 +1,5 @@
 # Copyright (c) 2015 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2017 IBM Corp.
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
@@ -12,6 +13,7 @@
 #    limitations under the License.
 
 from oslo_log import log as logging
+from oslo_utils import excutils
 
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -72,26 +74,48 @@ def create_ssh_security_group(clients, add_rule=False, ethertype='IPv4',
     # Security Group Rules clients require different parameters depending on
     # the network service in use
     if add_rule:
-        if use_neutron:
-            security_group_rules_client.create_security_group_rule(
-                security_group_id=security_group['id'],
-                protocol='tcp',
-                ethertype=ethertype,
-                port_range_min=22,
-                port_range_max=22,
-                direction='ingress')
-            security_group_rules_client.create_security_group_rule(
-                security_group_id=security_group['id'],
-                protocol='icmp',
-                ethertype=ethertype,
-                direction='ingress')
-        else:
-            security_group_rules_client.create_security_group_rule(
-                parent_group_id=security_group['id'], ip_protocol='tcp',
-                from_port=22, to_port=22)
-            security_group_rules_client.create_security_group_rule(
-                parent_group_id=security_group['id'], ip_protocol='icmp',
-                from_port=-1, to_port=-1)
+        try:
+            if use_neutron:
+                security_group_rules_client.create_security_group_rule(
+                    security_group_id=security_group['id'],
+                    protocol='tcp',
+                    ethertype=ethertype,
+                    port_range_min=22,
+                    port_range_max=22,
+                    direction='ingress')
+                security_group_rules_client.create_security_group_rule(
+                    security_group_id=security_group['id'],
+                    protocol='icmp',
+                    ethertype=ethertype,
+                    direction='ingress')
+            else:
+                security_group_rules_client.create_security_group_rule(
+                    parent_group_id=security_group['id'], ip_protocol='tcp',
+                    from_port=22, to_port=22)
+                security_group_rules_client.create_security_group_rule(
+                    parent_group_id=security_group['id'], ip_protocol='icmp',
+                    from_port=-1, to_port=-1)
+        except Exception as sgc_exc:
+            # If adding security group rules fails, we cleanup the SG before
+            # re-raising the failure up
+            with excutils.save_and_reraise_exception():
+                try:
+                    msg = ('Error while provisioning security group rules in '
+                           'security group %s. Trying to cleanup.')
+                    # The exceptions logging is already handled, so using
+                    # debug here just to provide more context
+                    LOG.debug(msg, sgc_exc)
+                    clear_validation_resources(
+                        clients, keypair=None, floating_ip=None,
+                        security_group=security_group,
+                        use_neutron=use_neutron)
+                except Exception as cleanup_exc:
+                    msg = ('Error during cleanup of a security group. '
+                           'The cleanup was triggered by an exception during '
+                           'the provisioning of security group rules.\n'
+                           'Provisioning exception: %s\n'
+                           'First cleanup exception: %s')
+                    LOG.exception(msg, sgc_exc, cleanup_exc)
     LOG.debug("SSH Validation resource security group with tcp and icmp "
               "rules %s created", sg_name)
     return security_group
@@ -130,9 +154,9 @@ def create_validation_resources(clients, keypair=False, floating_ip=False,
     :param floating_network_name: The name of the floating IP pool used to
         provision the floating IP. Only used if a floating IP is requested and
         with nova-net.
-    :returns: A dictionary with the same keys as the input
-        `validation_resources` and the resources for values in the format
-         they are returned by the API.
+    :returns: A dictionary with the resources in the format they are returned
+        by the API. Valid keys are 'keypair', 'floating_ip' and
+        'security_group'.
 
     Examples::
 
@@ -157,35 +181,64 @@ def create_validation_resources(clients, keypair=False, floating_ip=False,
     """
     # Create and Return the validation resources required to validate a VM
     validation_data = {}
-    if keypair:
-        keypair_name = data_utils.rand_name('keypair')
-        validation_data.update(
-            clients.compute.KeyPairsClient().create_keypair(
-                name=keypair_name))
-        LOG.debug("Validation resource key %s created", keypair_name)
-    if security_group:
-        validation_data['security_group'] = create_ssh_security_group(
-            clients, add_rule=security_group_rules,
-            use_neutron=use_neutron, ethertype=ethertype)
-    if floating_ip:
-        floating_ip_client = _network_service(
-            clients, use_neutron).FloatingIPsClient()
-        if use_neutron:
-            floatingip = floating_ip_client.create_floatingip(
-                floating_network_id=floating_network_id)
-            # validation_resources['floating_ip'] has historically looked
-            # like a compute API POST /os-floating-ips response, so we need
-            # to mangle it a bit for a Neutron response with different
-            # fields.
-            validation_data['floating_ip'] = floatingip['floatingip']
-            validation_data['floating_ip']['ip'] = (
-                floatingip['floatingip']['floating_ip_address'])
-        else:
-            # NOTE(mriedem): The os-floating-ips compute API was deprecated
-            # in the 2.36 microversion. Any tests for CRUD operations on
-            # floating IPs using the compute API should be capped at 2.35.
-            validation_data.update(floating_ip_client.create_floating_ip(
-                pool=floating_network_name))
+    try:
+        if keypair:
+            keypair_name = data_utils.rand_name('keypair')
+            validation_data.update(
+                clients.compute.KeyPairsClient().create_keypair(
+                    name=keypair_name))
+            LOG.debug("Validation resource key %s created", keypair_name)
+        if security_group:
+            validation_data['security_group'] = create_ssh_security_group(
+                clients, add_rule=security_group_rules,
+                use_neutron=use_neutron, ethertype=ethertype)
+        if floating_ip:
+            floating_ip_client = _network_service(
+                clients, use_neutron).FloatingIPsClient()
+            if use_neutron:
+                floatingip = floating_ip_client.create_floatingip(
+                    floating_network_id=floating_network_id)
+                # validation_resources['floating_ip'] has historically looked
+                # like a compute API POST /os-floating-ips response, so we need
+                # to mangle it a bit for a Neutron response with different
+                # fields.
+                validation_data['floating_ip'] = floatingip['floatingip']
+                validation_data['floating_ip']['ip'] = (
+                    floatingip['floatingip']['floating_ip_address'])
+            else:
+                # NOTE(mriedem): The os-floating-ips compute API was deprecated
+                # in the 2.36 microversion. Any tests for CRUD operations on
+                # floating IPs using the compute API should be capped at 2.35.
+                validation_data.update(floating_ip_client.create_floating_ip(
+                    pool=floating_network_name))
+            LOG.debug("Validation resource floating IP %s created",
+                      validation_data['floating_ip'])
+    except Exception as prov_exc:
+        # If something goes wrong, cleanup as much as possible before we
+        # re-raise the exception
+        with excutils.save_and_reraise_exception():
+            if validation_data:
+                # Cleanup may fail as well
+                try:
+                    msg = ('Error while provisioning validation resources %s. '
+                           'Trying to cleanup what we provisioned so far: %s')
+                    # The exceptions logging is already handled, so using
+                    # debug here just to provide more context
+                    LOG.debug(msg, prov_exc, str(validation_data))
+                    clear_validation_resources(
+                        clients,
+                        keypair=validation_data.get('keypair', None),
+                        floating_ip=validation_data.get('floating_ip', None),
+                        security_group=validation_data.get('security_group',
+                                                           None),
+                        use_neutron=use_neutron)
+                except Exception as cleanup_exc:
+                    msg = ('Error during cleanup of validation resources. '
+                           'The cleanup was triggered by an exception during '
+                           'the provisioning step.\n'
+                           'Provisioning exception: %s\n'
+                           'First cleanup exception: %s')
+                    LOG.exception(msg, prov_exc, cleanup_exc)
     return validation_data
 
 
@@ -209,9 +262,6 @@ def clear_validation_resources(clients, keypair=None, floating_ip=None,
         Defaults to None.
     :param use_neutron: When True resources are provisioned via neutron, when
         False resources are provisioned via nova.
-    :returns: A dictionary with the same keys as the input
-        `validation_resources` and the resources for values in the format
-         they are returned by the API.
 
     Examples::
 
