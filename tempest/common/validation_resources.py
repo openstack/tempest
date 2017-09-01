@@ -12,6 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import fixtures
 from oslo_log import log as logging
 from oslo_utils import excutils
 
@@ -340,3 +341,111 @@ def clear_validation_resources(clients, keypair=None, floating_ip=None,
                 has_exception = exc
     if has_exception:
         raise has_exception
+
+
+class ValidationResourcesFixture(fixtures.Fixture):
+    """Fixture to provision and cleanup validation resources"""
+
+    DICT_KEYS = ['keypair', 'security_group', 'floating_ip']
+
+    def __init__(self, clients, keypair=False, floating_ip=False,
+                 security_group=False, security_group_rules=False,
+                 ethertype='IPv4', use_neutron=True, floating_network_id=None,
+                 floating_network_name=None):
+        """Create a ValidationResourcesFixture
+
+        Create a ValidationResourcesFixture fixtures, which provisions the
+        resources required to be able to ping / ssh a virtual machine upon
+        setUp and clears them out upon cleanup. Resources are  keypair,
+        security group, security group rules and a floating IP - depending
+        on the params.
+
+        The fixture exposes a dictionary that includes provisioned resources.
+
+        :param clients: `tempest.lib.services.clients.ServiceClients` or of a
+            subclass of it. Resources are provisioned using clients from
+            `clients`.
+        :param keypair: Whether to provision a keypair. Defaults to False.
+        :param floating_ip: Whether to provision a floating IP.
+            Defaults to False.
+        :param security_group: Whether to provision a security group.
+            Defaults to False.
+        :param security_group_rules: Whether to provision security group rules.
+            Defaults to False.
+        :param ethertype: 'IPv4' or 'IPv6'. Honoured only if neutron is used.
+        :param use_neutron: When True resources are provisioned via neutron,
+            when False resources are provisioned via nova.
+        :param floating_network_id: The id of the network used to provision a
+            floating IP. Only used if a floating IP is requested in case
+            neutron is used.
+        :param floating_network_name: The name of the floating IP pool used to
+            provision the floating IP. Only used if a floating IP is requested
+            and with nova-net.
+        :returns: A dictionary with the same keys as the input
+            `validation_resources` and the resources for values in the format
+             they are returned by the API.
+
+        Examples::
+
+            from tempest.common import validation_resources as vr
+            from tempest.lib import auth
+            from tempest.lib.services import clients
+            import testtools
+
+
+            class TestWithVR(testtools.TestCase):
+
+                def setUp(self):
+                    creds = auth.get_credentials(
+                        'http://mycloud/identity/v3',
+                         username='me', project_name='me',
+                         password='secret', domain_name='Default')
+
+                    osclients = clients.ServiceClients(
+                        creds, 'http://mycloud/identity/v3')
+                    # Request keypair and floating IP
+                    resources = dict(keypair=True, security_group=False,
+                                     security_group_rules=False,
+                                     floating_ip=True)
+                    network_id = '4240E68E-23DA-4C82-AC34-9FEFAA24521C'
+                    self.vr = self.useFixture(vr.ValidationResourcesFixture(
+                        osclients, use_neutron=True,
+                        floating_network_id=network_id,
+                        **resources)
+
+                def test_use_ip(self):
+                    # The floating IP to be attached to the VM
+                    floating_ip = self.vr['floating_ip']['ip']
+        """
+        self._clients = clients
+        self._keypair = keypair
+        self._floating_ip = floating_ip
+        self._security_group = security_group
+        self._security_group_rules = security_group_rules
+        self._ethertype = ethertype
+        self._use_neutron = use_neutron
+        self._floating_network_id = floating_network_id
+        self._floating_network_name = floating_network_name
+        self._validation_resources = None
+
+    def _setUp(self):
+        self._validation_resources = create_validation_resources(
+            self._clients, keypair=self._keypair,
+            floating_ip=self._floating_ip,
+            security_group=self._security_group,
+            security_group_rules=self._security_group_rules,
+            ethertype=self._ethertype, use_neutron=self._use_neutron,
+            floating_network_id=self._floating_network_id,
+            floating_network_name=self._floating_network_name)
+        # If provisioning raises an exception we won't have anything to
+        # cleanup here, so we don't need a try-finally around provisioning
+        vr = self._validation_resources
+        self.addCleanup(clear_validation_resources, self._clients,
+                        keypair=vr['keypair'],
+                        floating_ip=vr['floating_ip'],
+                        security_group=vr['security_group'],
+                        use_neutron=self._use_neutron)
+
+    @property
+    def resources(self):
+        return self._validation_resources

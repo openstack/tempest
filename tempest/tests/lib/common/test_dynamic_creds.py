@@ -40,6 +40,7 @@ from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests.lib import fake_http
 from tempest.tests.lib import fake_identity
+from tempest.tests.lib.services import registry_fixture
 
 
 class TestDynamicCredentialProvider(base.TestCase):
@@ -62,6 +63,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     def setUp(self):
         super(TestDynamicCredentialProvider, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
+        self.useFixture(registry_fixture.RegistryFixture())
         self.patchobject(config, 'TempestConfigPrivate',
                          fake_config.FakePrivate)
         self.patchobject(self.token_client_class, 'raw_request',
