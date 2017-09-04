@@ -495,12 +495,10 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     def get_host_other_than(self, server_id):
         source_host = self.get_host_for_server(server_id)
 
-        list_hosts_resp = self.os_admin.hosts_client.list_hosts()['hosts']
-        hosts = [
-            host_record['host_name']
-            for host_record in list_hosts_resp
-            if host_record['service'] == 'compute'
-        ]
+        hypers = self.os_admin.hypervisor_client.list_hypervisors(
+            )['hypervisors']
+        hosts = [hyper['hypervisor_hostname'] for hyper in hypers
+                 if hyper['state'] == 'up' and hyper['status'] == 'enabled']
 
         for target_host in hosts:
             if source_host != target_host:
