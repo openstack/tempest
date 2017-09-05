@@ -245,7 +245,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                 break
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
 
-    @decorators.skip_because(bug='1607714')
     @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
         """Tests the following:
