@@ -33,8 +33,8 @@
 #   * network access to https://git.openstack.org/cgit
 #   ))
 #
-# If a file named data/tempest-plugins-registry.header or
-# data/tempest-plugins-registry.footer is found relative to the
+# If a file named doc/source/data/tempest-plugins-registry.header or
+# doc/source/data/tempest-plugins-registry.footer is found relative to the
 # current working directory, it will be prepended or appended to
 # the generated reStructuredText plugins table respectively.
 
@@ -43,8 +43,8 @@ set -ex
 (
 declare -A plugins
 
-if [[ -r data/tempest-plugins-registry.header ]]; then
-    cat data/tempest-plugins-registry.header
+if [[ -r doc/source/data/tempest-plugins-registry.header ]]; then
+    cat doc/source/data/tempest-plugins-registry.header
 fi
 
 sorted_plugins=$(python tools/generate-tempest-plugins-list.py)
@@ -56,8 +56,8 @@ for k in ${sorted_plugins}; do
     printf "+----------------------------+-------------------------------------------------------------------------+\n"
 done
 
-if [[ -r data/tempest-plugins-registry.footer ]]; then
-    cat data/tempest-plugins-registry.footer
+if [[ -r doc/source/data/tempest-plugins-registry.footer ]]; then
+    cat doc/source/data/tempest-plugins-registry.footer
 fi
 ) > doc/source/plugin-registry.rst
 
