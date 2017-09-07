@@ -131,7 +131,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def _reset_class(cls):
         cls.__setup_credentials_called = False
-        cls.__resource_cleaup_called = False
+        cls.__resource_cleanup_called = False
         cls.__skip_checks_called = False
         cls._class_cleanups = []
 
@@ -144,7 +144,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             super(BaseTestCase, cls).setUpClass()
         cls.setUpClassCalled = True
         # Stack of (name, callable) to be invoked in reverse order at teardown
-        cls.teardowns = []
+        cls._teardowns = []
         # All the configuration checks that may generate a skip
         cls.skip_checks()
         if not cls.__skip_checks_called:
@@ -152,7 +152,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                                "skip_checks" % cls.__name__)
         try:
             # Allocation of all required credentials and client managers
-            cls.teardowns.append(('credentials', cls.clear_credentials))
+            cls._teardowns.append(('credentials', cls.clear_credentials))
             cls.setup_credentials()
             if not cls.__setup_credentials_called:
                 raise RuntimeError("setup_credentials for %s did not call the "
@@ -160,7 +160,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # Shortcuts to clients
             cls.setup_clients()
             # Additional class-wide test resources
-            cls.teardowns.append(('resources', cls.resource_cleanup))
+            cls._teardowns.append(('resources', cls.resource_cleanup))
             cls.resource_setup()
         except Exception:
             etype, value, trace = sys.exc_info()
@@ -187,14 +187,14 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # If there was no exception during setup we shall re-raise the first
         # exception in teardown
         re_raise = (etype is None)
-        while cls.teardowns:
-            name, teardown = cls.teardowns.pop()
+        while cls._teardowns:
+            name, teardown = cls._teardowns.pop()
             # Catch any exception in tearDown so we can re-raise the original
             # exception at the end
             try:
                 teardown()
                 if name == 'resources':
-                    if not cls.__resource_cleaup_called:
+                    if not cls.__resource_cleanup_called:
                         raise RuntimeError(
                             "resource_cleanup for %s did not call the "
                             "super's resource_cleanup" % cls.__name__)
@@ -549,7 +549,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                     # At this point test credentials are still available but
                     # anything from the cleanup stack has been already deleted.
         """
-        cls.__resource_cleaup_called = True
+        cls.__resource_cleanup_called = True
         cleanup_errors = []
         while cls._class_cleanups:
             try:
