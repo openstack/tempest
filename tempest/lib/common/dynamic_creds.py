@@ -28,6 +28,43 @@ LOG = logging.getLogger(__name__)
 
 
 class DynamicCredentialProvider(cred_provider.CredentialProvider):
+    """Creates credentials dynamically for tests
+
+    A credential provider that, based on an initial set of
+    admin credentials, creates new credentials on the fly for
+    tests to use and then discard.
+
+    :param str identity_version: identity API version to use `v2` or `v3`
+    :param str admin_role: name of the admin role added to admin users
+    :param str name: names of dynamic resources include this parameter
+                     when specified
+    :param str credentials_domain: name of the domain where the users
+                                   are created. If not defined, the project
+                                   domain from admin_credentials is used
+    :param dict network_resources: network resources to be created for
+                                   the created credentials
+    :param Credentials admin_creds: initial admin credentials
+    :param bool identity_admin_domain_scope: Set to true if admin should be
+                                             scoped to the domain. By
+                                             default this is False and the
+                                             admin role is scoped to the
+                                             project.
+    :param str identity_admin_role: The role name to use for admin
+    :param list extra_roles: A list of strings for extra roles that should
+                             be assigned to all created users
+    :param bool neutron_available: Whether we are running in an environemnt
+                                   with neutron
+    :param bool create_networks: Whether dynamic project networks should be
+                                 created or not
+    :param project_network_cidr: The CIDR to use for created project
+                                 networks
+    :param project_network_mask_bits: The network mask bits to use for
+                                      created project networks
+    :param public_network_id: The id for the public network to use
+    :param identity_admin_endpoint_type: The endpoint type for identity
+                                         admin clients. Defaults to public.
+    :param identity_uri: Identity URI of the target cloud
+    """
 
     def __init__(self, identity_version, name=None, network_resources=None,
                  credentials_domain=None, admin_role=None, admin_creds=None,
@@ -37,43 +74,6 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                  project_network_cidr=None, project_network_mask_bits=None,
                  public_network_id=None, resource_prefix=None,
                  identity_admin_endpoint_type='public', identity_uri=None):
-        """Creates credentials dynamically for tests
-
-        A credential provider that, based on an initial set of
-        admin credentials, creates new credentials on the fly for
-        tests to use and then discard.
-
-        :param str identity_version: identity API version to use `v2` or `v3`
-        :param str admin_role: name of the admin role added to admin users
-        :param str name: names of dynamic resources include this parameter
-                         when specified
-        :param str credentials_domain: name of the domain where the users
-                                       are created. If not defined, the project
-                                       domain from admin_credentials is used
-        :param dict network_resources: network resources to be created for
-                                       the created credentials
-        :param Credentials admin_creds: initial admin credentials
-        :param bool identity_admin_domain_scope: Set to true if admin should be
-                                                 scoped to the domain. By
-                                                 default this is False and the
-                                                 admin role is scoped to the
-                                                 project.
-        :param str identity_admin_role: The role name to use for admin
-        :param list extra_roles: A list of strings for extra roles that should
-                                 be assigned to all created users
-        :param bool neutron_available: Whether we are running in an environemnt
-                                       with neutron
-        :param bool create_networks: Whether dynamic project networks should be
-                                     created or not
-        :param project_network_cidr: The CIDR to use for created project
-                                     networks
-        :param project_network_mask_bits: The network mask bits to use for
-                                          created project networks
-        :param public_network_id: The id for the public network to use
-        :param identity_admin_endpoint_type: The endpoint type for identity
-                                             admin clients. Defaults to public.
-        :param identity_uri: Identity URI of the target cloud
-        """
         super(DynamicCredentialProvider, self).__init__(
             identity_version=identity_version, identity_uri=identity_uri,
             admin_role=admin_role, name=name,

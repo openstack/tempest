@@ -41,6 +41,35 @@ def read_accounts_yaml(path):
 
 
 class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
+    """Credentials provider using pre-provisioned accounts
+
+    This credentials provider loads the details of pre-provisioned
+    accounts from a YAML file, in the format specified by
+    ``etc/accounts.yaml.sample``. It locks accounts while in use, using the
+    external locking mechanism, allowing for multiple python processes
+    to share a single account file, and thus running tests in parallel.
+
+    The accounts_lock_dir must be generated using `lockutils.get_lock_path`
+    from the oslo.concurrency library. For instance::
+
+        accounts_lock_dir = os.path.join(lockutils.get_lock_path(CONF),
+                                         'test_accounts')
+
+    Role names for object storage are optional as long as the
+    `operator` and `reseller_admin` credential types are not used in the
+    accounts file.
+
+    :param identity_version: identity version of the credentials
+    :param admin_role: name of the admin role
+    :param test_accounts_file: path to the accounts YAML file
+    :param accounts_lock_dir: the directory for external locking
+    :param name: name of the hash file (optional)
+    :param credentials_domain: name of the domain credentials belong to
+                               (if no domain is configured)
+    :param object_storage_operator_role: name of the role
+    :param object_storage_reseller_admin_role: name of the role
+    :param identity_uri: Identity URI of the target cloud
+    """
 
     # Exclude from the hash fields specific to v2 or v3 identity API
     # i.e. only include user*, project*, tenant* and password
@@ -51,35 +80,6 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                  accounts_lock_dir, name=None, credentials_domain=None,
                  admin_role=None, object_storage_operator_role=None,
                  object_storage_reseller_admin_role=None, identity_uri=None):
-        """Credentials provider using pre-provisioned accounts
-
-        This credentials provider loads the details of pre-provisioned
-        accounts from a YAML file, in the format specified by
-        `etc/accounts.yaml.sample`. It locks accounts while in use, using the
-        external locking mechanism, allowing for multiple python processes
-        to share a single account file, and thus running tests in parallel.
-
-        The accounts_lock_dir must be generated using `lockutils.get_lock_path`
-        from the oslo.concurrency library. For instance:
-
-            accounts_lock_dir = os.path.join(lockutils.get_lock_path(CONF),
-                                             'test_accounts')
-
-        Role names for object storage are optional as long as the
-        `operator` and `reseller_admin` credential types are not used in the
-        accounts file.
-
-        :param identity_version: identity version of the credentials
-        :param admin_role: name of the admin role
-        :param test_accounts_file: path to the accounts YAML file
-        :param accounts_lock_dir: the directory for external locking
-        :param name: name of the hash file (optional)
-        :param credentials_domain: name of the domain credentials belong to
-                                   (if no domain is configured)
-        :param object_storage_operator_role: name of the role
-        :param object_storage_reseller_admin_role: name of the role
-        :param identity_uri: Identity URI of the target cloud
-        """
         super(PreProvisionedCredentialProvider, self).__init__(
             identity_version=identity_version, name=name,
             admin_role=admin_role, credentials_domain=credentials_domain,
