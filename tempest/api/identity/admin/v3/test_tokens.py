@@ -161,16 +161,14 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                                 manager_project_id]
 
         # Get available project scopes
-        available_projects =\
-            self.client.list_auth_projects()['projects']
+        available_projects = self.client.list_auth_projects()['projects']
 
         # create list to save fetched project's id
         fetched_project_ids = [i['id'] for i in available_projects]
 
         # verifying the project ids in list
         missing_project_ids = \
-            [p for p in assigned_project_ids
-             if p not in fetched_project_ids]
+            [p for p in assigned_project_ids if p not in fetched_project_ids]
         self.assertEmpty(missing_project_ids,
                          "Failed to find project_id %s in fetched list" %
                          ', '.join(missing_project_ids))

@@ -52,8 +52,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
             self.client.wait_for_resource_deletion(sg['id'])
         # Now check if all the created Security Groups are deleted
         fetched_list = self.client.list_security_groups()['security_groups']
-        deleted_sgs = \
-            [sg for sg in security_group_list if sg in fetched_list]
+        deleted_sgs = [sg for sg in security_group_list if sg in fetched_list]
         self.assertFalse(deleted_sgs,
                          "Failed to delete Security Group %s "
                          "list" % ', '.join(m_group['name']
