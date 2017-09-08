@@ -103,7 +103,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                  ['interfaceAttachment'])
         iface = waiters.wait_for_interface_status(
             self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface)
         return iface
 
     def _test_create_interface_by_network_id(self, server, ifs):
@@ -190,7 +189,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
-        self._check_interface(ifs[0])
 
         try:
             iface = self._test_create_interface(server)
@@ -228,7 +226,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
-        self._check_interface(ifs[0])
         network_id = ifs[0]['net_id']
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Remove the fixed IP from server.
