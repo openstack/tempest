@@ -139,33 +139,6 @@ class RoutersTest(base.BaseNetworkTest):
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
 
-    def _verify_router_gateway(self, router_id, exp_ext_gw_info=None):
-        show_body = self.admin_routers_client.show_router(router_id)
-        actual_ext_gw_info = show_body['router']['external_gateway_info']
-        if exp_ext_gw_info is None:
-            self.assertIsNone(actual_ext_gw_info)
-            return
-        # Verify only keys passed in exp_ext_gw_info
-        for k, v in exp_ext_gw_info.items():
-            self.assertEqual(v, actual_ext_gw_info[k])
-
-    def _verify_gateway_port(self, router_id):
-        list_body = self.admin_ports_client.list_ports(
-            network_id=CONF.network.public_network_id,
-            device_id=router_id)
-        self.assertEqual(len(list_body['ports']), 1)
-        gw_port = list_body['ports'][0]
-        fixed_ips = gw_port['fixed_ips']
-        self.assertNotEmpty(fixed_ips)
-        # Assert that all of the IPs from the router gateway port
-        # are allocated from a valid public subnet.
-        public_net_body = self.admin_networks_client.show_network(
-            CONF.network.public_network_id)
-        public_subnet_ids = public_net_body['network']['subnets']
-        for fixed_ip in fixed_ips:
-            subnet_id = fixed_ip['subnet_id']
-            self.assertIn(subnet_id, public_subnet_ids)
-
     @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
     @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
