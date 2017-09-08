@@ -84,25 +84,13 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertTrue(port1['admin_state_up'])
         self.assertTrue(port2['admin_state_up'])
 
-    @classmethod
-    def _get_ipaddress_from_tempest_conf(cls):
-        """Return subnet with mask bits for configured CIDR """
-        if cls._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            cidr.prefixlen = CONF.network.project_network_mask_bits
-
-        elif cls._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            cidr.prefixlen = CONF.network.project_network_v6_mask_bits
-
-        return cidr
-
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
     def test_create_port_in_allowed_allocation_pools(self):
         network = self.create_network()
         net_id = network['id']
-        address = self._get_ipaddress_from_tempest_conf()
+        address = self.cidr
+        address.prefixlen = self.mask_bits
         if ((address.version == 4 and address.prefixlen >= 30) or
            (address.version == 6 and address.prefixlen >= 126)):
             msg = ("Subnet %s isn't large enough for the test" % address.cidr)

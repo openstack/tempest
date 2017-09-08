@@ -59,13 +59,6 @@ class RoutersTest(base.BaseNetworkTest):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
-    @classmethod
-    def resource_setup(cls):
-        super(RoutersTest, cls).resource_setup()
-        cls.tenant_cidr = (CONF.network.project_network_cidr
-                           if cls._ip_version == 4 else
-                           CONF.network.project_network_v6_cidr)
-
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
     @testtools.skipUnless(CONF.network.public_network_id,
@@ -202,7 +195,7 @@ class RoutersTest(base.BaseNetworkTest):
     def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
         # The cidr starts from project_cidr
-        next_cidr = netaddr.IPNetwork(self.tenant_cidr)
+        next_cidr = netaddr.IPNetwork(self.cidr)
         # Prepare to build several routes
         test_routes = []
         routes_num = 4
@@ -278,7 +271,7 @@ class RoutersTest(base.BaseNetworkTest):
         network02 = self.create_network(
             network_name=data_utils.rand_name('router-network02-'))
         subnet01 = self.create_subnet(network01)
-        sub02_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
+        sub02_cidr = netaddr.IPNetwork(self.cidr).next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
         router = self._create_router()
         interface01 = self._add_router_interface_with_subnet_id(router['id'],

@@ -40,9 +40,6 @@ class RoutersNegativeTest(base.BaseNetworkTest):
         cls.router = cls.create_router()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.tenant_cidr = (CONF.network.project_network_cidr
-                           if cls._ip_version == 4 else
-                           CONF.network.project_network_v6_cidr)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('37a94fc0-a834-45b9-bd23-9a81d2fd1e22')
@@ -57,7 +54,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('11836a18-0b15-4327-a50b-f0d9dc66bddd')
     def test_router_add_gateway_net_not_external_returns_400(self):
         alt_network = self.create_network()
-        sub_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
+        sub_cidr = netaddr.IPNetwork(self.cidr).next()
         self.create_subnet(alt_network, cidr=sub_cidr)
         self.assertRaises(lib_exc.BadRequest,
                           self.routers_client.update_router,
