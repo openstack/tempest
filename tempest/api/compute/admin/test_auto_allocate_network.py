@@ -175,9 +175,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         _, servers = compute.create_test_server(
             self.os_primary, networks='auto', wait_until='ACTIVE',
             min_count=3)
-        server_nets = set()
         for server in servers:
             self.addCleanup(self.delete_server, server['id'])
+
+        server_nets = set()
+        for server in servers:
             # get the server ips
             addresses = self.servers_client.list_addresses(
                 server['id'])['addresses']
