@@ -37,18 +37,6 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
         super(DomainConfigurationTestJSON, cls).setup_clients()
         cls.client = cls.domain_config_client
 
-    @classmethod
-    def resource_setup(cls):
-        super(DomainConfigurationTestJSON, cls).resource_setup()
-        cls.group = cls.groups_client.create_group(
-            name=data_utils.rand_name('group'),
-            description=data_utils.rand_name('group-desc'))['group']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.groups_client.delete_group(cls.group['id'])
-        super(DomainConfigurationTestJSON, cls).resource_cleanup()
-
     def _create_domain_and_config(self, config):
         domain = self.setup_test_domain()
         config = self.client.create_domain_config(domain['id'], **config)[

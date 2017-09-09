@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -34,12 +35,18 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         interfaces = ['public', 'internal']
         cls.setup_endpoint_ids = list()
         for i in range(2):
-            cls._create_service()
+            service = cls._create_service()
+            cls.service_ids.append(service['id'])
+            cls.addClassResourceCleanup(
+                cls.services_client.delete_service, service['id'])
+
             region = data_utils.rand_name('region')
             url = data_utils.rand_url()
             endpoint = cls.client.create_endpoint(
                 service_id=cls.service_ids[i], interface=interfaces[i],
                 url=url, region=region, enabled=True)['endpoint']
+            cls.addClassResourceCleanup(
+                cls.client.delete_endpoint, endpoint['id'])
             cls.setup_endpoint_ids.append(endpoint['id'])
 
     @classmethod
@@ -53,17 +60,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         service_data = (
             cls.services_client.create_service(name=s_name, type=s_type,
                                                description=s_description))
-        service = service_data['service']
-        cls.service_ids.append(service['id'])
-        return service
-
-    @classmethod
-    def resource_cleanup(cls):
-        for e in cls.setup_endpoint_ids:
-            cls.client.delete_endpoint(e)
-        for s in cls.service_ids:
-            cls.services_client.delete_service(s)
-        super(EndPointsTestJSON, cls).resource_cleanup()
+        return service_data['service']
 
     @decorators.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
     def test_list_endpoints(self):
@@ -114,8 +111,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                                interface=interface,
                                                url=url, region=region,
                                                enabled=True)['endpoint']
-
-        self.setup_endpoint_ids.append(endpoint['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_endpoint, endpoint['id'])
         # Asserting Create Endpoint response body
         self.assertEqual(region, endpoint['region'])
         self.assertEqual(url, endpoint['url'])
@@ -137,7 +134,6 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
         # Deleting the endpoint created in this method
         self.client.delete_endpoint(endpoint['id'])
-        self.setup_endpoint_ids.remove(endpoint['id'])
 
         # Checking whether endpoint is deleted successfully
         fetched_endpoints = self.client.list_endpoints()['endpoints']
@@ -147,8 +143,20 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
     def test_update_endpoint(self):
-        # Creating an endpoint so as to check update endpoint
-        # with new values
+        # NOTE(zhufl) Service2 should be created before endpoint_for_update
+        # is created, because Service2 must be deleted after
+        # endpoint_for_update is deleted, otherwise we will get a 404 error
+        # when deleting endpoint_for_update if endpoint's service is deleted.
+
+        # Creating service for updating endpoint with new service ID
+        s_name = data_utils.rand_name('service')
+        s_type = data_utils.rand_name('type')
+        s_description = data_utils.rand_name('description')
+        service2 = self._create_service(s_name=s_name, s_type=s_type,
+                                        s_description=s_description)
+        self.addCleanup(self.services_client.delete_service, service2['id'])
+
+        # Creating an endpoint so as to check update endpoint with new values
         region1 = data_utils.rand_name('region')
         url1 = data_utils.rand_url()
         interface1 = 'public'
@@ -158,12 +166,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                         url=url1, region=region1,
                                         enabled=True)['endpoint'])
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
-        # Creating service so as update endpoint with new service ID
-        s_name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        s_description = data_utils.rand_name('description')
-        service2 = self._create_service(s_name=s_name, s_type=s_type,
-                                        s_description=s_description)
+
         # Updating endpoint with new values
         region2 = data_utils.rand_name('region')
         url2 = data_utils.rand_url()
