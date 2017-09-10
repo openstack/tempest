@@ -22,15 +22,6 @@ from tempest.lib import exceptions as lib_exc
 class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
 
     @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('b48c98f2-e662-4885-9b71-032256906314')
-    def test_create_with_nonexistent_volume_type(self):
-        # Should not be able to create volume with nonexistent volume_type.
-        params = {'name': data_utils.rand_uuid(),
-                  'volume_type': data_utils.rand_uuid()}
-        self.assertRaises(lib_exc.NotFound,
-                          self.volumes_client.create_volume, **params)
-
-    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
