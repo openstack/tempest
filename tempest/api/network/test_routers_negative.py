@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
-
 from tempest.api.network import base
 from tempest.common import utils
 from tempest import config
@@ -54,7 +52,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('11836a18-0b15-4327-a50b-f0d9dc66bddd')
     def test_router_add_gateway_net_not_external_returns_400(self):
         alt_network = self.create_network()
-        sub_cidr = netaddr.IPNetwork(self.cidr).next()
+        sub_cidr = self.cidr.next()
         self.create_subnet(alt_network, cidr=sub_cidr)
         self.assertRaises(lib_exc.BadRequest,
                           self.routers_client.update_router,
