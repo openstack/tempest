@@ -35,7 +35,6 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()
-        cls.mountpoint = "/dev/vdc"
 
     def create_image(self):
         # Create image
@@ -176,7 +175,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
                           self.volumes_client.attach_volume,
                           data_utils.rand_uuid(),
                           instance_uuid=server['id'],
-                          mountpoint=self.mountpoint)
+                          mountpoint="/dev/vdc")
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9f9c24e4-011d-46b5-b992-952140ce237a')
