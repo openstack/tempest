@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import six
 
 from tempest.api.network import base
@@ -40,8 +39,6 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
         api_extensions
     """
-
-    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
@@ -105,8 +102,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('4d6d178f-34f6-4bff-a01c-0a2f8fe909e4')
     def test_update_port_with_cidr_address_pair(self):
         # Update allowed address pair with cidr
-        cidr = str(netaddr.IPNetwork(self._project_network_cidr))
-        self._update_port_with_address(cidr)
+        self._update_port_with_address(str(self.cidr))
 
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
     def test_update_port_with_multiple_ip_mac_address_pair(self):
@@ -135,4 +131,3 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
 class AllowedAddressPairIpV6TestJSON(AllowedAddressPairTestJSON):
     _ip_version = 6
-    _project_network_cidr = CONF.network.project_network_v6_cidr

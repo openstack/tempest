@@ -168,7 +168,7 @@ class RoutersTest(base.BaseNetworkTest):
     def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
         # The cidr starts from project_cidr
-        next_cidr = netaddr.IPNetwork(self.cidr)
+        next_cidr = self.cidr
         # Prepare to build several routes
         test_routes = []
         routes_num = 4
@@ -244,7 +244,7 @@ class RoutersTest(base.BaseNetworkTest):
         network02 = self.create_network(
             network_name=data_utils.rand_name('router-network02-'))
         subnet01 = self.create_subnet(network01)
-        sub02_cidr = netaddr.IPNetwork(self.cidr).next()
+        sub02_cidr = self.cidr.next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
         router = self._create_router()
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
