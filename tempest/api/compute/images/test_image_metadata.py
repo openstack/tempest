@@ -72,7 +72,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         body = body['image'] if 'image' in body else body
         cls.image_id = body['id']
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
-                                    cls.compute_images_client.delete_image,
+                                    cls.glance_client.delete_image,
                                     cls.image_id)
         image_file = six.BytesIO((b'*' * 1024))
         if CONF.image_feature_enabled.api_v1:
