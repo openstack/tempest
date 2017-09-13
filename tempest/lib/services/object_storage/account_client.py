@@ -50,41 +50,20 @@ class AccountClient(rest_client.RestClient):
         return resp, body
 
     def list_account_metadata(self):
-        """HEAD on the storage URL
-
-        Returns all account metadata headers
-        """
+        """List all account metadata."""
         resp, body = self.head('')
         self.expected_success(204, resp.status)
         return resp, body
 
     def list_account_containers(self, params=None):
-        """GET on the (base) storage URL
+        """List all containers for the account.
 
         Given valid X-Auth-Token, returns a list of all containers for the
         account.
 
-        Optional Arguments:
-        limit=[integer value N]
-            Limits the number of results to at most N values
-            DEFAULT:  10,000
-
-        marker=[string value X]
-            Given string value X, return object names greater in value
-            than the specified marker.
-            DEFAULT: No Marker
-
-        prefix=[string value Y]
-            Given string value Y, return object names starting with that prefix
-
-        reverse=[boolean value Z]
-            Reverse the result order based on the boolean value Z
-            DEFAULT: False
-
-        format=[string value, either 'json' or 'xml']
-            Specify either json or xml to return the respective serialized
-            response.
-            DEFAULT:  Python-List returned in response body
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/object-store/#show-account-details-and-list-containers
         """
         url = '?%s' % urllib.urlencode(params) if params else ''
 
