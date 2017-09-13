@@ -102,7 +102,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         while self.attempts > 0:
             object_lists = []
             for c_client, cont in zip(cont_client, self.containers):
-                resp, object_list = c_client.list_container_contents(
+                resp, object_list = c_client.list_container_objects(
                     cont, params=params)
                 object_lists.append(dict(
                     (obj['name'], obj) for obj in object_list))

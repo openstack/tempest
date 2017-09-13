@@ -43,7 +43,7 @@ def delete_containers(containers, container_client, object_client):
     for cont in containers:
         try:
             params = {'limit': 9999, 'format': 'json'}
-            _, objlist = container_client.list_container_contents(cont, params)
+            _, objlist = container_client.list_container_objects(cont, params)
             # delete every object in the container
             for obj in objlist:
                 test_utils.call_and_ignore_notfound_exc(

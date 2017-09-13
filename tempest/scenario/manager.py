@@ -1355,7 +1355,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
             present_obj = []
         if not_present_obj is None:
             not_present_obj = []
-        _, object_list = self.container_client.list_container_contents(
+        _, object_list = self.container_client.list_container_objects(
             container_name)
         if present_obj:
             for obj in present_obj:

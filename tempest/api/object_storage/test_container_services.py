@@ -130,7 +130,7 @@ class ContainerTest(base.BaseObjectTest):
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual([object_name], object_list)
@@ -140,7 +140,7 @@ class ContainerTest(base.BaseObjectTest):
         # get empty container contents list
         container_name = self.create_container()
 
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEmpty(object_list)
@@ -153,7 +153,7 @@ class ContainerTest(base.BaseObjectTest):
         self.create_object(container_name, object_name)
 
         params = {'delimiter': '/'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -166,7 +166,7 @@ class ContainerTest(base.BaseObjectTest):
         object_name, _ = self.create_object(container_name)
 
         params = {'end_marker': object_name + 'zzzz'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -179,7 +179,7 @@ class ContainerTest(base.BaseObjectTest):
         self.create_object(container_name)
 
         params = {'format': 'json'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -198,7 +198,7 @@ class ContainerTest(base.BaseObjectTest):
         self.create_object(container_name)
 
         params = {'format': 'xml'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -222,7 +222,7 @@ class ContainerTest(base.BaseObjectTest):
         object_name, _ = self.create_object(container_name)
 
         params = {'limit': data_utils.rand_int_id(1, 10000)}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -235,7 +235,7 @@ class ContainerTest(base.BaseObjectTest):
         object_name, _ = self.create_object(container_name)
 
         params = {'marker': 'AaaaObject1234567890'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -250,7 +250,7 @@ class ContainerTest(base.BaseObjectTest):
         self.create_object(container_name, object_name)
 
         params = {'path': 'Swift'}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
@@ -264,7 +264,7 @@ class ContainerTest(base.BaseObjectTest):
 
         prefix_key = object_name[0:8]
         params = {'prefix': prefix_key}
-        resp, object_list = self.container_client.list_container_contents(
+        resp, object_list = self.container_client.list_container_objects(
             container_name,
             params=params)
         self.assertHeaders(resp, 'Container', 'GET')
