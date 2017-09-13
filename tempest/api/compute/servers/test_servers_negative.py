@@ -37,7 +37,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.client, self.server_id,
                                            'ACTIVE')
         except Exception:
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.recreate_server(self.server_id)
 
     def tearDown(self):
         self.server_check_teardown()
@@ -551,7 +551,7 @@ class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.servers_client, self.server_id,
                                            'ACTIVE')
         except Exception:
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.recreate_server(self.server_id)
 
     @classmethod
     def setup_clients(cls):

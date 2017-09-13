@@ -301,7 +301,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         return image
 
     @classmethod
-    def rebuild_server(cls, server_id, validatable=False, **kwargs):
+    def recreate_server(cls, server_id, validatable=False, **kwargs):
         """Destroy an existing class level server and creates a new one
 
         Some test classes use a test server that can be used by multiple

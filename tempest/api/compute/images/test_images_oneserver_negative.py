@@ -52,7 +52,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             self._reset_server()
 
     def _reset_server(self):
-        self.__class__.server_id = self.rebuild_server(self.server_id)
+        self.__class__.server_id = self.recreate_server(self.server_id)
 
     @classmethod
     def skip_checks(cls):
