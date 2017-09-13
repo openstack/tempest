@@ -98,13 +98,14 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     - resource_cleanup
     """
 
-    setUpClassCalled = False
-
     # NOTE(andreaf) credentials holds a list of the credentials to be allocated
     # at class setup time. Credential types can be 'primary', 'alt', 'admin' or
     # a list of roles - the first element of the list being a label, and the
     # rest the actual roles
     credentials = []
+
+    # Track if setUpClass was invoked
+    __setupclass_called = False
 
     # Network resources to be provisioned for the requested test credentials.
     # Only used with the dynamic credentials provider.
@@ -133,18 +134,19 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls.__setup_credentials_called = False
         cls.__resource_cleanup_called = False
         cls.__skip_checks_called = False
+        # Stack of callable to be invoked in reverse order
         cls._class_cleanups = []
+        # Stack of (name, callable) to be invoked in reverse order at teardown
+        cls._teardowns = []
 
     @classmethod
     def setUpClass(cls):
+        cls.__setupclass_called = True
         # Reset state
         cls._reset_class()
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
-        cls.setUpClassCalled = True
-        # Stack of (name, callable) to be invoked in reverse order at teardown
-        cls._teardowns = []
         # All the configuration checks that may generate a skip
         cls.skip_checks()
         if not cls.__skip_checks_called:
@@ -579,7 +581,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
-        if not self.setUpClassCalled:
+        if not self.__setupclass_called:
             raise RuntimeError("setUpClass does not calls the super's"
                                "setUpClass in the "
                                + self.__class__.__name__)
