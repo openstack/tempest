@@ -109,6 +109,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     validation_resources = {}
     network_resources = {}
 
+    # Stack of resource cleanups
+    _class_cleanups = []
+
     # NOTE(sdague): log_format is defined inline here instead of using the oslo
     # default because going through the config path recouples config to the
     # stress tests too early, and depending on testr order will fail unit tests
@@ -122,7 +125,14 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     TIMEOUT_SCALING_FACTOR = 1
 
     @classmethod
+    def _reset_class(cls):
+        cls.__resource_cleaup_called = False
+        cls._class_cleanups = []
+
+    @classmethod
     def setUpClass(cls):
+        # Reset state
+        cls._reset_class()
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
@@ -171,12 +181,23 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # exception at the end
             try:
                 teardown()
+                if name == 'resources':
+                    if not cls.__resource_cleaup_called:
+                        raise RuntimeError(
+                            "resource_cleanup for %s did not call the "
+                            "super's resource_cleanup" % cls.__name__)
             except Exception as te:
                 sys_exec_info = sys.exc_info()
                 tetype = sys_exec_info[0]
-                # TODO(andreaf): Till we have the ability to cleanup only
-                # resources that were successfully setup in resource_cleanup,
-                # log AttributeError as info instead of exception.
+                # TODO(andreaf): Resource cleanup is often implemented by
+                # storing an array of resources at class level, and cleaning
+                # them up during `resource_cleanup`.
+                # In case of failure during setup, some resource arrays might
+                # not be defined at all, in which case the cleanup code might
+                # trigger an AttributeError. In such cases we log
+                # AttributeError as info instead of exception. Once all
+                # cleanups are migrated to addClassResourceCleanup we can
+                # remove this.
                 if tetype is AttributeError and name == 'resources':
                     LOG.info("tearDownClass of %s failed: %s", name, te)
                 else:
@@ -299,7 +320,65 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def resource_setup(cls):
-        """Class level resource setup for test cases."""
+        """Class level resource setup for test cases.
+
+        `resource_setup` is invoked once all credentials (and related network
+        resources have been provisioned and after client aliases - if any -
+        have been defined.
+
+        The use case for `resource_setup` is test optimization: provisioning
+        of project-specific "expensive" resources that are not dirtied by tests
+        and can thus safely be re-used by multiple tests.
+
+        System wide resources shared by all tests could instead be provisioned
+        only once, before the test run.
+
+        Resources provisioned here must be cleaned up during
+        `resource_cleanup`. This is best achieved by scheduling a cleanup via
+        `addClassResourceCleanup`.
+
+        Some test resources have an asynchronous delete process. It's best
+        practice for them to schedule a wait for delete via
+        `addClassResourceCleanup` to avoid having resources in process of
+        deletion when we reach the credentials cleanup step.
+
+        Example::
+
+            @classmethod
+            def resource_setup(cls):
+                super(MyTest, cls).resource_setup()
+                servers = cls.os_primary.compute.ServersClient()
+                # Schedule delete and wait so that we can first delete the
+                # two servers and then wait for both to delete
+                # Create server 1
+                cls.shared_server = servers.create_server()
+                # Create server 2. If something goes wrong we schedule cleanup
+                # of server 1 anyways.
+                try:
+                    cls.shared_server2 = servers.create_server()
+                    # Wait server 2
+                    cls.addClassResourceCleanup(
+                        waiters.wait_for_server_termination,
+                        servers, cls.shared_server2['id'],
+                        ignore_error=False)
+                finally:
+                    # Wait server 1
+                    cls.addClassResourceCleanup(
+                        waiters.wait_for_server_termination,
+                        servers, cls.shared_server['id'],
+                        ignore_error=False)
+                        # Delete server 1
+                    cls.addClassResourceCleanup(
+                        test_utils.call_and_ignore_notfound_exc,
+                        servers.delete_server,
+                        cls.shared_server['id'])
+                    # Delete server 2 (if it was created)
+                    if hasattr(cls, 'shared_server2'):
+                        cls.addClassResourceCleanup(
+                            test_utils.call_and_ignore_notfound_exc,
+                            servers.delete_server,
+                            cls.shared_server2['id'])
+        """
         if (CONF.validation.ip_version_for_ssh not in (4, 6) and
             CONF.service_available.neutron):
             msg = "Invalid IP version %s in ip_version_for_ssh. Use 4 or 6"
@@ -322,9 +401,45 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def resource_cleanup(cls):
         """Class level resource cleanup for test cases.
 
-        Resource cleanup must be able to handle the case of partially setup
-        resources, in case a failure during `resource_setup` should happen.
+        Resource cleanup processes the stack or cleanups produced by
+        `addClassResourceCleanup` and then cleans up validation resources
+        if any were provisioned.
+
+        All cleanups are processed whatever the outcome. Exceptions are
+        accumulated and re-raised as a `MultipleExceptions` at the end.
+
+        In most cases test cases won't need to override `resource_cleanup`,
+        but if they do they must invoke `resource_cleanup` on super.
+
+        Example::
+
+            class TestWithReallyComplexCleanup(test.BaseTestCase):
+
+                @classmethod
+                def resource_setup(cls):
+                    # provision resource A
+                    cls.addClassResourceCleanup(delete_resource, A)
+                    # provision resource B
+                    cls.addClassResourceCleanup(delete_resource, B)
+
+                @classmethod
+                def resource_cleanup(cls):
+                    # It's possible to override resource_cleanup but in most
+                    # cases it shouldn't be required. Nothing that may fail
+                    # should be executed before the call to super since it
+                    # might cause resource leak in case of error.
+                    super(TestWithReallyComplexCleanup, cls).resource_cleanup()
+                    # At this point test credentials are still available but
+                    # anything from the cleanup stack has been already deleted.
         """
+        cls.__resource_cleaup_called = True
+        cleanup_errors = []
+        while cls._class_cleanups:
+            try:
+                fn, args, kwargs = cls._class_cleanups.pop()
+                fn(*args, **kwargs)
+            except Exception:
+                cleanup_errors.append(sys.exc_info())
         if cls.validation_resources:
             if hasattr(cls, "os_primary"):
                 vr = cls.validation_resources
@@ -335,6 +450,25 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             else:
                 LOG.warning("Client manager not found, validation resources "
                             "not deleted")
+        if cleanup_errors:
+            raise testtools.MultipleExceptions(*cleanup_errors)
+
+    @classmethod
+    def addClassResourceCleanup(cls, fn, *arguments, **keywordArguments):
+        """Add a cleanup function to be called during resource_cleanup.
+
+        Functions added with addClassResourceCleanup will be called in reverse
+        order of adding at the beginning of resource_cleanup, before any
+        credential, networking or validation resources cleanup is processed.
+
+        If a function added with addClassResourceCleanup raises an exception,
+        the error will be recorded as a test error, and the next cleanup will
+        then be run.
+
+        Cleanup functions are always called during the test class tearDown
+        fixture, even if an exception occured during setUp or tearDown.
+        """
+        cls._class_cleanups.append((fn, arguments, keywordArguments))
 
     def setUp(self):
         super(BaseTestCase, self).setUp()

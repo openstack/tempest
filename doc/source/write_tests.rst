@@ -59,10 +59,16 @@ are a number of predefined phases to setUpClass that are used. The phases are:
  * setup_clients
  * resource_setup
 
-which is executed in that order. An example of a TestCase which defines all
+which is executed in that order. Cleanup of resources provisioned during
+the resource_setup must be scheduled right after provisioning using
+the addClassResourceCleanp helper. The resource cleanups stacked this way
+are executed in reverse order during tearDownClass, before the cleanup of
+test credentials takes place. An example of a TestCase which defines all
 of these would be::
-
+  
+  from tempest.common import waiters
   from tempest import config
+  from tempest.lib.common.utils import test_utils
   from tempest import test
 
   CONF = config.CONF
@@ -111,6 +117,13 @@ of these would be::
         """
         super(TestExampleCase, cls).resource_setup()
         cls.shared_server = cls.servers_client.create_server(...)
+        cls.addClassResourceCleanup(waiters.wait_for_server_termination,
+                                    cls.servers_client,
+                                    cls.shared_server['id'])
+        cls.addClassResourceCleanup(
+            test_utils.call_and_ignore_notfound_exc(
+                cls.servers_client.delete_server,
+                cls.shared_server['id']))
 
 .. _credentials:
 
