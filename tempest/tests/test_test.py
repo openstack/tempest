@@ -332,3 +332,48 @@ class TestTempestBaseTestClass(base.TestCase):
         found_exc = log[0][1][1]
         self.assertTrue(isinstance(found_exc, RuntimeError))
         self.assertIn(BadResourceCleanup.__name__, str(found_exc))
+
+    def test_super_skip_checks_not_invoked(self):
+
+        class BadSkipChecks(self.parent_test):
+
+            @classmethod
+            def skip_checks(cls):
+                pass
+
+        bad_class = BadSkipChecks()
+        with testtools.ExpectedException(
+                RuntimeError,
+                value_re='^.* ' + BadSkipChecks.__name__):
+            bad_class.setUpClass()
+
+    def test_super_setup_credentials_not_invoked(self):
+
+        class BadSetupCredentials(self.parent_test):
+
+            @classmethod
+            def skip_checks(cls):
+                pass
+
+        bad_class = BadSetupCredentials()
+        with testtools.ExpectedException(
+                RuntimeError,
+                value_re='^.* ' + BadSetupCredentials.__name__):
+            bad_class.setUpClass()
+
+    def test_grandparent_skip_checks_not_invoked(self):
+
+        class BadSkipChecks(self.parent_test):
+
+            @classmethod
+            def skip_checks(cls):
+                pass
+
+        class SonOfBadSkipChecks(BadSkipChecks):
+            pass
+
+        bad_class = SonOfBadSkipChecks()
+        with testtools.ExpectedException(
+                RuntimeError,
+                value_re='^.* ' + SonOfBadSkipChecks.__name__):
+            bad_class.setUpClass()

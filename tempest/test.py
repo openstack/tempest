@@ -132,6 +132,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def _reset_class(cls):
         cls.__setup_credentials_called = False
         cls.__resource_cleaup_called = False
+        cls.__skip_checks_called = False
         cls._class_cleanups = []
 
     @classmethod
@@ -146,10 +147,16 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls.teardowns = []
         # All the configuration checks that may generate a skip
         cls.skip_checks()
+        if not cls.__skip_checks_called:
+            raise RuntimeError("skip_checks for %s did not call the super's "
+                               "skip_checks" % cls.__name__)
         try:
             # Allocation of all required credentials and client managers
             cls.teardowns.append(('credentials', cls.clear_credentials))
             cls.setup_credentials()
+            if not cls.__setup_credentials_called:
+                raise RuntimeError("setup_credentials for %s did not call the "
+                                   "super's setup_credentials" % cls.__name__)
             # Shortcuts to clients
             cls.setup_clients()
             # Additional class-wide test resources
@@ -245,6 +252,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         If one is really needed it may be implemented either in the
         resource_setup or at test level.
         """
+        cls.__skip_checks_called = True
         identity_version = cls.get_identity_version()
         # setting force_tenant_isolation to True also needs admin credentials.
         if ('admin' in cls.credentials or
