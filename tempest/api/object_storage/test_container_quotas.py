@@ -40,8 +40,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
         self.container_name = self.create_container()
         metadata = {"quota-bytes": str(QUOTA_BYTES),
                     "quota-count": str(QUOTA_COUNT), }
-        self.container_client.update_container_metadata(
-            self.container_name, metadata)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=metadata)
 
     def tearDown(self):
         """Cleans the container of any object after each test."""

@@ -277,9 +277,9 @@ class ContainerTest(base.BaseObjectTest):
         container_name = self.create_container()
 
         metadata = {'name': 'Pictures'}
-        self.container_client.update_container_metadata(
+        self.container_client.create_update_or_delete_container_metadata(
             container_name,
-            metadata=metadata)
+            create_update_metadata=metadata)
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
@@ -307,10 +307,11 @@ class ContainerTest(base.BaseObjectTest):
         self.containers.append(container_name)
 
         metadata_2 = {'test-container-meta2': 'Meta2'}
-        resp, _ = self.container_client.update_container_metadata(
-            container_name,
-            metadata=metadata_2,
-            remove_metadata=metadata_1)
+        resp, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                container_name,
+                create_update_metadata=metadata_2,
+                delete_metadata=metadata_1))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -326,9 +327,10 @@ class ContainerTest(base.BaseObjectTest):
         container_name = self.create_container()
 
         metadata = {'test-container-meta1': 'Meta1'}
-        resp, _ = self.container_client.update_container_metadata(
-            container_name,
-            metadata=metadata)
+        resp, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                container_name,
+                create_update_metadata=metadata))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -346,9 +348,10 @@ class ContainerTest(base.BaseObjectTest):
                                                metadata=metadata)
         self.containers.append(container_name)
 
-        resp, _ = self.container_client.delete_container_metadata(
-            container_name,
-            metadata=metadata)
+        resp, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                container_name,
+                delete_metadata=metadata))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -361,9 +364,10 @@ class ContainerTest(base.BaseObjectTest):
         container_name = self.create_container()
 
         metadata = {'test-container-meta1': ''}
-        resp, _ = self.container_client.update_container_metadata(
-            container_name,
-            metadata=metadata)
+        resp, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                container_name,
+                create_update_metadata=metadata))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -380,9 +384,10 @@ class ContainerTest(base.BaseObjectTest):
         self.containers.append(container_name)
 
         metadata = {'test-container-meta1': ''}
-        resp, _ = self.container_client.delete_container_metadata(
-            container_name,
-            metadata=metadata)
+        resp, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                container_name,
+                delete_metadata=metadata))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(container_name)

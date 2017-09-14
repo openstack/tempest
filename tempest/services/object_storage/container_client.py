@@ -55,40 +55,37 @@ class ContainerClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return resp, body
 
-    def update_container_metadata(
+    def create_update_or_delete_container_metadata(
             self, container_name,
-            metadata=None,
-            remove_metadata=None,
-            metadata_prefix='X-Container-Meta-',
-            remove_metadata_prefix='X-Remove-Container-Meta-'):
-        """Updates arbitrary metadata on container."""
+            create_update_metadata=None,
+            delete_metadata=None,
+            create_update_metadata_prefix='X-Container-Meta-',
+            delete_metadata_prefix='X-Remove-Container-Meta-'):
+        """Creates, Updates or deletes an containter metadata entry.
+
+        Container Metadata can be created, updated or deleted based on
+        metadata header or value. For detailed info, please refer to the
+        official API reference:
+        https://developer.openstack.org/api-ref/object-store/#create-update-or-delete-container-metadata
+        """
         url = str(container_name)
         headers = {}
+        if create_update_metadata:
+            for key in create_update_metadata:
+                metadata_header_name = create_update_metadata_prefix + key
+                headers[metadata_header_name] = create_update_metadata[key]
+        if delete_metadata:
+            for key in delete_metadata:
+                headers[delete_metadata_prefix + key] = delete_metadata[key]
 
-        if metadata is not None:
-            for key in metadata:
-                headers[metadata_prefix + key] = metadata[key]
-        if remove_metadata is not None:
-            for key in remove_metadata:
-                headers[remove_metadata_prefix + key] = remove_metadata[key]
-
-        resp, body = self.post(url, body=None, headers=headers)
+        resp, body = self.post(url, headers=headers, body=None)
         self.expected_success(204, resp.status)
         return resp, body
 
-    def delete_container_metadata(self, container_name, metadata,
-                                  metadata_prefix='X-Remove-Container-Meta-'):
-        """Deletes arbitrary metadata on container."""
-        url = str(container_name)
-        headers = {}
-
-        if metadata is not None:
-            for item in metadata:
-                headers[metadata_prefix + item] = metadata[item]
-
-        resp, body = self.post(url, body=None, headers=headers)
-        self.expected_success(204, resp.status)
-        return resp, body
+    update_container_metadata = debtcollector.moves.moved_function(
+        create_update_or_delete_container_metadata,
+        'update_container_metadata', __name__,
+        version='Queens', removal_version='Rocky')
 
     def list_container_metadata(self, container_name):
         """List all container metadata."""

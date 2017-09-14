@@ -120,9 +120,10 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # Attempts to update metadata using a nonexistent container name.
         metadata = {'animal': 'penguin'}
 
-        self.assertRaises(exceptions.NotFound,
-                          self.container_client.update_container_metadata,
-                          'nonexistent_container_name', metadata)
+        self.assertRaises(
+            exceptions.NotFound,
+            self.container_client.create_update_or_delete_container_metadata,
+            'nonexistent_container_name', create_update_metadata=metadata)
 
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('65387dbf-a0e2-4aac-9ddc-16eb3f1f69ba')
@@ -130,9 +131,10 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # Attempts to delete metadata using a nonexistent container name.
         metadata = {'animal': 'penguin'}
 
-        self.assertRaises(exceptions.NotFound,
-                          self.container_client.delete_container_metadata,
-                          'nonexistent_container_name', metadata)
+        self.assertRaises(
+            exceptions.NotFound,
+            self.container_client.create_update_or_delete_container_metadata,
+            'nonexistent_container_name', delete_metadata=metadata)
 
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('14331d21-1e81-420a-beea-19cb5e5207f5')

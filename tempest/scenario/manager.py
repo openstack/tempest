@@ -1367,8 +1367,8 @@ class ObjectStorageScenarioTest(ScenarioTest):
     def change_container_acl(self, container_name, acl):
         metadata_param = {'metadata_prefix': 'x-container-',
                           'metadata': {'read': acl}}
-        self.container_client.update_container_metadata(container_name,
-                                                        **metadata_param)
+        self.container_client.create_update_or_delete_container_metadata(
+            container_name, create_update_metadata=metadata_param)
         resp, _ = self.container_client.list_container_metadata(container_name)
         self.assertEqual(resp['x-container-read'], acl)
 
