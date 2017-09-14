@@ -245,12 +245,35 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """Class level skip checks.
 
         Subclasses verify in here all conditions that might prevent the
-        execution of the entire test class.
-        Checks implemented here may not make use API calls, and should rely on
-        configuration alone.
-        In general skip checks that require an API call are discouraged.
-        If one is really needed it may be implemented either in the
-        resource_setup or at test level.
+        execution of the entire test class. Skipping here prevents any other
+        class fixture from being executed i.e. no credentials or other
+        resource allocation will happen.
+
+        Tests defined in the test class will no longer appear in test results.
+        The `setUpClass` for the entire test class will be marked as SKIPPED
+        instead.
+
+        At this stage no test credentials are available, so skip checks
+        should rely on configuration alone. This is deliberate since skips
+        based on the result of an API call are discouraged.
+
+        The following checks are implemented in `test.py` already:
+        - check that alt credentials are available when requested by the test
+        - check that admin credentials are available when requested by the test
+        - check that the identity version specified by the test is marked as
+          enabled in the configuration
+
+        Overriders of skip_checks must always invoke skip_check on `super`
+        first.
+
+        Example::
+
+            @classmethod
+            def skip_checks(cls):
+                super(Example, cls).skip_checks()
+                if not CONF.service_available.my_service:
+                    skip_msg = ("%s skipped as my_service is not available")
+                    raise cls.skipException(skip_msg % cls.__name__)
         """
         cls.__skip_checks_called = True
         identity_version = cls.get_identity_version()
