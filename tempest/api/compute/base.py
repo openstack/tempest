@@ -187,7 +187,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def create_test_server(cls, validatable=False, volume_backed=False,
-                           **kwargs):
+                           validation_resources=None, **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
@@ -197,6 +197,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
         :param validatable: Whether the server will be pingable or sshable.
         :param volume_backed: Whether the instance is volume backed or not.
+        :param validation_resources: Dictionary of validation resources as
+            returned by `get_class_validation_resources`.
+        :param kwargs: Extra arguments are passed down to the
+            `compute.create_test_server` call.
         """
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
@@ -213,7 +217,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         body, servers = compute.create_test_server(
             cls.os_primary,
             validatable,
-            validation_resources=cls.validation_resources,
+            validation_resources=validation_resources,
             tenant_network=tenant_network,
             volume_backed=volume_backed,
             **kwargs)
@@ -325,13 +329,33 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def rebuild_server(cls, server_id, validatable=False, **kwargs):
-        # Destroy an existing server and creates a new one
+        """Destroy an existing class level server and creates a new one
+
+        Some test classes use a test server that can be used by multiple
+        tests. This is done to optimise runtime and test load.
+        If something goes wrong with the test server, it can be rebuilt
+        using this helper.
+
+        This helper can also be used for the initial provisioning if no
+        server_id is specified.
+
+        :param server_id: UUID of the server to be rebuilt. If None is
+            specified, a new server is provisioned.
+        :param validatable: whether to the server needs to be
+            validatable. When True, validation resources are acquired via
+            the `get_class_validation_resources` helper.
+        :param kwargs: extra paramaters are passed through to the
+            `create_test_server` call.
+        :return: the UUID of the created server.
+        """
         if server_id:
             cls.delete_server(server_id)
 
         cls.password = data_utils.rand_password()
         server = cls.create_test_server(
             validatable,
+            validation_resources=cls.get_class_validation_resources(
+                cls.os_primary),
             wait_until='ACTIVE',
             adminPass=cls.password,
             **kwargs)
@@ -362,14 +386,23 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls._delete_volume(cls.volumes_client, volume_id)
 
     @classmethod
-    def get_server_ip(cls, server):
+    def get_server_ip(cls, server, validation_resources=None):
         """Get the server fixed or floating IP.
 
         Based on the configuration we're in, return a correct ip
         address for validating that a guest is up.
+
+        :param server: The server dict as returned by the API
+        :param validation_resources: The dict of validation resources
+            provisioned for the server.
         """
         if CONF.validation.connect_method == 'floating':
-            return cls.validation_resources['floating_ip']['ip']
+            if validation_resources:
+                return validation_resources['floating_ip']['ip']
+            else:
+                msg = ('When validation.connect_method equals floating, '
+                       'validation_resources cannot be None')
+                raise exceptions.InvalidParam(invalid_param=msg)
         elif CONF.validation.connect_method == 'fixed':
             addresses = server['addresses'][CONF.validation.network_for_ssh]
             for address in addresses:

@@ -17,8 +17,10 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils.linux import remote_client
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -34,12 +36,6 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(ServersWithSpecificFlavorTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-
-    @classmethod
-    def resource_setup(cls):
-        cls.set_validation_resources()
-
-        super(ServersWithSpecificFlavorTestJSON, cls).resource_setup()
 
     @decorators.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
     @testtools.skipUnless(CONF.validation.run_validation,
@@ -67,20 +63,30 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         admin_pass = self.image_ssh_password
 
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
         server_no_eph_disk = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE',
             adminPass=admin_pass,
             flavor=flavor_no_eph_disk_id)
+
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.servers_client, server_no_eph_disk['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.servers_client.delete_server,
+                        server_no_eph_disk['id'])
 
         # Get partition number of server without ephemeral disk.
         server_no_eph_disk = self.client.show_server(
             server_no_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(server_no_eph_disk),
+            self.get_server_ip(server_no_eph_disk,
+                               validation_resources),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=server_no_eph_disk,
             servers_client=self.client)
         disks_num = len(linux_client.get_disks().split('\n'))
@@ -90,17 +96,25 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         server_with_eph_disk = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE',
             adminPass=admin_pass,
             flavor=flavor_with_eph_disk_id)
 
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.servers_client, server_with_eph_disk['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.servers_client.delete_server,
+                        server_with_eph_disk['id'])
+
         server_with_eph_disk = self.client.show_server(
             server_with_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(server_with_eph_disk),
+            self.get_server_ip(server_with_eph_disk,
+                               validation_resources),
             self.ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=server_with_eph_disk,
             servers_client=self.client)
         disks_num_eph = len(linux_client.get_disks().split('\n'))

@@ -66,11 +66,6 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                                   dhcp=True)
         super(DeviceTaggingTest, cls).setup_credentials()
 
-    @classmethod
-    def resource_setup(cls):
-        cls.set_validation_resources()
-        super(DeviceTaggingTest, cls).resource_setup()
-
     def verify_device_metadata(self, md_json):
         md_dict = json.loads(md_json)
         for d in md_dict['devices']:
@@ -139,9 +134,12 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         # Create server
         admin_pass = data_utils.rand_password()
         config_drive_enabled = CONF.compute_feature_enabled.config_drive
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
 
         server = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             config_drive=config_drive_enabled,
             adminPass=admin_pass,
             name=data_utils.rand_name('device-tagging-server'),
@@ -208,10 +206,10 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.addCleanup(self.delete_server, server['id'])
 
         self.ssh_client = remote_client.RemoteClient(
-            self.get_server_ip(server),
+            self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=server,
             servers_client=self.servers_client)
 
