@@ -26,10 +26,10 @@ import testtools
 from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import utils
-import tempest.common.validation_resources as vr
 from tempest import config
 from tempest.lib.common import cred_client
 from tempest.lib.common import fixed_network
+from tempest.lib.common import validation_resources as vr
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 

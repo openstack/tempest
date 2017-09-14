@@ -20,8 +20,8 @@ from oslo_config import cfg
 import testtools
 
 from tempest import clients
-from tempest.common import validation_resources as vr
 from tempest import config
+from tempest.lib.common import validation_resources as vr
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 from tempest.tests import base
@@ -48,7 +48,7 @@ class LoggingTestResult(testtools.TestResult):
 
 class TestValidationResources(base.TestCase):
 
-    validation_resources_module = 'tempest.common.validation_resources'
+    validation_resources_module = 'tempest.lib.common.validation_resources'
 
     def setUp(self):
         super(TestValidationResources, self).setUp()

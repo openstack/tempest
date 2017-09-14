@@ -15,7 +15,7 @@ import fixtures
 import mock
 import testtools
 
-from tempest.common import validation_resources as vr
+from tempest.lib.common import validation_resources as vr
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
 from tempest.tests import base
