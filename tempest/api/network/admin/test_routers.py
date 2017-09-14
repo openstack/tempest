@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import identity
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -66,10 +67,11 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         # Test creating router from admin user setting project_id.
         project = data_utils.rand_name('test_tenant_')
         description = data_utils.rand_name('desc_')
-        project = self.identity_utils.create_project(name=project,
-                                                     description=description)
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project, description=description)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
 
         name = data_utils.rand_name('router-')
         create_body = self.admin_routers_client.create_router(

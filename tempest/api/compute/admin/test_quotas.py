@@ -17,6 +17,7 @@ from oslo_log import log as logging
 from testtools import matchers
 
 from tempest.api.compute import base
+from tempest.common import identity
 from tempest.common import tempest_fixtures as fixtures
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -93,10 +94,11 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Verify that GET shows the updated quota set of project
         project_name = data_utils.rand_name('cpu_quota_project')
         project_desc = project_name + '-desc'
-        project = self.identity_utils.create_project(name=project_name,
-                                                     description=project_desc)
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project_name, description=project_desc)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
 
         self.adm_client.update_quota_set(project_id, ram='5120')
         quota_set = self.adm_client.show_quota_set(project_id)['quota_set']
@@ -106,12 +108,12 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         user_name = data_utils.rand_name('cpu_quota_user')
         password = data_utils.rand_password()
         email = user_name + '@testmail.tm'
-        user = self.identity_utils.create_user(username=user_name,
-                                               password=password,
-                                               project=project,
-                                               email=email)
+        user = identity.identity_utils(self.os_admin).create_user(
+            username=user_name, password=password, project=project,
+            email=email)
         user_id = user['id']
-        self.addCleanup(self.identity_utils.delete_user, user_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_user,
+                        user_id)
 
         self.adm_client.update_quota_set(project_id,
                                          user_id=user_id,
@@ -125,10 +127,11 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Admin can delete the resource quota set for a project
         project_name = data_utils.rand_name('ram_quota_project')
         project_desc = project_name + '-desc'
-        project = self.identity_utils.create_project(name=project_name,
-                                                     description=project_desc)
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project_name, description=project_desc)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
         quota_set_default = (self.adm_client.show_quota_set(project_id)
                              ['quota_set'])
         ram_default = quota_set_default['ram']
