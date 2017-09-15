@@ -35,24 +35,13 @@ class TestTempestRun(base.TestCase):
         super(TestTempestRun, self).setUp()
         self.run_cmd = run.TempestRun(None, None)
 
-    def test_build_options(self):
-        args = mock.Mock(spec=argparse.Namespace)
-        setattr(args, "subunit", True)
-        setattr(args, "parallel", False)
-        setattr(args, "concurrency", 10)
-        setattr(args, "load_list", '')
-        options = self.run_cmd._build_options(args)
-        self.assertEqual(['--subunit',
-                          '--concurrency=10'],
-                         options)
-
     def test__build_regex_default(self):
         args = mock.Mock(spec=argparse.Namespace)
         setattr(args, 'smoke', False)
         setattr(args, 'regex', '')
         setattr(args, 'whitelist_file', None)
         setattr(args, 'blacklist_file', None)
-        self.assertEqual('', self.run_cmd._build_regex(args))
+        self.assertIsNone(None, self.run_cmd._build_regex(args))
 
     def test__build_regex_smoke(self):
         args = mock.Mock(spec=argparse.Namespace)
@@ -60,7 +49,7 @@ class TestTempestRun(base.TestCase):
         setattr(args, 'regex', '')
         setattr(args, 'whitelist_file', None)
         setattr(args, 'blacklist_file', None)
-        self.assertEqual('smoke', self.run_cmd._build_regex(args))
+        self.assertEqual(['smoke'], self.run_cmd._build_regex(args))
 
     def test__build_regex_regex(self):
         args = mock.Mock(spec=argparse.Namespace)
@@ -68,36 +57,8 @@ class TestTempestRun(base.TestCase):
         setattr(args, "regex", 'i_am_a_fun_little_regex')
         setattr(args, 'whitelist_file', None)
         setattr(args, 'blacklist_file', None)
-        self.assertEqual('i_am_a_fun_little_regex',
+        self.assertEqual(['i_am_a_fun_little_regex'],
                          self.run_cmd._build_regex(args))
-
-    def test__build_whitelist_file(self):
-        args = mock.Mock(spec=argparse.Namespace)
-        setattr(args, 'smoke', False)
-        setattr(args, 'regex', None)
-        self.tests = tempfile.NamedTemporaryFile(
-            prefix='whitelist', delete=False)
-        self.tests.write(b"volume \n compute")
-        self.tests.close()
-        setattr(args, 'whitelist_file', self.tests.name)
-        setattr(args, 'blacklist_file', None)
-        self.assertEqual("volume|compute",
-                         self.run_cmd._build_regex(args))
-        os.unlink(self.tests.name)
-
-    def test__build_blacklist_file(self):
-        args = mock.Mock(spec=argparse.Namespace)
-        setattr(args, 'smoke', False)
-        setattr(args, 'regex', None)
-        self.tests = tempfile.NamedTemporaryFile(
-            prefix='blacklist', delete=False)
-        self.tests.write(b"volume \n compute")
-        self.tests.close()
-        setattr(args, 'whitelist_file', None)
-        setattr(args, 'blacklist_file', self.tests.name)
-        self.assertEqual("^((?!compute|volume).)*$",
-                         self.run_cmd._build_regex(args))
-        os.unlink(self.tests.name)
 
 
 class TestRunReturnCode(base.TestCase):
@@ -109,13 +70,13 @@ class TestRunReturnCode(base.TestCase):
         self.test_dir = os.path.join(self.directory, 'tests')
         os.mkdir(self.test_dir)
         # Setup Test files
-        self.testr_conf_file = os.path.join(self.directory, '.testr.conf')
+        self.stestr_conf_file = os.path.join(self.directory, '.stestr.conf')
         self.setup_cfg_file = os.path.join(self.directory, 'setup.cfg')
         self.passing_file = os.path.join(self.test_dir, 'test_passing.py')
         self.failing_file = os.path.join(self.test_dir, 'test_failing.py')
         self.init_file = os.path.join(self.test_dir, '__init__.py')
         self.setup_py = os.path.join(self.directory, 'setup.py')
-        shutil.copy('tempest/tests/files/testr-conf', self.testr_conf_file)
+        shutil.copy('tempest/tests/files/testr-conf', self.stestr_conf_file)
         shutil.copy('tempest/tests/files/passing-tests', self.passing_file)
         shutil.copy('tempest/tests/files/failing-tests', self.failing_file)
         shutil.copy('setup.py', self.setup_py)
@@ -134,25 +95,13 @@ class TestRunReturnCode(base.TestCase):
         self.assertEqual(p.returncode, expected, msg)
 
     def test_tempest_run_passes(self):
-        # Git init is required for the pbr testr command. pbr requires a git
-        # version or an sdist to work. so make the test directory a git repo
-        # too.
-        subprocess.call(['git', 'init'], stderr=DEVNULL)
         self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
 
-    def test_tempest_run_passes_with_testrepository(self):
-        # Git init is required for the pbr testr command. pbr requires a git
-        # version or an sdist to work. so make the test directory a git repo
-        # too.
-        subprocess.call(['git', 'init'], stderr=DEVNULL)
-        subprocess.call(['testr', 'init'])
+    def test_tempest_run_passes_with_stestr_repository(self):
+        subprocess.call(['stestr', 'init'])
         self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
 
     def test_tempest_run_fails(self):
-        # Git init is required for the pbr testr command. pbr requires a git
-        # version or an sdist to work. so make the test directory a git repo
-        # too.
-        subprocess.call(['git', 'init'], stderr=DEVNULL)
         self.assertRunExit(['tempest', 'run'], 1)
 
 

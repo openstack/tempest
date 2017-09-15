@@ -20,19 +20,15 @@ from cliff import command
 from oslo_config import generator
 from oslo_log import log as logging
 from six import moves
-from testrepository import commands
+from stestr import commands
 
 from tempest.cmd import workspace
 
 LOG = logging.getLogger(__name__)
 
-TESTR_CONF = """[DEFAULT]
-test_command=OS_STDOUT_CAPTURE=${OS_STDOUT_CAPTURE:-1} \\
-    OS_STDERR_CAPTURE=${OS_STDERR_CAPTURE:-1} \\
-    OS_TEST_TIMEOUT=${OS_TEST_TIMEOUT:-500} \\
-    ${PYTHON:-python} -m subunit.run discover -t %s %s $LISTOPT $IDOPTION
-test_id_option=--load-list $IDFILE
-test_list_option=--list
+STESTR_CONF = """[DEFAULT]
+test_path=%s
+top_dir=%s
 group_regex=([^\.]*\.)*
 """
 
@@ -84,13 +80,13 @@ class TempestInit(command.Command):
                                  "is ~/.tempest/workspace.yaml")
         return parser
 
-    def generate_testr_conf(self, local_path):
-        testr_conf_path = os.path.join(local_path, '.testr.conf')
+    def generate_stestr_conf(self, local_path):
+        stestr_conf_path = os.path.join(local_path, '.stestr.conf')
         top_level_path = os.path.dirname(os.path.dirname(__file__))
         discover_path = os.path.join(top_level_path, 'test_discover')
-        testr_conf = TESTR_CONF % (top_level_path, discover_path)
-        with open(testr_conf_path, 'w+') as testr_conf_file:
-            testr_conf_file.write(testr_conf)
+        stestr_conf = STESTR_CONF % (discover_path, top_level_path)
+        with open(stestr_conf_path, 'w+') as stestr_conf_file:
+            stestr_conf_file.write(stestr_conf)
 
     def get_configparser(self, conf_path):
         config_parse = moves.configparser.ConfigParser()
@@ -148,7 +144,7 @@ class TempestInit(command.Command):
         etc_dir = os.path.join(local_dir, 'etc')
         config_path = os.path.join(etc_dir, 'tempest.conf')
         log_dir = os.path.join(local_dir, 'logs')
-        testr_dir = os.path.join(local_dir, '.testrepository')
+        stestr_dir = os.path.join(local_dir, '.stestr')
         # Create lock dir
         if not os.path.isdir(lock_dir):
             LOG.debug('Creating lock dir: %s', lock_dir)
@@ -163,12 +159,11 @@ class TempestInit(command.Command):
         self.generate_sample_config(local_dir)
         # Update local confs to reflect local paths
         self.update_local_conf(config_path, lock_dir, log_dir)
-        # Generate a testr conf file
-        self.generate_testr_conf(local_dir)
-        # setup local testr working dir
-        if not os.path.isdir(testr_dir):
-            commands.run_argv(['testr', 'init', '-d', local_dir], sys.stdin,
-                              sys.stdout, sys.stderr)
+        # Generate a stestr conf file
+        self.generate_stestr_conf(local_dir)
+        # setup local stestr working dir
+        if not os.path.isdir(stestr_dir):
+            commands.init_command(repo_url=local_dir)
 
     def take_action(self, parsed_args):
         workspace_manager = workspace.WorkspaceManager(
