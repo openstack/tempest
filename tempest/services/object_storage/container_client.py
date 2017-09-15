@@ -24,29 +24,24 @@ from tempest.lib.common import rest_client
 
 class ContainerClient(rest_client.RestClient):
 
-    def create_container(
-            self, container_name,
-            metadata=None,
-            remove_metadata=None,
-            metadata_prefix='X-Container-Meta-',
-            remove_metadata_prefix='X-Remove-Container-Meta-'):
-        """Creates a container
+    def update_container(self, container_name, **headers):
+        """Creates or Updates a container
 
-        with optional metadata passed in as a dictionary
+        with optional metadata passed in as a dictionary.
+        Full list of allowed headers or value, please refer to the
+        official API reference:
+        https://developer.openstack.org/api-ref/object-store/#create-container
         """
         url = str(container_name)
-        headers = {}
-
-        if metadata is not None:
-            for key in metadata:
-                headers[metadata_prefix + key] = metadata[key]
-        if remove_metadata is not None:
-            for key in remove_metadata:
-                headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.put(url, body=None, headers=headers)
         self.expected_success([201, 202], resp.status)
         return resp, body
+
+    # NOTE: This alias is for the usability because PUT can be used for both
+    # updating/creating a resource and this PUT is mainly used for creating
+    # on Swift container API.
+    create_container = update_container
 
     def delete_container(self, container_name):
         """Deletes the container (if it's empty)."""

@@ -51,18 +51,16 @@ class ContainerTest(base.BaseObjectTest):
     def test_versioned_container(self):
         # create container
         vers_container_name = data_utils.rand_name(name='TestVersionContainer')
-        resp, _ = self.container_client.create_container(
-            vers_container_name)
+        resp, _ = self.container_client.update_container(vers_container_name)
         self.containers.append(vers_container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
         base_container_name = data_utils.rand_name(name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
-        resp, _ = self.container_client.create_container(
+        resp, _ = self.container_client.update_container(
             base_container_name,
-            metadata=headers,
-            metadata_prefix='')
+            **headers)
         self.containers.append(base_container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(base_container_name, '0', '0',

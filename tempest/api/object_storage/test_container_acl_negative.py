@@ -39,7 +39,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_client.update_container(self.container_name)
 
     def tearDown(self):
         self.delete_containers([self.container_name])

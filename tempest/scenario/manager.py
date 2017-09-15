@@ -1278,7 +1278,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
     def create_container(self, container_name=None):
         name = container_name or data_utils.rand_name(
             'swift-scenario-container')
-        self.container_client.create_container(name)
+        self.container_client.update_container(name)
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
         LOG.debug('Container %s created', name)

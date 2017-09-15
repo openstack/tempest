@@ -786,12 +786,12 @@ class ObjectTest(base.BaseObjectTest):
     def test_copy_object_across_containers(self):
         # create a container to use as a source container
         src_container_name = data_utils.rand_name(name='TestSourceContainer')
-        self.container_client.create_container(src_container_name)
+        self.container_client.update_container(src_container_name)
         self.containers.append(src_container_name)
         # create a container to use as a destination container
         dst_container_name = data_utils.rand_name(
             name='TestDestinationContainer')
-        self.container_client.create_container(dst_container_name)
+        self.container_client.update_container(dst_container_name)
         self.containers.append(dst_container_name)
         # create object in source container
         object_name = data_utils.rand_name(name='Object')
@@ -977,7 +977,7 @@ class PublicObjectTest(base.BaseObjectTest):
     def setUp(self):
         super(PublicObjectTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_client.update_container(self.container_name)
 
     def tearDown(self):
         self.delete_containers([self.container_name])
