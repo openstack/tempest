@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
-
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base
 
@@ -136,43 +134,6 @@ class TestDataUtils(base.TestCase):
 
         actual = data_utils.random_bytes(size=2048)
         self.assertEqual(2048, len(actual))
-
-    def test_get_ipv6_addr_by_EUI64(self):
-        actual = data_utils.get_ipv6_addr_by_EUI64('2001:db8::',
-                                                   '00:16:3e:33:44:55')
-        self.assertIsInstance(actual, netaddr.IPAddress)
-        self.assertEqual(actual,
-                         netaddr.IPAddress('2001:db8::216:3eff:fe33:4455'))
-
-    def test_get_ipv6_addr_by_EUI64_with_IPv4_prefix(self):
-        ipv4_prefix = '10.0.8'
-        mac = '00:16:3e:33:44:55'
-        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
-                          ipv4_prefix, mac)
-
-    def test_get_ipv6_addr_by_EUI64_bad_cidr_type(self):
-        bad_cidr = 123
-        mac = '00:16:3e:33:44:55'
-        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
-                          bad_cidr, mac)
-
-    def test_get_ipv6_addr_by_EUI64_bad_cidr_value(self):
-        bad_cidr = 'bb'
-        mac = '00:16:3e:33:44:55'
-        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
-                          bad_cidr, mac)
-
-    def test_get_ipv6_addr_by_EUI64_bad_mac_value(self):
-        cidr = '2001:db8::'
-        bad_mac = '00:16:3e:33:44:5Z'
-        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
-                          cidr, bad_mac)
-
-    def test_get_ipv6_addr_by_EUI64_bad_mac_type(self):
-        cidr = '2001:db8::'
-        bad_mac = 99999999999999999999
-        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
-                          cidr, bad_mac)
 
     def test_chunkify(self):
         data = "aaa"
