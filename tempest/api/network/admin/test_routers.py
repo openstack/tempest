@@ -41,19 +41,6 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.addCleanup(self._cleanup_router, router)
         return router
 
-    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
-        interface = self.routers_client.add_router_interface(
-            router_id, subnet_id=subnet_id)
-        self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        router_id, subnet_id)
-        self.assertEqual(subnet_id, interface['subnet_id'])
-        return interface
-
-    def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
-        body = self.routers_client.remove_router_interface(router_id,
-                                                           subnet_id=subnet_id)
-        self.assertEqual(subnet_id, body['subnet_id'])
-
     @classmethod
     def skip_checks(cls):
         super(RoutersAdminTest, cls).skip_checks()
