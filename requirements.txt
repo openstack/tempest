@@ -22,4 +22,4 @@ PrettyTable<0.8,>=0.7.1 # BSD
 os-testr>=1.0.0 # Apache-2.0
 urllib3>=1.21.1 # MIT
 debtcollector>=1.2.0 # Apache-2.0
-unittest2 # BSD
+unittest2>=1.1.0 # BSD
