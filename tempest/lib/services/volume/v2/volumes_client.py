@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from debtcollector import moves
 from debtcollector import removals
 from oslo_serialization import jsonutils as json
 import six
@@ -22,42 +21,11 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
-from tempest.lib.services.volume.v2 import transfers_client
 
 
 class VolumesClient(base_client.BaseClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"
-
-    create_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.create_volume_transfer,
-        'VolumesClient.create_volume_transfer', __name__,
-        message='Use create_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    show_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.show_volume_transfer,
-        'VolumesClient.show_volume_transfer', __name__,
-        message='Use show_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    list_volume_transfers = moves.moved_function(
-        transfers_client.TransfersClient.list_volume_transfers,
-        'VolumesClient.list_volume_transfers', __name__,
-        message='Use list_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    delete_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.delete_volume_transfer,
-        'VolumesClient.delete_volume_transfer', __name__,
-        message='Use delete_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    accept_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.accept_volume_transfer,
-        'VolumesClient.accept_volume_transfer', __name__,
-        message='Use accept_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.

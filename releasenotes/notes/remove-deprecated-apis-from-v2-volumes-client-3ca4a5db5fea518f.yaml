@@ -1,0 +1,11 @@
+---
+upgrade:
+  - |
+    Remove deprecated APIs from volume v2 volumes_client, and the deprecated
+    APIs are re-realized in volume v2 transfers_client.
+
+    * create_volume_transfer
+    * show_volume_transfer
+    * list_volume_transfers
+    * delete_volume_transfer
+    * accept_volume_transfer
