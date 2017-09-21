@@ -103,10 +103,10 @@ to work even if just one ``test_method`` is selected for execution.
 Service Tagging
 ---------------
 Service tagging is used to specify which services are exercised by a particular
-test method. You specify the services with the ``tempest.test.services``
+test method. You specify the services with the ``tempest.common.utils.services``
 decorator. For example:
 
-@services('compute', 'image')
+@utils.services('compute', 'image')
 
 Valid service tag names are the same as the list of directories in tempest.api
 that have tests.
