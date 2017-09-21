@@ -116,12 +116,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_password = CONF.validation.image_ssh_password
-        cls.volumes = []
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.clear_volumes()
-        super(BaseV2ComputeTest, cls).resource_cleanup()
 
     @classmethod
     def server_check_teardown(cls):
@@ -415,28 +409,14 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         if image_ref is not None:
             kwargs['imageRef'] = image_ref
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
-        cls.volumes.append(volume)
+        cls.addClassResourceCleanup(
+            cls.volumes_client.wait_for_resource_deletion, volume['id'])
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.volumes_client.delete_volume,
+                                    volume['id'])
         waiters.wait_for_volume_resource_status(cls.volumes_client,
                                                 volume['id'], 'available')
         return volume
-
-    @classmethod
-    def clear_volumes(cls):
-        LOG.debug('Clearing volumes: %s', ','.join(
-            volume['id'] for volume in cls.volumes))
-        for volume in cls.volumes:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.volumes_client.delete_volume, volume['id'])
-            except Exception:
-                LOG.exception('Deleting volume %s failed', volume['id'])
-
-        for volume in cls.volumes:
-            try:
-                cls.volumes_client.wait_for_resource_deletion(volume['id'])
-            except Exception:
-                LOG.exception('Waiting for deletion of volume %s failed',
-                              volume['id'])
 
     def attach_volume(self, server, volume, device=None, check_reserved=False):
         """Attaches volume to server and waits for 'in-use' volume status.
