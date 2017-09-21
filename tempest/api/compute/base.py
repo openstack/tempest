@@ -116,39 +116,18 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_user = CONF.validation.image_ssh_user
         cls.image_ssh_password = CONF.validation.image_ssh_password
-        cls.servers = []
         cls.security_groups = []
         cls.server_groups = []
         cls.volumes = []
 
     @classmethod
     def resource_cleanup(cls):
-        cls.clear_servers()
         cls.clear_resources('security groups', cls.security_groups,
                             cls.security_groups_client.delete_security_group)
         cls.clear_resources('server groups', cls.server_groups,
                             cls.server_groups_client.delete_server_group)
         cls.clear_volumes()
         super(BaseV2ComputeTest, cls).resource_cleanup()
-
-    @classmethod
-    def clear_servers(cls):
-        LOG.debug('Clearing servers: %s', ','.join(
-            server['id'] for server in cls.servers))
-        for server in cls.servers:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.servers_client.delete_server, server['id'])
-            except Exception:
-                LOG.exception('Deleting server %s failed', server['id'])
-
-        for server in cls.servers:
-            try:
-                waiters.wait_for_server_termination(cls.servers_client,
-                                                    server['id'])
-            except Exception:
-                LOG.exception('Waiting for deletion of server %s failed',
-                              server['id'])
 
     @classmethod
     def server_check_teardown(cls):
@@ -222,7 +201,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             volume_backed=volume_backed,
             **kwargs)
 
-        cls.servers.extend(servers)
+        # For each server schedule wait and delete, so we first delete all
+        # and then wait for all
+        for server in servers:
+            cls.addClassResourceCleanup(waiters.wait_for_server_termination,
+                                        cls.servers_client, server['id'])
+        for server in servers:
+            cls.addClassResourceCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                cls.servers_client.delete_server, server['id'])
 
         return body
 

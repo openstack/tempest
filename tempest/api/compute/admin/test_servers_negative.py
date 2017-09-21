@@ -61,7 +61,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_ref = self.create_flavor(ram=ram, vcpus=vcpus, disk=disk)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize_server,
-                          self.servers[0]['id'],
+                          self.s1_id,
                           flavor_ref['id'])
 
     @decorators.idempotent_id('7368a427-2f26-4ad9-9ba9-911a0ec2b0db')
@@ -83,7 +83,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         flavor_ref = self.create_flavor(ram=ram, vcpus=vcpus, disk=disk)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.client.resize_server,
-                          self.servers[0]['id'],
+                          self.s1_id,
                           flavor_ref['id'])
 
     @decorators.attr(type=['negative'])
