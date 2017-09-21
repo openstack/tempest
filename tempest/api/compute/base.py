@@ -264,18 +264,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 return
             time.sleep(self.build_interval)
 
-    @staticmethod
-    def _delete_volume(volumes_client, volume_id):
-        """Deletes the given volume and waits for it to be gone."""
-        try:
-            volumes_client.delete_volume(volume_id)
-            # TODO(mriedem): We should move the wait_for_resource_deletion
-            # into the delete_volume method as a convenience to the caller.
-            volumes_client.wait_for_resource_deletion(volume_id)
-        except lib_exc.NotFound:
-            LOG.warning("Unable to delete volume '%s' since it was not found. "
-                        "Maybe it was already deleted?", volume_id)
-
     @classmethod
     def prepare_instance_network(cls):
         if (CONF.validation.auth_method != 'disabled' and
@@ -383,7 +371,14 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        cls._delete_volume(cls.volumes_client, volume_id)
+        try:
+            cls.volumes_client.delete_volume(volume_id)
+            # TODO(mriedem): We should move the wait_for_resource_deletion
+            # into the delete_volume method as a convenience to the caller.
+            cls.volumes_client.wait_for_resource_deletion(volume_id)
+        except lib_exc.NotFound:
+            LOG.warning("Unable to delete volume '%s' since it was not found. "
+                        "Maybe it was already deleted?", volume_id)
 
     @classmethod
     def get_server_ip(cls, server, validation_resources=None):
