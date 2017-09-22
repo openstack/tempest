@@ -1024,23 +1024,6 @@ class NetworkScenarioTest(ScenarioTest):
                         client.delete_security_group, secgroup['id'])
         return secgroup
 
-    def _default_security_group(self, client=None, tenant_id=None):
-        """Get default secgroup for given tenant_id.
-
-        :returns: default secgroup for given tenant
-        """
-        if client is None:
-            client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
-        sgs = [
-            sg for sg in list(client.list_security_groups().values())[0]
-            if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
-        ]
-        msg = "No default security group for tenant %s." % (tenant_id)
-        self.assertNotEmpty(sgs, msg)
-        return sgs[0]
-
     def _create_security_group_rule(self, secgroup=None,
                                     sec_group_rules_client=None,
                                     tenant_id=None,
@@ -1069,8 +1052,12 @@ class NetworkScenarioTest(ScenarioTest):
         if not tenant_id:
             tenant_id = security_groups_client.tenant_id
         if secgroup is None:
-            secgroup = self._default_security_group(
-                client=security_groups_client, tenant_id=tenant_id)
+            # Get default secgroup for tenant_id
+            default_secgroups = security_groups_client.list_security_groups(
+                name='default', tenant_id=tenant_id)['security_groups']
+            msg = "No default security group for tenant %s." % (tenant_id)
+            self.assertNotEmpty(default_secgroups, msg)
+            secgroup = default_secgroups[0]
 
         ruleset = dict(security_group_id=secgroup['id'],
                        tenant_id=secgroup['tenant_id'])
