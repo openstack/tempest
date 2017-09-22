@@ -426,3 +426,28 @@ class TestTempestBaseTestClass(base.TestCase):
 
         with testtools.ExpectedException(testtools.testcase.TestSkipped):
             NeedV3().skip_checks()
+
+    def test_setup_credentials_all(self):
+        expected_creds = ['string', ['list', 'role1', 'role2']]
+
+        class AllCredentials(self.parent_test):
+            credentials = expected_creds
+
+        expected_clients = 'clients'
+        with mock.patch.object(
+                AllCredentials,
+                'get_client_manager') as mock_get_client_manager:
+            mock_get_client_manager.return_value = expected_clients
+            all_creds = AllCredentials()
+            all_creds.setup_credentials()
+        self.assertTrue(hasattr(all_creds, 'os_string'))
+        self.assertEqual(expected_clients, all_creds.os_string)
+        self.assertTrue(hasattr(all_creds, 'os_roles_list'))
+        self.assertEqual(expected_clients, all_creds.os_roles_list)
+        self.assertEqual(2, mock_get_client_manager.call_count)
+        self.assertEqual(
+            expected_creds[0],
+            mock_get_client_manager.mock_calls[0][2]['credential_type'])
+        self.assertEqual(
+            expected_creds[1][1:],
+            mock_get_client_manager.mock_calls[1][2]['roles'])

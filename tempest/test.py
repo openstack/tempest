@@ -300,12 +300,65 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def setup_credentials(cls):
         """Allocate credentials and create the client managers from them.
 
-        For every element of credentials param function creates tenant/user,
-        Then it creates client manager for that credential.
+        `setup_credentials` looks for the content of the `credentials`
+        attribute in the test class. If the value is a non-empty collection,
+        a credentials provider is setup, and credentials are provisioned or
+        allocated based on the content of the collection. Every set of
+        credentials is associated to an object of type `cls.client_manager`.
+        The client manager is accessible by tests via class attribute
+        `os_[type]`:
 
-        Network related tests must override this function with
-        set_network_resources() method, otherwise it will create
-        network resources(network resources are created in a later step).
+        Valid values in `credentials` are:
+        - 'primary':
+            A normal user is provisioned.
+            It can be used only once. Multiple entries will be ignored.
+            Clients are available at os_primary.
+        - 'alt':
+            A normal user other than 'primary' is provisioned.
+            It can be used only once. Multiple entries will be ignored.
+            Clients are available at os_alt.
+        - 'admin':
+            An admin user is provisioned.
+            It can be used only once. Multiple entries will be ignored.
+            Clients are available at os_admin.
+        - A list in the format ['any_label', 'role1', ... , 'roleN']:
+            A client with roles <list>[1:] is provisioned.
+            It can be used multiple times, with unique labels.
+            Clients are available at os_roles_<list>[0].
+
+        By default network resources are allocated (in case of dynamic
+        credentials). Tests that do not need network or that require a
+        custom network setup must specify which network resources shall
+        be provisioned using the `set_network_resources()` method (note
+        that it must be invoked before the `setup_credentials` is
+        invoked on super).
+
+        Example::
+
+            class TestWithCredentials(test.BaseTestCase):
+
+                credentials = ['primary', 'admin',
+                               ['special', 'special_role1']]
+
+                @classmethod
+                def setup_credentials(cls):
+                    # set_network_resources must be called first
+                    cls.set_network_resources(network=True)
+                    super(TestWithCredentials, cls).setup_credentials()
+
+                @classmethod
+                def setup_clients(cls):
+                    cls.servers = cls.os_primary.compute.ServersClient()
+                    cls.admin_servers = cls.os_admin.compute.ServersClient()
+                    # certain API calls may require a user with a specific
+                    # role assigned. In this example `special_role1` is
+                    # assigned to the user in `cls.os_roles_special`.
+                    cls.special_servers = (
+                        cls.os_roles_special.compute.ServersClient())
+
+                def test_special_servers(self):
+                    # Do something with servers
+                    pass
         """
         cls.__setup_credentials_called = True
         for credentials_type in cls.credentials:
@@ -709,6 +762,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         can be altered using this method, which allows tests to define which
         specific network resources to be provisioned - none if no parameter
         is specified.
+
+        This method is designed so that only the network resources set on the
+        leaf class are honoured.
 
         Credentials are provisioned as part of the class setup fixture,
         during the `setup_credentials` step. For this to be effective this
