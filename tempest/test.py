@@ -27,7 +27,6 @@ from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import utils
 from tempest import config
-from tempest.lib.common import cred_client
 from tempest.lib.common import fixed_network
 from tempest.lib.common import validation_resources as vr
 from tempest.lib import decorators
@@ -611,37 +610,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     @property
     def credentials_provider(self):
         return self._get_credentials_provider()
-
-    @property
-    def identity_utils(self):
-        """A client that abstracts v2 and v3 identity operations.
-
-        This can be used for creating and tearing down projects in tests. It
-        should not be used for testing identity features.
-        """
-        if CONF.identity.auth_version == 'v2':
-            client = self.os_admin.identity_client
-            users_client = self.os_admin.users_client
-            project_client = self.os_admin.tenants_client
-            roles_client = self.os_admin.roles_client
-            domains_client = None
-        else:
-            client = self.os_admin.identity_v3_client
-            users_client = self.os_admin.users_v3_client
-            project_client = self.os_admin.projects_client
-            roles_client = self.os_admin.roles_v3_client
-            domains_client = self.os_admin.domains_client
-
-        try:
-            domain = client.auth_provider.credentials.project_domain_name
-        except AttributeError:
-            domain = 'Default'
-
-        return cred_client.get_creds_client(client, project_client,
-                                            users_client,
-                                            roles_client,
-                                            domains_client,
-                                            project_domain_name=domain)
 
     @classmethod
     def get_identity_version(cls):

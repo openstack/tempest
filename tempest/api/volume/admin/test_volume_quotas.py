@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import identity
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
@@ -117,10 +118,11 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         # Admin can delete the resource quota set for a project
         project_name = data_utils.rand_name('quota_tenant')
         description = data_utils.rand_name('desc_')
-        project = self.identity_utils.create_project(project_name,
-                                                     description=description)
+        project = identity.identity_utils(self.os_admin).create_project(
+            project_name, description=description)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
         quota_set_default = self.admin_quotas_client.show_default_quota_set(
             project_id)['quota_set']
         volume_default = quota_set_default['volumes']
