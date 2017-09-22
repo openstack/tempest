@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import sys
 
 import mock
@@ -451,3 +452,155 @@ class TestTempestBaseTestClass(base.TestCase):
         self.assertEqual(
             expected_creds[1][1:],
             mock_get_client_manager.mock_calls[1][2]['roles'])
+
+
+class TestTempestBaseTestClassFixtures(base.TestCase):
+
+    SETUP_FIXTURES = [test.BaseTestCase.setUpClass.__name__,
+                      test.BaseTestCase.skip_checks.__name__,
+                      test.BaseTestCase.setup_credentials.__name__,
+                      test.BaseTestCase.setup_clients.__name__,
+                      test.BaseTestCase.resource_setup.__name__]
+    TEARDOWN_FIXTURES = [test.BaseTestCase.tearDownClass.__name__,
+                         test.BaseTestCase.resource_cleanup.__name__,
+                         test.BaseTestCase.clear_credentials.__name__]
+
+    def setUp(self):
+        super(TestTempestBaseTestClassFixtures, self).setUp()
+        self.mocks = {}
+        for fix in self.SETUP_FIXTURES + self.TEARDOWN_FIXTURES:
+            self.mocks[fix] = mock.Mock()
+
+        def tracker_builder(name):
+
+            def tracker(cls):
+                # Track that the fixture was invoked
+                cls.fixtures_invoked.append(name)
+                # Run the fixture
+                getattr(super(TestWithClassFixtures, cls), name)()
+                # Run a mock we can use for side effects
+                self.mocks[name]()
+
+            return tracker
+
+        class TestWithClassFixtures(test.BaseTestCase):
+
+            credentials = []
+            fixtures_invoked = []
+
+            def runTest(_self):
+                pass
+
+        # Decorate all test class fixtures with tracker_builder
+        for method_name in self.SETUP_FIXTURES + self.TEARDOWN_FIXTURES:
+            setattr(TestWithClassFixtures, method_name,
+                    classmethod(tracker_builder(method_name)))
+
+        self.test = TestWithClassFixtures()
+
+    def test_no_error_flow(self):
+        # If all setup fixtures are executed, all cleanup fixtures are
+        # executed too
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        self.assertEqual(self.SETUP_FIXTURES + self.TEARDOWN_FIXTURES,
+                         self.test.fixtures_invoked)
+
+    def test_skip_only(self):
+        # If a skip condition is hit in the test, no credentials or resource
+        # is provisioned / cleaned-up
+        self.mocks['skip_checks'].side_effect = (
+            testtools.testcase.TestSkipped())
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If we trigger a skip condition, teardown is not invoked at all
+        self.assertEqual(self.SETUP_FIXTURES[:2],
+                         self.test.fixtures_invoked)
+
+    def test_skip_credentials_fails(self):
+        expected_exc = 'sc exploded'
+        self.mocks['setup_credentials'].side_effect = Exception(expected_exc)
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If setup_credentials explodes, we invoked teardown class and
+        # clear credentials, and re-raise
+        self.assertEqual((self.SETUP_FIXTURES[:3] +
+                          [self.TEARDOWN_FIXTURES[i] for i in (0, 2)]),
+                         self.test.fixtures_invoked)
+        found_exc = log[0][1][1]
+        self.assertIn(expected_exc, str(found_exc))
+
+    def test_skip_credentials_fails_clear_fails(self):
+        # If cleanup fails on failure, we log the exception and do not
+        # re-raise it. Note that since the exception happens outside of
+        # the Tempest test setUp, logging is not captured on the Tempest
+        # test side, it will be captured by the unit test instead.
+        expected_exc = 'sc exploded'
+        clear_exc = 'clear exploded'
+        self.mocks['setup_credentials'].side_effect = Exception(expected_exc)
+        self.mocks['clear_credentials'].side_effect = Exception(clear_exc)
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If setup_credentials explodes, we invoked teardown class and
+        # clear credentials, and re-raise
+        self.assertEqual((self.SETUP_FIXTURES[:3] +
+                          [self.TEARDOWN_FIXTURES[i] for i in (0, 2)]),
+                         self.test.fixtures_invoked)
+        found_exc = log[0][1][1]
+        self.assertIn(expected_exc, str(found_exc))
+        # Since log capture depends on OS_LOG_CAPTURE, we can only assert if
+        # logging was captured
+        if os.environ.get('OS_LOG_CAPTURE'):
+            self.assertIn(clear_exc, self.log_fixture.logger.output)
+
+    def test_skip_credentials_clients_resources_credentials_clear_fails(self):
+        # If cleanup fails with no previous failure, we re-raise the exception.
+        expected_exc = 'clear exploded'
+        self.mocks['clear_credentials'].side_effect = Exception(expected_exc)
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If setup_credentials explodes, we invoked teardown class and
+        # clear credentials, and re-raise
+        self.assertEqual(self.SETUP_FIXTURES + self.TEARDOWN_FIXTURES,
+                         self.test.fixtures_invoked)
+        found_exc = log[0][1][1]
+        self.assertIn(expected_exc, str(found_exc))
+
+    def test_skip_credentials_clients_fails(self):
+        expected_exc = 'clients exploded'
+        self.mocks['setup_clients'].side_effect = Exception(expected_exc)
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If setup_clients explodes, we invoked teardown class and
+        # clear credentials, and re-raise
+        self.assertEqual((self.SETUP_FIXTURES[:4] +
+                          [self.TEARDOWN_FIXTURES[i] for i in (0, 2)]),
+                         self.test.fixtures_invoked)
+        found_exc = log[0][1][1]
+        self.assertIn(expected_exc, str(found_exc))
+
+    def test_skip_credentials_clients_resources_fails(self):
+        expected_exc = 'resource setup exploded'
+        self.mocks['resource_setup'].side_effect = Exception(expected_exc)
+        suite = unittest.TestSuite((self.test,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # If resource_setup explodes, we invoked teardown class and
+        # clear credentials and resource cleanup, and re-raise
+        self.assertEqual(self.SETUP_FIXTURES + self.TEARDOWN_FIXTURES,
+                         self.test.fixtures_invoked)
+        found_exc = log[0][1][1]
+        self.assertIn(expected_exc, str(found_exc))
