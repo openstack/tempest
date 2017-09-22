@@ -196,10 +196,6 @@ def _get_api_versions(os, service):
 def verify_keystone_api_versions(os, update):
     # Check keystone api versions
     versions = _get_api_versions(os, 'keystone')
-    if (CONF.identity_feature_enabled.api_v2 !=
-            contains_version('v2.', versions)):
-        print_and_or_update('api_v2', 'identity-feature-enabled',
-                            not CONF.identity_feature_enabled.api_v2, update)
     if (CONF.identity_feature_enabled.api_v3 !=
             contains_version('v3.', versions)):
         print_and_or_update('api_v3', 'identity-feature-enabled',

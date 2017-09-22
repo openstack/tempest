@@ -207,8 +207,14 @@ IdentityFeatureGroup = [
                 help='Does the identity service have delegation and '
                      'impersonation enabled'),
     cfg.BoolOpt('api_v2',
-                default=True,
-                help='Is the v2 identity API enabled'),
+                default=False,
+                help='Is the v2 identity API enabled',
+                deprecated_for_removal=True,
+                deprecated_reason='The identity v2.0 API was removed in the '
+                                  'Queens release. Tests that exercise the '
+                                  'v2.0 API will be removed from tempest in '
+                                  'the v22.0.0 release. They are kept only to '
+                                  'test stable branches.'),
     cfg.BoolOpt('api_v2_admin',
                 default=True,
                 help="Is the v2 identity admin API available? This setting "
