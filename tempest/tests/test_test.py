@@ -453,6 +453,26 @@ class TestTempestBaseTestClass(base.TestCase):
             expected_creds[1][1:],
             mock_get_client_manager.mock_calls[1][2]['roles'])
 
+    def test_setup_class_overwritten(self):
+
+        class OverridesSetup(self.parent_test):
+
+            @classmethod
+            def setUpClass(cls):  # noqa
+                pass
+
+        overrides_setup = OverridesSetup()
+        suite = unittest.TestSuite((overrides_setup,))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+        # Record 0, test (error holder). The error generates during test run.
+        self.assertIn('runTest', str(log[0][0]))
+        # Record 0, traceback
+        self.assertRegex(
+            str(log[0][2]['traceback']).replace('\n', ' '),
+            RuntimeError.__name__ + ': .* ' + OverridesSetup.__name__)
+
 
 class TestTempestBaseTestClassFixtures(base.TestCase):
 
