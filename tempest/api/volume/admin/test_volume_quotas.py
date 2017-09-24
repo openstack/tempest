@@ -101,7 +101,7 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
         volume = self.create_volume()
         self.addCleanup(self.delete_volume,
-                        self.admin_volume_client, volume['id'])
+                        self.volumes_client, volume['id'])
 
         new_quota_usage = self.admin_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
