@@ -416,6 +416,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_mtu_sized_frames(self):
         """Validate that network MTU sized frames fit through."""
         self._setup_network_and_servers()
+        # first check that connectivity works in general for the instance
+        self.check_public_network_connectivity(should_connect=True)
+        # now that we checked general connectivity, test that full size frames
+        # can also pass between nodes
         self.check_public_network_connectivity(
             should_connect=True, mtu=self.network['mtu'])
 
