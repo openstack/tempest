@@ -184,3 +184,12 @@ class TestGroupsClient(base.BaseServiceTest):
             group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
             status=202,
             **self.FAKE_UPDATE_GROUP['group'])
+
+    def test_reset_group_status(self):
+        self.check_service_client_function(
+            self.client.reset_group_status,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {},
+            status=202,
+            group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
+            status_to_set='error')
