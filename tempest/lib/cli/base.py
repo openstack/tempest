@@ -93,10 +93,20 @@ class CLIClient(object):
     :type insecure: boolean
     :param prefix: prefix to insert before commands
     :type prefix: string
+    :param user_domain_name: User's domain name
+    :type user_domain_name: string
+    :param user_domain_id: User's domain ID
+    :type user_domain_id: string
+    :param project_domain_name: Project's domain name
+    :type project_domain_name: string
+    :param project_domain_id: Project's domain ID
+    :type project_domain_id: string
     """
 
     def __init__(self, username='', password='', tenant_name='', uri='',
-                 cli_dir='', insecure=False, prefix='', *args, **kwargs):
+                 cli_dir='', insecure=False, prefix='', user_domain_name=None,
+                 user_domain_id=None, project_domain_name=None,
+                 project_domain_id=None, *args, **kwargs):
         """Initialize a new CLIClient object."""
         super(CLIClient, self).__init__()
         self.cli_dir = cli_dir if cli_dir else '/usr/bin'
@@ -106,6 +116,10 @@ class CLIClient(object):
         self.uri = uri
         self.insecure = insecure
         self.prefix = prefix
+        self.user_domain_name = user_domain_name
+        self.user_domain_id = user_domain_id
+        self.project_domain_name = project_domain_name
+        self.project_domain_id = project_domain_id
 
     def nova(self, action, flags='', params='', fail_ok=False,
              endpoint_type='publicURL', merge_stderr=False):
@@ -366,6 +380,14 @@ class CLIClient(object):
                   self.tenant_name,
                   self.password,
                   self.uri))
+        if self.user_domain_name is not None:
+            creds += ' --os-user-domain-name %s' % self.user_domain_name
+        if self.user_domain_id is not None:
+            creds += ' --os-user-domain-id %s' % self.user_domain_id
+        if self.project_domain_name is not None:
+            creds += ' --os-project-domain-name %s' % self.project_domain_name
+        if self.project_domain_id is not None:
+            creds += ' --os-project-domain-id %s' % self.project_domain_id
         if self.insecure:
             flags = creds + ' --insecure ' + flags
         else:
