@@ -108,16 +108,16 @@ class GroupsTest(BaseGroupsTest):
         self.assertEqual(grp2_id, grp2['id'])
 
         # Get all groups with detail
-        grps = self.groups_client.list_groups(
-            detail=True)['groups']
-        filtered_grps = [g for g in grps if g['id'] in [grp1_id, grp2_id]]
-        self.assertEqual(2, len(filtered_grps))
-        for grp in filtered_grps:
-            self.assertEqual([volume_type['id']], grp['volume_types'])
-            self.assertEqual(group_type['id'], grp['group_type'])
+        grps = self.groups_client.list_groups(detail=True)['groups']
+        for grp_id in [grp1_id, grp2_id]:
+            filtered_grps = [g for g in grps if g['id'] == grp_id]
+            self.assertEqual(1, len(filtered_grps))
+            self.assertEqual([volume_type['id']],
+                             filtered_grps[0]['volume_types'])
+            self.assertEqual(group_type['id'],
+                             filtered_grps[0]['group_type'])
 
-        vols = self.volumes_client.list_volumes(
-            detail=True)['volumes']
+        vols = self.volumes_client.list_volumes(detail=True)['volumes']
         filtered_vols = [v for v in vols if v['id'] in [vol1_id]]
         self.assertEqual(1, len(filtered_vols))
         for vol in filtered_vols:
@@ -297,8 +297,7 @@ class GroupsTest(BaseGroupsTest):
         self.assertEqual(new_desc, grp['description'])
 
         # Get volumes in the group
-        vols = self.volumes_client.list_volumes(
-            detail=True)['volumes']
+        vols = self.volumes_client.list_volumes(detail=True)['volumes']
         grp_vols = [v for v in vols if v['group_id'] == grp['id']]
         self.assertEqual(1, len(grp_vols))
 
