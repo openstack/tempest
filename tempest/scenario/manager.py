@@ -858,22 +858,6 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
-    def _associate_floating_ip(self, floating_ip, server):
-        port_id, _ = self._get_server_port_id_and_ip4(server)
-        kwargs = dict(port_id=port_id)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertEqual(port_id, floating_ip['port_id'])
-        return floating_ip
-
-    def _disassociate_floating_ip(self, floating_ip):
-        """:param floating_ip: floating_ips_client.create_floatingip"""
-        kwargs = dict(port_id=None)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertIsNone(floating_ip['port_id'])
-        return floating_ip
-
     def check_floating_ip_status(self, floating_ip, status):
         """Verifies floatingip reaches the given status
 
@@ -1182,12 +1166,6 @@ class NetworkScenarioTest(ScenarioTest):
                         client.delete_router,
                         router['id'])
         return router
-
-    def _update_router_admin_state(self, router, admin_state_up):
-        kwargs = dict(admin_state_up=admin_state_up)
-        router = self.routers_client.update_router(
-            router['id'], **kwargs)['router']
-        self.assertEqual(admin_state_up, router['admin_state_up'])
 
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,

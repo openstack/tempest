@@ -213,17 +213,20 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _disassociate_floating_ips(self):
         floating_ip, _ = self.floating_ip_tuple
-        self._disassociate_floating_ip(floating_ip)
-        self.floating_ip_tuple = Floating_IP_tuple(
-            floating_ip, None)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], port_id=None)['floatingip']
+        self.assertIsNone(floating_ip['port_id'])
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, None)
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
         # create a new server for the floating ip
         server = self._create_server(self.network)
-        self._associate_floating_ip(floating_ip, server)
-        self.floating_ip_tuple = Floating_IP_tuple(
-            floating_ip, server)
+        port_id, _ = self._get_server_port_id_and_ip4(server)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], port_id=port_id)['floatingip']
+        self.assertEqual(port_id, floating_ip['port_id'])
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
 
     def _create_new_network(self, create_gateway=False):
         self.new_net = self._create_network()
@@ -354,6 +357,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         for remote_ip in address_list:
             self.check_remote_connectivity(ssh_source, remote_ip,
                                            should_connect)
+
+    def _update_router_admin_state(self, router, admin_state_up):
+        kwargs = dict(admin_state_up=admin_state_up)
+        router = self.routers_client.update_router(
+            router['id'], **kwargs)['router']
+        self.assertEqual(admin_state_up, router['admin_state_up'])
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
