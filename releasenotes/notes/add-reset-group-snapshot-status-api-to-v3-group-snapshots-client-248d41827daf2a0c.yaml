@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add reset group snapshot status API to v3 group_snapshots_client library,
+    min_microversion of this API is 3.19. This feature enables the possibility
+    to reset group snapshot status.
