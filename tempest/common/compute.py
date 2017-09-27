@@ -287,13 +287,21 @@ def shelve_server(servers_client, server_id, force_shelve_offload=False):
 
 def create_websocket(url):
     url = urlparse.urlparse(url)
-    if url.scheme == 'https':
-        client_socket = ssl.wrap_socket(socket.socket(socket.AF_INET,
-                                                      socket.SOCK_STREAM))
+    for res in socket.getaddrinfo(url.hostname, url.port,
+                                  socket.AF_UNSPEC, socket.SOCK_STREAM):
+        af, socktype, proto, _, sa = res
+        client_socket = socket.socket(af, socktype, proto)
+        if url.scheme == 'https':
+            client_socket = ssl.wrap_socket(client_socket)
+        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            client_socket.connect(sa)
+        except socket.error:
+            client_socket.close()
+            continue
+        break
     else:
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    client_socket.connect((url.hostname, url.port))
+        raise socket.error('WebSocket creation failed')
     # Turn the Socket into a WebSocket to do the communication
     return _WebSocket(client_socket, url)
 
