@@ -20,14 +20,10 @@ from tempest.lib import decorators
 class AvailabilityZoneTestJSON(base.BaseVolumeTest):
     """Tests Availability Zone API List"""
 
-    @classmethod
-    def setup_clients(cls):
-        super(AvailabilityZoneTestJSON, cls).setup_clients()
-        cls.client = cls.availability_zone_client
-
     @decorators.idempotent_id('01f1ae88-eba9-4c6b-a011-6f7ace06b725')
     def test_get_availability_zone_list(self):
         # List of availability zone
-        availability_zone = (self.client.list_availability_zones()
-                             ['availabilityZoneInfo'])
+        availability_zone = (
+            self.availability_zone_client.list_availability_zones()
+            ['availabilityZoneInfo'])
         self.assertNotEmpty(availability_zone)
