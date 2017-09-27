@@ -40,6 +40,7 @@ class TestTempestRun(base.TestCase):
         setattr(args, "subunit", True)
         setattr(args, "parallel", False)
         setattr(args, "concurrency", 10)
+        setattr(args, "load_list", '')
         options = self.run_cmd._build_options(args)
         self.assertEqual(['--subunit',
                           '--concurrency=10'],
