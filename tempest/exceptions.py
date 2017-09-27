@@ -52,9 +52,5 @@ class ServerUnreachable(exceptions.TempestException):
                "the configured network")
 
 
-class RFCViolation(exceptions.RestClientException):
-    message = "RFC Violation"
-
-
 class InvalidServiceTag(exceptions.TempestException):
     message = "Invalid service tag"
