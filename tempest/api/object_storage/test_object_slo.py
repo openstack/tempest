@@ -172,6 +172,6 @@ class ObjectSloTest(base.BaseObjectTest):
         # Check only the format of common headers with custom matcher
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-        resp, body = self.container_client.list_container_contents(
+        resp, body = self.container_client.list_container_objects(
             self.container_name)
         self.assertEqual(int(resp['x-container-object-count']), 0)

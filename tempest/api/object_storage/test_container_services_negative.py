@@ -141,7 +141,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # that doesn't exist.
         params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
-                          self.container_client.list_container_contents,
+                          self.container_client.list_container_objects,
                           'nonexistent_container_name', params)
 
     @decorators.attr(type=["negative"])
@@ -155,7 +155,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'DELETE')
         params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
-                          self.container_client.list_container_contents,
+                          self.container_client.list_container_objects,
                           container_name, params)
 
     @decorators.attr(type=["negative"])

@@ -96,7 +96,7 @@ class BulkTest(base.BaseObjectTest):
         self.assertIn(container_name, [b['name'] for b in body])
 
         param = {'format': 'json'}
-        resp, contents_list = self.container_client.list_container_contents(
+        resp, contents_list = self.container_client.list_container_objects(
             container_name, param)
 
         self.assertHeaders(resp, 'Container', 'GET')

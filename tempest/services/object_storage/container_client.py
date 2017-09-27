@@ -15,6 +15,7 @@
 
 from xml.etree import ElementTree as etree
 
+import debtcollector.moves
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
@@ -90,47 +91,24 @@ class ContainerClient(rest_client.RestClient):
         return resp, body
 
     def list_container_metadata(self, container_name):
-        """Retrieves container metadata headers"""
+        """List all container metadata."""
         url = str(container_name)
         resp, body = self.head(url)
         self.expected_success(204, resp.status)
         return resp, body
 
-    def list_container_contents(self, container, params=None):
+    def list_container_objects(self, container_name, params=None):
         """List the objects in a container, given the container name
 
-           Returns the container object listing as a plain text list, or as
-           xml or json if that option is specified via the 'format' argument.
+        Returns the container object listing as a plain text list, or as
+        xml or json if that option is specified via the 'format' argument.
 
-           Optional Arguments:
-           limit = integer
-               For an integer value n, limits the number of results to at most
-               n values.
-
-           marker = 'string'
-               Given a string value x, return object names greater in value
-               than the specified marker.
-
-           prefix = 'string'
-               For a string value x, causes the results to be limited to names
-               beginning with the substring x.
-
-           format = 'json' or 'xml'
-               Specify either json or xml to return the respective serialized
-               response.
-               If json, returns a list of json objects
-               if xml, returns a string of xml
-
-           path = 'string'
-               For a string value x, return the object names nested in the
-               pseudo path (assuming preconditions are met - see below).
-
-           delimiter = 'character'
-               For a character c, return all the object names nested in the
-               container (without the need for the directory marker objects).
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/object-storage/?expanded=show-container-details-and-list-objects-detail
         """
 
-        url = str(container)
+        url = str(container_name)
         if params:
             url += '?'
             url += '&%s' % urllib.urlencode(params)
@@ -148,3 +126,7 @@ class ContainerClient(rest_client.RestClient):
 
         self.expected_success([200, 204], resp.status)
         return resp, body
+
+    list_container_contents = debtcollector.moves.moved_function(
+        list_container_objects, 'list_container_contents', __name__,
+        version='Queens', removal_version='Rocky')
