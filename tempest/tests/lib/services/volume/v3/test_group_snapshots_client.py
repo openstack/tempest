@@ -161,3 +161,12 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
             {},
             group_snapshot_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
             status=202)
+
+    def test_reset_group_snapshot_status(self):
+        self.check_service_client_function(
+            self.client.reset_group_snapshot_status,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {},
+            status=202,
+            group_snapshot_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
+            status_to_set='error')

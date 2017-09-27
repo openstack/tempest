@@ -63,9 +63,9 @@ class BaseGroupsTest(base.BaseVolumeAdminTest):
 
 
 class GroupsTest(BaseGroupsTest):
+    _api_version = 3
     min_microversion = '3.14'
     max_microversion = 'latest'
-    _api_version = 3
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
@@ -316,6 +316,55 @@ class GroupsTest(BaseGroupsTest):
         vols = self.volumes_client.list_volumes(detail=True)['volumes']
         grp_vols = [v for v in vols if v['group_id'] == grp['id']]
         self.assertEqual(2, len(grp_vols))
+
+
+class GroupsV319Test(BaseGroupsTest):
+    _api_version = 3
+    min_microversion = '3.19'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('3b42c9b9-c984-4444-816e-ca2e1ed30b40')
+    def test_reset_group_snapshot_status(self):
+        # Create volume type
+        volume_type = self.create_volume_type()
+
+        # Create group type
+        group_type = self.create_group_type()
+
+        # Create group
+        group = self._create_group(group_type, volume_type)
+
+        # Create volume
+        volume = self.create_volume(volume_type=volume_type['id'],
+                                    group_id=group['id'])
+
+        # Create group snapshot
+        group_snapshot_name = data_utils.rand_name('group_snapshot')
+        group_snapshot = (self.group_snapshots_client.create_group_snapshot(
+            group_id=group['id'], name=group_snapshot_name)['group_snapshot'])
+        self.addCleanup(self._delete_group_snapshot,
+                        group_snapshot['id'], group['id'])
+        snapshots = self.snapshots_client.list_snapshots(
+            detail=True)['snapshots']
+        for snap in snapshots:
+            if volume['id'] == snap['volume_id']:
+                waiters.wait_for_volume_resource_status(
+                    self.snapshots_client, snap['id'], 'available')
+        waiters.wait_for_volume_resource_status(
+            self.group_snapshots_client, group_snapshot['id'], 'available')
+
+        # Reset group snapshot status
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.group_snapshots_client,
+                        group_snapshot['id'], 'available')
+        self.addCleanup(
+            self.admin_group_snapshots_client.reset_group_snapshot_status,
+            group_snapshot['id'], 'available')
+        for status in ['creating', 'available', 'error']:
+            self.admin_group_snapshots_client.reset_group_snapshot_status(
+                group_snapshot['id'], status)
+            waiters.wait_for_volume_resource_status(
+                self.group_snapshots_client, group_snapshot['id'], status)
 
 
 class GroupsV320Test(BaseGroupsTest):
