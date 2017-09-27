@@ -34,10 +34,10 @@ class StaticWebTest(base.BaseObjectTest):
         cls.object_name, cls.object_data = cls.create_object(
             cls.container_name)
 
-        cls.container_client.update_container_metadata(
+        cls.container_client.create_update_or_delete_container_metadata(
             cls.container_name,
-            metadata=headers_public_read_acl,
-            metadata_prefix="X-Container-")
+            create_update_metadata=headers_public_read_acl,
+            create_update_metadata_prefix="X-Container-")
 
     @classmethod
     def resource_cleanup(cls):
@@ -49,8 +49,8 @@ class StaticWebTest(base.BaseObjectTest):
     def test_web_index(self):
         headers = {'web-index': self.object_name}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Maintain original headers, no auth added
         self.account_client.auth_provider.set_alt_auth_data(
@@ -68,8 +68,9 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertEqual(body, self.object_data)
 
         # clean up before exiting
-        self.container_client.update_container_metadata(self.container_name,
-                                                        {'web-index': ""})
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name,
+            create_update_metadata={'web-index': ""})
 
         _, body = self.container_client.list_container_metadata(
             self.container_name)
@@ -80,8 +81,8 @@ class StaticWebTest(base.BaseObjectTest):
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # test GET on http://account_url/container_name
         # we should retrieve a listing of objects
@@ -100,9 +101,9 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertIn(self.object_name, body.decode())
 
         # clean up before exiting
-        self.container_client.update_container_metadata(self.container_name,
-                                                        {'web-listings': ""})
-
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name,
+            create_update_metadata={'web-listings': ""})
         _, body = self.container_client.list_container_metadata(
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
@@ -113,8 +114,8 @@ class StaticWebTest(base.BaseObjectTest):
         headers = {'web-listings': 'true',
                    'web-listings-css': 'listings.css'}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Maintain original headers, no auth added
         self.account_client.auth_provider.set_alt_auth_data(
@@ -136,8 +137,8 @@ class StaticWebTest(base.BaseObjectTest):
         headers = {'web-listings': 'true',
                    'web-error': self.object_name}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Create object to return when requested object not found
         object_name_404 = "404" + self.object_name

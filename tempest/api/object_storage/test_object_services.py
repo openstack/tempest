@@ -990,8 +990,11 @@ class PublicObjectTest(base.BaseObjectTest):
 
         # update container metadata to make it publicly readable
         cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-        resp_meta, body = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers, metadata_prefix='')
+        resp_meta, body = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name,
+                create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
 
         # create object
@@ -1025,9 +1028,10 @@ class PublicObjectTest(base.BaseObjectTest):
         # make container public-readable and access an object in it using
         # another user's credentials
         cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-        resp_meta, body = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, body = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
 
         # create object
