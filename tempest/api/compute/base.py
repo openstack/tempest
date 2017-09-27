@@ -262,7 +262,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
         image = cls.compute_images_client.create_image(server_id, name=name,
                                                        **kwargs)
-        image_id = data_utils.parse_image_id(image.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+            image_id = image['image_id']
+        else:
+            image_id = data_utils.parse_image_id(image.response['location'])
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
                                     cls.compute_images_client.delete_image,
                                     image_id)

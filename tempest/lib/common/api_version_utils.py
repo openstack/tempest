@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 import testtools
 
 from tempest.lib.common import api_version_request
@@ -20,7 +19,6 @@ from tempest.lib import exceptions
 
 
 LATEST_MICROVERSION = 'latest'
-LOG = logging.getLogger(__name__)
 
 
 class BaseMicroversionTest(object):
@@ -166,7 +164,6 @@ def compare_version_header_to_response(api_microversion_header_name,
     if op is None:
         msg = ("Operation %s is invalid. Valid options include: lt, eq, gt, "
                "le, ne, ge." % operation)
-        LOG.debug(msg)
         raise exceptions.InvalidParam(invalid_param=msg)
 
     # Remove "volume" from "volume <microversion>", for example, so that the
