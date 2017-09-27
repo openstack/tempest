@@ -171,18 +171,20 @@ class GroupsTest(BaseGroupsTest):
             group_snapshot['id'])['group_snapshot']
         self.assertEqual(group_snapshot_name, group_snapshot['name'])
 
-        # Get all group snapshots with detail
-        group_snapshots = (
-            self.group_snapshots_client.list_group_snapshots(
-                detail=True)['group_snapshots'])
+        # Get all group snapshots with details, check some detail-specific
+        # elements, and look for the created group snapshot
+        group_snapshots = (self.group_snapshots_client.list_group_snapshots(
+            detail=True)['group_snapshots'])
+        for grp_snapshot in group_snapshots:
+            self.assertIn('created_at', grp_snapshot)
+            self.assertIn('group_id', grp_snapshot)
         self.assertIn((group_snapshot['name'], group_snapshot['id']),
                       [(m['name'], m['id']) for m in group_snapshots])
 
         # Delete group snapshot
         self._delete_group_snapshot(group_snapshot['id'], grp['id'])
-        group_snapshots = (
-            self.group_snapshots_client.list_group_snapshots(
-                detail=True)['group_snapshots'])
+        group_snapshots = (self.group_snapshots_client.list_group_snapshots()
+                           ['group_snapshots'])
         self.assertEmpty(group_snapshots)
 
     @decorators.idempotent_id('eff52c70-efc7-45ed-b47a-4ad675d09b81')
