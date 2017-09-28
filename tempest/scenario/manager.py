@@ -504,9 +504,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
 
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        self.assertEqual('available', volume['status'])
-
     def rebuild_server(self, server_id, image=None,
                        preserve_ephemeral=False, wait=True,
                        rebuild_kwargs=None):
