@@ -23,7 +23,6 @@ CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
-    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
@@ -209,7 +208,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         protocol = 'tcp'
         port_range_min = 76
         port_range_max = 77
-        ip_prefix = self._project_network_cidr
+        ip_prefix = str(self.cidr)
         self._create_verify_security_group_rule(sg_id, direction,
                                                 self.ethertype, protocol,
                                                 port_range_min,
@@ -238,4 +237,3 @@ class SecGroupTest(base.BaseSecGroupTest):
 
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
-    _project_network_cidr = CONF.network.project_network_v6_cidr
