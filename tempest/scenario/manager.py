@@ -271,10 +271,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if backend_name:
             extra_specs = {"volume_backend_name": backend_name}
 
-        body = client.create_volume_type(name=randomized_name,
-                                         extra_specs=extra_specs)
-        volume_type = body['volume_type']
-        self.assertIn('id', volume_type)
+        volume_type = client.create_volume_type(
+            name=randomized_name, extra_specs=extra_specs)['volume_type']
         self.addCleanup(client.delete_volume_type, volume_type['id'])
         return volume_type
 
