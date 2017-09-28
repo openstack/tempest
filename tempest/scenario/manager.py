@@ -675,9 +675,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 addresses = server['addresses'][
                     CONF.validation.network_for_ssh]
             else:
-                creds_provider = self._get_credentials_provider()
-                net_creds = creds_provider.get_primary_creds()
-                network = getattr(net_creds, 'network', None)
+                network = self.get_tenant_network()
                 addresses = (server['addresses'][network['name']]
                              if network else [])
             for address in addresses:
