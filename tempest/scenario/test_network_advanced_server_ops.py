@@ -83,7 +83,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                     should_connect=True):
         username = CONF.validation.image_ssh_user
         private_key = keypair['private_key']
-        self._check_tenant_network_connectivity(
+        self.check_tenant_network_connectivity(
             server, username, private_key,
             should_connect=should_connect,
             servers_for_debug=[server])
