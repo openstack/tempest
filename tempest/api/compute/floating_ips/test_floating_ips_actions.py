@@ -26,8 +26,6 @@ CONF = config.CONF
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
-    server_id = None
-    floating_ip = None
 
     @classmethod
     def skip_checks(cls):
