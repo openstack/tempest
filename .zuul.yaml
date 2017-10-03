@@ -11,6 +11,7 @@
       devstack_services:
         tempest: True
     run: playbooks/devstack-tempest.yaml
+    post-run: playbooks/post-tempest.yaml
 
 - project:
     name: openstack/tempest
