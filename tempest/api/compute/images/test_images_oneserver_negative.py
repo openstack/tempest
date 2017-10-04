@@ -19,6 +19,7 @@ from oslo_log import log as logging
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -105,7 +106,11 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.Conflict, self.create_image_from_server,
                           self.server_id)
 
-        image_id = data_utils.parse_image_id(image.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+            image_id = image['image_id']
+        else:
+            image_id = data_utils.parse_image_id(image.response['location'])
         self.client.delete_image(image_id)
 
     @decorators.attr(type=['negative'])
@@ -123,7 +128,11 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error while trying to delete an image what is creating
 
         image = self.create_image_from_server(self.server_id)
-        image_id = data_utils.parse_image_id(image.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+            image_id = image['image_id']
+        else:
+            image_id = data_utils.parse_image_id(image.response['location'])
 
         self.addCleanup(self._reset_server)
 
