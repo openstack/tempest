@@ -23,12 +23,10 @@ from tempest.tests import base
 
 class TestTestList(base.TestCase):
 
-    def test_testr_list_tests_no_errors(self):
-        # Remove unit test discover path from env to test tempest tests
+    def test_stestr_list_no_errors(self):
         test_env = os.environ.copy()
-        test_env.pop('OS_TEST_PATH')
         import_failures = []
-        p = subprocess.Popen(['testr', 'list-tests'], stdout=subprocess.PIPE,
+        p = subprocess.Popen(['stestr', 'list'], stdout=subprocess.PIPE,
                              env=test_env)
         ids, err = p.communicate()
         self.assertEqual(0, p.returncode,
