@@ -8,13 +8,15 @@
     - role: process-test-results
       test_results_dir: '{{ logs_root }}/tempest'
       tox_envdir: tempest
+    - role: process-stackviz
     - role: stage-output
       zuul_copy_output:
         { '{{ logs_root }}/tempest/etc/tempest.conf': 'logs',
           '{{ logs_root }}/tempest/etc/accounts.yaml': 'logs',
           '{{ logs_root }}/tempest/tempest.log': 'logs',
           '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': 'logs',
-          '{{ stage_dir }}/{{ test_results_stage_name }}.html': 'logs' }
+          '{{ stage_dir }}/{{ test_results_stage_name }}.html': 'logs',
+          '{{ stage_dir }}/stackviz': 'logs' }
       extensions_to_txt:
         - conf
         - log
