@@ -18,6 +18,7 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -127,6 +128,27 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         body = self.domains_client.list_domains()['domains']
         domains_list = [d['id'] for d in body]
         self.assertNotIn(domain['id'], domains_list)
+
+    @decorators.idempotent_id('d8d318b7-d1b3-4c37-94c5-3c5ba0b121ea')
+    @decorators.skip_because(bug='1718747')
+    def test_domain_delete_cascades_content(self):
+        # Create a domain with a user and a group in it
+        domain = self.setup_test_domain()
+        user = self.create_test_user(domain_id=domain['id'])
+        group = self.groups_client.create_group(
+            name=data_utils.rand_name('group'),
+            domain_id=domain['id'])['group']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.groups_client.delete_group, group['id'])
+        # Delete the domain
+        self.delete_domain(domain['id'])
+        # Check the domain, its users and groups are gone
+        self.assertRaises(exceptions.NotFound,
+                          self.domains_client.show_domain, domain['id'])
+        self.assertRaises(exceptions.NotFound,
+                          self.users_client.show_user, user['id'])
+        self.assertRaises(exceptions.NotFound,
+                          self.groups_client.show_group, group['id'])
 
     @decorators.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):
