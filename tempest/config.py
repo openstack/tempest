@@ -836,7 +836,14 @@ VolumeFeaturesGroup = [
                 help="Is the v2 volume API enabled"),
     cfg.BoolOpt('api_v3',
                 default=True,
-                help="Is the v3 volume API enabled")
+                help="Is the v3 volume API enabled"),
+    cfg.BoolOpt('extend_attached_volume',
+                default=False,
+                help='Does the cloud support extending the size of a volume '
+                     'which is currently attached to a server instance? This '
+                     'depends on the 3.42 volume API microversion and the '
+                     '2.51 compute API microversion. Also, not all volume or '
+                     'compute backends support this operation.')
 ]
 
 
