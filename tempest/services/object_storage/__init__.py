@@ -17,7 +17,8 @@ from tempest.lib.services.object_storage.bulk_middleware_client import \
     BulkMiddlewareClient
 from tempest.lib.services.object_storage.capabilities_client import \
     CapabilitiesClient
-from tempest.services.object_storage.container_client import ContainerClient
+from tempest.lib.services.object_storage.container_client import \
+    ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 
 __all__ = ['AccountClient', 'BulkMiddlewareClient', 'CapabilitiesClient',

@@ -7,3 +7,4 @@ features:
     without any maintenance changes.
 
       * account_client
+      * container_client
