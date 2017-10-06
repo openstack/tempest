@@ -130,7 +130,6 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn(domain['id'], domains_list)
 
     @decorators.idempotent_id('d8d318b7-d1b3-4c37-94c5-3c5ba0b121ea')
-    @decorators.skip_because(bug='1718747')
     def test_domain_delete_cascades_content(self):
         # Create a domain with a user and a group in it
         domain = self.setup_test_domain()
