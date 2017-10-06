@@ -106,7 +106,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def create_container(cls):
         # wrapper that returns a test container
         container_name = data_utils.rand_name(name='TestContainer')
-        cls.container_client.create_container(container_name)
+        cls.container_client.update_container(container_name)
         cls.containers.append(container_name)
 
         return container_name

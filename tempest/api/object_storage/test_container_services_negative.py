@@ -45,9 +45,10 @@ class ContainerNegativeTest(base.BaseObjectTest):
         max_length = self.constraints['max_container_name_length']
         # create a container with long name
         container_name = data_utils.arbitrary_string(size=max_length + 1)
-        ex = self.assertRaises(exceptions.BadRequest,
-                               self.container_client.create_container,
-                               container_name)
+        ex = self.assertRaises(
+            exceptions.BadRequest,
+            self.container_client.update_container,
+            container_name)
         self.assertIn('Container name length of ' + str(max_length + 1) +
                       ' longer than ' + str(max_length), str(ex))
 
@@ -61,11 +62,13 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # that is longer than max.
         max_length = self.constraints['max_meta_name_length']
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata_name = data_utils.arbitrary_string(size=max_length + 1)
+        metadata_name = 'X-Container-Meta-' + data_utils.arbitrary_string(
+            size=max_length + 1)
         metadata = {metadata_name: 'penguin'}
-        ex = self.assertRaises(exceptions.BadRequest,
-                               self.container_client.create_container,
-                               container_name, metadata=metadata)
+        ex = self.assertRaises(
+            exceptions.BadRequest,
+            self.container_client.update_container,
+            container_name, **metadata)
         self.assertIn('Metadata name too long', str(ex))
 
     @decorators.attr(type=["negative"])
@@ -79,10 +82,11 @@ class ContainerNegativeTest(base.BaseObjectTest):
         max_length = self.constraints['max_meta_value_length']
         container_name = data_utils.rand_name(name='TestContainer')
         metadata_value = data_utils.arbitrary_string(size=max_length + 1)
-        metadata = {'animal': metadata_value}
-        ex = self.assertRaises(exceptions.BadRequest,
-                               self.container_client.create_container,
-                               container_name, metadata=metadata)
+        metadata = {'X-Container-Meta-animal': metadata_value}
+        ex = self.assertRaises(
+            exceptions.BadRequest,
+            self.container_client.update_container,
+            container_name, **metadata)
         self.assertIn('Metadata value longer than ' + str(max_length), str(ex))
 
     @decorators.attr(type=["negative"])
@@ -97,11 +101,12 @@ class ContainerNegativeTest(base.BaseObjectTest):
         container_name = data_utils.rand_name(name='TestContainer')
         metadata = {}
         for i in range(max_count + 1):
-            metadata['animal-' + str(i)] = 'penguin'
+            metadata['X-Container-Meta-animal-' + str(i)] = 'penguin'
 
-        ex = self.assertRaises(exceptions.BadRequest,
-                               self.container_client.create_container,
-                               container_name, metadata=metadata)
+        ex = self.assertRaises(
+            exceptions.BadRequest,
+            self.container_client.update_container,
+            container_name, **metadata)
         self.assertIn('Too many metadata items; max ' + str(max_count),
                       str(ex))
 

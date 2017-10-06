@@ -27,7 +27,7 @@ class ContainerTest(base.BaseObjectTest):
     @decorators.idempotent_id('92139d73-7819-4db1-85f8-3f2f22a8d91f')
     def test_create_container(self):
         container_name = data_utils.rand_name(name='TestContainer')
-        resp, _ = self.container_client.create_container(container_name)
+        resp, _ = self.container_client.update_container(container_name)
         self.containers.append(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
@@ -35,20 +35,20 @@ class ContainerTest(base.BaseObjectTest):
     def test_create_container_overwrite(self):
         # overwrite container with the same name
         container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(container_name)
+        self.container_client.update_container(container_name)
         self.containers.append(container_name)
 
-        resp, _ = self.container_client.create_container(container_name)
+        resp, _ = self.container_client.update_container(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
     @decorators.idempotent_id('c2ac4d59-d0f5-40d5-ba19-0635056d48cd')
     def test_create_container_with_metadata_key(self):
         # create container with the blank value of metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata = {'test-container-meta': ''}
-        resp, _ = self.container_client.create_container(
+        headers = {'X-Container-Meta-test-container-meta': ''}
+        resp, _ = self.container_client.update_container(
             container_name,
-            metadata=metadata)
+            **headers)
         self.containers.append(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
@@ -64,10 +64,10 @@ class ContainerTest(base.BaseObjectTest):
         container_name = data_utils.rand_name(name='TestContainer')
 
         # metadata name using underscores should be converted to hyphens
-        metadata = {'test_container_meta': 'Meta1'}
-        resp, _ = self.container_client.create_container(
+        headers = {'X-Container-Meta-test_container_meta': 'Meta1'}
+        resp, _ = self.container_client.update_container(
             container_name,
-            metadata=metadata)
+            **headers)
         self.containers.append(container_name)
         self.assertHeaders(resp, 'Container', 'PUT')
 
@@ -75,22 +75,20 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertIn('x-container-meta-test-container-meta', resp)
         self.assertEqual(resp['x-container-meta-test-container-meta'],
-                         metadata['test_container_meta'])
+                         headers['X-Container-Meta-test_container_meta'])
 
     @decorators.idempotent_id('24d16451-1c0c-4e4f-b59c-9840a3aba40e')
     def test_create_container_with_remove_metadata_key(self):
         # create container with the blank value of remove metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata_1 = {'test-container-meta': 'Meta1'}
-        self.container_client.create_container(
-            container_name,
-            metadata=metadata_1)
+        headers = {'X-Container-Meta-test-container-meta': 'Meta1'}
+        self.container_client.update_container(container_name, **headers)
         self.containers.append(container_name)
 
-        metadata_2 = {'test-container-meta': ''}
-        resp, _ = self.container_client.create_container(
+        headers = {'X-Remove-Container-Meta-test-container-meta': ''}
+        resp, _ = self.container_client.update_container(
             container_name,
-            remove_metadata=metadata_2)
+            **headers)
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -101,14 +99,13 @@ class ContainerTest(base.BaseObjectTest):
     def test_create_container_with_remove_metadata_value(self):
         # create container with remove metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata = {'test-container-meta': 'Meta1'}
-        self.container_client.create_container(container_name,
-                                               metadata=metadata)
+        headers = {'X-Container-Meta-test-container-meta': 'Meta1'}
+        self.container_client.update_container(container_name, **headers)
         self.containers.append(container_name)
-
-        resp, _ = self.container_client.create_container(
+        headers = {'X-Remove-Container-Meta-test-container-meta': 'Meta1'}
+        resp, _ = self.container_client.update_container(
             container_name,
-            remove_metadata=metadata)
+            **headers)
         self.assertHeaders(resp, 'Container', 'PUT')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -301,9 +298,8 @@ class ContainerTest(base.BaseObjectTest):
     def test_update_container_metadata_with_create_and_delete_metadata(self):
         # Send one request of adding and deleting metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata_1 = {'test-container-meta1': 'Meta1'}
-        self.container_client.create_container(container_name,
-                                               metadata=metadata_1)
+        metadata_1 = {'X-Container-Meta-test-container-meta1': 'Meta1'}
+        self.container_client.update_container(container_name, **metadata_1)
         self.containers.append(container_name)
 
         metadata_2 = {'test-container-meta2': 'Meta2'}
@@ -311,7 +307,7 @@ class ContainerTest(base.BaseObjectTest):
             self.container_client.create_update_or_delete_container_metadata(
                 container_name,
                 create_update_metadata=metadata_2,
-                delete_metadata=metadata_1))
+                delete_metadata={'test-container-meta1': 'Meta1'}))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -343,15 +339,14 @@ class ContainerTest(base.BaseObjectTest):
     def test_update_container_metadata_with_delete_metadata(self):
         # update container metadata using delete metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata = {'test-container-meta1': 'Meta1'}
-        self.container_client.create_container(container_name,
-                                               metadata=metadata)
+        metadata = {'X-Container-Meta-test-container-meta1': 'Meta1'}
+        self.container_client.update_container(container_name, **metadata)
         self.containers.append(container_name)
 
         resp, _ = (
             self.container_client.create_update_or_delete_container_metadata(
                 container_name,
-                delete_metadata=metadata))
+                delete_metadata={'test-container-meta1': 'Meta1'}))
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -378,9 +373,8 @@ class ContainerTest(base.BaseObjectTest):
     def test_update_container_metadata_with_delete_metadata_key(self):
         # update container metadata with a blank value of metadata
         container_name = data_utils.rand_name(name='TestContainer')
-        metadata = {'test-container-meta1': 'Meta1'}
-        self.container_client.create_container(container_name,
-                                               metadata=metadata)
+        headers = {'X-Container-Meta-test-container-meta1': 'Meta1'}
+        self.container_client.update_container(container_name, **headers)
         self.containers.append(container_name)
 
         metadata = {'test-container-meta1': ''}
