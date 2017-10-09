@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class NegativeSecGroupTest(base.BaseSecGroupTest):
-    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
@@ -110,7 +109,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         sg2_body, _ = self._create_security_group()
 
         # Create rule specifying both remote_ip_prefix and remote_group_id
-        prefix = self._project_network_cidr
+        prefix = str(self.cidr)
         self.assertRaises(
             lib_exc.BadRequest,
             self.security_group_rules_client.create_security_group_rule,
@@ -225,7 +224,6 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
-    _project_network_cidr = CONF.network.project_network_v6_cidr
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7607439c-af73-499e-bf64-f687fd12a842')
