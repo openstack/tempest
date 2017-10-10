@@ -422,6 +422,23 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                                                 volume['id'], 'available')
         return volume
 
+    def _detach_volume(self, server, volume):
+        """Helper method to detach a volume.
+
+        Ignores 404 responses if the volume or server do not exist, or the
+        volume is already detached from the server.
+        """
+        try:
+            volume = self.volumes_client.show_volume(volume['id'])['volume']
+            # Check the status. You can only detach an in-use volume, otherwise
+            # the compute API will return a 400 response.
+            if volume['status'] == 'in-use':
+                self.servers_client.detach_volume(server['id'], volume['id'])
+        except exceptions.NotFound:
+            # Ignore 404s on detach in case the server is deleted or the volume
+            # is already detached.
+            pass
+
     def attach_volume(self, server, volume, device=None, check_reserved=False):
         """Attaches volume to server and waits for 'in-use' volume status.
 
@@ -449,9 +466,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                         self.volumes_client, volume['id'], 'available')
         # Ignore 404s on detach in case the server is deleted or the volume
         # is already detached.
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.servers_client.detach_volume,
-                        server['id'], volume['id'])
+        self.addCleanup(self._detach_volume, server, volume)
         statuses = ['in-use']
         if check_reserved:
             statuses.append('reserved')
