@@ -65,9 +65,12 @@ class RoutersTest(base.BaseNetworkTest):
                           'The public_network_id option must be specified.')
     def test_create_show_list_update_delete_router(self):
         # Create a router
+        name = data_utils.rand_name(self.__class__.__name__ + '-router')
         router = self._create_router(
+            name=name,
             admin_state_up=False,
             external_network_id=CONF.network.public_network_id)
+        self.assertEqual(router['name'], name)
         self.assertEqual(router['admin_state_up'], False)
         self.assertEqual(
             router['external_gateway_info']['network_id'],
