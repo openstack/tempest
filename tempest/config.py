@@ -1384,7 +1384,7 @@ def _register_tempest_service_clients():
         module = service_clients[service_client]
         configs = service_client.split('.')[0]
         service_client_data = dict(
-            name=service_client.replace('.', '_'),
+            name=service_client.replace('.', '_').replace('-', '_'),
             service_version=service_client,
             module_path=module.__name__,
             client_names=module.__all__,

@@ -8,3 +8,4 @@ features:
 
       * account_client
       * container_client
+      * object_client
