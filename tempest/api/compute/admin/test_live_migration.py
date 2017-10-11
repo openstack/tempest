@@ -46,6 +46,18 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
                 "Less than 2 compute nodes, skipping migration test.")
 
     @classmethod
+    def setup_credentials(cls):
+        # These tests don't attempt any SSH validation nor do they use
+        # floating IPs on the instance, so all we need is a network and
+        # a subnet so the instance being migrated has a single port, but
+        # we need that to make sure we are properly updating the port
+        # host bindings during the live migration.
+        # TODO(mriedem): SSH validation before and after the instance is
+        # live migrated would be a nice test wrinkle addition.
+        cls.set_network_resources(network=True, subnet=True)
+        super(LiveMigrationTest, cls).setup_credentials()
+
+    @classmethod
     def setup_clients(cls):
         super(LiveMigrationTest, cls).setup_clients()
         cls.admin_migration_client = cls.os_admin.migrations_client
