@@ -329,11 +329,10 @@ class ObjectTest(base.BaseObjectTest):
         object_name, _ = self.create_object(self.container_name)
 
         metadata = {'X-Object-Meta-test-meta': 'Meta'}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            metadata,
-            metadata_prefix='')
+            headers=metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -354,11 +353,10 @@ class ObjectTest(base.BaseObjectTest):
                                          metadata=create_metadata)
 
         update_metadata = {'X-Remove-Object-Meta-test-meta1': 'Meta1'}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            update_metadata,
-            metadata_prefix='')
+            headers=update_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -379,11 +377,10 @@ class ObjectTest(base.BaseObjectTest):
 
         update_metadata = {'X-Object-Meta-test-meta2': 'Meta2',
                            'X-Remove-Object-Meta-test-meta1': 'Meta1'}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            update_metadata,
-            metadata_prefix='')
+            headers=update_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -407,11 +404,10 @@ class ObjectTest(base.BaseObjectTest):
                                          metadata=None)
         object_prefix = '%s/%s' % (self.container_name, object_name)
         update_metadata = {'X-Object-Manifest': object_prefix}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            update_metadata,
-            metadata_prefix='')
+            headers=update_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -426,11 +422,10 @@ class ObjectTest(base.BaseObjectTest):
         object_name, _ = self.create_object(self.container_name)
 
         update_metadata = {'X-Object-Meta-test-meta': ''}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            update_metadata,
-            metadata_prefix='')
+            headers=update_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -451,11 +446,10 @@ class ObjectTest(base.BaseObjectTest):
                                          metadata=create_metadata)
 
         update_metadata = {'X-Remove-Object-Meta-test-meta': ''}
-        resp, _ = self.object_client.update_object_metadata(
+        resp, _ = self.object_client.create_or_update_object_metadata(
             self.container_name,
             object_name,
-            update_metadata,
-            metadata_prefix='')
+            headers=update_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(
@@ -816,10 +810,11 @@ class ObjectTest(base.BaseObjectTest):
         # set object metadata
         meta_key = data_utils.rand_name(name='test')
         meta_value = data_utils.rand_name(name='MetaValue')
-        orig_metadata = {meta_key: meta_value}
-        resp, _ = self.object_client.update_object_metadata(src_container_name,
-                                                            object_name,
-                                                            orig_metadata)
+        orig_metadata = {'X-Object-Meta-' + meta_key: meta_value}
+        resp, _ = self.object_client.create_or_update_object_metadata(
+            src_container_name,
+            object_name,
+            headers=orig_metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         # copy object from source container to destination container
@@ -926,8 +921,8 @@ class ObjectTest(base.BaseObjectTest):
                                                    object_name, data='')
         self.assertHeaders(resp, 'Object', 'PUT')
 
-        resp, _ = self.object_client.update_object_metadata(
-            self.container_name, object_name, metadata, metadata_prefix='')
+        resp, _ = self.object_client.create_or_update_object_metadata(
+            self.container_name, object_name, headers=metadata)
         self.assertHeaders(resp, 'Object', 'POST')
 
         resp, _ = self.object_client.list_object_metadata(

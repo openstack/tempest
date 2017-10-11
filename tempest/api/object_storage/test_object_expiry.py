@@ -40,10 +40,10 @@ class ObjectExpiryTest(base.BaseObjectTest):
     def _test_object_expiry(self, metadata):
         # update object metadata
         resp, _ = \
-            self.object_client.update_object_metadata(self.container_name,
-                                                      self.object_name,
-                                                      metadata,
-                                                      metadata_prefix='')
+            self.object_client.create_or_update_object_metadata(
+                self.container_name,
+                self.object_name,
+                headers=metadata)
         # verify object metadata
         resp, _ = \
             self.object_client.list_object_metadata(self.container_name,
