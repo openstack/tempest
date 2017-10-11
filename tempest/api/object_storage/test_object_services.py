@@ -48,8 +48,9 @@ class ObjectTest(base.BaseObjectTest):
         data_segments = [data + str(i) for i in range(segments)]
         # uploading segments
         for i in range(segments):
-            self.object_client.create_object_segments(
-                self.container_name, object_name, i, data_segments[i])
+            obj_name = "%s/%s" % (object_name, i)
+            self.object_client.create_object(
+                self.container_name, obj_name, data_segments[i])
 
         return object_name, data_segments
 
@@ -184,12 +185,15 @@ class ObjectTest(base.BaseObjectTest):
         # create object with transfer_encoding
         object_name = data_utils.rand_name(name='TestObject')
         data = data_utils.random_bytes(1024)
-        _, _, resp_headers = self.object_client.put_object_with_chunk(
-            container=self.container_name,
-            name=object_name,
-            contents=data_utils.chunkify(data, 512)
-        )
-        self.assertHeaders(resp_headers, 'Object', 'PUT')
+        headers = {'Transfer-Encoding': 'chunked'}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data=data_utils.chunkify(data, 512),
+            headers=headers,
+            chunked=True)
+
+        self.assertHeaders(resp, 'Object', 'PUT')
 
         # check uploaded content
         _, body = self.object_client.get_object(self.container_name,
@@ -728,8 +732,13 @@ class ObjectTest(base.BaseObjectTest):
                                                    dst_object_name,
                                                    dst_data)
         # copy source object to destination
-        resp, _ = self.object_client.copy_object_in_same_container(
-            self.container_name, src_object_name, dst_object_name)
+        headers = {}
+        headers['X-Copy-From'] = "%s/%s" % (str(self.container_name),
+                                            str(src_object_name))
+        resp, body = self.object_client.create_object(self.container_name,
+                                                      dst_object_name,
+                                                      data=None,
+                                                      headers=headers)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # check data
@@ -749,8 +758,14 @@ class ObjectTest(base.BaseObjectTest):
         # change the content type of the object
         metadata = {'content-type': 'text/plain; charset=UTF-8'}
         self.assertNotEqual(resp_tmp['content-type'], metadata['content-type'])
-        resp, _ = self.object_client.copy_object_in_same_container(
-            self.container_name, object_name, object_name, metadata)
+        headers = {}
+        headers['X-Copy-From'] = "%s/%s" % (str(self.container_name),
+                                            str(object_name))
+        resp, body = self.object_client.create_object(self.container_name,
+                                                      object_name,
+                                                      data=None,
+                                                      metadata=metadata,
+                                                      headers=headers)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # check the content type
@@ -808,9 +823,13 @@ class ObjectTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'POST')
 
         # copy object from source container to destination container
-        resp, _ = self.object_client.copy_object_across_containers(
-            src_container_name, object_name, dst_container_name,
-            object_name)
+        headers = {}
+        headers['X-Copy-From'] = "%s/%s" % (str(src_container_name),
+                                            str(object_name))
+        resp, body = self.object_client.create_object(dst_container_name,
+                                                      object_name,
+                                                      data=None,
+                                                      headers=headers)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # check if object is present in destination container
@@ -897,8 +916,9 @@ class ObjectTest(base.BaseObjectTest):
         data_segments = [data + str(i) for i in range(segments)]
         # uploading segments
         for i in range(segments):
-            resp, _ = self.object_client.create_object_segments(
-                self.container_name, object_name, i, data_segments[i])
+            obj_name = "%s/%s" % (object_name, i)
+            resp, _ = self.object_client.create_object(
+                self.container_name, obj_name, data_segments[i])
         # creating a manifest file
         metadata = {'X-Object-Manifest': '%s/%s/'
                     % (self.container_name, object_name)}
