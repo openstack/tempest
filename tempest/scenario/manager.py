@@ -1324,14 +1324,6 @@ class ObjectStorageScenarioTest(ScenarioTest):
             for obj in not_present_obj:
                 self.assertNotIn(obj, object_list)
 
-    def change_container_acl(self, container_name, acl):
-        metadata_param = {'metadata_prefix': 'x-container-',
-                          'metadata': {'read': acl}}
-        self.container_client.create_update_or_delete_container_metadata(
-            container_name, create_update_metadata=metadata_param)
-        resp, _ = self.container_client.list_container_metadata(container_name)
-        self.assertEqual(resp['x-container-read'], acl)
-
     def download_and_verify(self, container_name, obj_name, expected_data):
         _, obj = self.object_client.get_object(container_name, obj_name)
         self.assertEqual(obj, expected_data)

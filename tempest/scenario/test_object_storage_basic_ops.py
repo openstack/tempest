@@ -58,12 +58,18 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
         5. Delete the object and container
         """
         container_name = self.create_container()
-        obj_name, _ = self.upload_object_to_container(container_name)
+        obj_name, obj_data = self.upload_object_to_container(container_name)
         obj_url = '%s/%s/%s' % (self.object_client.base_url,
                                 container_name, obj_name)
         resp, _ = self.object_client.raw_request(obj_url, 'GET')
         self.assertEqual(resp.status, 401)
-
-        self.change_container_acl(container_name, '.r:*')
-        resp, _ = self.object_client.raw_request(obj_url, 'GET')
+        metadata_param = {'X-Container-Read': '.r:*'}
+        self.container_client.create_update_or_delete_container_metadata(
+            container_name, create_update_metadata=metadata_param,
+            create_update_metadata_prefix='')
+        resp, _ = self.container_client.list_container_metadata(container_name)
+        self.assertEqual(metadata_param['X-Container-Read'],
+                         resp['x-container-read'])
+        resp, data = self.object_client.raw_request(obj_url, 'GET')
         self.assertEqual(resp.status, 200)
+        self.assertEqual(obj_data, data)
