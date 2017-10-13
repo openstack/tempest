@@ -44,7 +44,6 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServerPersonalityTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
-        cls.user_client = cls.limits_client
 
     @decorators.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
     def test_create_server_with_personality(self):
@@ -104,7 +103,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         # number of files are injected into the server.
         file_contents = 'This is a test file.'
         personality = []
-        limits = self.user_client.show_limits()['limits']
+        limits = self.limits_client.show_limits()['limits']
         max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
@@ -123,7 +122,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.
         file_contents = 'This is a test file.'
-        limits = self.user_client.show_limits()['limits']
+        limits = self.limits_client.show_limits()['limits']
         max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
