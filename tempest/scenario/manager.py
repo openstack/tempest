@@ -904,16 +904,13 @@ class NetworkScenarioTest(ScenarioTest):
             self._log_net_info(e)
             raise
 
-    def _check_remote_connectivity(self, source, dest, should_succeed=True,
-                                   nic=None):
+    def check_remote_connectivity(self, source, dest, should_succeed=True,
+                                  nic=None):
         """assert ping server via source ssh connection
 
-        Note: This is an internal method.  Use check_remote_connectivity
-        instead.
-
         :param source: RemoteClient: an ssh connection from which to ping
-        :param dest: and IP to ping against
-        :param should_succeed: boolean should ping succeed or not
+        :param dest: an IP to ping against
+        :param should_succeed: boolean: should ping succeed or not
         :param nic: specific network interface to ping from
         """
         def ping_remote():
@@ -925,21 +922,8 @@ class NetworkScenarioTest(ScenarioTest):
                 return not should_succeed
             return should_succeed
 
-        return test_utils.call_until_true(ping_remote,
-                                          CONF.validation.ping_timeout,
-                                          1)
-
-    def check_remote_connectivity(self, source, dest, should_succeed=True,
-                                  nic=None):
-        """assert ping server via source ssh connection
-
-        :param source: RemoteClient: an ssh connection from which to ping
-        :param dest: and IP to ping against
-        :param should_succeed: boolean should ping succeed or not
-        :param nic: specific network interface to ping from
-        """
-        result = self._check_remote_connectivity(source, dest, should_succeed,
-                                                 nic)
+        result = test_utils.call_until_true(ping_remote,
+                                            CONF.validation.ping_timeout, 1)
         source_host = source.ssh_client.host
         if should_succeed:
             msg = "Timed out waiting for %s to become reachable from %s" \
