@@ -27,7 +27,6 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(AggregatesAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_admin.aggregates_client
-        cls.user_client = cls.aggregates_client
 
     @classmethod
     def resource_setup(cls):
@@ -52,7 +51,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Regular user is not allowed to create an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.create_aggregate,
+                          self.aggregates_client.create_aggregate,
                           name=aggregate_name)
 
     @decorators.attr(type=['negative'])
@@ -87,7 +86,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Regular user is not allowed to delete an aggregate.
         aggregate = self._create_test_aggregate()
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.delete_aggregate,
+                          self.aggregates_client.delete_aggregate,
                           aggregate['id'])
 
     @decorators.attr(type=['negative'])
@@ -95,7 +94,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_list_as_user(self):
         # Regular user is not allowed to list aggregates.
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.list_aggregates)
+                          self.aggregates_client.list_aggregates)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('557cad12-34c9-4ff4-95f0-22f0dfbaf7dc')
@@ -103,7 +102,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Regular user is not allowed to get aggregate details.
         aggregate = self._create_test_aggregate()
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.show_aggregate,
+                          self.aggregates_client.show_aggregate,
                           aggregate['id'])
 
     @decorators.attr(type=['negative'])
@@ -140,7 +139,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Regular user is not allowed to add a host to an aggregate.
         aggregate = self._create_test_aggregate()
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.add_host,
+                          self.aggregates_client.add_host,
                           aggregate['id'], host=self.host)
 
     @decorators.attr(type=['negative'])
@@ -168,7 +167,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                         host=self.host)
 
         self.assertRaises(lib_exc.Forbidden,
-                          self.user_client.remove_host,
+                          self.aggregates_client.remove_host,
                           aggregate['id'], host=self.host)
 
     @decorators.attr(type=['negative'])
