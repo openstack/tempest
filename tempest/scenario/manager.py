@@ -89,16 +89,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
     # The create_[resource] functions only return body and discard the
     # resp part which is not used in scenario tests
 
-    def _create_port(self, network_id, client=None, namestart='port-quotatest',
-                     **kwargs):
+    def create_port(self, network_id, client=None, **kwargs):
         if not client:
             client = self.ports_client
-        name = data_utils.rand_name(namestart)
+        name = data_utils.rand_name(self.__class__.__name__)
         result = client.create_port(
             name=name,
             network_id=network_id,
             **kwargs)
-        self.assertIsNotNone(result, 'Unable to allocate port')
         port = result['port']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         client.delete_port, port['id'])
@@ -147,8 +145,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if vnic_type:
             ports = []
 
-            create_port_body = {'binding:vnic_type': vnic_type,
-                                'namestart': 'port-smoke'}
+            create_port_body = {'binding:vnic_type': vnic_type}
             if kwargs:
                 # Convert security group names to security group ids
                 # to pass to create_port
@@ -185,9 +182,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             for net in networks:
                 net_id = net.get('uuid', net.get('id'))
                 if 'port' not in net:
-                    port = self._create_port(network_id=net_id,
-                                             client=clients.ports_client,
-                                             **create_port_body)
+                    port = self.create_port(network_id=net_id,
+                                            client=clients.ports_client,
+                                            **create_port_body)
                     ports.append({'port': port['id']})
                 else:
                     ports.append({'port': net['port']})
