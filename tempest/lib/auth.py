@@ -261,12 +261,13 @@ class KeystoneAuthProvider(AuthProvider):
     def __init__(self, credentials, auth_url,
                  disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None, scope='project',
-                 http_timeout=None):
+                 http_timeout=None, proxy_url=None):
         super(KeystoneAuthProvider, self).__init__(credentials, scope)
         self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
         self.http_timeout = http_timeout
+        self.proxy_url = proxy_url
         self.auth_url = auth_url
         self.auth_client = self._auth_client(auth_url)
 
@@ -345,7 +346,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         return json_v2id.TokenClient(
             auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests,
-            http_timeout=self.http_timeout)
+            http_timeout=self.http_timeout, proxy_url=self.proxy_url)
 
     def _auth_params(self):
         """Auth parameters to be passed to the token request
@@ -433,7 +434,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         return json_v3id.V3TokenClient(
             auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests,
-            http_timeout=self.http_timeout)
+            http_timeout=self.http_timeout, proxy_url=self.proxy_url)
 
     def _auth_params(self):
         """Auth parameters to be passed to the token request

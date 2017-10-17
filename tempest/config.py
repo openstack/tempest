@@ -194,6 +194,8 @@ ServiceClientsGroup = [
                default=60,
                help='Timeout in seconds to wait for the http request to '
                     'return'),
+    cfg.StrOpt('proxy_url',
+               help='Specify an http proxy to use.')
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -1308,6 +1310,7 @@ def service_client_config(service_client_name=None):
         * `ca_certs`
         * `trace_requests`
         * `http_timeout`
+        * `proxy_url`
 
     The dict returned by this does not fit a few service clients:
 
@@ -1330,7 +1333,8 @@ def service_client_config(service_client_name=None):
             CONF.identity.disable_ssl_certificate_validation,
         'ca_certs': CONF.identity.ca_certificates_file,
         'trace_requests': CONF.debug.trace_requests,
-        'http_timeout': CONF.service_clients.http_timeout
+        'http_timeout': CONF.service_clients.http_timeout,
+        'proxy_url': CONF.service_clients.proxy_url,
     }
 
     if service_client_name is None:
