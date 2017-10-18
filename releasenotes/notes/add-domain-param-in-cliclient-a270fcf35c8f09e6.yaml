@@ -1,0 +1,17 @@
+---
+fixes:
+  - |
+    Allow to specify new domain parameters:
+
+    * `user_domain_name`
+    * `user_domain_id`
+    * `project_domain_name`
+    * `project_domain_id`
+
+    for CLIClient class, whose values will be substituted to
+    ``--os-user-domain-name``, ``--os-user-domain-id``,
+    ``--os-project-domain-name`` and ``--os-project-domain-id`` respectively
+    during command execution.
+
+    This allows to prevent possible test failures with authentication in
+    Keystone v3. Bug: #1719687
