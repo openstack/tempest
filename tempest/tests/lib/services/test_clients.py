@@ -189,9 +189,7 @@ class TestServiceClients(base.TestCase):
     def setUp(self):
         super(TestServiceClients, self).setUp()
         self.useFixture(fixtures.MockPatch(
-            'tempest.lib.services.clients.tempest_modules', return_value={}))
-        self.useFixture(fixtures.MockPatch(
-            'tempest.lib.services.clients._tempest_internal_modules',
+            'tempest.lib.services.clients.tempest_modules',
             return_value=set(['fake_service1'])))
 
     def test___init___creds_v2_uri(self):
@@ -416,6 +414,7 @@ class TestServiceClients(base.TestCase):
         _manager = self._get_manager()
         duplicate_service = 'fake_service1'
         expected_error = '.*' + duplicate_service
+        _manager._registered_services = [duplicate_service]
         with testtools.ExpectedException(
                 exceptions.ServiceClientRegistrationException, expected_error):
             _manager.register_service_client_module(

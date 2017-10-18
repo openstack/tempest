@@ -38,7 +38,7 @@ class RegistryFixture(fixtures.Fixture):
         """Initialise the registry fixture"""
         self.services = set(['compute', 'identity.v2', 'identity.v3',
                              'image.v1', 'image.v2', 'network', 'volume.v1',
-                             'volume.v2', 'volume.v3'])
+                             'volume.v2', 'volume.v3', 'object-storage'])
 
     def _setUp(self):
         # Cleanup the registry
@@ -50,7 +50,7 @@ class RegistryFixture(fixtures.Fixture):
         for sc in self.services:
             sc_module = service_clients[sc]
             sc_unversioned = sc.split('.')[0]
-            sc_name = sc.replace('.', '_')
+            sc_name = sc.replace('.', '_').replace('-', '_')
             # Pass the bare minimum params to satisfy the clients interface
             service_client_data = dict(
                 name=sc_name, service_version=sc, service=sc_unversioned,

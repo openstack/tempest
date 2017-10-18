@@ -17,7 +17,6 @@ from tempest import config
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
-from tempest.services import object_storage
 
 CONF = config.CONF
 
@@ -281,21 +280,11 @@ class Manager(clients.ServiceClients):
             self.snapshots_client_latest = self.snapshots_v3_client
 
     def _set_object_storage_clients(self):
-        # NOTE(andreaf) Load configuration from config. Once object storage
-        # is in lib, configuration will be pulled directly from the registry
-        # and this will not be required anymore.
-        params = config.service_client_config('object-storage')
-
-        self.account_client = object_storage.AccountClient(self.auth_provider,
-                                                           **params)
-        self.bulk_client = object_storage.BulkMiddlewareClient(
-            self.auth_provider, **params)
-        self.capabilities_client = object_storage.CapabilitiesClient(
-            self.auth_provider, **params)
-        self.container_client = object_storage.ContainerClient(
-            self.auth_provider, **params)
-        self.object_client = object_storage.ObjectClient(self.auth_provider,
-                                                         **params)
+        self.account_client = self.object_storage.AccountClient()
+        self.bulk_client = self.object_storage.BulkMiddlewareClient()
+        self.capabilities_client = self.object_storage.CapabilitiesClient()
+        self.container_client = self.object_storage.ContainerClient()
+        self.object_client = self.object_storage.ObjectClient()
 
 
 def get_auth_provider_class(credentials):

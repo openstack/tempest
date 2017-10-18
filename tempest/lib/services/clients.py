@@ -31,6 +31,7 @@ from tempest.lib.services import compute
 from tempest.lib.services import identity
 from tempest.lib.services import image
 from tempest.lib.services import network
+from tempest.lib.services import object_storage
 from tempest.lib.services import volume
 
 warnings.simplefilter("once")
@@ -50,18 +51,11 @@ def tempest_modules():
         'image.v1': image.v1,
         'image.v2': image.v2,
         'network': network,
+        'object-storage': object_storage,
         'volume.v1': volume.v1,
         'volume.v2': volume.v2,
         'volume.v3': volume.v3
     }
-
-
-def _tempest_internal_modules():
-    # Set of unstable service clients available in Tempest
-    # NOTE(andreaf) This list will exists only as long the remain clients
-    # are migrated to tempest.lib, and it will then be deleted without
-    # deprecation or advance notice
-    return set(['object-storage'])
 
 
 def available_modules():
@@ -99,17 +93,6 @@ def available_modules():
                     'claimed by another one' % (plugin_name,
                                                 extra_service_versions &
                                                 plug_service_versions))
-                name_conflicts.append(exceptions.PluginRegistrationException(
-                    name=plugin_name, detailed_error=detailed_error))
-            # NOTE(andreaf) Once all tempest clients are stable, the following
-            # if will have to be removed.
-            if not plug_service_versions.isdisjoint(
-                    _tempest_internal_modules()):
-                detailed_error = (
-                    'Plugin %s is trying to register a service %s already '
-                    'claimed by a Tempest one' % (plugin_name,
-                                                  _tempest_internal_modules() &
-                                                  plug_service_versions))
                 name_conflicts.append(exceptions.PluginRegistrationException(
                     name=plugin_name, detailed_error=detailed_error))
         extra_service_versions |= plug_service_versions
@@ -375,7 +358,7 @@ class ServiceClients(object):
         self.parameters = {}
 
         # Parameters are provided for unversioned services
-        all_modules = available_modules() | _tempest_internal_modules()
+        all_modules = available_modules()
         unversioned_services = set(
             [x.split('.')[0] for x in all_modules])
         for service in unversioned_services:
@@ -463,9 +446,7 @@ class ServiceClients(object):
 
     @property
     def registered_services(self):
-        # NOTE(andreaf) Once all tempest modules are stable this needs to
-        # be updated to remove _tempest_internal_modules
-        return self._registered_services | _tempest_internal_modules()
+        return self._registered_services
 
     def _setup_parameters(self, parameters):
         """Setup default values for client parameters

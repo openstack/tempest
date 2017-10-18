@@ -76,7 +76,6 @@ from tempest.common import credentials_factory as credentials
 from tempest import config
 import tempest.lib.common.http
 from tempest.lib import exceptions as lib_exc
-from tempest.services import object_storage
 
 
 CONF = config.CONF
@@ -236,11 +235,10 @@ def verify_api_versions(os, service, update):
 
 
 def get_extension_client(os, service):
-    params = config.service_client_config('object-storage')
     extensions_client = {
         'nova': os.compute.ExtensionsClient(),
         'neutron': os.network.ExtensionsClient(),
-        'swift': object_storage.CapabilitiesClient(os.auth_provider, **params),
+        'swift': os.object_storage.CapabilitiesClient(),
         # NOTE: Cinder v3 API is current and v2 and v1 are deprecated.
         # V3 extension API is the same as v2, so we reuse the v2 client
         # for v3 API also.
