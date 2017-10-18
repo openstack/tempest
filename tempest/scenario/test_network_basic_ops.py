@@ -113,7 +113,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         port_id = None
         if boot_with_port:
             # create a port on the network and boot with that
-            port_id = self._create_port(self.network['id'])['id']
+            port_id = self.create_port(self.network['id'])['id']
             self.ports.append({'port': port_id})
 
         server = self._create_server(self.network, port_id)
