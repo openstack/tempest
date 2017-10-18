@@ -51,28 +51,27 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success([200, 204], resp.status)
         return resp, body
 
-    def update_object_metadata(self, container, object_name, metadata,
-                               metadata_prefix='X-Object-Meta-'):
+    def create_or_update_object_metadata(self, container, object_name,
+                                         headers=None):
         """Add, remove, or change X-Object-Meta metadata for storage object."""
-
-        headers = {}
-        for key in metadata:
-            headers["%s%s" % (str(metadata_prefix), str(key))] = metadata[key]
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.post(url, None, headers=headers)
         self.expected_success(202, resp.status)
         return resp, body
 
-    def list_object_metadata(self, container, object_name):
+    def list_object_metadata(self, container, object_name,
+                             params=None, headers=None):
         """List all storage object X-Object-Meta- metadata."""
 
         url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.head(url)
+        if params:
+            url += '?%s' % urlparse.urlencode(params)
+        resp, body = self.head(url, headers=headers)
         self.expected_success(200, resp.status)
         return resp, body
 
-    def get_object(self, container, object_name, metadata=None):
+    def get_object(self, container, object_name, metadata=None, params=None):
         """Retrieve object's data."""
 
         headers = {}
@@ -81,6 +80,8 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         url = "{0}/{1}".format(container, object_name)
+        if params:
+            url += '?%s' % urlparse.urlencode(params)
         resp, body = self.get(url, headers=headers)
         self.expected_success([200, 206], resp.status)
         return resp, body
@@ -117,8 +118,7 @@ class ObjectClient(rest_client.RestClient):
         path = str(parsed.path) + "/"
         path += "%s/%s" % (str(container), str(object_name))
 
-        conn = create_connection(parsed)
-
+        conn = _create_connection(parsed)
         # Send the PUT request and the headers including the "Expect" header
         conn.putrequest('PUT', path)
 
@@ -152,7 +152,7 @@ class ObjectClient(rest_client.RestClient):
         return resp.status, resp.reason
 
 
-def create_connection(parsed_url):
+def _create_connection(parsed_url):
     """Helper function to create connection with httplib
 
     :param parsed_url: parsed url of the remote location
