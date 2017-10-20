@@ -20,6 +20,15 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
+def get_project_by_name(client, project_name):
+    projects = client.list_projects({'name': project_name})['projects']
+    for project in projects:
+        if project['name'] == project_name:
+            return project
+    raise lib_exc.NotFound('No such project(%s) in %s' % (project_name,
+                           projects))
+
+
 def get_tenant_by_name(client, tenant_name):
     tenants = client.list_tenants()['tenants']
     for tenant in tenants:
@@ -33,6 +42,18 @@ def get_user_by_username(client, tenant_id, username):
     for user in users:
         if user['name'] == username:
             return user
+    raise lib_exc.NotFound('No such user(%s) in %s' % (username, users))
+
+
+def get_user_by_project(users_client, roles_client, project_id, username):
+    users = users_client.list_users(**{'name': username})['users']
+    users_in_project = roles_client.list_role_assignments(
+        **{'scope.project.id': project_id})['role_assignments']
+    for user in users:
+        if user['name'] == username:
+            for u in users_in_project:
+                if u['user']['id'] == user['id']:
+                    return user
     raise lib_exc.NotFound('No such user(%s) in %s' % (username, users))
 
 

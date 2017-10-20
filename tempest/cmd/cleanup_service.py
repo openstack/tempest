@@ -32,7 +32,7 @@ CONF_NETWORKS = []
 CONF_PRIV_NETWORK_NAME = None
 CONF_PUB_NETWORK = None
 CONF_PUB_ROUTER = None
-CONF_TENANTS = None
+CONF_PROJECTS = None
 CONF_USERS = None
 
 IS_CINDER = None
@@ -50,7 +50,7 @@ def init_conf():
     global CONF_PRIV_NETWORK_NAME
     global CONF_PUB_NETWORK
     global CONF_PUB_ROUTER
-    global CONF_TENANTS
+    global CONF_PROJECTS
     global CONF_USERS
     global IS_CINDER
     global IS_GLANCE
@@ -69,7 +69,7 @@ def init_conf():
     CONF_PRIV_NETWORK_NAME = CONF.compute.fixed_network_name
     CONF_PUB_NETWORK = CONF.network.public_network_id
     CONF_PUB_ROUTER = CONF.network.public_router_id
-    CONF_TENANTS = [CONF.auth.admin_project_name]
+    CONF_PROJECTS = [CONF.auth.admin_project_name]
     CONF_USERS = [CONF.auth.admin_username]
 
     if IS_NEUTRON:
@@ -82,14 +82,14 @@ def _get_network_id(net_name, project_name):
     am = clients.Manager(
         credentials.get_configured_admin_credentials())
     net_cl = am.networks_client
-    tn_cl = am.tenants_client
+    pr_cl = am.projects_client
 
     networks = net_cl.list_networks()
-    tenant = identity.get_tenant_by_name(tn_cl, project_name)
-    t_id = tenant['id']
+    project = identity.get_project_by_name(pr_cl, project_name)
+    p_id = project['id']
     n_id = None
     for net in networks['networks']:
-        if (net['tenant_id'] == t_id and net['name'] == net_name):
+        if (net['project_id'] == p_id and net['name'] == net_name):
             n_id = net['id']
             break
     return n_id
@@ -786,14 +786,14 @@ class ImageService(BaseService):
 class IdentityService(BaseService):
     def __init__(self, manager, **kwargs):
         super(IdentityService, self).__init__(kwargs)
-        self.client = manager.identity_client
+        self.client = manager.identity_v3_client
 
 
 class UserService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(UserService, self).__init__(kwargs)
-        self.client = manager.users_client
+        self.client = manager.users_v3_client
 
     def list(self):
         users = self.client.list_users()['users']
@@ -872,43 +872,43 @@ class RoleService(BaseService):
             self.data['roles'][role['id']] = role['name']
 
 
-class TenantService(BaseService):
+class ProjectService(BaseService):
 
     def __init__(self, manager, **kwargs):
-        super(TenantService, self).__init__(kwargs)
-        self.client = manager.tenants_client
+        super(ProjectService, self).__init__(kwargs)
+        self.client = manager.projects_client
 
     def list(self):
-        tenants = self.client.list_tenants()['tenants']
+        projects = self.client.list_projects()['projects']
         if not self.is_save_state:
-            tenants = [tenant for tenant in tenants if (tenant['id']
-                       not in self.saved_state_json['tenants'].keys()
-                       and tenant['name'] != CONF.auth.admin_project_name)]
+            projects = [project for project in projects if (project['id']
+                        not in self.saved_state_json['projects'].keys()
+                        and project['name'] != CONF.auth.admin_project_name)]
 
         if self.is_preserve:
-            tenants = [tenant for tenant in tenants if tenant['name']
-                       not in CONF_TENANTS]
+            projects = [project for project in projects if project['name']
+                        not in CONF_PROJECTS]
 
-        LOG.debug("List count, %s Tenants after reconcile", len(tenants))
-        return tenants
+        LOG.debug("List count, %s Projects after reconcile", len(projects))
+        return projects
 
     def delete(self):
-        tenants = self.list()
-        for tenant in tenants:
+        projects = self.list()
+        for project in projects:
             try:
-                self.client.delete_tenant(tenant['id'])
+                self.client.delete_project(project['id'])
             except Exception:
-                LOG.exception("Delete Tenant exception.")
+                LOG.exception("Delete project exception.")
 
     def dry_run(self):
-        tenants = self.list()
-        self.data['tenants'] = tenants
+        projects = self.list()
+        self.data['projects'] = projects
 
     def save_state(self):
-        tenants = self.list()
-        self.data['tenants'] = {}
-        for tenant in tenants:
-            self.data['tenants'][tenant['id']] = tenant['name']
+        projects = self.list()
+        self.data['projects'] = {}
+        for project in projects:
+            self.data['projects'][project['id']] = project['name']
 
 
 class DomainService(BaseService):
@@ -948,35 +948,35 @@ class DomainService(BaseService):
             self.data['domains'][domain['id']] = domain['name']
 
 
-def get_tenant_cleanup_services():
-    tenant_services = []
+def get_project_cleanup_services():
+    project_services = []
     # TODO(gmann): Tempest should provide some plugin hook for cleanup
     # script extension to plugin tests also.
     if IS_NOVA:
-        tenant_services.append(ServerService)
-        tenant_services.append(KeyPairService)
-        tenant_services.append(SecurityGroupService)
-        tenant_services.append(ServerGroupService)
+        project_services.append(ServerService)
+        project_services.append(KeyPairService)
+        project_services.append(SecurityGroupService)
+        project_services.append(ServerGroupService)
         if not IS_NEUTRON:
-            tenant_services.append(FloatingIpService)
-        tenant_services.append(NovaQuotaService)
+            project_services.append(FloatingIpService)
+        project_services.append(NovaQuotaService)
     if IS_HEAT:
-        tenant_services.append(StackService)
+        project_services.append(StackService)
     if IS_NEUTRON:
-        tenant_services.append(NetworkFloatingIpService)
+        project_services.append(NetworkFloatingIpService)
         if utils.is_extension_enabled('metering', 'network'):
-            tenant_services.append(NetworkMeteringLabelRuleService)
-            tenant_services.append(NetworkMeteringLabelService)
-        tenant_services.append(NetworkRouterService)
-        tenant_services.append(NetworkPortService)
-        tenant_services.append(NetworkSubnetService)
-        tenant_services.append(NetworkService)
-        tenant_services.append(NetworkSecGroupService)
+            project_services.append(NetworkMeteringLabelRuleService)
+            project_services.append(NetworkMeteringLabelService)
+        project_services.append(NetworkRouterService)
+        project_services.append(NetworkPortService)
+        project_services.append(NetworkSubnetService)
+        project_services.append(NetworkService)
+        project_services.append(NetworkSecGroupService)
     if IS_CINDER:
-        tenant_services.append(SnapshotService)
-        tenant_services.append(VolumeService)
-        tenant_services.append(VolumeQuotaService)
-    return tenant_services
+        project_services.append(SnapshotService)
+        project_services.append(VolumeService)
+        project_services.append(VolumeQuotaService)
+    return project_services
 
 
 def get_global_cleanup_services():
@@ -986,7 +986,7 @@ def get_global_cleanup_services():
     if IS_GLANCE:
         global_services.append(ImageService)
     global_services.append(UserService)
-    global_services.append(TenantService)
+    global_services.append(ProjectService)
     global_services.append(DomainService)
     global_services.append(RoleService)
     return global_services
