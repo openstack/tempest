@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    As of the Queens release, tempest no longer tests the identity v2.0 API
+    because the majority of the v2.0 API have been removed from the identity
+    project. Once the Queens release reaches end-of-life, we can remove the
+    v2.0 tempest tests and clean up v2.0 testing cruft.

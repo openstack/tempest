@@ -176,22 +176,6 @@ class TestDiscovery(base.TestCase):
                                            False, True)
 
     @mock.patch('tempest.lib.common.http.ClosingHttp.request')
-    def test_verify_keystone_api_versions_no_v2(self, mock_request):
-        self.useFixture(fixtures.MockPatchObject(
-            verify_tempest_config, '_get_unversioned_endpoint',
-            return_value='http://fake_endpoint:5000'))
-        fake_resp = {'versions': {'values': [{'id': 'v3.0'}]}}
-        fake_resp = json.dumps(fake_resp)
-        mock_request.return_value = (None, fake_resp)
-        fake_os = mock.MagicMock()
-        with mock.patch.object(verify_tempest_config,
-                               'print_and_or_update') as print_mock:
-            verify_tempest_config.verify_keystone_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2',
-                                           'identity-feature-enabled',
-                                           False, True)
-
-    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
     def test_verify_cinder_api_versions_no_v3(self, mock_request):
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
