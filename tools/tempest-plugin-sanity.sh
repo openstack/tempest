@@ -120,3 +120,8 @@ for project in $PROJECT_LIST; do
         failed_plugin+=", $project"
     fi
 done
+
+# Check for failed status
+if [[ -n $failed_plugin ]]; then
+    exit 1
+fi

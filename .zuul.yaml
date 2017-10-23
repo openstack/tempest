@@ -12,6 +12,82 @@
         tempest: True
     run: playbooks/devstack-tempest.yaml
 
+- job:
+    name: tempest-tox-plugin-sanity-check
+    parent: tox
+    description: |
+      Run tempest plugin sanity check script using tox.
+    nodeset: ubuntu-xenial
+    vars:
+      tox_envlist: plugin-sanity-check
+    voting: false
+    timeout: 5000
+    required-projects:
+      - openstack/almanach
+      - openstack/aodh
+      - openstack/barbican-tempest-plugin
+      - openstack/ceilometer
+      - openstack/cinder
+      - openstack/congress
+      - openstack/designate-tempest-plugin
+      - openstack/ec2-api
+      - openstack/freezer
+      - openstack/freezer-api
+      - openstack/freezer-tempest-plugin
+      - openstack/gce-api
+      - openstack/glare
+      - openstack/heat
+      - openstack/intel-nfv-ci-tests
+      - openstack/ironic
+      - openstack/ironic-inspector
+      - openstack/keystone-tempest-plugin
+      - openstack/kingbird
+      - openstack/kuryr-tempest-plugin
+      - openstack/magnum
+      - openstack/magnum-tempest-plugin
+      - openstack/manila
+      - openstack/manila-tempest-plugin
+      - openstack/mistral
+      - openstack/mogan
+      - openstack/monasca-api
+      - openstack/monasca-log-api
+      - openstack/murano
+      - openstack/networking-bgpvpn
+      - openstack/networking-cisco
+      - openstack/networking-fortinet
+      - openstack/networking-generic-switch
+      - openstack/networking-l2gw
+      - openstack/networking-midonet
+      - openstack/networking-plumgrid
+      - openstack/networking-sfc
+      - openstack/neutron
+      - openstack/neutron-dynamic-routing
+      - openstack/neutron-fwaas
+      - openstack/neutron-lbaas
+      - openstack/neutron-tempest-plugin
+      - openstack/neutron-vpnaas
+      - openstack/nova-lxd
+      - openstack/novajoin-tempest-plugin
+      - openstack/octavia
+      - openstack/oswin-tempest-plugin
+      - openstack/panko
+      - openstack/patrole
+      - openstack/qinling
+      - openstack/requirements
+      - openstack/sahara-tests
+      - openstack/senlin
+      - openstack/senlin-tempest-plugin
+      - openstack/tap-as-a-service
+      - openstack/tempest-horizon
+      - openstack/trio2o
+      - openstack/trove
+      - openstack/valet
+      - openstack/vitrage
+      - openstack/vmware-nsx-tempest-plugin
+      - openstack/watcher-tempest-plugin
+      - openstack/zaqar-tempest-plugin
+      - openstack/zun-tempest-plugin
+
 - project:
     name: openstack/tempest
     check:
@@ -21,3 +97,4 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
+        - tempest-tox-plugin-sanity-check
