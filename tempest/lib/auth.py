@@ -600,7 +600,8 @@ def is_identity_version_supported(identity_version):
 
 def get_credentials(auth_url, fill_in=True, identity_version='v2',
                     disable_ssl_certificate_validation=None, ca_certs=None,
-                    trace_requests=None, http_timeout=None, **kwargs):
+                    trace_requests=None, http_timeout=None, proxy_url=None,
+                    **kwargs):
     """Builds a credentials object based on the configured auth_version
 
     :param auth_url (string): Full URI of the OpenStack Identity API(Keystone)
@@ -618,6 +619,7 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2',
     :param trace_requests: trace in log API requests to the auth system
     :param http_timeout: timeout in seconds to wait for the http request to
            return
+    :param proxy_url: URL of HTTP(s) proxy used when fill_in is True
     :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
@@ -642,7 +644,7 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2',
         auth_provider = auth_provider_class(
             creds, auth_url, disable_ssl_certificate_validation=dscv,
             ca_certs=ca_certs, trace_requests=trace_requests,
-            http_timeout=http_timeout)
+            http_timeout=http_timeout, proxy_url=proxy_url)
         creds = auth_provider.fill_credentials()
     return creds
 
