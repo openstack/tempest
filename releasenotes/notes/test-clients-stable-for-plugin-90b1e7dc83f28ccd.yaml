@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Two extra modules are now marked as stable for plugins, test.py and clients.py.
+    The former includes the test base class with its automatic credentials
+    provisioning and test resource managing fixtures.
+    The latter is built on top of ServiceClients and it adds aliases and a few custom
+    configurations to it.
