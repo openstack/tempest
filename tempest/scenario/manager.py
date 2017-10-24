@@ -706,17 +706,14 @@ class NetworkScenarioTest(ScenarioTest):
                         network['id'])
         return network
 
-    def _create_subnet(self, network, subnets_client=None,
-                       routers_client=None, namestart='subnet-smoke',
-                       **kwargs):
+    def create_subnet(self, network, subnets_client=None,
+                      namestart='subnet-smoke', **kwargs):
         """Create a subnet for the given network
 
         within the cidr block configured for tenant networks.
         """
         if not subnets_client:
             subnets_client = self.subnets_client
-        if not routers_client:
-            routers_client = self.routers_client
 
         def cidr_in_use(cidr, tenant_id):
             """Check cidr existence
@@ -1146,12 +1143,11 @@ class NetworkScenarioTest(ScenarioTest):
             router = self._get_router(client=routers_client,
                                       tenant_id=tenant_id)
             subnet_kwargs = dict(network=network,
-                                 subnets_client=subnets_client,
-                                 routers_client=routers_client)
+                                 subnets_client=subnets_client)
             # use explicit check because empty list is a valid option
             if dns_nameservers is not None:
                 subnet_kwargs['dns_nameservers'] = dns_nameservers
-            subnet = self._create_subnet(**subnet_kwargs)
+            subnet = self.create_subnet(**subnet_kwargs)
             if not routers_client:
                 routers_client = self.routers_client
             router_id = router['id']

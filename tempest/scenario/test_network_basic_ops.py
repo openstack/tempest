@@ -231,10 +231,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _create_new_network(self, create_gateway=False):
         self.new_net = self._create_network()
         if create_gateway:
-            self.new_subnet = self._create_subnet(
+            self.new_subnet = self.create_subnet(
                 network=self.new_net)
         else:
-            self.new_subnet = self._create_subnet(
+            self.new_subnet = self.create_subnet(
                 network=self.new_net,
                 gateway_ip=None)
 
