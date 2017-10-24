@@ -13,29 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
-from tempest.common import utils
+from tempest.api.compute.floating_ips import base
 from tempest import config
 from tempest.lib import decorators
 
 CONF = config.CONF
 
 
-class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
+class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(FloatingIPDetailsTestJSON, cls).skip_checks()
-        if not utils.get_service_list()['network']:
-            raise cls.skipException("network service not enabled.")
-        if not CONF.network_feature_enabled.floating_ips:
-            raise cls.skipException("Floating ips are not available")
-
-    @classmethod
-    def setup_clients(cls):
-        super(FloatingIPDetailsTestJSON, cls).setup_clients()
-        cls.client = cls.floating_ips_client
-        cls.pools_client = cls.floating_ip_pools_client
+    max_microversion = '2.35'
 
     @classmethod
     def resource_setup(cls):

@@ -14,6 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
+from tempest import config
+
+CONF = config.CONF
 
 
 class BaseFloatingIPsTest(base.BaseV2ComputeTest):
@@ -24,3 +28,17 @@ class BaseFloatingIPsTest(base.BaseV2ComputeTest):
         cls.set_network_resources(network=True, subnet=True,
                                   router=True, dhcp=True)
         super(BaseFloatingIPsTest, cls).setup_credentials()
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseFloatingIPsTest, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
+        if not CONF.network_feature_enabled.floating_ips:
+            raise cls.skipException("Floating ips are not available")
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseFloatingIPsTest, cls).setup_clients()
+        cls.client = cls.floating_ips_client
+        cls.pools_client = cls.floating_ip_pools_client

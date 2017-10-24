@@ -16,7 +16,6 @@
 import testtools
 
 from tempest.api.compute.floating_ips import base
-from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -27,26 +26,12 @@ CONF = config.CONF
 
 class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(FloatingIPsNegativeTestJSON, cls).skip_checks()
-        if not utils.get_service_list()['network']:
-            raise cls.skipException("network service not enabled.")
-        if not CONF.network_feature_enabled.floating_ips:
-            raise cls.skipException("Floating ips are not available")
-
-    @classmethod
-    def setup_clients(cls):
-        super(FloatingIPsNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.floating_ips_client
+    max_microversion = '2.35'
 
     @classmethod
     def resource_setup(cls):
         super(FloatingIPsNegativeTestJSON, cls).resource_setup()
 
-        # Server creation
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
         # Generating a nonexistent floatingIP id
         body = cls.client.list_floating_ips()['floating_ips']
         floating_ip_ids = [floating_ip['id'] for floating_ip in body]
@@ -76,6 +61,17 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         # Deleting the non existent floating IP
         self.assertRaises(lib_exc.NotFound, self.client.delete_floating_ip,
                           self.non_exist_id)
+
+
+class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
+
+    max_microversion = '2.43'
+
+    @classmethod
+    def resource_setup(cls):
+        super(FloatingIPsAssociationNegativeTestJSON, cls).resource_setup()
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = cls.server['id']
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('595fa616-1a71-4670-9614-46564ac49a4c')
