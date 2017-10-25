@@ -209,3 +209,34 @@ class ServerShowV247Test(base.BaseV2ComputeTest):
                                        server['id'], 'ACTIVE')
         # Checking list details API response schema
         self.servers_client.list_servers(detail=True)
+
+
+class ServerShowV263Test(base.BaseV2ComputeTest):
+    min_microversion = '2.63'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('71b8e3d5-11d2-494f-b917-b094a4afed3c')
+    def test_show_update_rebuild_list_server(self):
+        trusted_certs = ['test-cert-1', 'test-cert-2']
+        server = self.create_test_server(
+            trusted_image_certificates=trusted_certs,
+            wait_until='ACTIVE')
+
+        # Check show API response schema
+        self.servers_client.show_server(server['id'])['server']
+
+        # Check update API response schema
+        self.servers_client.update_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        # Check rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        # Check list details API response schema
+        params = {'trusted_image_certificates': trusted_certs}
+        servers = self.servers_client.list_servers(
+            detail=True, **params)['servers']
+        self.assertNotEmpty(servers)
