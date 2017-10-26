@@ -183,7 +183,7 @@ class TestCredentialsFactory(base.TestCase):
         # Build the expected params
         expected_params = dict(
             [(field, value) for _, field, value in all_params])
-        expected_params.update(cf.DEFAULT_PARAMS)
+        expected_params.update(config.service_client_config())
         admin_creds = cf.get_configured_admin_credentials()
         mock_get_credentials.assert_called_once_with(
             fill_in=True, identity_version='v3', **expected_params)
@@ -205,7 +205,7 @@ class TestCredentialsFactory(base.TestCase):
         # Build the expected params
         expected_params = dict(
             [(field, value) for _, field, value in all_params])
-        expected_params.update(cf.DEFAULT_PARAMS)
+        expected_params.update(config.service_client_config())
         admin_creds = cf.get_configured_admin_credentials(
             fill_in=False, identity_version='v3')
         mock_get_credentials.assert_called_once_with(
@@ -232,7 +232,7 @@ class TestCredentialsFactory(base.TestCase):
         cfg.CONF.set_default('uri', expected_uri, 'identity')
         params = {'foo': 'bar'}
         expected_params = params.copy()
-        expected_params.update(cf.DEFAULT_PARAMS)
+        expected_params.update(config.service_client_config())
         result = cf.get_credentials(identity_version='v2', **params)
         self.assertEqual(expected_result, result)
         mock_auth_get_credentials.assert_called_once_with(
@@ -251,7 +251,7 @@ class TestCredentialsFactory(base.TestCase):
         params = {'foo': 'bar'}
         expected_params = params.copy()
         expected_params['domain_name'] = expected_domain
-        expected_params.update(cf.DEFAULT_PARAMS)
+        expected_params.update(config.service_client_config())
         result = cf.get_credentials(fill_in=False, identity_version='v3',
                                     **params)
         self.assertEqual(expected_result, result)
@@ -270,7 +270,7 @@ class TestCredentialsFactory(base.TestCase):
                              expected_domain, 'auth')
         params = {'foo': 'bar', 'user_domain_name': expected_domain}
         expected_params = params.copy()
-        expected_params.update(cf.DEFAULT_PARAMS)
+        expected_params.update(config.service_client_config())
         result = cf.get_credentials(fill_in=False, identity_version='v3',
                                     **params)
         self.assertEqual(expected_result, result)

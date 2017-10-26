@@ -44,6 +44,7 @@ class MockHelpersMixin(object):
         self.patchobject(config, 'TempestConfigPrivate',
                          fake_config.FakePrivate)
         self.opts = FakeOpts(version=identity_version)
+        self.patch('oslo_log.log.setup', autospec=True)
 
     def mock_resource_creation(self):
         fake_resource = dict(id='id', name='name')

@@ -219,13 +219,6 @@ CREDENTIAL_TYPES = {
     'alt_user': ('identity', 'alt')
 }
 
-DEFAULT_PARAMS = {
-    'disable_ssl_certificate_validation':
-        CONF.identity.disable_ssl_certificate_validation,
-    'ca_certs': CONF.identity.ca_certificates_file,
-    'trace_requests': CONF.debug.trace_requests
-}
-
 
 def get_configured_admin_credentials(fill_in=True, identity_version=None):
     """Get admin credentials from the config file
@@ -252,7 +245,7 @@ def get_configured_admin_credentials(fill_in=True, identity_version=None):
     if identity_version == 'v3':
         conf_attributes.append('domain_name')
     # Read the parts of credentials from config
-    params = DEFAULT_PARAMS.copy()
+    params = config.service_client_config()
     for attr in conf_attributes:
         params[attr] = getattr(CONF.auth, 'admin_' + attr)
     # Build and validate credentials. We are reading configured credentials,
@@ -282,7 +275,7 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
     :param kwargs: Attributes to be used to build the Credentials object.
     :returns: An object of a sub-type of `auth.Credentials`
     """
-    params = dict(DEFAULT_PARAMS, **kwargs)
+    params = dict(config.service_client_config(), **kwargs)
     identity_version = identity_version or CONF.identity.auth_version
     # In case of "v3" add the domain from config if not specified
     # To honour the "default_credentials_domain_name", if not domain

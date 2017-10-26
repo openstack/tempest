@@ -1,0 +1,13 @@
+---
+upgrade:
+  - |
+    Replace any call in your code to credentials_factory.DEFAULT_PARAMS with
+    a call to config.service_client_config().
+fixes:
+  - |
+    The credentials_factory module used to load configuration at import time
+    which caused configuration being loaded at test discovery time.
+    This was fixed by removing the DEFAULT_PARAMS variable. This variable
+    was redundant (and outdated), the same dictionary (but up to date) can
+    be obtained via invoking config.service_client_config() with no service
+    parameter.

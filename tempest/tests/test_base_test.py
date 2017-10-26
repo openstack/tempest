@@ -17,6 +17,7 @@ from oslo_config import cfg
 
 from tempest import clients
 from tempest.common import credentials_factory as credentials
+from tempest import config
 from tempest.lib.common import fixed_network
 from tempest import test
 from tempest.tests import base
@@ -27,6 +28,8 @@ class TestBaseTestCase(base.TestCase):
     def setUp(self):
         super(TestBaseTestCase, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
+        self.patchobject(config, 'TempestConfigPrivate',
+                         fake_config.FakePrivate)
         self.fixed_network_name = 'fixed-net'
         cfg.CONF.set_default('fixed_network_name', self.fixed_network_name,
                              'compute')
