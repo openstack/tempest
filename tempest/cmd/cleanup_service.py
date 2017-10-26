@@ -141,7 +141,7 @@ class SnapshotService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(SnapshotService, self).__init__(kwargs)
-        self.client = manager.snapshots_client
+        self.client = manager.snapshots_client_latest
 
     def list(self):
         client = self.client
@@ -319,7 +319,7 @@ class FloatingIpService(BaseService):
 class VolumeService(BaseService):
     def __init__(self, manager, **kwargs):
         super(VolumeService, self).__init__(kwargs)
-        self.client = manager.volumes_client
+        self.client = manager.volumes_client_latest
 
     def list(self):
         client = self.client
@@ -344,7 +344,7 @@ class VolumeService(BaseService):
 class VolumeQuotaService(BaseService):
     def __init__(self, manager, **kwargs):
         super(VolumeQuotaService, self).__init__(kwargs)
-        self.client = manager.volume_quotas_client
+        self.client = manager.volume_quotas_v2_client
 
     def delete(self):
         client = self.client
