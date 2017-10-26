@@ -117,7 +117,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.ports.append({'port': port_id})
 
         server = self._create_server(self.network, port_id)
-        self._check_tenant_network_connectivity()
+        ssh_login = CONF.validation.image_ssh_user
+        for server in self.servers:
+            # call the common method in the parent class
+            self.check_tenant_network_connectivity(
+                server, ssh_login, self._get_server_key(server),
+                servers_for_debug=self.servers)
 
         floating_ip = self.create_floating_ip(server)
         self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
@@ -169,15 +174,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _get_server_key(self, server):
         return self.keypairs[server['key_name']]['private_key']
-
-    def _check_tenant_network_connectivity(self):
-        ssh_login = CONF.validation.image_ssh_user
-        for server in self.servers:
-            # call the common method in the parent class
-            super(TestNetworkBasicOps, self).\
-                _check_tenant_network_connectivity(
-                    server, ssh_login, self._get_server_key(server),
-                    servers_for_debug=self.servers)
 
     def check_public_network_connectivity(
             self, should_connect=True, msg=None,

@@ -859,11 +859,11 @@ class NetworkScenarioTest(ScenarioTest):
         LOG.info("FloatingIP: {fp} is at status: {st}"
                  .format(fp=floating_ip, st=status))
 
-    def _check_tenant_network_connectivity(self, server,
-                                           username,
-                                           private_key,
-                                           should_connect=True,
-                                           servers_for_debug=None):
+    def check_tenant_network_connectivity(self, server,
+                                          username,
+                                          private_key,
+                                          should_connect=True,
+                                          servers_for_debug=None):
         if not CONF.network.project_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
             LOG.info(msg)
