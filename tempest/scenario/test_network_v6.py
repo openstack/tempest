@@ -78,9 +78,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet:
             network_v6 = self._create_network()
 
-        sub4 = self._create_subnet(network=network,
-                                   namestart='sub4',
-                                   ip_version=4)
+        sub4 = self.create_subnet(network=network,
+                                  namestart='sub4',
+                                  ip_version=4)
 
         router = self._get_router()
         self.routers_client.add_router_interface(router['id'],
@@ -93,11 +93,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self.subnets_v6 = []
         for _ in range(n_subnets6):
             net6 = network_v6 if dualnet else network
-            sub6 = self._create_subnet(network=net6,
-                                       namestart='sub6',
-                                       ip_version=6,
-                                       ipv6_ra_mode=address6_mode,
-                                       ipv6_address_mode=address6_mode)
+            sub6 = self.create_subnet(network=net6,
+                                      namestart='sub6',
+                                      ip_version=6,
+                                      ipv6_ra_mode=address6_mode,
+                                      ipv6_address_mode=address6_mode)
 
             self.routers_client.add_router_interface(router['id'],
                                                      subnet_id=sub6['id'])
