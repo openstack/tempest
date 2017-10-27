@@ -15,6 +15,7 @@
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -52,7 +53,10 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
             description=description,
             name=name)
         metering_label = body['metering_label']
-        cls.metering_labels.append(metering_label)
+        cls.addClassResourceCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            cls.admin_metering_labels_client.delete_metering_label,
+            metering_label['id'])
         return metering_label
 
     @classmethod
@@ -64,7 +68,9 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
             remote_ip_prefix=remote_ip_prefix, direction=direction,
             metering_label_id=metering_label_id)
         metering_label_rule = body['metering_label_rule']
-        cls.metering_label_rules.append(metering_label_rule)
+        cls.addClassResourceCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            client.delete_metering_label_rule, metering_label_rule['id'])
         return metering_label_rule
 
     def _delete_metering_label(self, metering_label_id):
