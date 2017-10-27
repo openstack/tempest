@@ -131,11 +131,8 @@ class TagsExtTest(base.BaseNetworkTest):
         prefix = CONF.network.default_network
         cls.subnetpool = cls.subnetpools_client.create_subnetpool(
             name=subnetpool_name, prefixes=prefix)['subnetpool']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.subnetpools_client.delete_subnetpool(cls.subnetpool['id'])
-        super(TagsExtTest, cls).resource_cleanup()
+        cls.addClassResourceCleanup(cls.subnetpools_client.delete_subnetpool,
+                                    cls.subnetpool['id'])
 
     def _create_tags_for_each_resource(self):
         # Create a tag for each resource in `SUPPORTED_RESOURCES` and return
