@@ -1084,30 +1084,17 @@ class NetworkScenarioTest(ScenarioTest):
             body = client.show_router(router_id)
             return body['router']
         elif network_id:
-            router = self._create_router(client, tenant_id)
-            kwargs = {'external_gateway_info': dict(network_id=network_id)}
-            router = client.update_router(router['id'], **kwargs)['router']
+            router = client.create_router(
+                name=data_utils.rand_name(self.__class__.__name__ + '-router'),
+                admin_state_up=True,
+                tenant_id=tenant_id,
+                external_gateway_info=dict(network_id=network_id))['router']
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            client.delete_router, router['id'])
             return router
         else:
             raise Exception("Neither of 'public_router_id' or "
                             "'public_network_id' has been defined.")
-
-    def _create_router(self, client=None, tenant_id=None,
-                       namestart='router-smoke'):
-        if not client:
-            client = self.routers_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
-        name = data_utils.rand_name(namestart)
-        result = client.create_router(name=name,
-                                      admin_state_up=True,
-                                      tenant_id=tenant_id)
-        router = result['router']
-        self.assertEqual(router['name'], name)
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_router,
-                        router['id'])
-        return router
 
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,
