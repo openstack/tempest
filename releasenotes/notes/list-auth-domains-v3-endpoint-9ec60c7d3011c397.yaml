@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add ``list_auth_domains`` API endpoint to the identity v3 client. This
+    allows the possibility of listing all domains a user has access to
+    via role assignments.
