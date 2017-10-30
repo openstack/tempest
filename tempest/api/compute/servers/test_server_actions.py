@@ -315,6 +315,22 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_resize_server_confirm(self):
         self._test_resize_server_confirm(self.server_id, stop=False)
 
+    @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
+    @decorators.related_bug('1728603')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @utils.services('volume')
+    def test_resize_volume_backed_server_confirm(self):
+        # We have to create a new server that is volume-backed since the one
+        # from setUp is not volume-backed.
+        server = self.create_test_server(
+            volume_backed=True, wait_until='ACTIVE')
+        self._test_resize_server_confirm(server['id'])
+        # Now do something interactive with the guest like get its console
+        # output; we don't actually care about the output, just that it doesn't
+        # raise an error.
+        self.client.get_console_output(server['id'])
+
     @decorators.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
