@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from debtcollector import removals
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
@@ -336,34 +335,6 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-show_image_metadata': {}})
         url = "volumes/%s/action" % volume_id
         resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    @removals.remove(message="use list_pools from tempest.lib.services."
-                             "volume.v2.scheduler_stats_client")
-    def show_pools(self, detail=False):
-        # List all the volumes pools (hosts)
-        url = 'scheduler-stats/get_pools'
-        if detail:
-            url += '?detail=True'
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    @removals.remove(message="use show_backend_capabilities from tempest.lib."
-                             "services.volume.v2.capabilities_client")
-    def show_backend_capabilities(self, host):
-        """Shows capabilities for a storage back end.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#show-back-end-capabilities
-        """
-        url = 'capabilities/%s' % host
-        resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
