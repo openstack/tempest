@@ -79,7 +79,11 @@ class TestDataUtils(base.TestCase):
         self.assertEqual(len(actual), 3)
         self.assertRegex(actual, "[A-Za-z0-9~!@#%^&*_=+]{3}")
         actual2 = data_utils.rand_password(2)
-        self.assertNotEqual(actual, actual2)
+        # NOTE(masayukig): Originally, we checked that the acutal and actual2
+        # are different each other. But only 3 letters can be the same value
+        # in a very rare case. So, we just check the length here, too,
+        # just in case.
+        self.assertEqual(len(actual2), 3)
 
     def test_rand_url(self):
         actual = data_utils.rand_url()
