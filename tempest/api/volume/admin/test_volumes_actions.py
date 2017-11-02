@@ -37,7 +37,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
-        # test volume reset status : available->error->available
+        # test volume reset status : available->error->available->maintenance
         volume = self.create_volume()
         self.addCleanup(waiters.wait_for_volume_resource_status,
                         self.volumes_client, volume['id'], 'available')
