@@ -121,10 +121,10 @@ function create_public_network() {
 
 function create_flavor() {
     local id=$1
-    local name='tempest_flavor'
-    local ram=512
-    local disk=1
-    local vCPU=1
+    local name="tempest_flavor_$id"
+    local ram=${2:-512}
+    local disk=${3:-1}
+    local vCPU=${4:-1}
     if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
         nova='nova --insecure'
     else
@@ -137,3 +137,8 @@ function create_flavor() {
     fi
 }
 
+function get_compute_count() {
+    count=`nova service-list | grep "nova-compute" | grep "up" | wc -l`
+    echo $count
+}
+    

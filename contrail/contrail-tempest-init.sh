@@ -19,10 +19,11 @@ export API_SERVER_IP=${API_SERVER_IP:-127.0.0.1}
 export API_SERVER_HOST_USER=${API_SERVER_HOST_USER:-root}
 export API_SERVER_HOST_PASSWORD=${API_SERVER_HOST_PASSWORD:-c0ntrail123}
 export PUBLIC_NETWORK_SUBNET=${PUBLIC_NETWORK_SUBNET:-10.1.1.0/24}
-export HTTP_IMAGE_PATH=${HTTP_IMAGE_PATH:-http://10.204.216.50/images/cirros/cirros-0.3.1-x86_64-disk.img}
+export HTTP_IMAGE_PATH=${HTTP_IMAGE_PATH:-http://10.204.216.50/images/cirros/cirros-0.3.5-x86_64-disk.img}
 export PUBLIC_ACCESS_AVAILABLE=${PUBLIC_ACCESS_AVAILABLE:-0}
 
 FLAVOR_ID=7
+FLAVOR_ID_ALT=8
 SERVICE_HOST=$KEYSTONE_SERVICE_HOST
 
 TEMPEST_CONFIG_DIR=${TEMPEST_CONFIG_DIR:-$TEMPEST_DIR/etc}
@@ -54,6 +55,9 @@ create_project $ALT_TENANT_NAME
 create_user $ALT_USERNAME $password $ALT_TENANT_NAME "member"
 create_public_network $PUBLIC_NETWORK_NAME $PUBLIC_NETWORK_SUBNET
 create_flavor $FLAVOR_ID
+create_flavor $FLAVOR_ID_ALT 1024 1 1 
+
+compute_count=`get_compute_count`
 
 #DASHBOARD
 iniset $TEMPEST_CONFIG dashboard dashboard_url "http://$SERVICE_HOST/horizon"
@@ -95,17 +99,28 @@ iniset $TEMPEST_CONFIG compute ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG compute image_ref $image_uuid
 iniset $TEMPEST_CONFIG validation image_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG validation image_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
+iniset $TEMPEST_CONFIG validation run_validation true
+iniset $TEMPEST_CONFIG compute min_compute_nodes $compute_count
+
 iniset $TEMPEST_CONFIG compute flavor_ref $FLAVOR_ID
+iniset $TEMPEST_CONFIG compute flavor_ref_alt $FLAVOR_ID_ALT
 iniset $TEMPEST_CONFIG compute image_ref_alt $image_uuid_alt
 iniset $TEMPEST_CONFIG compute image_alt_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG compute image_alt_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
 iniset $TEMPEST_CONFIG compute allow_tenant_isolation ${TENANT_ISOLATION:-false}
 iniset $TEMPEST_CONFIG network public_network_id "$public_network_id"
+iniset $TEMPEST_CONFIG network floating_network_name $PUBLIC_NETWORK_NAME
 
-# Disable IPv6 tests
-iniset $TEMPEST_CONFIG network-feature-enabled ipv6 true
-iniset $TEMPEST_CONFIG network-feature-enabled port_security false
-iniset $TEMPEST_CONFIG network-feature-enabled floating_ips false
+iniset $TEMPEST_CONFIG network-feature-enabled api_extensions allowed-address-pairs,extra_dhcp_opt,security-group,floating_ip,port_security,ipv6,router,quotas,binding
+iniset $TEMPEST_CONFIG compute-feature-enabled live_migration false
+iniset $TEMPEST_CONFIG compute-feature-enabled cold_migration false
+iniset $TEMPEST_CONFIG compute-feature-enabled scheduler_available_filters "RetryFilter, AvailabilityZoneFilter, RamFilter, DiskFilter, ComputeFilter, ComputeCapabilitiesFilter, ImagePropertiesFilter, ServerGroupAntiAffinityFilter, ServerGroupAffinityFilter"
+
+
+iniset $TEMPEST_CONFIG identity-feature-enabled api_v2 false
+iniset $TEMPEST_CONFIG identity-feature-enabled api_v2_admin false
+iniset $TEMPEST_CONFIG identity-feature-enabled api_v3 false
+
 if [ $PUBLIC_ACCESS_AVAILABLE -eq 1 ];
 then
     iniset $TEMPEST_CONFIG network-feature-enabled floating_ips true
@@ -114,7 +129,7 @@ fi
 iniset $TEMPEST_CONFIG service_available "neutron" "True"
 iniset $TEMPEST_CONFIG service_available "nova" "True"
 iniset $TEMPEST_CONFIG service_available "heat" "True"
-iniset $TEMPEST_CONFIG service_available "glance" "False"
+iniset $TEMPEST_CONFIG service_available "glance" "True"
 iniset $TEMPEST_CONFIG service_available "horizon" "False"
 iniset $TEMPEST_CONFIG service_available "cinder" "False"
 iniset $TEMPEST_CONFIG service_available "swift" "False"
