@@ -900,13 +900,17 @@ class NetworkScenarioTest(ScenarioTest):
 
         result = test_utils.call_until_true(ping_remote,
                                             CONF.validation.ping_timeout, 1)
+        if result:
+            return
+
         source_host = source.ssh_client.host
         if should_succeed:
             msg = "Timed out waiting for %s to become reachable from %s" \
                 % (dest, source_host)
         else:
             msg = "%s is reachable from %s" % (dest, source_host)
-        self.assertTrue(result, msg)
+        self._log_console_output()
+        self.fail(msg)
 
     def _create_security_group(self, security_group_rules_client=None,
                                tenant_id=None,
