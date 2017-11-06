@@ -46,16 +46,6 @@ class BaseImageTest(tempest.test.BaseTestCase):
         cls.created_images = []
 
     @classmethod
-    def resource_cleanup(cls):
-        for image_id in cls.created_images:
-            test_utils.call_and_ignore_notfound_exc(
-                cls.client.delete_image, image_id)
-
-        for image_id in cls.created_images:
-                cls.client.wait_for_resource_deletion(image_id)
-        super(BaseImageTest, cls).resource_cleanup()
-
-    @classmethod
     def create_image(cls, data=None, **kwargs):
         """Wrapper that returns a test image."""
 
@@ -75,6 +65,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
         if 'image' in image:
             image = image['image']
         cls.created_images.append(image['id'])
+        cls.addClassResourceCleanup(cls.client.wait_for_resource_deletion,
+                                    image['id'])
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.client.delete_image, image['id'])
         return image
 
     @classmethod
