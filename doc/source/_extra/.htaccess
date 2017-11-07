@@ -1,0 +1,1 @@
+redirectmatch 301 ^/developer/tempest/(.*) /tempest/latest/$1
