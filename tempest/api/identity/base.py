@@ -249,13 +249,16 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         if 'description' not in kwargs:
             kwargs['description'] = data_utils.rand_name('desc')
         domain = cls.domains_client.create_domain(**kwargs)['domain']
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.delete_domain, domain['id'])
         return domain
 
-    def delete_domain(self, domain_id):
+    @classmethod
+    def delete_domain(cls, domain_id):
         # NOTE(mpavlase) It is necessary to disable the domain before deleting
         # otherwise it raises Forbidden exception
-        self.domains_client.update_domain(domain_id, enabled=False)
-        self.domains_client.delete_domain(domain_id)
+        cls.domains_client.update_domain(domain_id, enabled=False)
+        cls.domains_client.delete_domain(domain_id)
 
     def setup_test_user(self, password=None):
         """Set up a test user."""

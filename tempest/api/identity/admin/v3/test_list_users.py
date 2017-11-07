@@ -60,9 +60,6 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Cleanup the users created during setup
         for user in cls.users:
             cls.users_client.delete_user(user['id'])
-        # Cleanup the domain created during setup
-        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
-        cls.domains_client.delete_domain(cls.domain['id'])
         super(UsersV3TestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
