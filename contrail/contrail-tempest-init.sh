@@ -111,7 +111,7 @@ iniset $TEMPEST_CONFIG compute allow_tenant_isolation ${TENANT_ISOLATION:-false}
 iniset $TEMPEST_CONFIG network public_network_id "$public_network_id"
 iniset $TEMPEST_CONFIG network floating_network_name $PUBLIC_NETWORK_NAME
 
-iniset $TEMPEST_CONFIG network-feature-enabled api_extensions allowed-address-pairs,extra_dhcp_opt,security-group,floating_ip,port_security,ipv6,router,quotas,binding
+iniset $TEMPEST_CONFIG network-feature-enabled api_extensions allowed-address-pairs,extra_dhcp_opt,security-group,floating_ips,port_security,ipv6,router,quotas,binding
 iniset $TEMPEST_CONFIG compute-feature-enabled live_migration false
 iniset $TEMPEST_CONFIG compute-feature-enabled cold_migration false
 iniset $TEMPEST_CONFIG compute-feature-enabled scheduler_available_filters "RetryFilter, AvailabilityZoneFilter, RamFilter, DiskFilter, ComputeFilter, ComputeCapabilitiesFilter, ImagePropertiesFilter, ServerGroupAntiAffinityFilter, ServerGroupAffinityFilter"
