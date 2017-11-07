@@ -3,12 +3,18 @@
   vars:
     logs_root: "{{ devstack_base_dir|default('/opt/stack') }}"
     stage_dir: "{{ devstack_base_dir|default('/opt/stack') }}"
+    test_results_stage_name: 'test_results'
   roles:
+    - role: process-test-results
+      test_results_dir: '{{ logs_root }}/tempest'
+      tox_envdir: tempest
     - role: stage-output
       zuul_copy_output:
         { '{{ logs_root }}/tempest/etc/tempest.conf': 'logs',
           '{{ logs_root }}/tempest/etc/accounts.yaml': 'logs',
-          '{{ logs_root }}/tempest/tempest.log': 'logs' }
+          '{{ logs_root }}/tempest/tempest.log': 'logs',
+          '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': 'logs',
+          '{{ stage_dir }}/{{ test_results_stage_name }}.html': 'logs' }
       extensions_to_txt:
         - conf
         - log
