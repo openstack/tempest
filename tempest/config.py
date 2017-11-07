@@ -227,7 +227,8 @@ IdentityFeatureGroup = [
                 help="A list of enabled identity extensions with a special "
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
-                     "To get the list of extensions run: 'keystone discover'"),
+                     "To get the list of extensions run: "
+                     "'openstack extension list --identity'"),
     # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
     # in Newton and Ocata. This option can be removed after Mitaka is end of
     # life.
