@@ -123,7 +123,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             server['id'], port_id=port_id)['interfaceAttachment']
         iface = waiters.wait_for_interface_status(
             self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface, port_id=port_id)
+        self._check_interface(iface, port_id=port_id, network_id=network_id)
         return iface
 
     def _test_create_interface_by_fixed_ips(self, server, ifs):
