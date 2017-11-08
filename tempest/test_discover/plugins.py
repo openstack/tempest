@@ -76,7 +76,7 @@ class TempestPlugin(object):
                 conf.register_opt(my_config.service_option,
                                   group='service_available')
                 conf.register_group(my_config.my_service_group)
-                conf.register_opts(my_config.MyService +
+                conf.register_opts(my_config.MyServiceGroup,
                                    my_config.my_service_group)
 
                 conf.register_group(my_config.my_service_feature_group)
