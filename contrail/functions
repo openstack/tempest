@@ -62,13 +62,13 @@ function get_image_id() {
 function create_project() {
     local project_name=$1
     if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
-        keystone='keystone --insecure'
+        keystone='openstack --insecure'
     else
-        keystone='keystone'
+        keystone='openstack'
     fi
-    id=`${with_venv} ${keystone} tenant-list | grep ' '$project_name' ' | awk '{print $2;}'`
+    id=`${with_venv} ${keystone} project list | grep ' '$project_name' ' | awk '{print $2;}'`
     if [ -z "$id" ]; then
-        ${with_venv} ${keystone} tenant-create --name $project_name --enabled True
+        ${with_venv} ${keystone} project create --name $project_name --enabled True
     fi
 }
 
@@ -78,14 +78,14 @@ function create_user() {
     local project_name=$3
     local role=$4
     if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
-        keystone='keystone --insecure'
+        keystone='openstack --insecure'
     else
-        keystone='keystone'
+        keystone='openstack'
     fi
-    id=$(${with_venv} ${keystone} user-list | grep $username | awk '{print $2;}')
+    id=$(${with_venv} ${keystone} user list | grep $username | awk '{print $2;}')
     if [ -z $id ]; then
-        ${with_venv} ${keystone} user-create --name $username --tenant $project_name --pass $password --email $username@example.com
-        ${with_venv} ${keystone} user-role-add --user $username --role $role --tenant $project_name
+        ${with_venv} ${keystone} user create --name $username --project $project_name --password $password --email $username@example.com
+        ${with_venv} ${keystone} role add --user $username --project $project_name $role
     fi
 }    
 
@@ -121,10 +121,10 @@ function create_public_network() {
 
 function create_flavor() {
     local id=$1
-    local name='tempest_flavor'
-    local ram=512
-    local disk=1
-    local vCPU=1
+    local name="tempest_flavor_$id"
+    local ram=${2:-512}
+    local disk=${3:-1}
+    local vCPU=${4:-1}
     if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
         nova='nova --insecure'
     else
@@ -137,3 +137,8 @@ function create_flavor() {
     fi
 }
 
+function get_compute_count() {
+    count=`nova service-list | grep "nova-compute" | grep "up" | wc -l`
+    echo $count
+}
+    

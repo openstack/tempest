@@ -109,7 +109,8 @@ function run_tests {
 }
 
 function apply_patches {
-  git apply contrail/bug_*.patch || exit 1
+#  git apply contrail/bug_*.patch || exit 1
+  git apply contrail/bug_1621622.patch || exit 1
 }
 
 echo "###### Ubuntu Main Repos
@@ -119,7 +120,7 @@ deb http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted universe
 " >& /etc/apt/sources.list.d/contrail-tempest.list
 
 apt-get update
-sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev || exit 1
+sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev iputils-ping || exit 1
 pip install virtualenv
 rm /etc/apt/sources.list.d/contrail-tempest.list
 
@@ -159,7 +160,7 @@ if [ $populate_config -eq 1 ]; then
    (unset http_proxy && ./contrail/contrail-tempest-init.sh)
 fi
 
-#apply_patches
+apply_patches
 (unset http_proxy && run_tests)
 retval=$?
 
