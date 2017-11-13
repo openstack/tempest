@@ -55,8 +55,15 @@ Optional Arguments
 **-h**, **--help** (Optional) Shows help message with the description of
 utility and its arguments, and exits.
 
-**c /etc/tempest.conf**, **--config-file /etc/tempest.conf** (Optional) Path to
-tempest config file.
+**-c /etc/tempest.conf**, **--config-file /etc/tempest.conf** (Optional) Path
+to tempest config file. If not specified, it searches for tempest.conf in these
+locations:
+
+- ./etc/
+- /etc/tempest
+- ~/.tempest/
+- ~/
+- /etc/
 
 **--os-username <auth-user-name>** (Optional) Name used for authentication with
 the OpenStack Identity service. Defaults to env[OS_USERNAME]. Note: User should
@@ -78,7 +85,7 @@ belong to. Defaults to env[OS_DOMAIN_NAME].
 will have the prefix with the given TAG in its name. Using tag is recommended
 for the further using, cleaning resources.
 
-**-r CONCURRENCY**, **--concurrency CONCURRENCY** (Required) Concurrency count
+**-r CONCURRENCY**, **--concurrency CONCURRENCY** (Optional) Concurrency count
 (default: 1). The number of accounts required can be estimated as
 CONCURRENCY x 2. Each user provided in *accounts.yaml* file will be in
 a different tenant. This is required to provide isolation between test for
