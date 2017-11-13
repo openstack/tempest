@@ -31,7 +31,7 @@ def skip_because(*args, **kwargs):
     """
     def decorator(f):
         @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
+        def wrapper(*func_args, **func_kwargs):
             skip = False
             if "condition" in kwargs:
                 if kwargs["condition"] is True:
@@ -43,7 +43,7 @@ def skip_because(*args, **kwargs):
                     raise ValueError('bug must be a valid bug number')
                 msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
                 raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
+            return f(*func_args, **func_kwargs)
         return wrapper
     return decorator
 
