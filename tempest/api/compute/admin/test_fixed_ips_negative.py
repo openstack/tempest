@@ -43,6 +43,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
         super(FixedIPsNegativeTestJson, cls).resource_setup()
         server = cls.create_test_server(wait_until='ACTIVE')
         server = cls.servers_client.show_server(server['id'])['server']
+        cls.ip = None
         for ip_set in server['addresses']:
             for ip in server['addresses'][ip_set]:
                 if ip['OS-EXT-IPS:type'] == 'fixed':
@@ -50,6 +51,9 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
                     break
             if cls.ip:
                 break
+        if cls.ip is None:
+            raise cls.skipException("No fixed ip found for server: %s"
+                                    % server['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9f17f47d-daad-4adc-986e-12370c93e407')
