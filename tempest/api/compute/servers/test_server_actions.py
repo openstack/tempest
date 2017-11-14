@@ -281,45 +281,45 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server_id,
                          vol_after_rebuild['attachments'][0]['server_id'])
 
-    def _test_resize_server_confirm(self, stop=False):
+    def _test_resize_server_confirm(self, server_id, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
         if stop:
-            self.client.stop_server(self.server_id)
-            waiters.wait_for_server_status(self.client, self.server_id,
+            self.client.stop_server(server_id)
+            waiters.wait_for_server_status(self.client, server_id,
                                            'SHUTOFF')
 
-        self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        self.client.resize_server(server_id, self.flavor_ref_alt)
         # NOTE(jlk): Explicitly delete the server to get a new one for later
         # tests. Avoids resize down race issues.
-        self.addCleanup(self.delete_server, self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id,
+        self.addCleanup(self.delete_server, server_id)
+        waiters.wait_for_server_status(self.client, server_id,
                                        'VERIFY_RESIZE')
 
-        self.client.confirm_resize_server(self.server_id)
+        self.client.confirm_resize_server(server_id)
         expected_status = 'SHUTOFF' if stop else 'ACTIVE'
-        waiters.wait_for_server_status(self.client, self.server_id,
+        waiters.wait_for_server_status(self.client, server_id,
                                        expected_status)
 
-        server = self.client.show_server(self.server_id)['server']
+        server = self.client.show_server(server_id)['server']
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
-            self.client.start_server(self.server_id)
+            self.client.start_server(server_id)
 
     @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm(self):
-        self._test_resize_server_confirm(stop=False)
+        self._test_resize_server_confirm(self.server_id, stop=False)
 
     @decorators.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm_from_stopped(self):
-        self._test_resize_server_confirm(stop=True)
+        self._test_resize_server_confirm(self.server_id, stop=True)
 
     @decorators.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
