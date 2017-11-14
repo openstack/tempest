@@ -12,8 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import functools
-
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
@@ -183,17 +181,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         for i in range(n_subnets6):
             # v6 should be configured since the image supports it
             # It can take time for ipv6 automatic address to get assigned
-            srv1_v6_addr_assigned = functools.partial(
-                guest_has_address, sshv4_1, ips_from_api_1['6'][i])
+            self.assertTrue(test_utils.call_until_true(guest_has_address,
+                            CONF.validation.ping_timeout, 1,
+                            sshv4_1, ips_from_api_1['6'][i]))
 
-            srv2_v6_addr_assigned = functools.partial(
-                guest_has_address, sshv4_2, ips_from_api_2['6'][i])
-
-            self.assertTrue(test_utils.call_until_true(srv1_v6_addr_assigned,
-                            CONF.validation.ping_timeout, 1))
-
-            self.assertTrue(test_utils.call_until_true(srv2_v6_addr_assigned,
-                            CONF.validation.ping_timeout, 1))
+            self.assertTrue(test_utils.call_until_true(guest_has_address,
+                            CONF.validation.ping_timeout, 1,
+                            sshv4_2, ips_from_api_2['6'][i]))
 
         self.check_remote_connectivity(sshv4_1, ips_from_api_2['4'])
         self.check_remote_connectivity(sshv4_2, ips_from_api_1['4'])

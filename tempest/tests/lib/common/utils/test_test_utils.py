@@ -81,11 +81,13 @@ class TestTestUtils(base.TestCase):
     @mock.patch('time.sleep')
     @mock.patch('time.time')
     def test_call_until_true_when_f_never_returns_true(self, m_time, m_sleep):
+        def set_value(bool_value):
+            return bool_value
         timeout = 42  # The value doesn't matter as we mock time.time()
         sleep = 60  # The value doesn't matter as we mock time.sleep()
         m_time.side_effect = utils.generate_timeout_series(timeout)
         self.assertEqual(
-            False, test_utils.call_until_true(lambda: False, timeout, sleep)
+            False, test_utils.call_until_true(set_value, timeout, sleep, False)
         )
         m_sleep.call_args_list = [mock.call(sleep)] * 2
         m_time.call_args_list = [mock.call()] * 2
@@ -93,11 +95,30 @@ class TestTestUtils(base.TestCase):
     @mock.patch('time.sleep')
     @mock.patch('time.time')
     def test_call_until_true_when_f_returns_true(self, m_time, m_sleep):
+        def set_value(bool_value=False):
+            return bool_value
         timeout = 42  # The value doesn't matter as we mock time.time()
         sleep = 60  # The value doesn't matter as we mock time.sleep()
         m_time.return_value = 0
         self.assertEqual(
-            True, test_utils.call_until_true(lambda: True, timeout, sleep)
+            True, test_utils.call_until_true(set_value, timeout, sleep,
+                                             bool_value=True)
         )
         self.assertEqual(0, m_sleep.call_count)
-        self.assertEqual(1, m_time.call_count)
+        # when logging cost time we need to acquire current time.
+        self.assertEqual(2, m_time.call_count)
+
+    @mock.patch('time.sleep')
+    @mock.patch('time.time')
+    def test_call_until_true_when_f_returns_true_no_param(
+            self, m_time, m_sleep):
+        def set_value(bool_value=False):
+            return bool_value
+        timeout = 42  # The value doesn't matter as we mock time.time()
+        sleep = 60  # The value doesn't matter as we mock time.sleep()
+        m_time.side_effect = utils.generate_timeout_series(timeout)
+        self.assertEqual(
+            False, test_utils.call_until_true(set_value, timeout, sleep)
+        )
+        m_sleep.call_args_list = [mock.call(sleep)] * 2
+        m_time.call_args_list = [mock.call()] * 2
