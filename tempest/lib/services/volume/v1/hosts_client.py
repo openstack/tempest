@@ -23,8 +23,12 @@ class HostsClient(rest_client.RestClient):
     """Client class to send CRUD Volume Host API V1 requests"""
 
     def list_hosts(self, **params):
-        """Lists all hosts."""
+        """Lists all hosts.
 
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#list-all-hosts
+        """
         url = 'os-hosts'
         if params:
             url += '?%s' % urllib.urlencode(params)

@@ -92,7 +92,9 @@ class QosSpecsClient(rest_client.RestClient):
 
         :param keys: keys to delete from the QoS specification.
 
-        TODO(jordanP): Add a link once LP #1524877 is fixed.
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/#unset-keys-in-qos-specification
         """
         put_body = json.dumps({'keys': keys})
         resp, body = self.put('qos-specs/%s/delete_keys' % qos_id, put_body)
