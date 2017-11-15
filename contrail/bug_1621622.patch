@@ -1,21 +1,20 @@
 diff --git a/tempest/lib/services/network/security_groups_client.py b/tempest/lib/services/network/security_groups_client.py
-index 1f30216..793c6d9 100644
+index d3ebf20..9daba65 100644
 --- a/tempest/lib/services/network/security_groups_client.py
 +++ b/tempest/lib/services/network/security_groups_client.py
-@@ -11,7 +11,7 @@
- #    under the License.
-
+@@ -12,6 +12,7 @@
+ 
+ from tempest.lib import exceptions as lib_exc
  from tempest.lib.services.network import base
--
 +import time
-
+ 
+ 
  class SecurityGroupsClient(base.BaseNetworkClient):
-
-@@ -55,6 +55,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
+@@ -56,6 +57,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
          http://developer.openstack.org/api-ref/networking/v2/index.html#delete-security-group
          """
          uri = '/security-groups/%s' % security_group_id
 +        time.sleep(5)
          return self.delete_resource(uri)
-
+ 
      def list_security_groups(self, **filters):
