@@ -543,7 +543,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                                 volume['id'], 'available')
 
     def ping_ip_address(self, ip_address, should_succeed=True,
-                        ping_timeout=None, mtu=None):
+                        ping_timeout=None, mtu=None, server=None):
         timeout = ping_timeout or CONF.validation.ping_timeout
         cmd = ['ping', '-c1', '-w1']
 
@@ -577,12 +577,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
                       'caller': caller, 'ip': ip_address, 'timeout': timeout,
                       'result': 'expected' if result else 'unexpected'
                   })
+        if server:
+            self._log_console_output([server])
         return result
 
     def check_vm_connectivity(self, ip_address,
                               username=None,
                               private_key=None,
                               should_connect=True,
+                              extra_msg="",
+                              server=None,
                               mtu=None):
         """Check server connectivity
 
@@ -592,43 +596,36 @@ class ScenarioTest(tempest.test.BaseTestCase):
         :param should_connect: True/False indicates positive/negative test
             positive - attempt ping and ssh
             negative - attempt ping and fail if succeed
+        :param extra_msg: Message to help with debugging if ``ping_ip_address``
+            fails
+        :param server: The server whose console to log for debugging
         :param mtu: network MTU to use for connectivity validation
 
         :raises: AssertError if the result of the connectivity check does
             not match the value of the should_connect param
         """
+        LOG.debug('checking network connections to IP %s with user: %s',
+                  ip_address, username)
         if should_connect:
             msg = "Timed out waiting for %s to become reachable" % ip_address
         else:
             msg = "ip address %s is reachable" % ip_address
+        if extra_msg:
+            msg = "%s\n%s" % (extra_msg, msg)
         self.assertTrue(self.ping_ip_address(ip_address,
                                              should_succeed=should_connect,
-                                             mtu=mtu),
+                                             mtu=mtu, server=server),
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
-            self.get_remote_client(ip_address, username, private_key)
-
-    def check_public_network_connectivity(self, ip_address, username,
-                                          private_key, should_connect=True,
-                                          msg=None, servers=None, mtu=None):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        LOG.debug('checking network connections to IP %s with user: %s',
-                  ip_address, username)
-        try:
-            self.check_vm_connectivity(ip_address,
-                                       username,
-                                       private_key,
-                                       should_connect=should_connect,
-                                       mtu=mtu)
-        except Exception:
-            ex_msg = 'Public network connectivity check failed'
-            if msg:
-                ex_msg += ": " + msg
-            LOG.exception(ex_msg)
-            self._log_console_output(servers)
-            raise
+            try:
+                self.get_remote_client(ip_address, username, private_key,
+                                       server=server)
+            except Exception:
+                if not extra_msg:
+                    extra_msg = 'Failed to ssh to %s' % ip_address
+                LOG.exception(extra_msg)
+                raise
 
     def create_floating_ip(self, thing, pool_name=None):
         """Create a floating IP and associates to a server on Nova"""

@@ -175,7 +175,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _get_server_key(self, server):
         return self.keypairs[server['key_name']]['private_key']
 
-    def check_public_network_connectivity(
+    def _check_public_network_connectivity(
             self, should_connect=True, msg=None,
             should_check_floating_ip_status=True, mtu=None):
         """Verifies connectivty to a VM via public network and floating IP
@@ -199,13 +199,18 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         if should_connect:
             private_key = self._get_server_key(server)
             floatingip_status = 'ACTIVE'
+
         # Check FloatingIP Status before initiating a connection
         if should_check_floating_ip_status:
             self.check_floating_ip_status(floating_ip, floatingip_status)
-        # call the common method in the parent class
-        super(TestNetworkBasicOps, self).check_public_network_connectivity(
-            ip_address, ssh_login, private_key, should_connect, msg,
-            self.servers, mtu=mtu)
+
+        message = 'Public network connectivity check failed'
+        if msg:
+            message += '. Reason: %s' % msg
+
+        self.check_vm_connectivity(
+            ip_address, ssh_login, private_key, should_connect,
+            message, server, mtu=mtu)
 
     def _disassociate_floating_ips(self):
         floating_ip, _ = self.floating_ip_tuple
@@ -404,17 +409,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         """
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
         self._disassociate_floating_ips()
-        self.check_public_network_connectivity(should_connect=False,
-                                               msg="after disassociate "
-                                                   "floating ip")
+        self._check_public_network_connectivity(should_connect=False,
+                                                msg="after disassociate "
+                                                    "floating ip")
         self._reassociate_floating_ips()
-        self.check_public_network_connectivity(should_connect=True,
-                                               msg="after re-associate "
-                                                   "floating ip")
+        self._check_public_network_connectivity(should_connect=True,
+                                                msg="after re-associate "
+                                                    "floating ip")
 
     @decorators.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
     @testtools.skipUnless(utils.is_extension_enabled('net-mtu', 'network'),
@@ -425,10 +430,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         """Validate that network MTU sized frames fit through."""
         self._setup_network_and_servers()
         # first check that connectivity works in general for the instance
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
         # now that we checked general connectivity, test that full size frames
         # can also pass between nodes
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True, mtu=self.network['mtu'])
 
     @decorators.idempotent_id('1546850e-fbaa-42f5-8b5f-03d8a6a95f15')
@@ -468,7 +473,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         """
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
         self._create_new_network(create_gateway=True)
@@ -503,7 +508,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         """
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
@@ -525,19 +530,19 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 admin_state_up attribute of router to True
         """
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True, msg="before updating "
             "admin_state_up of router to False")
         self._update_router_admin_state(self.router, False)
         # TODO(alokmaurya): Remove should_check_floating_ip_status=False check
         # once bug 1396310 is fixed
 
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=False, msg="after updating "
             "admin_state_up of router to False",
             should_check_floating_ip_status=False)
         self._update_router_admin_state(self.router, True)
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
@@ -582,7 +587,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         renew_timeout = CONF.network.build_timeout
 
         self._setup_network_and_servers(dns_nameservers=[initial_dns_server])
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
 
         floating_ip, server = self.floating_ip_tuple
         ip_address = floating_ip['floating_ip_address']
@@ -657,20 +662,20 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                             private_key=private_key,
                                             server=server2)
 
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True, msg="before updating "
             "admin_state_up of instance port to False")
         self.check_remote_connectivity(ssh_client, dest=server_pip,
                                        should_succeed=True)
         self.ports_client.update_port(port_id, admin_state_up=False)
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=False, msg="after updating "
             "admin_state_up of instance port to False",
             should_check_floating_ip_status=False)
         self.check_remote_connectivity(ssh_client, dest=server_pip,
                                        should_succeed=False)
         self.ports_client.update_port(port_id, admin_state_up=True)
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True, msg="after updating "
             "admin_state_up of instance port to True")
         self.check_remote_connectivity(ssh_client, dest=server_pip,
@@ -767,7 +772,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             msg = "Rescheduling test does not apply to distributed routers."
             raise self.skipException(msg)
 
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
 
         # remove resource from agents
         hosting_agents = set(a["id"] for a in
@@ -784,7 +789,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                              'unscheduling router failed')
 
         # verify resource is un-functional
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=False,
             msg='after router unscheduling',
         )
@@ -801,7 +806,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             "target agent")
 
         # verify resource is functional
-        self.check_public_network_connectivity(
+        self._check_public_network_connectivity(
             should_connect=True,
             msg='After router rescheduling')
 
@@ -835,7 +840,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         # Create server
         self._setup_network_and_servers()
-        self.check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()
         fip, server = self.floating_ip_tuple
