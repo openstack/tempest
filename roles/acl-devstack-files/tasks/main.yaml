@@ -1,0 +1,6 @@
+- name: Grant global read access to devstack files
+  file:
+    path: "{{devstack_data_dir}}/files"
+    mode: "o+rx"
+    recurse: yes
+  become: yes

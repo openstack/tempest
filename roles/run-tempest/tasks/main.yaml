@@ -1,0 +1,28 @@
+# NOTE(andreaf) The number of vcpus is not available on all systems.
+# See https://github.com/ansible/ansible/issues/30688
+# When not available, we fall back to ansible_processor_cores
+- name: Get hw.logicalcpu from sysctl
+  shell: sysctl hw.logicalcpu | cut -d' ' -f2
+  register: sysctl_hw_logicalcpu
+  when: ansible_processor_vcpus is not defined
+
+- name: Number of cores
+  set_fact:
+    num_cores: "{{ansible_processor_vcpus|default(sysctl_hw_logicalcpu.stdout)}}"
+
+- name: Set concurrency for cores == 3 or less
+  set_fact:
+    default_concurrency: "{{ num_cores }}"
+  when: num_cores|int <= 3
+
+- name: Limit max concurrency when more than 3 vcpus are available
+  set_fact:
+    default_concurrency: "{{ num_cores|int // 2 }}"
+  when: num_cores|int > 3
+
+- name: Run Tempest
+  command: tox -e {{tox_venvlist}} -- --concurrency={{tempest_concurrency|default(default_concurrency)}}
+  args:
+    chdir: "{{devstack_base_dir}}/tempest"
+  become: true
+  become_user: tempest
