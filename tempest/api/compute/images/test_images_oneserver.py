@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
@@ -74,7 +75,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
         # Verify the image was deleted correctly
         self.client.delete_image(image['id'])
-        self.images.remove(image['id'])
         self.client.wait_for_resource_deletion(image['id'])
 
     @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
@@ -87,5 +87,9 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # 4 byte utf-8 character.
         utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
         body = self.client.create_image(self.server_id, name=utf8_name)
-        image_id = data_utils.parse_image_id(body.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", body.response, "lt"):
+            image_id = body['image_id']
+        else:
+            image_id = data_utils.parse_image_id(body.response['location'])
         self.addCleanup(self.client.delete_image, image_id)

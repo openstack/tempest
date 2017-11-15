@@ -14,8 +14,8 @@
 
 from tempest.api.network import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class AgentManagementTestJSON(base.BaseAdminNetworkTest):
@@ -23,7 +23,7 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(AgentManagementTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('agent', 'network'):
+        if not utils.is_extension_enabled('agent', 'network'):
             msg = "agent extension not enabled."
             raise cls.skipException(msg)
 

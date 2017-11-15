@@ -41,6 +41,27 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
+def is_scheduler_filter_enabled(filter_name):
+    """Check the list of enabled compute scheduler filters from config.
+
+    This function checks whether the given compute scheduler filter is
+    available and configured in the config file. If the
+    scheduler_available_filters option is set to 'all' (Default value. which
+    means default filters are configured in nova) in tempest.conf then, this
+    function returns True with assumption that requested filter 'filter_name'
+    is one of available filter in nova ("nova.scheduler.filters.all_filters").
+    """
+
+    filters = CONF.compute_feature_enabled.scheduler_available_filters
+    if not filters:
+        return False
+    if 'all' in filters:
+        return True
+    if filter_name in filters:
+        return True
+    return False
+
+
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
@@ -107,6 +128,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                    "this stage.")
             raise ValueError(msg)
 
+        LOG.debug("Provisioning test server with validation resources %s",
+                  validation_resources)
         if 'security_groups' in kwargs:
             kwargs['security_groups'].append(
                 {'name': validation_resources['security_group']['name']})
@@ -177,9 +200,27 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         body = rest_client.ResponseBody(body.response, body['server'])
         servers = [body]
 
-    # The name of the method to associate a floating IP to as server is too
-    # long for PEP8 compliance so:
-    assoc = clients.compute_floating_ips_client.associate_floating_ip_to_server
+    def _setup_validation_fip():
+        if CONF.service_available.neutron:
+            ifaces = clients.interfaces_client.list_interfaces(server['id'])
+            validation_port = None
+            for iface in ifaces['interfaceAttachments']:
+                if iface['net_id'] == tenant_network['id']:
+                    validation_port = iface['port_id']
+                    break
+            if not validation_port:
+                # NOTE(artom) This will get caught by the catch-all clause in
+                # the wait_until loop below
+                raise ValueError('Unable to setup floating IP for validation: '
+                                 'port not found on tenant network')
+            clients.floating_ips_client.update_floatingip(
+                validation_resources['floating_ip']['id'],
+                port_id=validation_port)
+        else:
+            fip_client = clients.compute_floating_ips_client
+            fip_client.associate_floating_ip_to_server(
+                floating_ip=validation_resources['floating_ip']['ip'],
+                server_id=servers[0]['id'])
 
     if wait_until:
         for server in servers:
@@ -191,9 +232,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 # creation will fail with the condition above (l.58).
                 if CONF.validation.run_validation and validatable:
                     if CONF.validation.connect_method == 'floating':
-                        assoc(floating_ip=validation_resources[
-                              'floating_ip']['ip'],
-                              server_id=servers[0]['id'])
+                        _setup_validation_fip()
 
             except Exception:
                 with excutils.save_and_reraise_exception():

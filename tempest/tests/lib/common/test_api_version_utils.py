@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 import testtools
 
 from tempest.lib.common import api_version_utils
@@ -30,7 +31,7 @@ class TestVersionSkipLogic(base.TestCase):
                                                            cfg_max_version)
         except testtools.TestCase.skipException as e:
             if not expected_skip:
-                raise testtools.TestCase.failureException(e.message)
+                raise testtools.TestCase.failureException(six.text_type(e))
 
     def test_version_min_in_range(self):
         self._test_version('2.2', '2.10', '2.1', '2.7')
@@ -91,24 +92,106 @@ class TestMicroversionHeaderMatches(base.TestCase):
     def test_header_matches(self):
         microversion_header_name = 'x-openstack-xyz-api-version'
         request_microversion = '2.1'
-        test_respose = {microversion_header_name: request_microversion}
+        test_response = {microversion_header_name: request_microversion}
         api_version_utils.assert_version_header_matches_request(
-            microversion_header_name, request_microversion, test_respose)
+            microversion_header_name, request_microversion, test_response)
 
     def test_header_does_not_match(self):
         microversion_header_name = 'x-openstack-xyz-api-version'
         request_microversion = '2.1'
-        test_respose = {microversion_header_name: '2.2'}
+        test_response = {microversion_header_name: '2.2'}
         self.assertRaises(
             exceptions.InvalidHTTPResponseHeader,
             api_version_utils.assert_version_header_matches_request,
-            microversion_header_name, request_microversion, test_respose)
+            microversion_header_name, request_microversion, test_response)
 
     def test_header_not_present(self):
         microversion_header_name = 'x-openstack-xyz-api-version'
         request_microversion = '2.1'
-        test_respose = {}
+        test_response = {}
         self.assertRaises(
             exceptions.InvalidHTTPResponseHeader,
             api_version_utils.assert_version_header_matches_request,
-            microversion_header_name, request_microversion, test_respose)
+            microversion_header_name, request_microversion, test_response)
+
+    def test_compare_versions_less_than(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.2'
+        test_response = {microversion_header_name: '2.1'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "lt"))
+
+    def test_compare_versions_less_than_equal(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.2'
+        test_response = {microversion_header_name: '2.1'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "le"))
+
+    def test_compare_versions_greater_than_equal(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_response = {microversion_header_name: '2.2'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "ge"))
+
+    def test_compare_versions_greater_than(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_response = {microversion_header_name: '2.2'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "gt"))
+
+    def test_compare_versions_equal(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.11'
+        test_response = {microversion_header_name: '2.1'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "eq"))
+
+    def test_compare_versions_not_equal(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_response = {microversion_header_name: '2.1'}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "ne"))
+
+    def test_compare_versions_with_name_in_microversion(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = 'volume 3.1'
+        test_response = {microversion_header_name: 'volume 3.1'}
+        self.assertTrue(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "eq"))
+
+    def test_compare_versions_invalid_operation(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_response = {microversion_header_name: '2.1'}
+        self.assertRaises(
+            exceptions.InvalidParam,
+            api_version_utils.compare_version_header_to_response,
+            microversion_header_name, request_microversion, test_response,
+            "foo")
+
+    def test_compare_versions_header_not_present(self):
+        microversion_header_name = 'x-openstack-xyz-api-version'
+        request_microversion = '2.1'
+        test_response = {}
+        self.assertFalse(
+            api_version_utils.compare_version_header_to_response(
+                microversion_header_name, request_microversion, test_response,
+                "eq"))

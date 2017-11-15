@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
@@ -29,7 +29,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def skip_checks(cls):
         super(FlavorsExtraSpecsTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
+        if not utils.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
             msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
@@ -53,12 +53,11 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             ephemeral=ephemeral,
             swap=swap,
             rxtx_factor=rxtx)['flavor']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.admin_flavors_client.delete_flavor(cls.flavor['id'])
-        cls.admin_flavors_client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsTestJSON, cls).resource_cleanup()
+        cls.addClassResourceCleanup(
+            cls.admin_flavors_client.wait_for_resource_deletion,
+            cls.flavor['id'])
+        cls.addClassResourceCleanup(cls.admin_flavors_client.delete_flavor,
+                                    cls.flavor['id'])
 
     @decorators.idempotent_id('0b2f9d4b-1ca2-4b99-bb40-165d4bb94208')
     def test_flavor_set_get_update_show_unset_keys(self):

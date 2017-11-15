@@ -14,11 +14,11 @@
 # under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -40,7 +40,7 @@ class TagsTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(TagsTest, cls).skip_checks()
-        if not test.is_extension_enabled('tag', 'network'):
+        if not utils.is_extension_enabled('tag', 'network'):
             msg = "tag extension not enabled."
             raise cls.skipException(msg)
 
@@ -115,7 +115,7 @@ class TagsExtTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(TagsExtTest, cls).skip_checks()
-        if not test.is_extension_enabled('tag-ext', 'network'):
+        if not utils.is_extension_enabled('tag-ext', 'network'):
             msg = "tag-ext extension not enabled."
             raise cls.skipException(msg)
 
@@ -131,11 +131,8 @@ class TagsExtTest(base.BaseNetworkTest):
         prefix = CONF.network.default_network
         cls.subnetpool = cls.subnetpools_client.create_subnetpool(
             name=subnetpool_name, prefixes=prefix)['subnetpool']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.subnetpools_client.delete_subnetpool(cls.subnetpool['id'])
-        super(TagsExtTest, cls).resource_cleanup()
+        cls.addClassResourceCleanup(cls.subnetpools_client.delete_subnetpool,
+                                    cls.subnetpool['id'])
 
     def _create_tags_for_each_resource(self):
         # Create a tag for each resource in `SUPPORTED_RESOURCES` and return

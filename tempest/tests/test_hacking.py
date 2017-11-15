@@ -86,13 +86,13 @@ class HackingTestCase(base.TestCase):
     def test_scenario_tests_need_service_tags(self):
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake:', './tempest/scenario/test_fake.py',
-            "@test.services('compute')"))
+            "@utils.services('compute')"))
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/api/compute/test_fake.py',
-            "@test.services('image')"))
+            "@utils.services('image')"))
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake:', './tempest/scenario/orchestration/test_fake.py',
-            "@test.services('compute')"))
+            "@utils.services('compute')"))
         self.assertTrue(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/scenario/test_fake.py',
             '\n'))
@@ -113,12 +113,13 @@ class HackingTestCase(base.TestCase):
 
     def test_service_tags_not_in_module_path(self):
         self.assertTrue(checks.service_tags_not_in_module_path(
-            "@test.services('compute')", './tempest/api/compute/fake_test.py'))
+            "@utils.services('compute')",
+            './tempest/api/compute/fake_test.py'))
         self.assertFalse(checks.service_tags_not_in_module_path(
-            "@test.services('compute')",
+            "@utils.services('compute')",
             './tempest/scenario/compute/fake_test.py'))
         self.assertFalse(checks.service_tags_not_in_module_path(
-            "@test.services('compute')", './tempest/api/image/fake_test.py'))
+            "@utils.services('compute')", './tempest/api/image/fake_test.py'))
 
     def test_no_hyphen_at_end_of_rand_name(self):
         self.assertIsNone(checks.no_hyphen_at_end_of_rand_name(
@@ -180,3 +181,15 @@ class HackingTestCase(base.TestCase):
             'from oslo_config import cfg', './tempest/lib/decorators.py')))
         self.assertTrue(list(checks.dont_use_config_in_tempest_lib(
             'import tempest.config', './tempest/lib/common/rest_client.py')))
+
+    def test_unsupported_exception_attribute_PY3(self):
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(e.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(ex.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(exc.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(exception.message)"))), 1)
+        self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
+            "raise TestCase.failureException(ee.message)"))), 0)

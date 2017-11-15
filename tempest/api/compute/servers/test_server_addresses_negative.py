@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
@@ -38,7 +38,7 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('02c3f645-2d2e-4417-8525-68c0407d001b')
-    @test.services('network')
+    @utils.services('network')
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
         self.assertRaises(lib_exc.NotFound, self.client.list_addresses,
@@ -46,7 +46,7 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a2ab5144-78c0-4942-a0ed-cc8edccfd9ba')
-    @test.services('network')
+    @utils.services('network')
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
         self.assertRaises(lib_exc.NotFound,

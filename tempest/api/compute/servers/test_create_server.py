@@ -17,11 +17,11 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -42,8 +42,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_validation_resources()
         super(ServersTestJSON, cls).resource_setup()
+        validation_resources = cls.get_class_validation_resources(
+            cls.os_primary)
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -52,6 +53,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         disk_config = cls.disk_config
         server_initial = cls.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE',
             name=cls.name,
             metadata=cls.meta,
@@ -105,11 +107,13 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
+            self.get_server_ip(self.server, validation_resources),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
         output = linux_client.exec_command('grep -c ^processor /proc/cpuinfo')
@@ -120,33 +124,19 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                           'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(self.server),
+            self.get_server_ip(self.server, validation_resources),
             self.ssh_user,
             self.password,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=self.server,
             servers_client=self.client)
         hostname = linux_client.exec_command("hostname").rstrip()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' % (self.name, hostname))
         self.assertEqual(self.name.lower(), hostname, msg)
-
-    @decorators.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
-    @testtools.skipUnless(
-        test.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
-        'ServerGroupAffinityFilter is not available.')
-    def test_create_server_with_scheduler_hint_group(self):
-        # Create a server with the scheduler hint "group".
-        group_id = self.create_test_server_group()['id']
-        hints = {'group': group_id}
-        server = self.create_test_server(scheduler_hints=hints,
-                                         wait_until='ACTIVE')
-
-        # Check a server is in the group
-        server_group = (self.server_groups_client.show_server_group(group_id)
-                        ['server_group'])
-        self.assertIn(server['id'], server_group['members'])
 
 
 class ServersTestManualDisk(ServersTestJSON):
@@ -167,6 +157,6 @@ class ServersTestBootFromVolume(ServersTestJSON):
     @classmethod
     def skip_checks(cls):
         super(ServersTestBootFromVolume, cls).skip_checks()
-        if not test.get_service_list()['volume']:
+        if not utils.get_service_list()['volume']:
             msg = "Volume service not enabled."
             raise cls.skipException(msg)

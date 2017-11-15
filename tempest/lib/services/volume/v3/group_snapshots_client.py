@@ -60,7 +60,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
-    def list_group_snapshots(self, **params):
+    def list_group_snapshots(self, detail=False, **params):
         """Information for all the tenant's group snapshots.
 
         For more information, please refer to the official API reference:
@@ -68,11 +68,25 @@ class GroupSnapshotsClient(base_client.BaseClient):
         https://developer.openstack.org/api-ref/block-storage/v3/#list-group-snapshots-with-details
         """
         url = "group_snapshots"
+        if detail:
+            url += "/detail"
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def reset_group_snapshot_status(self, group_snapshot_id, status_to_set):
+        """Resets group snapshot status.
+
+        For more information, please refer to the official API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#reset-group-snapshot-status
+        """
+        post_body = json.dumps({'reset_status': {'status': status_to_set}})
+        resp, body = self.post('group_snapshots/%s/action' % group_snapshot_id,
+                               post_body)
+        self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):

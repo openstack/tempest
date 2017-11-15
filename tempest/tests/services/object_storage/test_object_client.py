@@ -31,15 +31,15 @@ class TestObjectClient(base.TestCase):
         self.object_client = object_client.ObjectClient(self.fake_auth,
                                                         'swift', 'region1')
 
-    @mock.patch.object(object_client, 'create_connection')
+    @mock.patch.object(object_client, '_create_connection')
     def test_create_object_continue_no_data(self, mock_poc):
         self._validate_create_object_continue(None, mock_poc)
 
-    @mock.patch.object(object_client, 'create_connection')
+    @mock.patch.object(object_client, '_create_connection')
     def test_create_object_continue_with_data(self, mock_poc):
         self._validate_create_object_continue('hello', mock_poc)
 
-    @mock.patch.object(object_client, 'create_connection')
+    @mock.patch.object(object_client, '_create_connection')
     def test_create_continue_with_no_continue_received(self, mock_poc):
         self._validate_create_object_continue('hello', mock_poc,
                                               initial_status=201)

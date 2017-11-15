@@ -15,14 +15,16 @@
 
 import time
 
+import six
+
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -101,7 +103,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                  ['interfaceAttachment'])
         iface = waiters.wait_for_interface_status(
             self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface)
         return iface
 
     def _test_create_interface_by_network_id(self, server, ifs):
@@ -183,19 +184,18 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(sorted(list1), sorted(list2))
 
     @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
-    @test.services('network')
+    @utils.services('network')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
-        self._check_interface(ifs[0])
 
         try:
             iface = self._test_create_interface(server)
         except lib_exc.BadRequest as e:
             msg = ('Multiple possible networks found, use a Network ID to be '
                    'more specific.')
-            if not CONF.compute.fixed_network_name and e.message == msg:
+            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
                 raise
         else:
             ifs.append(iface)
@@ -220,13 +220,12 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
-    @test.services('network')
+    @utils.services('network')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
-        self._check_interface(ifs[0])
         network_id = ifs[0]['net_id']
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Remove the fixed IP from server.
@@ -243,7 +242,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
                 break
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
 
-    @decorators.skip_because(bug='1607714')
     @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
         """Tests the following:

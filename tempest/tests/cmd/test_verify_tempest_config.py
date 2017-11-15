@@ -16,9 +16,13 @@ import fixtures
 import mock
 from oslo_serialization import jsonutils as json
 
+from tempest import clients
 from tempest.cmd import verify_tempest_config
+from tempest.common import credentials_factory
 from tempest import config
+from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 from tempest.tests import fake_config
 
@@ -172,22 +176,6 @@ class TestDiscovery(base.TestCase):
                                            False, True)
 
     @mock.patch('tempest.lib.common.http.ClosingHttp.request')
-    def test_verify_keystone_api_versions_no_v2(self, mock_request):
-        self.useFixture(fixtures.MockPatchObject(
-            verify_tempest_config, '_get_unversioned_endpoint',
-            return_value='http://fake_endpoint:5000'))
-        fake_resp = {'versions': {'values': [{'id': 'v3.0'}]}}
-        fake_resp = json.dumps(fake_resp)
-        mock_request.return_value = (None, fake_resp)
-        fake_os = mock.MagicMock()
-        with mock.patch.object(verify_tempest_config,
-                               'print_and_or_update') as print_mock:
-            verify_tempest_config.verify_keystone_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2',
-                                           'identity-feature-enabled',
-                                           False, True)
-
-    @mock.patch('tempest.lib.common.http.ClosingHttp.request')
     def test_verify_cinder_api_versions_no_v3(self, mock_request):
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
@@ -234,10 +222,15 @@ class TestDiscovery(base.TestCase):
         print_mock.assert_not_called()
 
     def test_verify_glance_version_no_v2_with_v1_1(self):
-        def fake_get_versions():
-            return (None, ['v1.1'])
+        # This test verifies that wrong config api_v2 = True is detected
+        class FakeClient(object):
+            def get_versions(self):
+                return (None, ['v1.0'])
+
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
+        fake_module = mock.MagicMock()
+        fake_module.ImagesClient = FakeClient
+        fake_os.image_v1 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
@@ -245,10 +238,15 @@ class TestDiscovery(base.TestCase):
                                            False, True)
 
     def test_verify_glance_version_no_v2_with_v1_0(self):
-        def fake_get_versions():
-            return (None, ['v1.0'])
+        # This test verifies that wrong config api_v2 = True is detected
+        class FakeClient(object):
+            def get_versions(self):
+                return (None, ['v1.0'])
+
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
+        fake_module = mock.MagicMock()
+        fake_module.ImagesClient = FakeClient
+        fake_os.image_v1 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
@@ -256,14 +254,46 @@ class TestDiscovery(base.TestCase):
                                            False, True)
 
     def test_verify_glance_version_no_v1(self):
-        def fake_get_versions():
-            return (None, ['v2.0'])
+        # This test verifies that wrong config api_v1 = True is detected
+        class FakeClient(object):
+            def get_versions(self):
+                raise lib_exc.NotFound()
+
+            def list_versions(self):
+                return {'versions': [{'id': 'v2.0'}]}
+
         fake_os = mock.MagicMock()
-        fake_os.image_client.get_versions = fake_get_versions
+        fake_module = mock.MagicMock()
+        fake_module.ImagesClient = FakeClient
+        fake_module.VersionsClient = FakeClient
+        fake_os.image_v1 = fake_module
+        fake_os.image_v2 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v1', 'image-feature-enabled',
+                                           False, True)
+
+    def test_verify_glance_version_no_version(self):
+        # This test verifies that wrong config api_v1 = True is detected
+        class FakeClient(object):
+            def get_versions(self):
+                raise lib_exc.NotFound()
+
+            def list_versions(self):
+                raise lib_exc.NotFound()
+
+        fake_os = mock.MagicMock()
+        fake_module = mock.MagicMock()
+        fake_module.ImagesClient = FakeClient
+        fake_module.VersionsClient = FakeClient
+        fake_os.image_v1 = fake_module
+        fake_os.image_v2 = fake_module
+        with mock.patch.object(verify_tempest_config,
+                               'print_and_or_update') as print_mock:
+            verify_tempest_config.verify_glance_api_versions(fake_os, True)
+        print_mock.assert_called_once_with('glance',
+                                           'service-available',
                                            False, True)
 
     def test_verify_extensions_neutron(self):
@@ -272,8 +302,11 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        fake_os.network_extensions_client.list_extensions = (
-            fake_list_extensions)
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -295,8 +328,11 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        fake_os.network_extensions_client.list_extensions = (
-            fake_list_extensions)
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
@@ -313,15 +349,17 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        # NOTE (e0ne): mock both v1 and v2 APIs
-        fake_os.volumes_extension_client.list_extensions = fake_list_extensions
-        fake_os.volumes_v2_extension_client.list_extensions = (
-            fake_list_extensions)
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
         results = verify_tempest_config.verify_extensions(fake_os,
                                                           'cinder', {})
+
         self.assertIn('cinder', results)
         self.assertIn('fake1', results['cinder'])
         self.assertTrue(results['cinder']['fake1'])
@@ -338,10 +376,11 @@ class TestDiscovery(base.TestCase):
                                    {'alias': 'fake2'},
                                    {'alias': 'not_fake'}]}
         fake_os = mock.MagicMock()
-        # NOTE (e0ne): mock both v1 and v2 APIs
-        fake_os.volumes_extension_client.list_extensions = fake_list_extensions
-        fake_os.volumes_v2_extension_client.list_extensions = (
-            fake_list_extensions)
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
@@ -357,7 +396,11 @@ class TestDiscovery(base.TestCase):
             return ([{'alias': 'fake1'}, {'alias': 'fake2'},
                      {'alias': 'not_fake'}])
         fake_os = mock.MagicMock()
-        fake_os.extensions_client.list_extensions = fake_list_extensions
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -379,7 +422,11 @@ class TestDiscovery(base.TestCase):
                                     {'alias': 'fake2'},
                                     {'alias': 'not_fake'}]})
         fake_os = mock.MagicMock()
-        fake_os.extensions_client.list_extensions = fake_list_extensions
+        fake_client = mock.MagicMock()
+        fake_client.list_extensions = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
@@ -397,7 +444,11 @@ class TestDiscovery(base.TestCase):
                     'not_fake': 'metadata',
                     'swift': 'metadata'}
         fake_os = mock.MagicMock()
-        fake_os.capabilities_client.list_capabilities = fake_list_extensions
+        fake_client = mock.MagicMock()
+        fake_client.list_capabilities = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['fake1', 'fake2', 'fake3'])))
@@ -419,7 +470,11 @@ class TestDiscovery(base.TestCase):
                     'not_fake': 'metadata',
                     'swift': 'metadata'}
         fake_os = mock.MagicMock()
-        fake_os.capabilities_client.list_capabilities = fake_list_extensions
+        fake_client = mock.MagicMock()
+        fake_client.list_capabilities = fake_list_extensions
+        self.useFixture(fixtures.MockPatchObject(
+            verify_tempest_config, 'get_extension_client',
+            return_value=fake_client))
         self.useFixture(fixtures.MockPatchObject(
             verify_tempest_config, 'get_enabled_extensions',
             return_value=(['all'])))
@@ -429,3 +484,13 @@ class TestDiscovery(base.TestCase):
         self.assertIn('extensions', results['swift'])
         self.assertEqual(sorted(['not_fake', 'fake1', 'fake2']),
                          sorted(results['swift']['extensions']))
+
+    def test_get_extension_client(self):
+        creds = credentials_factory.get_credentials(
+            fill_in=False, username='fake_user', project_name='fake_project',
+            password='fake_password')
+        os = clients.Manager(creds)
+        for service in ['nova', 'neutron', 'swift', 'cinder']:
+            extensions_client = verify_tempest_config.get_extension_client(
+                os, service)
+            self.assertIsInstance(extensions_client, rest_client.RestClient)

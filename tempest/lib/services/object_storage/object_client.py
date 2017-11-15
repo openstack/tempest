@@ -23,7 +23,8 @@ from tempest.lib import exceptions
 class ObjectClient(rest_client.RestClient):
 
     def create_object(self, container, object_name, data,
-                      params=None, metadata=None, headers=None):
+                      params=None, metadata=None, headers=None,
+                      chunked=False):
         """Create storage object."""
 
         if headers is None:
@@ -37,7 +38,7 @@ class ObjectClient(rest_client.RestClient):
         if params:
             url += '?%s' % urlparse.urlencode(params)
 
-        resp, body = self.put(url, data, headers)
+        resp, body = self.put(url, data, headers, chunked=chunked)
         self.expected_success(201, resp.status)
         return resp, body
 
@@ -50,28 +51,27 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success([200, 204], resp.status)
         return resp, body
 
-    def update_object_metadata(self, container, object_name, metadata,
-                               metadata_prefix='X-Object-Meta-'):
+    def create_or_update_object_metadata(self, container, object_name,
+                                         headers=None):
         """Add, remove, or change X-Object-Meta metadata for storage object."""
-
-        headers = {}
-        for key in metadata:
-            headers["%s%s" % (str(metadata_prefix), str(key))] = metadata[key]
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.post(url, None, headers=headers)
         self.expected_success(202, resp.status)
         return resp, body
 
-    def list_object_metadata(self, container, object_name):
+    def list_object_metadata(self, container, object_name,
+                             params=None, headers=None):
         """List all storage object X-Object-Meta- metadata."""
 
         url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.head(url)
+        if params:
+            url += '?%s' % urlparse.urlencode(params)
+        resp, body = self.head(url, headers=headers)
         self.expected_success(200, resp.status)
         return resp, body
 
-    def get_object(self, container, object_name, metadata=None):
+    def get_object(self, container, object_name, metadata=None, params=None):
         """Retrieve object's data."""
 
         headers = {}
@@ -80,43 +80,10 @@ class ObjectClient(rest_client.RestClient):
                 headers[str(key)] = metadata[key]
 
         url = "{0}/{1}".format(container, object_name)
+        if params:
+            url += '?%s' % urlparse.urlencode(params)
         resp, body = self.get(url, headers=headers)
         self.expected_success([200, 206], resp.status)
-        return resp, body
-
-    def copy_object_in_same_container(self, container, src_object_name,
-                                      dest_object_name, metadata=None):
-        """Copy storage object's data to the new object using PUT."""
-
-        url = "{0}/{1}".format(container, dest_object_name)
-        headers = {}
-        headers['X-Copy-From'] = "%s/%s" % (str(container),
-                                            str(src_object_name))
-        headers['content-length'] = '0'
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
-
-        resp, body = self.put(url, None, headers=headers)
-        self.expected_success(201, resp.status)
-        return resp, body
-
-    def copy_object_across_containers(self, src_container, src_object_name,
-                                      dst_container, dst_object_name,
-                                      metadata=None):
-        """Copy storage object's data to the new object using PUT."""
-
-        url = "{0}/{1}".format(dst_container, dst_object_name)
-        headers = {}
-        headers['X-Copy-From'] = "%s/%s" % (str(src_container),
-                                            str(src_object_name))
-        headers['content-length'] = '0'
-        if metadata:
-            for key in metadata:
-                headers[str(key)] = metadata[key]
-
-        resp, body = self.put(url, None, headers=headers)
-        self.expected_success(201, resp.status)
         return resp, body
 
     def copy_object_2d_way(self, container, src_object_name, dest_object_name,
@@ -135,38 +102,6 @@ class ObjectClient(rest_client.RestClient):
         self.expected_success(201, resp.status)
         return resp, body
 
-    def create_object_segments(self, container, object_name, segment, data):
-        """Creates object segments."""
-        url = "{0}/{1}/{2}".format(container, object_name, segment)
-        resp, body = self.put(url, data)
-        self.expected_success(201, resp.status)
-        return resp, body
-
-    def put_object_with_chunk(self, container, name, contents):
-        """Put an object with Transfer-Encoding header
-
-        :param container: name of the container
-        :type container: string
-        :param name: name of the object
-        :type name: string
-        :param contents: object data
-        :type contents: iterable
-        """
-        headers = {'Transfer-Encoding': 'chunked'}
-        if self.token:
-            headers['X-Auth-Token'] = self.token
-
-        url = "%s/%s" % (container, name)
-        resp, body = self.put(
-            url, headers=headers,
-            body=contents,
-            chunked=True
-        )
-
-        self._error_checker(resp, body)
-        self.expected_success(201, resp.status)
-        return resp.status, resp.reason, resp
-
     def create_object_continue(self, container, object_name,
                                data, metadata=None):
         """Put an object using Expect:100-continue"""
@@ -183,8 +118,7 @@ class ObjectClient(rest_client.RestClient):
         path = str(parsed.path) + "/"
         path += "%s/%s" % (str(container), str(object_name))
 
-        conn = create_connection(parsed)
-
+        conn = _create_connection(parsed)
         # Send the PUT request and the headers including the "Expect" header
         conn.putrequest('PUT', path)
 
@@ -218,7 +152,7 @@ class ObjectClient(rest_client.RestClient):
         return resp.status, resp.reason
 
 
-def create_connection(parsed_url):
+def _create_connection(parsed_url):
     """Helper function to create connection with httplib
 
     :param parsed_url: parsed url of the remote location

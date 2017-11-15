@@ -72,6 +72,11 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if cls._api_version == 3:
             cls.backups_client = cls.os_primary.backups_v3_client
             cls.volumes_client = cls.os_primary.volumes_v3_client
+            cls.messages_client = cls.os_primary.volume_v3_messages_client
+            cls.versions_client = cls.os_primary.volume_v3_versions_client
+            cls.groups_client = cls.os_primary.groups_v3_client
+            cls.group_snapshots_client = (
+                cls.os_primary.group_snapshots_v3_client)
         else:
             cls.backups_client = cls.os_primary.backups_v2_client
             cls.volumes_client = cls.os_primary.volumes_v2_client
@@ -82,10 +87,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.availability_zone_client = (
             cls.os_primary.volume_v2_availability_zone_client)
         cls.volume_limits_client = cls.os_primary.volume_v2_limits_client
-        cls.messages_client = cls.os_primary.volume_v3_messages_client
-        cls.versions_client = cls.os_primary.volume_v3_versions_client
-        cls.groups_client = cls.os_primary.groups_v3_client
-        cls.group_snapshots_client = cls.os_primary.group_snapshots_v3_client
 
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
@@ -259,6 +260,11 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_volume_client = cls.os_admin.volumes_v2_client
         if cls._api_version == 3:
             cls.admin_volume_client = cls.os_admin.volumes_v3_client
+            cls.admin_groups_client = cls.os_admin.groups_v3_client
+            cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
+            cls.admin_group_snapshots_client = \
+                cls.os_admin.group_snapshots_v3_client
+            cls.admin_group_types_client = cls.os_admin.group_types_v3_client
         cls.admin_hosts_client = cls.os_admin.volume_hosts_v2_client
         cls.admin_snapshot_manage_client = \
             cls.os_admin.snapshot_manage_v2_client
@@ -274,11 +280,6 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.os_admin.volume_capabilities_v2_client
         cls.admin_scheduler_stats_client = \
             cls.os_admin.volume_scheduler_stats_v2_client
-        cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
-        cls.admin_groups_client = cls.os_admin.groups_v3_client
-        cls.admin_group_snapshots_client = \
-            cls.os_admin.group_snapshots_v3_client
-        cls.admin_group_types_client = cls.os_admin.group_types_v3_client
 
     @classmethod
     def resource_setup(cls):

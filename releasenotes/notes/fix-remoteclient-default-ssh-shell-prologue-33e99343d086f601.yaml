@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix RemoteClient default ssh_shell_prologue: Bug#1707478
+
+    The default ssh_shell_proloque has been modified from
+    specifying erroneous PATH=$$PATH:/sbin to PATH=$PATH:/sbin.

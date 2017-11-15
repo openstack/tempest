@@ -24,6 +24,7 @@ Tempest Specific Commandments
 - [T114] Check that tempest.lib does not use tempest config
 - [T115] Check that admin tests should exist under admin path
 - [N322] Method's default argument shouldn't be mutable
+- [T116] Unsupported 'message' Exception attribute in PY3
 
 Test Data/Configuration
 -----------------------
@@ -102,10 +103,10 @@ to work even if just one ``test_method`` is selected for execution.
 Service Tagging
 ---------------
 Service tagging is used to specify which services are exercised by a particular
-test method. You specify the services with the ``tempest.test.services``
+test method. You specify the services with the ``tempest.common.utils.services``
 decorator. For example:
 
-@services('compute', 'image')
+@utils.services('compute', 'image')
 
 Valid service tag names are the same as the list of directories in tempest.api
 that have tests.
@@ -127,6 +128,12 @@ order.
 Test class level resources should be defined in the `resource_setup` method of
 the test class, except for any credential obtained from the credentials
 provider, which should be set-up in the `setup_credentials` method.
+Cleanup is best scheduled using `addClassResourceCleanup` which ensures that
+the cleanup code is always invoked, and in reverse order with respect to the
+creation order.
+
+In both cases - test level and class level cleanups - a wait loop should be
+scheduled before the actual delete of resources with an asynchronous delete.
 
 The test base class `BaseTestCase` defines Tempest framework for class level
 fixtures. `setUpClass` and `tearDownClass` are defined here and cannot be
@@ -357,10 +364,10 @@ to Tempest.
 
 When adding tests for new features that were not in previous releases of the
 projects the new test has to be properly skipped with a feature flag. Whether
-this is just as simple as using the @test.requires_ext() decorator to check
-if the required extension (or discoverable optional API) is enabled or adding
-a new config option to the appropriate section. If there isn't a method of
-selecting the new **feature** from the config file then there won't be a
+this is just as simple as using the @utils.requires_ext() decorator to
+check if the required extension (or discoverable optional API) is enabled or
+adding a new config option to the appropriate section. If there isn't a method
+of selecting the new **feature** from the config file then there won't be a
 mechanism to disable the test with older stable releases and the new test won't
 be able to merge.
 
@@ -379,7 +386,7 @@ following procedure::
 Otherwise the bug fix won't be able to land in the project.
 
 Handily, `Zuul’s cross-repository dependencies
-<https://docs.openstack.org/infra/zuul/gating.html#cross-repository-dependencies>`_.
+<https://docs.openstack.org/infra/zuul/user/gating.html#cross-project-dependencies>`_.
 can be leveraged to do without step 2 and to have steps 3 and 4 happen
 "atomically". To do that, make the patch written in step 1 to depend (refer to
 Zuul's documentation above) on the patch written in step 4. The commit message

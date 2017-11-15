@@ -104,7 +104,8 @@ class TempestCleanup(command.Command):
     def init(self, parsed_args):
         cleanup_service.init_conf()
         self.options = parsed_args
-        self.admin_mgr = credentials.AdminManager()
+        self.admin_mgr = clients.Manager(
+            credentials.get_configured_admin_credentials())
         self.dry_run_data = {}
         self.json_data = {}
 
@@ -263,9 +264,10 @@ class TempestCleanup(command.Command):
 
     def _remove_admin_role(self, tenant_id):
         LOG.debug("Remove admin user role for tenant: %s", tenant_id)
-        # Must initialize AdminManager for each user role
+        # Must initialize Admin Manager for each user role
         # Otherwise authentication exception is thrown, weird
-        id_cl = credentials.AdminManager().identity_client
+        id_cl = clients.Manager(
+            credentials.get_configured_admin_credentials()).identity_client
         if (self._tenant_exists(tenant_id)):
             try:
                 id_cl.delete_role_from_user_on_project(tenant_id,

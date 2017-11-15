@@ -15,10 +15,10 @@
 
 import testtools
 
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -44,7 +44,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
     @decorators.attr(type='slow')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
-    @test.services('compute', 'network', 'image')
+    @utils.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting an instance
         keypair = self.create_keypair()

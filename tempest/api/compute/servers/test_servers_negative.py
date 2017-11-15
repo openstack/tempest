@@ -19,12 +19,12 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -37,7 +37,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.client, self.server_id,
                                            'ACTIVE')
         except Exception:
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.recreate_server(self.server_id)
 
     def tearDown(self):
         self.server_check_teardown()
@@ -217,7 +217,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.related_bug('1651064', status_code=500)
-    @test.services('volume')
+    @utils.services('volume')
     @decorators.idempotent_id('12146ac1-d7df-4928-ad25-b1f99e5286cd')
     def test_create_server_invalid_bdm_in_2nd_dict(self):
         volume = self.create_volume()
@@ -512,7 +512,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('74085be3-a370-4ca2-bc51-2d0e10e0f573')
-    @test.services('volume', 'image')
+    @utils.services('volume', 'image')
     def test_create_server_from_non_bootable_volume(self):
         # Create a volume
         volume = self.create_volume()
@@ -551,7 +551,7 @@ class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
             waiters.wait_for_server_status(self.servers_client, self.server_id,
                                            'ACTIVE')
         except Exception:
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.recreate_server(self.server_id)
 
     @classmethod
     def setup_clients(cls):

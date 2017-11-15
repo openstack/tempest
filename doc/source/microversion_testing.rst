@@ -300,46 +300,66 @@ Microversion tests implemented in Tempest
 
  * `2.2`_
 
- .. _2.2: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id2
+ .. _2.2: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id2
 
  * `2.10`_
 
- .. _2.10: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id9
+ .. _2.10: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id9
 
  * `2.20`_
 
- .. _2.20: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id18
+ .. _2.20: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id18
 
  * `2.25`_
 
- .. _2.25: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-mitaka
+ .. _2.25: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-mitaka
 
  * `2.32`_
 
- .. _2.32: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id29
+ .. _2.32: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id29
 
  * `2.37`_
 
- .. _2.37: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id34
+ .. _2.37: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id34
 
  * `2.42`_
 
- .. _2.42: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-ocata
+ .. _2.42: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-ocata
 
  * `2.47`_
 
- .. _2.47: http://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id42
+ .. _2.47: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id42
 
- * `2.52`_
+ * `2.48`_
 
- .. _2.52: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id47
-
- * `2.53`_
-
- .. _2.53: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id48
+ .. _2.48: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id43
 
 * Volume
 
  * `3.3`_
 
- .. _3.3:  https://docs.openstack.org/cinder/ocata/devref/api_microversion_history.html#id4
+ .. _3.3:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id3
+
+ * `3.9`_
+
+ .. _3.9:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id9
+
+ * `3.11`_
+
+ .. _3.11:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id11
+
+ * `3.12`_
+
+ .. _3.12:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id12
+
+ * `3.14`_
+
+ .. _3.14:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id14
+
+ * `3.19`_
+
+ .. _3.19:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id18
+
+ * `3.20`_
+
+ .. _3.20:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id19

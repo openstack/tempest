@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Remove deprecated get_ipv6_addr_by_EUI64 method from data_utils.
+    Use the same method from oslo_utils.netutils.

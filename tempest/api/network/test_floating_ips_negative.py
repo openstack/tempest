@@ -15,10 +15,10 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -34,7 +34,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(FloatingIPNegativeTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
         if not CONF.network.public_network_id:

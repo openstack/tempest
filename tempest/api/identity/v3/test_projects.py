@@ -24,8 +24,7 @@ class IdentityV3ProjectsTest(base.BaseIdentityV3Test):
 
     @decorators.idempotent_id('86128d46-e170-4644-866a-cc487f699e1d')
     def test_list_projects_returns_only_authorized_projects(self):
-        alt_project_name =\
-            self.os_alt.credentials.project_name
+        alt_project_name = self.os_alt.credentials.project_name
         resp = self.non_admin_users_client.list_user_projects(
             self.os_primary.credentials.user_id)
 

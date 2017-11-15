@@ -261,12 +261,13 @@ class KeystoneAuthProvider(AuthProvider):
     def __init__(self, credentials, auth_url,
                  disable_ssl_certificate_validation=None,
                  ca_certs=None, trace_requests=None, scope='project',
-                 http_timeout=None):
+                 http_timeout=None, proxy_url=None):
         super(KeystoneAuthProvider, self).__init__(credentials, scope)
         self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
         self.http_timeout = http_timeout
+        self.proxy_url = proxy_url
         self.auth_url = auth_url
         self.auth_client = self._auth_client(auth_url)
 
@@ -345,7 +346,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         return json_v2id.TokenClient(
             auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests,
-            http_timeout=self.http_timeout)
+            http_timeout=self.http_timeout, proxy_url=self.proxy_url)
 
     def _auth_params(self):
         """Auth parameters to be passed to the token request
@@ -433,7 +434,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         return json_v3id.V3TokenClient(
             auth_url, disable_ssl_certificate_validation=self.dscv,
             ca_certs=self.ca_certs, trace_requests=self.trace_requests,
-            http_timeout=self.http_timeout)
+            http_timeout=self.http_timeout, proxy_url=self.proxy_url)
 
     def _auth_params(self):
         """Auth parameters to be passed to the token request
@@ -599,7 +600,8 @@ def is_identity_version_supported(identity_version):
 
 def get_credentials(auth_url, fill_in=True, identity_version='v2',
                     disable_ssl_certificate_validation=None, ca_certs=None,
-                    trace_requests=None, http_timeout=None, **kwargs):
+                    trace_requests=None, http_timeout=None, proxy_url=None,
+                    **kwargs):
     """Builds a credentials object based on the configured auth_version
 
     :param auth_url (string): Full URI of the OpenStack Identity API(Keystone)
@@ -617,6 +619,7 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2',
     :param trace_requests: trace in log API requests to the auth system
     :param http_timeout: timeout in seconds to wait for the http request to
            return
+    :param proxy_url: URL of HTTP(s) proxy used when fill_in is True
     :param kwargs (dict): Dict of credential key/value pairs
 
     Examples:
@@ -641,7 +644,7 @@ def get_credentials(auth_url, fill_in=True, identity_version='v2',
         auth_provider = auth_provider_class(
             creds, auth_url, disable_ssl_certificate_validation=dscv,
             ca_certs=ca_certs, trace_requests=trace_requests,
-            http_timeout=http_timeout)
+            http_timeout=http_timeout, proxy_url=proxy_url)
         creds = auth_provider.fill_credentials()
     return creds
 

@@ -23,15 +23,15 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(EndPointsTestJSON, cls).resource_setup()
-        cls.service_ids = list()
         s_name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         s_description = data_utils.rand_name('description')
         service_data = cls.services_client.create_service(
             name=s_name, type=s_type,
             description=s_description)['OS-KSADM:service']
+        cls.addClassResourceCleanup(cls.services_client.delete_service,
+                                    service_data['id'])
         cls.service_id = service_data['id']
-        cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
         for _ in range(2):
@@ -43,17 +43,11 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
                 publicurl=url,
                 adminurl=url,
                 internalurl=url)['endpoint']
+            cls.addClassResourceCleanup(cls.endpoints_client.delete_endpoint,
+                                        endpoint['id'])
             # list_endpoints() will return 'enabled' field
             endpoint['enabled'] = True
             cls.setup_endpoints.append(endpoint)
-
-    @classmethod
-    def resource_cleanup(cls):
-        for e in cls.setup_endpoints:
-            cls.endpoints_client.delete_endpoint(e['id'])
-        for s in cls.service_ids:
-            cls.services_client.delete_service(s)
-        super(EndPointsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
     def test_list_endpoints(self):

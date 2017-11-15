@@ -18,9 +18,6 @@ import random
 import string
 import uuid
 
-from debtcollector import removals
-import netaddr
-from oslo_utils import netutils
 from oslo_utils import uuidutils
 import six.moves
 
@@ -175,36 +172,6 @@ def random_bytes(size=1024):
     """
     return b''.join([six.int2byte(random.randint(0, 255))
                     for i in range(size)])
-
-
-@removals.remove(
-    message="use get_ipv6_addr_by_EUI64 from oslo_utils.netutils",
-    version="Newton",
-    removal_version="Ocata")
-def get_ipv6_addr_by_EUI64(cidr, mac):
-    """Generate a IPv6 addr by EUI-64 with CIDR and MAC
-
-    :param str cidr: a IPv6 CIDR
-    :param str mac: a MAC address
-    :return: an IPv6 Address
-    :rtype: netaddr.IPAddress
-    """
-    # Check if the prefix is IPv4 address
-    is_ipv4 = netutils.is_valid_ipv4(cidr)
-    if is_ipv4:
-        msg = "Unable to generate IP address by EUI64 for IPv4 prefix"
-        raise TypeError(msg)
-    try:
-        eui64 = int(netaddr.EUI(mac).eui64())
-        prefix = netaddr.IPNetwork(cidr)
-        return netaddr.IPAddress(prefix.first + eui64 ^ (1 << 57))
-    except (ValueError, netaddr.AddrFormatError):
-        raise TypeError('Bad prefix or mac format for generating IPv6 '
-                        'address by EUI-64: %(prefix)s, %(mac)s:'
-                        % {'prefix': cidr, 'mac': mac})
-    except TypeError:
-        raise TypeError('Bad prefix type for generate IPv6 address by '
-                        'EUI-64: %s' % cidr)
 
 
 # Courtesy of http://stackoverflow.com/a/312464

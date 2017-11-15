@@ -1,0 +1,9 @@
+---
+features:
+  - Adds a new config options, ``proxy_url``. This options is used to configure
+    running tempest through a proxy server.
+  - The RestClient class in tempest.lib.rest_client has a new kwarg parameters,
+    ``proxy_url``, that is used to set a proxy server.
+  - A new class was added to tempest.lib.http, ClosingProxyHttp. This behaves
+    identically to ClosingHttp except that it requires a proxy url and will
+    establish a connection through a proxy

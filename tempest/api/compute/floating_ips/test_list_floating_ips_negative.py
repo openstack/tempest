@@ -13,32 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
+from tempest.api.compute.floating_ips import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
-class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
+class FloatingIPDetailsNegativeTestJSON(base.BaseFloatingIPsTest):
 
-    @classmethod
-    def skip_checks(cls):
-        super(FloatingIPDetailsNegativeTestJSON, cls).skip_checks()
-        if not CONF.network_feature_enabled.floating_ips:
-            raise cls.skipException("Floating ips are not available")
-
-    @classmethod
-    def setup_clients(cls):
-        super(FloatingIPDetailsNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.floating_ips_client
+    max_microversion = '2.35'
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
-    @test.services('network')
     def test_get_nonexistent_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
         # of non-existent floating IP

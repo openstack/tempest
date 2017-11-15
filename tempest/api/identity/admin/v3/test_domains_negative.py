@@ -20,7 +20,6 @@ from tempest.lib import exceptions as lib_exc
 
 
 class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
-    _interface = 'json'
 
     @decorators.attr(type=['negative', 'gate'])
     @decorators.idempotent_id('1f3fbff5-4e44-400d-9ca1-d953f05f609b')

@@ -17,6 +17,47 @@ import six
 import urllib3
 
 
+class ClosingProxyHttp(urllib3.ProxyManager):
+    def __init__(self, proxy_url, disable_ssl_certificate_validation=False,
+                 ca_certs=None, timeout=None):
+        kwargs = {}
+
+        if disable_ssl_certificate_validation:
+            urllib3.disable_warnings()
+            kwargs['cert_reqs'] = 'CERT_NONE'
+        elif ca_certs:
+            kwargs['cert_reqs'] = 'CERT_REQUIRED'
+            kwargs['ca_certs'] = ca_certs
+
+        if timeout:
+            kwargs['timeout'] = timeout
+
+        super(ClosingProxyHttp, self).__init__(proxy_url, **kwargs)
+
+    def request(self, url, method, *args, **kwargs):
+
+        class Response(dict):
+            def __init__(self, info):
+                for key, value in info.getheaders().items():
+                    self[key.lower()] = value
+                self.status = info.status
+                self['status'] = str(self.status)
+                self.reason = info.reason
+                self.version = info.version
+                self['content-location'] = url
+
+        original_headers = kwargs.get('headers', {})
+        new_headers = dict(original_headers, connection='close')
+        new_kwargs = dict(kwargs, headers=new_headers)
+
+        # Follow up to 5 redirections. Don't raise an exception if
+        # it's exceeded but return the HTTP 3XX response instead.
+        retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+        r = super(ClosingProxyHttp, self).request(method, url, retries=retry,
+                                                  *args, **new_kwargs)
+        return Response(r), r.data
+
+
 class ClosingHttp(urllib3.poolmanager.PoolManager):
     def __init__(self, disable_ssl_certificate_validation=False,
                  ca_certs=None, timeout=None):
@@ -25,8 +66,7 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
         if disable_ssl_certificate_validation:
             urllib3.disable_warnings()
             kwargs['cert_reqs'] = 'CERT_NONE'
-
-        if ca_certs:
+        elif ca_certs:
             kwargs['cert_reqs'] = 'CERT_REQUIRED'
             kwargs['ca_certs'] = ca_certs
 

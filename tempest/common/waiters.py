@@ -211,6 +211,8 @@ def wait_for_volume_resource_status(client, resource_id, statuses):
                        (resource_name, resource_id, statuses, resource_status,
                         client.build_timeout))
             raise lib_exc.TimeoutException(message)
+    LOG.info('%s %s reached %s after waiting for %f seconds',
+             resource_name, resource_id, statuses, time.time() - start)
 
 
 def wait_for_volume_retype(client, volume_id, new_volume_type):

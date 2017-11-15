@@ -91,3 +91,37 @@ class TestCLIClient(base.TestCase):
         self.assertEqual(mock_execute.call_count, 1)
         self.assertEqual(mock_execute.call_args[1],
                          {'prefix': 'env LAC_ALL=C'})
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_domain_name(self, mock_execute):
+        cli = cli_base.CLIClient(
+            user_domain_name='default',
+            project_domain_name='default'
+        )
+        cli.glance('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertIn('--os-user-domain-name default',
+                      mock_execute.call_args[0][2])
+        self.assertIn('--os-project-domain-name default',
+                      mock_execute.call_args[0][2])
+        self.assertNotIn('--os-user-domain-id',
+                         mock_execute.call_args[0][2])
+        self.assertNotIn('--os-project-domain-id',
+                         mock_execute.call_args[0][2])
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_domain_id(self, mock_execute):
+        cli = cli_base.CLIClient(
+            user_domain_id='default',
+            project_domain_id='default'
+        )
+        cli.glance('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertIn('--os-user-domain-id default',
+                      mock_execute.call_args[0][2])
+        self.assertIn('--os-project-domain-id default',
+                      mock_execute.call_args[0][2])
+        self.assertNotIn('--os-user-domain-name',
+                         mock_execute.call_args[0][2])
+        self.assertNotIn('--os-project-domain-name',
+                         mock_execute.call_args[0][2])

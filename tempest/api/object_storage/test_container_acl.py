@@ -41,10 +41,11 @@ class ObjectTestACLs(base.BaseObjectTest):
         tenant_name = self.os_roles_operator_alt.credentials.tenant_name
         username = self.os_roles_operator_alt.credentials.username
         cont_headers = {'X-Container-Read': tenant_name + ':' + username}
+        container_client = self.os_roles_operator.container_client
         resp_meta, _ = (
-            self.os_roles_operator.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix=''))
+            container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -68,10 +69,11 @@ class ObjectTestACLs(base.BaseObjectTest):
         tenant_name = self.os_roles_operator_alt.credentials.tenant_name
         username = self.os_roles_operator_alt.credentials.username
         cont_headers = {'X-Container-Write': tenant_name + ':' + username}
+        container_client = self.os_roles_operator.container_client
         resp_meta, _ = (
-            self.os_roles_operator.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix=''))
+            container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # set alternative authentication data; cannot simply use the
         # other object client.

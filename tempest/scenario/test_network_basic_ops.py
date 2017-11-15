@@ -19,13 +19,13 @@ import re
 from oslo_log import log as logging
 import testtools
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -87,7 +87,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
         for ext in ['router', 'security-group']:
-            if not test.is_extension_enabled(ext, 'network'):
+            if not utils.is_extension_enabled(ext, 'network'):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
         if not CONF.network_feature_enabled.floating_ips:
@@ -113,11 +113,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         port_id = None
         if boot_with_port:
             # create a port on the network and boot with that
-            port_id = self._create_port(self.network['id'])['id']
+            port_id = self.create_port(self.network['id'])['id']
             self.ports.append({'port': port_id})
 
         server = self._create_server(self.network, port_id)
-        self._check_tenant_network_connectivity()
+        ssh_login = CONF.validation.image_ssh_user
+        for server in self.servers:
+            # call the common method in the parent class
+            self.check_tenant_network_connectivity(
+                server, ssh_login, self._get_server_key(server),
+                servers_for_debug=self.servers)
 
         floating_ip = self.create_floating_ip(server)
         self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
@@ -170,15 +175,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _get_server_key(self, server):
         return self.keypairs[server['key_name']]['private_key']
 
-    def _check_tenant_network_connectivity(self):
-        ssh_login = CONF.validation.image_ssh_user
-        for server in self.servers:
-            # call the common method in the parent class
-            super(TestNetworkBasicOps, self).\
-                _check_tenant_network_connectivity(
-                    server, ssh_login, self._get_server_key(server),
-                    servers_for_debug=self.servers)
-
     def check_public_network_connectivity(
             self, should_connect=True, msg=None,
             should_check_floating_ip_status=True, mtu=None):
@@ -213,25 +209,28 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _disassociate_floating_ips(self):
         floating_ip, _ = self.floating_ip_tuple
-        self._disassociate_floating_ip(floating_ip)
-        self.floating_ip_tuple = Floating_IP_tuple(
-            floating_ip, None)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], port_id=None)['floatingip']
+        self.assertIsNone(floating_ip['port_id'])
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, None)
 
     def _reassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
         # create a new server for the floating ip
         server = self._create_server(self.network)
-        self._associate_floating_ip(floating_ip, server)
-        self.floating_ip_tuple = Floating_IP_tuple(
-            floating_ip, server)
+        port_id, _ = self._get_server_port_id_and_ip4(server)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], port_id=port_id)['floatingip']
+        self.assertEqual(port_id, floating_ip['port_id'])
+        self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
 
     def _create_new_network(self, create_gateway=False):
         self.new_net = self._create_network()
         if create_gateway:
-            self.new_subnet = self._create_subnet(
+            self.new_subnet = self.create_subnet(
                 network=self.new_net)
         else:
-            self.new_subnet = self._create_subnet(
+            self.new_subnet = self.create_subnet(
                 network=self.new_net,
                 gateway_ip=None)
 
@@ -355,9 +354,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.check_remote_connectivity(ssh_source, remote_ip,
                                            should_connect)
 
+    def _update_router_admin_state(self, router, admin_state_up):
+        kwargs = dict(admin_state_up=admin_state_up)
+        router = self.routers_client.update_router(
+            router['id'], **kwargs)['router']
+        self.assertEqual(admin_state_up, router['admin_state_up'])
+
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f323b3ba-82f8-4db7-8ea6-6a895869ec49')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_network_basic_ops(self):
         """Basic network operation test
 
@@ -409,10 +414,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                    "floating ip")
 
     @decorators.idempotent_id('b158ea55-472e-4086-8fa9-c64ac0c6c1d0')
-    @testtools.skipUnless(test.is_extension_enabled('net-mtu', 'network'),
+    @testtools.skipUnless(utils.is_extension_enabled('net-mtu', 'network'),
                           'No way to calculate MTU for networks')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_mtu_sized_frames(self):
         """Validate that network MTU sized frames fit through."""
         self._setup_network_and_servers()
@@ -425,7 +430,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'multitenant network environment')
     @decorators.skip_because(bug="1610994")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_connectivity_between_vms_on_different_networks(self):
         """Test connectivity between VMs on different networks
 
@@ -479,7 +484,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipIf(CONF.network.port_vnic_type in ['direct', 'macvtap'],
                       'NIC hotplug not supported for '
                       'vnic_type direct or macvtap')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_hotplug_nic(self):
         """Test hotplug network interface
 
@@ -501,7 +506,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                       'Router state can be altered only with multitenant '
                       'networks capabilities')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_update_router_admin_state(self):
         """Test to update admin state up of router
 
@@ -535,7 +540,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.scenario.dhcp_client,
                           "DHCP client is not available.")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_subnet_details(self):
         """Tests that subnet's extra configuration details are affecting VMs.
 
@@ -619,7 +624,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                           "Changing a port's admin state is not supported "
                           "by the test environment")
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_update_instance_port_admin_state(self):
         """Test to update admin_state_up attribute of instance port
 
@@ -666,7 +671,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('759462e1-8535-46b0-ab3a-33aa45c55aaa')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_preserve_preexisting_port(self):
         """Test preserve pre-existing port
 
@@ -715,10 +720,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                          'server %s.' % server['id'])
         self.assertEqual(port['id'], port_list[0]['id'])
 
-    @test.requires_ext(service='network', extension='l3_agent_scheduler')
+    @utils.requires_ext(service='network', extension='l3_agent_scheduler')
     @decorators.idempotent_id('2e788c46-fb3f-4ac9-8f82-0561555bea73')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_router_rescheduling(self):
         """Tests that router can be removed from agent and add to a new agent.
 
@@ -793,12 +798,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True,
             msg='After router rescheduling')
 
-    @test.requires_ext(service='network', extension='port-security')
+    @utils.requires_ext(service='network', extension='port-security')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
                           'NIC hotplug not available')
     @decorators.idempotent_id('7c0bb1a2-d053-49a4-98f9-ca1a1d849f63')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_port_security_macspoofing_port(self):
         """Tests port_security extension enforces mac spoofing
 

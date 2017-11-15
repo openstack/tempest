@@ -13,10 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
+from tempest.common import compute
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ServerGroupTestJSON(base.BaseV2ComputeTest):
@@ -30,7 +33,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(ServerGroupTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('os-server-groups', 'compute'):
+        if not utils.is_extension_enabled('os-server-groups', 'compute'):
             msg = "os-server-groups extension is not enabled."
             raise cls.skipException(msg)
 
@@ -106,3 +109,19 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         # List the server-group
         body = self.client.list_server_groups()['server_groups']
         self.assertIn(self.created_server_group, body)
+
+    @decorators.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
+    @testtools.skipUnless(
+        compute.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
+        'ServerGroupAffinityFilter is not available.')
+    def test_create_server_with_scheduler_hint_group(self):
+        # Create a server with the scheduler hint "group".
+        hints = {'group': self.created_server_group['id']}
+        server = self.create_test_server(scheduler_hints=hints,
+                                         wait_until='ACTIVE')
+        self.addCleanup(self.delete_server, server['id'])
+
+        # Check a server is in the group
+        server_group = (self.server_groups_client.show_server_group(
+            self.created_server_group['id'])['server_group'])
+        self.assertIn(server['id'], server_group['members'])

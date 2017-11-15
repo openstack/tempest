@@ -87,7 +87,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # project and domain APIs
         projects_list = self.projects_client.list_projects(
             params={'is_domain': True})['projects']
-        self.assertIn(project, projects_list)
+        project_ids = [p['id'] for p in projects_list]
+        self.assertIn(project['id'], project_ids)
 
         # The domains API return different attributes for the entity, so we
         # compare the entities IDs
@@ -205,3 +206,31 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project['id'],
                          new_user_get['project_id'])
         self.assertEqual(u_email, new_user_get['email'])
+
+    @decorators.idempotent_id('d1db68b6-aebe-4fa0-b79d-d724d2e21162')
+    def test_project_get_equals_list(self):
+        fields = ['parent_id', 'is_domain', 'description', 'links',
+                  'name', 'enabled', 'domain_id', 'id', 'tags']
+
+        # Tags must be unique, keystone API will reject duplicates
+        tags = ['a', 'c', 'b', 'd']
+
+        # Create a Project, cleanup is handled in the helper
+        project = self.setup_test_project(tags=tags)
+
+        # Show and list for the project
+        project_get = self.projects_client.show_project(
+            project['id'])['project']
+        _projects = self.projects_client.list_projects()['projects']
+        project_list = next(x for x in _projects if x['id'] == project['id'])
+
+        # Assert the list of fields is correct (one is enough to check here)
+        self.assertSetEqual(set(fields), set(project_get.keys()))
+
+        # Ensure the set of tags is identical and match the expected one
+        get_tags = set(project_get.pop("tags"))
+        self.assertSetEqual(get_tags, set(project_list.pop("tags")))
+        self.assertSetEqual(get_tags, set(tags))
+
+        # Ensure all other fields are identical
+        self.assertDictEqual(project_get, project_list)

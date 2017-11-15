@@ -14,8 +14,8 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class CrossdomainTest(base.BaseObjectTest):
@@ -38,7 +38,7 @@ class CrossdomainTest(base.BaseObjectTest):
         self.account_client.skip_path()
 
     @decorators.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
-    @test.requires_ext(extension='crossdomain', service='object')
+    @utils.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
         resp, body = self.account_client.get("crossdomain.xml", {})
         body = body.decode()

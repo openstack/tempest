@@ -16,13 +16,13 @@
 import testtools
 
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -105,7 +105,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                           'The public_network_id option must be specified.')
     @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
                           'Floating ips are not available')
-    @test.services('compute', 'volume', 'image', 'network')
+    @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         image = self.glance_image_create()
         keypair = self.create_keypair()

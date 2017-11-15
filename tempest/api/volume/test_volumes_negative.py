@@ -16,13 +16,13 @@
 import six
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -35,7 +35,6 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()
-        cls.mountpoint = "/dev/vdc"
 
     def create_image(self):
         # Create image
@@ -168,7 +167,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f5e56b0a-5d02-43c1-a2a7-c9b792c2e3f6')
-    @test.services('compute')
+    @utils.services('compute')
     def test_attach_volumes_with_nonexistent_volume_id(self):
         server = self.create_server()
 
@@ -176,7 +175,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
                           self.volumes_client.attach_volume,
                           data_utils.rand_uuid(),
                           instance_uuid=server['id'],
-                          mountpoint=self.mountpoint)
+                          mountpoint="/dev/vdc")
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9f9c24e4-011d-46b5-b992-952140ce237a')
@@ -292,7 +291,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5b810c91-0ad1-47ce-aee8-615f789be78f')
-    @test.services('image')
+    @utils.services('image')
     def test_create_volume_from_image_with_decreasing_size(self):
         # Create image
         image = self.create_image()
@@ -307,7 +306,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d15e7f35-2cfc-48c8-9418-c8223a89bcbb')
-    @test.services('image')
+    @utils.services('image')
     def test_create_volume_from_deactivated_image(self):
         # Create image
         image = self.create_image()

@@ -29,7 +29,6 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(ObjectACLsNegativeTest, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
         cls.os_operator = cls.os_roles_operator_alt
 
     @classmethod
@@ -40,7 +39,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
-        self.container_client.create_container(self.container_name)
+        self.container_client.update_container(self.container_name)
 
     def tearDown(self):
         self.delete_containers([self.container_name])
@@ -134,9 +133,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # attempt to read object using non-authorized user
         # update X-Container-Read metadata ACL
         cont_headers = {'X-Container-Read': 'badtenant:baduser'}
-        resp_meta, _ = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -158,9 +158,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # attempt to write object using non-authorized user
         # update X-Container-Write metadata ACL
         cont_headers = {'X-Container-Write': 'badtenant:baduser'}
-        resp_meta, _ = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without rights
         self.object_client.auth_provider.set_alt_auth_data(
@@ -183,9 +184,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read':
                         tenant_name + ':' + username,
                         'X-Container-Write': ''}
-        resp_meta, _ = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without write rights
         self.object_client.auth_provider.set_alt_auth_data(
@@ -208,9 +210,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read':
                         tenant_name + ':' + username,
                         'X-Container-Write': ''}
-        resp_meta, _ = self.container_client.update_container_metadata(
-            self.container_name, metadata=cont_headers,
-            metadata_prefix='')
+        resp_meta, _ = (
+            self.container_client.create_update_or_delete_container_metadata(
+                self.container_name, create_update_metadata=cont_headers,
+                create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')

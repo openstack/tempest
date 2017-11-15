@@ -66,8 +66,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
         params = {'name': vol_name, 'volume_type': type_name,
                   'size': CONF.volume.volume_size}
-        cls.volume = cls.admin_volume_client.create_volume(
-            **params)['volume']
+        cls.volume = cls.create_volume(**params)
         if with_prefix:
             cls.volume_id_list_with_prefix.append(cls.volume['id'])
         else:
@@ -75,21 +74,6 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
                 cls.volume['id'])
         waiters.wait_for_volume_resource_status(cls.admin_volume_client,
                                                 cls.volume['id'], 'available')
-
-    @classmethod
-    def resource_cleanup(cls):
-        # volumes deletion
-        vid_prefix = getattr(cls, 'volume_id_list_with_prefix', [])
-        for volume_id in vid_prefix:
-            cls.admin_volume_client.delete_volume(volume_id)
-            cls.admin_volume_client.wait_for_resource_deletion(volume_id)
-
-        vid_no_pre = getattr(cls, 'volume_id_list_without_prefix', [])
-        for volume_id in vid_no_pre:
-            cls.admin_volume_client.delete_volume(volume_id)
-            cls.admin_volume_client.wait_for_resource_deletion(volume_id)
-
-        super(VolumeMultiBackendTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):

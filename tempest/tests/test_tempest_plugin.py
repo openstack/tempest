@@ -17,9 +17,16 @@ from tempest.lib.services import clients
 from tempest.test_discover import plugins
 from tempest.tests import base
 from tempest.tests import fake_tempest_plugin as fake_plugin
+from tempest.tests.lib.services import registry_fixture
 
 
 class TestPluginDiscovery(base.TestCase):
+
+    def setUp(self):
+        super(TestPluginDiscovery, self).setUp()
+        # Make sure we leave the registry clean
+        self.useFixture(registry_fixture.RegistryFixture())
+
     def test_load_tests_with_one_plugin(self):
         # we can't mock stevedore since it's a singleton and already executed
         # during test discovery. So basically this test covers the plugin loop

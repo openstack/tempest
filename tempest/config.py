@@ -15,15 +15,12 @@
 
 from __future__ import print_function
 
-import functools
 import os
 import tempfile
 
-import debtcollector.removals
 from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
-import testtools
 
 from tempest.lib import exceptions
 from tempest.lib.services import clients
@@ -197,6 +194,8 @@ ServiceClientsGroup = [
                default=60,
                help='Timeout in seconds to wait for the http request to '
                     'return'),
+    cfg.StrOpt('proxy_url',
+               help='Specify an http proxy to use.')
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -208,8 +207,14 @@ IdentityFeatureGroup = [
                 help='Does the identity service have delegation and '
                      'impersonation enabled'),
     cfg.BoolOpt('api_v2',
-                default=True,
-                help='Is the v2 identity API enabled'),
+                default=False,
+                help='Is the v2 identity API enabled',
+                deprecated_for_removal=True,
+                deprecated_reason='The identity v2.0 API was removed in the '
+                                  'Queens release. Tests that exercise the '
+                                  'v2.0 API will be removed from tempest in '
+                                  'the v22.0.0 release. They are kept only to '
+                                  'test stable branches.'),
     cfg.BoolOpt('api_v2_admin',
                 default=True,
                 help="Is the v2 identity admin API available? This setting "
@@ -234,6 +239,12 @@ IdentityFeatureGroup = [
                 deprecated_reason="This feature flag was introduced to "
                                   "support testing of old OpenStack versions, "
                                   "which are not supported anymore"),
+    cfg.BoolOpt('domain_specific_drivers',
+                default=False,
+                help='Are domain specific drivers enabled? '
+                     'This configuration value should be same as '
+                     '[identity]->domain_specific_drivers_enabled '
+                     'in keystone.conf.'),
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
@@ -833,7 +844,14 @@ VolumeFeaturesGroup = [
                 help="Is the v2 volume API enabled"),
     cfg.BoolOpt('api_v3',
                 default=True,
-                help="Is the v3 volume API enabled")
+                help="Is the v3 volume API enabled"),
+    cfg.BoolOpt('extend_attached_volume',
+                default=False,
+                help='Does the cloud support extending the size of a volume '
+                     'which is currently attached to a server instance? This '
+                     'depends on the 3.42 volume API microversion and the '
+                     '2.51 compute API microversion. Also, not all volume or '
+                     'compute backends support this operation.')
 ]
 
 
@@ -1278,79 +1296,6 @@ class TempestConfigProxy(object):
 CONF = TempestConfigProxy()
 
 
-@debtcollector.removals.remove(
-    message='use testtools.skipUnless instead', removal_version='Queens')
-def skip_unless_config(*args):
-    """Decorator to raise a skip if a config opt doesn't exist or is False
-
-    :param str group: The first arg, the option group to check
-    :param str name: The second arg, the option name to check
-    :param str msg: Optional third arg, the skip msg to use if a skip is raised
-    :raises testtools.TestCaseskipException: If the specified config option
-        doesn't exist or it exists and evaluates to False
-    """
-    def decorator(f):
-        group = args[0]
-        name = args[1]
-
-        @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
-            if not hasattr(CONF, group):
-                msg = "Config group %s doesn't exist" % group
-                raise testtools.TestCase.skipException(msg)
-
-            conf_group = getattr(CONF, group)
-            if not hasattr(conf_group, name):
-                msg = "Config option %s.%s doesn't exist" % (group,
-                                                             name)
-                raise testtools.TestCase.skipException(msg)
-
-            value = getattr(conf_group, name)
-            if not value:
-                if len(args) == 3:
-                    msg = args[2]
-                else:
-                    msg = "Config option %s.%s is false" % (group,
-                                                            name)
-                raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
-        return wrapper
-    return decorator
-
-
-@debtcollector.removals.remove(
-    message='use testtools.skipIf instead', removal_version='Queens')
-def skip_if_config(*args):
-    """Raise a skipException if a config exists and is True
-
-    :param str group: The first arg, the option group to check
-    :param str name: The second arg, the option name to check
-    :param str msg: Optional third arg, the skip msg to use if a skip is raised
-    :raises testtools.TestCase.skipException: If the specified config option
-        exists and evaluates to True
-    """
-    def decorator(f):
-        group = args[0]
-        name = args[1]
-
-        @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
-            if hasattr(CONF, group):
-                conf_group = getattr(CONF, group)
-                if hasattr(conf_group, name):
-                    value = getattr(conf_group, name)
-                    if value:
-                        if len(args) == 3:
-                            msg = args[2]
-                        else:
-                            msg = "Config option %s.%s is false" % (group,
-                                                                    name)
-                        raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
-        return wrapper
-    return decorator
-
-
 def service_client_config(service_client_name=None):
     """Return a dict with the parameters to init service clients
 
@@ -1371,6 +1316,7 @@ def service_client_config(service_client_name=None):
         * `ca_certs`
         * `trace_requests`
         * `http_timeout`
+        * `proxy_url`
 
     The dict returned by this does not fit a few service clients:
 
@@ -1393,7 +1339,8 @@ def service_client_config(service_client_name=None):
             CONF.identity.disable_ssl_certificate_validation,
         'ca_certs': CONF.identity.ca_certificates_file,
         'trace_requests': CONF.debug.trace_requests,
-        'http_timeout': CONF.service_clients.http_timeout
+        'http_timeout': CONF.service_clients.http_timeout,
+        'proxy_url': CONF.service_clients.proxy_url,
     }
 
     if service_client_name is None:
@@ -1447,7 +1394,7 @@ def _register_tempest_service_clients():
         module = service_clients[service_client]
         configs = service_client.split('.')[0]
         service_client_data = dict(
-            name=service_client.replace('.', '_'),
+            name=service_client.replace('.', '_').replace('-', '_'),
             service_version=service_client,
             module_path=module.__name__,
             client_names=module.__all__,

@@ -12,13 +12,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import functools
-
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -78,9 +76,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet:
             network_v6 = self._create_network()
 
-        sub4 = self._create_subnet(network=network,
-                                   namestart='sub4',
-                                   ip_version=4)
+        sub4 = self.create_subnet(network=network,
+                                  namestart='sub4',
+                                  ip_version=4)
 
         router = self._get_router()
         self.routers_client.add_router_interface(router['id'],
@@ -93,11 +91,11 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         self.subnets_v6 = []
         for _ in range(n_subnets6):
             net6 = network_v6 if dualnet else network
-            sub6 = self._create_subnet(network=net6,
-                                       namestart='sub6',
-                                       ip_version=6,
-                                       ipv6_ra_mode=address6_mode,
-                                       ipv6_address_mode=address6_mode)
+            sub6 = self.create_subnet(network=net6,
+                                      namestart='sub6',
+                                      ip_version=6,
+                                      ipv6_ra_mode=address6_mode,
+                                      ipv6_address_mode=address6_mode)
 
             self.routers_client.add_router_interface(router['id'],
                                                      subnet_id=sub6['id'])
@@ -183,17 +181,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         for i in range(n_subnets6):
             # v6 should be configured since the image supports it
             # It can take time for ipv6 automatic address to get assigned
-            srv1_v6_addr_assigned = functools.partial(
-                guest_has_address, sshv4_1, ips_from_api_1['6'][i])
+            self.assertTrue(test_utils.call_until_true(guest_has_address,
+                            CONF.validation.ping_timeout, 1,
+                            sshv4_1, ips_from_api_1['6'][i]))
 
-            srv2_v6_addr_assigned = functools.partial(
-                guest_has_address, sshv4_2, ips_from_api_2['6'][i])
-
-            self.assertTrue(test_utils.call_until_true(srv1_v6_addr_assigned,
-                            CONF.validation.ping_timeout, 1))
-
-            self.assertTrue(test_utils.call_until_true(srv2_v6_addr_assigned,
-                            CONF.validation.ping_timeout, 1))
+            self.assertTrue(test_utils.call_until_true(guest_has_address,
+                            CONF.validation.ping_timeout, 1,
+                            sshv4_2, ips_from_api_2['6'][i]))
 
         self.check_remote_connectivity(sshv4_1, ips_from_api_2['4'])
         self.check_remote_connectivity(sshv4_2, ips_from_api_1['4'])
@@ -210,49 +204,49 @@ class TestGettingAddress(manager.NetworkScenarioTest):
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('2c92df61-29f0-4eaa-bee3-7c65bef62a43')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac')
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('d7e1f858-187c-45a6-89c9-bdafde619a9f')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless')
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('7ab23f41-833b-4a16-a7c9-5b42fe6d4123')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_multi_prefix_dhcpv6_stateless(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('dec222b1-180c-4098-b8c5-cc1b8342d611')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('b6399d76-4438-4658-bcf5-0d6c8584fde2')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_dualnet_slaac_from_os(self):
         self._prepare_and_test(address6_mode='slaac', dualnet=True)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('76f26acd-9688-42b4-bc3e-cd134c4cb09e')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_dualnet_dhcp6_stateless_from_os(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', dualnet=True)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('cf1c4425-766b-45b8-be35-e2959728eb00')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_dualnet_multi_prefix_dhcpv6_stateless(self):
         self._prepare_and_test(address6_mode='dhcpv6-stateless', n_subnets6=2,
                                dualnet=True)
 
     @decorators.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_dualnet_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2,
                                dualnet=True)

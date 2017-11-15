@@ -120,3 +120,59 @@ def assert_version_header_matches_request(api_microversion_header_name,
                                     api_microversion,
                                     response_header))
         raise exceptions.InvalidHTTPResponseHeader(msg)
+
+
+def compare_version_header_to_response(api_microversion_header_name,
+                                       api_microversion,
+                                       response_header,
+                                       operation='eq'):
+    """Compares API microversion in response header to ``api_microversion``.
+
+    Compare the ``api_microversion`` value in response header if microversion
+    header is present in response, otherwise return false.
+
+    To make this function work for APIs which do not return microversion
+    header in response (example compute v2.0), this function does *not* raise
+    InvalidHTTPResponseHeader.
+
+    :param api_microversion_header_name: Microversion header name. Example:
+        'Openstack-Api-Version'.
+    :param api_microversion: Microversion number. Example:
+
+        * '2.10' for the old-style header name, 'X-OpenStack-Nova-API-Version'
+        * 'Compute 2.10' for the new-style header name, 'Openstack-Api-Version'
+
+    :param response_header: Response header where microversion is
+        expected to be present.
+    :param operation: The boolean operation to use to compare the
+        ``api_microversion`` to the microversion in ``response_header``.
+        Can be 'lt', 'eq', 'gt', 'le', 'ne', 'ge'. Default is 'eq'. The
+        operation type should be based on the order of the arguments:
+        ``api_microversion`` <operation> ``response_header`` microversion.
+    :returns: True if the comparison is logically true, else False if the
+        comparison is logically false or if ``api_microversion_header_name`` is
+        missing in the ``response_header``.
+    :raises InvalidParam: If the operation is not lt, eq, gt, le, ne or ge.
+    """
+    api_microversion_header_name = api_microversion_header_name.lower()
+    if api_microversion_header_name not in response_header:
+        return False
+
+    op = getattr(api_version_request.APIVersionRequest,
+                 '__%s__' % operation, None)
+
+    if op is None:
+        msg = ("Operation %s is invalid. Valid options include: lt, eq, gt, "
+               "le, ne, ge." % operation)
+        raise exceptions.InvalidParam(invalid_param=msg)
+
+    # Remove "volume" from "volume <microversion>", for example, so that the
+    # microversion can be converted to `APIVersionRequest`.
+    api_version = api_microversion.split(' ')[-1]
+    resp_version = response_header[api_microversion_header_name].split(' ')[-1]
+    if not op(
+        api_version_request.APIVersionRequest(api_version),
+        api_version_request.APIVersionRequest(resp_version)):
+        return False
+
+    return True

@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Remove deprecated APIs (``show_pools`` and ``show_backend_capabilities``)
+    from volume v2 volumes_client, and the deprecated APIs are re-realized in
+    volume v2 scheduler_stats_client (``list_pools``) and capabilities_client
+    (``show_backend_capabilities``) accordingly.

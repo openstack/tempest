@@ -1,0 +1,23 @@
+- job:
+    name: devstack-tempest
+    parent: devstack
+    description: Base Tempest job.
+    required-projects:
+      - openstack/tempest
+    timeout: 7200
+    roles:
+      - zuul: openstack-dev/devstack
+    vars:
+      devstack_services:
+        tempest: True
+    run: playbooks/devstack-tempest.yaml
+
+- project:
+    name: openstack/tempest
+    check:
+      jobs:
+        - devstack-tempest:
+            files:
+              - ^playbooks/
+              - ^roles/
+              - ^.zuul.yaml$

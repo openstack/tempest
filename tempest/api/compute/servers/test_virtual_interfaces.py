@@ -17,10 +17,10 @@ import netaddr
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 CONF = config.CONF
 
@@ -44,7 +44,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @decorators.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
-    @test.services('network')
+    @utils.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
@@ -56,11 +56,11 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
                 self.client.list_virtual_interfaces(self.server['id'])
         else:
             output = self.client.list_virtual_interfaces(self.server['id'])
-            virt_ifaces = output
-            self.assertNotEmpty(virt_ifaces['virtual_interfaces'],
+            virt_ifaces = output['virtual_interfaces']
+            self.assertNotEmpty(virt_ifaces,
                                 'Expected virtual interfaces, got 0 '
                                 'interfaces.')
-            for virt_iface in virt_ifaces['virtual_interfaces']:
+            for virt_iface in virt_ifaces:
                 mac_address = virt_iface['mac_address']
                 self.assertTrue(netaddr.valid_mac(mac_address),
                                 "Invalid mac address detected. mac address: %s"

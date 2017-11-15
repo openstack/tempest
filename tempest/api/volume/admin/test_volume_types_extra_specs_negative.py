@@ -61,7 +61,7 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('a77dfda2-9100-448e-9076-ed1711f4bdfc')
     def test_update_multiple_extra_spec(self):
         # Should not update volume type extra specs with multiple specs as
-            # body.
+        # body.
         extra_spec = {"spec1": "val2", "spec2": "val1"}
         self.assertRaises(
             lib_exc.BadRequest,
@@ -73,7 +73,7 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('49d5472c-a53d-4eab-a4d3-450c4db1c545')
     def test_create_nonexistent_type_id(self):
         # Should not create volume type extra spec for nonexistent volume
-            # type id.
+        # type id.
         extra_specs = {"spec2": "val1"}
         self.assertRaises(
             lib_exc.NotFound,
@@ -128,10 +128,10 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c881797d-12ff-4f1a-b09d-9f6212159753')
-    def test_get_nonexistent_extra_spec_id(self):
+    def test_get_nonexistent_extra_spec_name(self):
         # Should not get volume type extra spec for nonexistent extra spec
-            # id.
+        # name.
         self.assertRaises(
             lib_exc.NotFound,
             self.admin_volume_types_client.show_volume_type_extra_specs,
-            self.volume_type['id'], data_utils.rand_uuid())
+            self.volume_type['id'], "nonexistent_extra_spec_name")

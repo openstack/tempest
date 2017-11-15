@@ -14,6 +14,51 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+"""
+Verifies user's current tempest configuration.
+
+This command is used for updating or user's tempest configuration file based on
+api queries or replacing all option in a tempest configuration file for a full
+list of extensions.
+
+General Options
+===============
+
+-u, --update
+------------
+Update the config file with results from api queries. This assumes whatever is
+set in the config file is incorrect.
+
+-o FILE, --output=FILE
+----------------------
+Output file to write an updated config file to. This has to be a separate file
+from the original one. If one isn't specified with -u the values which should
+be changed will be printed to STDOUT.
+
+-r, --replace-ext
+-----------------
+If specified the all option will be replaced with a full list of extensions.
+
+Environment Variables
+=====================
+
+The command is workspace aware - it uses tempest config file tempest.conf
+located in ./etc/ directory.
+The path to the config file and it's name can be changed through environment
+variables.
+
+TEMPEST_CONFIG_DIR
+------------------
+Path to a directory where tempest configuration file is stored. If the variable
+is set, the default path (./etc/) is overridden.
+
+TEMPEST_CONFIG
+--------------
+Name of a tempest configuration file. If the variable is specified, the default
+name (tempest.conf) is overridden.
+
+"""
+
 import argparse
 import os
 import re
@@ -30,6 +75,7 @@ from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest import config
 import tempest.lib.common.http
+from tempest.lib import exceptions as lib_exc
 
 
 CONF = config.CONF
@@ -39,8 +85,8 @@ LOG = logging.getLogger(__name__)
 
 
 def _get_config_file():
-    default_config_dir = os.path.join(os.path.abspath(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "etc")
+    config_dir = os.getcwd()
+    default_config_dir = os.path.join(config_dir, "etc")
     default_config_file = "tempest.conf"
 
     conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
@@ -69,7 +115,25 @@ def contains_version(prefix, versions):
 
 def verify_glance_api_versions(os, update):
     # Check glance api versions
-    _, versions = os.image_client.get_versions()
+    # Since we want to verify that the configuration is correct, we cannot
+    # rely on a specific version of the API being available.
+    try:
+        _, versions = os.image_v1.ImagesClient().get_versions()
+    except lib_exc.NotFound:
+        # If not found, we use v2. The assumption is that either v1 or v2
+        # are available, since glance is marked as available in the catalog.
+        # If not, glance should be disabled in Tempest conf.
+        try:
+            versions = os.image_v2.VersionsClient().list_versions()['versions']
+            versions = [x['id'] for x in versions]
+        except lib_exc.NotFound:
+            msg = ('Glance is available in the catalog, but no known version, '
+                   '(v1.x or v2.x) of Glance could be found, so Glance should '
+                   'be configured as not available')
+            LOG.warn(msg)
+            print_and_or_update('glance', 'service-available', False, update)
+            return
+
     if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
         print_and_or_update('api_v1', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v1, update)
@@ -92,10 +156,15 @@ def _get_unversioned_endpoint(base_url):
 
 
 def _get_api_versions(os, service):
+    # Clients are used to obtain the base_url. Each client applies the
+    # appropriate filters to the catalog to extract a base_url which
+    # matches the configured region and endpoint_type.
+    # The base URL is used to obtain the list of versions available.
     client_dict = {
-        'nova': os.servers_client,
-        'keystone': os.identity_client,
-        'cinder': os.volumes_client_latest,
+        'nova': os.compute.ServersClient(),
+        'keystone': os.identity_v3.IdentityClient(
+            endpoint_type=CONF.identity.v3_endpoint_type),
+        'cinder': os.volume_v3.VolumesClient(),
     }
     if service != 'keystone' and service != 'cinder':
         # Since keystone and cinder may be listening on a path,
@@ -127,10 +196,6 @@ def _get_api_versions(os, service):
 def verify_keystone_api_versions(os, update):
     # Check keystone api versions
     versions = _get_api_versions(os, 'keystone')
-    if (CONF.identity_feature_enabled.api_v2 !=
-            contains_version('v2.', versions)):
-        print_and_or_update('api_v2', 'identity-feature-enabled',
-                            not CONF.identity_feature_enabled.api_v2, update)
     if (CONF.identity_feature_enabled.api_v3 !=
             contains_version('v3.', versions)):
         print_and_or_update('api_v3', 'identity-feature-enabled',
@@ -167,13 +232,13 @@ def verify_api_versions(os, service, update):
 
 def get_extension_client(os, service):
     extensions_client = {
-        'nova': os.extensions_client,
-        'neutron': os.network_extensions_client,
-        'swift': os.capabilities_client,
+        'nova': os.compute.ExtensionsClient(),
+        'neutron': os.network.ExtensionsClient(),
+        'swift': os.object_storage.CapabilitiesClient(),
         # NOTE: Cinder v3 API is current and v2 and v1 are deprecated.
         # V3 extension API is the same as v2, so we reuse the v2 client
         # for v3 API also.
-        'cinder': os.volumes_v2_extension_client,
+        'cinder': os.volume_v2.ExtensionsClient(),
     }
 
     if service not in extensions_client:
@@ -344,8 +409,8 @@ def _parser_add_args(parser):
                         help="Output file to write an updated config file to. "
                              "This has to be a separate file from the "
                              "original config file. If one isn't specified "
-                             "with -u the new config file will be printed to "
-                             "STDOUT")
+                             "with -u the values which should be changed "
+                             "will be printed to STDOUT")
     parser.add_argument('-r', '--replace-ext', action='store_true',
                         help="If specified the all option will be replaced "
                              "with a full list of extensions")

@@ -19,6 +19,7 @@ from oslo_log import log as logging
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest.common import identity
 from tempest.common import tempest_fixtures as fixtures
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -92,9 +93,10 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
         # Verify a new project's default quotas.
         project_name = data_utils.rand_name('quota_class_tenant')
         description = data_utils.rand_name('desc_')
-        project_id = self.identity_utils.create_project(
+        project_id = identity.identity_utils(self.os_admin).create_project(
             name=project_name, description=description)['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
         default_quotas = self.admin_quotas_client.show_default_quota_set(
             project_id)['quota_set']
         self.assertThat(default_quotas.items(),

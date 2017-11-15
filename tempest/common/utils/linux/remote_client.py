@@ -70,7 +70,7 @@ class RemoteClient(remote_client.RemoteClient):
         if selected:
             return "\n".join(selected)
         else:
-            msg = "'TYPE' column is requred but the output doesn't have it: "
+            msg = "'TYPE' column is required but the output doesn't have it: "
             raise tempest.lib.exceptions.TempestException(msg + output)
 
     def get_boot_time(self):

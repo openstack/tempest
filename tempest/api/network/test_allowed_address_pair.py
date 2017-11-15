@@ -13,13 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 import six
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -44,7 +43,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(AllowedAddressPairTestJSON, cls).skip_checks()
-        if not test.is_extension_enabled('allowed-address-pairs', 'network'):
+        if not utils.is_extension_enabled('allowed-address-pairs', 'network'):
             msg = "Allowed Address Pairs extension not enabled."
             raise cls.skipException(msg)
 
@@ -103,8 +102,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('4d6d178f-34f6-4bff-a01c-0a2f8fe909e4')
     def test_update_port_with_cidr_address_pair(self):
         # Update allowed address pair with cidr
-        cidr = str(netaddr.IPNetwork(CONF.network.project_network_cidr))
-        self._update_port_with_address(cidr)
+        self._update_port_with_address(str(self.cidr))
 
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
     def test_update_port_with_multiple_ip_mac_address_pair(self):

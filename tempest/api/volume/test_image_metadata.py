@@ -16,9 +16,9 @@
 from testtools import matchers
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -39,7 +39,7 @@ class VolumesImageMetadata(base.BaseVolumeTest):
         cls.volume = cls.create_volume(imageRef=CONF.compute.image_ref)
 
     @decorators.idempotent_id('03efff0b-5c75-4822-8f10-8789ac15b13e')
-    @test.services('image')
+    @utils.services('image')
     def test_update_show_delete_image_metadata(self):
         # Update image metadata
         image_metadata = {'image_id': '5137a025-3c5f-43c1-bc64-5f41270040a5',

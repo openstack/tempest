@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common.utils.linux import remote_client
@@ -42,35 +40,37 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.set_validation_resources()
         super(AttachVolumeTestJSON, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
 
     def _create_server(self):
         # Start a server and wait for it to become ready
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
         server = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             wait_until='ACTIVE',
             adminPass=self.image_ssh_password)
         self.addCleanup(self.delete_server, server['id'])
         # Record addresses so that we can ssh later
         server['addresses'] = self.servers_client.list_addresses(
             server['id'])['addresses']
-        return server
+        return server, validation_resources
 
     @decorators.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
-        server = self._create_server()
+        server, validation_resources = self._create_server()
 
         # NOTE(andreaf) Create one remote client used throughout the test.
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.image_ssh_user,
                 self.image_ssh_password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=server,
                 servers_client=self.servers_client)
             # NOTE(andreaf) We need to ensure the ssh key has been
@@ -113,7 +113,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
         # List volume attachment of the server
-        server = self._create_server()
+        server, _ = self._create_server()
         volume_1st = self.create_volume()
         attachment_1st = self.attach_volume(server, volume_1st,
                                             device=('/dev/%s' % self.device))
@@ -143,6 +143,10 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(server['id'], body['serverId'])
             self.assertEqual(attachment['volumeId'], body['volumeId'])
             self.assertEqual(attachment['id'], body['id'])
+            self.servers_client.detach_volume(server['id'],
+                                              attachment['volumeId'])
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, attachment['volumeId'], 'available')
 
 
 class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
@@ -155,15 +159,21 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
     min_microversion = '2.20'
     max_microversion = 'latest'
 
-    def _count_volumes(self, server):
+    @classmethod
+    def skip_checks(cls):
+        super(AttachVolumeShelveTestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.shelve:
+            raise cls.skipException('Shelve is not available.')
+
+    def _count_volumes(self, server, validation_resources):
         # Count number of volumes on an instance
         volumes = 0
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.image_ssh_user,
                 self.image_ssh_password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=server,
                 servers_client=self.servers_client)
 
@@ -171,7 +181,7 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
             volumes = int(linux_client.exec_command(command).strip())
         return volumes
 
-    def _shelve_server(self, server):
+    def _shelve_server(self, server, validation_resources):
         # NOTE(andreaf) If we are going to shelve a server, we should
         # check first whether the server is ssh-able. Otherwise we
         # won't be able to distinguish failures introduced by shelve
@@ -180,10 +190,10 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         # avoid breaking the VM
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server),
+                self.get_server_ip(server, validation_resources),
                 self.image_ssh_user,
                 self.image_ssh_password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=server,
                 servers_client=self.servers_client)
             linux_client.validate_authentication()
@@ -191,32 +201,34 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         # If validation went ok, or it was skipped, shelve the server
         compute.shelve_server(self.servers_client, server['id'])
 
-    def _unshelve_server_and_check_volumes(self, server, number_of_volumes):
+    def _unshelve_server_and_check_volumes(self, server,
+                                           validation_resources,
+                                           number_of_volumes):
         # Unshelve the instance and check that there are expected volumes
         self.servers_client.unshelve_server(server['id'])
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'],
                                        'ACTIVE')
         if CONF.validation.run_validation:
-            counted_volumes = self._count_volumes(server)
+            counted_volumes = self._count_volumes(
+                server, validation_resources)
             self.assertEqual(number_of_volumes, counted_volumes)
 
     @decorators.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     def test_attach_volume_shelved_or_offload_server(self):
         # Create server, count number of volumes on it, shelve
         # server and attach pre-created volume to shelved server
-        server = self._create_server()
+        server, validation_resources = self._create_server()
         volume = self.create_volume()
-        num_vol = self._count_volumes(server)
-        self._shelve_server(server)
+        num_vol = self._count_volumes(server, validation_resources)
+        self._shelve_server(server, validation_resources)
         attachment = self.attach_volume(server, volume,
                                         device=('/dev/%s' % self.device),
                                         check_reserved=True)
 
         # Unshelve the instance and check that attached volume exists
-        self._unshelve_server_and_check_volumes(server, num_vol + 1)
+        self._unshelve_server_and_check_volumes(
+            server, validation_resources, num_vol + 1)
 
         # Get volume attachment of the server
         volume_attachment = self.servers_client.show_volume_attachment(
@@ -229,15 +241,13 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
         self.assertIsNotNone(volume_attachment['device'])
 
     @decorators.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
-    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
-                          'Shelve is not available.')
     def test_detach_volume_shelved_or_offload_server(self):
         # Count number of volumes on instance, shelve
         # server and attach pre-created volume to shelved server
-        server = self._create_server()
+        server, validation_resources = self._create_server()
         volume = self.create_volume()
-        num_vol = self._count_volumes(server)
-        self._shelve_server(server)
+        num_vol = self._count_volumes(server, validation_resources)
+        self._shelve_server(server, validation_resources)
 
         # Attach and then detach the volume
         self.attach_volume(server, volume, device=('/dev/%s' % self.device),
@@ -248,4 +258,5 @@ class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
 
         # Unshelve the instance and check that we have the expected number of
         # volume(s)
-        self._unshelve_server_and_check_volumes(server, num_vol)
+        self._unshelve_server_and_check_volumes(
+            server, validation_resources, num_vol)

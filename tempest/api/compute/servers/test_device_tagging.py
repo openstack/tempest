@@ -17,13 +17,13 @@ import json
 from oslo_log import log as logging
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 
 CONF = config.CONF
@@ -66,11 +66,6 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                                   dhcp=True)
         super(DeviceTaggingTest, cls).setup_credentials()
 
-    @classmethod
-    def resource_setup(cls):
-        cls.set_validation_resources()
-        super(DeviceTaggingTest, cls).resource_setup()
-
     def verify_device_metadata(self, md_json):
         md_dict = json.loads(md_json)
         for d in md_dict['devices']:
@@ -94,7 +89,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
                                                       'other']))
 
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
-    @test.services('network', 'volume', 'image')
+    @utils.services('network', 'volume', 'image')
     def test_device_tagging(self):
         # Create volumes
         # The create_volume methods waits for the volumes to be available and
@@ -139,9 +134,12 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         # Create server
         admin_pass = data_utils.rand_password()
         config_drive_enabled = CONF.compute_feature_enabled.config_drive
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
 
         server = self.create_test_server(
             validatable=True,
+            validation_resources=validation_resources,
             config_drive=config_drive_enabled,
             adminPass=admin_pass,
             name=data_utils.rand_name('device-tagging-server'),
@@ -208,10 +206,10 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.addCleanup(self.delete_server, server['id'])
 
         self.ssh_client = remote_client.RemoteClient(
-            self.get_server_ip(server),
+            self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
             admin_pass,
-            self.validation_resources['keypair']['private_key'],
+            validation_resources['keypair']['private_key'],
             server=server,
             servers_client=self.servers_client)
 

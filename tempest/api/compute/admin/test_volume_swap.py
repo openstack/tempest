@@ -13,11 +13,11 @@
 import time
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -80,7 +80,7 @@ class TestVolumeSwap(base.BaseV2ComputeAdminTest):
                 raise lib_exc.TimeoutException(message)
 
     @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
-    @test.services('volume')
+    @utils.services('volume')
     def test_volume_swap(self):
         # Create two volumes.
         # NOTE(gmann): Volumes are created before server creation so that

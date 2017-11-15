@@ -16,10 +16,11 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import identity
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -41,23 +42,10 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.addCleanup(self._cleanup_router, router)
         return router
 
-    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
-        interface = self.routers_client.add_router_interface(
-            router_id, subnet_id=subnet_id)
-        self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        router_id, subnet_id)
-        self.assertEqual(subnet_id, interface['subnet_id'])
-        return interface
-
-    def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
-        body = self.routers_client.remove_router_interface(router_id,
-                                                           subnet_id=subnet_id)
-        self.assertEqual(subnet_id, body['subnet_id'])
-
     @classmethod
     def skip_checks(cls):
         super(RoutersAdminTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
@@ -66,10 +54,11 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         # Test creating router from admin user setting project_id.
         project = data_utils.rand_name('test_tenant_')
         description = data_utils.rand_name('desc_')
-        project = self.identity_utils.create_project(name=project,
-                                                     description=description)
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project, description=description)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
 
         name = data_utils.rand_name('router-')
         create_body = self.admin_routers_client.create_router(
@@ -79,7 +68,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.assertEqual(project_id, create_body['router']['tenant_id'])
 
     @decorators.idempotent_id('847257cc-6afd-4154-b8fb-af49f5670ce8')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_create_router_with_default_snat_value(self):
@@ -91,7 +80,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
                            'enable_snat': True})
 
     @decorators.idempotent_id('ea74068d-09e9-4fd7-8995-9b6a1ace920f')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_create_router_with_snat_explicit(self):
@@ -153,7 +142,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self._verify_gateway_port(router['id'])
 
     @decorators.idempotent_id('b386c111-3b21-466d-880c-5e72b01e1a33')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_set_gateway_with_snat_explicit(self):
@@ -170,7 +159,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self._verify_gateway_port(router['id'])
 
     @decorators.idempotent_id('96536bc7-8262-4fb2-9967-5c46940fa279')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_set_gateway_without_snat(self):
@@ -202,7 +191,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.assertFalse(list_body['ports'])
 
     @decorators.idempotent_id('f2faf994-97f4-410b-a831-9bc977b64374')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_reset_gateway_without_snat(self):

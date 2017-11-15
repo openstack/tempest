@@ -85,9 +85,7 @@ class VolumeRetypeWithMigrationTest(base.BaseVolumeAdminTest):
         volume_source = self.admin_volume_client.show_volume(
             self.src_vol['id'])['volume']
 
-        # TODO(erlon): change this to volumes_client client after Bug
-        # #1657806 is fixed
-        self.admin_volume_client.retype_volume(
+        self.volumes_client.retype_volume(
             self.src_vol['id'],
             new_type=self.dst_vol_type['name'],
             migration_policy='on-demand')

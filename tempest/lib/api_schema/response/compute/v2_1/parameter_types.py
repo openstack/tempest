@@ -65,7 +65,7 @@ addresses = {
             'items': {
                 'type': 'object',
                 'properties': {
-                    'version': {'type': 'integer'},
+                    'version': {'enum': [4, 6]},
                     'addr': {
                         'type': 'string',
                         'oneOf': [

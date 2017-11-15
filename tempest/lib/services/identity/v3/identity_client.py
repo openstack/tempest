@@ -57,3 +57,10 @@ class IdentityClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def list_auth_domains(self):
+        """Get available domain scopes."""
+        resp, body = self.get("auth/domains")
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)

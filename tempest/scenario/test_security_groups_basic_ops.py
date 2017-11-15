@@ -15,12 +15,13 @@
 from oslo_log import log
 import testtools
 
+from tempest.common import compute
+from tempest.common import utils
 from tempest.common.utils import net_info
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -141,7 +142,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             msg = ('Either project_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             raise cls.skipException(msg)
-        if not test.is_extension_enabled('security-group', 'network'):
+        if not utils.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
         if CONF.network.shared_physical_network:
@@ -162,7 +163,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).resource_setup()
 
         cls.multi_node = CONF.compute.min_compute_nodes > 1 and \
-            test.is_scheduler_filter_enabled("DifferentHostFilter")
+            compute.is_scheduler_filter_enabled("DifferentHostFilter")
         if cls.multi_node:
             LOG.info("Working in Multi Node mode")
         else:
@@ -470,7 +471,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                     servers=[tenant.access_point], client=client)
 
     @decorators.idempotent_id('e79f879e-debb-440c-a7e4-efeda05b6848')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_cross_tenant_traffic(self):
         if not self.credentials_provider.is_multi_tenant():
             raise self.skipException("No secondary tenant defined")
@@ -490,7 +491,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @decorators.idempotent_id('63163892-bbf6-4249-aa12-d5ea1f8f421b')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_in_tenant_traffic(self):
         try:
             self._create_tenant_servers(self.primary_tenant, num=1)
@@ -504,7 +505,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('f4d556d7-1526-42ad-bafb-6bebf48568f6')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_port_update_new_security_group(self):
         """Verifies the traffic after updating the vm port
 
@@ -558,7 +559,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('d2f77418-fcc4-439d-b935-72eca704e293')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_multiple_security_groups(self):
         """Verify multiple security groups and checks that rules
 
@@ -590,9 +591,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                    should_connect=True)
 
     @decorators.attr(type='slow')
-    @test.requires_ext(service='network', extension='port-security')
+    @utils.requires_ext(service='network', extension='port-security')
     @decorators.idempotent_id('7c811dcc-263b-49a3-92d2-1b4d8405f50c')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_port_security_disable_security_group(self):
         """Verify the default security group rules is disabled."""
         new_tenant = self.primary_tenant
@@ -630,7 +631,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             raise
 
     @decorators.attr(type='slow')
-    @test.requires_ext(service='network', extension='port-security')
+    @utils.requires_ext(service='network', extension='port-security')
     @decorators.idempotent_id('13ccf253-e5ad-424b-9c4a-97b88a026699')
     # TODO(mriedem): We shouldn't actually need to check this since neutron
     # disables the port_security extension by default, but the problem is nova
@@ -640,7 +641,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(
         CONF.network_feature_enabled.port_security,
         'Port security must be enabled.')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_boot_into_disabled_port_security_network_without_secgroup(self):
         tenant = self.primary_tenant
         self._create_tenant_network(tenant, port_security_enabled=False)

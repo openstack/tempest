@@ -15,11 +15,11 @@
 
 import testtools
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 
@@ -59,7 +59,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     def _setup_server(self, keypair):
         security_groups = []
-        if test.is_extension_enabled('security-group', 'network'):
+        if utils.is_extension_enabled('security-group', 'network'):
             security_group = self._create_security_group()
             security_groups = [{'name': security_group['name']}]
         network, _, _ = self.create_networks()
@@ -83,7 +83,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                     should_connect=True):
         username = CONF.validation.image_ssh_user
         private_key = keypair['private_key']
-        self._check_tenant_network_connectivity(
+        self.check_tenant_network_connectivity(
             server, username, private_key,
             should_connect=should_connect,
             servers_for_debug=[server])
@@ -107,7 +107,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -122,7 +122,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             server, keypair, floating_ip)
 
     @decorators.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -133,7 +133,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @decorators.idempotent_id('88a529c2-1daa-4c85-9aec-d541ba3eb699')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -148,7 +148,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_pause_unpause(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -166,7 +166,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_suspend_resume(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -184,7 +184,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_resize(self):
         resize_flavor = CONF.compute.flavor_ref_alt
         keypair = self.create_keypair()
@@ -205,7 +205,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                           'Less than 2 compute nodes, skipping multinode '
                           'tests.')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_cold_migration(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
@@ -231,7 +231,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                           'Less than 2 compute nodes, skipping multinode '
                           'tests.')
     @decorators.attr(type='slow')
-    @test.services('compute', 'network')
+    @utils.services('compute', 'network')
     def test_server_connectivity_cold_migration_revert(self):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)

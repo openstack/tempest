@@ -18,12 +18,12 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -34,8 +34,7 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
     def resource_setup(cls):
         super(BaseNetworkTestResources, cls).resource_setup()
         cls.network = cls.create_network()
-        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network,
-                                                               cls._ip_version)
+        cls.subnet = cls._create_subnet_with_last_subnet_block(cls.network)
         cls._subnet_data = {6: {'gateway':
                                 str(cls._get_gateway_from_tempest_conf(6)),
                                 'allocation_pools':
@@ -64,20 +63,13 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
                                 'new_dns_nameservers': ['7.8.8.8', '7.8.4.4']}}
 
     @classmethod
-    def _create_subnet_with_last_subnet_block(cls, network, ip_version):
+    def _create_subnet_with_last_subnet_block(cls, network):
         # Derive last subnet CIDR block from project CIDR and
         # create the subnet with that derived CIDR
-        if ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            mask_bits = CONF.network.project_network_mask_bits
-        elif ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            mask_bits = CONF.network.project_network_v6_mask_bits
-
-        subnet_cidr = list(cidr.subnet(mask_bits))[-1]
+        subnet_cidr = list(cls.cidr.subnet(cls.mask_bits))[-1]
         gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
         return cls.create_subnet(network, gateway=gateway_ip,
-                                 cidr=subnet_cidr, mask_bits=mask_bits)
+                                 cidr=subnet_cidr, mask_bits=cls.mask_bits)
 
     @classmethod
     def _get_gateway_from_tempest_conf(cls, ip_version):
@@ -209,7 +201,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_show_network_fields(self):
         # Verify specific fields of a network
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
+        if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
         body = self.networks_client.show_network(self.network['id'],
                                                  fields=fields)
@@ -233,7 +225,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         fields = ['id', 'name']
-        if test.is_extension_enabled('net-mtu', 'network'):
+        if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
         body = self.networks_client.list_networks(fields=fields)
         networks = body['networks']
@@ -370,30 +362,44 @@ class NetworksTest(BaseNetworkTestResources):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('af774677-42a9-4e4b-bb58-16fe6a5bc1ec')
-    @test.requires_ext(extension='external-net', service='network')
+    @utils.requires_ext(extension='external-net', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_external_network_visibility(self):
-        """Verifies user can see external networks but not subnets."""
+        public_network_id = CONF.network.public_network_id
+
+        # find external network matching public_network_id
         body = self.networks_client.list_networks(**{'router:external': True})
-        networks = [network['id'] for network in body['networks']]
-        self.assertNotEmpty(networks, "No external networks found")
+        external_network = next((network for network in body['networks']
+                                 if network['id'] == public_network_id), None)
+        self.assertIsNotNone(external_network, "Public network %s not found "
+                                               "in external network list"
+                             % public_network_id)
 
         nonexternal = [net for net in body['networks'] if
                        not net['router:external']]
         self.assertEmpty(nonexternal, "Found non-external networks"
                                       " in filtered list (%s)." % nonexternal)
-        self.assertIn(CONF.network.public_network_id, networks)
+
         # only check the public network ID because the other networks may
         # belong to other tests and their state may have changed during this
         # test
-        body = self.subnets_client.list_subnets(
-            network_id=CONF.network.public_network_id)
-        self.assertEmpty(body['subnets'], "Public subnets visible")
+        body = self.subnets_client.list_subnets(network_id=public_network_id)
+
+        # check subnet visibility of external_network
+        if external_network['shared']:
+            self.assertNotEmpty(body['subnets'], "Subnets should be visible "
+                                                 "for shared public network %s"
+                                % public_network_id)
+        else:
+            self.assertEmpty(body['subnets'], "Subnets should not be visible "
+                                              "for non-shared public "
+                                              "network %s"
+                             % public_network_id)
 
     @decorators.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
-    @test.requires_ext(extension="standard-attr-description",
-                       service="network")
+    @utils.requires_ext(extension="standard-attr-description",
+                        service="network")
     def test_create_update_network_description(self):
         body = self.create_network(description='d1')
         self.assertEqual('d1', body['description'])
@@ -473,14 +479,8 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
     def test_bulk_create_delete_subnet(self):
         networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
-        if self._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            mask_bits = CONF.network.project_network_mask_bits
-        else:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            mask_bits = CONF.network.project_network_v6_mask_bits
-
-        cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
+        cidrs = [subnet_cidr
+                 for subnet_cidr in self.cidr.subnet(self.mask_bits)]
 
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []

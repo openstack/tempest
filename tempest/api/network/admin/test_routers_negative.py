@@ -16,10 +16,10 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -29,13 +29,13 @@ class RoutersAdminNegativeTest(base.BaseAdminNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(RoutersAdminNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7101cc02-058a-11e7-93e1-fa163e4fa634')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_router_set_gateway_used_ip_returns_409(self):

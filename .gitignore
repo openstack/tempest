@@ -18,6 +18,7 @@ include/swift_objects/swift_large
 dist
 build
 .testrepository
+.stestr
 .idea
 .project
 .pydevproject

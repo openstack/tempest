@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds a new cli option to tempest run, --load-list <list-file>
+    to specify target tests to run from a list-file. The list-file
+    supports the output format of the tempest run --list-tests
+    command.

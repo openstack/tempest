@@ -12,11 +12,11 @@
 
 from oslo_log import log as logging
 
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -36,11 +36,6 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     """
 
     credentials = ['primary', 'admin']
-
-    @classmethod
-    def setup_clients(cls):
-        super(TestVolumeMigrateRetypeAttached, cls).setup_clients()
-        cls.admin_volumes_client = cls.os_admin.volumes_v2_client
 
     @classmethod
     def skip_checks(cls):
@@ -82,7 +77,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
 
     def _volume_retype_with_migration(self, volume_id, new_volume_type):
         migration_policy = 'on-demand'
-        self.admin_volumes_client.retype_volume(
+        self.volumes_client.retype_volume(
             volume_id, new_type=new_volume_type,
             migration_policy=migration_policy)
         waiters.wait_for_volume_retype(self.volumes_client,
@@ -90,7 +85,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
-    @test.services('compute', 'volume')
+    @utils.services('compute', 'volume')
     def test_volume_migrate_attached(self):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()

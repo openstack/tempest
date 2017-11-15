@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest.common import utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class EC2CredentialsTest(base.BaseIdentityV2Test):
@@ -24,7 +24,7 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
     @classmethod
     def skip_checks(cls):
         super(EC2CredentialsTest, cls).skip_checks()
-        if not test.is_extension_enabled('OS-EC2', 'identity'):
+        if not utils.is_extension_enabled('OS-EC2', 'identity'):
             msg = "OS-EC2 identity extension not enabled."
             raise cls.skipException(msg)
 

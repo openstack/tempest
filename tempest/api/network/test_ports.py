@@ -18,11 +18,11 @@ import testtools
 
 from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
-from tempest import test
 
 CONF = config.CONF
 
@@ -84,25 +84,13 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertTrue(port1['admin_state_up'])
         self.assertTrue(port2['admin_state_up'])
 
-    @classmethod
-    def _get_ipaddress_from_tempest_conf(cls):
-        """Return subnet with mask bits for configured CIDR """
-        if cls._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            cidr.prefixlen = CONF.network.project_network_mask_bits
-
-        elif cls._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
-            cidr.prefixlen = CONF.network.project_network_v6_mask_bits
-
-        return cidr
-
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
     def test_create_port_in_allowed_allocation_pools(self):
         network = self.create_network()
         net_id = network['id']
-        address = self._get_ipaddress_from_tempest_conf()
+        address = self.cidr
+        address.prefixlen = self.mask_bits
         if ((address.version == 4 and address.prefixlen >= 30) or
            (address.version == 6 and address.prefixlen >= 126)):
             msg = ("Subnet %s isn't large enough for the test" % address.cidr)
@@ -307,7 +295,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('58091b66-4ff4-4cc1-a549-05d60c7acd1a')
     @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
+        utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_update_port_with_security_group_and_extra_attributes(self):
         self._update_port_with_security_groups(
@@ -315,7 +303,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
     @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
+        utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_update_port_with_two_security_groups_and_extra_attributes(self):
         self._update_port_with_security_groups(
@@ -342,7 +330,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('4179dcb9-1382-4ced-84fe-1b91c54f5735')
     @testtools.skipUnless(
-        test.is_extension_enabled('security-group', 'network'),
+        utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_create_port_with_no_securitygroups(self):
         network = self.create_network()

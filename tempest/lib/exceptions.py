@@ -276,3 +276,7 @@ class DeleteErrorException(TempestException):
 
 class InvalidTestResource(TempestException):
     message = "%(name)s is not a valid %(type)s, or the name is ambiguous"
+
+
+class InvalidParam(TempestException):
+    message = ("Invalid Parameter passed: %(invalid_param)s")

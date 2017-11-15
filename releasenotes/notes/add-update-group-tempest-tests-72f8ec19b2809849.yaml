@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add update_group to groups_client in the volume service library.

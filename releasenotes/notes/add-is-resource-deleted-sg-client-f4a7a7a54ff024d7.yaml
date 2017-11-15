@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Implement the `rest_client` method `is_resource_deleted` in the network
+    security group client.

@@ -14,14 +14,20 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest import test
 
 CONF = config.CONF
 
 
 class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseSecurityGroupsTest, cls).skip_checks()
+        if not utils.get_service_list()['network']:
+            raise cls.skipException("network service not enabled.")
 
     @classmethod
     def setup_credentials(cls):
@@ -32,7 +38,7 @@ class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
     @staticmethod
     def generate_random_security_group_id():
         if (CONF.service_available.neutron and
-            test.is_extension_enabled('security-group', 'network')):
+            utils.is_extension_enabled('security-group', 'network')):
             return data_utils.rand_uuid()
         else:
             return data_utils.rand_int_id(start=999)

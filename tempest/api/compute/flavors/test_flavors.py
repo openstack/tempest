@@ -18,8 +18,6 @@ from tempest.lib import decorators
 
 
 class FlavorsV2TestJSON(base.BaseV2ComputeTest):
-    _min_disk = 'minDisk'
-    _min_ram = 'minRam'
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('e36c0eaa-dff5-4082-ad1f-3f9a80aa3f59')
@@ -89,7 +87,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         flavor_id = flavor['id']
 
-        params = {self._min_disk: flavor['disk'] + 1}
+        params = {'minDisk': flavor['disk'] + 1}
         flavors = self.flavors_client.list_flavors(detail=True,
                                                    **params)['flavors']
         self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
@@ -100,7 +98,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         flavor_id = flavor['id']
 
-        params = {self._min_ram: flavor['ram'] + 1}
+        params = {'minRam': flavor['ram'] + 1}
         flavors = self.flavors_client.list_flavors(detail=True,
                                                    **params)['flavors']
         self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
@@ -111,7 +109,7 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         flavor_id = flavor['id']
 
-        params = {self._min_disk: flavor['disk'] + 1}
+        params = {'minDisk': flavor['disk'] + 1}
         flavors = self.flavors_client.list_flavors(**params)['flavors']
         self.assertEmpty([i for i in flavors if i['id'] == flavor_id])
 
@@ -121,6 +119,6 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         flavor_id = flavor['id']
 
-        params = {self._min_ram: flavor['ram'] + 1}
+        params = {'minRam': flavor['ram'] + 1}
         flavors = self.flavors_client.list_flavors(**params)['flavors']
         self.assertEmpty([i for i in flavors if i['id'] == flavor_id])

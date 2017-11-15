@@ -16,7 +16,9 @@ import fixtures
 from oslo_config import cfg
 import testtools
 
+from tempest.common import utils
 from tempest import config
+from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest import test
 from tempest.tests import base
@@ -31,6 +33,10 @@ class BaseDecoratorsTest(base.TestCase):
                          fake_config.FakePrivate)
 
 
+# NOTE: The test module is for tempest.test.idempotent_id.
+# After all projects switch to use decorators.idempotent_id,
+# we can remove tempest.test.idempotent_id as well as this
+# test module
 class TestIdempotentIdDecorator(BaseDecoratorsTest):
 
     def _test_helper(self, _id, **decorator_args):
@@ -71,7 +77,7 @@ class TestIdempotentIdDecorator(BaseDecoratorsTest):
 class TestServicesDecorator(BaseDecoratorsTest):
     def _test_services_helper(self, *decorator_args):
         class TestFoo(test.BaseTestCase):
-            @test.services(*decorator_args)
+            @utils.services(*decorator_args)
             def test_bar(self):
                 return 0
 
@@ -90,7 +96,7 @@ class TestServicesDecorator(BaseDecoratorsTest):
         self._test_services_helper('compute', 'compute')
 
     def test_services_decorator_with_invalid_service(self):
-        self.assertRaises(test.InvalidServiceTag,
+        self.assertRaises(exceptions.InvalidServiceTag,
                           self._test_services_helper, 'compute',
                           'bad_service')
 
@@ -102,11 +108,11 @@ class TestServicesDecorator(BaseDecoratorsTest):
                           'volume')
 
     def test_services_list(self):
-        service_list = test.get_service_list()
+        service_list = utils.get_service_list()
         for service in service_list:
             try:
                 self._test_services_helper(service)
-            except test.InvalidServiceTag:
+            except exceptions.InvalidServiceTag:
                 self.fail('%s is not listed in the valid service tag list'
                           % service)
             except KeyError:
@@ -133,7 +139,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
     def _test_requires_ext_helper(self, expected_to_skip=True,
                                   **decorator_args):
         class TestFoo(test.BaseTestCase):
-            @test.requires_ext(**decorator_args)
+            @utils.requires_ext(**decorator_args)
             def test_bar(self):
                 return 0
 
@@ -170,96 +176,3 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                           self._test_requires_ext_helper,
                           extension='enabled_ext',
                           service='bad_service')
-
-
-class TestConfigDecorators(BaseDecoratorsTest):
-    def setUp(self):
-        super(TestConfigDecorators, self).setUp()
-        cfg.CONF.set_default('nova', True, 'service_available')
-        cfg.CONF.set_default('glance', False, 'service_available')
-
-    def _assert_skip_message(self, func, skip_msg):
-        try:
-            func()
-            self.fail()
-        except testtools.TestCase.skipException as skip_exc:
-            self.assertEqual(skip_exc.args[0], skip_msg)
-
-    def _test_skip_unless_config(self, expected_to_skip=True, *decorator_args):
-
-        class TestFoo(test.BaseTestCase):
-            @config.skip_unless_config(*decorator_args)
-            def test_bar(self):
-                return 0
-
-        t = TestFoo('test_bar')
-        if expected_to_skip:
-            self.assertRaises(testtools.TestCase.skipException, t.test_bar)
-            if (len(decorator_args) >= 3):
-                # decorator_args[2]: skip message specified
-                self._assert_skip_message(t.test_bar, decorator_args[2])
-        else:
-            try:
-                self.assertEqual(t.test_bar(), 0)
-            except testtools.TestCase.skipException:
-                # We caught a skipException but we didn't expect to skip
-                # this test so raise a hard test failure instead.
-                raise testtools.TestCase.failureException(
-                    "Not supposed to skip")
-
-    def _test_skip_if_config(self, expected_to_skip=True,
-                             *decorator_args):
-
-        class TestFoo(test.BaseTestCase):
-            @config.skip_if_config(*decorator_args)
-            def test_bar(self):
-                return 0
-
-        t = TestFoo('test_bar')
-        if expected_to_skip:
-            self.assertRaises(testtools.TestCase.skipException, t.test_bar)
-            if (len(decorator_args) >= 3):
-                # decorator_args[2]: skip message specified
-                self._assert_skip_message(t.test_bar, decorator_args[2])
-        else:
-            try:
-                self.assertEqual(t.test_bar(), 0)
-            except testtools.TestCase.skipException:
-                # We caught a skipException but we didn't expect to skip
-                # this test so raise a hard test failure instead.
-                raise testtools.TestCase.failureException(
-                    "Not supposed to skip")
-
-    def test_skip_unless_no_group(self):
-        self._test_skip_unless_config(True, 'fake_group', 'an_option')
-
-    def test_skip_unless_no_option(self):
-        self._test_skip_unless_config(True, 'service_available',
-                                      'not_an_option')
-
-    def test_skip_unless_false_option(self):
-        self._test_skip_unless_config(True, 'service_available', 'glance')
-
-    def test_skip_unless_false_option_msg(self):
-        self._test_skip_unless_config(True, 'service_available', 'glance',
-                                      'skip message')
-
-    def test_skip_unless_true_option(self):
-        self._test_skip_unless_config(False,
-                                      'service_available', 'nova')
-
-    def test_skip_if_no_group(self):
-        self._test_skip_if_config(False, 'fake_group', 'an_option')
-
-    def test_skip_if_no_option(self):
-        self._test_skip_if_config(False, 'service_available', 'not_an_option')
-
-    def test_skip_if_false_option(self):
-        self._test_skip_if_config(False, 'service_available', 'glance')
-
-    def test_skip_if_true_option(self):
-        self._test_skip_if_config(True, 'service_available', 'nova')
-
-    def test_skip_if_true_option_msg(self):
-        self._test_skip_if_config(True, 'service_available', 'nova',
-                                  'skip message')

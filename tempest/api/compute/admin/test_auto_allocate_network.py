@@ -16,12 +16,11 @@ from oslo_log import log
 
 from tempest.api.compute import base
 from tempest.common import compute
-from tempest.common import credentials_factory as credentials
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_excs
-from tempest import test
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -46,14 +45,10 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def skip_checks(cls):
         super(AutoAllocateNetworkTest, cls).skip_checks()
-        identity_version = cls.get_identity_version()
-        if not credentials.is_admin_available(
-                identity_version=identity_version):
-            msg = "Missing Identity Admin API credentials in configuration."
-            raise cls.skipException(msg)
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron is required')
-        if not test.is_extension_enabled('auto-allocated-topology', 'network'):
+        if not utils.is_extension_enabled('auto-allocated-topology',
+                                          'network'):
             raise cls.skipException(
                 'auto-allocated-topology extension is not available')
 
@@ -148,6 +143,8 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             test_utils.call_and_ignore_notfound_exc(
                 cls.networks_client.delete_network, network['id'])
 
+        super(AutoAllocateNetworkTest, cls).resource_cleanup()
+
     @decorators.idempotent_id('5eb7b8fa-9c23-47a2-9d7d-02ed5809dd34')
     def test_server_create_no_allocate(self):
         """Tests that no networking is allocated for the server."""
@@ -180,9 +177,11 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         _, servers = compute.create_test_server(
             self.os_primary, networks='auto', wait_until='ACTIVE',
             min_count=3)
-        server_nets = set()
         for server in servers:
             self.addCleanup(self.delete_server, server['id'])
+
+        server_nets = set()
+        for server in servers:
             # get the server ips
             addresses = self.servers_client.list_addresses(
                 server['id'])['addresses']

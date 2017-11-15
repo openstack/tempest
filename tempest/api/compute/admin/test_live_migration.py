@@ -20,10 +20,10 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -44,6 +44,18 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         if CONF.compute.min_compute_nodes < 2:
             raise cls.skipException(
                 "Less than 2 compute nodes, skipping migration test.")
+
+    @classmethod
+    def setup_credentials(cls):
+        # These tests don't attempt any SSH validation nor do they use
+        # floating IPs on the instance, so all we need is a network and
+        # a subnet so the instance being migrated has a single port, but
+        # we need that to make sure we are properly updating the port
+        # host bindings during the live migration.
+        # TODO(mriedem): SSH validation before and after the instance is
+        # live migrated would be a nice test wrinkle addition.
+        cls.set_network_resources(network=True, subnet=True)
+        super(LiveMigrationTest, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
@@ -122,7 +134,7 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
 
     @decorators.skip_because(bug="1524898")
     @decorators.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
-    @test.services('volume')
+    @utils.services('volume')
     def test_volume_backed_live_migration(self):
         self._test_live_migration(volume_backed=True)
 
@@ -163,7 +175,7 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.serial_console,
                           'Serial console not supported.')
     @testtools.skipUnless(
-        test.is_scheduler_filter_enabled("DifferentHostFilter"),
+        compute.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_live_migration_serial_console(self):
         """Test the live-migration of an instance which has a serial console

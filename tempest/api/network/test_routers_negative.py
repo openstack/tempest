@@ -13,14 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
-
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -30,7 +28,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(RoutersNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
 
@@ -40,9 +38,6 @@ class RoutersNegativeTest(base.BaseNetworkTest):
         cls.router = cls.create_router()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.tenant_cidr = (CONF.network.project_network_cidr
-                           if cls._ip_version == 4 else
-                           CONF.network.project_network_v6_cidr)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('37a94fc0-a834-45b9-bd23-9a81d2fd1e22')
@@ -57,7 +52,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('11836a18-0b15-4327-a50b-f0d9dc66bddd')
     def test_router_add_gateway_net_not_external_returns_400(self):
         alt_network = self.create_network()
-        sub_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
+        sub_cidr = self.cidr.next()
         self.create_subnet(alt_network, cidr=sub_cidr)
         self.assertRaises(lib_exc.BadRequest,
                           self.routers_client.update_router,
@@ -124,16 +119,9 @@ class DvrRoutersNegativeTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(DvrRoutersNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('dvr', 'network'):
+        if not utils.is_extension_enabled('dvr', 'network'):
             msg = "DVR extension not enabled."
             raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
-        super(DvrRoutersNegativeTest, cls).resource_setup()
-        cls.router = cls.create_router()
-        cls.network = cls.create_network()
-        cls.subnet = cls.create_subnet(cls.network)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')

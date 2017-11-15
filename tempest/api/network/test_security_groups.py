@@ -14,21 +14,20 @@
 #    under the License.
 
 from tempest.api.network import base_security_groups as base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
-    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
         super(SecGroupTest, cls).skip_checks()
-        if not test.is_extension_enabled('security-group', 'network'):
+        if not utils.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
 
@@ -209,7 +208,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         protocol = 'tcp'
         port_range_min = 76
         port_range_max = 77
-        ip_prefix = self._project_network_cidr
+        ip_prefix = str(self.cidr)
         self._create_verify_security_group_rule(sg_id, direction,
                                                 self.ethertype, protocol,
                                                 port_range_min,
@@ -238,4 +237,3 @@ class SecGroupTest(base.BaseSecGroupTest):
 
 class SecGroupIPv6Test(SecGroupTest):
     _ip_version = 6
-    _project_network_cidr = CONF.network.project_network_v6_cidr

@@ -3,7 +3,7 @@ Team and repository tags
 ========================
 
 .. image:: http://governance.openstack.org/badges/tempest.svg
-    :target: http://governance.openstack.org/reference/tags/index.html
+    :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 .. Change things from this point on
 
@@ -183,11 +183,11 @@ Unit Tests
 Tempest also has a set of unit tests which test the Tempest code itself. These
 tests can be run by specifying the test discovery path::
 
-    $ OS_TEST_PATH=./tempest/tests testr run --parallel
+    $ stestr --test-path ./tempest/tests run
 
-By setting OS_TEST_PATH to ./tempest/tests it specifies that test discover
-should only be run on the unit test directory. The default value of OS_TEST_PATH
-is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
+By setting ``--test-path`` option to ./tempest/tests it specifies that test discover
+should only be run on the unit test directory. The default value of ``test_path``
+is ``test_path=./tempest/test_discover`` which will only run test discover on the
 Tempest suite.
 
 Alternatively, there are the py27 and py35 tox jobs which will run the unit

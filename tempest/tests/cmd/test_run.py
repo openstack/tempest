@@ -13,6 +13,7 @@
 # under the License.
 
 import argparse
+import atexit
 import os
 import shutil
 import subprocess
@@ -25,6 +26,7 @@ from tempest.cmd import run
 from tempest.tests import base
 
 DEVNULL = open(os.devnull, 'wb')
+atexit.register(DEVNULL.close)
 
 
 class TestTempestRun(base.TestCase):
@@ -38,6 +40,7 @@ class TestTempestRun(base.TestCase):
         setattr(args, "subunit", True)
         setattr(args, "parallel", False)
         setattr(args, "concurrency", 10)
+        setattr(args, "load_list", '')
         options = self.run_cmd._build_options(args)
         self.assertEqual(['--subunit',
                           '--concurrency=10'],
@@ -67,6 +70,34 @@ class TestTempestRun(base.TestCase):
         setattr(args, 'blacklist_file', None)
         self.assertEqual('i_am_a_fun_little_regex',
                          self.run_cmd._build_regex(args))
+
+    def test__build_whitelist_file(self):
+        args = mock.Mock(spec=argparse.Namespace)
+        setattr(args, 'smoke', False)
+        setattr(args, 'regex', None)
+        self.tests = tempfile.NamedTemporaryFile(
+            prefix='whitelist', delete=False)
+        self.tests.write(b"volume \n compute")
+        self.tests.close()
+        setattr(args, 'whitelist_file', self.tests.name)
+        setattr(args, 'blacklist_file', None)
+        self.assertEqual("volume|compute",
+                         self.run_cmd._build_regex(args))
+        os.unlink(self.tests.name)
+
+    def test__build_blacklist_file(self):
+        args = mock.Mock(spec=argparse.Namespace)
+        setattr(args, 'smoke', False)
+        setattr(args, 'regex', None)
+        self.tests = tempfile.NamedTemporaryFile(
+            prefix='blacklist', delete=False)
+        self.tests.write(b"volume \n compute")
+        self.tests.close()
+        setattr(args, 'whitelist_file', None)
+        setattr(args, 'blacklist_file', self.tests.name)
+        self.assertEqual("^((?!compute|volume).)*$",
+                         self.run_cmd._build_regex(args))
+        os.unlink(self.tests.name)
 
 
 class TestRunReturnCode(base.TestCase):

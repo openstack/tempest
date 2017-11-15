@@ -13,11 +13,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
@@ -89,7 +89,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                              condition=CONF.service_available.neutron)
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
-    @test.services('network')
+    @utils.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
         # Set the quota to number of used security groups
@@ -108,7 +108,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                              condition=CONF.service_available.neutron)
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e9f436d-f1ed-4f8e-a493-7275dfaa4b4d')
-    @test.services('network')
+    @utils.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules

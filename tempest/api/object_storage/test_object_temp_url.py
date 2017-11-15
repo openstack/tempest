@@ -19,9 +19,9 @@ import time
 from six.moves.urllib import parse as urlparse
 
 from tempest.api.object_storage import base
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class ObjectTempUrlTest(base.BaseObjectTest):
@@ -88,7 +88,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         return url
 
     @decorators.idempotent_id('f91c96d4-1230-4bba-8eb9-84476d18d991')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url(self):
         expires = self._get_expiry_date()
 
@@ -103,11 +103,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, self.content)
 
         # Testing a HEAD on this Temp URL
-        resp, body = self.object_client.head(url)
+        resp, _ = self.object_client.head(url)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @decorators.idempotent_id('671f9583-86bd-4128-a034-be282a68c5d8')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_key_2(self):
         key2 = 'Meta2-'
         metadata = {'Temp-URL-Key-2': key2}
@@ -132,7 +132,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, self.content)
 
     @decorators.idempotent_id('9b08dade-3571-4152-8a4f-a4f2a873a735')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_put_object_using_temp_url(self):
         new_data = data_utils.random_bytes(size=len(self.object_name))
 
@@ -142,11 +142,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  expires, self.key)
 
         # trying to put random data in the object using temp url
-        resp, body = self.object_client.put(url, new_data, None)
+        resp, _ = self.object_client.put(url, new_data, None)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # Testing a HEAD on this Temp URL
-        resp, body = self.object_client.head(url)
+        resp, _ = self.object_client.head(url)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
         # Validate that the content of the object has been modified
@@ -158,7 +158,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertEqual(body, new_data)
 
     @decorators.idempotent_id('249a0111-5ad3-4534-86a7-1993d55f9185')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_head_object_using_temp_url(self):
         expires = self._get_expiry_date()
 
@@ -172,7 +172,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'HEAD')
 
     @decorators.idempotent_id('9d9cfd90-708b-465d-802c-e4a8090b823d')
-    @test.requires_ext(extension='tempurl', service='object')
+    @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_with_inline_query_parameter(self):
         expires = self._get_expiry_date()
 

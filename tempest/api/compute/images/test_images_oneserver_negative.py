@@ -19,6 +19,7 @@ from oslo_log import log as logging
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -51,7 +52,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             self._reset_server()
 
     def _reset_server(self):
-        self.__class__.server_id = self.rebuild_server(self.server_id)
+        self.__class__.server_id = self.recreate_server(self.server_id)
 
     @classmethod
     def skip_checks(cls):
@@ -105,9 +106,12 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.Conflict, self.create_image_from_server,
                           self.server_id)
 
-        image_id = data_utils.parse_image_id(image.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+            image_id = image['image_id']
+        else:
+            image_id = data_utils.parse_image_id(image.response['location'])
         self.client.delete_image(image_id)
-        self.images.remove(image_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
@@ -124,12 +128,15 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error while trying to delete an image what is creating
 
         image = self.create_image_from_server(self.server_id)
-        image_id = data_utils.parse_image_id(image.response['location'])
+        if api_version_utils.compare_version_header_to_response(
+            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+            image_id = image['image_id']
+        else:
+            image_id = data_utils.parse_image_id(image.response['location'])
 
         self.addCleanup(self._reset_server)
 
         # Do not wait, attempt to delete the image, ensure it's successful
         self.client.delete_image(image_id)
-        self.images.remove(image_id)
         self.assertRaises(lib_exc.NotFound,
                           self.client.show_image, image_id)

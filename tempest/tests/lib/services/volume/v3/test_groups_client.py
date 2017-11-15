@@ -28,6 +28,33 @@ class TestGroupsClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_CREATE_GROUP_FROM_GROUP_SNAPSHOT = {
+        "create-from-src": {
+            "name": "group-002",
+            "description": "Test group 2",
+            "group_snapshot_id": "79c9afdb-7e46-4d71-9249-1f022886963c",
+        }
+    }
+
+    FAKE_CREATE_GROUP_FROM_GROUP = {
+        "create-from-src": {
+            "name": "group-003",
+            "description": "Test group 3",
+            "source_group_id": "e92f9dc7-0b20-492d-8ab2-3ad8fdac270e",
+        }
+    }
+
+    FAKE_UPDATE_GROUP = {
+        "group": {
+            "name": "new-group",
+            "description": "New test group",
+            "add_volumes": "27d45037-ade3-4a87-b729-dba3293c06f3,"
+                           "6e7cd916-d961-41cc-b3bd-0601ca0c701f",
+            "remove_volumes": "4d580519-6467-448e-95e9-5b25c94d83c7,"
+                              "ea22464c-f095-4a87-a31f-c5d34e0c6fc9"
+        }
+    }
+
     FAKE_INFO_GROUP = {
         "group": {
             "id": "0e701ab8-1bec-4b9f-b026-a7ba4af13578",
@@ -134,3 +161,35 @@ class TestGroupsClient(base.BaseServiceTest):
             {},
             group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
             status=202)
+
+    def test_create_group_from_group_snapshot(self):
+        self.check_service_client_function(
+            self.client.create_group_from_source,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_CREATE_GROUP_FROM_GROUP_SNAPSHOT,
+            status=202)
+
+    def test_create_group_from_group(self):
+        self.check_service_client_function(
+            self.client.create_group_from_source,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_CREATE_GROUP_FROM_GROUP,
+            status=202)
+
+    def test_update_group(self):
+        self.check_service_client_function(
+            self.client.update_group,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
+            status=202,
+            **self.FAKE_UPDATE_GROUP['group'])
+
+    def test_reset_group_status(self):
+        self.check_service_client_function(
+            self.client.reset_group_status,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {},
+            status=202,
+            group_id='0e701ab8-1bec-4b9f-b026-a7ba4af13578',
+            status_to_set='error')

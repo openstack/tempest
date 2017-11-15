@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Remove two deprecated skip decorators in ``config`` module:
+    ``skip_unless_config`` and ``skip_if_config``.

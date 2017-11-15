@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from debtcollector import moves
-from debtcollector import removals
 from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
@@ -22,42 +20,11 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
-from tempest.lib.services.volume.v2 import transfers_client
 
 
 class VolumesClient(base_client.BaseClient):
     """Client class to send CRUD Volume V2 API requests"""
     api_version = "v2"
-
-    create_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.create_volume_transfer,
-        'VolumesClient.create_volume_transfer', __name__,
-        message='Use create_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    show_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.show_volume_transfer,
-        'VolumesClient.show_volume_transfer', __name__,
-        message='Use show_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    list_volume_transfers = moves.moved_function(
-        transfers_client.TransfersClient.list_volume_transfers,
-        'VolumesClient.list_volume_transfers', __name__,
-        message='Use list_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    delete_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.delete_volume_transfer,
-        'VolumesClient.delete_volume_transfer', __name__,
-        message='Use delete_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
-
-    accept_volume_transfer = moves.moved_function(
-        transfers_client.TransfersClient.accept_volume_transfer,
-        'VolumesClient.accept_volume_transfer', __name__,
-        message='Use accept_volume_transfer from new location.',
-        version='Pike', removal_version='Queens')
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
@@ -197,10 +164,18 @@ class VolumesClient(base_client.BaseClient):
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
+        """Check the specified resource is deleted or not.
+
+        :param id: A checked resource id
+        :raises lib_exc.DeleteErrorException: If the specified resource is on
+        the status the delete was failed.
+        """
         try:
-            self.show_volume(id)
+            volume = self.show_volume(id)
         except lib_exc.NotFound:
             return True
+        if volume["volume"]["status"] == "error_deleting":
+            raise lib_exc.DeleteErrorException(resource_id=id)
         return False
 
     @property
@@ -360,34 +335,6 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-show_image_metadata': {}})
         url = "volumes/%s/action" % volume_id
         resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    @removals.remove(message="use list_pools from tempest.lib.services."
-                             "volume.v2.scheduler_stats_client")
-    def show_pools(self, detail=False):
-        # List all the volumes pools (hosts)
-        url = 'scheduler-stats/get_pools'
-        if detail:
-            url += '?detail=True'
-
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    @removals.remove(message="use show_backend_capabilities from tempest.lib."
-                             "services.volume.v2.capabilities_client")
-    def show_backend_capabilities(self, host):
-        """Shows capabilities for a storage back end.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        http://developer.openstack.org/api-ref/block-storage/v2/#show-back-end-capabilities
-        """
-        url = 'capabilities/%s' % host
-        resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)

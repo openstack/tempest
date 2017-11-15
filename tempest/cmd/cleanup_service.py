@@ -16,11 +16,12 @@
 
 from oslo_log import log as logging
 
+from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import identity
+from tempest.common import utils
 from tempest.common.utils import net_info
 from tempest import config
-from tempest import test
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
@@ -78,7 +79,8 @@ def init_conf():
 
 
 def _get_network_id(net_name, project_name):
-    am = credentials.AdminManager()
+    am = clients.Manager(
+        credentials.get_configured_admin_credentials())
     net_cl = am.networks_client
     tn_cl = am.tenants_client
 
@@ -962,7 +964,7 @@ def get_tenant_cleanup_services():
         tenant_services.append(StackService)
     if IS_NEUTRON:
         tenant_services.append(NetworkFloatingIpService)
-        if test.is_extension_enabled('metering', 'network'):
+        if utils.is_extension_enabled('metering', 'network'):
             tenant_services.append(NetworkMeteringLabelRuleService)
             tenant_services.append(NetworkMeteringLabelService)
         tenant_services.append(NetworkRouterService)

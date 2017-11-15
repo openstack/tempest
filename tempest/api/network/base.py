@@ -93,9 +93,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.ports = []
         cls.routers = []
         cls.floating_ips = []
-        cls.metering_labels = []
-        cls.metering_label_rules = []
         cls.ethertype = "IPv" + str(cls._ip_version)
+        if cls._ip_version == 4:
+            cls.cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
+            cls.mask_bits = CONF.network.project_network_mask_bits
+        elif cls._ip_version == 6:
+            cls.cidr = netaddr.IPNetwork(CONF.network.project_network_v6_cidr)
+            cls.mask_bits = CONF.network.project_network_v6_mask_bits
 
     @classmethod
     def resource_cleanup(cls):
@@ -105,20 +109,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 test_utils.call_and_ignore_notfound_exc(
                     cls.floating_ips_client.delete_floatingip,
                     floating_ip['id'])
-
-            # Clean up metering label rules
-            # Not all classes in the hierarchy have the client class variable
-            if cls.metering_label_rules:
-                label_rules_client = cls.admin_metering_label_rules_client
-                for metering_label_rule in cls.metering_label_rules:
-                    test_utils.call_and_ignore_notfound_exc(
-                        label_rules_client.delete_metering_label_rule,
-                        metering_label_rule['id'])
-            # Clean up metering labels
-            for metering_label in cls.metering_labels:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.admin_metering_labels_client.delete_metering_label,
-                    metering_label['id'])
             # Clean up ports
             for port in cls.ports:
                 test_utils.call_and_ignore_notfound_exc(

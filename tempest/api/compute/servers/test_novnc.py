@@ -166,7 +166,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         self._validate_novnc_html(body['url'])
         # Do the WebSockify HTTP Request to novncproxy to do the RFB connection
         self._websocket = compute.create_websocket(body['url'])
-        # Validate that we succesfully connected and upgraded to Web Sockets
+        # Validate that we successfully connected and upgraded to Web Sockets
         self._validate_websocket_upgrade()
         # Validate the RFB Negotiation to determine if a valid VNC session
         self._validate_rfb_negotiation()

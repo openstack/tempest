@@ -20,49 +20,15 @@ from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
-    server_id = None
-    floating_ip = None
 
-    @classmethod
-    def skip_checks(cls):
-        super(FloatingIPsTestJSON, cls).skip_checks()
-        if not CONF.network_feature_enabled.floating_ips:
-            raise cls.skipException("Floating ips are not available")
-
-    @classmethod
-    def setup_clients(cls):
-        super(FloatingIPsTestJSON, cls).setup_clients()
-        cls.client = cls.floating_ips_client
-
-    @classmethod
-    def resource_setup(cls):
-        super(FloatingIPsTestJSON, cls).resource_setup()
-        cls.floating_ip_id = None
-
-        # Server creation
-        server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
-        # Floating IP creation
-        body = cls.client.create_floating_ip(
-            pool=CONF.network.floating_network_name)['floating_ip']
-        cls.floating_ip_id = body['id']
-        cls.floating_ip = body['ip']
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Deleting the floating IP which is created in this method
-        if cls.floating_ip_id:
-            cls.client.delete_floating_ip(cls.floating_ip_id)
-        super(FloatingIPsTestJSON, cls).resource_cleanup()
+    max_microversion = '2.35'
 
     @decorators.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
-    @test.services('network')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
@@ -78,7 +44,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.assertIn(floating_ip_details, body)
 
     @decorators.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
-    @test.services('network')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
@@ -92,8 +57,26 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Check it was really deleted.
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
+
+class FloatingIPsAssociationTestJSON(base.BaseFloatingIPsTest):
+
+    max_microversion = '2.43'
+
+    @classmethod
+    def resource_setup(cls):
+        super(FloatingIPsAssociationTestJSON, cls).resource_setup()
+
+        # Server creation
+        cls.server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = cls.server['id']
+        # Floating IP creation
+        body = cls.client.create_floating_ip(
+            pool=CONF.network.floating_network_name)['floating_ip']
+        cls.addClassResourceCleanup(cls.client.delete_floating_ip, body['id'])
+        cls.floating_ip_id = body['id']
+        cls.floating_ip = body['ip']
+
     @decorators.idempotent_id('307efa27-dc6f-48a0-8cd2-162ce3ef0b52')
-    @test.services('network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_disassociate_floating_ip(self):
@@ -116,7 +99,6 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.server_id)
 
     @decorators.idempotent_id('6edef4b2-aaf1-4abc-bbe3-993e2561e0fe')
-    @test.services('network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_already_associated_floating_ip(self):

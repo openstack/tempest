@@ -41,7 +41,6 @@ class ContainerSyncTest(base.BaseObjectTest):
     @classmethod
     def setup_credentials(cls):
         super(ContainerSyncTest, cls).setup_credentials()
-        cls.os = cls.os_roles_operator
         cls.os_alt = cls.os_roles_operator_alt
 
     @classmethod
@@ -103,7 +102,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         while self.attempts > 0:
             object_lists = []
             for c_client, cont in zip(cont_client, self.containers):
-                resp, object_list = c_client.list_container_contents(
+                resp, object_list = c_client.list_container_objects(
                     cont, params=params)
                 object_lists.append(dict(
                     (obj['name'], obj) for obj in object_list))

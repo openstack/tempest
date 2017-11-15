@@ -14,22 +14,21 @@
 #    under the License.
 
 from tempest.api.network import base_security_groups as base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 CONF = config.CONF
 
 
 class NegativeSecGroupTest(base.BaseSecGroupTest):
-    _project_network_cidr = CONF.network.project_network_cidr
 
     @classmethod
     def skip_checks(cls):
         super(NegativeSecGroupTest, cls).skip_checks()
-        if not test.is_extension_enabled('security-group', 'network'):
+        if not utils.is_extension_enabled('security-group', 'network'):
             msg = "security-group extension not enabled."
             raise cls.skipException(msg)
 
@@ -110,7 +109,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         sg2_body, _ = self._create_security_group()
 
         # Create rule specifying both remote_ip_prefix and remote_group_id
-        prefix = self._project_network_cidr
+        prefix = str(self.cidr)
         self.assertRaises(
             lib_exc.BadRequest,
             self.security_group_rules_client.create_security_group_rule,
@@ -225,7 +224,6 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
 class NegativeSecGroupIPv6Test(NegativeSecGroupTest):
     _ip_version = 6
-    _project_network_cidr = CONF.network.project_network_v6_cidr
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7607439c-af73-499e-bf64-f687fd12a842')

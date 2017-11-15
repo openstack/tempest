@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 
 CONF = config.CONF
@@ -56,7 +56,7 @@ class VolumesCloneTest(base.BaseVolumeTest):
         self._verify_volume_clone(src_vol, dst_vol, extra_size=1)
 
     @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
-    @test.services('image')
+    @utils.services('image')
     def test_create_from_bootable_volume(self):
         # Create volume from image
         img_uuid = CONF.compute.image_ref

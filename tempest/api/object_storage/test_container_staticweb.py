@@ -14,10 +14,10 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class StaticWebTest(base.BaseObjectTest):
@@ -34,10 +34,10 @@ class StaticWebTest(base.BaseObjectTest):
         cls.object_name, cls.object_data = cls.create_object(
             cls.container_name)
 
-        cls.container_client.update_container_metadata(
+        cls.container_client.create_update_or_delete_container_metadata(
             cls.container_name,
-            metadata=headers_public_read_acl,
-            metadata_prefix="X-Container-")
+            create_update_metadata=headers_public_read_acl,
+            create_update_metadata_prefix="X-Container-")
 
     @classmethod
     def resource_cleanup(cls):
@@ -45,12 +45,12 @@ class StaticWebTest(base.BaseObjectTest):
         super(StaticWebTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_index(self):
         headers = {'web-index': self.object_name}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Maintain original headers, no auth added
         self.account_client.auth_provider.set_alt_auth_data(
@@ -68,20 +68,21 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertEqual(body, self.object_data)
 
         # clean up before exiting
-        self.container_client.update_container_metadata(self.container_name,
-                                                        {'web-index': ""})
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name,
+            create_update_metadata={'web-index': ""})
 
         _, body = self.container_client.list_container_metadata(
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
     @decorators.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # test GET on http://account_url/container_name
         # we should retrieve a listing of objects
@@ -100,21 +101,21 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertIn(self.object_name, body.decode())
 
         # clean up before exiting
-        self.container_client.update_container_metadata(self.container_name,
-                                                        {'web-listings': ""})
-
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name,
+            create_update_metadata={'web-listings': ""})
         _, body = self.container_client.list_container_metadata(
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
 
     @decorators.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing_css(self):
         headers = {'web-listings': 'true',
                    'web-listings-css': 'listings.css'}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Maintain original headers, no auth added
         self.account_client.auth_provider.set_alt_auth_data(
@@ -131,13 +132,13 @@ class StaticWebTest(base.BaseObjectTest):
         self.assertIn(css, body.decode())
 
     @decorators.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
-    @test.requires_ext(extension='staticweb', service='object')
+    @utils.requires_ext(extension='staticweb', service='object')
     def test_web_error(self):
         headers = {'web-listings': 'true',
                    'web-error': self.object_name}
 
-        self.container_client.update_container_metadata(
-            self.container_name, metadata=headers)
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name, create_update_metadata=headers)
 
         # Create object to return when requested object not found
         object_name_404 = "404" + self.object_name

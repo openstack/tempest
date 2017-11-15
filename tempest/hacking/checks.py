@@ -33,6 +33,7 @@ METHOD = re.compile(r"^    def .+")
 METHOD_GET_RESOURCE = re.compile(r"^\s*def (list|show)\_.+")
 METHOD_DELETE_RESOURCE = re.compile(r"^\s*def delete_.+")
 CLASS = re.compile(r"^class .+")
+EX_ATTRIBUTE = re.compile(r'(\s+|\()(e|ex|exc|exception).message(\s+|\))')
 
 
 def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
@@ -294,6 +295,17 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
         yield(0, msg)
 
 
+def unsupported_exception_attribute_PY3(logical_line):
+    """Check Unsupported 'message' exception attribute in PY3
+
+    T116
+    """
+    result = EX_ATTRIBUTE.search(logical_line)
+    msg = ("[T116] Unsupported 'message' Exception attribute in PY3")
+    if result:
+        yield(0, msg)
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -309,3 +321,4 @@ def factory(register):
     register(dont_use_config_in_tempest_lib)
     register(use_rand_uuid_instead_of_uuid4)
     register(dont_put_admin_tests_on_nonadmin_path)
+    register(unsupported_exception_attribute_PY3)

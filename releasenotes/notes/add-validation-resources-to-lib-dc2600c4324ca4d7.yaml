@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add the `validation_resources` module to tempest.lib. The module provides
+    a set of helpers that can be used to provision and cleanup all the
+    resources required to perform ping / ssh tests against a virtual machine:
+    a keypair, a security group with targeted rules and a floating IP.

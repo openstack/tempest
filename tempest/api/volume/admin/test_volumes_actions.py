@@ -14,10 +14,10 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -30,21 +30,24 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         if status:
             self.admin_volume_client.reset_volume_status(
                 temp_volume['id'], status=status)
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, temp_volume['id'], status)
         self.admin_volume_client.force_delete_volume(temp_volume['id'])
         self.volumes_client.wait_for_resource_deletion(temp_volume['id'])
 
     @decorators.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
-        # test volume reset status : available->error->available
+        # test volume reset status : available->error->available->maintenance
         volume = self.create_volume()
+        self.addCleanup(waiters.wait_for_volume_resource_status,
+                        self.volumes_client, volume['id'], 'available')
         self.addCleanup(self.admin_volume_client.reset_volume_status,
                         volume['id'], status='available')
         for status in ['error', 'available', 'maintenance']:
             self.admin_volume_client.reset_volume_status(
                 volume['id'], status=status)
-            volume_get = self.admin_volume_client.show_volume(
-                volume['id'])['volume']
-            self.assertEqual(status, volume_get['status'])
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, volume['id'], status)
 
     @decorators.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
     def test_volume_force_delete_when_volume_is_creating(self):
@@ -67,7 +70,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         self._create_reset_and_force_delete_temp_volume('maintenance')
 
     @decorators.idempotent_id('d38285d9-929d-478f-96a5-00e66a115b81')
-    @test.services('compute')
+    @utils.services('compute')
     def test_force_detach_volume(self):
         # Create a server and a volume
         server_id = self.create_server()['id']
@@ -88,6 +91,8 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
 
         # Reset volume's status to error
         self.admin_volume_client.reset_volume_status(volume_id, status='error')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_id, 'error')
 
         # Force detach volume
         self.admin_volume_client.force_detach_volume(

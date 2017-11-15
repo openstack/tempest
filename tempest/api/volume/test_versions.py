@@ -26,4 +26,4 @@ class VersionsTest(base.BaseVolumeTest):
         # NOTE: The version data is checked on service client side
         #       with JSON-Schema validation. It is enough to just call
         #       the API here.
-        self.versions_client.list_versions()['versions']
+        self.versions_client.list_versions()

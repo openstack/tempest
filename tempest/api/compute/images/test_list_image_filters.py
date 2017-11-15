@@ -23,6 +23,7 @@ from tempest.common import image as common_image
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
 
@@ -74,7 +75,10 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             body = cls.glance_client.create_image(**params)
             body = body['image'] if 'image' in body else body
             image_id = body['id']
-            cls.images.append(image_id)
+            cls.addClassResourceCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                cls.compute_images_client.delete_image,
+                image_id)
             # Wait 1 second between creation and upload to ensure a delta
             # between created_at and updated_at.
             time.sleep(1)

@@ -69,6 +69,7 @@ class RestClient(object):
                               of the request and response payload
     :param str http_timeout: Timeout in seconds to wait for the http request to
                              return
+    :param str proxy_url: http proxy url to use.
     """
 
     # The version of the API this client implements
@@ -80,7 +81,8 @@ class RestClient(object):
                  endpoint_type='publicURL',
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
-                 trace_requests='', name=None, http_timeout=None):
+                 trace_requests='', name=None, http_timeout=None,
+                 proxy_url=None):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
@@ -100,9 +102,16 @@ class RestClient(object):
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
         dscv = disable_ssl_certificate_validation
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
-            timeout=http_timeout)
+
+        if proxy_url:
+            self.http_obj = http.ClosingProxyHttp(
+                proxy_url,
+                disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+                timeout=http_timeout)
+        else:
+            self.http_obj = http.ClosingHttp(
+                disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+                timeout=http_timeout)
 
     def get_headers(self, accept_type=None, send_type=None):
         """Return the default headers which will be used with outgoing requests

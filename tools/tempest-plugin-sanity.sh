@@ -20,7 +20,7 @@
 # What it does:
 # * Creates the virtualenv
 # * Install tempest
-# * Retrive the project lists having tempest plugin if project name is
+# * Retrieve the project lists having tempest plugin if project name is
 #   given.
 # * For each project in a list, It does:
 #   * Clone the Project

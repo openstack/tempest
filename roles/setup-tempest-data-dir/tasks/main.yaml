@@ -1,0 +1,7 @@
+- name: Set tempest as owner of Tempest data folder
+  file:
+    path: "{{devstack_data_dir}}/tempest"
+    owner: tempest
+    group: stack
+    recurse: yes
+  become: yes

@@ -26,6 +26,8 @@ CONF = config.CONF
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
+    credentials = ['primary', 'admin', 'alt']
+
     @decorators.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_tokens(self):
         # Valid user's token is authenticated
@@ -161,16 +163,80 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                                 manager_project_id]
 
         # Get available project scopes
-        available_projects =\
-            self.client.list_auth_projects()['projects']
+        available_projects = self.client.list_auth_projects()['projects']
 
-        # create list to save fetched project's id
+        # Create list to save fetched project IDs
         fetched_project_ids = [i['id'] for i in available_projects]
 
         # verifying the project ids in list
         missing_project_ids = \
-            [p for p in assigned_project_ids
-             if p not in fetched_project_ids]
+            [p for p in assigned_project_ids if p not in fetched_project_ids]
         self.assertEmpty(missing_project_ids,
-                         "Failed to find project_id %s in fetched list" %
+                         "Failed to find project_ids %s in fetched list" %
                          ', '.join(missing_project_ids))
+
+    @decorators.idempotent_id('ec5ecb05-af64-4c04-ac86-4d9f6f12f185')
+    def test_get_available_domain_scopes(self):
+        # Test for verifying that listing domain scopes for a user works if
+        # the user has a domain role or belongs to a group that has a domain
+        # role. For this test, admin client is used to add roles to alt user,
+        # which performs API calls, to avoid 401 Unauthorized errors.
+        alt_user_id = self.os_alt.credentials.user_id
+
+        def _create_user_domain_role_for_alt_user():
+            domain_id = self.setup_test_domain()['id']
+            role_id = self.setup_test_role()['id']
+
+            # Create a role association between the user and domain.
+            self.roles_client.create_user_role_on_domain(
+                domain_id, alt_user_id, role_id)
+            self.addCleanup(
+                self.roles_client.delete_role_from_user_on_domain,
+                domain_id, alt_user_id, role_id)
+
+            return domain_id
+
+        def _create_group_domain_role_for_alt_user():
+            domain_id = self.setup_test_domain()['id']
+            role_id = self.setup_test_role()['id']
+
+            # Create a group.
+            group_name = data_utils.rand_name('Group')
+            group_id = self.groups_client.create_group(
+                name=group_name, domain_id=domain_id)['group']['id']
+            self.addCleanup(self.groups_client.delete_group, group_id)
+
+            # Add the alt user to the group.
+            self.groups_client.add_group_user(group_id, alt_user_id)
+            self.addCleanup(self.groups_client.delete_group_user,
+                            group_id, alt_user_id)
+
+            # Create a role association between the group and domain.
+            self.roles_client.create_group_role_on_domain(
+                domain_id, group_id, role_id)
+            self.addCleanup(
+                self.roles_client.delete_role_from_group_on_domain,
+                domain_id, group_id, role_id)
+
+            return domain_id
+
+        # Add the alt user to 2 random domains and 2 random groups
+        # with randomized domains and roles.
+        assigned_domain_ids = []
+        for _ in range(2):
+            domain_id = _create_user_domain_role_for_alt_user()
+            assigned_domain_ids.append(domain_id)
+            domain_id = _create_group_domain_role_for_alt_user()
+            assigned_domain_ids.append(domain_id)
+
+        # Get available domain scopes for the alt user.
+        available_domains = self.os_alt.identity_v3_client.list_auth_domains()[
+            'domains']
+        fetched_domain_ids = [i['id'] for i in available_domains]
+
+        # Verify the expected domain IDs are in the list.
+        missing_domain_ids = \
+            [p for p in assigned_domain_ids if p not in fetched_domain_ids]
+        self.assertEmpty(missing_domain_ids,
+                         "Failed to find domain_ids %s in fetched list"
+                         % ", ".join(missing_domain_ids))

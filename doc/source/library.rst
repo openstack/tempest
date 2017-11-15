@@ -69,3 +69,4 @@ Current Library APIs
    library/auth
    library/clients
    library/credential_providers
+   library/validation_resources

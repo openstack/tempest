@@ -17,10 +17,10 @@ import netaddr
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -55,16 +55,9 @@ class RoutersTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(RoutersTest, cls).skip_checks()
-        if not test.is_extension_enabled('router', 'network'):
+        if not utils.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
-        super(RoutersTest, cls).resource_setup()
-        cls.tenant_cidr = (CONF.network.project_network_cidr
-                           if cls._ip_version == 4 else
-                           CONF.network.project_network_v6_cidr)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f64403e2-8483-4b34-8ccd-b09a87bcc68c')
@@ -72,9 +65,12 @@ class RoutersTest(base.BaseNetworkTest):
                           'The public_network_id option must be specified.')
     def test_create_show_list_update_delete_router(self):
         # Create a router
+        name = data_utils.rand_name(self.__class__.__name__ + '-router')
         router = self._create_router(
+            name=name,
             admin_state_up=False,
             external_network_id=CONF.network.public_network_id)
+        self.assertEqual(router['name'], name)
         self.assertEqual(router['admin_state_up'], False)
         self.assertEqual(
             router['external_gateway_info']['network_id'],
@@ -139,35 +135,8 @@ class RoutersTest(base.BaseNetworkTest):
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
 
-    def _verify_router_gateway(self, router_id, exp_ext_gw_info=None):
-        show_body = self.admin_routers_client.show_router(router_id)
-        actual_ext_gw_info = show_body['router']['external_gateway_info']
-        if exp_ext_gw_info is None:
-            self.assertIsNone(actual_ext_gw_info)
-            return
-        # Verify only keys passed in exp_ext_gw_info
-        for k, v in exp_ext_gw_info.items():
-            self.assertEqual(v, actual_ext_gw_info[k])
-
-    def _verify_gateway_port(self, router_id):
-        list_body = self.admin_ports_client.list_ports(
-            network_id=CONF.network.public_network_id,
-            device_id=router_id)
-        self.assertEqual(len(list_body['ports']), 1)
-        gw_port = list_body['ports'][0]
-        fixed_ips = gw_port['fixed_ips']
-        self.assertNotEmpty(fixed_ips)
-        # Assert that all of the IPs from the router gateway port
-        # are allocated from a valid public subnet.
-        public_net_body = self.admin_networks_client.show_network(
-            CONF.network.public_network_id)
-        public_subnet_ids = public_net_body['network']['subnets']
-        for fixed_ip in fixed_ips:
-            subnet_id = fixed_ip['subnet_id']
-            self.assertIn(subnet_id, public_subnet_ids)
-
     @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
-    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     @decorators.skip_because(bug='1676207')
@@ -198,11 +167,11 @@ class RoutersTest(base.BaseNetworkTest):
                          fixed_ip['ip_address'])
 
     @decorators.idempotent_id('c86ac3a8-50bd-4b00-a6b8-62af84a0765c')
-    @test.requires_ext(extension='extraroute', service='network')
+    @utils.requires_ext(extension='extraroute', service='network')
     def test_update_delete_extra_route(self):
         # Create different cidr for each subnet to avoid cidr duplicate
         # The cidr starts from project_cidr
-        next_cidr = netaddr.IPNetwork(self.tenant_cidr)
+        next_cidr = self.cidr
         # Prepare to build several routes
         test_routes = []
         routes_num = 4
@@ -278,7 +247,7 @@ class RoutersTest(base.BaseNetworkTest):
         network02 = self.create_network(
             network_name=data_utils.rand_name('router-network02-'))
         subnet01 = self.create_subnet(network01)
-        sub02_cidr = netaddr.IPNetwork(self.tenant_cidr).next()
+        sub02_cidr = self.cidr.next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
         router = self._create_router()
         interface01 = self._add_router_interface_with_subnet_id(router['id'],

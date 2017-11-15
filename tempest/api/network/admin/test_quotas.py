@@ -14,10 +14,11 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.common import identity
+from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
-from tempest import test
 
 
 class QuotasTest(base.BaseAdminNetworkTest):
@@ -38,7 +39,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(QuotasTest, cls).skip_checks()
-        if not test.is_extension_enabled('quotas', 'network'):
+        if not utils.is_extension_enabled('quotas', 'network'):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 
@@ -46,10 +47,11 @@ class QuotasTest(base.BaseAdminNetworkTest):
         # Add a project to conduct the test
         project = data_utils.rand_name('test_project_')
         description = data_utils.rand_name('desc_')
-        project = self.identity_utils.create_project(name=project,
-                                                     description=description)
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project, description=description)
         project_id = project['id']
-        self.addCleanup(self.identity_utils.delete_project, project_id)
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
 
         # Change quotas for project
         quota_set = self.admin_quotas_client.update_quotas(

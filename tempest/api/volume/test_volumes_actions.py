@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
-from tempest import test
 
 CONF = config.CONF
 
@@ -35,7 +35,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('fff42874-7db5-4487-a8e1-ddda5fb5288d')
     @decorators.attr(type='smoke')
-    @test.services('compute')
+    @utils.services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Create a server
         server = self.create_server()
@@ -66,7 +66,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
                              fetched_volume['bootable'])
 
     @decorators.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
-    @test.services('compute')
+    @utils.services('compute')
     def test_get_volume_attachment(self):
         # Create a server
         server = self.create_server()
@@ -94,7 +94,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
         self.assertEqual(self.volume['id'], attachment['volume_id'])
 
     @decorators.idempotent_id('d8f1ca95-3d5b-44a3-b8ca-909691c9532d')
-    @test.services('image')
+    @utils.services('image')
     def test_volume_upload(self):
         # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
         # it is shared with the other tests. After it is uploaded in Glance,
@@ -111,6 +111,10 @@ class VolumesActionsTest(base.BaseVolumeTest):
         waiters.wait_for_image_status(self.images_client, image_id, 'active')
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 self.volume['id'], 'available')
+
+        image_info = self.images_client.show_image(image_id)
+        self.assertEqual(image_name, image_info['name'])
+        self.assertEqual(CONF.volume.disk_format, image_info['disk_format'])
 
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):

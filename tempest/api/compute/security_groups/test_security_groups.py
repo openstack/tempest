@@ -18,7 +18,6 @@ from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
@@ -30,7 +29,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('eb2b087d-633d-4d0d-a7bd-9e6ba35b32de')
-    @test.services('network')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         # Create 3 Security Groups
@@ -54,15 +52,13 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
             self.client.wait_for_resource_deletion(sg['id'])
         # Now check if all the created Security Groups are deleted
         fetched_list = self.client.list_security_groups()['security_groups']
-        deleted_sgs = \
-            [sg for sg in security_group_list if sg in fetched_list]
+        deleted_sgs = [sg for sg in security_group_list if sg in fetched_list]
         self.assertFalse(deleted_sgs,
                          "Failed to delete Security Group %s "
                          "list" % ', '.join(m_group['name']
                                             for m_group in deleted_sgs))
 
     @decorators.idempotent_id('ecc0da4a-2117-48af-91af-993cca39a615')
-    @test.services('network')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
         # with char space between name along with
@@ -83,7 +79,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.wait_for_resource_deletion(securitygroup['id'])
 
     @decorators.idempotent_id('fe4abc0d-83f5-4c50-ad11-57a1127297a2')
-    @test.services('network')
     def test_server_security_groups(self):
         # Checks that security groups may be added and linked to a server
         # and not deleted if the server is active.
@@ -125,7 +120,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.delete_security_group(sg2['id'])
 
     @decorators.idempotent_id('7d4e1d3c-3209-4d6d-b020-986304ebad1f')
-    @test.services('network')
     def test_update_security_groups(self):
         # Update security group name and description
         # Create a security group
@@ -144,7 +138,6 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(s_new_des, fetched_group['description'])
 
     @decorators.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
-    @test.services('network')
     def test_list_security_groups_by_server(self):
         # Create a couple security groups that we will use
         # for the server resource this test creates

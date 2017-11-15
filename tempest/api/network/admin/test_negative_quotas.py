@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 
 class QuotasNegativeTest(base.BaseAdminNetworkTest):
@@ -35,7 +35,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(QuotasNegativeTest, cls).skip_checks()
-        if not test.is_extension_enabled('quotas', 'network'):
+        if not utils.is_extension_enabled('quotas', 'network'):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
 

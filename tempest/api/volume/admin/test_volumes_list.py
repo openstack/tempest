@@ -45,9 +45,9 @@ class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
         # Create a volume in admin tenant
         adm_vol = self.admin_volume_client.create_volume(
             size=CONF.volume.volume_size)['volume']
+        self.addCleanup(self.admin_volume_client.delete_volume, adm_vol['id'])
         waiters.wait_for_volume_resource_status(self.admin_volume_client,
                                                 adm_vol['id'], 'available')
-        self.addCleanup(self.admin_volume_client.delete_volume, adm_vol['id'])
         params = {'all_tenants': 1,
                   'project_id': self.volumes_client.tenant_id}
         # Getting volume list from primary tenant using admin credentials
