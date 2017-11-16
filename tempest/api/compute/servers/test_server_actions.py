@@ -326,10 +326,22 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(
             volume_backed=True, wait_until='ACTIVE')
         self._test_resize_server_confirm(server['id'])
-        # Now do something interactive with the guest like get its console
-        # output; we don't actually care about the output, just that it doesn't
-        # raise an error.
-        self.client.get_console_output(server['id'])
+        if CONF.compute_feature_enabled.console_output:
+            # Now do something interactive with the guest like get its console
+            # output; we don't actually care about the output,
+            # just that it doesn't raise an error.
+            self.client.get_console_output(server['id'])
+        if CONF.validation.run_validation:
+            validation_resources = self.get_class_validation_resources(
+                self.os_primary)
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server, validation_resources),
+                self.ssh_user,
+                password=None,
+                pkey=validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
+            linux_client.validate_authentication()
 
     @decorators.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
