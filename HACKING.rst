@@ -84,7 +84,7 @@ For example ``self.assertIn`` can include the whole set.
 It is recommended to use testtools `matcher`_ for the more tricky assertions.
 You can implement your own specific `matcher`_ as well.
 
-.. _matcher: http://testtools.readthedocs.org/en/latest/for-test-authors.html#matchers
+.. _matcher: https://testtools.readthedocs.org/en/latest/for-test-authors.html#matchers
 
 If the test case fails you can see the related logs and the information
 carried by the exception (exception class, backtrack and exception info).
@@ -178,7 +178,7 @@ negative testing should be handled with project function tests.
 All negative tests should be based on `API-WG guideline`_ . Such negative
 tests can block any changes from accurate failure code to invalid one.
 
-.. _API-WG guideline: http://specs.openstack.org/openstack/api-wg/guidelines/http.html#failure-code-clarifications
+.. _API-WG guideline: https://specs.openstack.org/openstack/api-wg/guidelines/http.html#failure-code-clarifications
 
 If facing some gray area which is not clarified on the above guideline, propose
 a new guideline to the API-WG. With a proposal to the API-WG we will be able to
