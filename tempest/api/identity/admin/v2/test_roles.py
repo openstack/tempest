@@ -28,13 +28,10 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         for _ in range(5):
             role_name = data_utils.rand_name(name='role')
             role = cls.roles_client.create_role(name=role_name)['role']
+            cls.addClassResourceCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                cls.roles_client.delete_role, role['id'])
             cls.roles.append(role)
-
-    @classmethod
-    def resource_cleanup(cls):
-        super(RolesTestJSON, cls).resource_cleanup()
-        for role in cls.roles:
-            cls.roles_client.delete_role(role['id'])
 
     def _get_role_params(self):
         user = self.setup_test_user()
