@@ -49,8 +49,6 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.groups_client.delete_group(cls.group['id'])
         cls.users_client.delete_user(cls.user['id'])
         cls.projects_client.delete_project(cls.project['id'])
-        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
-        cls.domains_client.delete_domain(cls.domain['id'])
         super(InheritsV3TestJSON, cls).resource_cleanup()
 
     def _list_assertions(self, body, fetched_role_ids, role_id):

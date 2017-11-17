@@ -34,19 +34,6 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
             domain = cls.create_domain(enabled=i < 2)
             cls.setup_domains.append(domain)
 
-    @classmethod
-    def resource_cleanup(cls):
-        for domain in cls.setup_domains:
-            cls._delete_domain(domain['id'])
-        super(DomainsTestJSON, cls).resource_cleanup()
-
-    @classmethod
-    def _delete_domain(cls, domain_id):
-        # It is necessary to disable the domain before deleting,
-        # or else it would result in unauthorized error
-        cls.domains_client.update_domain(domain_id, enabled=False)
-        cls.domains_client.delete_domain(domain_id)
-
     @decorators.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
         # Test to list domains
@@ -92,7 +79,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         domain = self.domains_client.create_domain(
             name=d_name, description=d_desc)['domain']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self._delete_domain, domain['id'])
+                        self.delete_domain, domain['id'])
         self.assertIn('description', domain)
         self.assertIn('name', domain)
         self.assertIn('enabled', domain)
@@ -145,7 +132,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # Create domain only with name
         d_name = data_utils.rand_name('domain')
         domain = self.domains_client.create_domain(name=d_name)['domain']
-        self.addCleanup(self._delete_domain, domain['id'])
+        self.addCleanup(self.delete_domain, domain['id'])
         expected_data = {'name': d_name, 'enabled': True}
         self.assertEqual('', domain['description'])
         self.assertDictContainsSubset(expected_data, domain)

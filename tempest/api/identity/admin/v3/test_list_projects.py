@@ -51,9 +51,6 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Cleanup the projects created during setup in inverse order
         for project in reversed(cls.projects):
             cls.projects_client.delete_project(project['id'])
-        # Cleanup the domain created during setup
-        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
-        cls.domains_client.delete_domain(cls.domain['id'])
         super(ListProjectsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')

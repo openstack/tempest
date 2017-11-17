@@ -28,13 +28,6 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         super(GroupsV3TestJSON, cls).resource_setup()
         cls.domain = cls.create_domain()
 
-    @classmethod
-    def resource_cleanup(cls):
-        # Cleanup the domains created in the setup
-        cls.domains_client.update_domain(cls.domain['id'], enabled=False)
-        cls.domains_client.delete_domain(cls.domain['id'])
-        super(GroupsV3TestJSON, cls).resource_cleanup()
-
     @decorators.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')
