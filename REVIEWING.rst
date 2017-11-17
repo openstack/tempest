@@ -121,8 +121,8 @@ fix it. When it will happen, we will deal with it on a case-by-case basis.
 
 When to approve
 ---------------
- * Every patch needs two +2s before being approved.
- * Its ok to hold off on an approval until a subject matter expert reviews it
- * If a patch has already been approved but requires a trivial rebase to merge,
-   you do not have to wait for a second +2, since the patch has already had
-   two +2s.
+* Every patch needs two +2s before being approved.
+* Its ok to hold off on an approval until a subject matter expert reviews it
+* If a patch has already been approved but requires a trivial rebase to merge,
+  you do not have to wait for a second +2, since the patch has already had
+  two +2s.

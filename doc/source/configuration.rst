@@ -17,10 +17,10 @@ Test Credentials
 Tempest allows for configuring a set of admin credentials in the ``auth``
 section, via the following parameters:
 
- #. ``admin_username``
- #. ``admin_password``
- #. ``admin_project_name``
- #. ``admin_domain_name``
+#. ``admin_username``
+#. ``admin_password``
+#. ``admin_project_name``
+#. ``admin_domain_name``
 
 Admin credentials are not mandatory to run Tempest, but when provided they
 can be used to:
@@ -47,9 +47,9 @@ In order for Tempest to be able to talk to your OpenStack deployment you need
 to provide it with information about how it communicates with keystone.
 This involves configuring the following options in the ``identity`` section:
 
- - ``auth_version``
- - ``uri``
- - ``uri_v3``
+- ``auth_version``
+- ``uri``
+- ``uri_v3``
 
 The ``auth_version`` option is used to tell Tempest whether it should be using
 Keystone's v2 or v3 api for communicating with Keystone. The two uri options are
@@ -74,12 +74,12 @@ three sets of username, password, and project names for a primary user,
 an admin user, and an alternate user. To enable and use dynamic credentials you
 only need to configure two things:
 
- #. A set of admin credentials with permissions to create users and
-    projects. This is specified in the ``auth`` section with the
-    ``admin_username``, ``admin_project_name``, ``admin_domain_name`` and
-    ``admin_password`` options
- #. To enable dynamic credentials in the ``auth`` section with the
-    ``use_dynamic_credentials`` option.
+#. A set of admin credentials with permissions to create users and
+   projects. This is specified in the ``auth`` section with the
+   ``admin_username``, ``admin_project_name``, ``admin_domain_name`` and
+   ``admin_password`` options
+#. To enable dynamic credentials in the ``auth`` section with the
+   ``use_dynamic_credentials`` option.
 
 This is also currently the default credential provider enabled by Tempest, due
 to its common use and ease of configuration.
@@ -115,21 +115,21 @@ like with dynamic credentials.
 
 To enable and use locking test accounts you need do a few things:
 
- #. Create an accounts.yaml file which contains the set of pre-existing
-    credentials to use for testing. To make sure you don't have a credentials
-    starvation issue when running in parallel make sure you have at least two
-    times the number of worker processes you are using to execute Tempest
-    available in the file. (If running serially the worker count is 1.)
+#. Create an accounts.yaml file which contains the set of pre-existing
+   credentials to use for testing. To make sure you don't have a credentials
+   starvation issue when running in parallel make sure you have at least two
+   times the number of worker processes you are using to execute Tempest
+   available in the file. (If running serially the worker count is 1.)
 
-    You can check the accounts.yaml.sample file packaged in Tempest for the yaml
-    format.
- #. Provide Tempest with the location of your accounts.yaml file with the
-    ``test_accounts_file`` option in the ``auth`` section
+   You can check the accounts.yaml.sample file packaged in Tempest for the yaml
+   format.
+#. Provide Tempest with the location of your accounts.yaml file with the
+   ``test_accounts_file`` option in the ``auth`` section
 
-    *NOTE: Be sure to use a full path for the file; otherwise Tempest will
-    likely not find it.*
+   *NOTE: Be sure to use a full path for the file; otherwise Tempest will
+   likely not find it.*
 
- #. Set ``use_dynamic_credentials = False`` in the ``auth`` group
+#. Set ``use_dynamic_credentials = False`` in the ``auth`` group
 
 It is worth pointing out that each set of credentials in the accounts.yaml
 should have a unique project. This is required to provide proper isolation
@@ -162,8 +162,8 @@ For Tempest to be able to create servers you need to specify flavors that it
 can use to boot the servers with. There are two options in the Tempest config
 for doing this:
 
- #. ``flavor_ref``
- #. ``flavor_ref_alt``
+#. ``flavor_ref``
+#. ``flavor_ref_alt``
 
 Both of these options are in the ``compute`` section of the config file and take
 in the flavor id (not the name) from Nova. The ``flavor_ref`` option is what
@@ -181,8 +181,8 @@ Images
 Just like with flavors, Tempest needs to know which images to use for booting
 servers. There are two options in the compute section just like with flavors:
 
- #. ``image_ref``
- #. ``image_ref_alt``
+#. ``image_ref``
+#. ``image_ref_alt``
 
 Both options are expecting an image id (not name) from Nova. The ``image_ref``
 option is what will be used for booting the majority of servers in Tempest.
@@ -192,13 +192,13 @@ those tests will be skipped.
 
 There are also options in the ``scenario`` section for images:
 
- #. ``img_file``
- #. ``img_dir``
- #. ``aki_img_file``
- #. ``ari_img_file``
- #. ``ami_img_file``
- #. ``img_container_format``
- #. ``img_disk_format``
+#. ``img_file``
+#. ``img_dir``
+#. ``aki_img_file``
+#. ``ari_img_file``
+#. ``ami_img_file``
+#. ``img_container_format``
+#. ``img_disk_format``
 
 However, unlike the other image options, these are used for a very small subset
 of scenario tests which are uploading an image. These options are used to tell
@@ -261,7 +261,7 @@ booting.
 
 To set a fixed network name simply:
 
- #. Set the ``fixed_network_name`` option in the ``compute`` group
+#. Set the ``fixed_network_name`` option in the ``compute`` group
 
 In the case that the configured fixed network name can not be found by a user
 network list call, it will be treated like one was not provided except that a
@@ -329,9 +329,9 @@ connecting to and remotely accessing the created servers.
 
 To enable remote access to servers, there are 3 options at a minimum that are used:
 
- #. ``run_validation``
- #. ``connect_method``
- #. ``auth_method``
+#. ``run_validation``
+#. ``connect_method``
+#. ``auth_method``
 
 The ``run_validation`` is used to enable or disable ssh connectivity for
 all tests (with the exception of scenario tests which do not have a flag for
@@ -370,9 +370,9 @@ API calls for each service, it needs to know how that project is defined in the
 service catalog. There are three options for each service section to accomplish
 this:
 
- #. ``catalog_type``
- #. ``endpoint_type``
- #. ``region``
+#. ``catalog_type``
+#. ``endpoint_type``
+#. ``region``
 
 Setting ``catalog_type`` and ``endpoint_type`` should normally give Tempest
 enough information to determine which endpoint it should pull from the service

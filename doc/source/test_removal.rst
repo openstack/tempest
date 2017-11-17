@@ -29,19 +29,19 @@ Proposing a test removal
 
 In the proposal etherpad we'll be looking for answers to 3 questions
 
- #. The tests proposed for removal must have equiv. coverage in a different
-    project's test suite (whether this is another gating test project, or an in
-    tree functional test suite). For API tests preferably the other project will
-    have a similar source of friction in place to prevent breaking api changes
-    so that we don't regress and let breaking api changes slip through the
-    gate.
- #. The test proposed for removal has a failure rate <  0.50% in the gate over
-    the past release (the value and interval will likely be adjusted in the
-    future)
+#. The tests proposed for removal must have equiv. coverage in a different
+   project's test suite (whether this is another gating test project, or an in
+   tree functional test suite). For API tests preferably the other project will
+   have a similar source of friction in place to prevent breaking api changes
+   so that we don't regress and let breaking api changes slip through the
+   gate.
+#. The test proposed for removal has a failure rate <  0.50% in the gate over
+   the past release (the value and interval will likely be adjusted in the
+   future)
 
-    .. _`prong #3`:
- #. There must not be an external user/consumer of tempest
-    that depends on the test proposed for removal
+   .. _`prong #3`:
+#. There must not be an external user/consumer of tempest
+   that depends on the test proposed for removal
 
 The answers to 1 and 2 are easy to verify. For 1 just provide a link to the new
 test location. If you are linking to the tempest removal patch please also put
@@ -68,23 +68,23 @@ setUpClass or tearDownClass failures)
 
 You can access the infra mysql subunit2sql db w/ read-only permissions with:
 
- * hostname: logstash.openstack.org
- * username: query
- * password: query
- * db_name: subunit2sql
+* hostname: logstash.openstack.org
+* username: query
+* password: query
+* db_name: subunit2sql
 
 For example if you were trying to remove the test with the id:
 tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON.test_get_flavor_details_for_deleted_flavor
 you would run the following:
 
- #. run: "mysql -u query -p -h logstash.openstack.org subunit2sql" to connect
-    to the subunit2sql db
- #. run the query: MySQL [subunit2sql]> select * from tests where test_id like
-    "tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON%";
-    which will return a table of all the tests in the class (but it will also
-    catch failures in setUpClass and tearDownClass)
- #. paste the output table with numbers and the mysql command you ran to
-    generate it into the etherpad.
+#. run: "mysql -u query -p -h logstash.openstack.org subunit2sql" to connect
+   to the subunit2sql db
+#. run the query: MySQL [subunit2sql]> select * from tests where test_id like
+   "tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON%";
+   which will return a table of all the tests in the class (but it will also
+   catch failures in setUpClass and tearDownClass)
+#. paste the output table with numbers and the mysql command you ran to
+   generate it into the etherpad.
 
 Eventually a cli interface will be created to make that a bit more friendly.
 Also a dashboard is in the works so we don't need to manually run the command.
@@ -131,23 +131,23 @@ Exceptions to this procedure
 For the most part all tempest test removals have to go through this procedure
 there are a couple of exceptions though:
 
- #. The class of testing has been decided to be outside the scope of tempest.
- #. A revert for a patch which added a broken test, or testing which didn't
-    actually run in the gate (basically any revert for something which
-    shouldn't have been added)
- #. Tests that would become out of scope as a consequence of an API change,
-    as described in `API Compatibility`_.
-    Such tests cannot live in Tempest because of the branchless nature of
-    Tempest. Such test must still honor `prong #3`_.
+#. The class of testing has been decided to be outside the scope of tempest.
+#. A revert for a patch which added a broken test, or testing which didn't
+   actually run in the gate (basically any revert for something which
+   shouldn't have been added)
+#. Tests that would become out of scope as a consequence of an API change,
+   as described in `API Compatibility`_.
+   Such tests cannot live in Tempest because of the branchless nature of
+   Tempest. Such test must still honor `prong #3`_.
 
 For the first exception type the only types of testing in tree which have been
 declared out of scope at this point are:
 
- * The CLI tests (which should be completely removed at this point)
- * Neutron Adv. Services testing (which should be completely removed at this
-   point)
- * XML API Tests (which should be completely removed at this point)
- * EC2 API/boto tests (which should be completely removed at this point)
+* The CLI tests (which should be completely removed at this point)
+* Neutron Adv. Services testing (which should be completely removed at this
+  point)
+* XML API Tests (which should be completely removed at this point)
+* EC2 API/boto tests (which should be completely removed at this point)
 
 For tests that fit into this category the only criteria for removal is that
 there is equivalent testing elsewhere.
@@ -159,12 +159,12 @@ Starting in the liberty cycle tempest has defined a set of projects which
 are defined as in scope for direct testing in tempest. As of today that list
 is:
 
- * Keystone
- * Nova
- * Glance
- * Cinder
- * Neutron
- * Swift
+* Keystone
+* Nova
+* Glance
+* Cinder
+* Neutron
+* Swift
 
 anything that lives in tempest which doesn't test one of these projects can be
 removed assuming there is equivalent testing elsewhere. Preferably using the

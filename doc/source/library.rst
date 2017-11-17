@@ -44,9 +44,9 @@ ensure that we don't break backwards compatibility. For patches that change
 existing interfaces we have to be careful to make sure we don't break any
 external consumers. Some common red flags are:
 
- * a change to an existing API requires a change outside the library directory
-   where the interface is being consumed
- * a unit test has to be significantly changed to make the proposed change pass
+* a change to an existing API requires a change outside the library directory
+  where the interface is being consumed
+* a unit test has to be significantly changed to make the proposed change pass
 
 Testing
 '''''''
