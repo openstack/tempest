@@ -2,7 +2,7 @@
 Team and repository tags
 ========================
 
-.. image:: http://governance.openstack.org/badges/tempest.svg
+.. image:: https://governance.openstack.org/badges/tempest.svg
     :target: https://governance.openstack.org/tc/reference/tags/index.html
 
 .. Change things from this point on
@@ -61,7 +61,7 @@ as it is simpler, and quicker to work with.
 #. You first need to install Tempest. This is done with pip after you check out
    the Tempest repo::
 
-    $ git clone http://git.openstack.org/openstack/tempest
+    $ git clone https://git.openstack.org/openstack/tempest
     $ pip install tempest/
 
    This can be done within a venv, but the assumption for this guide is that
@@ -133,7 +133,7 @@ For more details refer to the library documentation here: :ref:`library`
 
 Release Versioning
 ------------------
-`Tempest Release Notes <http://docs.openstack.org/releasenotes/tempest>`_
+`Tempest Release Notes <https://docs.openstack.org/releasenotes/tempest>`_
 shows what changes have been released on each version.
 
 Tempest's released versions are broken into 2 sets of information. Depending on

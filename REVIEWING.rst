@@ -2,7 +2,7 @@ Reviewing Tempest Code
 ======================
 
 To start read the `OpenStack Common Review Checklist
-<http://docs.openstack.org/infra/manual/developers.html#peer-review>`_
+<https://docs.openstack.org/infra/manual/developers.html#peer-review>`_
 
 
 Ensuring code is executed
@@ -16,7 +16,7 @@ not be accepted.
 If a new test is added that depends on a new config option (like a feature
 flag), the commit message must reference a change in DevStack or DevStack-Gate
 that enables the execution of this newly introduced test. This reference could
-either be a `Cross-Repository Dependency <http://docs.openstack.org/infra/
+either be a `Cross-Repository Dependency <https://docs.openstack.org/infra/
 manual/developers.html#cross-repository-dependencies>`_ or a simple link
 to a Gerrit review.
 
