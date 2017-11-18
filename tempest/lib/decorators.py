@@ -15,7 +15,6 @@
 import functools
 import uuid
 
-import debtcollector.removals
 from oslo_log import log as logging
 import six
 import testtools
@@ -85,25 +84,6 @@ def idempotent_id(id):
             f.__doc__ = 'Test idempotent id: %s' % id
         return f
     return decorator
-
-
-@debtcollector.removals.remove(removal_version='Queen')
-class skip_unless_attr(object):
-    """Decorator to skip tests if a specified attr does not exists or False"""
-    def __init__(self, attr, msg=None):
-        self.attr = attr
-        self.message = msg or ("Test case attribute %s not found "
-                               "or False") % attr
-
-    def __call__(self, func):
-        @functools.wraps(func)
-        def _skipper(*args, **kw):
-            """Wrapped skipper function."""
-            testobj = args[0]
-            if not getattr(testobj, self.attr, False):
-                raise testtools.TestCase.skipException(self.message)
-            func(*args, **kw)
-        return _skipper
 
 
 def attr(**kwargs):

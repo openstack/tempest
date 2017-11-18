@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    Remove the deprecated decorator ``skip_unless_attr`` in lib/decorators.py.
