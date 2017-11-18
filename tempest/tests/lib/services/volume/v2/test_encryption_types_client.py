@@ -43,6 +43,10 @@ class TestEncryptionTypesClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_ENCRYPTION_SPECS_ITEM = {
+        "cipher": "aes-xts-plain64"
+    }
+
     def setUp(self):
         super(TestEncryptionTypesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -65,6 +69,13 @@ class TestEncryptionTypesClient(base.BaseServiceTest):
             self.FAKE_INFO_ENCRYPTION_TYPE,
             bytes_body, volume_type_id="cbc36478b0bd8e67e89")
 
+    def _test_show_encryption_specs_item(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_encryption_specs_item,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ENCRYPTION_SPECS_ITEM,
+            bytes_body, volume_type_id="cbc36478b0bd8e67e89", key="cipher")
+
     def test_create_encryption_type_with_str_body(self):
         self._test_create_encryption()
 
@@ -76,6 +87,12 @@ class TestEncryptionTypesClient(base.BaseServiceTest):
 
     def test_show_encryption_type_with_bytes_body(self):
         self._test_show_encryption_type(bytes_body=True)
+
+    def test_show_encryption_specs_item_with_str_body(self):
+        self._test_show_encryption_specs_item()
+
+    def test_show_encryption_specs_item_with_bytes_body(self):
+        self._test_show_encryption_specs_item(bytes_body=True)
 
     def test_delete_encryption_type(self):
         self.check_service_client_function(

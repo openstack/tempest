@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show encryption specs item API to v2 encryption_types_client library.
+    This feature enables the possibility to show specific encryption specs for
+    a volume type.
