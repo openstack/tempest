@@ -130,7 +130,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         ssh = self.get_remote_client(
             ip_address=fip['floating_ip_address'],
             username=username, server=srv)
-        return ssh, ips, srv["id"]
+        return ssh, ips, srv
 
     def turn_nic6_on(self, ssh, sid, network_id):
         """Turns the IPv6 vNIC on
@@ -161,8 +161,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                         n_subnets6=n_subnets6,
                                         dualnet=dualnet)
 
-        sshv4_1, ips_from_api_1, sid1 = self.prepare_server(networks=net_list)
-        sshv4_2, ips_from_api_2, sid2 = self.prepare_server(networks=net_list)
+        sshv4_1, ips_from_api_1, srv1 = self.prepare_server(networks=net_list)
+        sshv4_2, ips_from_api_2, srv2 = self.prepare_server(networks=net_list)
 
         def guest_has_address(ssh, addr):
             return addr in ssh.exec_command("ip address")
@@ -170,8 +170,8 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         # Turn on 2nd NIC for Cirros when dualnet
         if dualnet:
             _, network_v6 = net_list
-            self.turn_nic6_on(sshv4_1, sid1, network_v6['id'])
-            self.turn_nic6_on(sshv4_2, sid2, network_v6['id'])
+            self.turn_nic6_on(sshv4_1, srv1['id'], network_v6['id'])
+            self.turn_nic6_on(sshv4_2, srv2['id'], network_v6['id'])
 
         # get addresses assigned to vNIC as reported by 'ip address' utility
         ips_from_ip_1 = sshv4_1.exec_command("ip address")
@@ -181,13 +181,19 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         for i in range(n_subnets6):
             # v6 should be configured since the image supports it
             # It can take time for ipv6 automatic address to get assigned
-            self.assertTrue(test_utils.call_until_true(guest_has_address,
-                            CONF.validation.ping_timeout, 1,
-                            sshv4_1, ips_from_api_1['6'][i]))
-
-            self.assertTrue(test_utils.call_until_true(guest_has_address,
-                            CONF.validation.ping_timeout, 1,
-                            sshv4_2, ips_from_api_2['6'][i]))
+            for srv, ssh, ips in (
+                    (srv1, sshv4_1, ips_from_api_1),
+                    (srv2, sshv4_2, ips_from_api_2)):
+                ip = ips['6'][i]
+                result = test_utils.call_until_true(
+                    guest_has_address,
+                    CONF.validation.ping_timeout, 1, ssh, ip)
+                if not result:
+                    self._log_console_output(servers=[srv])
+                    self.fail(
+                        'Address %s not configured for instance %s, '
+                        'ip address output is\n%s' %
+                        (ip, srv['id'], ssh.exec_command("ip address")))
 
         self.check_remote_connectivity(sshv4_1, ips_from_api_2['4'])
         self.check_remote_connectivity(sshv4_2, ips_from_api_1['4'])
