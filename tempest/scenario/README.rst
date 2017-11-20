@@ -14,11 +14,11 @@ multiple OpenStack services to exercise the touch points between them.
 
 Any scenario test should have a real-life use case. An example would be:
 
- - "As operator I want to start with a blank environment":
-    1. upload a glance image
-    2. deploy a vm from it
-    3. ssh to the guest
-    4. create a snapshot of the vm
+- "As operator I want to start with a blank environment":
+  1. upload a glance image
+  2. deploy a vm from it
+  3. ssh to the guest
+  4. create a snapshot of the vm
 
 
 Why are these tests in Tempest?

@@ -33,46 +33,46 @@ project guidelines.
 Tempest will cover only integration testing of applicable microversions with
 below exceptions:
 
-  #. Test covers a feature which is important for interoperability. This covers tests requirement
-     from Defcore.
-  #. Test needed to fill Schema gaps.
-     Tempest validates API responses with defined JSON schema. API responses can be different on
-     each microversion and the JSON schemas need to be defined separately for the microversion.
-     While implementing new integration tests for a specific microversion, there
-     may be a gap in the JSON schemas (caused by previous microversions) implemented
-     in Tempest.
-     Filling that gap while implementing the new integration test cases is not efficient due to
-     many reasons:
+#. Test covers a feature which is important for interoperability. This covers tests requirement
+   from Defcore.
+#. Test needed to fill Schema gaps.
+   Tempest validates API responses with defined JSON schema. API responses can be different on
+   each microversion and the JSON schemas need to be defined separately for the microversion.
+   While implementing new integration tests for a specific microversion, there
+   may be a gap in the JSON schemas (caused by previous microversions) implemented
+   in Tempest.
+   Filling that gap while implementing the new integration test cases is not efficient due to
+   many reasons:
 
-     * Hard to review
-     * Sync between multiple integration tests patches which try to fill the same schema gap at same
-       time
-     * Might delay the microversion change on project side where project team wants Tempest
-       tests to verify the results.
+   * Hard to review
+   * Sync between multiple integration tests patches which try to fill the same schema gap at same
+     time
+   * Might delay the microversion change on project side where project team wants Tempest
+     tests to verify the results.
 
-     Tempest will allow to fill the schema gaps at the end of each cycle, or more
-     often if required.
-     Schema gap can be filled with testing those with a minimal set of tests. Those
-     tests might not be integration tests and might be already covered on project
-     side also.
-     This exception is needed because:
+   Tempest will allow to fill the schema gaps at the end of each cycle, or more
+   often if required.
+   Schema gap can be filled with testing those with a minimal set of tests. Those
+   tests might not be integration tests and might be already covered on project
+   side also.
+   This exception is needed because:
 
-     * Allow to create microversion response schema in Tempest at the same time that projects are
-       implementing their API microversions. This will make implementation easier for adding
-       required tests before a new microversion change can be merged in the corresponding project
-       and hence accelerate the development of microversions.
-     * New schema must be verified by at least one test case which exercises such schema.
+   * Allow to create microversion response schema in Tempest at the same time that projects are
+     implementing their API microversions. This will make implementation easier for adding
+     required tests before a new microversion change can be merged in the corresponding project
+     and hence accelerate the development of microversions.
+   * New schema must be verified by at least one test case which exercises such schema.
 
-     For example:
-        If any projects implemented 4 API microversion say- v2.3, v2.4, v2.5, v2.6
-        Assume microversion v2.3, v2.4, v2.6 change the API Response which means Tempest
-        needs to add JSON schema for v2.3, v2.4, v2.6.
-        In that case if only 1 or 2 tests can verify all new schemas then we do not need
-        separate tests for each new schemas. In worst case, we have to add 3 separate tests.
-  #. Test covers service behavior at large scale with involvement of more deep layer like hypervisor
-     etc not just API/DB layer. This type of tests will be added case by case basis and
-     with project team consultation about why it cannot be covered on project side and worth to test
-     in Tempest.
+   For example:
+      If any projects implemented 4 API microversion say- v2.3, v2.4, v2.5, v2.6
+      Assume microversion v2.3, v2.4, v2.6 change the API Response which means Tempest
+      needs to add JSON schema for v2.3, v2.4, v2.6.
+      In that case if only 1 or 2 tests can verify all new schemas then we do not need
+      separate tests for each new schemas. In worst case, we have to add 3 separate tests.
+#. Test covers service behavior at large scale with involvement of more deep layer like hypervisor
+   etc not just API/DB layer. This type of tests will be added case by case basis and
+   with project team consultation about why it cannot be covered on project side and worth to test
+   in Tempest.
 
 Project Scope For Microversion Testing
 """"""""""""""""""""""""""""""""""""""
@@ -294,72 +294,72 @@ Microversion tests implemented in Tempest
 
 * Compute
 
- * `2.1`_
+  * `2.1`_
 
- .. _2.1:  https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id1
+  .. _2.1:  https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id1
 
- * `2.2`_
+  * `2.2`_
 
- .. _2.2: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id2
+  .. _2.2: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id2
 
- * `2.10`_
+  * `2.10`_
 
- .. _2.10: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id9
+  .. _2.10: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id9
 
- * `2.20`_
+  * `2.20`_
 
- .. _2.20: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id18
+  .. _2.20: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id18
 
- * `2.25`_
+  * `2.25`_
 
- .. _2.25: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-mitaka
+  .. _2.25: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-mitaka
 
- * `2.32`_
+  * `2.32`_
 
- .. _2.32: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id29
+  .. _2.32: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id29
 
- * `2.37`_
+  * `2.37`_
 
- .. _2.37: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id34
+  .. _2.37: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id34
 
- * `2.42`_
+  * `2.42`_
 
- .. _2.42: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-ocata
+  .. _2.42: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-ocata
 
- * `2.47`_
+  * `2.47`_
 
- .. _2.47: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id42
+  .. _2.47: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id42
 
- * `2.48`_
+  * `2.48`_
 
- .. _2.48: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id43
+  .. _2.48: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id43
 
 * Volume
 
- * `3.3`_
+  * `3.3`_
 
- .. _3.3:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id3
+  .. _3.3:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id3
 
- * `3.9`_
+  * `3.9`_
 
- .. _3.9:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id9
+  .. _3.9:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id9
 
- * `3.11`_
+  * `3.11`_
 
- .. _3.11:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id11
+  .. _3.11:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id11
 
- * `3.12`_
+  * `3.12`_
 
- .. _3.12:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id12
+  .. _3.12:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id12
 
- * `3.14`_
+  * `3.14`_
 
- .. _3.14:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id14
+  .. _3.14:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id14
 
- * `3.19`_
+  * `3.19`_
 
- .. _3.19:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id18
+  .. _3.19:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id18
 
- * `3.20`_
+  * `3.20`_
 
- .. _3.20:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id19
+  .. _3.20:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id19

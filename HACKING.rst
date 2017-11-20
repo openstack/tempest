@@ -9,14 +9,14 @@ Tempest Specific Commandments
 ------------------------------
 
 - [T102] Cannot import OpenStack python clients in tempest/api &
-         tempest/scenario tests
+  tempest/scenario tests
 - [T104] Scenario tests require a services decorator
 - [T105] Tests cannot use setUpClass/tearDownClass
 - [T106] vim configuration should not be kept in source files.
 - [T107] Check that a service tag isn't in the module path
 - [T108] Check no hyphen at the end of rand_name() argument
 - [T109] Cannot use testtools.skip decorator; instead use
-         decorators.skip_because from tempest.lib
+  decorators.skip_because from tempest.lib
 - [T110] Check that service client names of GET should be consistent
 - [T111] Check that service client names of DELETE should be consistent
 - [T112] Check that tempest.lib should not import local tempest code
