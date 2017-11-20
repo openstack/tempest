@@ -24,7 +24,7 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
     max_microversion = 'latest'
 
     @decorators.idempotent_id('dd71e5f9-393e-4d4f-90e9-fa1b8d278864')
-    def test_group_type_create_list_show(self):
+    def test_group_type_create_list_update_show(self):
         # Create/list/show group type.
         name = data_utils.rand_name(self.__class__.__name__ + '-group-type')
         description = data_utils.rand_name("group-type-description")
@@ -46,8 +46,19 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
         self.assertIsInstance(group_list, list)
         self.assertNotEmpty(group_list)
 
+        update_params = {
+            'name': data_utils.rand_name(
+                self.__class__.__name__ + '-updated-group-type'),
+            'description': 'updated-group-type-desc'
+        }
+        updated_group_type = self.admin_group_types_client.update_group_type(
+            body['id'], **update_params)['group_type']
+        for key, expected_val in update_params.items():
+            self.assertEqual(expected_val, updated_group_type[key])
+
         fetched_group_type = self.admin_group_types_client.show_group_type(
             body['id'])['group_type']
+        params.update(update_params)  # Add updated params to original params.
         for key in params.keys():
             self.assertEqual(params[key], fetched_group_type[key],
                              '%s of the fetched group_type is different '
