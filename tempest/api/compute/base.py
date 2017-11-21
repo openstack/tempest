@@ -434,7 +434,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             # the compute API will return a 400 response.
             if volume['status'] == 'in-use':
                 self.servers_client.detach_volume(server['id'], volume['id'])
-        except exceptions.NotFound:
+        except lib_exc.NotFound:
             # Ignore 404s on detach in case the server is deleted or the volume
             # is already detached.
             pass
