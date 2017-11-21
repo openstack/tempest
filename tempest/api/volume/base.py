@@ -242,6 +242,27 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                         self.servers_client.delete_server, body['id'])
         return body
 
+    def create_group(self, **kwargs):
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name(
+                self.__class__.__name__ + '-Group')
+
+        group = self.groups_client.create_group(**kwargs)['group']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.delete_group, group['id'])
+        waiters.wait_for_volume_resource_status(
+            self.groups_client, group['id'], 'available')
+        return group
+
+    def delete_group(self, group_id, delete_volumes=True):
+        self.groups_client.delete_group(group_id, delete_volumes)
+        if delete_volumes:
+            vols = self.volumes_client.list_volumes(detail=True)['volumes']
+            for vol in vols:
+                if vol['group_id'] == group_id:
+                    self.volumes_client.wait_for_resource_deletion(vol['id'])
+        self.groups_client.wait_for_resource_deletion(group_id)
+
 
 class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
