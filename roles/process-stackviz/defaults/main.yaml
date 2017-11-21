@@ -1,0 +1,3 @@
+devstack_base_dir: /opt/stack
+stage_dir: /opt/stack/
+test_results_stage_name: test_results

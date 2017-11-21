@@ -1,0 +1,63 @@
+- name: Check if stackviz archive exists
+  stat:
+    path: "/opt/cache/files/stackviz-latest.tar.gz"
+  register: stackviz_archive
+
+- debug:
+    msg: "Stackviz archive could not be found in /opt/cache/files/stackviz-latest.tar.gz"
+  when: not stackviz_archive.stat.exists
+
+- name: Check if subunit data exists
+  stat:
+    path: "{{ stage_dir }}/{{ test_results_stage_name }}.subunit"
+  register: subunit_input
+
+- debug:
+    msg: "Subunit file could not be found at {{ stage_dir }}/{{ test_results_stage_name }}.subunit"
+  when: not subunit_input.stat.exists
+
+- name: Install stackviz
+  pip:
+    name: "file://{{ stackviz_archive.stat.path }}"
+    virtualenv: /tmp/stackviz
+    extra_args: -U
+  when:
+    - stackviz_archive.stat.exists
+    - subunit_input.stat.exists
+
+- name: Deploy stackviz static html+js
+  command: cp -pR /tmp/stackviz/share/stackviz-html {{ stage_dir }}/stackviz
+  when:
+    - stackviz_archive.stat.exists
+    - subunit_input.stat.exists
+
+- name: Check if dstat data exists
+  stat:
+    path: "{{ devstack_base_dir }}/logs/dstat-csv.log"
+  register: dstat_input
+  when:
+    - stackviz_archive.stat.exists
+    - subunit_input.stat.exists
+
+- name: Run stackviz with dstat
+  shell: |
+    cat {{ subunit_input.stat.path }} | \
+      /tmp/stackviz/bin/stackviz-export \
+        --dstat "{{ devstack_base_dir }}/logs/dstat-csv.log" \
+        --env --stdin \
+        {{ stage_dir }}/stackviz/data
+  when:
+    - stackviz_archive.stat.exists
+    - subunit_input.stat.exists
+    - dstat_input.stat.exists
+
+- name: Run stackviz without dstat
+  shell: |
+    cat {{ subunit_input.stat.path }} | \
+      /tmp/stackviz/bin/stackviz-export \
+        --env --stdin \
+        {{ stage_dir }}/stackviz/data
+  when:
+    - stackviz_archive.stat.exists
+    - subunit_input.stat.exists
+    - not dstat_input.stat.exists
