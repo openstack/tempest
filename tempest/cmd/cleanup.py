@@ -28,45 +28,48 @@ specified in ``tempest.conf`` is never deleted.
 Example Run
 -----------
 
-**WARNING: If step 1 is skipped in the example below, the cleanup procedure
-may delete resources that existed in the cloud before the test run. This
-may cause an unwanted destruction of cloud resources, so use caution with
-this command.**
+.. warning::
 
-``$ tempest cleanup --init-saved-state``
+    If step 1 is skipped in the example below, the cleanup procedure
+    may delete resources that existed in the cloud before the test run. This
+    may cause an unwanted destruction of cloud resources, so use caution with
+    this command.
 
-``$ # Actual running of Tempest tests``
+    Examples::
 
-``$ tempest cleanup``
+     $ tempest cleanup --init-saved-state
+     $ # Actual running of Tempest tests
+     $ tempest cleanup
 
 Runtime Arguments
 -----------------
 
-**--init-saved-state**: Initializes the saved state of the OpenStack deployment
-and will output a ``saved_state.json`` file containing resources from your
-deployment that will be preserved from the cleanup command. This should be
-done prior to running Tempest tests.
+* ``--init-saved-state``: Initializes the saved state of the OpenStack
+  deployment and will output a ``saved_state.json`` file containing resources
+  from your deployment that will be preserved from the cleanup command. This
+  should be done prior to running Tempest tests.
 
-**--delete-tempest-conf-objects**: If option is present, then the command will
-delete the admin project in addition to the resources associated with them on
-clean up. If option is not present, the command will delete the resources
-associated with the Tempest and alternate Tempest users and projects but will
-not delete the projects themselves.
+* ``--delete-tempest-conf-objects``: If option is present, then the command
+  will delete the admin project in addition to the resources associated with
+  them on clean up. If option is not present, the command will delete the
+  resources associated with the Tempest and alternate Tempest users and
+  projects but will not delete the projects themselves.
 
-**--dry-run**: Creates a report (``./dry_run.json``) of the projects that will
-be cleaned up (in the ``_projects_to_clean`` dictionary [1]_) and the global
-objects that will be removed (domains, flavors, images, roles, projects,
-and users). Once the cleanup command is executed (e.g. run without
-parameters), running it again with **--dry-run** should yield an empty report.
+* ``--dry-run``: Creates a report (``./dry_run.json``) of the projects that
+  will be cleaned up (in the ``_projects_to_clean`` dictionary [1]_) and the
+  global objects that will be removed (domains, flavors, images, roles,
+  projects, and users). Once the cleanup command is executed (e.g. run without
+  parameters), running it again with ``--dry-run`` should yield an empty
+  report.
 
-**--help**: Print the help text for the command and parameters.
+* ``--help``: Print the help text for the command and parameters.
 
 .. [1] The ``_projects_to_clean`` dictionary in ``dry_run.json`` lists the
     projects that ``tempest cleanup`` will loop through to delete child
     objects, but the command will, by default, not delete the projects
     themselves. This may differ from the ``projects`` list as you can clean
     the Tempest and alternate Tempest users and projects but they will not be
-    deleted unless the **--delete-tempest-conf-objects** flag is used to
+    deleted unless the ``--delete-tempest-conf-objects`` flag is used to
     force their deletion.
 
 """

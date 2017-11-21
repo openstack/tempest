@@ -21,17 +21,14 @@ API calls are made inside of a test and in what order they are called.
 Runtime Arguments
 -----------------
 
-**--subunit, -s**: (Optional) The path to the subunit file being parsed,
-defaults to stdin
-
-**--non-subunit-name, -n**: (Optional) The file_name that the logs are being
-stored in
-
-**--output-file, -o**: (Optional) The path where the JSON output will be
-written to. This contains more information than is present in stdout.
-
-**--ports, -p**: (Optional) The path to a JSON file describing the ports being
-used by different services
+* ``--subunit, -s``: (Optional) The path to the subunit file being parsed,
+  defaults to stdin
+* ``--non-subunit-name, -n``: (Optional) The file_name that the logs are being
+  stored in
+* ``--output-file, -o``: (Optional) The path where the JSON output will be
+  written to. This contains more information than is present in stdout.
+* ``--ports, -p``: (Optional) The path to a JSON file describing the ports
+  being used by different services
 
 Usage
 -----

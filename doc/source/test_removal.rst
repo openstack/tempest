@@ -62,9 +62,9 @@ and failure rates on the bottom graph. For example, something like `this URL`_.
 The Old Way using subunit2sql directly
 """"""""""""""""""""""""""""""""""""""
 
-SELECT * from tests where test_id like "%test_id%";
-(where $test_id is the full test_id, but truncated to the class because of
-setUpClass or tearDownClass failures)
+``SELECT * from tests where test_id like "%test_id%";``
+(where ``$test_id`` is the full test_id, but truncated to the class because of
+``setUpClass`` or ``tearDownClass`` failures)
 
 You can access the infra mysql subunit2sql db w/ read-only permissions with:
 
@@ -74,15 +74,20 @@ You can access the infra mysql subunit2sql db w/ read-only permissions with:
 * db_name: subunit2sql
 
 For example if you were trying to remove the test with the id:
-tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON.test_get_flavor_details_for_deleted_flavor
+``tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON.test_get_flavor_details_for_deleted_flavor``
 you would run the following:
 
-#. run: "mysql -u query -p -h logstash.openstack.org subunit2sql" to connect
-   to the subunit2sql db
-#. run the query: MySQL [subunit2sql]> select * from tests where test_id like
-   "tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON%";
+#. run the command: ``mysql -u query -p -h logstash.openstack.org subunit2sql``
+   to connect to the subunit2sql db
+#. run the query:
+
+   .. code-block:: console
+
+       MySQL [subunit2sql]> select * from tests where test_id like \
+       "tempest.api.compute.admin.test_flavors_negative.FlavorsAdminNegativeTestJSON%";
+
    which will return a table of all the tests in the class (but it will also
-   catch failures in setUpClass and tearDownClass)
+   catch failures in ``setUpClass`` and ``tearDownClass``)
 #. paste the output table with numbers and the mysql command you ran to
    generate it into the etherpad.
 

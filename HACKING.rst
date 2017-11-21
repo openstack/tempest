@@ -121,38 +121,38 @@ however they do not need to be tagged as ``compute``.
 Test fixtures and resources
 ---------------------------
 Test level resources should be cleaned-up after the test execution. Clean-up
-is best scheduled using `addCleanup` which ensures that the resource cleanup
+is best scheduled using ``addCleanup`` which ensures that the resource cleanup
 code is always invoked, and in reverse order with respect to the creation
 order.
 
-Test class level resources should be defined in the `resource_setup` method of
-the test class, except for any credential obtained from the credentials
-provider, which should be set-up in the `setup_credentials` method.
-Cleanup is best scheduled using `addClassResourceCleanup` which ensures that
+Test class level resources should be defined in the ``resource_setup`` method
+of the test class, except for any credential obtained from the credentials
+provider, which should be set-up in the ``setup_credentials`` method.
+Cleanup is best scheduled using ``addClassResourceCleanup`` which ensures that
 the cleanup code is always invoked, and in reverse order with respect to the
 creation order.
 
 In both cases - test level and class level cleanups - a wait loop should be
 scheduled before the actual delete of resources with an asynchronous delete.
 
-The test base class `BaseTestCase` defines Tempest framework for class level
-fixtures. `setUpClass` and `tearDownClass` are defined here and cannot be
+The test base class ``BaseTestCase`` defines Tempest framework for class level
+fixtures. ``setUpClass`` and ``tearDownClass`` are defined here and cannot be
 overwritten by subclasses (enforced via hacking rule T105).
 
 Set-up is split in a series of steps (setup stages), which can be overwritten
 by test classes. Set-up stages are:
 
-- `skip_checks`
-- `setup_credentials`
-- `setup_clients`
-- `resource_setup`
+- ``skip_checks``
+- ``setup_credentials``
+- ``setup_clients``
+- ``resource_setup``
 
 Tear-down is also split in a series of steps (teardown stages), which are
 stacked for execution only if the corresponding setup stage had been
 reached during the setup phase. Tear-down stages are:
 
-- `clear_credentials` (defined in the base test class)
-- `resource_cleanup`
+- ``clear_credentials`` (defined in the base test class)
+- ``resource_cleanup``
 
 Skipping Tests
 --------------
