@@ -92,7 +92,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.subnets = []
         cls.ports = []
         cls.routers = []
-        cls.floating_ips = []
         cls.ethertype = "IPv" + str(cls._ip_version)
         if cls._ip_version == 4:
             cls.cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
@@ -104,11 +103,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_cleanup(cls):
         if CONF.service_available.neutron:
-            # Clean up floating IPs
-            for floating_ip in cls.floating_ips:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.floating_ips_client.delete_floatingip,
-                    floating_ip['id'])
             # Clean up ports
             for port in cls.ports:
                 test_utils.call_and_ignore_notfound_exc(
@@ -222,7 +216,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         body = cls.floating_ips_client.create_floatingip(
             floating_network_id=external_network_id)
         fip = body['floatingip']
-        cls.floating_ips.append(fip)
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.floating_ips_client.delete_floatingip,
+                                    fip['id'])
         return fip
 
     @classmethod
