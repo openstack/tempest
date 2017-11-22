@@ -91,3 +91,28 @@ class TokensV3Test(base.BaseIdentityV3Test):
             self.assertIsNotNone(subject_name, 'Expected user name in token.')
 
         self.assertEqual(resp['methods'][0], 'password')
+
+    @decorators.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
+    def test_token_auth_creation_existence_deletion(self):
+        # Tests basic token auth functionality in a way that is compatible with
+        # pre-provisioned credentials. The default user is used for token
+        # authentication.
+
+        # Valid user's token is authenticated
+        user = self.os_primary.credentials
+        # Perform Authentication
+        resp = self.non_admin_token.auth(
+            user_id=user.user_id, password=user.password).response
+        subject_token = resp['x-subject-token']
+        self.non_admin_client.check_token_existence(subject_token)
+        # Perform GET Token
+        token_details = self.non_admin_client.show_token(
+            subject_token)['token']
+        self.assertEqual(resp['x-subject-token'], subject_token)
+        self.assertEqual(token_details['user']['id'], user.user_id)
+        self.assertEqual(token_details['user']['name'], user.username)
+        # Perform Delete Token
+        self.non_admin_client.delete_token(subject_token)
+        self.assertRaises(lib_exc.NotFound,
+                          self.non_admin_client.check_token_existence,
+                          subject_token)

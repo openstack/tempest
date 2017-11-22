@@ -19,7 +19,6 @@ from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -27,30 +26,6 @@ CONF = config.CONF
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
     credentials = ['primary', 'admin', 'alt']
-
-    @decorators.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
-    def test_tokens(self):
-        # Valid user's token is authenticated
-        # Create a User
-        u_name = data_utils.rand_name('user')
-        u_desc = '%s-description' % u_name
-        u_password = data_utils.rand_password()
-        user = self.create_test_user(
-            name=u_name, description=u_desc, password=u_password)
-        # Perform Authentication
-        resp = self.token.auth(user_id=user['id'],
-                               password=u_password).response
-        subject_token = resp['x-subject-token']
-        self.client.check_token_existence(subject_token)
-        # Perform GET Token
-        token_details = self.client.show_token(subject_token)['token']
-        self.assertEqual(resp['x-subject-token'], subject_token)
-        self.assertEqual(token_details['user']['id'], user['id'])
-        self.assertEqual(token_details['user']['name'], u_name)
-        # Perform Delete Token
-        self.client.delete_token(subject_token)
-        self.assertRaises(lib_exc.NotFound, self.client.check_token_existence,
-                          subject_token)
 
     @decorators.idempotent_id('565fa210-1da1-4563-999b-f7b5b67cf112')
     def test_rescope_token(self):
