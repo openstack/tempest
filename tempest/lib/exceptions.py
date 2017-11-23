@@ -96,7 +96,7 @@ class NotFound(ClientRestClientException):
 
 class Conflict(ClientRestClientException):
     status_code = 409
-    message = "An object with that identifier already exists"
+    message = "Conflict with state of target resource"
 
 
 class Gone(ClientRestClientException):
