@@ -40,7 +40,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
             backup_id)['restore']
 
         # Delete backup
-        self.addCleanup(self.volumes_client.delete_volume,
+        self.addCleanup(self.delete_volume, self.volumes_client,
                         restored_volume['volume_id'])
         self.assertEqual(backup_id, restored_volume['backup_id'])
         waiters.wait_for_volume_resource_status(self.backups_client,
@@ -59,8 +59,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                     "vol-meta2": "value2",
                     "vol-meta3": "value3"}
         volume = self.create_volume(metadata=metadata)
-        self.addCleanup(self.volumes_client.delete_volume,
-                        volume['id'])
+        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
 
         # Create a backup
         backup_name = data_utils.rand_name(
@@ -109,8 +108,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         """
         # Create a server
         volume = self.create_volume()
-        self.addCleanup(self.volumes_client.delete_volume,
-                        volume['id'])
+        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         server = self.create_server()
         # Attach volume to instance
         self.attach_volume(server['id'], volume['id'])
