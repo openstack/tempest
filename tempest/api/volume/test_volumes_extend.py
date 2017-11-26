@@ -18,6 +18,7 @@ import time
 import testtools
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
@@ -104,6 +105,7 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
     @decorators.idempotent_id('301f5a30-1c6f-4ea0-be1a-91fd28d44354')
     @testtools.skipUnless(CONF.volume_feature_enabled.extend_attached_volume,
                           "Attached volume extend is disabled.")
+    @utils.services('compute')
     def test_extend_attached_volume(self):
         """This is a happy path test which does the following:
 
