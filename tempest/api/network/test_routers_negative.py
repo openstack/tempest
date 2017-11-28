@@ -84,6 +84,8 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     def test_router_remove_interface_in_use_returns_409(self):
         self.routers_client.add_router_interface(self.router['id'],
                                                  subnet_id=self.subnet['id'])
+        self.addCleanup(self.routers_client.remove_router_interface,
+                        self.router['id'], subnet_id=self.subnet['id'])
         self.assertRaises(lib_exc.Conflict,
                           self.routers_client.delete_router,
                           self.router['id'])

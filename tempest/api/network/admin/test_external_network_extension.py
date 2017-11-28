@@ -130,5 +130,3 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         subnet_list = self.admin_subnets_client.list_subnets()
         self.assertNotIn(subnet['id'],
                          (s['id'] for s in subnet_list))
-        # Removes subnet from the cleanup list
-        self.subnets.remove(subnet)
