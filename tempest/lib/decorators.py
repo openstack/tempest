@@ -56,9 +56,9 @@ def related_bug(bug, status_code=None):
     """
     def decorator(f):
         @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
+        def wrapper(*func_args, **func_kwargs):
             try:
-                return f(self, *func_args, **func_kwargs)
+                return f(*func_args, **func_kwargs)
             except Exception as exc:
                 exc_status_code = getattr(exc, 'status_code', None)
                 if status_code is None or status_code == exc_status_code:

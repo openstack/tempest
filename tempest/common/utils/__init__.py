@@ -78,7 +78,7 @@ def services(*args):
         decorators.attr(type=list(args))(f)
 
         @functools.wraps(f)
-        def wrapper(self, *func_args, **func_kwargs):
+        def wrapper(*func_args, **func_kwargs):
             service_list = get_service_list()
 
             for service in args:
@@ -86,7 +86,7 @@ def services(*args):
                     msg = 'Skipped because the %s service is not available' % (
                         service)
                     raise testtools.TestCase.skipException(msg)
-            return f(self, *func_args, **func_kwargs)
+            return f(*func_args, **func_kwargs)
         return wrapper
     return decorator
 
