@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Add support of `OSProfiler library`_ for profiling and distributed
+    tracing of OpenStack. A new config option ``key`` in section ``profiler``
+    is added, the option sets the secret key used to enable profiling in
+    OpenStack services. The value needs to correspond to the one specified
+    in [profiler]/hmac_keys option of OpenStack services.
+
+    .. _OSProfiler library: https://docs.openstack.org/osprofiler/

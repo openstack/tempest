@@ -27,6 +27,7 @@ from six.moves import urllib
 
 from tempest.lib.common import http
 from tempest.lib.common import jsonschema_validator
+from tempest.lib.common import profiler
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 
@@ -131,8 +132,10 @@ class RestClient(object):
             accept_type = 'json'
         if send_type is None:
             send_type = 'json'
-        return {'Content-Type': 'application/%s' % send_type,
-                'Accept': 'application/%s' % accept_type}
+        headers = {'Content-Type': 'application/%s' % send_type,
+                   'Accept': 'application/%s' % accept_type}
+        headers.update(profiler.serialize_as_http_headers())
+        return headers
 
     def __str__(self):
         STRING_LIMIT = 80
