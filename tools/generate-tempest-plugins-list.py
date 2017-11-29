@@ -28,12 +28,12 @@ import re
 
 try:
     # For Python 3.0 and later
-    from urllib.error import HTTPError as HTTPError
+    from urllib.error import HTTPError
     import urllib.request as urllib
 except ImportError:
     # Fall back to Python 2's urllib2
     import urllib2 as urllib
-    from urllib2 import HTTPError as HTTPError
+    from urllib2 import HTTPError
 
 
 url = 'https://review.openstack.org/projects/'
