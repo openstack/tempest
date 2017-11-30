@@ -27,31 +27,26 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a domain
         cls.domain = cls.create_domain()
         # Create project with domain
-        cls.projects = list()
         cls.p1_name = data_utils.rand_name('project')
         cls.p1 = cls.projects_client.create_project(
             cls.p1_name, enabled=False,
             domain_id=cls.domain['id'])['project']
-        cls.projects.append(cls.p1)
+        cls.addClassResourceCleanup(cls.projects_client.delete_project,
+                                    cls.p1['id'])
         cls.project_ids.append(cls.p1['id'])
         # Create default project
         p2_name = data_utils.rand_name('project')
         cls.p2 = cls.projects_client.create_project(p2_name)['project']
-        cls.projects.append(cls.p2)
+        cls.addClassResourceCleanup(cls.projects_client.delete_project,
+                                    cls.p2['id'])
         cls.project_ids.append(cls.p2['id'])
         # Create a new project (p3) using p2 as parent project
         p3_name = data_utils.rand_name('project')
         cls.p3 = cls.projects_client.create_project(
             p3_name, parent_id=cls.p2['id'])['project']
-        cls.projects.append(cls.p3)
+        cls.addClassResourceCleanup(cls.projects_client.delete_project,
+                                    cls.p3['id'])
         cls.project_ids.append(cls.p3['id'])
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Cleanup the projects created during setup in inverse order
-        for project in reversed(cls.projects):
-            cls.projects_client.delete_project(project['id'])
-        super(ListProjectsTestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_list_projects(self):
