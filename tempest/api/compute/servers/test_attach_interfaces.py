@@ -78,8 +78,11 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         return port
 
-    def _check_interface(self, iface, port_id=None, network_id=None,
-                         fixed_ip=None, mac_addr=None):
+    def _check_interface(self, iface, server_id=None, port_id=None,
+                         network_id=None, fixed_ip=None, mac_addr=None):
+        if server_id:
+            iface = waiters.wait_for_interface_status(
+                self.interfaces_client, server_id, iface['port_id'], 'ACTIVE')
         if port_id:
             self.assertEqual(iface['port_id'], port_id)
         if network_id:
@@ -109,9 +112,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         network_id = ifs[0]['net_id']
         iface = self.interfaces_client.create_interface(
             server['id'], net_id=network_id)['interfaceAttachment']
-        iface = waiters.wait_for_interface_status(
-            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface, network_id=network_id)
+        self._check_interface(iface, server_id=server['id'],
+                              network_id=network_id)
         return iface
 
     def _test_create_interface_by_port_id(self, server, ifs):
@@ -121,9 +123,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.ports_client.delete_port, port_id)
         iface = self.interfaces_client.create_interface(
             server['id'], port_id=port_id)['interfaceAttachment']
-        iface = waiters.wait_for_interface_status(
-            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface, port_id=port_id, network_id=network_id)
+        self._check_interface(iface, server_id=server['id'], port_id=port_id,
+                              network_id=network_id)
         return iface
 
     def _test_create_interface_by_fixed_ips(self, server, ifs):
@@ -140,9 +141,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
         self.addCleanup(self.ports_client.delete_port, iface['port_id'])
-        iface = waiters.wait_for_interface_status(
-            self.interfaces_client, server['id'], iface['port_id'], 'ACTIVE')
-        self._check_interface(iface, fixed_ip=ip_list[0])
+        self._check_interface(iface, server_id=server['id'],
+                              fixed_ip=ip_list[0])
         return iface
 
     def _test_show_interface(self, server, ifs):
@@ -271,7 +271,8 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             # attach the port to the server
             iface = self.interfaces_client.create_interface(
                 server['id'], port_id=port_id)['interfaceAttachment']
-            self._check_interface(iface, port_id=port_id)
+            self._check_interface(iface, server_id=server['id'],
+                                  port_id=port_id)
 
             # detach the port from the server; this is a cast in the compute
             # API so we have to poll the port until the device_id is unset.
