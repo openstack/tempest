@@ -26,28 +26,28 @@ Outputs the name and path of all known tempest workspaces
 
 register
 --------
-Registers a new tempest workspace via a given --name and --path
+Registers a new tempest workspace via a given ``--name`` and ``--path``
 
 rename
 ------
-Renames a tempest workspace from --old-name to --new-name
+Renames a tempest workspace from ``--old-name`` to ``--new-name``
 
 move
 ----
-Changes the path of a given tempest workspace --name to --path
+Changes the path of a given tempest workspace ``--name`` to ``--path``
 
 remove
 ------
-Deletes the entry for a given tempest workspace --name
+Deletes the entry for a given tempest workspace ``--name``
 
---rmdir Deletes the given tempest workspace directory
+``--rmdir`` Deletes the given tempest workspace directory
 
 General Options
 ===============
 
- **--workspace_path**: Allows the user to specify a different location for the
-                       workspace.yaml file containing the workspace definitions
-                       instead of ~/.tempest/workspace.yaml
+* ``--workspace_path``: Allows the user to specify a different location for the
+  workspace.yaml file containing the workspace definitions instead of
+  ``~/.tempest/workspace.yaml``
 """
 
 import os
