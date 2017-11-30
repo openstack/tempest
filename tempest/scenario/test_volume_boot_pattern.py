@@ -208,7 +208,19 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         # boot instance from EBS image
         instance = self.create_server(image_id=image['id'])
-        # just ensure that instance booted
+
+        # Verify the server was created from the image
+        created_volume = instance['os-extended-volumes:volumes_attached']
+        self.assertNotEmpty(created_volume, "No volume attachment found.")
+        created_volume_info = self.volumes_client.show_volume(
+            created_volume[0]['id'])['volume']
+        self.assertEqual(instance['id'],
+                         created_volume_info['attachments'][0]['server_id'])
+        self.assertEqual(created_volume[0]['id'],
+                         created_volume_info['attachments'][0]['volume_id'])
+        self.assertEqual(
+            volume_origin['volume_image_metadata']['image_id'],
+            created_volume_info['volume_image_metadata']['image_id'])
 
         # delete instance
         self._delete_server(instance)
