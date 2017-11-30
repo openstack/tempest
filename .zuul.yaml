@@ -405,10 +405,12 @@
       - git.openstack.org/openstack/sahara-tests
       - git.openstack.org/openstack/senlin
       - git.openstack.org/openstack/senlin-tempest-plugin
+      - git.openstack.org/openstack/solum-tempest-plugin
       - git.openstack.org/openstack/tap-as-a-service
       - git.openstack.org/openstack/telemetry-tempest-plugin
       - git.openstack.org/openstack/tempest-horizon
       - git.openstack.org/openstack/tobiko
+      - git.openstack.org/openstack/trio2o
       - git.openstack.org/openstack/tripleo-common-tempest-plugin
       - git.openstack.org/openstack/trove-tempest-plugin
       - git.openstack.org/openstack/valet
