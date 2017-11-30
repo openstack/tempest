@@ -32,6 +32,22 @@
         ENABLE_FILE_INJECTION: True
 
 - job:
+    name: tempest-full-py3
+    parent: tempest-full
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: True
+        FORCE_CONFIG_DRIVE: True
+        ENABLE_FILE_INJECTION: False
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        # without Swift, c-bak cannot run (in the Gate at least)
+        c-bak: false
+
+- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
@@ -116,4 +132,15 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
+        - tempest-full-py3:
+            voting: false
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
