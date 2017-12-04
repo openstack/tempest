@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The tox ostestr job (normally invoked with ``tox -eostestr``) has been
+    removed. This was lightly used, and in the near future ostestr will be
+    removed from the tempest requirements file. If you were relying on this
+    functionality you can replicate it by using the venv-tempest tox job. For
+    example, simply running ``tox -evenv-tempest -- ostestr`` will do the same
+    thing the old ostestr job did.
