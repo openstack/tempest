@@ -14,6 +14,19 @@
     post-run: playbooks/post-tempest.yaml
 
 - job:
+    name: tempest-full
+    parent: devstack-tempest
+    description: |
+      Base integration test with Neutron networking and py27.
+      Former names for this job where:
+        * legacy-tempest-dsvm-neutron-full
+        * gate-tempest-dsvm-neutron-full-ubuntu-xenial
+    vars:
+      tox_venvlist: full
+      devstack_localrc:
+        ENABLE_FILE_INJECTION: True
+
+- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
@@ -98,4 +111,15 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
+        - tempest-full:
+            voting: false
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
