@@ -312,9 +312,9 @@ ComputeGroup = [
                default=0,
                help='Time in seconds before a shelved instance is eligible '
                     'for removing from a host.  -1 never offload, 0 offload '
-                    'when shelved. This time should be the same as the time '
-                    'of nova.conf, and some tests will run for as long as the '
-                    'time.'),
+                    'when shelved. This configuration value should be same as '
+                    '[nova.DEFAULT]->shelved_offload_time in nova.conf, and '
+                    'some tests will run for as long as the time.'),
     cfg.IntOpt('min_compute_nodes',
                default=1,
                help=('The minimum number of compute nodes expected. This will '
