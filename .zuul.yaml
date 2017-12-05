@@ -23,6 +23,13 @@
       tox_envlist: plugin-sanity-check
     voting: false
     timeout: 5000
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^etc/.*$
+      - ^releasenotes/.*$
+      - ^tempest/hacking/.*$
+      - ^tempest/tests/.*$
     required-projects:
       - openstack/almanach
       - openstack/aodh
