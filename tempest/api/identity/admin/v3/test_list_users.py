@@ -47,20 +47,17 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.domain_enabled_user = cls.users_client.create_user(
             name=u1_name, password=alt_password,
             email=cls.alt_email, domain_id=cls.domain['id'])['user']
+        cls.addClassResourceCleanup(cls.users_client.delete_user,
+                                    cls.domain_enabled_user['id'])
         cls.users.append(cls.domain_enabled_user)
         # Create default not enabled user
         u2_name = data_utils.rand_name('test_user')
         cls.non_domain_enabled_user = cls.users_client.create_user(
             name=u2_name, password=alt_password,
             email=cls.alt_email, enabled=False)['user']
+        cls.addClassResourceCleanup(cls.users_client.delete_user,
+                                    cls.non_domain_enabled_user['id'])
         cls.users.append(cls.non_domain_enabled_user)
-
-    @classmethod
-    def resource_cleanup(cls):
-        # Cleanup the users created during setup
-        for user in cls.users:
-            cls.users_client.delete_user(user['id'])
-        super(UsersV3TestJSON, cls).resource_cleanup()
 
     @decorators.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
     def test_list_user_domains(self):
