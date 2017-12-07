@@ -132,7 +132,7 @@ Abstract Plugin Class
 
 Plugin Structure
 ================
-While there are no hard and fast rules for the structure a plugin, there are
+While there are no hard and fast rules for the structure of a plugin, there are
 basically no constraints on what the plugin looks like as long as the 2 steps
 above are done. However,  there are some recommended patterns to follow to make
 it easy for people to contribute and work with your plugin. For example, if you
