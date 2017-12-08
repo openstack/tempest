@@ -40,10 +40,12 @@ class ConfigFixture(conf_fixture.Config):
                               group='identity')
         self.conf.set_default('neutron', True, group='service_available')
         self.conf.set_default('heat', True, group='service_available')
-        if not os.path.exists(str(os.environ.get('OS_TEST_LOCK_PATH'))):
-            os.mkdir(str(os.environ.get('OS_TEST_LOCK_PATH')))
+        lock_path = str(os.environ.get('OS_TEST_LOCK_PATH',
+                                       os.environ.get('TMPDIR', '/tmp')))
+        if not os.path.exists(lock_path):
+            os.mkdir(lock_path)
         lockutils.set_defaults(
-            lock_path=str(os.environ.get('OS_TEST_LOCK_PATH')),
+            lock_path=lock_path,
         )
         self.conf.set_default('auth_version', 'v2', group='identity')
         for config_option in ['username', 'password', 'project_name']:
