@@ -61,7 +61,7 @@ are a number of predefined phases to setUpClass that are used. The phases are:
 
 which is executed in that order. Cleanup of resources provisioned during
 the resource_setup must be scheduled right after provisioning using
-the addClassResourceCleanp helper. The resource cleanups stacked this way
+the addClassResourceCleanup helper. The resource cleanups stacked this way
 are executed in reverse order during tearDownClass, before the cleanup of
 test credentials takes place. An example of a TestCase which defines all
 of these would be::
