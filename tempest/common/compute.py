@@ -229,7 +229,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                     clients.servers_client, server['id'], wait_until)
 
                 # Multiple validatable servers are not supported for now. Their
-                # creation will fail with the condition above (l.58).
+                # creation will fail with the condition above.
                 if CONF.validation.run_validation and validatable:
                     if CONF.validation.connect_method == 'floating':
                         _setup_validation_fip()
