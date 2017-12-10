@@ -8,3 +8,5 @@ upgrade:
     * ``[identity-feature-enabled].forbid_global_implied_dsr``
     * ``[image-feature-enabled].deactivate_image``
     * ``[default].resources_prefix``
+    * config group ``orchestration``
+    * ``[service_available].heat``

@@ -37,7 +37,6 @@ CONF_USERS = None
 
 IS_CINDER = None
 IS_GLANCE = None
-IS_HEAT = None
 IS_NEUTRON = None
 IS_NOVA = None
 
@@ -60,7 +59,6 @@ def init_conf():
 
     IS_CINDER = CONF.service_available.cinder
     IS_GLANCE = CONF.service_available.glance
-    IS_HEAT = CONF.service_available.heat
     IS_NEUTRON = CONF.service_available.neutron
     IS_NOVA = CONF.service_available.nova
 
@@ -210,33 +208,6 @@ class ServerGroupService(ServerService):
     def dry_run(self):
         sgs = self.list()
         self.data['server_groups'] = sgs
-
-
-class StackService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(StackService, self).__init__(kwargs)
-        params = config.service_client_config('orchestration')
-        self.client = manager.orchestration.OrchestrationClient(
-            manager.auth_provider, **params)
-
-    def list(self):
-        client = self.client
-        stacks = client.list_stacks()['stacks']
-        LOG.debug("List count, %s Stacks", len(stacks))
-        return stacks
-
-    def delete(self):
-        client = self.client
-        stacks = self.list()
-        for stack in stacks:
-            try:
-                client.delete_stack(stack['id'])
-            except Exception:
-                LOG.exception("Delete Stack exception.")
-
-    def dry_run(self):
-        stacks = self.list()
-        self.data['stacks'] = stacks
 
 
 class KeyPairService(BaseService):
@@ -960,8 +931,6 @@ def get_project_cleanup_services():
         if not IS_NEUTRON:
             project_services.append(FloatingIpService)
         project_services.append(NovaQuotaService)
-    if IS_HEAT:
-        project_services.append(StackService)
     if IS_NEUTRON:
         project_services.append(NetworkFloatingIpService)
         if utils.is_extension_enabled('metering', 'network'):

@@ -349,7 +349,6 @@ def check_service_availability(os, update):
         'image': 'glance',
         'object_storage': 'swift',
         'compute': 'nova',
-        'orchestration': 'heat',
         'baremetal': 'ironic',
         'identity': 'keystone',
     }
