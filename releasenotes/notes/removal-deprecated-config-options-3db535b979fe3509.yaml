@@ -6,3 +6,4 @@ upgrade:
     good to handle them.
 
     * ``[identity-feature-enabled].forbid_global_implied_dsr``
+    * ``[image-feature-enabled].deactivate_image``
