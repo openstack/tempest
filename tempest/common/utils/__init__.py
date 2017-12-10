@@ -31,10 +31,9 @@ class DataUtils(object):
 
         if attr == 'rand_name':
             # NOTE(flwang): This is a proxy to generate a random name that
-            # includes a random number and a prefix if one is configured in
-            # CONF.resources_prefix
+            # includes a random number and a prefix 'tempest'
             attr_obj = partial(lib_data_utils.rand_name,
-                               prefix=CONF.resources_prefix)
+                               prefix='tempest')
         else:
             attr_obj = getattr(lib_data_utils, attr)
 

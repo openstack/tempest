@@ -241,7 +241,7 @@ class AccountTest(base.BaseObjectTest):
     @decorators.idempotent_id('365e6fc7-1cfe-463b-a37c-8bd08d47b6aa')
     def test_list_containers_with_prefix(self):
         # list containers that have a name that starts with a prefix
-        prefix = '{0}-a'.format(CONF.resources_prefix)
+        prefix = 'tempest-a'
         params = {'prefix': prefix}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
