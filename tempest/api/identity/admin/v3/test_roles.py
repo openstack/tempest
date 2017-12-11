@@ -338,14 +338,13 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         # domain role to a global one
         self._create_implied_role(domain_role1['id'], self.role['id'])
 
-        if CONF.identity_feature_enabled.forbid_global_implied_dsr:
-            # The contrary is not true: we can't create an inference rule
-            # from a global role to a domain role
-            self.assertRaises(
-                lib_exc.Forbidden,
-                self.roles_client.create_role_inference_rule,
-                self.role['id'],
-                domain_role1['id'])
+        # The contrary is not true: we can't create an inference rule
+        # from a global role to a domain role
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.roles_client.create_role_inference_rule,
+            self.role['id'],
+            domain_role1['id'])
 
     @decorators.idempotent_id('3859df7e-5b78-4e4d-b10e-214c8953842a')
     def test_assignments_for_domain_roles(self):

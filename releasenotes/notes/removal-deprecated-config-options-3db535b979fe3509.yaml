@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    Below config options or feature flags were deprecated for removal.
+    It's time to remove them as all supported stable branches are
+    good to handle them.
+
+    * ``[identity-feature-enabled].forbid_global_implied_dsr``

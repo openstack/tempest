@@ -229,17 +229,6 @@ IdentityFeatureGroup = [
                      "Empty list indicates all extensions are disabled. "
                      "To get the list of extensions run: "
                      "'openstack extension list --identity'"),
-    # TODO(rodrigods): This is a feature flag for bug 1590578 which is fixed
-    # in Newton and Ocata. This option can be removed after Mitaka is end of
-    # life.
-    cfg.BoolOpt('forbid_global_implied_dsr',
-                default=False,
-                help='Does the environment forbid global roles implying '
-                     'domain specific ones?',
-                deprecated_for_removal=True,
-                deprecated_reason="This feature flag was introduced to "
-                                  "support testing of old OpenStack versions, "
-                                  "which are not supported anymore"),
     cfg.BoolOpt('domain_specific_drivers',
                 default=False,
                 help='Are domain specific drivers enabled? '
