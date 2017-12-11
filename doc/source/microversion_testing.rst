@@ -352,6 +352,10 @@ Microversion tests implemented in Tempest
 
   .. _3.12:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id12
 
+  * `3.13`_
+
+  .. _3.13:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id13
+
   * `3.14`_
 
   .. _3.14:  https://docs.openstack.org/cinder/latest/contributor/api_microversion_history.html#id14
