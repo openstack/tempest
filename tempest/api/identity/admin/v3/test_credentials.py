@@ -32,21 +32,18 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_password()
         for _ in range(2):
-            cls.project = cls.projects_client.create_project(
+            project = cls.projects_client.create_project(
                 data_utils.rand_name('project'),
                 description=data_utils.rand_name('project-desc'))['project']
-            cls.projects.append(cls.project['id'])
+            cls.addClassResourceCleanup(
+                cls.projects_client.delete_project, project['id'])
+            cls.projects.append(project['id'])
 
         cls.user_body = cls.users_client.create_user(
             name=u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])['user']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.users_client.delete_user(cls.user_body['id'])
-        for p in cls.projects:
-            cls.projects_client.delete_project(p)
-        super(CredentialsTestJSON, cls).resource_cleanup()
+        cls.addClassResourceCleanup(
+            cls.users_client.delete_user, cls.user_body['id'])
 
     def _delete_credential(self, cred_id):
         self.creds_client.delete_credential(cred_id)

@@ -15,6 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -28,11 +29,12 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
     @classmethod
     def resource_setup(cls):
         super(EndPointGroupsTest, cls).resource_setup()
-        cls.service_ids = list()
         cls.endpoint_groups = list()
 
         # Create endpoint group so as to use it for LIST test
         service_id = cls._create_service()
+        cls.addClassResourceCleanup(
+            cls.services_client.delete_service, service_id)
 
         name = data_utils.rand_name('service_group')
         description = data_utils.rand_name('description')
@@ -42,16 +44,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
             name=name,
             description=description,
             filters=filters)['endpoint_group']
+        cls.addClassResourceCleanup(
+            cls.client.delete_endpoint_group, endpoint_group['id'])
 
         cls.endpoint_groups.append(endpoint_group)
-
-    @classmethod
-    def resource_cleanup(cls):
-        for e in cls.endpoint_groups:
-            cls.client.delete_endpoint_group(e['id'])
-        for s in cls.service_ids:
-            cls.services_client.delete_service(s)
-        super(EndPointGroupsTest, cls).resource_cleanup()
 
     @classmethod
     def _create_service(cls):
@@ -64,7 +60,6 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
                                                description=s_description))
 
         service_id = service_data['service']['id']
-        cls.service_ids.append(service_id)
         return service_id
 
     @decorators.idempotent_id('7c69e7a1-f865-402d-a2ea-44493017315a')
@@ -78,6 +73,9 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
             name=name,
             description=description,
             filters=filters)['endpoint_group']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.client.delete_endpoint_group, endpoint_group['id'])
 
         self.endpoint_groups.append(endpoint_group)
 
@@ -115,7 +113,6 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
 
         # Deleting the endpoint group created in this method
         self.client.delete_endpoint_group(endpoint_group['id'])
-        self.endpoint_groups.remove(endpoint_group)
 
         # Checking whether endpoint group is deleted successfully
         fetched_endpoints = \
@@ -136,10 +133,12 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
             name=name,
             description=description,
             filters=filters)['endpoint_group']
-        self.endpoint_groups.append(endpoint_group)
+        self.addCleanup(self.client.delete_endpoint_group,
+                        endpoint_group['id'])
 
         # Creating new attr values to update endpoint group
         service2_id = self._create_service()
+        self.addCleanup(self.services_client.delete_service, service2_id)
         name2 = data_utils.rand_name('service_group2')
         description2 = data_utils.rand_name('description2')
         filters = {'service_id': service2_id}
