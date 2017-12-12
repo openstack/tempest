@@ -369,6 +369,41 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(self.server_id)['server']
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
 
+    @decorators.idempotent_id('fbbf075f-a812-4022-bc5c-ccb8047eef12')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @utils.services('volume')
+    def test_resize_server_revert_with_volume_attached(self):
+        # Tests attaching a volume to a server instance and then resizing
+        # the instance. Once the instance is resized, revert the resize which
+        # should move the instance and volume attachment back to the original
+        # compute host.
+
+        # Create a blank volume and attach it to the server created in setUp.
+        volume = self.create_volume()
+        server = self.client.show_server(self.server_id)['server']
+        self.attach_volume(server, volume)
+        # Now resize the server with the blank volume attached.
+        self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
+        waiters.wait_for_server_status(
+            self.client, self.server_id, 'VERIFY_RESIZE')
+        # Now revert the resize which should move the instance and it's volume
+        # attachment back to the original source compute host.
+        self.client.revert_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        # Make sure everything still looks OK.
+        server = self.client.show_server(self.server_id)['server']
+        # The flavor id is not returned in the server response after
+        # microversion 2.46 so handle that gracefully.
+        if server['flavor'].get('id'):
+            self.assertEqual(self.flavor_ref, server['flavor']['id'])
+        attached_volumes = server['os-extended-volumes:volumes_attached']
+        self.assertEqual(1, len(attached_volumes))
+        self.assertEqual(volume['id'], attached_volumes[0]['id'])
+
     @decorators.idempotent_id('b963d4f1-94b3-4c40-9e97-7b583f46e470')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
