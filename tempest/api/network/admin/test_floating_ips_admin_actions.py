@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
-    force_tenant_isolation = True
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
