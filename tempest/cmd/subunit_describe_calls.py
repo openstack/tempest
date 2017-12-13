@@ -35,12 +35,14 @@ Usage
 
 subunit-describe-calls will take in either stdin subunit v1 or v2 stream or a
 file path which contains either a subunit v1 or v2 stream passed via the
---subunit parameter. This is then parsed checking for details contained in the
-file_bytes of the --non-subunit-name parameter (the default is pythonlogging
-which is what Tempest uses to store logs). By default the OpenStack Kilo
-release port defaults (http://bit.ly/22jpF5P) are used unless a file is
-provided via the --ports option. The resulting output is dumped in JSON output
-to the path provided in the --output-file option.
+``--subunit`` parameter. This is then parsed checking for details contained in
+the file_bytes of the ``--non-subunit-name`` parameter (the default is
+pythonlogging which is what Tempest uses to store logs). By default `the
+OpenStack default ports
+<https://docs.openstack.org/install-guide/firewalls-default-ports.html>`_
+are used unless a file is provided via the ``--ports`` option. The resulting
+output is dumped in JSON output to the path provided in the ``--output-file``
+option.
 
 Ports file JSON structure
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,9 +101,8 @@ class UrlParser(testtools.TestResult):
     response_re = re.compile(r'.* Response - Headers: (?P<headers>.*)')
     body_re = re.compile(r'.*Body: (?P<body>.*)')
 
-    # Based on newton defaults:
-    # http://docs.openstack.org/newton/config-reference/
-    # firewalls-default-ports.html
+    # Based on OpenStack default ports:
+    # https://docs.openstack.org/install-guide/firewalls-default-ports.html
     services = {
         "8776": "Block Storage",
         "8774": "Nova",
@@ -120,7 +121,10 @@ class UrlParser(testtools.TestResult):
         "3260": "iSCSI",
         "3306": "MySQL",
         "5672": "AMQP",
-        "8082": "murano"}
+        "8082": "murano",
+        "8778": "Clustering",
+        "8999": "Vitrage",
+        "8989": "Mistral"}
 
     def __init__(self, services=None):
         super(UrlParser, self).__init__()
