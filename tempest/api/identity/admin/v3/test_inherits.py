@@ -36,20 +36,19 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'),
             domain_id=cls.domain['id'])['project']
+        cls.addClassResourceCleanup(cls.projects_client.delete_project,
+                                    cls.project['id'])
         cls.group = cls.groups_client.create_group(
             name=data_utils.rand_name('group-'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])['group']
+        cls.addClassResourceCleanup(cls.groups_client.delete_group,
+                                    cls.group['id'])
         cls.user = cls.users_client.create_user(
             name=u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])['user']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.groups_client.delete_group(cls.group['id'])
-        cls.users_client.delete_user(cls.user['id'])
-        cls.projects_client.delete_project(cls.project['id'])
-        super(InheritsV3TestJSON, cls).resource_cleanup()
+        cls.addClassResourceCleanup(cls.users_client.delete_user,
+                                    cls.user['id'])
 
     def _list_assertions(self, body, fetched_role_ids, role_id):
         self.assertEqual(len(body), 1)
