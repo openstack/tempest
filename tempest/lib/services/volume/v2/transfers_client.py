@@ -20,8 +20,7 @@ from tempest.lib.common import rest_client
 
 
 class TransfersClient(rest_client.RestClient):
-    """Client class to send CRUD Volume Transfer V2 API requests"""
-    api_version = "v2"
+    """Client class to send CRUD Volume Transfer API requests"""
 
     def create_volume_transfer(self, **kwargs):
         """Create a volume transfer.

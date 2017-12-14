@@ -19,7 +19,6 @@ from tempest.lib.common import rest_client
 
 
 class SchedulerStatsClient(rest_client.RestClient):
-    api_version = "v2"
 
     def list_pools(self, detail=False):
         """List all the volumes pools (hosts).

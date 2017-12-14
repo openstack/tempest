@@ -20,8 +20,7 @@ from tempest.lib.common import rest_client
 
 
 class HostsClient(rest_client.RestClient):
-    """Client class to send CRUD Volume V2 API requests"""
-    api_version = "v2"
+    """Client class to send CRUD Volume API requests"""
 
     def list_hosts(self, **params):
         """Lists all hosts.

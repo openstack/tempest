@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    The volume config option ``catalog_type`` default is changed to
+    ``volumev3`` which is v3 API endpoint configured in devstack.
+    With this change Tempest will be testing v3 API as default.
+    User who want to test v2 API can still test by configuring the
+    ``catalog_type`` to v2 endpoint.

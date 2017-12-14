@@ -19,7 +19,6 @@ from tempest.lib.common import rest_client
 
 
 class AvailabilityZoneClient(rest_client.RestClient):
-    api_version = "v2"
 
     def list_availability_zones(self):
         resp, body = self.get('os-availability-zone')

@@ -19,9 +19,7 @@ from tempest.lib.common import rest_client
 
 
 class VolumeManageClient(rest_client.RestClient):
-    """Volume manage V2 client."""
-
-    api_version = "v2"
+    """Volume manage client."""
 
     def manage_volume(self, **kwargs):
         """Manage existing volume.

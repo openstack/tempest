@@ -19,8 +19,7 @@ from tempest.lib.common import rest_client
 
 
 class ExtensionsClient(rest_client.RestClient):
-    """Volume V2 extensions client."""
-    api_version = "v2"
+    """Volume extensions client."""
 
     def list_extensions(self):
         url = 'extensions'

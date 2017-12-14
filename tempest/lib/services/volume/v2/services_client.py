@@ -20,8 +20,7 @@ from tempest.lib.common import rest_client
 
 
 class ServicesClient(rest_client.RestClient):
-    """Client class to send CRUD Volume V2 API requests"""
-    api_version = "v2"
+    """Client class to send CRUD Volume API requests"""
 
     def list_services(self, **params):
         url = 'os-services'

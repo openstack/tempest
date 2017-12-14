@@ -19,12 +19,10 @@ from tempest.lib import exceptions as lib_exc
 
 
 class QosSpecsClient(rest_client.RestClient):
-    """Volume V2 QoS client.
+    """Volume QoS client.
 
        Client class to send CRUD QoS API requests
     """
-
-    api_version = "v2"
 
     def is_resource_deleted(self, qos_id):
         try:

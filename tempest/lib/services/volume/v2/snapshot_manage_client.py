@@ -19,9 +19,7 @@ from tempest.lib.common import rest_client
 
 
 class SnapshotManageClient(rest_client.RestClient):
-    """Snapshot manage V2 client."""
-
-    api_version = "v2"
+    """Snapshot manage client."""
 
     def manage_snapshot(self, **kwargs):
         """Manage a snapshot."""
