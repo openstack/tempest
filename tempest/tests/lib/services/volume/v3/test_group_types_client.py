@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
+
 from tempest.lib.services.volume.v3 import group_types_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -97,6 +99,18 @@ class TestGroupTypesClient(base.BaseServiceTest):
             self.FAKE_LIST_GROUP_TYPES,
             bytes_body)
 
+    def _test_update_group_types(self, bytes_body=False):
+        resp_body = copy.deepcopy(self.FAKE_INFO_GROUP_TYPE)
+        resp_body['group_type'].pop('created_at')
+
+        self.check_service_client_function(
+            self.client.update_group_type,
+            'tempest.lib.common.rest_client.RestClient.put',
+            resp_body,
+            bytes_body,
+            group_type_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5",
+            name='updated-group-type-name')
+
     def test_create_group_type_with_str_body(self):
         self._test_create_group_type()
 
@@ -122,3 +136,9 @@ class TestGroupTypesClient(base.BaseServiceTest):
 
     def test_list_group_types_with_bytes_body(self):
         self._test_list_group_types(bytes_body=True)
+
+    def test_update_group_types_with_str_body(self):
+        self._test_update_group_types()
+
+    def test_update_group_types_with_bytes_body(self):
+        self._test_update_group_types(bytes_body=True)

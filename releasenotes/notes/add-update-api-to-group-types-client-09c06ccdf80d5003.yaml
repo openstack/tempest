@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add update group types API to v3 ``group_types_client`` library;
+    min_microversion of this API is 3.11.

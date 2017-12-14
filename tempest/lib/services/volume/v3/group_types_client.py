@@ -75,3 +75,16 @@ class GroupTypesClient(base_client.BaseClient):
         body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def update_group_type(self, group_type_id, **kwargs):
+        """Updates a group type.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#update-group-type
+        """
+        post_body = json.dumps({'group_type': kwargs})
+        resp, body = self.put('group_types/%s' % group_type_id, post_body)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
