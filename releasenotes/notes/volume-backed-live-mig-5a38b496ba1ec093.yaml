@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new boolean configuration option
+    ``[compute-feature-enabled]/volume_backed_live_migration`` has been added.
+    If enabled, tests which validate the behavior of Nova's *volume-backed live
+    migration* feature will be executed. The option defaults to ``False``.

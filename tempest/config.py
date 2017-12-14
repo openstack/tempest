@@ -473,6 +473,10 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Does the test environment support in-place swapping of '
                      'volumes attached to a server instance?'),
+    cfg.BoolOpt('volume_backed_live_migration',
+                default=False,
+                help='Does the test environment support volume-backed live '
+                     'migration?'),
 ]
 
 
