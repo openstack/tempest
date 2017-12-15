@@ -41,3 +41,18 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
 
         self.assertRaises(lib_exc.BadRequest,
                           self.delete_volume, volume['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('aab919e2-d992-4cbb-a4ed-745c2475398c')
+    def test_attach_attached_volume_to_same_server(self):
+        # Test attaching the same volume to the same instance once
+        # it's already attached. The nova/cinder validation for this differs
+        # depending on whether or not cinder v3.27 is being used to attach
+        # the volume to the instance.
+        server = self.create_test_server(wait_until='ACTIVE')
+        volume = self.create_volume()
+
+        self.attach_volume(server, volume)
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.attach_volume, server, volume)
