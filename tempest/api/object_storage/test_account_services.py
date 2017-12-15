@@ -44,13 +44,12 @@ class AccountTest(base.BaseObjectTest):
         for i in range(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % six.int2byte(i))
             cls.container_client.update_container(name)
+            cls.addClassResourceCleanup(base.delete_containers,
+                                        [name],
+                                        cls.container_client,
+                                        cls.object_client)
             cls.containers.append(name)
         cls.containers_count = len(cls.containers)
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.delete_containers()
-        super(AccountTest, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('3499406a-ae53-4f8c-b43a-133d4dc6fe3f')
