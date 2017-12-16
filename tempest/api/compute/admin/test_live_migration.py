@@ -132,7 +132,9 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
     def test_live_block_migration_paused(self):
         self._test_live_migration(state='PAUSED')
 
-    @decorators.skip_because(bug="1524898")
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          volume_backed_live_migration,
+                          'Volume-backed live migration not available')
     @decorators.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
     @utils.services('volume')
     def test_volume_backed_live_migration(self):
