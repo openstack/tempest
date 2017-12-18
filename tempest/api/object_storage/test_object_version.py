@@ -24,16 +24,6 @@ CONF = config.CONF
 
 
 class ContainerTest(base.BaseObjectTest):
-    @classmethod
-    def resource_setup(cls):
-        super(ContainerTest, cls).resource_setup()
-        cls.containers = []
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.delete_containers()
-        super(ContainerTest, cls).resource_cleanup()
-
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)
         self.assertHeaders(resp, 'Container', 'HEAD')
@@ -52,7 +42,10 @@ class ContainerTest(base.BaseObjectTest):
         # create container
         vers_container_name = data_utils.rand_name(name='TestVersionContainer')
         resp, _ = self.container_client.update_container(vers_container_name)
-        self.containers.append(vers_container_name)
+        self.addCleanup(base.delete_containers,
+                        [vers_container_name],
+                        self.container_client,
+                        self.object_client)
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
@@ -61,7 +54,10 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container(
             base_container_name,
             **headers)
-        self.containers.append(base_container_name)
+        self.addCleanup(base.delete_containers,
+                        [base_container_name],
+                        self.container_client,
+                        self.object_client)
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
