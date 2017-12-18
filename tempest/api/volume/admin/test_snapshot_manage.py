@@ -35,6 +35,9 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
     def skip_checks(cls):
         super(SnapshotManageAdminTest, cls).skip_checks()
 
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
+
         if not CONF.volume_feature_enabled.manage_snapshot:
             raise cls.skipException("Manage snapshot tests are disabled")
 

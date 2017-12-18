@@ -16,12 +16,21 @@
 
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
+CONF = config.CONF
+
 
 class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseGroupSnapshotsTest, cls).skip_checks()
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
 
     def _create_group_snapshot(self, **kwargs):
         if 'name' not in kwargs:
