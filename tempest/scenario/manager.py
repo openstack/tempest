@@ -252,6 +252,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
         waiters.wait_for_volume_resource_status(self.snapshots_client,
                                                 snapshot['id'], 'available')
+        snapshot = self.snapshots_client.show_snapshot(
+            snapshot['id'])['snapshot']
         return snapshot
 
     def create_volume_type(self, client=None, name=None, backend_name=None):
