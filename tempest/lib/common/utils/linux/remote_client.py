@@ -31,7 +31,7 @@ def debug_ssh(function):
         except Exception as e:
             caller = test_utils.find_test_caller() or "not found"
             if not isinstance(e, tempest.lib.exceptions.SSHTimeout):
-                message = ('Initializing SSH connection to %(ip)s failed. '
+                message = ('Executing command on %(ip)s failed. '
                            'Error: %(error)s' % {'ip': self.ip_address,
                                                  'error': e})
                 message = '(%s) %s' % (caller, message)
