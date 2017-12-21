@@ -97,7 +97,7 @@ class ContainerClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/object-storage/?expanded=show-container-details-and-list-objects-detail
+        https://developer.openstack.org/api-ref/object-store/#show-container-details-and-list-objects
         """
 
         url = str(container_name)
