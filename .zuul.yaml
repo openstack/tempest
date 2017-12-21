@@ -82,7 +82,7 @@
       - openstack/neutron-vpnaas
       - openstack/nova-lxd
       - openstack/novajoin-tempest-plugin
-      - openstack/octavia
+      - openstack/octavia-tempest-plugin
       - openstack/oswin-tempest-plugin
       - openstack/panko
       - openstack/patrole
