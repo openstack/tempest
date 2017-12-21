@@ -41,3 +41,8 @@ class QuotasClient(base.BaseNetworkClient):
     def list_quotas(self, **filters):
         uri = '/quotas'
         return self.list_resources(uri, **filters)
+
+    def show_default_quotas(self, tenant_id):
+        """List default quotas for a project."""
+        uri = '/quotas/%s/default' % tenant_id
+        return self.show_resource(uri)

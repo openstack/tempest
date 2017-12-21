@@ -80,6 +80,10 @@ class QuotasTest(base.BaseAdminNetworkTest):
         non_default_quotas = self.admin_quotas_client.list_quotas()
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(project_id, q['tenant_id'])
+        quota_set = self.admin_quotas_client.show_quotas(project_id)['quota']
+        default_quotas = self.admin_quotas_client.show_default_quotas(
+            project_id)['quota']
+        self.assertEqual(default_quotas, quota_set)
 
     @decorators.idempotent_id('2390f766-836d-40ef-9aeb-e810d78207fb')
     def test_quotas(self):
