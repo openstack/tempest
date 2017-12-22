@@ -16,6 +16,12 @@ from tempest.lib.services.network import base
 class MeteringLabelRulesClient(base.BaseNetworkClient):
 
     def create_metering_label_rule(self, **kwargs):
+        """Create metering label rule.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/index.html#create-metering-label-rule
+        """
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
         return self.create_resource(uri, post_data)
@@ -29,5 +35,11 @@ class MeteringLabelRulesClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def list_metering_label_rules(self, **filters):
+        """List metering label rules.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/index.html#list-metering-label-rules
+        """
         uri = '/metering/metering-label-rules'
         return self.list_resources(uri, **filters)

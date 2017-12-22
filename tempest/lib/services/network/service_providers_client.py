@@ -16,6 +16,11 @@ from tempest.lib.services.network import base
 class ServiceProvidersClient(base.BaseNetworkClient):
 
     def list_service_providers(self, **filters):
-        """Lists service providers."""
+        """Lists service providers.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/index.html#list-service-providers
+        """
         uri = '/service-providers'
         return self.list_resources(uri, **filters)

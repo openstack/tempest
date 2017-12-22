@@ -18,6 +18,12 @@ from tempest.lib.services.network import base
 class QuotasClient(base.BaseNetworkClient):
 
     def update_quotas(self, tenant_id, **kwargs):
+        """Update quota for a project.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/index.html#update-quota-for-a-project
+        """
         put_body = {'quota': kwargs}
         uri = '/quotas/%s' % tenant_id
         return self.update_resource(uri, put_body)
