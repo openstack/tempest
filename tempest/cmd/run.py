@@ -149,7 +149,7 @@ class TempestRun(command.Command):
         discover_path = os.path.join(top_level_path, 'test_discover')
         file_contents = init.TESTR_CONF % (top_level_path, discover_path)
         with open('.testr.conf', 'w+') as testr_conf_file:
-                testr_conf_file.write(file_contents)
+            testr_conf_file.write(file_contents)
 
     def take_action(self, parsed_args):
         returncode = 0
