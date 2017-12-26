@@ -33,8 +33,6 @@ CONF = config.CONF
 
 
 class ContainerSyncTest(base.BaseObjectTest):
-    clients = {}
-
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
 
@@ -54,6 +52,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         super(ContainerSyncTest, cls).resource_setup()
         cls.containers = []
         cls.objects = []
+        cls.clients = {}
 
         # Default container-server config only allows localhost
         cls.local_ip = '127.0.0.1'
