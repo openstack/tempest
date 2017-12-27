@@ -16,8 +16,18 @@ Run Tempest
    :default: ''
 
    A regular expression used to select the tests.
+
    It works only when used with some specific tox environments
    ('all', 'all-plugin'.)
+
+   Multi-line and commented regexs can be achieved by doing this:
+
+       ::
+           vars:
+             tempest_test_regex: |
+               (?x)    # Ignore comments and whitespaces
+               # Line with only a comment.
+               (tempest\.(api|scenario|thirdparty)).*$    # Run only api scenario and third party
 
 .. zuul:rolevar:: tox_venvlist
    :default: smoke
