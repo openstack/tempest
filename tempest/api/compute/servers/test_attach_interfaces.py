@@ -185,7 +185,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @utils.services('network')
-    def test_create_list_show_delete_interfaces(self):
+    def test_create_list_show_delete_interfaces_by_network_port(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
@@ -205,6 +205,42 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         iface = self._test_create_interface_by_port_id(server, ifs)
         ifs.append(iface)
+
+        _ifs = (self.interfaces_client.list_interfaces(server['id'])
+                ['interfaceAttachments'])
+        self._compare_iface_list(ifs, _ifs)
+
+        self._test_show_interface(server, ifs)
+
+        _ifs = self._test_delete_interface(server, ifs)
+        self.assertEqual(len(ifs) - 1, len(_ifs))
+
+    @decorators.idempotent_id('d290c06c-f5b3-11e7-8ec8-002293781009')
+    @utils.services('network')
+    def test_create_list_show_delete_interfaces_by_fixed_ip(self):
+        # NOTE(zhufl) By default only project that is admin or network owner
+        # or project with role advsvc is authorised to create interfaces with
+        # fixed-ip, so if we don't create network for each project, do not
+        # test _test_create_interface_by_fixed_ips.
+        if not (CONF.auth.use_dynamic_credentials and
+                CONF.auth.create_isolated_networks and
+                not CONF.network.shared_physical_network):
+                raise self.skipException("Only owner network supports "
+                                         "creating interface by fixed ip.")
+
+        server, ifs = self._create_server_get_interfaces()
+        interface_count = len(ifs)
+        self.assertGreater(interface_count, 0)
+
+        try:
+            iface = self._test_create_interface(server)
+        except lib_exc.BadRequest as e:
+            msg = ('Multiple possible networks found, use a Network ID to be '
+                   'more specific.')
+            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
+                raise
+        else:
+            ifs.append(iface)
 
         iface = self._test_create_interface_by_fixed_ips(server, ifs)
         ifs.append(iface)
