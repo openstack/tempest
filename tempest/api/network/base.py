@@ -88,7 +88,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def resource_setup(cls):
         super(BaseNetworkTest, cls).resource_setup()
-        cls.networks = []
         cls.subnets = []
         cls.ports = []
         cls.routers = []
@@ -101,27 +100,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.mask_bits = CONF.network.project_network_v6_mask_bits
 
     @classmethod
-    def resource_cleanup(cls):
-        if CONF.service_available.neutron:
-            # Clean up ports
-            for port in cls.ports:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.ports_client.delete_port, port['id'])
-            # Clean up routers
-            for router in cls.routers:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.delete_router, router)
-            # Clean up subnets
-            for subnet in cls.subnets:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.subnets_client.delete_subnet, subnet['id'])
-            # Clean up networks
-            for network in cls.networks:
-                test_utils.call_and_ignore_notfound_exc(
-                    cls.networks_client.delete_network, network['id'])
-        super(BaseNetworkTest, cls).resource_cleanup()
-
-    @classmethod
     def create_network(cls, network_name=None, **kwargs):
         """Wrapper utility that returns a test network."""
         network_name = network_name or data_utils.rand_name(
@@ -129,7 +107,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
         body = cls.networks_client.create_network(name=network_name, **kwargs)
         network = body['network']
-        cls.networks.append(network)
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.networks_client.delete_network,
+                                    network['id'])
         return network
 
     @classmethod
@@ -172,6 +152,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             message = 'Available CIDR for subnet creation could not be found'
             raise exceptions.BuildErrorException(message)
         subnet = body['subnet']
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.subnets_client.delete_subnet,
+                                    subnet['id'])
         cls.subnets.append(subnet)
         return subnet
 
@@ -181,6 +164,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         body = cls.ports_client.create_port(network_id=network['id'],
                                             **kwargs)
         port = body['port']
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.ports_client.delete_port, port['id'])
         cls.ports.append(port)
         return port
 
@@ -207,6 +192,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             name=router_name, external_gateway_info=ext_gw_info,
             admin_state_up=admin_state_up, **kwargs)
         router = body['router']
+        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                    cls.delete_router, router)
         cls.routers.append(router)
         return router
 

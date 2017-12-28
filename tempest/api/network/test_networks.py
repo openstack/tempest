@@ -104,15 +104,6 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
         self.assertThat(actual, custom_matchers.MatchesDictExceptForKeys(
                         expected, exclude_keys))
 
-    def _delete_network(self, network):
-        # Deleting network also deletes its subnets if exists
-        self.networks_client.delete_network(network['id'])
-        if network in self.networks:
-            self.networks.remove(network)
-        for subnet in self.subnets:
-            if subnet['network_id'] == network['id']:
-                self.subnets.remove(subnet)
-
     def _create_verify_delete_subnet(self, cidr=None, mask_bits=None,
                                      **kwargs):
         network = self.create_network()
@@ -132,8 +123,6 @@ class BaseNetworkTestResources(base.BaseNetworkTest):
 
         self._compare_resource_attrs(subnet, compare_args)
         self.networks_client.delete_network(net_id)
-        self.networks.pop()
-        self.subnets.pop()
 
 
 class NetworksTest(BaseNetworkTestResources):
@@ -171,7 +160,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_create_update_delete_network_subnet(self):
         # Create a network
         network = self.create_network()
-        self.addCleanup(self._delete_network, network)
+        self.addCleanup(self.networks_client.delete_network, network['id'])
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
         # Verify network update
@@ -280,7 +269,7 @@ class NetworksTest(BaseNetworkTestResources):
         network = self.create_network()
         net_id = network['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self._delete_network, network)
+                        self.networks_client.delete_network, network['id'])
 
         # Find a cidr that is not in use yet and create a subnet with it
         subnet = self.create_subnet(network)
@@ -324,7 +313,7 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
-        self.addCleanup(self._delete_network, network)
+        self.addCleanup(self.networks_client.delete_network, network['id'])
 
         subnet = self.create_subnet(
             network, **self.subnet_dict(['gateway', 'host_routes',
@@ -622,7 +611,6 @@ class NetworksIpV6TestAttrs(BaseNetworkTestResources):
         port = self.create_port(slaac_network)
         self.assertIsNotNone(port['fixed_ips'][0]['ip_address'])
         self.subnets_client.delete_subnet(subnet_slaac['id'])
-        self.subnets.pop()
         subnets = self.subnets_client.list_subnets()
         subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
