@@ -56,6 +56,18 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             # Create a flavor with ephemeral disk
             flavor = self.create_flavor(name=flavor_name, ram=ram, vcpus=vcpus,
                                         disk=disk, ephemeral=ephem_disk)
+
+            # Set extra specs same as self.flavor_ref for the created flavor,
+            # because the environment may need some special extra specs to
+            # create server which should have been contained in
+            # self.flavor_ref.
+            extra_spec_keys = \
+                self.admin_flavors_client.list_flavor_extra_specs(
+                    self.flavor_ref)['extra_specs']
+            if extra_spec_keys:
+                self.admin_flavors_client.set_flavor_extra_spec(
+                    flavor['id'], **extra_spec_keys)
+
             return flavor['id']
 
         flavor_with_eph_disk_id = create_flavor_with_ephemeral(ephem_disk=1)
