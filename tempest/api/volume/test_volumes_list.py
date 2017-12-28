@@ -26,8 +26,8 @@ from tempest.lib import decorators
 
 
 class VolumesListTestJSON(base.BaseVolumeTest):
-    # NOTE: This test creates a number of 1G volumes. To run successfully,
-    # ensure that the backing file for the volume group that Nova uses
+    # NOTE: This test creates a number of 1G volumes. To run it successfully,
+    # ensure that the backing file for the volume group that Cinder uses
     # has space for at least 3 1G volumes!
     # If you are running a Devstack environment, ensure that the
     # VOLUME_BACKING_FILE_SIZE is at least 4G in your localrc
