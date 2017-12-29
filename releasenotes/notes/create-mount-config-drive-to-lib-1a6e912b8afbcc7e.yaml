@@ -1,0 +1,4 @@
+---
+features:
+  - A function has been added to the common library to allow mounting and
+    unmounting of the config drive consistently.

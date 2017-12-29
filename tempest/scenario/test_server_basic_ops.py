@@ -14,7 +14,6 @@
 #    under the License.
 
 import json
-import re
 
 from tempest.common import utils
 from tempest.common import waiters
@@ -94,22 +93,13 @@ class TestServerBasicOps(manager.ScenarioTest):
             result = self.servers_client.show_password(self.instance['id'])
             self.assertEqual(data, result['password'])
 
-    def _mount_config_drive(self):
-        cmd_blkid = 'blkid | grep -i config-2'
-        result = self.ssh_client.exec_command(cmd_blkid)
-        dev_name = re.match('([^:]+)', result).group()
-        self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
-
-    def _unmount_config_drive(self):
-        self.ssh_client.exec_command('sudo umount /mnt')
-
     def verify_metadata_on_config_drive(self):
         if self.run_ssh and CONF.compute_feature_enabled.config_drive:
             # Verify metadata on config_drive
-            self._mount_config_drive()
+            self.ssh_client.mount_config_drive()
             cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
             result = self.ssh_client.exec_command(cmd_md)
-            self._unmount_config_drive()
+            self.ssh_client.unmount_config_drive()
             result = json.loads(result)
             self.assertIn('meta', result)
             msg = ('Failed while verifying metadata on config_drive on server.'
@@ -119,10 +109,10 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_networkdata_on_config_drive(self):
         if self.run_ssh and CONF.compute_feature_enabled.config_drive:
             # Verify network data on config_drive
-            self._mount_config_drive()
+            self.ssh_client.mount_config_drive()
             cmd_md = 'sudo cat /mnt/openstack/latest/network_data.json'
             result = self.ssh_client.exec_command(cmd_md)
-            self._unmount_config_drive()
+            self.ssh_client.unmount_config_drive()
             result = json.loads(result)
             self.assertIn('services', result)
             self.assertIn('links', result)

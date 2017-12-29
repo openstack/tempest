@@ -264,25 +264,13 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
 
         # Verify metadata on config drive
         if CONF.compute_feature_enabled.config_drive:
-            cmd_blkid = 'blkid -t LABEL=config-2 -o device'
             LOG.info('Attempting to verify tagged devices in server %s via '
                      'the config drive.', server['id'])
-            dev_name = self.ssh_client.exec_command(cmd_blkid)
-            dev_name = dev_name.rstrip()
-            try:
-                self.ssh_client.exec_command('sudo mount %s /mnt' % dev_name)
-            except exceptions.SSHExecCommandFailed:
-                # So the command failed, let's try to know why and print some
-                # useful information.
-                lsblk = self.ssh_client.exec_command('sudo lsblk --fs --ascii')
-                LOG.error("Mounting %s on /mnt failed. Right after the "
-                          "failure 'lsblk' in the guest reported:\n%s",
-                          dev_name, lsblk)
-                raise
-
+            self.ssh_client.mount_config_drive()
             cmd_md = 'sudo cat /mnt/openstack/latest/meta_data.json'
             md_json = self.ssh_client.exec_command(cmd_md)
             self.verify_device_metadata(md_json)
+            self.ssh_client.unmount_config_drive()
 
 
 class DeviceTaggingTestV2_42(DeviceTaggingTest):
