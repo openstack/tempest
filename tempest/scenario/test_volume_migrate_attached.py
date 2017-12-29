@@ -38,6 +38,11 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     credentials = ['primary', 'admin']
 
     @classmethod
+    def setup_clients(cls):
+        super(TestVolumeMigrateRetypeAttached, cls).setup_clients()
+        cls.admin_volumes_client = cls.os_admin.volumes_v2_client
+
+    @classmethod
     def skip_checks(cls):
         super(TestVolumeMigrateRetypeAttached, cls).skip_checks()
         if not CONF.volume_feature_enabled.multi_backend:
@@ -77,7 +82,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
 
     def _volume_retype_with_migration(self, volume_id, new_volume_type):
         migration_policy = 'on-demand'
-        self.volumes_client.retype_volume(
+        self.admin_volumes_client.retype_volume(
             volume_id, new_type=new_volume_type,
             migration_policy=migration_policy)
         waiters.wait_for_volume_retype(self.volumes_client,
