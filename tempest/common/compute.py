@@ -289,7 +289,12 @@ def shelve_server(servers_client, server_id, force_shelve_offload=False):
 
 def create_websocket(url):
     url = urlparse.urlparse(url)
-    for res in socket.getaddrinfo(url.hostname, url.port,
+
+    # NOTE(mnaser): It is possible that there is no port specified, so fall
+    #               back to the default port based on the scheme.
+    port = url.port or (443 if url.scheme == 'https' else 80)
+
+    for res in socket.getaddrinfo(url.hostname, port,
                                   socket.AF_UNSPEC, socket.SOCK_STREAM):
         af, socktype, proto, _, sa = res
         client_socket = socket.socket(af, socktype, proto)
@@ -382,7 +387,12 @@ class _WebSocket(object):
         """Upgrade the HTTP connection to a WebSocket and verify."""
         # The real request goes to the /websockify URI always
         reqdata = 'GET /websockify HTTP/1.1\r\n'
-        reqdata += 'Host: %s:%s\r\n' % (url.hostname, url.port)
+        reqdata += 'Host: %s' % url.hostname
+        # Add port only if we have one specified
+        if url.port:
+            reqdata += ':%s' % url.port
+        # Line-ending for Host header
+        reqdata += '\r\n'
         # Tell the HTTP Server to Upgrade the connection to a WebSocket
         reqdata += 'Upgrade: websocket\r\nConnection: Upgrade\r\n'
         # The token=xxx is sent as a Cookie not in the URI
