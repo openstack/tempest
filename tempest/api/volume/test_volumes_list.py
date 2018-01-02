@@ -34,6 +34,19 @@ class VolumesListTestJSON(base.BaseVolumeTest):
 
     VOLUME_FIELDS = ('id', 'name')
 
+    @classmethod
+    def _remove_volatile_fields(cls, fetched_list):
+        """Remove fields that should not be compared.
+
+        This method makes sure that Tempest does not compare e.g.
+        the volume's "updated_at" field that may change for any reason
+        internal to the operation of Cinder.
+        """
+        for volume in fetched_list:
+            for field in ('updated_at',):
+                if field in volume:
+                    del volume[field]
+
     def _assert_volumes_in(self, fetched_list, expected_list, fields=None):
         """Check out the list.
 
@@ -45,6 +58,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             expected_list = map(fieldsgetter, expected_list)
             fetched_list = [fieldsgetter(item) for item in fetched_list]
 
+        # Hopefully the expected_list has already been cleaned.
+        self._remove_volatile_fields(fetched_list)
         missing_vols = [v for v in expected_list if v not in fetched_list]
         if not missing_vols:
             return
@@ -72,6 +87,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             volume = cls.volumes_client.show_volume(volume['id'])['volume']
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
+        cls._remove_volatile_fields(cls.volume_list)
 
     def _list_by_param_value_and_assert(self, params, with_detail=False):
         """list or list_details with given params and validates result"""
