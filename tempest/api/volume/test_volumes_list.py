@@ -34,7 +34,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
 
     VOLUME_FIELDS = ('id', 'name')
 
-    def assertVolumesIn(self, fetched_list, expected_list, fields=None):
+    def _assert_volumes_in(self, fetched_list, expected_list, fields=None):
         """Check out the list.
 
         This function is aim at check out whether all of the volumes in
@@ -103,15 +103,15 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         # Get a list of Volumes
         # Fetch all volumes
         fetched_list = self.volumes_client.list_volumes()['volumes']
-        self.assertVolumesIn(fetched_list, self.volume_list,
-                             fields=self.VOLUME_FIELDS)
+        self._assert_volumes_in(fetched_list, self.volume_list,
+                                fields=self.VOLUME_FIELDS)
 
     @decorators.idempotent_id('adcbb5a7-5ad8-4b61-bd10-5380e111a877')
     def test_volume_list_with_details(self):
         # Get a list of Volumes with details
         # Fetch all Volumes
         fetched_list = self.volumes_client.list_volumes(detail=True)['volumes']
-        self.assertVolumesIn(fetched_list, self.volume_list)
+        self._assert_volumes_in(fetched_list, self.volume_list)
 
     @decorators.idempotent_id('a28e8da4-0b56-472f-87a8-0f4d3f819c02')
     def test_volume_list_by_name(self):
@@ -137,8 +137,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         fetched_list = self.volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
-        self.assertVolumesIn(fetched_list, self.volume_list,
-                             fields=self.VOLUME_FIELDS)
+        self._assert_volumes_in(fetched_list, self.volume_list,
+                                fields=self.VOLUME_FIELDS)
 
     @decorators.idempotent_id('2943f712-71ec-482a-bf49-d5ca06216b9f')
     def test_volumes_list_details_by_status(self):
@@ -147,7 +147,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual('available', volume['status'])
-        self.assertVolumesIn(fetched_list, self.volume_list)
+        self._assert_volumes_in(fetched_list, self.volume_list)
 
     @decorators.idempotent_id('2016a942-3020-40d7-95ce-7613bf8407ce')
     def test_volumes_list_by_bootable(self):
@@ -160,8 +160,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         fetched_list = self.volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
-        self.assertVolumesIn(fetched_list, self.volume_list,
-                             fields=self.VOLUME_FIELDS)
+        self._assert_volumes_in(fetched_list, self.volume_list,
+                                fields=self.VOLUME_FIELDS)
 
     @decorators.idempotent_id('2016a939-72ec-482a-bf49-d5ca06216b9f')
     def test_volumes_list_details_by_bootable(self):
@@ -170,7 +170,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual('false', volume['bootable'])
-        self.assertVolumesIn(fetched_list, self.volume_list)
+        self._assert_volumes_in(fetched_list, self.volume_list)
 
     @decorators.idempotent_id('c0cfa863-3020-40d7-b587-e35f597d5d87')
     def test_volumes_list_by_availability_zone(self):
@@ -180,8 +180,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         fetched_list = self.volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
-        self.assertVolumesIn(fetched_list, self.volume_list,
-                             fields=self.VOLUME_FIELDS)
+        self._assert_volumes_in(fetched_list, self.volume_list,
+                                fields=self.VOLUME_FIELDS)
 
     @decorators.idempotent_id('e1b80d13-94f0-4ba2-a40e-386af29f8db1')
     def test_volumes_list_details_by_availability_zone(self):
@@ -192,7 +192,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual(zone, volume['availability_zone'])
-        self.assertVolumesIn(fetched_list, self.volume_list)
+        self._assert_volumes_in(fetched_list, self.volume_list)
 
     @decorators.idempotent_id('b5ebea1b-0603-40a0-bb41-15fcd0a53214')
     def test_volume_list_with_param_metadata(self):
