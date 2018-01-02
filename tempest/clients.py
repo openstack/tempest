@@ -234,7 +234,9 @@ class Manager(clients.ServiceClients):
             self.volumes_client = self.volume_v1.VolumesClient()
             self.volumes_extension_client = self.volume_v1.ExtensionsClient()
 
-        if CONF.volume_feature_enabled.api_v2:
+        # if only api_v3 is enabled, all these clients should be available
+        if (CONF.volume_feature_enabled.api_v2 or
+            CONF.volume_feature_enabled.api_v3):
             self.backups_v2_client = self.volume_v2.BackupsClient()
             self.encryption_types_v2_client = \
                 self.volume_v2.EncryptionTypesClient()
