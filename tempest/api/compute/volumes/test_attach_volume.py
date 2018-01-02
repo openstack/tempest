@@ -23,12 +23,12 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class AttachVolumeTestJSON(base.BaseV2ComputeTest):
-    max_microversion = '2.19'
+class BaseAttachVolumeTest(base.BaseV2ComputeTest):
+    """Base class for the attach volume tests in this module."""
 
     @classmethod
     def skip_checks(cls):
-        super(AttachVolumeTestJSON, cls).skip_checks()
+        super(BaseAttachVolumeTest, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -36,11 +36,11 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
-        super(AttachVolumeTestJSON, cls).setup_credentials()
+        super(BaseAttachVolumeTest, cls).setup_credentials()
 
     @classmethod
     def resource_setup(cls):
-        super(AttachVolumeTestJSON, cls).resource_setup()
+        super(BaseAttachVolumeTest, cls).resource_setup()
         cls.device = CONF.compute.volume_device_name
 
     def _create_server(self):
@@ -57,6 +57,9 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         server['addresses'] = self.servers_client.list_addresses(
             server['id'])['addresses']
         return server, validation_resources
+
+
+class AttachVolumeTestJSON(BaseAttachVolumeTest):
 
     @decorators.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     def test_attach_detach_volume(self):
@@ -149,7 +152,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
                 self.volumes_client, attachment['volumeId'], 'available')
 
 
-class AttachVolumeShelveTestJSON(AttachVolumeTestJSON):
+class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
     """Testing volume with shelved instance.
 
     This test checks the attaching and detaching volumes from
