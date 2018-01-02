@@ -36,10 +36,14 @@ def delete_containers(containers, container_client, object_client):
     using HA proxy sync the deletion properly, otherwise, the container
     might fail to be deleted because it's not empty.
 
-    :param containers: List of containers to be deleted
+    :param containers: List of containers(or string of a container)
+                       to be deleted
     :param container_client: Client to be used to delete containers
     :param object_client: Client to be used to delete objects
     """
+    if isinstance(containers, str):
+        containers = [containers]
+
     for cont in containers:
         try:
             params = {'limit': 9999, 'format': 'json'}
