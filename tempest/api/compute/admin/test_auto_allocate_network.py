@@ -84,8 +84,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         nets = cls.networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
-            raise lib_excs.TempestException(
-                'Found shared networks: %s' % nets)
+            raise cls.skipException('Found shared networks: %s' % nets)
 
     @classmethod
     def resource_cleanup(cls):
