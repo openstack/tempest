@@ -41,7 +41,7 @@ class TestBaseTestCase(base.TestCase):
     def test_get_tenant_network(self, mock_gtn, mock_gprov, mock_gcm):
         net_client = mock.Mock()
         mock_prov = mock.Mock()
-        mock_gcm.return_value.compute_networks_client = net_client
+        mock_gcm.return_value.networks_client = net_client
         mock_gprov.return_value = mock_prov
 
         test.BaseTestCase.get_tenant_network()
@@ -85,7 +85,7 @@ class TestBaseTestCase(base.TestCase):
                                                mock_gcm):
         net_client = mock.Mock()
         mock_prov = mock.Mock()
-        mock_gcm.return_value.compute_networks_client = net_client
+        mock_gcm.return_value.networks_client = net_client
         mock_gprov.return_value = mock_prov
 
         test.BaseTestCase.get_tenant_network(credentials_type='alt')
@@ -102,7 +102,7 @@ class TestBaseTestCase(base.TestCase):
                                                 mock_gcm):
         net_client = mock.Mock()
         mock_prov = mock.Mock()
-        mock_gcm.return_value.compute_networks_client = net_client
+        mock_gcm.return_value.networks_client = net_client
         mock_gprov.return_value = mock_prov
         creds = ['foo_type', 'role1']
 

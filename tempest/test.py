@@ -836,7 +836,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             manager = cls.get_client_manager()
 
         # Make sure cred_provider exists and get a network client
-        networks_client = manager.compute_networks_client
+        networks_client = manager.networks_client
         cred_provider = cls._get_credentials_provider()
         # In case of nova network, isolated tenants are not able to list the
         # network configured in fixed_network_name, even if they can use it
