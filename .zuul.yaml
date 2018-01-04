@@ -16,6 +16,8 @@
 - job:
     name: tempest-full
     parent: devstack-tempest
+    # This currently only works on the master branch.
+    branches: master
     description: |
       Base integration test with Neutron networking and py27.
       Former names for this job where:
