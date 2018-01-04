@@ -17,7 +17,10 @@
     name: tempest-full
     parent: devstack-tempest
     # This currently only works on the master branch.
-    branches: master
+    # NOTE(andreaf) Only run on master for now.
+    # The negative lookup is redudant but it's a
+    # reminder that we don't want the job running there.
+    branches: ^(?!driverfixes/)master$
     description: |
       Base integration test with Neutron networking and py27.
       Former names for this job where:
