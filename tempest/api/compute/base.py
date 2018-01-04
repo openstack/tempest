@@ -176,11 +176,12 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.request_microversion)
         v2_37_version = api_version_request.APIVersionRequest('2.37')
 
+        tenant_network = cls.get_tenant_network()
         # NOTE(snikitin): since microversion v2.37 'networks' field is required
-        if request_version >= v2_37_version and 'networks' not in kwargs:
+        if (request_version >= v2_37_version and 'networks' not in kwargs and
+            not tenant_network):
             kwargs['networks'] = 'none'
 
-        tenant_network = cls.get_tenant_network()
         body, servers = compute.create_test_server(
             cls.os_primary,
             validatable,
