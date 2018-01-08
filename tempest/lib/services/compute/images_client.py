@@ -17,12 +17,17 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import images as schema
+from tempest.lib.api_schema.response.compute.v2_45 import images as schemav245
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import base_compute_client
 
 
 class ImagesClient(base_compute_client.BaseComputeClient):
+
+    schema_versions_info = [
+        {'min': None, 'max': '2.44', 'schema': schema},
+        {'min': '2.45', 'max': None, 'schema': schemav245}]
 
     def create_image(self, server_id, **kwargs):
         """Create an image of the original server.
@@ -36,7 +41,10 @@ class ImagesClient(base_compute_client.BaseComputeClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
-        self.validate_response(schema.create_image, resp, body)
+        _schema = self.get_schema(self.schema_versions_info)
+        if body:
+            body = json.loads(body)
+        self.validate_response(_schema.create_image, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_images(self, detail=False, **params):

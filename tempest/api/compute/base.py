@@ -99,6 +99,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.versions_client = cls.os_primary.compute_versions_client
         if CONF.service_available.cinder:
             cls.volumes_client = cls.os_primary.volumes_client_latest
+        if CONF.service_available.glance:
+            if CONF.image_feature_enabled.api_v1:
+                cls.images_client = cls.os_primary.image_client
+            elif CONF.image_feature_enabled.api_v2:
+                cls.images_client = cls.os_primary.image_client_v2
+            else:
+                raise lib_exc.InvalidConfiguration(
+                    'Either api_v1 or api_v2 must be True in '
+                    '[image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):
@@ -254,7 +263,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
-        """Wrapper utility that returns an image created from the server."""
+        """Wrapper utility that returns an image created from the server.
+
+        If compute microversion >= 2.36, the returned image response will
+        be from the image service API rather than the compute image proxy API.
+        """
         name = kwargs.pop('name',
                           data_utils.rand_name(cls.__name__ + "-image"))
         wait_until = kwargs.pop('wait_until', None)
@@ -267,14 +280,21 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             image_id = image['image_id']
         else:
             image_id = data_utils.parse_image_id(image.response['location'])
+
+        # The compute image proxy APIs were deprecated in 2.35 so
+        # use the images client directly if the API microversion being
+        # used is >=2.36.
+        if api_version_utils.compare_version_header_to_response(
+                "OpenStack-API-Version", "compute 2.36", image.response, "lt"):
+            client = cls.images_client
+        else:
+            client = cls.compute_images_client
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
-                                    cls.compute_images_client.delete_image,
-                                    image_id)
+                                    client.delete_image, image_id)
 
         if wait_until is not None:
             try:
-                waiters.wait_for_image_status(cls.compute_images_client,
-                                              image_id, wait_until)
+                waiters.wait_for_image_status(client, image_id, wait_until)
             except lib_exc.NotFound:
                 if wait_until.upper() == 'ACTIVE':
                     # If the image is not found after create_image returned
@@ -292,7 +312,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                             image_id=image_id)
                 else:
                     raise
-            image = cls.compute_images_client.show_image(image_id)['image']
+            image = client.show_image(image_id)
+            # Compute image client returns response wrapped in 'image' element
+            # which is not the case with Glance image client.
+            if 'image' in image:
+                image = image['image']
 
             if wait_until.upper() == 'ACTIVE':
                 if wait_for_server:

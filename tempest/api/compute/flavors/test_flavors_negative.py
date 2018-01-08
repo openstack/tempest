@@ -30,18 +30,6 @@ CONF = config.CONF
 
 class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
 
-    @classmethod
-    def setup_clients(cls):
-        super(FlavorsV2NegativeTest, cls).setup_clients()
-        if CONF.image_feature_enabled.api_v1:
-            cls.images_client = cls.os_primary.image_client
-        elif CONF.image_feature_enabled.api_v2:
-            cls.images_client = cls.os_primary.image_client_v2
-        else:
-            raise lib_exc.InvalidConfiguration(
-                'Either api_v1 or api_v2 must be True in '
-                '[image-feature-enabled].')
-
     @decorators.attr(type=['negative'])
     @utils.services('image')
     @decorators.idempotent_id('90f0d93a-91c1-450c-91e6-07d18172cefe')
