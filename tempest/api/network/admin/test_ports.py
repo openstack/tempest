@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import socket
-
 from tempest.api.network import base
 from tempest import config
 from tempest.lib import decorators
@@ -25,10 +23,16 @@ CONF = config.CONF
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @classmethod
+    def setup_clients(cls):
+        super(PortsAdminExtendedAttrsTestJSON, cls).setup_clients()
+        cls.hyper_client = cls.os_admin.hypervisor_client
+
+    @classmethod
     def resource_setup(cls):
         super(PortsAdminExtendedAttrsTestJSON, cls).resource_setup()
         cls.network = cls.create_network()
-        cls.host_id = socket.gethostname()
+        hyper_list = cls.hyper_client.list_hypervisors()
+        cls.host_id = hyper_list['hypervisors'][0]['hypervisor_hostname']
 
     @decorators.idempotent_id('8e8569c1-9ac7-44db-8bc1-f5fb2814f29b')
     def test_create_port_binding_ext_attr(self):
