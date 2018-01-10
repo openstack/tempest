@@ -43,12 +43,6 @@ class TestServerBasicOps(manager.ScenarioTest):
      * Terminate the instance
     """
 
-    @classmethod
-    def skip_checks(cls):
-        super(TestServerBasicOps, cls).skip_checks()
-        if not CONF.network_feature_enabled.floating_ips:
-            raise cls.skipException("Floating ips are not available")
-
     def setUp(self):
         super(TestServerBasicOps, self).setUp()
         self.run_ssh = CONF.validation.run_validation
@@ -56,11 +50,17 @@ class TestServerBasicOps(manager.ScenarioTest):
 
     def verify_ssh(self, keypair):
         if self.run_ssh:
-            # Obtain a floating IP
-            self.fip = self.create_floating_ip(self.instance)['ip']
+            # Obtain a floating IP if floating_ips is enabled
+            if (CONF.network_feature_enabled.floating_ips and
+                CONF.network.floating_network_name):
+                self.ip = self.create_floating_ip(self.instance)['ip']
+            else:
+                server = self.servers_client.show_server(
+                    self.instance['id'])['server']
+                self.ip = self.get_server_ip(server)
             # Check ssh
             self.ssh_client = self.get_remote_client(
-                ip_address=self.fip,
+                ip_address=self.ip,
                 username=self.ssh_user,
                 private_key=keypair['private_key'],
                 server=self.instance)
@@ -75,8 +75,8 @@ class TestServerBasicOps(manager.ScenarioTest):
                 result = self.ssh_client.exec_command(cmd)
                 if result:
                     msg = ('Failed while verifying metadata on server. Result '
-                           'of command "%s" is NOT "%s".' % (cmd, self.fip))
-                    self.assertEqual(self.fip, result, msg)
+                           'of command "%s" is NOT "%s".' % (cmd, self.ip))
+                    self.assertEqual(self.ip, result, msg)
                     return 'Verification is successful!'
 
             if not test_utils.call_until_true(exec_cmd_and_verify_output,
