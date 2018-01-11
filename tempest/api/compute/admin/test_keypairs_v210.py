@@ -34,7 +34,8 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
             k_name = data_utils.rand_name('keypair')
             keypair = self.create_keypair(k_name,
                                           keypair_type='ssh',
-                                          user_id=user_id)
+                                          user_id=user_id,
+                                          client=self.client)
             self.assertEqual(k_name, keypair['name'],
                              "The created keypair name is not equal "
                              "to the requested name!")
@@ -56,7 +57,8 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
         self.assertEqual(user_id, keypair_detail['user_id'],
                          "The fetched keypair is not for requested user!")
         # Create a admin keypair
-        admin_keypair = self.create_keypair(keypair_type='ssh')
+        admin_keypair = self.create_keypair(keypair_type='ssh',
+                                            client=self.client)
         admin_keypair.pop('private_key', None)
         admin_keypair.pop('user_id')
 

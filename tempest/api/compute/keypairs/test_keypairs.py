@@ -35,7 +35,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
             key_list.append(keypair)
         # Fetch all keypairs and verify the list
         # has all created keypairs
-        fetched_list = self.client.list_keypairs()['keypairs']
+        fetched_list = self.keypairs_client.list_keypairs()['keypairs']
         new_list = list()
         for keypair in fetched_list:
             new_list.append(keypair['keypair'])
@@ -61,7 +61,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair')
         self.create_keypair(k_name)
-        keypair_detail = self.client.show_keypair(k_name)['keypair']
+        keypair_detail = self.keypairs_client.show_keypair(k_name)['keypair']
         self.assertEqual(keypair_detail['name'], k_name,
                          "The created keypair name is not equal "
                          "to requested name")
