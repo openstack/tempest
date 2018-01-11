@@ -125,3 +125,27 @@ class TestCLIClient(base.TestCase):
                          mock_execute.call_args[0][2])
         self.assertNotIn('--os-project-domain-name',
                          mock_execute.call_args[0][2])
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_default_api_version(self, mock_execute):
+        cli = cli_base.CLIClient()
+        cli.openstack('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertNotIn('--os-identity-api-version ',
+                         mock_execute.call_args[0][2])
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_empty_api_version(self, mock_execute):
+        cli = cli_base.CLIClient(identity_api_version='')
+        cli.openstack('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertNotIn('--os-identity-api-version ',
+                         mock_execute.call_args[0][2])
+
+    @mock.patch.object(cli_base, 'execute')
+    def test_execute_with_explicit_api_version(self, mock_execute):
+        cli = cli_base.CLIClient(identity_api_version='0.0')
+        cli.openstack('action')
+        self.assertEqual(mock_execute.call_count, 1)
+        self.assertIn('--os-identity-api-version 0.0 ',
+                      mock_execute.call_args[0][2])

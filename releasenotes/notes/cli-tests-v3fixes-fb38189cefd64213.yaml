@@ -1,0 +1,9 @@
+---
+other:
+  - |
+    The CLIClient class, when it calls a command line client, uses
+    --os-project-name instead of --os-tenant-name for the project, and
+    passes --os-identity-api-version (default empty).
+    All CLI clients still available in supported releases of OpenStack
+    which are wrapped by the cmd_with_auth() method support those
+    switches.
