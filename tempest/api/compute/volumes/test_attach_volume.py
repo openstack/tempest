@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import utils
@@ -418,13 +420,24 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
         # might still exist.
         self.volumes_client.wait_for_resource_deletion(volume['id'])
 
+    @decorators.idempotent_id('f01c7169-a124-4fc7-ae60-5e380e247c9c')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    def test_resize_server_with_multiattached_volume(self):
+        # Attach a single volume to multiple servers, then resize the servers
+        servers, volume, _ = self._create_and_multiattach()
+
+        for server in servers:
+            self.resize_server(server['id'], self.flavor_ref_alt)
+
+        for server in servers:
+            self._detach_multiattach_volume(volume['id'], server['id'])
+
     # TODO(mriedem): Might be interesting to create a bootable multiattach
     # volume with delete_on_termination=True, create server1 from the
     # volume, then attach it to server2, and then delete server1 in which
     # case the volume won't be deleted because it's still attached to
     # server2 and make sure the volume is still attached to server2.
-
-    # TODO(mriedem): Test migration with a multiattached volume.
 
     # TODO(mriedem): Test swap_volume with a multiattach volume (admin-only).
     # That test would live in tempest.api.compute.admin.test_volume_swap.
