@@ -21,7 +21,7 @@
   when: num_cores|int > 3
 
 - name: Run Tempest
-  command: tox -e {{tox_venvlist}} -- {{tempest_test_regex|quote}} --concurrency={{tempest_concurrency|default(default_concurrency)}}
+  command: tox -e {{tox_envlist}} -- {{tempest_test_regex|quote}} --concurrency={{tempest_concurrency|default(default_concurrency)}}
   args:
     chdir: "{{devstack_base_dir}}/tempest"
   become: true

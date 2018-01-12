@@ -24,7 +24,7 @@
         * legacy-tempest-dsvm-neutron-full
         * gate-tempest-dsvm-neutron-full-ubuntu-xenial
     vars:
-      tox_venvlist: full
+      tox_envlist: full
       devstack_localrc:
         ENABLE_FILE_INJECTION: True
 
