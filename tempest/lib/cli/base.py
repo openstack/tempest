@@ -101,12 +101,15 @@ class CLIClient(object):
     :type project_domain_name: string
     :param project_domain_id: Project's domain ID
     :type project_domain_id: string
+    :param identity_api_version: Version of the Identity API
+    :type identity_api_version: string
     """
 
     def __init__(self, username='', password='', tenant_name='', uri='',
                  cli_dir='', insecure=False, prefix='', user_domain_name=None,
                  user_domain_id=None, project_domain_name=None,
-                 project_domain_id=None, *args, **kwargs):
+                 project_domain_id=None, identity_api_version=None, *args,
+                 **kwargs):
         """Initialize a new CLIClient object."""
         super(CLIClient, self).__init__()
         self.cli_dir = cli_dir if cli_dir else '/usr/bin'
@@ -120,6 +123,7 @@ class CLIClient(object):
         self.user_domain_id = user_domain_id
         self.project_domain_name = project_domain_name
         self.project_domain_id = project_domain_id
+        self.identity_api_version = identity_api_version
 
     def nova(self, action, flags='', params='', fail_ok=False,
              endpoint_type='publicURL', merge_stderr=False):
@@ -374,12 +378,15 @@ class CLIClient(object):
         :param merge_stderr:  if True the stderr buffer is merged into stdout
         :type merge_stderr: boolean
         """
-        creds = ('--os-username %s --os-tenant-name %s --os-password %s '
+        creds = ('--os-username %s --os-project-name %s --os-password %s '
                  '--os-auth-url %s' %
                  (self.username,
                   self.tenant_name,
                   self.password,
                   self.uri))
+        if self.identity_api_version:
+            creds += ' --os-identity-api-version %s' % (
+                self.identity_api_version)
         if self.user_domain_name is not None:
             creds += ' --os-user-domain-name %s' % self.user_domain_name
         if self.user_domain_id is not None:
