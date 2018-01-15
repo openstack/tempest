@@ -139,6 +139,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
 
         server = self.create_test_server(
             validatable=True,
+            wait_until='ACTIVE',
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
             adminPass=admin_pass,
@@ -205,6 +206,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
 
         self.addCleanup(self.delete_server, server['id'])
 
+        server = self.servers_client.show_server(server['id'])['server']
         self.ssh_client = remote_client.RemoteClient(
             self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
