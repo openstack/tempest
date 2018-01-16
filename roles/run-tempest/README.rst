@@ -29,7 +29,7 @@ Run Tempest
                # Line with only a comment.
                (tempest\.(api|scenario|thirdparty)).*$    # Run only api scenario and third party
 
-.. zuul:rolevar:: tox_venvlist
+.. zuul:rolevar:: tox_envlist
    :default: smoke
 
    The Tempest tox environment to run.
