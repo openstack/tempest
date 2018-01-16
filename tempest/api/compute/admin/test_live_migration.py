@@ -50,8 +50,6 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
         # a subnet so the instance being migrated has a single port, but
         # we need that to make sure we are properly updating the port
         # host bindings during the live migration.
-        # TODO(mriedem): SSH validation before and after the instance is
-        # live migrated would be a nice test wrinkle addition.
         cls.set_network_resources(network=True, subnet=True)
         super(LiveMigrationTestBase, cls).setup_credentials()
 

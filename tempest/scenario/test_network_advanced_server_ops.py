@@ -230,6 +230,32 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         self.assertNotEqual(src_host, dst_host)
 
+    @decorators.idempotent_id('03fd1562-faad-11e7-9ea0-fa163e65f5ce')
+    @testtools.skipUnless(CONF.compute_feature_enabled.live_migration,
+                          'Live migration is not available.')
+    @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
+                          'Less than 2 compute nodes, skipping multinode '
+                          'tests.')
+    @decorators.attr(type='slow')
+    @utils.services('compute', 'network')
+    def test_server_connectivity_live_migration(self):
+        keypair = self.create_keypair()
+        server = self._setup_server(keypair)
+        floating_ip = self._setup_network(server, keypair)
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
+
+        block_migration = (CONF.compute_feature_enabled.
+                           block_migration_for_live_migration)
+        self.admin_servers_client.live_migrate_server(
+            server['id'], host=None, block_migration=block_migration,
+            disk_over_commit=False)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
+
     @decorators.skip_because(bug='1788403')
     @decorators.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
