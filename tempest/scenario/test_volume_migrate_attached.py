@@ -81,6 +81,8 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         return source_body['name'], dest_body['name']
 
     def _volume_retype_with_migration(self, volume_id, new_volume_type):
+        # NOTE: The 'on-demand' migration requires admin operation, so
+        # admin_volumes_client() should be used here.
         migration_policy = 'on-demand'
         self.admin_volumes_client.retype_volume(
             volume_id, new_type=new_volume_type,
