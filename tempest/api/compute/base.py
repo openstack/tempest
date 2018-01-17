@@ -376,6 +376,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                                        'VERIFY_RESIZE')
         cls.servers_client.confirm_resize_server(server_id)
         waiters.wait_for_server_status(cls.servers_client, server_id, 'ACTIVE')
+        server = cls.servers_client.show_server(server_id)['server']
+        if new_flavor_id != server['flavor']['id']:
+            msg = ('Flavor id of %s is not equal to new_flavor_id.'
+                   % server_id)
+            raise lib_exc.TempestException(msg)
 
     @classmethod
     def delete_volume(cls, volume_id):

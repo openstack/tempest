@@ -195,6 +195,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'VERIFY_RESIZE')
         self.servers_client.confirm_resize_server(server['id'])
+        server = self.servers_client.show_server(server['id'])['server']
+        self.assertEqual(resize_flavor, server['flavor']['id'])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
