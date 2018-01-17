@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
 import sys
 
 import netaddr
@@ -25,6 +26,7 @@ LOG = logging.getLogger(__name__)
 
 def debug_ssh(function):
     """Decorator to generate extra debug info in case off SSH failure"""
+    @functools.wraps(function)
     def wrapper(self, *args, **kwargs):
         try:
             return function(self, *args, **kwargs)
