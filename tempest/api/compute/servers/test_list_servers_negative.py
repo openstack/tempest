@@ -119,8 +119,12 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('74745ad8-b346-45b5-b9b8-509d7447fc1f')
     def test_list_servers_by_changes_since_future_date(self):
-        # Return an empty list when a date in the future is passed
-        changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
+        # Return an empty list when a date in the future is passed.
+        # updated_at field may haven't been set at the point in the boot
+        # process where build_request still exists, so add
+        # {'status': 'ACTIVE'} along with changes-since as filter.
+        changes_since = {'changes-since': '2051-01-01T12:34:00Z',
+                         'status': 'ACTIVE'}
         body = self.client.list_servers(**changes_since)
         self.assertEmpty(body['servers'])
 
