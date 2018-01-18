@@ -103,21 +103,24 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_nonexistent_volume_type(self):
         # Should not be able to create volume with non-existent volume type
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
-                          size='1', volume_type=data_utils.rand_uuid())
+                          size=CONF.volume.volume_size,
+                          volume_type=data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0c36f6ae-4604-4017-b0a9-34fdc63096f9')
     def test_create_volume_with_nonexistent_snapshot_id(self):
         # Should not be able to create volume with non-existent snapshot
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
-                          size='1', snapshot_id=data_utils.rand_uuid())
+                          size=CONF.volume.volume_size,
+                          snapshot_id=data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('47c73e08-4be8-45bb-bfdf-0c4e79b88344')
     def test_create_volume_with_nonexistent_source_volid(self):
         # Should not be able to create volume with non-existent source volume
         self.assertRaises(lib_exc.NotFound, self.volumes_client.create_volume,
-                          size='1', source_volid=data_utils.rand_uuid())
+                          size=CONF.volume.volume_size,
+                          source_volid=data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
