@@ -2,7 +2,6 @@
   become: true
   vars:
     logs_root: "{{ devstack_base_dir|default('/opt/stack') }}"
-    stage_dir: "{{ devstack_base_dir|default('/opt/stack') }}"
     test_results_stage_name: 'test_results'
   roles:
     - role: process-test-results
