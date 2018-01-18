@@ -112,6 +112,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('ca3ea6f7-ed08-4a61-adbd-96906456ad31')
     def test_list_endpoints_for_token(self):
+        tempest_services = ['keystone', 'nova', 'neutron', 'swift', 'cinder',
+                            'neutron']
         # get a token for the user
         creds = self.os_primary.credentials
         username = creds.username
@@ -125,9 +127,10 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIsInstance(endpoints, list)
         # Store list of service names
         service_names = [e['name'] for e in endpoints]
-        # Get the list of available services.
+        # Get the list of available services. Keystone is always available.
         available_services = [s[0] for s in list(
-            CONF.service_available.items()) if s[1] is True]
+            CONF.service_available.items()) if s[1] is True] + ['keystone']
         # Verify that all available services are present.
-        for service in available_services:
-            self.assertIn(service, service_names)
+        for service in tempest_services:
+            if service in available_services:
+                self.assertIn(service, service_names)
