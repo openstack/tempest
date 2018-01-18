@@ -541,13 +541,6 @@ ImageFeaturesGroup = [
                                   'are current one. In future, Tempest will '
                                   'test v2 APIs only so this config option '
                                   'will be removed.'),
-    cfg.BoolOpt('deactivate_image',
-                default=False,
-                help="Is the deactivate-image feature enabled."
-                     " The feature has been integrated since Kilo.",
-                deprecated_for_removal=True,
-                deprecated_reason="All supported versions of OpenStack now "
-                                  "support the 'deactivate_image' feature"),
 ]
 
 network_group = cfg.OptGroup(name='network',

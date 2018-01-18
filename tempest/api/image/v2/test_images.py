@@ -18,8 +18,6 @@ import random
 
 import six
 
-import testtools
-
 from oslo_log import log as logging
 from tempest.api.image import base
 from tempest import config
@@ -128,8 +126,6 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(image['id'], body['id'])
         self.assertEqual(new_image_name, body['name'])
 
-    @testtools.skipUnless(CONF.image_feature_enabled.deactivate_image,
-                          'deactivate-image is not available.')
     @decorators.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')
     def test_deactivate_reactivate_image(self):
         # Create image
