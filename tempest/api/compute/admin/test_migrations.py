@@ -77,6 +77,16 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         )['flavor']
         self.addCleanup(self._flavor_clean_up, flavor['id'])
 
+        # Set extra specs same as self.flavor_ref for the created flavor,
+        # because the environment may need some special extra specs to
+        # create server which should have been contained in
+        # self.flavor_ref.
+        extra_spec_keys = self.admin_flavors_client.list_flavor_extra_specs(
+            self.flavor_ref)['extra_specs']
+        if extra_spec_keys:
+            self.admin_flavors_client.set_flavor_extra_spec(
+                flavor['id'], **extra_spec_keys)
+
         # Now boot a server with the copied flavor.
         server = self.create_test_server(
             wait_until='ACTIVE', flavor=flavor['id'])
