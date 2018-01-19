@@ -102,13 +102,13 @@ def call_until_true(func, duration, sleep_for, *args, **kwargs):
     now = time.time()
     begin_time = now
     timeout = now + duration
+    func_name = getattr(func, '__name__', getattr(func.__class__, '__name__'))
     while now < timeout:
         if func(*args, **kwargs):
             LOG.debug("Call %s returns true in %f seconds",
-                      getattr(func, '__name__'), time.time() - begin_time)
+                      func_name, time.time() - begin_time)
             return True
         time.sleep(sleep_for)
         now = time.time()
-    LOG.debug("Call %s returns false in %f seconds",
-              getattr(func, '__name__'), duration)
+    LOG.debug("Call %s returns false in %f seconds", func_name, duration)
     return False
