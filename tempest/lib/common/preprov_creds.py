@@ -344,11 +344,11 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         net_creds = cred_provider.TestResources(credential)
         net_clients = clients.ServiceClients(credentials=credential,
                                              identity_uri=self.identity_uri)
-        compute_network_client = net_clients.compute.NetworksClient()
+        networks_client = net_clients.network.NetworksClient()
         net_name = self.hash_dict['networks'].get(hash, None)
         try:
             network = fixed_network.get_network_from_name(
-                net_name, compute_network_client)
+                net_name, networks_client)
         except lib_exc.InvalidTestResource:
             network = {}
         net_creds.set_resources(network=network)

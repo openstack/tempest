@@ -339,7 +339,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             return_value=test_accounts))
         test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
-        with mock.patch('tempest.lib.services.compute.networks_client.'
+        with mock.patch('tempest.lib.services.network.networks_client.'
                         'NetworksClient.list_networks',
                         return_value={'networks': [{'name': 'network-2',
                                                     'id': 'fake-id',

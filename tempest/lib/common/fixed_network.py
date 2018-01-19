@@ -38,7 +38,12 @@ def get_network_from_name(name, compute_networks_client):
         raise exceptions.InvalidTestResource(type='network', name=name)
 
     networks = compute_networks_client.list_networks()['networks']
-    networks = [n for n in networks if n['label'] == name]
+    # NOTE(zhufl) compute networks_client uses 'label' as network name field,
+    # while neutron networks_client uses 'name' as network name field.
+    try:
+        networks = [n for n in networks if n['label'] == name]
+    except KeyError:
+        networks = [n for n in networks if n['name'] == name]
 
     # Check that a network exists, else raise an InvalidConfigurationException
     if len(networks) == 1:
