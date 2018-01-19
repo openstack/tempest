@@ -51,7 +51,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         agents = cls.admin_agents_client.list_agents(
             agent_type=AGENT_TYPE)['agents']
         for agent in agents:
-            if agent['configurations']['agent_mode'] in AGENT_MODES:
+            if (agent['configurations']['agent_mode'] in AGENT_MODES and
+                agent['alive']):
                 cls.agent = agent
                 break
         else:
