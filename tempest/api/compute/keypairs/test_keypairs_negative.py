@@ -34,7 +34,8 @@ class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     def test_keypair_delete_nonexistent_key(self):
         # Non-existent key deletion should throw a proper error
         k_name = data_utils.rand_name("keypair-non-existent")
-        self.assertRaises(lib_exc.NotFound, self.client.delete_keypair,
+        self.assertRaises(lib_exc.NotFound,
+                          self.keypairs_client.delete_keypair,
                           k_name)
 
     @decorators.attr(type=['negative'])
@@ -58,11 +59,11 @@ class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     def test_create_keypair_with_duplicate_name(self):
         # Keypairs with duplicate names should not be created
         k_name = data_utils.rand_name('keypair')
-        self.client.create_keypair(name=k_name)
+        self.keypairs_client.create_keypair(name=k_name)
         # Now try the same keyname to create another key
         self.assertRaises(lib_exc.Conflict, self.create_keypair,
                           k_name)
-        self.client.delete_keypair(k_name)
+        self.keypairs_client.delete_keypair(k_name)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1398abe1-4a84-45fb-9294-89f514daff00')

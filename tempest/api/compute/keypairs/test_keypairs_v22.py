@@ -32,9 +32,9 @@ class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
         # Verify whether 'type' is present in keypair create response of
         # version 2.2 and it is with default value 'ssh'.
         self._check_keypair_type(keypair, keypair_type)
-        keypair_detail = self.client.show_keypair(k_name)['keypair']
+        keypair_detail = self.keypairs_client.show_keypair(k_name)['keypair']
         self._check_keypair_type(keypair_detail, keypair_type)
-        fetched_list = self.client.list_keypairs()['keypairs']
+        fetched_list = self.keypairs_client.list_keypairs()['keypairs']
         for keypair in fetched_list:
             # Verify whether 'type' is present in keypair list response of
             # version 2.2 and it is with default value 'ssh'.

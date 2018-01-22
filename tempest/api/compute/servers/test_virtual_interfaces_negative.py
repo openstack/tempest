@@ -28,11 +28,6 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         cls.set_network_resources()
         super(VirtualInterfacesNegativeTestJSON, cls).setup_credentials()
 
-    @classmethod
-    def setup_clients(cls):
-        super(VirtualInterfacesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
-
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
     @utils.services('network')
@@ -41,5 +36,5 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
         # for an invalid server_id
         invalid_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.list_virtual_interfaces,
+                          self.servers_client.list_virtual_interfaces,
                           invalid_server_id)
