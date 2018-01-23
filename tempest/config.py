@@ -65,9 +65,7 @@ AuthGroup = [
                 deprecated_opts=[cfg.DeprecatedOpt('allow_tenant_isolation',
                                                    group='auth'),
                                  cfg.DeprecatedOpt('allow_tenant_isolation',
-                                                   group='compute'),
-                                 cfg.DeprecatedOpt('allow_tenant_isolation',
-                                                   group='orchestration')]),
+                                                   group='compute')]),
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
                 default=[]),
@@ -909,66 +907,6 @@ ObjectStoreFeaturesGroup = [
                 help="Execute discoverability tests"),
 ]
 
-orchestration_group = cfg.OptGroup(name='orchestration',
-                                   title='Orchestration Service Options')
-
-OrchestrationGroup = [
-    cfg.StrOpt('catalog_type',
-               default='orchestration',
-               help="Catalog type of the Orchestration service.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.StrOpt('region',
-               default='',
-               help="The orchestration region name to use. If empty, the "
-                    "value of identity.region is used instead. If no such "
-                    "region is found in the service catalog, the first found "
-                    "one is used.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               choices=['public', 'admin', 'internal',
-                        'publicURL', 'adminURL', 'internalURL'],
-               help="The endpoint type to use for the orchestration service.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.StrOpt('stack_owner_role', default='heat_stack_owner',
-               help='Role required for users to be able to manage stacks',
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.IntOpt('build_interval',
-               default=1,
-               help="Time in seconds between build status checks.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.IntOpt('build_timeout',
-               default=1200,
-               help="Timeout in seconds to wait for a stack to build.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.StrOpt('instance_type',
-               default='m1.micro',
-               help="Instance type for tests. Needs to be big enough for a "
-                    "full OS plus the test workload",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.StrOpt('keypair_name',
-               help="Name of existing keypair to launch servers with.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.IntOpt('max_template_size',
-               default=524288,
-               help="Value must match heat configuration of the same name.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-    cfg.IntOpt('max_resources_per_stack',
-               default=1000,
-               help="Value must match heat configuration of the same name.",
-               deprecated_for_removal=True,
-               deprecated_reason='Heat support will be removed from Tempest'),
-]
-
 
 scenario_group = cfg.OptGroup(name='scenario', title='Scenario Test Options')
 
@@ -1030,11 +968,6 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('nova',
                 default=True,
                 help="Whether or not nova is expected to be available"),
-    cfg.BoolOpt('heat',
-                default=False,
-                help="Whether or not Heat is expected to be available",
-                deprecated_for_removal=True,
-                deprecated_reason='Heat support will be removed from Tempest'),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1091,7 +1024,6 @@ _opts = [
     (volume_feature_group, VolumeFeaturesGroup),
     (object_storage_group, ObjectStoreGroup),
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
-    (orchestration_group, OrchestrationGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
     (debug_group, DebugGroup),
@@ -1158,7 +1090,6 @@ class TempestConfigPrivate(object):
         self.object_storage = _CONF['object-storage']
         self.object_storage_feature_enabled = _CONF[
             'object-storage-feature-enabled']
-        self.orchestration = _CONF.orchestration
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
         self.debug = _CONF.debug

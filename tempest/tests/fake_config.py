@@ -39,7 +39,6 @@ class ConfigFixture(conf_fixture.Config):
         self.conf.set_default('uri_v3', 'http://fake_uri_v3.com/auth',
                               group='identity')
         self.conf.set_default('neutron', True, group='service_available')
-        self.conf.set_default('heat', True, group='service_available')
         lock_path = str(os.environ.get('OS_TEST_LOCK_PATH',
                                        os.environ.get('TMPDIR', '/tmp')))
         if not os.path.exists(lock_path):
