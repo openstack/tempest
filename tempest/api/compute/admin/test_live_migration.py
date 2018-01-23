@@ -230,8 +230,8 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
             while data not in console_output and t <= 120.0:
                 try:
                     ws.send_frame(data)
-                    recieved = ws.receive_frame()
-                    console_output += recieved
+                    received = ws.receive_frame()
+                    console_output += received
                 except Exception:
                     # In case we had an issue with send/receive on the
                     # websocket connection, we create a new one.
