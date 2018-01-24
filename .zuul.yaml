@@ -33,12 +33,18 @@
 
 - job:
     name: tempest-full-py3
-    parent: tempest-full
+    parent: devstack-tempest
+    branches: ^(?!driverfixes/)master$
+    description: |
+      Base integration test with Neutron networking and py3.
+      Former names for this job where:
+        * legacy-tempest-dsvm-py35
+        * gate-tempest-dsvm-py35
     vars:
+      tox_envlist: full
       devstack_localrc:
         USE_PYTHON3: True
         FORCE_CONFIG_DRIVE: True
-        ENABLE_FILE_INJECTION: False
       devstack_services:
         s-account: false
         s-container: false
@@ -133,7 +139,6 @@
               - ^roles/
               - ^.zuul.yaml$
         - tempest-full-py3:
-            voting: false
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
