@@ -1,6 +1,6 @@
 ---
 fixes:
   - |
-    Fix list_group_snapshots API in v3 group_snapshots_client： Bug#1715786.
+    Fix list_group_snapshots API in v3 group_snapshots_client: Bug#1715786.
     The url path for list group snapshots with details API is changed from
     ``?detail=True`` to ``/detail``.
