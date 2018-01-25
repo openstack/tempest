@@ -183,3 +183,13 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
                                          disk_format='raw')
         self.addCleanup(self.client.delete_image, image['id'])
         return image['id']
+
+
+class BaseV2ImageAdminTest(BaseV2ImageTest):
+
+    credentials = ['admin', 'primary']
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseV2ImageAdminTest, cls).setup_clients()
+        cls.admin_client = cls.os_admin.image_client_v2
