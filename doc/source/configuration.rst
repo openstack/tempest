@@ -400,7 +400,7 @@ changed.
     Examples:
 
     * Good - ``http://example.com:1234/v2.0``
-    * Wouldn’t work -  ``http://example.com:1234/xyz/v2.0/``
+    * Wouldn't work -  ``http://example.com:1234/xyz/v2.0/``
       (adding prefix/suffix around version etc)
 
 Service Feature Configuration

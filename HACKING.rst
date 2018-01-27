@@ -385,7 +385,7 @@ following procedure::
 
 Otherwise the bug fix won't be able to land in the project.
 
-Handily, `Zuul’s cross-repository dependencies
+Handily, `Zuul's cross-repository dependencies
 <https://docs.openstack.org/infra/zuul/user/gating.html#cross-project-dependencies>`_.
 can be leveraged to do without step 2 and to have steps 3 and 4 happen
 "atomically". To do that, make the patch written in step 1 to depend (refer to
