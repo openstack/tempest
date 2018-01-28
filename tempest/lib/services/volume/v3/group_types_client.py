@@ -88,3 +88,54 @@ class GroupTypesClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def create_or_update_group_type_specs(self, group_type_id, group_specs):
+        """Creates new group specs or updates existing group specs.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-specs-for-a-group-type
+        """
+        url = "group_types/%s/group_specs" % group_type_id
+        post_body = json.dumps({'group_specs': group_specs})
+        resp, body = self.post(url, post_body)
+        body = json.loads(body)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_group_type_specs(self, group_type_id):
+        """Lists all group specs for a given group type."""
+        url = 'group_types/%s/group_specs' % group_type_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_group_type_specs_item(self, group_type_id, spec_id):
+        """Shows specified item of group specs for a given group type."""
+        url = "group_types/%s/group_specs/%s" % (group_type_id, spec_id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_group_type_specs_item(self, group_type_id, spec_id, spec):
+        """Updates specified item of group specs for a given group type.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#update-one-specific-group-spec-for-a-group-type
+        """
+        url = "group_types/%s/group_specs/%s" % (group_type_id, spec_id)
+        put_body = json.dumps(spec)
+        resp, body = self.put(url, put_body)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_group_type_specs_item(self, group_type_id, spec_id):
+        """Deletes specified item of group specs for a given group type."""
+        resp, body = self.delete("group_types/%s/group_specs/%s" % (
+            group_type_id, spec_id))
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp, body)

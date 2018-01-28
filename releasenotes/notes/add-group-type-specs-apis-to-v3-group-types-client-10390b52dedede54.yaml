@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Add group type specs APIs to v3 group_types_client library.
+
+    * create_or_update_group_type_specs
+    * list_group_type_specs
+    * show_group_type_specs_item
+    * update_group_type_specs_item
+    * delete_group_type_specs_item
