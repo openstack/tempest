@@ -62,7 +62,7 @@ def process_files(file_specs, url_specs, whitelists):
     for (name, filename) in file_specs:
         whitelist = whitelists.get(name, [])
         with open(filename) as content:
-            if scan_content(name, content, regexp, whitelist):
+            if scan_content(content, regexp, whitelist):
                 logs_with_errors.append(name)
     for (name, url) in url_specs:
         whitelist = whitelists.get(name, [])
@@ -71,12 +71,12 @@ def process_files(file_specs, url_specs, whitelists):
         page = urlreq.urlopen(req)
         buf = six.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
-        if scan_content(name, f.read().splitlines(), regexp, whitelist):
+        if scan_content(f.read().splitlines(), regexp, whitelist):
             logs_with_errors.append(name)
     return logs_with_errors
 
 
-def scan_content(name, content, regexp, whitelist):
+def scan_content(content, regexp, whitelist):
     had_errors = False
     for line in content:
         if not line.startswith("Stderr:") and regexp.match(line):
