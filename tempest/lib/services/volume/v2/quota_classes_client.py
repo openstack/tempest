@@ -26,8 +26,9 @@ class QuotaClassesClient(rest_client.RestClient):
     def show_quota_class_set(self, quota_class_id):
         """List quotas for a quota class.
 
-        TODO: Current api-site doesn't contain this API description.
-        LP: https://bugs.launchpad.net/nova/+bug/1602400
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#show-quota-classes
         """
         url = 'os-quota-class-sets/%s' % quota_class_id
         resp, body = self.get(url)
@@ -38,8 +39,9 @@ class QuotaClassesClient(rest_client.RestClient):
     def update_quota_class_set(self, quota_class_id, **kwargs):
         """Update quotas for a quota class.
 
-        TODO: Current api-site doesn't contain this API description.
-        LP: https://bugs.launchpad.net/nova/+bug/1602400
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v2/index.html#update-quota-classes
         """
         url = 'os-quota-class-sets/%s' % quota_class_id
         put_body = json.dumps({'quota_class_set': kwargs})
