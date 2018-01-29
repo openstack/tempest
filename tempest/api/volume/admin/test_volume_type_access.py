@@ -27,11 +27,6 @@ class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
 
     credentials = ['primary', 'alt', 'admin']
 
-    @classmethod
-    def setup_clients(cls):
-        super(VolumeTypesAccessTest, cls).setup_clients()
-        cls.alt_client = cls.os_alt.volumes_client_latest
-
     @decorators.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')
     def test_volume_type_access_add(self):
         # Creating a NON public volume type
@@ -70,10 +65,11 @@ class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
 
         # Adding volume type access for alt tenant
         self.admin_volume_types_client.add_type_access(
-            volume_type['id'], project=self.alt_client.tenant_id)
+            volume_type['id'],
+            project=self.os_alt.volumes_client_latest.tenant_id)
         self.addCleanup(self.admin_volume_types_client.remove_type_access,
                         volume_type['id'],
-                        project=self.alt_client.tenant_id)
+                        project=self.os_alt.volumes_client_latest.tenant_id)
 
         # List tenant access for the given volume type
         type_access_list = self.admin_volume_types_client.list_type_access(
@@ -88,5 +84,5 @@ class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
         # Validating the permitted tenants are the expected tenants
         self.assertIn(self.volumes_client.tenant_id,
                       map(operator.itemgetter('project_id'), type_access_list))
-        self.assertIn(self.alt_client.tenant_id,
+        self.assertIn(self.os_alt.volumes_client_latest.tenant_id,
                       map(operator.itemgetter('project_id'), type_access_list))
