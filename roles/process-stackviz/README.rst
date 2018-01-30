@@ -11,7 +11,7 @@ the stackviz archive embedded in test images.
    The devstack base directory.
 
 .. zuul:rolevar:: stage_dir
-   :default: /opt/stack/logs
+   :default: "{{ ansible_user_dir }}"
 
    The stage directory where the input data can be found and
    the output will be produced.
