@@ -1,0 +1,24 @@
+diff --git a/tempest/api/network/test_networks.py b/tempest/api/network/test_networks.py
+index 269f2c2..892a1be 100644
+--- a/tempest/api/network/test_networks.py
++++ b/tempest/api/network/test_networks.py
+@@ -329,6 +329,7 @@ class NetworksTest(BaseNetworkTestResources):
+     def test_create_delete_subnet_with_dhcp_enabled(self):
+         self._create_verify_delete_subnet(enable_dhcp=True)
+
++    @decorators.skip_because(bug="1617403")
+     @decorators.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
+     def test_update_subnet_gw_dns_host_routes_dhcp(self):
+         network = self.create_network()
+diff --git a/tempest/api/network/test_routers_negative.py b/tempest/api/network/test_routers_negative.py
+index 72face8..7f3fcde 100644
+--- a/tempest/api/network/test_routers_negative.py
++++ b/tempest/api/network/test_routers_negative.py
+@@ -135,6 +135,7 @@ class DvrRoutersNegativeTest(base.BaseNetworkTest):
+         cls.network = cls.create_network()
+         cls.subnet = cls.create_subnet(cls.network)
+
++    @decorators.skip_because(bug="1617403")
+     @decorators.attr(type=['negative'])
+     @decorators.idempotent_id('4990b055-8fc7-48ab-bba7-aa28beaad0b9')
+     def test_router_create_tenant_distributed_returns_forbidden(self):

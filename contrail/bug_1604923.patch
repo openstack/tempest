@@ -1,0 +1,23 @@
+diff --git a/tempest/api/network/test_ports.py b/tempest/api/network/test_ports.py
+index 49a1311..0f52196 100644
+--- a/tempest/api/network/test_ports.py
++++ b/tempest/api/network/test_ports.py
+@@ -295,7 +295,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
+         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
+         update_body = {"name": data_utils.rand_name('port-'),
+                        "admin_state_up": False,
+-                       "fixed_ips": fixed_ip_2,
++                       "fixed_ips": fixed_ip_1,
+                        "security_groups": security_groups_list}
+         body = self.ports_client.update_port(port['id'], **update_body)
+         port_show = body['port']
+@@ -305,7 +305,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
+         exclude_keys.add('security_groups')
+         self.assertThat(port_show, custom_matchers.MatchesDictExceptForKeys(
+                         update_body, exclude_keys))
+-        self.assertEqual(fixed_ip_2[0]['subnet_id'],
++        self.assertEqual(fixed_ip_1[0]['subnet_id'],
+                          port_show['fixed_ips'][0]['subnet_id'])
+ 
+         for security_group in security_groups_list:
+

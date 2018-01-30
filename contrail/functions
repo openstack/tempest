@@ -1,0 +1,144 @@
+
+with_venv=tools/with_venv.sh
+
+# Determinate is the given option present in the INI file
+# ini_has_option config-file section option
+function ini_has_option() {
+    local file=$1
+    local section=$2
+    local option=$3
+    local line
+    line=$(sed -ne "/^\[$section\]/,/^\[.*\]/ { /^$option[ \t]*=/ p; }" "$file")
+    [ -n "$line" ]
+}
+
+
+# Set an option in an INI file
+# iniset config-file section option value
+function iniset() {
+    local file=$1
+    local section=$2
+    local option=$3
+    local value=$4
+
+    [[ -z $section || -z $option ]] && return
+
+    if ! grep -q "^\[$section\]" "$file" 2>/dev/null; then
+        # Add section at the end
+        echo -e "\n[$section]" >>"$file"
+    fi
+    if ! ini_has_option "$file" "$section" "$option"; then
+        # Add it
+        sed -i -e "/^\[$section\]/ a\\
+$option = $value
+" "$file"
+    else
+        local sep=$(echo -ne "\x01")
+        # Replace it
+        sed -i -e '/^\['${section}'\]/,/^\[.*\]/ s'${sep}'^\('${option}'[ \t]*=[ \t]*\).*$'${sep}'\1'"${value}"${sep} "$file"
+    fi
+}
+
+
+function get_image_id() {
+    local keystone_host=$1
+    local image_name=$2
+    local image_path=$3
+    images=`${with_venv} glance image-list`
+    #if grep -q $image_name $images; then
+    if [[ "$images" == *\ ${image_name}\ * ]];then
+        image_id=`${with_venv} glance image-list | grep " $image_name "  | awk {'print $2'}`
+    else
+        image_filename=$(basename $image_path)
+        if [ ! -f $image_filename ]; then
+            `wget $image_path --no-check-certificate`
+        fi
+        export OS_IMAGE_URL=http://${keystone_host}:9292/ && ${with_venv} glance image-create --name $image_name --disk-format qcow2 --container-format bare --visibility public --file $image_filename > /dev/null
+        image_id=`${with_venv} glance image-list | grep " $image_name "  | awk {'print $2'}`
+    fi
+    echo $image_id
+}
+
+function create_project() {
+    local project_name=$1
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        keystone='openstack --insecure'
+    else
+        keystone='openstack'
+    fi
+    id=`${with_venv} ${keystone} project list | grep ' '$project_name' ' | awk '{print $2;}'`
+    if [ -z "$id" ]; then
+        ${with_venv} ${keystone} project create --name $project_name --enabled True
+    fi
+}
+
+function create_user() {
+    local username=$1
+    local password=$2
+    local project_name=$3
+    local role=$4
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        keystone='openstack --insecure'
+    else
+        keystone='openstack'
+    fi
+    id=$(${with_venv} ${keystone} user list | grep $username | awk '{print $2;}')
+    if [ -z $id ]; then
+        ${with_venv} ${keystone} user create --name $username --project $project_name --password $password --email $username@example.com
+        ${with_venv} ${keystone} role add --user $username --project $project_name $role
+    fi
+}    
+
+function create_network() {
+    local vn_name=$1
+    local subnet=$2
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        neutron='neutron --insecure'
+    else
+        neutron='neutron'
+    fi
+    if ${with_venv} ${neutron} net-show $vn_name >/dev/null 2>&1 ; then
+        echo "$vn_name already present, not creating"
+    else 
+        ${with_venv} ${neutron} net-create $vn_name
+        vn_id=`${with_venv} ${neutron} net-show $vn_name | grep " id " | awk {'print $4'}`
+        ${with_venv} ${neutron} subnet-create $vn_id $subnet
+    fi
+}
+
+function create_public_network() {
+    local vn_name=$1
+    local subnet=$2
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        neutron='neutron --insecure'
+    else
+        neutron='neutron'
+    fi
+    create_network $vn_name $subnet 
+    ${with_venv} ${neutron} net-update $vn_name --router:external True
+    sshpass -p $API_SERVER_HOST_PASSWORD ssh $SSHOPT ${API_SERVER_HOST_USER}@${API_SERVER_IP} "python /opt/contrail/utils/add_route_target.py --routing_instance_name $PUBLIC_NETWORK_RI_FQ_NAME --route_target_number $PUBLIC_NETWORK_RT --router_asn $ROUTER_ASN --api_server_ip $API_SERVER_IP --api_server_port 8082 --admin_user $OS_USERNAME --admin_password $OS_PASSWORD --admin_tenant_name $OS_TENANT_NAME" || echo "Unable to set route target on the public vn!!"
+}
+
+function create_flavor() {
+    local id=$1
+    local name="tempest_flavor_$id"
+    local ram=${2:-512}
+    local disk=${3:-1}
+    local vCPU=${4:-1}
+    if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
+        nova='nova --insecure'
+    else
+        nova='nova'
+    fi
+    if ${with_venv} ${nova} flavor-show $id >/dev/null 2>&1 ; then
+        echo "flavor $id already present, not creating"
+    else
+        ${with_venv} ${nova} flavor-create $name $id $ram $disk $vCPU
+    fi
+}
+
+function get_compute_count() {
+    count=`nova service-list | grep "nova-compute" | grep "up" | wc -l`
+    echo $count
+}
+    
