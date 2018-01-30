@@ -44,17 +44,17 @@ function get_image_id() {
     local keystone_host=$1
     local image_name=$2
     local image_path=$3
-    images=`${with_venv} nova image-list`
+    images=`${with_venv} glance image-list`
     #if grep -q $image_name $images; then
     if [[ "$images" == *\ ${image_name}\ * ]];then
-        image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
+        image_id=`${with_venv} glance image-list | grep " $image_name "  | awk {'print $2'}`
     else
         image_filename=$(basename $image_path)
         if [ ! -f $image_filename ]; then
             `wget $image_path --no-check-certificate`
         fi
         export OS_IMAGE_URL=http://${keystone_host}:9292/ && ${with_venv} glance image-create --name $image_name --disk-format qcow2 --container-format bare --visibility public --file $image_filename > /dev/null
-        image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
+        image_id=`${with_venv} glance image-list | grep " $image_name "  | awk {'print $2'}`
     fi
     echo $image_id
 }
