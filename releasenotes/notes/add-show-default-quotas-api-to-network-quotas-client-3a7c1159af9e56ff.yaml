@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show default quotas API to network quotas_client library.
+    This feature enables the possibility to show default network quotas for
+    a specified project.
