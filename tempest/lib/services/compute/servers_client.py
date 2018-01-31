@@ -126,7 +126,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref-compute-v2.1.html#showServer
+        https://developer.openstack.org/api-ref/compute/#show-server-details
         """
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
@@ -321,7 +321,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-or-replace-metadata-items
+        https://developer.openstack.org/api-ref/compute/#replace-metadata-items
         """
         if no_metadata_field:
             post_body = ""
@@ -338,7 +338,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-metadata-items
+        https://developer.openstack.org/api-ref/compute/#create-or-update-metadata-items
         """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % server_id,
@@ -609,9 +609,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        TODO (markus_z) The api-ref for that isn't yet available, update this
-        here when the docs in Nova are updated. The old API is at
-        http://developer.openstack.org/api-ref/compute/#get-serial-console-os-getserialconsole-action
+        https://developer.openstack.org/api-ref/compute/#create-remote-console
         """
         param = {
             'remote_console': {
@@ -722,7 +720,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#get-vnc-console-os-getvncconsole-action
+        https://developer.openstack.org/api-ref/compute/#get-vnc-console-os-getvncconsole-action-deprecated
         """
         return self.action(server_id, "os-getVNCConsole",
                            schema.get_vnc_console, **kwargs)
@@ -732,7 +730,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#add-associate-fixed-ip-addfixedip-action
+        https://developer.openstack.org/api-ref/compute/#add-associate-fixed-ip-addfixedip-action-deprecated
         """
         return self.action(server_id, 'addFixedIp', **kwargs)
 
@@ -741,7 +739,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#remove-disassociate-fixed-ip-removefixedip-action
+        https://developer.openstack.org/api-ref/compute/#remove-disassociate-fixed-ip-removefixedip-action-deprecated
         """
         return self.action(server_id, 'removeFixedIp', **kwargs)
 
