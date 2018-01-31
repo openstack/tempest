@@ -38,7 +38,6 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     def setup_credentials(cls):
         super(BaseVolumeQuotasAdminTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
-        cls.alt_client = cls.os_alt.volumes_client_latest
 
     @classmethod
     def setup_clients(cls):
@@ -150,7 +149,8 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         alt_quota = self.admin_quotas_client.show_quota_set(
-            self.alt_client.tenant_id, params={'usage': True})['quota_set']
+            self.os_alt.volumes_client_latest.tenant_id,
+            params={'usage': True})['quota_set']
 
         # Creates a volume transfer
         transfer = self.transfer_client.create_volume_transfer(
@@ -164,14 +164,15 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
         # Verify volume transferred is available
         waiters.wait_for_volume_resource_status(
-            self.alt_client, volume['id'], 'available')
+            self.os_alt.volumes_client_latest, volume['id'], 'available')
 
         # List of tenants quota usage post transfer
         new_primary_quota = self.admin_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         new_alt_quota = self.admin_quotas_client.show_quota_set(
-            self.alt_client.tenant_id, params={'usage': True})['quota_set']
+            self.os_alt.volumes_client_latest.tenant_id,
+            params={'usage': True})['quota_set']
 
         # Verify tenants quota usage was updated
         self.assertEqual(primary_quota['volumes']['in_use'] -

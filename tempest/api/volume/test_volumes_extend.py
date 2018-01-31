@@ -80,11 +80,6 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
     # is implicit - Cinder calls Nova at that microversion, Tempest does not.
     min_microversion = '3.42'
 
-    @classmethod
-    def setup_clients(cls):
-        super(VolumesExtendAttachedTest, cls).setup_clients()
-        cls.admin_servers_client = cls.os_admin.servers_client
-
     def _find_extend_volume_instance_action(self, server_id):
         actions = self.servers_client.list_instance_actions(
             server_id)['instanceActions']
@@ -95,7 +90,7 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
     def _find_extend_volume_instance_action_finish_event(self, action):
         # This has to be called by an admin client otherwise
         # the events don't show up.
-        action = self.admin_servers_client.show_instance_action(
+        action = self.os_admin.servers_client.show_instance_action(
             action['instance_uuid'], action['request_id'])['instanceAction']
         for event in action['events']:
             if (event['event'] == 'compute_extend_volume' and
