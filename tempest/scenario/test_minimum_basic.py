@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.common import custom_matchers
 from tempest.common import utils
 from tempest.common import waiters
@@ -101,10 +99,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                     return address
 
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
-    @testtools.skipUnless(CONF.network.public_network_id,
-                          'The public_network_id option must be specified.')
-    @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
-                          'Floating ips are not available')
     @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         image = self.glance_image_create()
@@ -126,22 +120,28 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.addCleanup(self.nova_volume_detach, server, volume)
         self.cinder_show(volume)
 
-        floating_ip = self.create_floating_ip(server)
-        # fetch the server again to make sure the addresses were refreshed
-        # after associating the floating IP
+        floating_ip = None
         server = self.servers_client.show_server(server['id'])['server']
-        address = self._get_floating_ip_in_server_addresses(
-            floating_ip, server)
-        self.assertIsNotNone(
-            address,
-            "Failed to find floating IP '%s' in server addresses: %s" %
-            (floating_ip['ip'], server['addresses']))
+        if (CONF.network_feature_enabled.floating_ips and
+            CONF.network.floating_network_name):
+            floating_ip = self.create_floating_ip(server)
+            # fetch the server again to make sure the addresses were refreshed
+            # after associating the floating IP
+            address = self._get_floating_ip_in_server_addresses(
+                floating_ip, server)
+            self.assertIsNotNone(
+                address,
+                "Failed to find floating IP '%s' in server addresses: %s" %
+                (floating_ip['ip'], server['addresses']))
+            ssh_ip = floating_ip['ip']
+        else:
+            ssh_ip = self.get_server_ip(server)
 
         self.create_and_add_security_group_to_server(server)
 
         # check that we can SSH to the server before reboot
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'],
+            ssh_ip, private_key=keypair['private_key'],
             server=server)
 
         self.nova_reboot(server)
@@ -149,25 +149,27 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         # check that we can SSH to the server after reboot
         # (both connections are part of the scenario)
         self.linux_client = self.get_remote_client(
-            floating_ip['ip'], private_key=keypair['private_key'],
+            ssh_ip, private_key=keypair['private_key'],
             server=server)
 
         self.check_disks()
 
-        # delete the floating IP, this should refresh the server addresses
-        self.compute_floating_ips_client.delete_floating_ip(floating_ip['id'])
+        if floating_ip:
+            # delete the floating IP, this should refresh the server addresses
+            self.compute_floating_ips_client.delete_floating_ip(
+                floating_ip['id'])
 
-        def is_floating_ip_detached_from_server():
-            server_info = self.servers_client.show_server(
-                server['id'])['server']
-            address = self._get_floating_ip_in_server_addresses(
-                floating_ip, server_info)
-            return (not address)
+            def is_floating_ip_detached_from_server():
+                server_info = self.servers_client.show_server(
+                    server['id'])['server']
+                address = self._get_floating_ip_in_server_addresses(
+                    floating_ip, server_info)
+                return (not address)
 
-        if not test_utils.call_until_true(
-            is_floating_ip_detached_from_server,
-            CONF.compute.build_timeout,
-            CONF.compute.build_interval):
-            msg = ("Floating IP '%s' should not be in server addresses: %s" %
-                   (floating_ip['ip'], server['addresses']))
-            raise exceptions.TimeoutException(msg)
+            if not test_utils.call_until_true(
+                is_floating_ip_detached_from_server,
+                CONF.compute.build_timeout,
+                CONF.compute.build_interval):
+                msg = ("Floating IP '%s' should not be in server addresses: %s"
+                       % (floating_ip['ip'], server['addresses']))
+                raise exceptions.TimeoutException(msg)
