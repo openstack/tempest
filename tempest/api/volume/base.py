@@ -31,6 +31,11 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     """Base test case class for all Cinder API tests."""
 
     _api_version = 2
+    # if api_v2 is not enabled while api_v3 is enabled, the volume v2 classes
+    # should be transferred to volume v3 classes.
+    if (not CONF.volume_feature_enabled.api_v2 and
+        CONF.volume_feature_enabled.api_v3):
+        _api_version = 3
     credentials = ['primary']
 
     @classmethod
