@@ -64,7 +64,7 @@ todo_include_todos = True
 # openstackdocstheme options
 repository_name = 'openstack/tempest'
 bug_project = 'tempest'
-bug_tag = ''
+bug_tag = 'doc'
 
 # Must set this variable to include year, month, day, hours, and minutes.
 html_last_updated_fmt = '%Y-%m-%d %H:%M'
