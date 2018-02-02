@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
@@ -261,3 +262,169 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
         # volume(s)
         self._unshelve_server_and_check_volumes(
             server, validation_resources, num_vol)
+
+
+class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
+    min_microversion = '2.60'
+    max_microversion = 'latest'
+
+    @classmethod
+    def skip_checks(cls):
+        super(AttachVolumeMultiAttachTest, cls).skip_checks()
+        if not CONF.compute_feature_enabled.volume_multiattach:
+            raise cls.skipException('Volume multi-attach is not available.')
+
+    def _attach_volume_to_servers(self, volume, servers):
+        """Attaches the given volume to the list of servers.
+
+        :param volume: The multiattach volume to use.
+        :param servers: list of server instances on which the volume will be
+                        attached
+        :returns: dict of server ID to volumeAttachment dict entries
+        """
+        attachments = {}
+        for server in servers:
+            # map the server id to the volume attachment
+            attachments[server['id']] = self.attach_volume(server, volume)
+            # NOTE(mriedem): In the case of multi-attach, after the first
+            # attach the volume will be in-use. On the second attach, nova will
+            # 'reserve' the volume which puts it back into 'attaching' status
+            # and then the volume shouldn't go back to in-use until the compute
+            # actually attaches the server to the volume.
+        return attachments
+
+    def _detach_multiattach_volume(self, volume_id, server_id):
+        """Detaches a multiattach volume from the given server.
+
+        Depending on the number of attachments the volume has, this method
+        will wait for the volume to go to back to 'in-use' status if there are
+        more attachments or 'available' state if there are no more attachments.
+        """
+        # Count the number of attachments before starting the detach.
+        volume = self.volumes_client.show_volume(volume_id)['volume']
+        attachments = volume['attachments']
+        wait_status = 'in-use' if len(attachments) > 1 else 'available'
+        # Now detach the volume from the given server.
+        self.servers_client.detach_volume(server_id, volume_id)
+        # Now wait for the volume status to change.
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume_id, wait_status)
+
+    def _create_multiattach_volume(self, bootable=False):
+        kwargs = {}
+        if bootable:
+            kwargs['image_ref'] = CONF.compute.image_ref
+        return self.create_volume(multiattach=True, **kwargs)
+
+    def _create_and_multiattach(self):
+        """Creates two server instances and a volume and attaches to both.
+
+        :returns: A three-item tuple of the list of created servers,
+                  the created volume, and dict of server ID to volumeAttachment
+                  dict entries
+        """
+        servers = []
+        for x in range(2):
+            name = 'multiattach-server-%i' % x
+            servers.append(self.create_test_server(name=name))
+
+        # Now wait for the servers to be ACTIVE.
+        for server in servers:
+            waiters.wait_for_server_status(self.servers_client, server['id'],
+                                           'ACTIVE')
+
+        volume = self._create_multiattach_volume()
+
+        # Attach the volume to the servers
+        attachments = self._attach_volume_to_servers(volume, servers)
+        return servers, volume, attachments
+
+    @decorators.idempotent_id('8d5853f7-56e7-4988-9b0c-48cea3c7049a')
+    def test_list_get_volume_attachments_multiattach(self):
+        # Attach a single volume to two servers.
+        servers, volume, attachments = self._create_and_multiattach()
+
+        # List attachments from the volume and make sure the server uuids
+        # are in that list.
+        vol_attachments = self.volumes_client.show_volume(
+            volume['id'])['volume']['attachments']
+        attached_server_ids = [attachment['server_id']
+                               for attachment in vol_attachments]
+        self.assertEqual(2, len(attached_server_ids))
+
+        # List Volume attachment of the servers
+        for server in servers:
+            self.assertIn(server['id'], attached_server_ids)
+            vol_attachments = self.servers_client.list_volume_attachments(
+                server['id'])['volumeAttachments']
+            self.assertEqual(1, len(vol_attachments))
+            attachment = attachments[server['id']]
+            self.assertDictEqual(attachment, vol_attachments[0])
+            # Detach the volume from this server.
+            self._detach_multiattach_volume(volume['id'], server['id'])
+
+    def _boot_from_multiattach_volume(self):
+        """Boots a server from a multiattach volume.
+
+        The volume will not be deleted when the server is deleted.
+
+        :returns: 2-item tuple of (server, volume)
+        """
+        volume = self._create_multiattach_volume(bootable=True)
+        # Now create a server from the bootable volume.
+        bdm = [{
+            'uuid': volume['id'],
+            'source_type': 'volume',
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': False}]
+        server = self.create_test_server(
+            image_id='', block_device_mapping_v2=bdm, wait_until='ACTIVE')
+        # Assert the volume is attached to the server.
+        attachments = self.servers_client.list_volume_attachments(
+            server['id'])['volumeAttachments']
+        self.assertEqual(1, len(attachments))
+        self.assertEqual(volume['id'], attachments[0]['volumeId'])
+        return server, volume
+
+    @decorators.idempotent_id('65e33aa2-185b-44c8-b22e-e524973ed625')
+    def test_boot_from_multiattach_volume(self):
+        """Simple test to boot an instance from a multiattach volume."""
+        self._boot_from_multiattach_volume()
+
+    @utils.services('image')
+    @decorators.idempotent_id('885ac48a-2d7a-40c5-ae8b-1993882d724c')
+    def test_snapshot_volume_backed_multiattach(self):
+        """Boots a server from a multiattach volume and snapshots the server.
+
+        Creating the snapshot of the server will also create a snapshot of
+        the volume.
+        """
+        server, volume = self._boot_from_multiattach_volume()
+        # Create a snapshot of the server (and volume implicitly).
+        self.create_image_from_server(
+            server['id'], name='multiattach-snapshot',
+            wait_until='active', wait_for_server=True)
+        # TODO(mriedem): Make sure the volume snapshot exists. This requires
+        # adding the volume snapshots client to BaseV2ComputeTest.
+        # Delete the server, wait for it to be gone, and make sure the volume
+        # still exists.
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+        # Delete the volume and cascade the delete of the volume snapshot.
+        self.volumes_client.delete_volume(volume['id'], cascade=True)
+        # Now we have to wait for the volume to be gone otherwise the normal
+        # teardown will fail since it will race with our call and the snapshot
+        # might still exist.
+        self.volumes_client.wait_for_resource_deletion(volume['id'])
+
+    # TODO(mriedem): Might be interesting to create a bootable multiattach
+    # volume with delete_on_termination=True, create server1 from the
+    # volume, then attach it to server2, and then delete server1 in which
+    # case the volume won't be deleted because it's still attached to
+    # server2 and make sure the volume is still attached to server2.
+
+    # TODO(mriedem): Test migration with a multiattached volume.
+
+    # TODO(mriedem): Test swap_volume with a multiattach volume (admin-only).
+    # That test would live in tempest.api.compute.admin.test_volume_swap.
