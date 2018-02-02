@@ -58,8 +58,6 @@ def execute(cmd, action, flags='', params='', fail_ok=False,
     if six.PY2:
         cmd = cmd.encode('utf-8')
     cmd = shlex.split(cmd)
-    result = ''
-    result_err = ''
     stdout = subprocess.PIPE
     stderr = subprocess.STDOUT if merge_stderr else subprocess.PIPE
     proc = subprocess.Popen(cmd, stdout=stdout, stderr=stderr)
