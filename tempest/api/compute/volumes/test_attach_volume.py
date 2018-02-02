@@ -438,6 +438,3 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
     # volume, then attach it to server2, and then delete server1 in which
     # case the volume won't be deleted because it's still attached to
     # server2 and make sure the volume is still attached to server2.
-
-    # TODO(mriedem): Test swap_volume with a multiattach volume (admin-only).
-    # That test would live in tempest.api.compute.admin.test_volume_swap.
