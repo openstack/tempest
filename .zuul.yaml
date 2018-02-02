@@ -9,7 +9,7 @@
       - zuul: openstack-dev/devstack
     vars:
       devstack_services:
-        tempest: True
+        tempest: true
     run: playbooks/devstack-tempest.yaml
     post-run: playbooks/post-tempest.yaml
 
@@ -29,7 +29,7 @@
     vars:
       tox_envlist: full
       devstack_localrc:
-        ENABLE_FILE_INJECTION: True
+        ENABLE_FILE_INJECTION: true
 
 - job:
     name: tempest-full-py3
@@ -130,7 +130,6 @@
       - openstack/zun-tempest-plugin
 
 - project:
-    name: openstack/tempest
     check:
       jobs:
         - devstack-tempest:
