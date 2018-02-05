@@ -137,6 +137,7 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
+        - nova-multiattach
         - tempest-full-py3:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -148,3 +149,6 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
+    gate:
+      jobs:
+        - nova-multiattach
