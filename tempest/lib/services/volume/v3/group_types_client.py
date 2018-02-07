@@ -94,7 +94,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-specs-for-a-group-type
+        https://developer.openstack.org/api-ref/block-storage/v3/#create-or-update-group-specs-for-a-group-type
         """
         url = "group_types/%s/group_specs" % group_type_id
         post_body = json.dumps({'group_specs': group_specs})
