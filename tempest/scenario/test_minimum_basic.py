@@ -127,6 +127,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             floating_ip = self.create_floating_ip(server)
             # fetch the server again to make sure the addresses were refreshed
             # after associating the floating IP
+            server = self.servers_client.show_server(server['id'])['server']
             address = self._get_floating_ip_in_server_addresses(
                 floating_ip, server)
             self.assertIsNotNone(
