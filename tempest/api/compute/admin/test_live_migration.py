@@ -158,14 +158,11 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         self.attach_volume(server, volume, device='/dev/xvdb')
         server = self.admin_servers_client.show_server(server_id)['server']
         volume_id1 = server["os-extended-volumes:volumes_attached"][0]["id"]
-        self._migrate_server_to(server_id, target_host)
-        waiters.wait_for_server_status(self.servers_client,
-                                       server_id, 'ACTIVE')
+        self._live_migrate(server_id, target_host, 'ACTIVE')
 
         server = self.admin_servers_client.show_server(server_id)['server']
         volume_id2 = server["os-extended-volumes:volumes_attached"][0]["id"]
 
-        self.assertEqual(target_host, self.get_host_for_server(server_id))
         self.assertEqual(volume_id1, volume_id2)
 
 
@@ -204,10 +201,7 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
         self._verify_console_interaction(server01_id)
         self._verify_console_interaction(server02_id)
 
-        self._migrate_server_to(server01_id, host02_id)
-        waiters.wait_for_server_status(self.servers_client,
-                                       server01_id, 'ACTIVE')
-        self.assertEqual(host02_id, self.get_host_for_server(server01_id))
+        self._live_migrate(server01_id, host02_id, 'ACTIVE')
         self._verify_console_interaction(server01_id)
         # At this point, both instances have a valid serial console
         # connection, which means the ports got updated.
