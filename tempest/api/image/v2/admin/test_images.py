@@ -31,3 +31,21 @@ class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
         self.addCleanup(self.admin_client.delete_image, image['id'])
         image_info = self.admin_client.show_image(image['id'])
         self.assertEqual(random_id, image_info['owner'])
+
+    @decorators.related_bug('1420008')
+    @decorators.idempotent_id('525ba546-10ef-4aad-bba1-1858095ce553')
+    def test_update_image_owner_param(self):
+        random_id_1 = data_utils.rand_uuid_hex()
+        image = self.admin_client.create_image(
+            container_format='bare', disk_format='raw', owner=random_id_1)
+        self.addCleanup(self.admin_client.delete_image, image['id'])
+        created_image_info = self.admin_client.show_image(image['id'])
+
+        random_id_2 = data_utils.rand_uuid_hex()
+        self.admin_client.update_image(
+            image['id'], [dict(replace="/owner", value=random_id_2)])
+        updated_image_info = self.admin_client.show_image(image['id'])
+
+        self.assertEqual(random_id_2, updated_image_info['owner'])
+        self.assertNotEqual(created_image_info['owner'],
+                            updated_image_info['owner'])
