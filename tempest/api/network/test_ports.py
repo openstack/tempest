@@ -13,7 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ipaddress
+
 import netaddr
+import six
 import testtools
 
 from tempest.api.network import base_security_groups as sec_base
@@ -177,6 +180,83 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.assertIn(port_1['port']['id'], port_ids)
         self.assertIn(port_1_fixed_ip, port_ips)
         self.assertIn(network['id'], port_net_ids)
+
+    @decorators.idempotent_id('79895408-85d5-460d-94e7-9531c5fd9123')
+    @testtools.skipUnless(
+        utils.is_extension_enabled('ip-substring-filtering', 'network'),
+        'ip-substring-filtering extension not enabled.')
+    def test_port_list_filter_by_ip_substr(self):
+        # Create network and subnet
+        network = self.create_network()
+        subnet = self.create_subnet(network)
+        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+
+        # Get two IP addresses
+        ip_address_1 = None
+        ip_address_2 = None
+        ip_network = ipaddress.ip_network(six.text_type(subnet['cidr']))
+        for ip in ip_network:
+            if ip == ip_network.network_address:
+                continue
+            if ip_address_1 is None:
+                ip_address_1 = six.text_type(ip)
+            else:
+                ip_address_2 = ip_address_1
+                ip_address_1 = six.text_type(ip)
+                # Make sure these two IP addresses have different substring
+                if ip_address_1[:-1] != ip_address_2[:-1]:
+                    break
+
+        # Create two ports
+        fixed_ips = [{'subnet_id': subnet['id'], 'ip_address': ip_address_1}]
+        port_1 = self.ports_client.create_port(network_id=network['id'],
+                                               fixed_ips=fixed_ips)
+        self.addCleanup(self.ports_client.delete_port, port_1['port']['id'])
+        fixed_ips = [{'subnet_id': subnet['id'], 'ip_address': ip_address_2}]
+        port_2 = self.ports_client.create_port(network_id=network['id'],
+                                               fixed_ips=fixed_ips)
+        self.addCleanup(self.ports_client.delete_port, port_2['port']['id'])
+
+        # Scenario 1: List port1 (port2 is filtered out)
+        if ip_address_1[:-1] != ip_address_2[:-1]:
+            ips_filter = 'ip_address_substr=' + ip_address_1[:-1]
+        else:
+            ips_filter = 'ip_address_substr=' + ip_address_1
+        ports = self.ports_client.list_ports(fixed_ips=ips_filter)['ports']
+        # Check that we got the desired port
+        port_ids = [port['id'] for port in ports]
+        fixed_ips = [port['fixed_ips'] for port in ports]
+        port_ips = []
+        for addr in fixed_ips:
+            port_ips.extend([a['ip_address'] for a in addr])
+
+        port_net_ids = [port['network_id'] for port in ports]
+        self.assertIn(network['id'], port_net_ids)
+        self.assertIn(port_1['port']['id'], port_ids)
+        self.assertIn(port_1['port']['fixed_ips'][0]['ip_address'], port_ips)
+        self.assertNotIn(port_2['port']['id'], port_ids)
+        self.assertNotIn(
+            port_2['port']['fixed_ips'][0]['ip_address'], port_ips)
+
+        # Scenario 2: List both port1 and port2
+        substr = ip_address_1
+        while substr not in ip_address_2:
+            substr = substr[:-1]
+        ips_filter = 'ip_address_substr=' + substr
+        ports = self.ports_client.list_ports(fixed_ips=ips_filter)['ports']
+        # Check that we got both port
+        port_ids = [port['id'] for port in ports]
+        fixed_ips = [port['fixed_ips'] for port in ports]
+        port_ips = []
+        for addr in fixed_ips:
+            port_ips.extend([a['ip_address'] for a in addr])
+
+        port_net_ids = [port['network_id'] for port in ports]
+        self.assertIn(network['id'], port_net_ids)
+        self.assertIn(port_1['port']['id'], port_ids)
+        self.assertIn(port_1['port']['fixed_ips'][0]['ip_address'], port_ips)
+        self.assertIn(port_2['port']['id'], port_ids)
+        self.assertIn(port_2['port']['fixed_ips'][0]['ip_address'], port_ips)
 
     @decorators.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
     def test_port_list_filter_by_router_id(self):
