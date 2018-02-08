@@ -161,6 +161,12 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
                              'The fetched encryption_type %s is different '
                              'from the updated encryption_type' % key)
 
+        # Get encryption specs item
+        key = 'cipher'
+        item = self.admin_encryption_types_client.show_encryption_specs_item(
+            encrypt_type_id, key)
+        self.assertEqual(update_kwargs[key], item[key])
+
         # Delete encryption type
         self.admin_encryption_types_client.delete_encryption_type(
             encrypt_type_id)

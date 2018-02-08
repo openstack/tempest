@@ -47,6 +47,14 @@ class EncryptionTypesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_encryption_specs_item(self, volume_type_id, key):
+        """Get the encryption specs item for the specified volume type."""
+        url = "/types/%s/encryption/%s" % (volume_type_id, key)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def create_encryption_type(self, volume_type_id, **kwargs):
         """Create encryption type.
 
