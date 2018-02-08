@@ -19,12 +19,12 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 
-class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class HypervisorAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
     """Tests Hypervisors API that require admin privileges"""
 
     @classmethod
     def setup_clients(cls):
-        super(HypervisorAdminNegativeTestJSON, cls).setup_clients()
+        super(HypervisorAdminNegativeTestBase, cls).setup_clients()
         cls.client = cls.os_admin.hypervisor_client
         cls.non_adm_client = cls.hypervisor_client
 
@@ -32,6 +32,10 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # List of hypervisors
         hypers = self.client.list_hypervisors()['hypervisors']
         return hypers
+
+
+class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
+    """Tests Hypervisors API that require admin privileges"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c136086a-0f67-4b2b-bc61-8482bd68989f')
@@ -53,27 +57,6 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             lib_exc.Forbidden,
             self.non_adm_client.show_hypervisor,
             hypers[0]['id'])
-
-    @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('2a0a3938-832e-4859-95bf-1c57c236b924')
-    def test_show_servers_with_non_admin_user(self):
-        hypers = self._list_hypervisors()
-        self.assertNotEmpty(hypers)
-
-        self.assertRaises(
-            lib_exc.Forbidden,
-            self.non_adm_client.list_servers_on_hypervisor,
-            hypers[0]['id'])
-
-    @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('02463d69-0ace-4d33-a4a8-93d7883a2bba')
-    def test_show_servers_with_nonexistent_hypervisor(self):
-        nonexistent_hypervisor_id = data_utils.rand_uuid()
-
-        self.assertRaises(
-            lib_exc.NotFound,
-            self.client.list_servers_on_hypervisor,
-            nonexistent_hypervisor_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e2b061bb-13f9-40d8-9d6e-d5bf17595849')
@@ -119,13 +102,30 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             lib_exc.Forbidden,
             self.non_adm_client.list_hypervisors, detail=True)
 
+
+class HypervisorAdminNegativeUnderV252Test(HypervisorAdminNegativeTestBase):
+    max_microversion = '2.52'
+
     @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('19a45cc1-1000-4055-b6d2-28e8b2ec4faa')
-    def test_search_nonexistent_hypervisor(self):
+    @decorators.idempotent_id('2a0a3938-832e-4859-95bf-1c57c236b924')
+    def test_show_servers_with_non_admin_user(self):
+        hypers = self._list_hypervisors()
+        self.assertNotEmpty(hypers)
+
+        self.assertRaises(
+            lib_exc.Forbidden,
+            self.non_adm_client.list_servers_on_hypervisor,
+            hypers[0]['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('02463d69-0ace-4d33-a4a8-93d7883a2bba')
+    def test_show_servers_with_nonexistent_hypervisor(self):
+        nonexistent_hypervisor_id = data_utils.rand_uuid()
+
         self.assertRaises(
             lib_exc.NotFound,
-            self.client.search_hypervisor,
-            'nonexistent_hypervisor_name')
+            self.client.list_servers_on_hypervisor,
+            nonexistent_hypervisor_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5b6a6c79-5dc1-4fa5-9c58-9c8085948e74')
@@ -137,3 +137,11 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             lib_exc.Forbidden,
             self.non_adm_client.search_hypervisor,
             hypers[0]['hypervisor_hostname'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('19a45cc1-1000-4055-b6d2-28e8b2ec4faa')
+    def test_search_nonexistent_hypervisor(self):
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.client.search_hypervisor,
+            'nonexistent_hypervisor_name')
