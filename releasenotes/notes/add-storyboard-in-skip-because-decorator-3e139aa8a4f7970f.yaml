@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Add a new parameter called ``bug_type`` to
+    ``tempest.lib.decorators.related_bug`` and
+    ``tempest.lib.decorators.skip_because`` decorators, which accepts
+    2 values:
+
+    * launchpad
+    * storyboard
+
+    This offers the possibility of tracking bugs related to tests using
+    launchpad or storyboard references. The default value is launchpad
+    for backward compatibility.
+
+    Passing in a non-digit ``bug`` value to either decorator will raise
+    a ``InvalidParam`` exception (previously ``ValueError``).
