@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add extension API show quota details to network quotas_client library.
+    This feature enables the possibility to show a quota set for a specified
+    project that includes the quota’s used, limit and reserved counts for per
+    resource

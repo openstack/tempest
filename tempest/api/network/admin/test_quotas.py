@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.network import base
 from tempest.common import identity
 from tempest.common import utils
@@ -89,3 +91,15 @@ class QuotasTest(base.BaseAdminNetworkTest):
     def test_quotas(self):
         new_quotas = {'network': 0, 'port': 0}
         self._check_quotas(new_quotas)
+
+    @testtools.skipUnless(utils.is_extension_enabled(
+        'quota_details', 'network'), 'Quota details extension not enabled.')
+    @decorators.idempotent_id('7b05ec5f-bf44-43cb-b28f-ddd72a824288')
+    def test_show_quota_details(self):
+        # Show quota details for an existing project
+        quota_details = self.admin_quotas_client.show_quota_details(
+            self.admin_quotas_client.tenant_id)['quota']
+        expected_keys = ['used', 'limit', 'reserved']
+        for resource_type in quota_details:
+            for key in expected_keys:
+                self.assertIn(key, quota_details[resource_type])
