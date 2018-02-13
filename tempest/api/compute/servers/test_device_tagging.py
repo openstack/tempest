@@ -82,7 +82,9 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
             # A hypervisor may present multiple paths to a tagged disk, so
             # there may be duplicated tags in the metadata, use set() to
             # remove duplicated tags.
-            found_devices = [d['tags'][0] for d in md_dict['devices']]
+            # Some hypervisors might report devices with no tags as well.
+            found_devices = [d['tags'][0] for d in md_dict['devices']
+                             if d.get('tags')]
             self.assertEqual(set(found_devices), set(['port-1', 'port-2',
                                                       'net-1', 'net-2-100',
                                                       'net-2-200', 'boot',
