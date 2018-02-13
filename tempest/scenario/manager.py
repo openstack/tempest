@@ -1174,7 +1174,7 @@ class EncryptionScenarioTest(ScenarioTest):
         LOG.debug("Creating an encryption type for volume type: %s", type_id)
         client.create_encryption_type(
             type_id, provider=provider, key_size=key_size, cipher=cipher,
-            control_location=control_location)['encryption']
+            control_location=control_location)
 
     def create_encrypted_volume(self, encryption_provider, volume_type,
                                 key_size=256, cipher='aes-xts-plain64',
