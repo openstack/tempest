@@ -167,6 +167,18 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server = self.client.show_server(server['id'])['server']
         self.assertEqual('2001:2001::3', server['accessIPv6'])
 
+    @decorators.related_bug('1730756')
+    @decorators.idempotent_id('defbaca5-d611-49f5-ae21-56ee25d2db49')
+    def test_create_server_specify_multibyte_character_name(self):
+        # prefix character is:
+        # http://unicode.org/cldr/utility/character.jsp?a=20A1
+
+        # We use a string with 3 byte utf-8 character due to nova
+        # will return 400(Bad Request) if we attempt to send a name which has
+        # 4 byte utf-8 character.
+        utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
+        self.create_test_server(name=utf8_name, wait_until='ACTIVE')
+
 
 class ServerShowV247Test(base.BaseV2ComputeTest):
     min_microversion = '2.47'
