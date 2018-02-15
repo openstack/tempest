@@ -10,6 +10,19 @@
     vars:
       devstack_services:
         tempest: true
+      test_results_stage_name: 'test_results'
+      zuul_copy_output:
+        '{{ devstack_base_dir }}/tempest/etc/tempest.conf': 'logs'
+        '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': 'logs'
+        '{{ devstack_base_dir }}/tempest/tempest.log': 'logs'
+        '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': 'logs'
+        '{{ stage_dir }}/{{ test_results_stage_name }}.html': 'logs'
+        '{{ stage_dir }}/stackviz': 'logs'
+      extensions_to_txt:
+        conf: True
+        log: True
+        yaml: True
+        yml: True
     run: playbooks/devstack-tempest.yaml
     post-run: playbooks/post-tempest.yaml
 
