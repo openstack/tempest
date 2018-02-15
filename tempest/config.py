@@ -104,6 +104,7 @@ AuthGroup = [
                secret=True,
                deprecated_group='identity'),
     cfg.StrOpt('admin_domain_name',
+               default='Default',
                help="Admin domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project",
                deprecated_group='identity'),
