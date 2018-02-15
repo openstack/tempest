@@ -142,16 +142,17 @@ class BaseV2ImageTest(BaseImageTest):
         cls.schemas_client = cls.os_primary.schemas_client
         cls.versions_client = cls.os_primary.image_versions_client
 
-    def create_namespace(cls, namespace_name=None, visibility='public',
+    def create_namespace(self, namespace_name=None, visibility='public',
                          description='Tempest', protected=False,
                          **kwargs):
         if not namespace_name:
             namespace_name = data_utils.rand_name('test-ns')
         kwargs.setdefault('display_name', namespace_name)
-        namespace = cls.namespaces_client.create_namespace(
+        namespace = self.namespaces_client.create_namespace(
             namespace=namespace_name, visibility=visibility,
             description=description, protected=protected, **kwargs)
-        cls.addCleanup(cls.namespaces_client.delete_namespace, namespace_name)
+        self.addCleanup(self.namespaces_client.delete_namespace,
+                        namespace_name)
         return namespace
 
 
