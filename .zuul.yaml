@@ -67,6 +67,16 @@
         c-bak: false
 
 - job:
+    name: tempest-full-queens
+    parent: tempest-full
+    override-checkout: stable/queens
+
+- job:
+    name: tempest-full-queens-py3
+    parent: tempest-full-py3
+    override-checkout: stable/queens
+
+- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
@@ -151,7 +161,33 @@
               - ^roles/
               - ^.zuul.yaml$
         - nova-multiattach
+        - tempest-full-queens:
+            voting: false
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+        - tempest-full-queens-py3:
+            voting: false
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
     gate:
       jobs:
         - nova-multiattach
+    periodic-stable:
+      jobs:
+        - tempest-full-queens
+        - tempest-full-queens-py3
