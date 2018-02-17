@@ -199,6 +199,8 @@ class Manager(clients.ServiceClients):
         self.catalog_client = self.identity_v3.CatalogClient(**params_v3)
         self.project_tags_client = self.identity_v3.ProjectTagsClient(
             **params_v3)
+        self.application_credentials_client = \
+            self.identity_v3.ApplicationCredentialsClient(**params_v3)
 
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding

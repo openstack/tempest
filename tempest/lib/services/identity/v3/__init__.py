@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest.lib.services.identity.v3.application_credentials_client import \
+    ApplicationCredentialsClient
 from tempest.lib.services.identity.v3.catalog_client import \
     CatalogClient
 from tempest.lib.services.identity.v3.credentials_client import \
@@ -46,11 +48,11 @@ from tempest.lib.services.identity.v3.trusts_client import TrustsClient
 from tempest.lib.services.identity.v3.users_client import UsersClient
 from tempest.lib.services.identity.v3.versions_client import VersionsClient
 
-__all__ = ['CatalogClient', 'CredentialsClient', 'DomainsClient',
-           'DomainConfigurationClient', 'EndPointGroupsClient',
-           'EndPointsClient', 'EndPointsFilterClient', 'GroupsClient',
-           'IdentityClient', 'InheritedRolesClient', 'OAUTHConsumerClient',
-           'OAUTHTokenClient', 'PoliciesClient', 'ProjectsClient',
-           'ProjectTagsClient', 'RegionsClient', 'RoleAssignmentsClient',
-           'RolesClient', 'ServicesClient', 'V3TokenClient', 'TrustsClient',
-           'UsersClient', 'VersionsClient']
+__all__ = ['ApplicationCredentialsClient', 'CatalogClient',
+           'CredentialsClient', 'DomainsClient', 'DomainConfigurationClient',
+           'EndPointGroupsClient', 'EndPointsClient', 'EndPointsFilterClient',
+           'GroupsClient', 'IdentityClient', 'InheritedRolesClient',
+           'OAUTHConsumerClient', 'OAUTHTokenClient', 'PoliciesClient',
+           'ProjectsClient', 'ProjectTagsClient', 'RegionsClient',
+           'RoleAssignmentsClient', 'RolesClient', 'ServicesClient',
+           'V3TokenClient', 'TrustsClient', 'UsersClient', 'VersionsClient']
