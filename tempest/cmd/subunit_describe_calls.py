@@ -29,6 +29,9 @@ Runtime Arguments
   written to. This contains more information than is present in stdout.
 * ``--ports, -p``: (Optional) The path to a JSON file describing the ports
   being used by different services
+* ``--verbose, -v``: (Optional) Print Request and Response Headers and Body
+  data to stdout
+
 
 Usage
 -----
@@ -262,6 +265,10 @@ class ArgumentParser(argparse.ArgumentParser):
             "-p", "--ports", metavar="<ports file>", default=None,
             help="A JSON file describing the ports for each service.")
 
+        self.add_argument(
+            "-v", "--verbose", action='store_true', default=False,
+            help="Add Request and Response header and body data to stdout.")
+
 
 def parse(stream, non_subunit_name, ports):
     if ports is not None and os.path.exists(ports):
@@ -286,7 +293,7 @@ def parse(stream, non_subunit_name, ports):
     return url_parser
 
 
-def output(url_parser, output_file):
+def output(url_parser, output_file, verbose):
     if output_file is not None:
         with open(output_file, "w") as outfile:
             outfile.write(json.dumps(url_parser.test_logs))
@@ -302,13 +309,22 @@ def output(url_parser, output_file):
             sys.stdout.write('\t- {0} {1} request for {2} to {3}\n'.format(
                 item.get('status_code'), item.get('verb'),
                 item.get('service'), item.get('url')))
+            if verbose:
+                sys.stdout.write('\t\t- request headers: {0}\n'.format(
+                    item.get('request_headers')))
+                sys.stdout.write('\t\t- request body: {0}\n'.format(
+                    item.get('request_body')))
+                sys.stdout.write('\t\t- response headers: {0}\n'.format(
+                    item.get('response_headers')))
+                sys.stdout.write('\t\t- response body: {0}\n'.format(
+                    item.get('response_body')))
         sys.stdout.write('\n')
 
 
 def entry_point():
     cl_args = ArgumentParser().parse_args()
     parser = parse(cl_args.subunit, cl_args.non_subunit_name, cl_args.ports)
-    output(parser, cl_args.output_file)
+    output(parser, cl_args.output_file, cl_args.verbose)
 
 
 if __name__ == "__main__":

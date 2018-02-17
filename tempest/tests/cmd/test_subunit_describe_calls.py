@@ -33,15 +33,42 @@ class TestSubunitDescribeCalls(base.TestCase):
         p.communicate()
         self.assertEqual(0, p.returncode)
 
+    def test_verbose(self):
+        subunit_file = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'sample_streams/calls.subunit')
+        p = subprocess.Popen([
+            'subunit-describe-calls', '-s', subunit_file,
+            '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout = p.communicate()
+        self.assertEqual(0, p.returncode)
+        self.assertIn(b'- request headers:', stdout[0])
+        self.assertIn(b'- request body:', stdout[0])
+        self.assertIn(b'- response headers:', stdout[0])
+        self.assertIn(b'- response body:', stdout[0])
+
     def test_return_code_no_output(self):
         subunit_file = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             'sample_streams/calls.subunit')
         p = subprocess.Popen([
             'subunit-describe-calls', '-s', subunit_file],
-            stdin=subprocess.PIPE)
-        p.communicate()
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout = p.communicate()
         self.assertEqual(0, p.returncode)
+        self.assertIn(b'foo', stdout[0])
+        self.assertIn(b'- 200 POST request for Nova to v2.1/<id>/',
+                      stdout[0])
+        self.assertIn(b'- 200 DELETE request for Nova to v2.1/<id>/',
+                      stdout[0])
+        self.assertIn(b'- 200 GET request for Nova to v2.1/<id>/',
+                      stdout[0])
+        self.assertIn(b'- 404 DELETE request for Nova to v2.1/<id>/',
+                      stdout[0])
+        self.assertNotIn(b'- request headers:', stdout[0])
+        self.assertNotIn(b'- request body:', stdout[0])
+        self.assertNotIn(b'- response headers:', stdout[0])
+        self.assertNotIn(b'- response body:', stdout[0])
 
     def test_parse(self):
         subunit_file = os.path.join(
