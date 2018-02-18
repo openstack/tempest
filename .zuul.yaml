@@ -29,11 +29,13 @@
 - job:
     name: tempest-full
     parent: devstack-tempest
-    # This currently only works on the master branch.
+    # This currently works from stable/queens on.
     # NOTE(andreaf) Only run on master for now.
     # The negative lookup is redudant but it's a
     # reminder that we don't want the job running there.
-    branches: ^(?!driverfixes/)master$
+    branches:
+      - master
+      - stable/queens
     description: |
       Base integration test with Neutron networking and py27.
       Former names for this job where:
@@ -47,7 +49,9 @@
 - job:
     name: tempest-full-py3
     parent: devstack-tempest
-    branches: ^(?!driverfixes/)master$
+    branches:
+      - master
+      - stable/queens
     description: |
       Base integration test with Neutron networking and py3.
       Former names for this job where:
@@ -162,7 +166,6 @@
               - ^.zuul.yaml$
         - nova-multiattach
         - tempest-full-queens:
-            voting: false
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
@@ -173,7 +176,6 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-full-queens-py3:
-            voting: false
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
