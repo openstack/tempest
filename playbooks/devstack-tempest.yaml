@@ -3,7 +3,7 @@
 # avoid zuul retrying on legitimate failures.
 - hosts: all
   roles:
-    - run-devstack
+    - orchestrate-devstack
 
 # We run tests only on one node, regardless how many nodes are in the system
 - hosts: tempest
