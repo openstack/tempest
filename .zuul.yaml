@@ -30,9 +30,6 @@
     name: tempest-full
     parent: devstack-tempest
     # This currently works from stable/queens on.
-    # NOTE(andreaf) Only run on master for now.
-    # The negative lookup is redudant but it's a
-    # reminder that we don't want the job running there.
     branches:
       - master
       - stable/queens
