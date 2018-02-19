@@ -13,22 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_serialization import jsonutils as json
+from debtcollector import moves
 
-from tempest.lib.common import rest_client
+from tempest.lib.services.volume.v3 import capabilities_client
 
 
-class CapabilitiesClient(rest_client.RestClient):
-
-    def show_backend_capabilities(self, host):
-        """Shows capabilities for a storage back end.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/index.html#show-back-end-capabilities
-        """
-        url = 'capabilities/%s' % host
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
+CapabilitiesClient = moves.moved_class(
+    capabilities_client.CapabilitiesClient, 'CapabilitiesClient',
+    __name__, version="Queens", removal_version='?')

@@ -12,52 +12,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from debtcollector import moves
 
-from oslo_serialization import jsonutils
-from six.moves.urllib import parse as urllib
-
-from tempest.lib.common import rest_client
+from tempest.lib.services.volume.v3 import quotas_client
 
 
-class QuotasClient(rest_client.RestClient):
-    """Client class to send CRUD Volume Quotas API requests"""
-
-    def show_default_quota_set(self, tenant_id):
-        """List the default volume quota set for a tenant."""
-
-        url = 'os-quota-sets/%s/defaults' % tenant_id
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = jsonutils.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def show_quota_set(self, tenant_id, params=None):
-        """List the quota set for a tenant."""
-
-        url = 'os-quota-sets/%s' % tenant_id
-        if params:
-            url += '?%s' % urllib.urlencode(params)
-
-        resp, body = self.get(url)
-        self.expected_success(200, resp.status)
-        body = jsonutils.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def update_quota_set(self, tenant_id, **kwargs):
-        """Updates quota set
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/index.html#update-quotas
-        """
-        put_body = jsonutils.dumps({'quota_set': kwargs})
-        resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)
-        self.expected_success(200, resp.status)
-        body = jsonutils.loads(body)
-        return rest_client.ResponseBody(resp, body)
-
-    def delete_quota_set(self, tenant_id):
-        """Delete the tenant's quota set."""
-        resp, body = self.delete('os-quota-sets/%s' % tenant_id)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
+QuotasClient = moves.moved_class(
+    quotas_client.QuotasClient, 'QuotasClient',
+    __name__, version="Rocky", removal_version='?')

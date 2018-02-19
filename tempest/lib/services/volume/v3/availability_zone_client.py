@@ -1,4 +1,4 @@
-# Copyright 2017 FiberHome Telecommunication Technologies CO.,LTD
+# Copyright 2014 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,11 +12,16 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from debtcollector import moves
 
-from tempest.lib.services.volume.v3 import volume_manage_client
+from oslo_serialization import jsonutils as json
+
+from tempest.lib.common import rest_client
 
 
-VolumeManageClient = moves.moved_class(
-    volume_manage_client.VolumeManageClient, 'VolumeManageClient',
-    __name__, version="Rocky", removal_version='?')
+class AvailabilityZoneClient(rest_client.RestClient):
+
+    def list_availability_zones(self):
+        resp, body = self.get('os-availability-zone')
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
