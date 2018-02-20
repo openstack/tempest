@@ -11,6 +11,7 @@
 #    under the License.
 
 import functools
+import re
 import sys
 
 import netaddr
@@ -126,3 +127,27 @@ class RemoteClient(object):
             cmd = 'sudo {cmd} -I {nic}'.format(cmd=cmd, nic=nic)
         cmd += ' -c{0} -w{0} -s{1} {2}'.format(count, size, host)
         return self.exec_command(cmd)
+
+    def mount_config_drive(self):
+        """Mount the config drive inside a virtual machine
+
+        This method will not unmount the config drive, so unmount_config_drive
+        must be used for cleanup.
+        """
+        cmd_blkid = 'blkid | grep -i config-2'
+        result = self.exec_command(cmd_blkid)
+        dev_name = re.match('([^:]+)', result).group()
+
+        try:
+            self.exec_command('sudo mount %s /mnt' % dev_name)
+        except tempest.lib.exceptions.SSHExecCommandFailed:
+            # So the command failed, let's try to know why and print some
+            # useful information.
+            lsblk = self.exec_command('sudo lsblk --fs --ascii')
+            LOG.error("Mounting %s on /mnt failed. Right after the "
+                      "failure 'lsblk' in the guest reported:\n%s",
+                      dev_name, lsblk)
+            raise
+
+    def unmount_config_drive(self):
+        self.exec_command('sudo umount /mnt')
