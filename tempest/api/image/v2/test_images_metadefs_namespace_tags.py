@@ -49,7 +49,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
         # List namespace tags
         body = self.namespace_tags_client.list_namespace_tags(
             namespace['namespace'])
-        self.assertTrue(3, len(body['tags']))
+        self.assertEqual(3, len(body['tags']))
         self.assertIn(body['tags'][0]['name'], self.tag_list)
         self.assertIn(body['tags'][1]['name'], self.tag_list)
         self.assertIn(body['tags'][2]['name'], self.tag_list)
