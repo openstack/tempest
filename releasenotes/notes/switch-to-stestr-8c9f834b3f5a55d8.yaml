@@ -1,0 +1,13 @@
+---
+features:
+- The Tempest CLI commands have switched from calling testrepository internally
+  to use stestr instead. This means that all of the features and bug fixes from
+  moving to stestr are available to the tempest commands.
+
+upgrade:
+- Tempest CLI commands will no long rely on anything from testr. This means any
+  data in existing testr internals that were being exposed are no longer
+  present. For example things like the .testr directories will be silently
+  ignored. There is a potential incompatibility for existing users who are
+  relying on test results being stored by testr. Anything relying on previous
+  testr behavior will need to be updated to handle stestr.

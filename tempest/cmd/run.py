@@ -19,9 +19,9 @@ Test Selection
 ==============
 Tempest run has several options:
 
-* ``--regex, -r``: This is a selection regex like what testr uses. It will run
-  any tests that match on re.match() with the regex
-* ``--smoke, -s``: Run all the tests tagged as smoke
+ * **--regex/-r**: This is a selection regex like what stestr uses. It will run
+                   any tests that match on re.match() with the regex
+ * **--smoke/-s**: Run all the tests tagged as smoke
 
 There are also the ``--blacklist-file`` and ``--whitelist-file`` options that
 let you pass a filepath to tempest run with the file format being a line
@@ -74,9 +74,9 @@ Running from Anywhere
 ---------------------
 Tempest run provides you with an option to execute tempest from anywhere on
 your system. You are required to provide a config file in this case with the
-``--config-file`` option. When run tempest will create a .testrepository
-directory and a .testr.conf file in your current working directory. This way
-you can use testr commands directly to inspect the state of the previous run.
+``--config-file`` option. When run tempest will create a .stestr
+directory and a .stestr.conf file in your current working directory. This way
+you can use stestr commands directly to inspect the state of the previous run.
 
 Test Output
 ===========
@@ -94,18 +94,13 @@ as a single run you can leverage the ``--combine`` option which will append
 the current run's results with the previous runs.
 """
 
-import io
 import os
 import sys
-import tempfile
-import threading
 
 from cliff import command
-from os_testr import regex_builder
-from os_testr import subunit_trace
 from oslo_serialization import jsonutils as json
 import six
-from testrepository.commands import run_argv
+from stestr import commands
 
 from tempest import clients
 from tempest.cmd import cleanup_service
@@ -124,35 +119,27 @@ class TempestRun(command.Command):
     def _set_env(self, config_file=None):
         if config_file:
             CONF.set_config_path(os.path.abspath(config_file))
-        # NOTE(mtreinish): This is needed so that testr doesn't gobble up any
+        # NOTE(mtreinish): This is needed so that stestr doesn't gobble up any
         # stacktraces on failure.
         if 'TESTR_PDB' in os.environ:
             return
         else:
             os.environ["TESTR_PDB"] = ""
-        # NOTE(dims): most of our .testr.conf try to test for PYTHON
+        # NOTE(dims): most of our .stestr.conf try to test for PYTHON
         # environment variable and fall back to "python", under python3
         # if it does not exist. we should set it to the python3 executable
         # to deal with this situation better for now.
         if six.PY3 and 'PYTHON' not in os.environ:
             os.environ['PYTHON'] = sys.executable
 
-    def _create_testrepository(self):
-        if not os.path.isdir('.testrepository'):
-            returncode = run_argv(['testr', 'init'], sys.stdin, sys.stdout,
-                                  sys.stderr)
-            if returncode:
-                sys.exit(returncode)
-
-    def _create_testr_conf(self):
+    def _create_stestr_conf(self):
         top_level_path = os.path.dirname(os.path.dirname(__file__))
         discover_path = os.path.join(top_level_path, 'test_discover')
-        file_contents = init.TESTR_CONF % (top_level_path, discover_path)
-        with open('.testr.conf', 'w+') as testr_conf_file:
-            testr_conf_file.write(file_contents)
+        file_contents = init.STESTR_CONF % (discover_path, top_level_path)
+        with open('.stestr.conf', 'w+') as stestr_conf_file:
+            stestr_conf_file.write(file_contents)
 
     def take_action(self, parsed_args):
-        returncode = 0
         if parsed_args.config_file:
             self._set_env(parsed_args.config_file)
         else:
@@ -169,52 +156,32 @@ class TempestRun(command.Command):
                     "register the workspace." %
                     (parsed_args.workspace, workspace_mgr.path))
             os.chdir(path)
-            # NOTE(mtreinish): tempest init should create a .testrepository dir
-            # but since workspaces can be imported let's sanity check and
-            # ensure that one is created
-            self._create_testrepository()
-        # Local execution mode
-        elif os.path.isfile('.testr.conf'):
-            # If you're running in local execution mode and there is not a
-            # testrepository dir create one
-            self._create_testrepository()
+            if not os.path.isfile('.stestr.conf'):
+                self._create_stestr_conf()
         # local execution with config file mode
         elif parsed_args.config_file:
-            self._create_testr_conf()
-            self._create_testrepository()
-        else:
-            print("No .testr.conf file was found for local execution")
+            self._create_stestr_conf()
+            self._create_stestrepository()
+        elif not os.path.isfile('.stestr.conf'):
+            print("No .stestr.conf file was found for local execution")
             sys.exit(2)
         if parsed_args.state:
             self._init_state()
         else:
             pass
 
-        if parsed_args.combine:
-            temp_stream = tempfile.NamedTemporaryFile()
-            return_code = run_argv(['tempest', 'last', '--subunit'], sys.stdin,
-                                   temp_stream, sys.stderr)
+        if not (parsed_args.config_file or parsed_args.workspace):
+            regex = self._build_regex(parsed_args)
+            serial = not parsed_args.parallel
+            return_code = commands.run_command(
+                filters=regex, subunit_out=parsed_args.subunit,
+                serial=serial, concurrency=parsed_args.concurrency,
+                blacklist_file=parsed_args.blacklist_file,
+                whitelist_file=parsed_args.whitelist_file,
+                load_list=parsed_args.load_list, combine=parsed_args.combine)
             if return_code > 0:
                 sys.exit(return_code)
-
-        regex = self._build_regex(parsed_args)
-        if parsed_args.list_tests:
-            argv = ['tempest', 'list-tests', regex]
-            returncode = run_argv(argv, sys.stdin, sys.stdout, sys.stderr)
-        else:
-            options = self._build_options(parsed_args)
-            returncode = self._run(regex, options)
-            if returncode > 0:
-                sys.exit(returncode)
-
-        if parsed_args.combine:
-            return_code = run_argv(['tempest', 'last', '--subunit'], sys.stdin,
-                                   temp_stream, sys.stderr)
-            if return_code > 0:
-                sys.exit(return_code)
-            returncode = run_argv(['tempest', 'load', temp_stream.name],
-                                  sys.stdin, sys.stdout, sys.stderr)
-        sys.exit(returncode)
+        return return_code
 
     def get_description(self):
         return 'Run tempest'
@@ -262,7 +229,7 @@ class TempestRun(command.Command):
         regex.add_argument('--smoke', '-s', action='store_true',
                            help="Run the smoke tests only")
         regex.add_argument('--regex', '-r', default='',
-                           help='A normal testr selection regex used to '
+                           help='A normal stestr selection regex used to '
                                 'specify a subset of tests to run')
         list_selector = parser.add_mutually_exclusive_group()
         list_selector.add_argument('--whitelist-file', '--whitelist_file',
@@ -305,62 +272,15 @@ class TempestRun(command.Command):
         parser.add_argument("--combine", action='store_true',
                             help='Combine the output of this run with the '
                                  "previous run's as a combined stream in the "
-                                 "testr repository after it finish")
+                                 "stestr repository after it finish")
 
         parser.set_defaults(parallel=True)
         return parser
 
     def _build_regex(self, parsed_args):
-        regex = ''
+        regex = None
         if parsed_args.smoke:
-            regex = 'smoke'
+            regex = ['smoke']
         elif parsed_args.regex:
-            regex = parsed_args.regex
-        if parsed_args.whitelist_file or parsed_args.blacklist_file:
-            regex = regex_builder.construct_regex(parsed_args.blacklist_file,
-                                                  parsed_args.whitelist_file,
-                                                  regex, False)
+            regex = parsed_args.regex.split()
         return regex
-
-    def _build_options(self, parsed_args):
-        options = []
-        if parsed_args.subunit:
-            options.append("--subunit")
-        if parsed_args.parallel:
-            options.append("--parallel")
-        if parsed_args.concurrency:
-            options.append("--concurrency=%s" % parsed_args.concurrency)
-        if parsed_args.load_list:
-            options.append("--load-list=%s" % parsed_args.load_list)
-        return options
-
-    def _run(self, regex, options):
-        returncode = 0
-        argv = ['tempest', 'run', regex] + options
-        if '--subunit' in options:
-            returncode = run_argv(argv, sys.stdin, sys.stdout, sys.stderr)
-        else:
-            argv.append('--subunit')
-            stdin = io.StringIO()
-            stdout_r, stdout_w = os.pipe()
-            subunit_w = os.fdopen(stdout_w, 'wt')
-            subunit_r = os.fdopen(stdout_r)
-            returncodes = {}
-
-            def run_argv_thread():
-                returncodes['testr'] = run_argv(argv, stdin, subunit_w,
-                                                sys.stderr)
-                subunit_w.close()
-
-            run_thread = threading.Thread(target=run_argv_thread)
-            run_thread.start()
-            returncodes['subunit-trace'] = subunit_trace.trace(
-                subunit_r, sys.stdout, post_fails=True, print_failures=True)
-            run_thread.join()
-            subunit_r.close()
-            # python version of pipefail
-            if returncodes['testr']:
-                returncode = returncodes['testr']
-            elif returncodes['subunit-trace']:
-                returncode = returncodes['subunit-trace']
-        return returncode

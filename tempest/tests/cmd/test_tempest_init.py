@@ -27,16 +27,16 @@ class TestTempestInit(base.TestCase):
         conf_dir = self.useFixture(fixtures.TempDir())
 
         init_cmd = init.TempestInit(None, None)
-        init_cmd.generate_testr_conf(conf_dir.path)
+        init_cmd.generate_stestr_conf(conf_dir.path)
 
         # Generate expected file contents
         top_level_path = os.path.dirname(os.path.dirname(init.__file__))
         discover_path = os.path.join(top_level_path, 'test_discover')
-        testr_conf_file = init.TESTR_CONF % (top_level_path, discover_path)
+        stestr_conf_file = init.STESTR_CONF % (discover_path, top_level_path)
 
-        conf_path = conf_dir.join('.testr.conf')
+        conf_path = conf_dir.join('.stestr.conf')
         with open(conf_path, 'r') as conf_file:
-            self.assertEqual(conf_file.read(), testr_conf_file)
+            self.assertEqual(conf_file.read(), stestr_conf_file)
 
     def test_generate_sample_config(self):
         local_dir = self.useFixture(fixtures.TempDir())
@@ -125,18 +125,18 @@ class TestTempestInit(base.TestCase):
         lock_path = os.path.join(fake_local_dir.path, 'tempest_lock')
         etc_dir = os.path.join(fake_local_dir.path, 'etc')
         log_dir = os.path.join(fake_local_dir.path, 'logs')
-        testr_dir = os.path.join(fake_local_dir.path, '.testrepository')
+        stestr_dir = os.path.join(fake_local_dir.path, '.stestr')
         self.assertTrue(os.path.isdir(lock_path))
         self.assertTrue(os.path.isdir(etc_dir))
         self.assertTrue(os.path.isdir(log_dir))
-        self.assertTrue(os.path.isdir(testr_dir))
+        self.assertTrue(os.path.isdir(stestr_dir))
         # Assert file creation
         fake_file_moved = os.path.join(etc_dir, 'conf_file.conf')
         local_conf_file = os.path.join(etc_dir, 'tempest.conf')
-        local_testr_conf = os.path.join(fake_local_dir.path, '.testr.conf')
+        local_stestr_conf = os.path.join(fake_local_dir.path, '.stestr.conf')
         self.assertTrue(os.path.isfile(fake_file_moved))
         self.assertTrue(os.path.isfile(local_conf_file))
-        self.assertTrue(os.path.isfile(local_testr_conf))
+        self.assertTrue(os.path.isfile(local_stestr_conf))
 
     def test_take_action_fails(self):
         class ParsedArgs(object):
