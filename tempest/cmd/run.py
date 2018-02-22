@@ -153,7 +153,7 @@ class TempestRun(command.Command):
             if not os.path.isfile('.stestr.conf'):
                 self._create_stestr_conf()
         # local execution with config file mode
-        elif parsed_args.config_file:
+        elif parsed_args.config_file and not os.path.isfile('.stestr.conf'):
             self._create_stestr_conf()
         elif not os.path.isfile('.stestr.conf'):
             print("No .stestr.conf file was found for local execution")
@@ -164,6 +164,7 @@ class TempestRun(command.Command):
             pass
 
         regex = self._build_regex(parsed_args)
+        return_code = 0
         if parsed_args.list_tests:
             return_code = commands.list_command(
                 filters=regex, whitelist_file=parsed_args.whitelist_file,
