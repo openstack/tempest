@@ -29,10 +29,11 @@
 - job:
     name: tempest-full
     parent: devstack-tempest
-    # This currently works from stable/queens on.
+    # This currently works from stable/pike on.
     branches:
       - master
       - stable/queens
+      - stable/pike
     description: |
       Base integration test with Neutron networking and py27.
       Former names for this job where:
@@ -76,6 +77,11 @@
     name: tempest-full-queens-py3
     parent: tempest-full-py3
     override-checkout: stable/queens
+
+- job:
+    name: tempest-full-pike
+    parent: tempest-full
+    override-checkout: stable/pike
 
 - job:
     name: tempest-tox-plugin-sanity-check
@@ -182,6 +188,16 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+        - tempest-full-pike:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
     gate:
       jobs:
@@ -190,3 +206,4 @@
       jobs:
         - tempest-full-queens
         - tempest-full-queens-py3
+        - tempest-full-pike
