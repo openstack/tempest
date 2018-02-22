@@ -1,0 +1,12 @@
+---
+prelude: >
+    This release marks the start of Queens release support in Tempest.
+    This release also marks the end of support for Newton in Tempest.
+other:
+    - OpenStack Releases supported after this release are **Queens**, **Pike**,
+      and **Ocata**.
+
+      The release under current development of this tag is Rocky, meaning
+      that every Tempest commit is also tested against master during the Rocky
+      cycle. However, this does not necessarily mean that using Tempest as of
+      this tag will work against a Rocky (or future release) cloud.
