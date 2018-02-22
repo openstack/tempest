@@ -161,7 +161,6 @@ class TempestRun(command.Command):
         # local execution with config file mode
         elif parsed_args.config_file:
             self._create_stestr_conf()
-            self._create_stestrepository()
         elif not os.path.isfile('.stestr.conf'):
             print("No .stestr.conf file was found for local execution")
             sys.exit(2)
