@@ -29,6 +29,12 @@ Run Tempest
                # Line with only a comment.
                (tempest\.(api|scenario|thirdparty)).*$    # Run only api scenario and third party
 
+.. zuul:rolevar:: tempest_test_blacklist
+
+   Specifies a blacklist file to skip tests that are not needed.
+
+   Pass a full path to the file.
+
 .. zuul:rolevar:: tox_envlist
    :default: smoke
 

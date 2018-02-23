@@ -20,8 +20,22 @@
     default_concurrency: "{{ num_cores|int // 2 }}"
   when: num_cores|int > 3
 
+- when:
+    - tempest_test_blacklist is defined
+  block:
+    - name: Check for test blacklist file
+      stat:
+        path: "{{ tempest_test_blacklist }}"
+      register:
+        blacklist_stat
+
+    - name: Build blacklist option
+      set_fact:
+        blacklist_option: "--blacklist-file={{ tempest_test_blacklist|quote }}"
+      when: blacklist_stat.stat.exists
+
 - name: Run Tempest
-  command: tox -e {{tox_envlist}} -- {{tempest_test_regex|quote}} --concurrency={{tempest_concurrency|default(default_concurrency)}}
+  command: tox -e {{tox_envlist}} -- {{tempest_test_regex|quote}} {{blacklist_option|default('')}} --concurrency={{tempest_concurrency|default(default_concurrency)}}
   args:
     chdir: "{{devstack_base_dir}}/tempest"
   become: true
