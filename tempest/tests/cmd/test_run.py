@@ -21,6 +21,7 @@ import tempfile
 
 import fixtures
 import mock
+import six
 
 from tempest.cmd import run
 from tempest.tests import base
@@ -93,6 +94,7 @@ class TestRunReturnCode(base.TestCase):
         msg = ("Running %s got an unexpected returncode\n"
                "Stdout: %s\nStderr: %s" % (' '.join(cmd), out, err))
         self.assertEqual(p.returncode, expected, msg)
+        return out, err
 
     def test_tempest_run_passes(self):
         self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
@@ -103,6 +105,23 @@ class TestRunReturnCode(base.TestCase):
 
     def test_tempest_run_fails(self):
         self.assertRunExit(['tempest', 'run'], 1)
+
+    def test_run_list(self):
+        subprocess.call(['stestr', 'init'])
+        out, err = self.assertRunExit(['tempest', 'run', '-l'], 0)
+        tests = out.split()
+        tests = sorted([six.text_type(x.rstrip()) for x in tests if x])
+        result = [
+            six.text_type('tests.test_failing.FakeTestClass.test_pass'),
+            six.text_type('tests.test_failing.FakeTestClass.test_pass_list'),
+            six.text_type('tests.test_passing.FakeTestClass.test_pass'),
+            six.text_type('tests.test_passing.FakeTestClass.test_pass_list'),
+        ]
+        # NOTE(mtreinish): on python 3 the subprocess prints b'' around
+        # stdout.
+        if six.PY3:
+            result = ["b\'" + x + "\'" for x in result]
+        self.assertEqual(result, tests)
 
 
 class TestTakeAction(base.TestCase):
