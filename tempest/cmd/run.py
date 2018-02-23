@@ -22,6 +22,8 @@ Tempest run has several options:
  * **--regex/-r**: This is a selection regex like what stestr uses. It will run
                    any tests that match on re.match() with the regex
  * **--smoke/-s**: Run all the tests tagged as smoke
+ * **--black-regex**: It allows to do simple test exclusion via passing a
+                      rejection/black regexp
 
 There are also the ``--blacklist-file`` and ``--whitelist-file`` options that
 let you pass a filepath to tempest run with the file format being a line
@@ -165,7 +167,8 @@ class TempestRun(command.Command):
         if parsed_args.list_tests:
             return_code = commands.list_command(
                 filters=regex, whitelist_file=parsed_args.whitelist_file,
-                blacklist_file=parsed_args.blacklist_file)
+                blacklist_file=parsed_args.blacklist_file,
+                black_regex=parsed_args.black_regex)
 
         elif not (parsed_args.config_file or parsed_args.workspace):
             serial = not parsed_args.parallel
@@ -174,6 +177,7 @@ class TempestRun(command.Command):
                 serial=serial, concurrency=parsed_args.concurrency,
                 blacklist_file=parsed_args.blacklist_file,
                 whitelist_file=parsed_args.whitelist_file,
+                black_regex=parsed_args.black_regex,
                 load_list=parsed_args.load_list, combine=parsed_args.combine)
             if return_code > 0:
                 sys.exit(return_code)
@@ -227,6 +231,8 @@ class TempestRun(command.Command):
         regex.add_argument('--regex', '-r', default='',
                            help='A normal stestr selection regex used to '
                                 'specify a subset of tests to run')
+        parser.add_argument('--black-regex', dest='black_regex',
+                            help='A regex to exclude tests that match it')
         parser.add_argument('--whitelist-file', '--whitelist_file',
                             help="Path to a whitelist file, this file "
                             "contains a separate regex on each "
