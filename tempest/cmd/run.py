@@ -170,7 +170,7 @@ class TempestRun(command.Command):
                 blacklist_file=parsed_args.blacklist_file,
                 black_regex=parsed_args.black_regex)
 
-        elif not (parsed_args.config_file or parsed_args.workspace):
+        else:
             serial = not parsed_args.parallel
             return_code = commands.run_command(
                 filters=regex, subunit_out=parsed_args.subunit,
