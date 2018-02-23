@@ -123,6 +123,23 @@ class TestRunReturnCode(base.TestCase):
             result = ["b\'" + x + "\'" for x in result]
         self.assertEqual(result, tests)
 
+    def test_tempest_run_with_whitelist(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        whitelist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(whitelist_file.close)
+        whitelist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path], 0)
+
+    def test_tempest_run_with_whitelist_with_regex(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        whitelist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(whitelist_file.close)
+        whitelist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+                            '--regex', 'fail'], 1)
+
 
 class TestTakeAction(base.TestCase):
     def test_workspace_not_registered(self):
