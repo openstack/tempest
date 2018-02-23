@@ -32,17 +32,9 @@ For example::
     ^regex1 # Match these tests
     .*regex2 # Match those tests
 
-The blacklist file will be used to construct a negative lookahead regex and
-the whitelist file will simply OR all the regexes in the file. The whitelist
-and blacklist file options are mutually exclusive so you can't use them
-together. However, you can combine either with a normal regex or the *--smoke*
-flag. When used with a blacklist file the generated regex will be combined to
-something like::
-
-    ^((?!black_regex1|black_regex2).)*$cli_regex1
-
-When combined with a whitelist file all the regexes from the file and the CLI
-regexes will be ORed.
+These arguments are just passed into stestr, you can refer to the stestr
+selection docs for more details on how these operate:
+http://stestr.readthedocs.io/en/latest/MANUAL.html#test-selection
 
 You can also use the ``--list-tests`` option in conjunction with selection
 arguments to list which tests will be run.
@@ -230,21 +222,20 @@ class TempestRun(command.Command):
         regex.add_argument('--regex', '-r', default='',
                            help='A normal stestr selection regex used to '
                                 'specify a subset of tests to run')
-        list_selector = parser.add_mutually_exclusive_group()
-        list_selector.add_argument('--whitelist-file', '--whitelist_file',
-                                   help="Path to a whitelist file, this file "
-                                        "contains a separate regex on each "
-                                        "newline.")
-        list_selector.add_argument('--blacklist-file', '--blacklist_file',
-                                   help='Path to a blacklist file, this file '
-                                        'contains a separate regex exclude on '
-                                        'each newline')
-        list_selector.add_argument('--load-list', '--load_list',
-                                   help='Path to a non-regex whitelist file, '
-                                        'this file contains a seperate test '
-                                        'on each newline. This command'
-                                        'supports files created by the tempest'
-                                        'run ``--list-tests`` command')
+        parser.add_argument('--whitelist-file', '--whitelist_file',
+                            help="Path to a whitelist file, this file "
+                            "contains a separate regex on each "
+                            "newline.")
+        parser.add_argument('--blacklist-file', '--blacklist_file',
+                            help='Path to a blacklist file, this file '
+                                 'contains a separate regex exclude on '
+                                 'each newline')
+        parser.add_argument('--load-list', '--load_list',
+                            help='Path to a non-regex whitelist file, '
+                                 'this file contains a seperate test '
+                                 'on each newline. This command'
+                                 'supports files created by the tempest'
+                                 'run ``--list-tests`` command')
         # list only args
         parser.add_argument('--list-tests', '-l', action='store_true',
                             help='List tests',
