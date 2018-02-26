@@ -140,6 +140,11 @@ class TestRunReturnCode(base.TestCase):
         self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
                             '--regex', 'fail'], 1)
 
+    def test_tempest_run_passes_with_config_file(self):
+        self.assertRunExit(['tempest', 'run',
+                            '--config-file', self.stestr_conf_file,
+                            '--regex', 'passing'], 0)
+
 
 class TestTakeAction(base.TestCase):
     def test_workspace_not_registered(self):
@@ -168,3 +173,27 @@ class TestTakeAction(base.TestCase):
         self.assertRaises(Exception_, tempest_run.take_action, parsed_args)
         exit_msg = m_exit.call_args[0][0]
         self.assertIn(workspace, exit_msg)
+
+    def test_config_file_specified(self):
+        # Setup test dirs
+        self.directory = tempfile.mkdtemp(prefix='tempest-unit')
+        self.addCleanup(shutil.rmtree, self.directory)
+        self.test_dir = os.path.join(self.directory, 'tests')
+        os.mkdir(self.test_dir)
+        # Change directory, run wrapper and check result
+        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
+        os.chdir(self.directory)
+
+        tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
+        parsed_args = mock.Mock()
+        parsed_args.config_file = []
+
+        parsed_args.workspace = None
+        parsed_args.state = None
+        parsed_args.list_tests = False
+        parsed_args.config_file = '.stestr.conf'
+
+        with mock.patch('stestr.commands.run_command') as m:
+            m.return_value = 0
+            self.assertEqual(0, tempest_run.take_action(parsed_args))
+            m.assert_called()
