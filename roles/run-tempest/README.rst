@@ -39,3 +39,20 @@ Run Tempest
    :default: smoke
 
    The Tempest tox environment to run.
+
+.. zuul:rolevar:: tempest_black_regex
+   :default: ''
+
+   A regular expression used to skip the tests.
+
+   It works only when used with some specific tox environments
+   ('all', 'all-plugin'.)
+
+   Multi-line and commented regexs can be achieved by doing this:
+
+       ::
+           vars:
+             tempest_black_regex: |
+               (?x)    # Ignore comments and whitespaces
+               # Line with only a comment.
+               (tempest.api.identity).*$
