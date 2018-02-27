@@ -1,7 +1,6 @@
 - hosts: all
   become: true
   roles:
-    - role: process-test-results
-      test_results_dir: '{{ devstack_base_dir }}/tempest'
-      tox_envdir: tempest
+    - role: fetch-subunit-output
+      zuul_work_dir: '{{ devstack_base_dir }}/tempest'
     - role: process-stackviz
