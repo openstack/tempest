@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adds a new CLI arg in tempest run, --black-regex, which is a regex to
+    exclude the tests that match it.
+fixes:
+  - |
+    Fixes tempest run CLI args mutually exclusive behavior which should not
+    be the case anymore (Bug#1751201).
