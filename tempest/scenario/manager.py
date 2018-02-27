@@ -139,13 +139,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(self.__class__.__name__ + "-server")
 
         vnic_type = CONF.network.port_vnic_type
+        profile = CONF.network.port_profile
 
         # If vnic_type is configured create port for
         # every network
         if vnic_type:
             ports = []
 
-            create_port_body = {'binding:vnic_type': vnic_type}
+            create_port_body = {'binding:vnic_type': vnic_type,
+                                'binding:profile': profile}
             if kwargs:
                 # Convert security group names to security group ids
                 # to pass to create_port
