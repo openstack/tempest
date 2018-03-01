@@ -16,7 +16,7 @@ the stackviz archive embedded in test images.
    The stage directory where the input data can be found and
    the output will be produced.
 
-.. zuul:rolevar:: test_results_stage_name
-   :default: test_results
+.. zuul:rolevar:: zuul_work_dir
+   :default: {{ devstack_base_dir }}/tempest
 
-   The name of the subunit file to be used as input.
+   Directory to work in. It has to be a fully qualified path.

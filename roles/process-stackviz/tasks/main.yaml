@@ -9,11 +9,11 @@
 
 - name: Check if subunit data exists
   stat:
-    path: "{{ stage_dir }}/{{ test_results_stage_name }}.subunit"
+    path: "{{ zuul_work_dir }}/testrepository.subunit"
   register: subunit_input
 
 - debug:
-    msg: "Subunit file could not be found at {{ stage_dir }}/{{ test_results_stage_name }}.subunit"
+    msg: "Subunit file could not be found at {{ zuul_work_dir }}/testrepository.subunit"
   when: not subunit_input.stat.exists
 
 - name: Install stackviz
