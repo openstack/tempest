@@ -45,6 +45,19 @@
         ENABLE_FILE_INJECTION: true
 
 - job:
+    name: tempest-full-parallel
+    parent: tempest-full
+    voting: false
+    branches:
+      - master
+    description: |
+      Base integration test with Neutron networking and py27.
+      It includes all scenarios as it was in the past.
+      This job runs all scenario tests in parallel!
+    vars:
+      tox_envlist: full-parallel
+
+- job:
     name: tempest-full-py3
     parent: devstack-tempest
     branches:
@@ -168,6 +181,16 @@
               - ^roles/
               - ^.zuul.yaml$
         - nova-multiattach
+        - tempest-full-parallel:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-full-queens:
             irrelevant-files:
               - ^(test-|)requirements.txt$
