@@ -41,16 +41,19 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     def test_snapshot_create_delete_with_volume_in_use(self):
         # Create a test instance
         server = self.create_server()
-        self.attach_volume(server['id'], self.volume_origin['id'])
+        # NOTE(zhufl) Here we create volume from self.image_ref for adding
+        # coverage for "creating snapshot from non-blank volume".
+        volume = self.create_volume(image_ref=self.image_ref)
+        self.attach_volume(server['id'], volume['id'])
 
         # Snapshot a volume which attached to an instance with force=False
         self.assertRaises(lib_exc.BadRequest, self.create_snapshot,
-                          self.volume_origin['id'], force=False)
+                          volume['id'], force=False)
 
         # Snapshot a volume attached to an instance
-        snapshot1 = self.create_snapshot(self.volume_origin['id'], force=True)
-        snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
-        snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
+        snapshot1 = self.create_snapshot(volume['id'], force=True)
+        snapshot2 = self.create_snapshot(volume['id'], force=True)
+        snapshot3 = self.create_snapshot(volume['id'], force=True)
 
         # Delete the snapshots. Some snapshot implementations can take
         # different paths according to order they are deleted.
