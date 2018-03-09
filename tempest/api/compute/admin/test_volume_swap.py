@@ -126,13 +126,13 @@ class TestVolumeSwap(TestVolumeSwapBase):
         self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])
 
 
-class AttachVolumeMultiAttachTest(TestVolumeSwapBase):
+class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
     min_microversion = '2.60'
     max_microversion = 'latest'
 
     @classmethod
     def skip_checks(cls):
-        super(AttachVolumeMultiAttachTest, cls).skip_checks()
+        super(TestMultiAttachVolumeSwap, cls).skip_checks()
         if not CONF.compute_feature_enabled.volume_multiattach:
             raise cls.skipException('Volume multi-attach is not available.')
 
