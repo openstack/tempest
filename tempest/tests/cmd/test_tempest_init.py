@@ -22,7 +22,7 @@ from tempest.tests import base
 
 class TestTempestInit(base.TestCase):
 
-    def test_generate_testr_conf(self):
+    def test_generate_stestr_conf(self):
         # Create fake conf dir
         conf_dir = self.useFixture(fixtures.TempDir())
 

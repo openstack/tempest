@@ -109,15 +109,18 @@ as it is simpler, and quicker to work with.
 
     $ tempest run --workspace cloud-01
 
-   There is also the option to use testr directly, or any `testr`_ based test
-   runner, like `ostestr`_. For example, from the workspace dir run::
+   There is also the option to use `stestr`_ directly. For example, from
+   the workspace dir run::
 
-    $ ostestr --regex '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario))'
+    $ stestr run --black-regex '\[.*\bslow\b.*\]' '^tempest\.(api|scenario)'
 
-   will run the same set of tests as the default gate jobs.
+   will run the same set of tests as the default gate jobs. Or you can
+   use `unittest`_ compatible test runners such as `testr`_, `pytest`_ etc.
 
+.. _unittest: https://docs.python.org/3/library/unittest.html
 .. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
-.. _ostestr: https://docs.openstack.org/os-testr/latest/
+.. _stestr: https://stestr.readthedocs.org/en/latest/MANUAL.html
+.. _pytest: https://docs.pytest.org/en/latest/
 
 Library
 -------
