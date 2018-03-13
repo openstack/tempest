@@ -20,6 +20,8 @@ from tempest.lib import decorators
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests hosts API using admin privileges."""
 
+    max_microversion = '2.42'
+
     @classmethod
     def setup_clients(cls):
         super(HostsAdminTestJSON, cls).setup_clients()

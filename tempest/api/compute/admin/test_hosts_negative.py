@@ -20,6 +20,8 @@ from tempest.lib import exceptions as lib_exc
 class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """Tests hosts API using admin privileges."""
 
+    max_microversion = '2.42'
+
     @classmethod
     def setup_clients(cls):
         super(HostsAdminNegativeTestJSON, cls).setup_clients()
