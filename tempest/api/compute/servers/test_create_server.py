@@ -135,8 +135,13 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             servers_client=self.client)
         hostname = linux_client.exec_command("hostname").rstrip()
         msg = ('Failed while verifying servername equals hostname. Expected '
-               'hostname "%s" but got "%s".' % (self.name, hostname))
-        self.assertEqual(self.name.lower(), hostname, msg)
+               'hostname "%s" but got "%s".' %
+               (self.name, hostname.split(".")[0]))
+        # NOTE(zhufl): Some images will add postfix for the hostname, e.g.,
+        # if hostname is "aaa", postfix ".novalocal" may be added to it, and
+        # the hostname will be "aaa.novalocal" then, so we should ignore the
+        # postfix when checking whether hostname equals self.name.
+        self.assertEqual(self.name.lower(), hostname.split(".")[0], msg)
 
 
 class ServersTestManualDisk(ServersTestJSON):
