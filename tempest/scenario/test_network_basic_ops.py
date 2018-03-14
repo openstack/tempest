@@ -304,16 +304,19 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         - ping internal gateway and DHCP port, implying in-tenant connectivity
         pinging both, because L3 and DHCP agents might be on different nodes
+        - ping internal compute port, implying connectivity to other VMs on
+        this network
         """
         floating_ip, server = self.floating_ip_tuple
         # get internal ports' ips:
-        # get all network ports in the new network
+        # get all network and compute ports in the new network
         internal_ips = (
             p['fixed_ips'][0]['ip_address'] for p in
             self.os_admin.ports_client.list_ports(
                 tenant_id=server['tenant_id'],
                 network_id=network['id'])['ports']
-            if p['device_owner'].startswith('network')
+            if p['device_owner'].startswith('network') or
+            p['device_owner'].startswith('compute')
         )
 
         self._check_server_connectivity(floating_ip,
