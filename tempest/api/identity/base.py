@@ -228,6 +228,7 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         cls.domain_config_client = cls.os_admin.domain_config_client
         cls.endpoint_filter_client = cls.os_admin.endpoint_filter_client
         cls.endpoint_groups_client = cls.os_admin.endpoint_groups_client
+        cls.project_tags_client = cls.os_admin.project_tags_client
 
         if CONF.identity.admin_domain_scope:
             # NOTE(andreaf) When keystone policy requires it, the identity

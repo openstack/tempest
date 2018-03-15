@@ -33,6 +33,8 @@ from tempest.lib.services.identity.v3.oauth_consumers_client import \
 from tempest.lib.services.identity.v3.oauth_token_client import \
     OAUTHTokenClient
 from tempest.lib.services.identity.v3.policies_client import PoliciesClient
+from tempest.lib.services.identity.v3.project_tags_client import \
+    ProjectTagsClient
 from tempest.lib.services.identity.v3.projects_client import ProjectsClient
 from tempest.lib.services.identity.v3.regions_client import RegionsClient
 from tempest.lib.services.identity.v3.role_assignments_client import \
@@ -49,6 +51,6 @@ __all__ = ['CatalogClient', 'CredentialsClient', 'DomainsClient',
            'EndPointsClient', 'EndPointsFilterClient', 'GroupsClient',
            'IdentityClient', 'InheritedRolesClient', 'OAUTHConsumerClient',
            'OAUTHTokenClient', 'PoliciesClient', 'ProjectsClient',
-           'RegionsClient', 'RoleAssignmentsClient', 'RolesClient',
-           'ServicesClient', 'V3TokenClient', 'TrustsClient', 'UsersClient',
-           'VersionsClient']
+           'ProjectTagsClient', 'RegionsClient', 'RoleAssignmentsClient',
+           'RolesClient', 'ServicesClient', 'V3TokenClient', 'TrustsClient',
+           'UsersClient', 'VersionsClient']
