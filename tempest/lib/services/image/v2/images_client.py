@@ -161,7 +161,7 @@ class ImagesClient(rest_client.RestClient):
         """
         url = 'images/%s/file' % image_id
         resp, body = self.get(url)
-        self.expected_success(200, resp.status)
+        self.expected_success([200, 204, 206], resp.status)
         return rest_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):

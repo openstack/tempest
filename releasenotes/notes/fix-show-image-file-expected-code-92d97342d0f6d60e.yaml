@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fix show_image_file interface in v2 ImagesClient: Bug#1756264.
+    The expected success code of show_image_file is changed from
+    ``200`` to ``[200, 204, 206]``.
