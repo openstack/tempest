@@ -3,7 +3,7 @@ features:
   - |
     Add a new function called ``compare_version_header_to_response`` to
     ``tempest.lib.common.api_version_utils``, which compares the API
-    micoversion in the response header to another microversion using the
+    microversion in the response header to another microversion using the
     comparators defined in
     ``tempest.lib.common.api_version_request.APIVersionRequest``.
 

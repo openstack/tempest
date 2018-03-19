@@ -3,4 +3,4 @@ features:
   - A new helper method `service_client_config` has been added
     to the stable module config.py that returns extracts from
     configuration into a dictionary the configuration settings
-    relevant for the initisialisation of a service client.
+    relevant for the initialization of a service client.

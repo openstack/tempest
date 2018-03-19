@@ -2,4 +2,4 @@
 features:
   - Add support of args and kwargs when calling func in call_until_true,
     also to log the cost time when call_until_true returns True or False
-    for debuggin.
+    for debugging.
