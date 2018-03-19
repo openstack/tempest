@@ -237,7 +237,10 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('security_compliance',
                 default=False,
                 help='Does the environment have the security compliance '
-                     'settings enabled?')
+                     'settings enabled?'),
+    cfg.BoolOpt('project_tags',
+                default=False,
+                help='Is the project tags identity v3 API available?')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
