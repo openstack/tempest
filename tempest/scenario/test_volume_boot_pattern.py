@@ -30,12 +30,6 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     # breathing room to get through deletes in the time allotted.
     TIMEOUT_SCALING_FACTOR = 2
 
-    @classmethod
-    def skip_checks(cls):
-        super(TestVolumeBootPattern, cls).skip_checks()
-        if not CONF.volume_feature_enabled.snapshot:
-            raise cls.skipException("Cinder volume snapshots are disabled")
-
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref
         vol_name = data_utils.rand_name(
@@ -76,6 +70,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
     @utils.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
 
@@ -156,6 +152,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
     @decorators.attr(type='slow')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
     @utils.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image
@@ -192,6 +190,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                          created_volume_info['attachments'][0]['volume_id'])
 
     @decorators.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
     @utils.services('compute', 'volume', 'image')
     def test_create_ebs_image_and_check_boot(self):
         # create an instance from volume
