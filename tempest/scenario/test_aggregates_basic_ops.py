@@ -37,7 +37,7 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         super(TestAggregatesBasicOps, cls).setup_clients()
         # Use admin client by default
         cls.aggregates_client = cls.os_admin.aggregates_client
-        cls.hosts_client = cls.os_admin.hosts_client
+        cls.hyper_client = cls.os_admin.hypervisor_client
 
     def _create_aggregate(self, **kwargs):
         aggregate = (self.aggregates_client.create_aggregate(**kwargs)
@@ -51,10 +51,9 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         return aggregate
 
     def _get_host_name(self):
-        hosts = self.hosts_client.list_hosts()['hosts']
-        self.assertNotEmpty(hosts)
-        computes = [x for x in hosts if x['service'] == 'compute']
-        return computes[0]['host_name']
+        hyper_list = self.hyper_client.list_hypervisors()['hypervisors']
+        self.assertNotEmpty(hyper_list)
+        return hyper_list[0]['hypervisor_hostname']
 
     def _add_host(self, aggregate_id, host):
         aggregate = (self.aggregates_client.add_host(aggregate_id, host=host)
