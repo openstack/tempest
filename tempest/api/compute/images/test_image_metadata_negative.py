@@ -20,6 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
+    max_microversion = '2.38'
 
     @classmethod
     def setup_clients(cls):
