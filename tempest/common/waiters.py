@@ -287,3 +287,24 @@ def wait_for_interface_status(client, server_id, port_id, status):
             raise lib_exc.TimeoutException(message)
 
     return body
+
+
+def wait_for_interface_detach(client, server_id, port_id):
+    """Waits for an interface to be detached from a server."""
+    body = client.list_interfaces(server_id)['interfaceAttachments']
+    ports = [iface['port_id'] for iface in body]
+    start = int(time.time())
+
+    while port_id in ports:
+        time.sleep(client.build_interval)
+        body = client.list_interfaces(server_id)['interfaceAttachments']
+        ports = [iface['port_id'] for iface in body]
+        if port_id not in ports:
+            return body
+
+        timed_out = int(time.time()) - start >= client.build_timeout
+        if timed_out:
+            message = ('Interface %s failed to detach from server %s within '
+                       'the required time (%s s)' % (port_id, server_id,
+                                                     client.build_timeout))
+            raise lib_exc.TimeoutException(message)
