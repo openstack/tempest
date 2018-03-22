@@ -193,36 +193,57 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
                           'Cinder volume snapshots are disabled')
     @utils.services('compute', 'volume', 'image')
-    def test_create_ebs_image_and_check_boot(self):
-        # create an instance from volume
+    def test_image_defined_boot_from_volume(self):
+        # create an instance from image-backed volume
         volume_origin = self._create_volume_from_image()
         instance = self._boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
             delete_on_termination=True)
-        # create EBS image
+        # Create a snapshot image from the volume-backed server.
+        # The compute service will have the block service create a snapshot of
+        # the root volume and store its metadata in the image.
         image = self.create_server_snapshot(instance)
 
-        # delete instance
+        # Delete the first server which will also delete the first image-backed
+        # volume.
         self._delete_server(instance)
 
-        # boot instance from EBS image
+        # Create a server from the image snapshot which has an
+        # "image-defined block device mapping (BDM)" in it, i.e. the metadata
+        # about the volume snapshot. The compute service will use this to
+        # create a volume from the volume snapshot and use that as the root
+        # disk for the server.
         instance = self.create_server(image_id=image['id'])
 
-        # Verify the server was created from the image
-        created_volume = instance['os-extended-volumes:volumes_attached']
-        self.assertNotEmpty(created_volume, "No volume attachment found.")
-        created_volume_info = self.volumes_client.show_volume(
-            created_volume[0]['id'])['volume']
+        # Verify the server was created from the image-defined BDM.
+        volume_attachments = instance['os-extended-volumes:volumes_attached']
+        self.assertEqual(1, len(volume_attachments),
+                         "No volume attachment found.")
+        created_volume = self.volumes_client.show_volume(
+            volume_attachments[0]['id'])['volume']
+        # Assert that the volume service also shows the server attachment.
+        self.assertEqual(1, len(created_volume['attachments']),
+                         "No server attachment found for volume: %s" %
+                         created_volume)
         self.assertEqual(instance['id'],
-                         created_volume_info['attachments'][0]['server_id'])
-        self.assertEqual(created_volume[0]['id'],
-                         created_volume_info['attachments'][0]['volume_id'])
+                         created_volume['attachments'][0]['server_id'])
+        self.assertEqual(volume_attachments[0]['id'],
+                         created_volume['attachments'][0]['volume_id'])
         self.assertEqual(
             volume_origin['volume_image_metadata']['image_id'],
-            created_volume_info['volume_image_metadata']['image_id'])
+            created_volume['volume_image_metadata']['image_id'])
 
-        # delete instance
+        # Delete the second server which should also delete the second volume
+        # created from the volume snapshot.
+        # TODO(mriedem): Currently, the compute service fails to delete the
+        # volume it created because the volume still has the snapshot
+        # associated with it, and the cleanups for the volume snapshot which
+        # were added in create_server_snapshot above, don't run until after
+        # this is called. So we need to delete the volume snapshot and wait for
+        # it to be gone here first before deleting the server, and then we can
+        # also assert that the underlying volume is deleted when the server is
+        # deleted.
         self._delete_server(instance)
 
     @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
