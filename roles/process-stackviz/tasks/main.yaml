@@ -50,6 +50,7 @@
     - stackviz_archive.stat.exists
     - subunit_input.stat.exists
     - dstat_input.stat.exists
+  failed_when: False
 
 - name: Run stackviz without dstat
   shell: |
@@ -61,3 +62,4 @@
     - stackviz_archive.stat.exists
     - subunit_input.stat.exists
     - not dstat_input.stat.exists
+  failed_when: False
