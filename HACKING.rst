@@ -363,13 +363,24 @@ to Tempest.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When adding tests for new features that were not in previous releases of the
-projects the new test has to be properly skipped with a feature flag. Whether
-this is just as simple as using the @utils.requires_ext() decorator to
-check if the required extension (or discoverable optional API) is enabled or
+projects the new test has to be properly skipped with a feature flag. This can
+be just as simple as using the ``@utils.requires_ext()`` or
+``testtools.skipUnless`` decorators to check if the required extension (or
+discoverable optional API) or feature is enabled or can be as difficult as
 adding a new config option to the appropriate section. If there isn't a method
 of selecting the new **feature** from the config file then there won't be a
-mechanism to disable the test with older stable releases and the new test won't
-be able to merge.
+mechanism to disable the test with older stable releases and the new test
+won't be able to merge.
+
+Introduction of a new feature flag requires specifying a default value for
+the corresponding config option that is appropriate in the latest OpenStack
+release. Because Tempest is branchless, the feature flag's default value will
+need to be overridden to a value that is appropriate in earlier releases
+in which the feature isn't available. In DevStack, this can be accomplished
+by modifying Tempest's `lib installation script`_ for previous branches
+(because DevStack is branched).
+
+.. _lib installation script: http://git.openstack.org/cgit/openstack-dev/devstack/tree/lib/tempest
 
 2. Bug fix on core project needing Tempest changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
