@@ -23,6 +23,7 @@ from tempest.lib import exceptions as lib_exc
 # TODO(mriedem): Remove this test class once the nova queens branch goes into
 # extended maintenance mode.
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
+    max_microversion = '2.43'
 
     depends_on_nova_network = True
 
