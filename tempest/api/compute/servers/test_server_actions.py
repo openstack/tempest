@@ -640,8 +640,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Get the VNC console of type 'novnc' and 'xvpvnc'
         console_types = ['novnc', 'xvpvnc']
         for console_type in console_types:
-            body = self.client.get_vnc_console(self.server_id,
-                                               type=console_type)['console']
+            if self.is_requested_microversion_compatible('2.5'):
+                body = self.client.get_vnc_console(
+                    self.server_id, type=console_type)['console']
+            else:
+                body = self.client.get_remote_console(
+                    self.server_id, console_type=console_type,
+                    protocol='vnc')['remote_console']
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
             self._validate_url(body['url'])
