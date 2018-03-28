@@ -221,8 +221,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if size is None:
             size = CONF.volume.volume_size
         if imageRef:
-            image = self.compute_images_client.show_image(imageRef)['image']
-            min_disk = image.get('minDisk')
+            if CONF.image_feature_enabled.api_v1:
+                resp = self.image_client.check_image(imageRef)
+                image = common_image.get_image_meta_from_headers(resp)
+            else:
+                image = self.image_client.show_image(imageRef)
+            min_disk = image.get('min_disk')
             size = max(size, min_disk)
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__ + "-volume")

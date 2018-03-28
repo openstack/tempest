@@ -720,11 +720,11 @@ class FlavorService(BaseService):
 class ImageService(BaseService):
     def __init__(self, manager, **kwargs):
         super(ImageService, self).__init__(kwargs)
-        self.client = manager.compute_images_client
+        self.client = manager.image_client_v2
 
     def list(self):
         client = self.client
-        images = client.list_images({"all_tenants": True})['images']
+        images = client.list_images(params={"all_tenants": True})['images']
         if not self.is_save_state:
             images = [image for image in images if image['id']
                       not in self.saved_state_json['images'].keys()]

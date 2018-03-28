@@ -22,11 +22,11 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
+class ImagesNegativeTestBase(base.BaseV2ComputeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(ImagesNegativeTestJSON, cls).skip_checks()
+        super(ImagesNegativeTestBase, cls).skip_checks()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -37,8 +37,11 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setup_clients(cls):
-        super(ImagesNegativeTestJSON, cls).setup_clients()
+        super(ImagesNegativeTestBase, cls).setup_clients()
         cls.client = cls.compute_images_client
+
+
+class ImagesNegativeTestJSON(ImagesNegativeTestBase):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6cd5a89d-5b47-46a7-93bc-3916f0d84973')
@@ -81,6 +84,10 @@ class ImagesNegativeTestJSON(base.BaseV2ComputeTest):
         test_uuid = ('a' * 37)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
                           test_uuid, name=snapshot_name)
+
+
+class ImagesDeleteNegativeTestJSON(ImagesNegativeTestBase):
+    max_microversion = '2.35'
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('381acb65-785a-4942-94ce-d8f8c84f1f0f')

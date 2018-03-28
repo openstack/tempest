@@ -131,8 +131,13 @@ class TestBaseV2ComputeTest(base.TestCase):
             self.assertIn(fault, six.text_type(ex))
         else:
             self.assertNotIn(fault, six.text_type(ex))
+        if compute_base.BaseV2ComputeTest.is_requested_microversion_compatible(
+            '2.35'):
+            status = 'ACTIVE'
+        else:
+            status = 'active'
         wait_for_image_status.assert_called_once_with(
-            compute_images_client, image_id, 'active')
+            compute_images_client, image_id, status)
         servers_client.show_server.assert_called_once_with(
             mock.sentinel.server_id)
 
