@@ -18,6 +18,7 @@ from tempest.lib import decorators
 
 
 class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
+    max_microversion = '2.35'
 
     @classmethod
     def resource_setup(cls):
