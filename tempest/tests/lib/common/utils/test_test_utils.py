@@ -12,12 +12,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+import time
+
 import mock
 
+from tempest.lib.common import thread
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions
 from tempest.tests import base
-from tempest.tests import utils
 
 
 class TestTestUtils(base.TestCase):
@@ -78,47 +81,126 @@ class TestTestUtils(base.TestCase):
             42, test_utils.call_and_ignore_notfound_exc(m, *args, **kwargs))
         m.assert_called_once_with(*args, **kwargs)
 
-    @mock.patch('time.sleep')
-    @mock.patch('time.time')
-    def test_call_until_true_when_f_never_returns_true(self, m_time, m_sleep):
-        def set_value(bool_value):
-            return bool_value
-        timeout = 42  # The value doesn't matter as we mock time.time()
-        sleep = 60  # The value doesn't matter as we mock time.sleep()
-        m_time.side_effect = utils.generate_timeout_series(timeout)
-        self.assertEqual(
-            False, test_utils.call_until_true(set_value, timeout, sleep, False)
-        )
-        m_sleep.call_args_list = [mock.call(sleep)] * 2
-        m_time.call_args_list = [mock.call()] * 2
 
-    @mock.patch('time.sleep')
-    @mock.patch('time.time')
-    def test_call_until_true_when_f_returns_true(self, m_time, m_sleep):
-        def set_value(bool_value=False):
-            return bool_value
-        timeout = 42  # The value doesn't matter as we mock time.time()
-        sleep = 60  # The value doesn't matter as we mock time.sleep()
-        m_time.return_value = 0
-        self.assertEqual(
-            True, test_utils.call_until_true(set_value, timeout, sleep,
-                                             bool_value=True)
-        )
-        self.assertEqual(0, m_sleep.call_count)
-        # when logging cost time we need to acquire current time.
-        self.assertEqual(2, m_time.call_count)
+class TestCallUntilTrue(base.TestCase):
 
-    @mock.patch('time.sleep')
-    @mock.patch('time.time')
-    def test_call_until_true_when_f_returns_true_no_param(
-            self, m_time, m_sleep):
-        def set_value(bool_value=False):
-            return bool_value
-        timeout = 42  # The value doesn't matter as we mock time.time()
-        sleep = 60  # The value doesn't matter as we mock time.sleep()
-        m_time.side_effect = utils.generate_timeout_series(timeout)
-        self.assertEqual(
-            False, test_utils.call_until_true(set_value, timeout, sleep)
-        )
-        m_sleep.call_args_list = [mock.call(sleep)] * 2
-        m_time.call_args_list = [mock.call()] * 2
+    def test_call_until_true_when_true_at_first_call(self):
+        """func returns True at first call
+
+        """
+        self._test_call_until_true(return_values=[True],
+                                   duration=30.,
+                                   time_sequence=[10., 60.])
+
+    def test_call_until_true_when_true_before_timeout(self):
+        """func returns false at first call, then True before timeout
+
+        """
+        self._test_call_until_true(return_values=[False, True],
+                                   duration=30.,
+                                   time_sequence=[10., 39., 41.])
+
+    def test_call_until_true_when_never_true_before_timeout(self):
+        """func returns false, then false, just before timeout
+
+        """
+        self._test_call_until_true(return_values=[False, False],
+                                   duration=30.,
+                                   time_sequence=[10., 39., 41.])
+
+    def test_call_until_true_with_params(self):
+        """func is called using given parameters
+
+        """
+        self._test_call_until_true(return_values=[False, True],
+                                   duration=30.,
+                                   time_sequence=[10., 30., 60.],
+                                   args=(1, 2),
+                                   kwargs=dict(foo='bar', bar='foo'))
+
+    def _test_call_until_true(self, return_values, duration, time_sequence,
+                              args=None, kwargs=None):
+        """Test call_until_true function
+
+        :param return_values: list of booleans values to be returned
+        each time given function is called. If any of these values
+        is not consumed by calling the function the test fails.
+        The list must contain a sequence of False items terminated
+        by a single True or False
+        :param duration: parameter passed to call_until_true function
+        (a floating point value).
+        :param time_sequence: sequence of time values returned by
+        mocked time.time function used to trigger call_until_true
+        behavior when handling timeout condition. The sequence must
+        contain the exact number of values expected to be consumed by
+        each time call_until_true calls time.time function.
+        :param args: sequence of positional arguments to be passed
+        to call_until_true function.
+        :param kwargs: sequence of named arguments to be passed
+        to call_until_true function.
+        """
+
+        # all values except the last are False
+        self.assertEqual([False] * len(return_values[:-1]), return_values[:-1])
+        # last value can be True or False
+        self.assertIn(return_values[-1], [True, False])
+
+        # GIVEN
+        func = mock.Mock(side_effect=return_values)
+        sleep = 10.  # this value has no effect as time.sleep is being mocked
+        sleep_func = self.patch('time.sleep')
+        time_func = self._patch_time(time_sequence)
+        args = args or tuple()
+        kwargs = kwargs or dict()
+
+        # WHEN
+        result = test_utils.call_until_true(func, duration, sleep,
+                                            *args, **kwargs)
+        # THEN
+
+        # It must return last returned value
+        self.assertIs(return_values[-1], result)
+
+        self._test_func_calls(func, return_values, *args, **kwargs)
+        self._test_sleep_calls(sleep_func, return_values, sleep)
+        # The number of times time.time is called is not relevant as a
+        # requirement of call_until_true. What is instead relevant is that
+        # call_until_true use a mocked function to make the test reliable
+        # and the test actually provide the right sequence of numbers to
+        # reproduce the behavior has to be tested
+        self._assert_called_n_times(time_func, len(time_sequence))
+
+    def _patch_time(self, time_sequence):
+        # Iterator over time sequence
+        time_iterator = iter(time_sequence)
+        # Preserve original time.time() behavior for other threads
+        original_time = time.time
+        thread_id = thread.get_ident()
+
+        def mocked_time():
+            if thread.get_ident() == thread_id:
+                # Test thread => return time sequence values
+                return next(time_iterator)
+            else:
+                # Other threads => call original time function
+                return original_time()
+
+        return self.patch('time.time', side_effect=mocked_time)
+
+    def _test_func_calls(self, func, return_values, *args, **kwargs):
+        self._assert_called_n_times(func, len(return_values), *args, **kwargs)
+
+    def _test_sleep_calls(self, sleep_func, return_values, sleep):
+        # count first consecutive False
+        expected_count = 0
+        for value in return_values:
+            if value:
+                break
+            expected_count += 1
+        self._assert_called_n_times(sleep_func, expected_count, sleep)
+
+    def _assert_called_n_times(self, mock_func, expected_count, *args,
+                               **kwargs):
+        calls = [mock.call(*args, **kwargs)] * expected_count
+        self.assertEqual(expected_count, mock_func.call_count)
+        mock_func.assert_has_calls(calls)
