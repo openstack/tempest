@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
+    max_microversion = '2.35'
 
     @classmethod
     # TODO(GMann): Once Bug# 1311500 is fixed, these test can run

@@ -22,12 +22,12 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class QuotasAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
     def setup_clients(cls):
-        super(QuotasAdminNegativeTestJSON, cls).setup_clients()
+        super(QuotasAdminNegativeTestBase, cls).setup_clients()
         cls.client = cls.os_primary.quotas_client
         cls.adm_client = cls.os_admin.quotas_client
         cls.sg_client = cls.security_groups_client
@@ -35,7 +35,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def resource_setup(cls):
-        super(QuotasAdminNegativeTestJSON, cls).resource_setup()
+        super(QuotasAdminNegativeTestBase, cls).resource_setup()
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         cls.demo_tenant_id = cls.client.tenant_id
@@ -50,6 +50,9 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                          **{quota_item: quota_value})
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         **{quota_item: default_quota_value})
+
+
+class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
@@ -84,6 +87,10 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self._update_quota('instances', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
+
+
+class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
+    max_microversion = '2.35'
 
     @decorators.skip_because(bug="1186354",
                              condition=CONF.service_available.neutron)

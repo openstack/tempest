@@ -20,6 +20,7 @@ from tempest.lib import decorators
 
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
+    max_microversion = '2.35'
 
     @classmethod
     def setup_clients(cls):
