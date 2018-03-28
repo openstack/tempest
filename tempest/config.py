@@ -404,6 +404,10 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Enable VNC console. This configuration value should '
                      'be same as [nova.vnc]->vnc_enabled in nova.conf'),
+    cfg.StrOpt('vnc_server_header',
+               default='WebSockify',
+               help='Expected VNC server name (WebSockify, nginx, etc) '
+                    'in response header.'),
     cfg.BoolOpt('spice_console',
                 default=False,
                 help='Enable Spice console. This configuration value should '
