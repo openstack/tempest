@@ -393,7 +393,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
                                          rotation=2,
-                                         name=backup1).response
+                                         name=backup1)
         oldest_backup_exist = True
 
         # the oldest one should be deleted automatically in this test
@@ -409,10 +409,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                 "deleted during rotation.", oldest_backup)
 
         if api_version_utils.compare_version_header_to_response(
-                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+                "OpenStack-API-Version", "compute 2.45", resp.response, "lt"):
             image1_id = resp['image_id']
         else:
-            image1_id = data_utils.parse_image_id(resp['location'])
+            image1_id = data_utils.parse_image_id(resp.response['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
         waiters.wait_for_image_status(glance_client,
                                       image1_id, 'active')
@@ -422,12 +422,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
                                          rotation=2,
-                                         name=backup2).response
+                                         name=backup2)
         if api_version_utils.compare_version_header_to_response(
-                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+                "OpenStack-API-Version", "compute 2.45", resp.response, "lt"):
             image2_id = resp['image_id']
         else:
-            image2_id = data_utils.parse_image_id(resp['location'])
+            image2_id = data_utils.parse_image_id(resp.response['location'])
         self.addCleanup(glance_client.delete_image, image2_id)
         waiters.wait_for_image_status(glance_client,
                                       image2_id, 'active')
@@ -465,12 +465,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
                                          rotation=2,
-                                         name=backup3).response
+                                         name=backup3)
         if api_version_utils.compare_version_header_to_response(
-                "OpenStack-API-Version", "compute 2.45", resp, "lt"):
+                "OpenStack-API-Version", "compute 2.45", resp.response, "lt"):
             image3_id = resp['image_id']
         else:
-            image3_id = data_utils.parse_image_id(resp['location'])
+            image3_id = data_utils.parse_image_id(resp.response['location'])
         self.addCleanup(glance_client.delete_image, image3_id)
         # the first back up should be deleted
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
