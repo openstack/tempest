@@ -106,7 +106,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
                                        'ACTIVE')
 
         server = self.servers_client.show_server(server['id'])['server']
-        self.assertEqual(flavor['id'], server['flavor']['id'])
+        self.assert_flavor_equal(flavor['id'], server['flavor'])
 
     def _test_cold_migrate_server(self, revert=False):
         if CONF.compute.min_compute_nodes < 2:

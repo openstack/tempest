@@ -196,7 +196,14 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                        'VERIFY_RESIZE')
         self.servers_client.confirm_resize_server(server['id'])
         server = self.servers_client.show_server(server['id'])['server']
-        self.assertEqual(resize_flavor, server['flavor']['id'])
+        # Nova API > 2.46 no longer includes flavor.id, and schema check
+        # will cover whether 'id' should be in flavor
+        if server['flavor'].get('id'):
+            self.assertEqual(resize_flavor, server['flavor']['id'])
+        else:
+            flavor = self.flavors_client.show_flavor(resize_flavor)['flavor']
+            for key in ['original_name', 'ram', 'vcpus', 'disk']:
+                self.assertEqual(flavor[key], server['flavor'][key])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 

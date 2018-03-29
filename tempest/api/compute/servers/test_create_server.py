@@ -80,7 +80,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.assertEqual("", self.server['image'])
         else:
             self.assertEqual(self.image_ref, self.server['image']['id'])
-        self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, self.server['flavor'])
         self.assertEqual(self.meta, self.server['metadata'])
 
     @decorators.attr(type='smoke')
