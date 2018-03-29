@@ -16,6 +16,7 @@ from tempest.api.compute import base
 from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -61,9 +62,13 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
     def test_list_servers_detailed_filter_by_invalid_status(self):
         params = {'status': 'invalid_status'}
-        body = self.client.list_servers(detail=True, **params)
-        servers = body['servers']
-        self.assertEmpty(servers)
+        if self.is_requested_microversion_compatible('2.37'):
+            body = self.client.list_servers(detail=True, **params)
+            servers = body['servers']
+            self.assertEmpty(servers)
+        else:
+            self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
+                              detail=True, **params)
 
     @decorators.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):
