@@ -33,15 +33,15 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('215cd465-d8ae-49c9-bf33-9c911913a5c8')
-    def test_max_image_meta_exceed_limit(self):
-        # We should not create vm with image meta over maxImageMeta limit
+    def test_max_metadata_exceed_limit(self):
+        # We should not create vm with metadata over maxServerMeta limit
         # Get max limit value
         limits = self.client.show_limits()['limits']
-        max_meta = limits['absolute']['maxImageMeta']
+        max_meta = limits['absolute']['maxServerMeta']
 
         # No point in running this test if there is no limit.
         if max_meta == -1:
-            raise self.skipException('no limit for maxImageMeta')
+            raise self.skipException('no limit for maxServerMeta')
 
         # Create server should fail, since we are passing > metadata Limit!
         max_meta_data = max_meta + 1
