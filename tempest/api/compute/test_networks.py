@@ -20,6 +20,8 @@ CONF = config.CONF
 
 
 class ComputeNetworksTest(base.BaseV2ComputeTest):
+    max_microversion = '2.35'
+
     @classmethod
     def skip_checks(cls):
         super(ComputeNetworksTest, cls).skip_checks()
