@@ -31,6 +31,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     API documentation - http://docs.openstack.org/api/openstack-compute/2/
     content/ext-os-floating-ips-bulk.html
     """
+    max_microversion = '2.35'
 
     @classmethod
     def setup_clients(cls):
