@@ -42,8 +42,8 @@ be self verifying by running them in the gate.
 
 API Stability
 -------------
-Tests should only be added for a published stable APIs. If a patch contains
-tests for an API which hasn't been marked as stable or for an API that which
+Tests should only be added for published stable APIs. If a patch contains
+tests for an API which hasn't been marked as stable or for an API which
 doesn't conform to the `API stability guidelines
 <https://wiki.openstack.org/wiki/Governance/Approved/APIStability>`_ then it
 should not be approved.
