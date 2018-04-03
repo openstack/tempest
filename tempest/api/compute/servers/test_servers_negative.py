@@ -481,7 +481,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
             server_info = self.client.show_server(self.server_id)['server']
             if 'SHELVED' in server_info['status']:
                 self.client.unshelve_server(self.server_id)
-        self.addOnException(_unshelve_server)
+        self.addCleanup(_unshelve_server)
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
