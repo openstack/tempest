@@ -27,15 +27,16 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(AggregatesAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_admin.aggregates_client
-        cls.hyper_client = cls.os_admin.hypervisor_client
+        cls.services_client = cls.os_admin.services_client
 
     @classmethod
     def resource_setup(cls):
         super(AggregatesAdminNegativeTestJSON, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate'
 
-        hyper_list = cls.hyper_client.list_hypervisors()['hypervisors']
-        cls.hosts = [v['hypervisor_hostname'] for v in hyper_list
+        svc_list = cls.services_client.list_services(
+            binary='nova-compute')['services']
+        cls.hosts = [v['host'] for v in svc_list
                      if v['status'] == 'enabled' and v['state'] == 'up']
 
     def _create_test_aggregate(self):
