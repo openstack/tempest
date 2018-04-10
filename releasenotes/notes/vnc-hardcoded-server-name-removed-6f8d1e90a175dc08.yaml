@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    New string configuration option ``vnc_server_header`` is added
+    to ``compute-feature-enabled`` section. It offers to provide VNC server
+    name that is to be expected in the responce header. For example, obvious
+    at hand names is 'WebSockify', 'nginx'.
+fixes:
+  - |
+    Fix VNC server response header issue when it is behind reverse proxy

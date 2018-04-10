@@ -151,11 +151,22 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(
             self._websocket.response.startswith(b'HTTP/1.1 101 Switching '
                                                 b'Protocols\r\n'),
-            'Did not get the expected 101 on the websockify call: '
-            + six.text_type(self._websocket.response))
-        self.assertTrue(
-            self._websocket.response.find(b'Server: WebSockify') > 0,
-            'Did not get the expected WebSocket HTTP Response.')
+            'Did not get the expected 101 on the {} call: {}'.format(
+                CONF.compute_feature_enabled.vnc_server_header,
+                six.text_type(self._websocket.response)
+            )
+        )
+        # Since every other server type returns Headers with different case
+        # (for example 'nginx'), lowercase must be applied to eliminate issues.
+        _desired_header = "server: {0}".format(
+            CONF.compute_feature_enabled.vnc_server_header
+        ).lower()
+        _response = six.text_type(self._websocket.response).lower()
+        self.assertIn(
+            _desired_header,
+            _response,
+            'Did not get the expected WebSocket HTTP Response.'
+        )
 
     @decorators.idempotent_id('c640fdff-8ab4-45a4-a5d8-7e6146cbd0dc')
     def test_novnc(self):
