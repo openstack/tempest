@@ -104,11 +104,11 @@ class BaseService(object):
             self.tenant_filter['tenant_id'] = self.tenant_id
 
     def _filter_by_tenant_id(self, item_list):
-        if (item_list is None
-                or not item_list
-                or not hasattr(self, 'tenant_id')
-                or self.tenant_id is None
-                or 'tenant_id' not in item_list[0]):
+        if (item_list is None or
+                not item_list or
+                not hasattr(self, 'tenant_id') or
+                self.tenant_id is None or
+                'tenant_id' not in item_list[0]):
             return item_list
 
         return [item for item in item_list
@@ -816,8 +816,8 @@ class RoleService(BaseService):
             if not self.is_save_state:
                 roles = [role for role in roles if
                          (role['id'] not in
-                          self.saved_state_json['roles'].keys()
-                          and role['name'] != CONF.identity.admin_role)]
+                          self.saved_state_json['roles'].keys() and
+                          role['name'] != CONF.identity.admin_role)]
                 LOG.debug("List count, %s Roles after reconcile", len(roles))
             return roles
         except Exception:
@@ -852,13 +852,16 @@ class ProjectService(BaseService):
     def list(self):
         projects = self.client.list_projects()['projects']
         if not self.is_save_state:
-            projects = [project for project in projects if (project['id']
-                        not in self.saved_state_json['projects'].keys()
-                        and project['name'] != CONF.auth.admin_project_name)]
+            project_ids = self.saved_state_json['projects']
+            projects = [project
+                        for project in projects
+                        if (project['id'] not in project_ids and
+                            project['name'] != CONF.auth.admin_project_name)]
 
         if self.is_preserve:
-            projects = [project for project in projects if project['name']
-                        not in CONF_PROJECTS]
+            projects = [project
+                        for project in projects
+                        if project['name'] not in CONF_PROJECTS]
 
         LOG.debug("List count, %s Projects after reconcile", len(projects))
         return projects

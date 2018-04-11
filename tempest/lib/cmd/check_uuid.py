@@ -103,7 +103,7 @@ class TestChecker(object):
     def _modules_search(self):
         """Recursive search for python modules in base package"""
         modules = []
-        for root, dirs, files in os.walk(self.base_path):
+        for root, _, files in os.walk(self.base_path):
             if not os.path.exists(os.path.join(root, '__init__.py')):
                 continue
             root_package = self._path_to_package(root)
@@ -121,10 +121,10 @@ class TestChecker(object):
         idempotent_id = None
         for decorator in test_node.decorator_list:
             if (hasattr(decorator, 'func') and
-                hasattr(decorator.func, 'attr') and
-                decorator.func.attr == DECORATOR_NAME and
-                hasattr(decorator.func, 'value') and
-                decorator.func.value.id == DECORATOR_MODULE):
+                    hasattr(decorator.func, 'attr') and
+                    decorator.func.attr == DECORATOR_NAME and
+                    hasattr(decorator.func, 'value') and
+                    decorator.func.value.id == DECORATOR_MODULE):
                 for arg in decorator.args:
                     idempotent_id = ast.literal_eval(arg)
         return idempotent_id
@@ -165,8 +165,8 @@ class TestChecker(object):
 
     @staticmethod
     def _is_test_method(node):
-        return (node.__class__ is ast.FunctionDef
-                and node.name.startswith('test_'))
+        return (node.__class__ is ast.FunctionDef and
+                node.name.startswith('test_'))
 
     @staticmethod
     def _next_node(body, node):

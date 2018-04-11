@@ -47,8 +47,8 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
             raise cls.skipException('Neutron is required')
         if not CONF.validation.run_validation:
             raise cls.skipException('Validation must be enabled')
-        if (not CONF.compute_feature_enabled.config_drive
-            and not CONF.compute_feature_enabled.metadata_service):
+        if (not CONF.compute_feature_enabled.config_drive and
+                not CONF.compute_feature_enabled.metadata_service):
             raise cls.skipException('One of metadata or config drive must be '
                                     'enabled')
 

@@ -228,12 +228,12 @@ def dont_import_local_tempest_into_lib(logical_line, filename):
     if 'tempest/lib/' not in filename:
         return
 
-    if not ('from tempest' in logical_line
-            or 'import tempest' in logical_line):
+    if not ('from tempest' in logical_line or
+            'import tempest' in logical_line):
         return
 
-    if ('from tempest.lib' in logical_line
-        or 'import tempest.lib' in logical_line):
+    if ('from tempest.lib' in logical_line or
+            'import tempest.lib' in logical_line):
         return
 
     msg = ("T112: tempest.lib should not import local tempest code to avoid "
@@ -266,9 +266,9 @@ def dont_use_config_in_tempest_lib(logical_line, filename):
     if 'tempest/lib/' not in filename:
         return
 
-    if ('tempest.config' in logical_line
-        or 'from tempest import config' in logical_line
-        or 'oslo_config' in logical_line):
+    if ('tempest.config' in logical_line or
+            'from tempest import config' in logical_line or
+            'oslo_config' in logical_line):
         msg = ('T114: tempest.lib can not have any dependency on tempest '
                'config.')
         yield(0, msg)

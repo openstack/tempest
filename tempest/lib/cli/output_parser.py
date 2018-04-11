@@ -37,8 +37,8 @@ def details_multiple(output_lines, with_label=False):
     items = []
     tables_ = tables(output_lines)
     for table_ in tables_:
-        if ('Property' not in table_['headers']
-            or 'Value' not in table_['headers']):
+        if ('Property' not in table_['headers'] or
+                'Value' not in table_['headers']):
             raise exceptions.InvalidStructure()
         item = {}
         for value in table_['values']:

@@ -132,8 +132,8 @@ class ListImagesTest(base.BaseV1ImageTest):
     @classmethod
     def skip_checks(cls):
         super(ListImagesTest, cls).skip_checks()
-        if (len(CONF.image.container_formats) < 2
-           or len(CONF.image.disk_formats) < 2):
+        if (len(CONF.image.container_formats) < 2 or
+                len(CONF.image.disk_formats) < 2):
             skip_msg = ("%s skipped as multiple container formats "
                         "or disk formats are not available." % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -227,8 +227,8 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertEqual(image['disk_format'], self.disk_format_alt)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.same_disk_format_set <= result_set)
-        self.assertFalse(self.created_set - self.same_disk_format_set
-                         <= result_set)
+        self.assertFalse(self.created_set - self.same_disk_format_set <=
+                         result_set)
 
     @decorators.idempotent_id('2143655d-96d9-4bec-9188-8674206b4b3b')
     def test_index_container_format(self):
@@ -238,8 +238,8 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertEqual(image['container_format'], self.container_format)
         result_set = set(map(lambda x: x['id'], images_list))
         self.assertTrue(self.same_container_format_set <= result_set)
-        self.assertFalse(self.created_set - self.same_container_format_set
-                         <= result_set)
+        self.assertFalse(self.created_set - self.same_container_format_set <=
+                         result_set)
 
     @decorators.idempotent_id('feb32ac6-22bb-4a16-afd8-9454bb714b14')
     def test_index_max_size(self):

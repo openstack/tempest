@@ -68,9 +68,9 @@ at_exit_set = set()
 def validate_tearDownClass():
     if at_exit_set:
         LOG.error(
-            "tearDownClass does not call the super's "
-            "tearDownClass in these classes: \n"
-            + str(at_exit_set))
+            "tearDownClass does not call the super's tearDownClass in "
+            "these classes:\n"
+            "  %s", at_exit_set)
 
 
 atexit.register(validate_tearDownClass)
@@ -582,8 +582,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         super(BaseTestCase, self).setUp()
         if not self.__setupclass_called:
             raise RuntimeError("setUpClass does not calls the super's"
-                               "setUpClass in the "
-                               + self.__class__.__name__)
+                               "setUpClass in the " +
+                               self.__class__.__name__)
         at_exit_set.add(self.__class__)
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
         try:
@@ -602,7 +602,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             stderr = self.useFixture(fixtures.StringStream('stderr')).stream
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
         if (os.environ.get('OS_LOG_CAPTURE') != 'False' and
-            os.environ.get('OS_LOG_CAPTURE') != '0'):
+                os.environ.get('OS_LOG_CAPTURE') != '0'):
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
                                                    format=self.log_format,
                                                    level=None))

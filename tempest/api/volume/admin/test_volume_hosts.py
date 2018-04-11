@@ -46,8 +46,8 @@ class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
         # show host API should fail (return code: 404). The cinder-volume host
         # is presented in format: <host-name>@driver-name.
         c_vol_hosts = [host['host_name'] for host in hosts
-                       if (host['service'] == 'cinder-volume'
-                           and host['service-state'] == 'enabled')]
+                       if (host['service'] == 'cinder-volume' and
+                           host['service-state'] == 'enabled')]
         self.assertNotEmpty(c_vol_hosts,
                             "No available cinder-volume host is found, "
                             "all hosts that found are: %s" % hosts)

@@ -338,15 +338,15 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 credentials = self._create_creds(roles=credential_type)
             self._creds[str(credential_type)] = credentials
             # Maintained until tests are ported
-            LOG.info("Acquired dynamic creds:\n credentials: %s", credentials)
-            if (self.neutron_available and
-                self.create_networks):
+            LOG.info("Acquired dynamic creds:\n"
+                     " credentials: %s", credentials)
+            if (self.neutron_available and self.create_networks):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
                 credentials.set_resources(network=network, subnet=subnet,
                                           router=router)
-                LOG.info("Created isolated network resources for : \n"
-                         + " credentials: %s", credentials)
+                LOG.info("Created isolated network resources for:\n"
+                         " credentials: %s", credentials)
         return credentials
 
     def get_primary_creds(self):

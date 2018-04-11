@@ -43,8 +43,7 @@ class BaseTestCase(testtools.testcase.WithAttributes, testtools.TestCase):
         super(BaseTestCase, self).setUp()
         if not self.setUpClassCalled:
             raise RuntimeError("setUpClass does not calls the super's "
-                               "setUpClass in the "
-                               + self.__class__.__name__)
+                               "setUpClass in {!r}".format(type(self)))
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
         try:
             test_timeout = int(test_timeout)
@@ -62,7 +61,7 @@ class BaseTestCase(testtools.testcase.WithAttributes, testtools.TestCase):
             stderr = self.useFixture(fixtures.StringStream('stderr')).stream
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
         if (os.environ.get('OS_LOG_CAPTURE') != 'False' and
-            os.environ.get('OS_LOG_CAPTURE') != '0'):
+                os.environ.get('OS_LOG_CAPTURE') != '0'):
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
                                                    format=self.log_format,
                                                    level=None))
