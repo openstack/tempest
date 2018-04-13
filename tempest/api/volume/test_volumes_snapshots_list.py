@@ -28,13 +28,11 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
     @classmethod
     def resource_setup(cls):
         super(VolumesSnapshotListTestJSON, cls).resource_setup()
-        cls.snapshot_id_list = []
         volume_origin = cls.create_volume()
 
         # Create snapshots with params
         for _ in range(3):
             snapshot = cls.create_snapshot(volume_origin['id'])
-            cls.snapshot_id_list.append(snapshot['id'])
         cls.snapshot = snapshot
 
     def _list_by_param_values_and_assert(self, with_detail=False, **params):
@@ -151,10 +149,14 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
     @decorators.idempotent_id('05489dde-44bc-4961-a1f5-3ce7ee7824f7')
     def test_snapshot_list_param_marker(self):
         # The list of snapshots should end before the provided marker
-        params = {'marker': self.snapshot_id_list[1]}
+        snap_list = self.snapshots_client.list_snapshots()['snapshots']
+        # list_snapshots will take the reverse order as they are created.
+        snapshot_id_list = [snap['id'] for snap in snap_list][::-1]
+
+        params = {'marker': snapshot_id_list[1]}
         snap_list = self.snapshots_client.list_snapshots(**params)['snapshots']
         fetched_list_id = [snap['id'] for snap in snap_list]
         # Verify the list of snapshots ends before the provided
         # marker(second snapshot), therefore only the first snapshot
         # should displayed.
-        self.assertEqual(self.snapshot_id_list[:1], fetched_list_id)
+        self.assertEqual(snapshot_id_list[:1], fetched_list_id)
