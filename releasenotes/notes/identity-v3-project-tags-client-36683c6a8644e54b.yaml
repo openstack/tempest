@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Add ``project_tags_client`` to the identity v3 library. This feature
+    enables the possibility of invoking the following API actions:
+
+    * update_project_tag
+    * list_project_tags
+    * update_all_project_tags
+    * check_project_tag_existence
+    * delete_project_tag
+    * delete_all_project_tags
