@@ -43,6 +43,25 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('tags')
 
+update_server = copy.deepcopy(servers219.update_server)
+update_server['response_body']['properties']['server'][
+    'properties'].update({'tags': tag_items})
+update_server['response_body']['properties']['server'][
+    'required'].append('tags')
+
+rebuild_server = copy.deepcopy(servers219.rebuild_server)
+rebuild_server['response_body']['properties']['server'][
+    'properties'].update({'tags': tag_items})
+rebuild_server['response_body']['properties']['server'][
+    'required'].append('tags')
+
+rebuild_server_with_admin_pass = copy.deepcopy(
+    servers219.rebuild_server_with_admin_pass)
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'tags': tag_items})
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('tags')
+
 # list response schema wasn't changed for v2.26 so use v2.1
 
 list_servers = copy.deepcopy(servers21.list_servers)
