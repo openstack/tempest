@@ -184,8 +184,28 @@ class ServerShowV247Test(base.BaseV2ComputeTest):
     min_microversion = '2.47'
     max_microversion = 'latest'
 
+    # NOTE(gmann): This test tests the server APIs response schema
+    # Along with 2.47 microversion schema this test class tests the
+    # other microversions 2.9, 2.19 and 2.26 server APIs response schema
+    # also. 2.47 APIs schema are on top of 2.9->2.19->2.26 schema so
+    # below tests cover all of the schema.
+
     @decorators.idempotent_id('88b0bdb2-494c-11e7-a919-92ebcb67fe33')
     def test_show_server(self):
         server = self.create_test_server()
         # All fields will be checked by API schema
         self.servers_client.show_server(server['id'])
+
+    @decorators.idempotent_id('8de397c2-57d0-4b90-aa30-e5d668f21a8b')
+    def test_update_rebuild_list_server(self):
+        server = self.create_test_server()
+        # Checking update API response schema
+        self.servers_client.update_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
+        # Checking rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+        # Checking list details API response schema
+        self.servers_client.list_servers(detail=True)
