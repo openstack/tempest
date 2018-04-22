@@ -18,7 +18,7 @@ from oslotest import base
 
 class TestCase(base.BaseTestCase):
 
-    def patch(self, target, **kwargs):
+    def patch(self, target, *args, **kwargs):
         """Returns a started `mock.patch` object for the supplied target.
 
         The caller may then call the returned patcher to create a mock object.
@@ -27,23 +27,35 @@ class TestCase(base.BaseTestCase):
         patcher object, as this method automatically adds a cleanup
         to the test class to stop the patcher.
 
-        :param target: String module.class or module.object expression to patch
-        :param **kwargs: Passed as-is to `mock.patch`. See mock documentation
-                         for details.
+        :param target: string module.class or module.object expression to patch
+        :param *args: passed as-is to `mock.patch`.
+        :param **kwargs: passed as-is to `mock.patch`.
+
+        See mock documentation for more details:
+        https://docs.python.org/3.5/library/unittest.mock.html#unittest.mock.patch
         """
-        p = mock.patch(target, **kwargs)
+
+        p = mock.patch(target, *args, **kwargs)
         m = p.start()
         self.addCleanup(p.stop)
         return m
 
-    def patchobject(self, target, attribute, new=mock.DEFAULT):
+    def patchobject(self, target, attribute, *args, **kwargs):
         """Convenient wrapper around `mock.patch.object`
 
         Returns a started mock that will be automatically stopped after the
         test ran.
+
+        :param target: object to have the attribute patched
+        :param attribute: name of the attribute to be patched
+        :param *args: passed as-is to `mock.patch.object`.
+        :param **kwargs: passed as-is to `mock.patch.object`.
+
+        See mock documentation for more details:
+        https://docs.python.org/3.5/library/unittest.mock.html#unittest.mock.patch.object
         """
 
-        p = mock.patch.object(target, attribute, new)
+        p = mock.patch.object(target, attribute, *args, **kwargs)
         m = p.start()
         self.addCleanup(p.stop)
         return m
