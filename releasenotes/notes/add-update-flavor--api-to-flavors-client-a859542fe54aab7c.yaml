@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add update flavor API to compute flavors_client library.

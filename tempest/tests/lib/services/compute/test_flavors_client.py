@@ -17,6 +17,7 @@ import copy
 import fixtures
 from oslo_serialization import jsonutils as json
 
+from tempest.api.compute import api_microversion_fixture
 from tempest.lib.services.compute import flavors_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib import fake_http
@@ -37,6 +38,21 @@ class TestFlavorsClient(base.BaseServiceTest):
         "ram": 512,
         "swap": 1,
         "vcpus": 1
+    }
+
+    FAKE_FLAVOR_UPDATE = {
+        "disk": 1,
+        "id": "1",
+        "links": [{
+            "href": "http://openstack.example.com/v2/openstack/flavors/1",
+            "rel": "self"}, {
+            "href": "http://openstack.example.com/openstack/flavors/1",
+            "rel": "bookmark"}],
+        "name": "m1.tiny",
+        "ram": 512,
+        "swap": 1,
+        "vcpus": 1,
+        "description": 'new'
     }
 
     EXTRA_SPECS = {"extra_specs": {
@@ -105,6 +121,25 @@ class TestFlavorsClient(base.BaseServiceTest):
 
     def test_create_flavor__byte_body(self):
         self._test_create_flavor(bytes_body=True)
+
+    def _test_update_flavor(self, bytes_body=False):
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            '2.55'))
+        expected = {"flavor": TestFlavorsClient.FAKE_FLAVOR_UPDATE}
+        request = {"flavor": {"description": "updated description"}}
+        self.check_service_client_function(
+            self.client.update_flavor,
+            'tempest.lib.common.rest_client.RestClient.put',
+            expected,
+            bytes_body,
+            flavor_id='8c7aae5a-d315-4216-875b-ed9b6a5bcfc6',
+            **request)
+
+    def test_update_flavor_str_body(self):
+        self._test_update_flavor(bytes_body=False)
+
+    def test_update_flavor__byte_body(self):
+        self._test_update_flavor(bytes_body=True)
 
     def test_delete_flavor(self):
         self.check_service_client_function(

@@ -21,11 +21,17 @@ from tempest.lib.api_schema.response.compute.v2_1 import flavors_access \
     as schema_access
 from tempest.lib.api_schema.response.compute.v2_1 import flavors_extra_specs \
     as schema_extra_specs
+from tempest.lib.api_schema.response.compute.v2_55 import flavors \
+    as schemav255
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class FlavorsClient(base_compute_client.BaseComputeClient):
+
+    schema_versions_info = [
+        {'min': None, 'max': '2.54', 'schema': schema},
+        {'min': '2.55', 'max': None, 'schema': schemav255}]
 
     def list_flavors(self, detail=False, **params):
         """Lists flavors.
@@ -36,11 +42,12 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         https://developer.openstack.org/api-ref/compute/#list-flavors-with-details
         """
         url = 'flavors'
-        _schema = schema.list_flavors
-
+        schema = self.get_schema(self.schema_versions_info)
         if detail:
             url += '/detail'
             _schema = schema.list_flavors_details
+        else:
+            _schema = schema.list_flavors
         if params:
             url += '?%s' % urllib.urlencode(params)
 
@@ -58,7 +65,9 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         """
         resp, body = self.get("flavors/%s" % flavor_id)
         body = json.loads(body)
-        self.validate_response(schema.create_get_flavor_details, resp, body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.create_update_get_flavor_details,
+                               resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def create_flavor(self, **kwargs):
@@ -77,7 +86,25 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
-        self.validate_response(schema.create_get_flavor_details, resp, body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.create_update_get_flavor_details,
+                               resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_flavor(self, flavor_id, **kwargs):
+        """Uodate the flavor or instance type.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#update-flavor-description
+        """
+        put_body = json.dumps({'flavor': kwargs})
+        resp, body = self.put("flavors/%s" % flavor_id, put_body)
+
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.create_update_get_flavor_details,
+                               resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_flavor(self, flavor_id):
