@@ -23,6 +23,8 @@ from tempest.lib.api_schema.response.compute.v2_1 import flavors_extra_specs \
     as schema_extra_specs
 from tempest.lib.api_schema.response.compute.v2_55 import flavors \
     as schemav255
+from tempest.lib.api_schema.response.compute.v2_61 import flavors \
+    as schemav261
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -31,7 +33,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [
         {'min': None, 'max': '2.54', 'schema': schema},
-        {'min': '2.55', 'max': None, 'schema': schemav255}]
+        {'min': '2.55', 'max': '2.60', 'schema': schemav255},
+        {'min': '2.61', 'max': None, 'schema': schemav261}]
 
     def list_flavors(self, detail=False, **params):
         """Lists flavors.

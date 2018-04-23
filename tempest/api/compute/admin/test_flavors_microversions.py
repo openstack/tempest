@@ -41,3 +41,11 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
         self.flavors_client.list_flavors(detail=True)['flavors']
         # Checking list API response schema
         self.flavors_client.list_flavors()['flavors']
+
+
+class FlavorsV261TestJSON(FlavorsV255TestJSON):
+    min_microversion = '2.61'
+    max_microversion = 'latest'
+
+    # NOTE(gmann): This class tests the flavors APIs
+    # response schema for the 2.61 microversion.
