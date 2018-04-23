@@ -81,6 +81,26 @@
         # without Swift, c-bak cannot run (in the Gate at least)
         c-bak: false
 
+- nodeset:
+    name: openstack-bionic-node
+    nodes:
+      - name: controller
+        label: ubuntu-bionic
+    groups:
+      - name: tempest
+        nodes:
+          - controller
+
+- job:
+    name: tempest-full-py36
+    parent: tempest-full-py3
+    nodeset: openstack-bionic-node
+    branches:
+      - master
+    description: |
+      Base integration test with Neutron networking and py36.
+    voting: false
+
 - job:
     name: tempest-full-queens
     parent: tempest-full
@@ -189,6 +209,16 @@
               - ^.zuul.yaml$
         - nova-multiattach
         - tempest-full-parallel:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+        - tempest-full-py36:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
