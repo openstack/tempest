@@ -190,6 +190,8 @@ class BaseIdentityV3Test(BaseIdentityTest):
         cls.non_admin_catalog_client = cls.os_primary.catalog_client
         cls.non_admin_versions_client =\
             cls.os_primary.identity_versions_v3_client
+        cls.non_admin_app_creds_client = \
+            cls.os_primary.application_credentials_client
 
 
 class BaseIdentityV3AdminTest(BaseIdentityV3Test):
@@ -289,3 +291,30 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             test_utils.call_and_ignore_notfound_exc,
             self.delete_domain, domain['id'])
         return domain
+
+
+class BaseApplicationCredentialsV3Test(BaseIdentityV3Test):
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseApplicationCredentialsV3Test, cls).skip_checks()
+        if not CONF.identity_feature_enabled.application_credentials:
+            raise cls.skipException("Application credentials are not available"
+                                    " in this environment")
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseApplicationCredentialsV3Test, cls).resource_setup()
+        cls.user_id = cls.os_primary.credentials.user_id
+        cls.project_id = cls.os_primary.credentials.project_id
+
+    def create_application_credential(self, name=None, **kwargs):
+        name = name or data_utils.rand_name('application_credential')
+        application_credential = (
+            self.non_admin_app_creds_client.create_application_credential(
+                self.user_id, name=name, **kwargs))['application_credential']
+        self.addCleanup(
+            self.non_admin_app_creds_client.delete_application_credential,
+            self.user_id,
+            application_credential['id'])
+        return application_credential

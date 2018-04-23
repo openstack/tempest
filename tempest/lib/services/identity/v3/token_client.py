@@ -51,7 +51,8 @@ class V3TokenClient(rest_client.RestClient):
     def auth(self, user_id=None, username=None, password=None, project_id=None,
              project_name=None, user_domain_id=None, user_domain_name=None,
              project_domain_id=None, project_domain_name=None, domain_id=None,
-             domain_name=None, token=None):
+             domain_name=None, token=None, app_cred_id=None,
+             app_cred_secret=None):
         """Obtains a token from the authentication service
 
         :param user_id: user id
@@ -108,6 +109,13 @@ class V3TokenClient(rest_client.RestClient):
                 _domain = dict(name=user_domain_name)
             if _domain:
                 id_obj['password']['user']['domain'] = _domain
+
+        if app_cred_id and app_cred_secret:
+            id_obj['methods'].append('application_credential')
+            id_obj['application_credential'] = {
+                'id': app_cred_id,
+                'secret': app_cred_secret,
+            }
 
         if (project_id or project_name):
             _project = dict()

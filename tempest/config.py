@@ -240,7 +240,13 @@ IdentityFeatureGroup = [
                      'settings enabled?'),
     cfg.BoolOpt('project_tags',
                 default=False,
-                help='Is the project tags identity v3 API available?')
+                help='Is the project tags identity v3 API available?'),
+    # Application credentials is a default feature in Queens. This config
+    # option can removed once Pike is EOL.
+    cfg.BoolOpt('application_credentials',
+                default=False,
+                help='Does the environment have application credentials '
+                     'enabled?')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
