@@ -32,7 +32,6 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     """The test suite for server advanced operations
 
     This test case stresses some advanced server instance operations:
-     * Resizing a volume-backed instance
      * Sequence suspend resume
     """
 
