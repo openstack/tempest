@@ -127,6 +127,36 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.image_ssh_password = CONF.validation.image_ssh_password
 
     @classmethod
+    def is_requested_microversion_compatible(cls, max_version):
+        """Check the compatibility of selected request microversion
+
+        This method will check if selected request microversion
+        (cls.request_microversion) for test is compatible with respect
+        to 'max_version'. Compatible means if selected request microversion
+        is in the range(<=) of 'max_version'.
+
+        :param max_version: maximum microversion to compare for compatibility.
+            Example: '2.30'
+        :returns: True if selected request microversion is compatible with
+            'max_version'. False in other case.
+        """
+        try:
+            req_version_obj = api_version_request.APIVersionRequest(
+                cls.request_microversion)
+        # NOTE(gmann): This is case where this method is used before calling
+        # resource_setup(), where cls.request_microversion is set. There may
+        # not be any such case but still we can handle this case.
+        except AttributeError:
+            request_microversion = (
+                api_version_utils.select_request_microversion(
+                    cls.min_microversion,
+                    CONF.compute.min_microversion))
+            req_version_obj = api_version_request.APIVersionRequest(
+                request_microversion)
+        max_version_obj = api_version_request.APIVersionRequest(max_version)
+        return req_version_obj <= max_version_obj
+
+    @classmethod
     def server_check_teardown(cls):
         """Checks is the shared server clean enough for subsequent test.
 

@@ -173,3 +173,20 @@ class TestBaseV2ComputeTest(base.TestCase):
         # make our assertions
         wait_for_image_status.assert_called_once_with(
             compute_images_client, image_id, 'SAVING')
+
+    def _test_version_compatible(self, max_version, expected=True):
+        actual = (compute_base.BaseV2ComputeTest.
+                  is_requested_microversion_compatible(max_version))
+        self.assertEqual(expected, actual)
+
+    def test_check_lower_version(self):
+        compute_base.BaseV2ComputeTest.request_microversion = '2.8'
+        self._test_version_compatible('2.40')
+
+    def test_check_euqal_version(self):
+        compute_base.BaseV2ComputeTest.request_microversion = '2.40'
+        self._test_version_compatible('2.40')
+
+    def test_check_higher_version(self):
+        compute_base.BaseV2ComputeTest.request_microversion = '2.41'
+        self._test_version_compatible('2.40', expected=False)
