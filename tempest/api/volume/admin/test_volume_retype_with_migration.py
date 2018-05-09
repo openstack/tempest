@@ -46,13 +46,10 @@ class VolumeRetypeWithMigrationTest(base.BaseVolumeAdminTest):
         extra_specs_src = {"volume_backend_name": backend_src}
         extra_specs_dst = {"volume_backend_name": backend_dst}
 
-        src_vol_type = cls.create_volume_type(extra_specs=extra_specs_src)
+        cls.src_vol_type = cls.create_volume_type(extra_specs=extra_specs_src)
         cls.dst_vol_type = cls.create_volume_type(extra_specs=extra_specs_dst)
 
-        cls.src_vol = cls.create_volume(volume_type=src_vol_type['name'])
-
-    @classmethod
-    def resource_cleanup(cls):
+    def _wait_for_internal_volume_cleanup(self, vol):
         # When retyping a volume, Cinder creates an internal volume in the
         # target backend. The volume in the source backend is deleted after
         # the migration, so we need to wait for Cinder delete this volume
@@ -60,40 +57,37 @@ class VolumeRetypeWithMigrationTest(base.BaseVolumeAdminTest):
 
         # This list should return 2 volumes until the copy and cleanup
         # process is finished.
-        fetched_list = cls.admin_volume_client.list_volumes(
+        fetched_list = self.admin_volume_client.list_volumes(
             params={'all_tenants': True,
-                    'display_name': cls.src_vol['name']})['volumes']
+                    'display_name': vol['name']})['volumes']
 
         for fetched_vol in fetched_list:
-            if fetched_vol['id'] != cls.src_vol['id']:
+            if fetched_vol['id'] != vol['id']:
                 # This is the Cinder internal volume
                 LOG.debug('Waiting for internal volume %s deletion',
                           fetched_vol['id'])
-                cls.admin_volume_client.wait_for_resource_deletion(
+                self.admin_volume_client.wait_for_resource_deletion(
                     fetched_vol['id'])
                 break
 
-        super(VolumeRetypeWithMigrationTest, cls).resource_cleanup()
-
-    @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
-    def test_available_volume_retype_with_migration(self):
-
+    def _retype_volume(self, volume):
         keys_with_no_change = ('id', 'size', 'description', 'name', 'user_id',
                                'os-vol-tenant-attr:tenant_id')
         keys_with_change = ('volume_type', 'os-vol-host-attr:host')
 
         volume_source = self.admin_volume_client.show_volume(
-            self.src_vol['id'])['volume']
+            volume['id'])['volume']
 
         self.volumes_client.retype_volume(
-            self.src_vol['id'],
+            volume['id'],
             new_type=self.dst_vol_type['name'],
             migration_policy='on-demand')
-
-        waiters.wait_for_volume_retype(self.volumes_client, self.src_vol['id'],
+        self.addCleanup(self._wait_for_internal_volume_cleanup, volume)
+        waiters.wait_for_volume_retype(self.volumes_client, volume['id'],
                                        self.dst_vol_type['name'])
+
         volume_dest = self.admin_volume_client.show_volume(
-            self.src_vol['id'])['volume']
+            volume['id'])['volume']
 
         # Check the volume information after the migration.
         self.assertEqual('success',
@@ -105,3 +99,27 @@ class VolumeRetypeWithMigrationTest(base.BaseVolumeAdminTest):
 
         for key in keys_with_change:
             self.assertNotEqual(volume_source[key], volume_dest[key])
+
+    @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
+    def test_available_volume_retype_with_migration(self):
+        src_vol = self.create_volume(volume_type=self.src_vol_type['name'])
+        self._retype_volume(src_vol)
+
+    @decorators.idempotent_id('d0d9554f-e7a5-4104-8973-f35b27ccb60d')
+    def test_volume_from_snapshot_retype_with_migration(self):
+        # Create a volume in the first backend
+        src_vol = self.create_volume(volume_type=self.src_vol_type['name'])
+
+        # Create a volume snapshot
+        snapshot = self.create_snapshot(src_vol['id'])
+
+        # Create a volume from the snapshot
+        src_vol = self.create_volume(volume_type=self.src_vol_type['name'],
+                                     snapshot_id=snapshot['id'])
+
+        # Delete the snapshot
+        self.snapshots_client.delete_snapshot(snapshot['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+
+        # Migrate the volume from snapshot to the second backend
+        self._retype_volume(src_vol)
