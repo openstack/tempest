@@ -14,9 +14,9 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_1 import servers as serversv21
 from tempest.lib.api_schema.response.compute.v2_16 import servers \
     as serversv216
+from tempest.lib.api_schema.response.compute.v2_9 import servers as serversv29
 
 list_servers = copy.deepcopy(serversv216.list_servers)
 
@@ -32,20 +32,20 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('description')
 
-update_server = copy.deepcopy(serversv21.update_server)
+update_server = copy.deepcopy(serversv29.update_server)
 update_server['response_body']['properties']['server'][
     'properties'].update({'description': {'type': ['string', 'null']}})
 update_server['response_body']['properties']['server'][
     'required'].append('description')
 
-rebuild_server = copy.deepcopy(serversv21.rebuild_server)
+rebuild_server = copy.deepcopy(serversv29.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update({'description': {'type': ['string', 'null']}})
 rebuild_server['response_body']['properties']['server'][
     'required'].append('description')
 
 rebuild_server_with_admin_pass = copy.deepcopy(
-    serversv21.rebuild_server_with_admin_pass)
+    serversv29.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'description': {'type': ['string', 'null']}})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
