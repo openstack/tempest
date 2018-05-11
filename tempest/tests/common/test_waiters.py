@@ -72,3 +72,37 @@ class TestImageWaiters(base.TestCase):
         mock_show.assert_has_calls([mock.call(volume_id),
                                     mock.call(volume_id)])
         mock_sleep.assert_called_once_with(1)
+
+
+class TestInterfaceWaiters(base.TestCase):
+    def setUp(self):
+        super(TestInterfaceWaiters, self).setUp()
+        self.client = mock.MagicMock()
+        self.client.build_timeout = 1
+        self.client.build_interval = 1
+
+    def _port_down(self):
+        return {'interfaceAttachment': {'port_state': 'DOWN'}}
+
+    def _port_active(self):
+        return {'interfaceAttachment': {'port_state': 'ACTIVE'}}
+
+    def test_wait_for_interface_status(self):
+        self.client.show_interface.side_effect = [self._port_down(),
+                                                  self._port_active()]
+        with mock.patch.object(time, 'sleep') as sleep_mock:
+            start_time = int(time.time())
+            waiters.wait_for_interface_status(self.client, 'server_id',
+                                              'port_id', 'ACTIVE')
+            end_time = int(time.time())
+            self.assertLess(end_time, (start_time + self.client.build_timeout))
+            sleep_mock.assert_called_once_with(self.client.build_interval)
+
+    def test_wait_for_interface_status_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        self.client.show_interface.return_value = self._port_down()
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_interface_status,
+                          self.client, 'server_id', 'port_id', 'ACTIVE')
