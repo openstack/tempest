@@ -147,6 +147,7 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
+    @utils.services('volume')
     def test_iscsi_volume(self):
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
