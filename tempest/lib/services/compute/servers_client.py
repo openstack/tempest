@@ -156,11 +156,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         url = 'servers'
         schema = self.get_schema(self.schema_versions_info)
-        _schema = schema.list_servers
-
         if detail:
             url += '/detail'
             _schema = schema.list_servers_detail
+        else:
+            _schema = schema.list_servers
         if params:
             url += '?%s' % urllib.urlencode(params)
 

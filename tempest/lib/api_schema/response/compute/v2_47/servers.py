@@ -37,3 +37,19 @@ flavor = {
 get_server = copy.deepcopy(servers226.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'flavor': flavor})
+list_servers_detail = copy.deepcopy(servers226.list_servers_detail)
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'properties'].update({'flavor': flavor})
+
+update_server = copy.deepcopy(servers226.update_server)
+update_server['response_body']['properties']['server'][
+    'properties'].update({'flavor': flavor})
+
+rebuild_server = copy.deepcopy(servers226.rebuild_server)
+rebuild_server['response_body']['properties']['server'][
+    'properties'].update({'flavor': flavor})
+
+rebuild_server_with_admin_pass = copy.deepcopy(
+    servers226.rebuild_server_with_admin_pass)
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'flavor': flavor})
