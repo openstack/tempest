@@ -128,7 +128,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 
         volume_details = self.volumes_client.show_volume(
             volume['id'])['volume']
-        self.assertEqual('true', volume_details['bootable'])
+        self.assertTrue(volume_details['bootable'])
 
         # Create a backup
         backup = self.create_backup(volume_id=volume['id'])
@@ -140,7 +140,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         restored_volume_info = self.volumes_client.show_volume(
             restored_volume_id)['volume']
 
-        self.assertEqual('true', restored_volume_info['bootable'])
+        self.assertTrue(restored_volume_info['bootable'])
 
 
 class VolumesBackupsV39Test(base.BaseVolumeTest):

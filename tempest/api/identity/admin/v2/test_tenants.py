@@ -59,11 +59,9 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Create a tenant that is enabled
         tenant = self.setup_test_tenant(enabled=True)
         tenant_id = tenant['id']
-        en1 = tenant['enabled']
-        self.assertTrue(en1, 'Enable should be True in response')
+        self.assertTrue(tenant['enabled'], 'Enable should be True in response')
         body = self.tenants_client.show_tenant(tenant_id)['tenant']
-        en2 = body['enabled']
-        self.assertTrue(en2, 'Enable should be True in lookup')
+        self.assertTrue(body['enabled'], 'Enable should be True in lookup')
         self.tenants_client.delete_tenant(tenant_id)
 
     @decorators.idempotent_id('3be22093-b30f-499d-b772-38340e5e16fb')
@@ -71,12 +69,10 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         # Create a tenant that is not enabled
         tenant = self.setup_test_tenant(enabled=False)
         tenant_id = tenant['id']
-        en1 = tenant['enabled']
-        self.assertEqual('false', str(en1).lower(),
+        self.assertFalse(tenant['enabled'],
                          'Enable should be False in response')
         body = self.tenants_client.show_tenant(tenant_id)['tenant']
-        en2 = body['enabled']
-        self.assertEqual('false', str(en2).lower(),
+        self.assertFalse(body['enabled'],
                          'Enable should be False in lookup')
         self.tenants_client.delete_tenant(tenant_id)
 
@@ -143,7 +139,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
-        self.assertEqual('false', str(resp1_en).lower())
+        self.assertFalse(tenant['enabled'])
         self.assertEqual(resp2_en, resp3_en)
 
         self.tenants_client.delete_tenant(t_id)
