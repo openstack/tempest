@@ -47,8 +47,8 @@
           set -x
           export PYTHONUNBUFFERED=true
           export DEVSTACK_GATE_TEMPEST=1
-          # Run scenario and nova migration tests with concurrency 2
-          export DEVSTACK_GATE_TEMPEST_REGEX='(^tempest\.(scenario|api\.compute\.admin\.test_(live_|)migration))'
+          # Run all scenario tests including slow tests with concurrency 2
+          export DEVSTACK_GATE_TEMPEST_REGEX='(^tempest\.(scenario))'
           export TEMPEST_CONCURRENCY=2
           export DEVSTACK_GATE_NEUTRON=1
           export DEVSTACK_GATE_TLSPROXY=1
