@@ -101,6 +101,19 @@
       Base integration test with Neutron networking and py36.
     voting: false
 
+# TODO(gmann): needs to migrate this to zuulv3
+- job:
+    name: tempest-scenario-multinode-lvm-multibackend
+    parent: legacy-dsvm-base-multinode
+    run: playbooks/tempest-scenario-multinode-lvm-multibackend/run.yaml
+    post-run: playbooks/tempest-scenario-multinode-lvm-multibackend/post.yaml
+    timeout: 10800
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/neutron
+      - openstack/tempest
+    nodeset: ubuntu-xenial-2-node
+
 - job:
     name: tempest-full-queens
     parent: tempest-full
@@ -259,6 +272,17 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
+        - tempest-scenario-multinode-lvm-multibackend:
+            voting: false
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
     gate:
       jobs:
         - nova-multiattach
