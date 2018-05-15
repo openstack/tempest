@@ -83,6 +83,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if CONF.service_available.cinder:
             cls.volumes_client = cls.os_primary.volumes_client_latest
             cls.snapshots_client = cls.os_primary.snapshots_client_latest
+            cls.backups_client = cls.os_primary.backups_client_latest
 
     # ## Test functions library
     #
@@ -243,6 +244,37 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Retrieval after it becomes active ensures correct details.
         volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
+
+    def create_backup(self, volume_id, name=None, description=None,
+                      force=False, snapshot_id=None, incremental=False,
+                      container=None):
+
+        name = name or data_utils.rand_name(
+            self.__class__.__name__ + "-backup")
+        kwargs = {'name': name,
+                  'description': description,
+                  'force': force,
+                  'snapshot_id': snapshot_id,
+                  'incremental': incremental,
+                  'container': container}
+        backup = self.backups_client.create_backup(volume_id=volume_id,
+                                                   **kwargs)['backup']
+        self.addCleanup(self.backups_client.delete_backup, backup['id'])
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup['id'], 'available')
+        return backup
+
+    def restore_backup(self, backup_id):
+        restore = self.backups_client.restore_backup(backup_id)['restore']
+        self.addCleanup(self.volumes_client.delete_volume,
+                        restore['volume_id'])
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup_id, 'available')
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                restore['volume_id'],
+                                                'available')
+        self.assertEqual(backup_id, restore['backup_id'])
+        return restore
 
     def create_volume_snapshot(self, volume_id, name=None, description=None,
                                metadata=None, force=False):
