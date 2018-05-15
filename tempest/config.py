@@ -1078,7 +1078,7 @@ def list_opts():
     return opt_list
 
 
-# this should never be called outside of this class
+# This should never be called outside of this module
 class TempestConfigPrivate(object):
     """Provides OpenStack configuration information."""
 
