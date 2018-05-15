@@ -71,8 +71,12 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(1024, body.get('size'))
 
         # Now try get image file
+        # NOTE: This Glance API returns different status codes for image
+        # condition. In this non-empty data case, Glance should return 200,
+        # so here should check the status code.
         body = self.client.show_image_file(image['id'])
         self.assertEqual(file_content, body.data)
+        self.assertEqual(200, body.response.status)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f848bb94-1c6e-45a4-8726-39e3a5b23535')
@@ -110,6 +114,13 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
                                   disk_format=disk_format,
                                   visibility='private')
         self.assertEqual('queued', image['status'])
+
+        # NOTE: This Glance API returns different status codes for image
+        # condition. In this empty data case, Glance should return 204,
+        # so here should check the status code.
+        image_file = self.client.show_image_file(image['id'])
+        self.assertEqual(0, len(image_file.data))
+        self.assertEqual(204, image_file.response.status)
 
         # Now try uploading an image file
         image_file = six.BytesIO(data_utils.random_bytes())
