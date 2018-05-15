@@ -101,22 +101,19 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a project that is enabled
         project = self.setup_test_project(enabled=True)
         project_id = project['id']
-        en1 = project['enabled']
-        self.assertTrue(en1, 'Enable should be True in response')
+        self.assertTrue(project['enabled'],
+                        'Enable should be True in response')
         body = self.projects_client.show_project(project_id)['project']
-        en2 = body['enabled']
-        self.assertTrue(en2, 'Enable should be True in lookup')
+        self.assertTrue(body['enabled'], 'Enable should be True in lookup')
 
     @decorators.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
         project = self.setup_test_project(enabled=False)
-        en1 = project['enabled']
-        self.assertEqual('false', str(en1).lower(),
+        self.assertFalse(project['enabled'],
                          'Enable should be False in response')
         body = self.projects_client.show_project(project['id'])['project']
-        en2 = body['enabled']
-        self.assertEqual('false', str(en2).lower(),
+        self.assertFalse(body['enabled'],
                          'Enable should be False in lookup')
 
     @decorators.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
@@ -178,7 +175,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
-        self.assertEqual('false', str(resp1_en).lower())
+        self.assertFalse(project['enabled'])
         self.assertEqual(resp2_en, resp3_en)
 
     @decorators.idempotent_id('59398d4a-5dc5-4f86-9a4c-c26cc804d6c6')
