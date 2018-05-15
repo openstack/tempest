@@ -1,1 +1,0 @@
-./tempest/services/object_storage/object_client.py
