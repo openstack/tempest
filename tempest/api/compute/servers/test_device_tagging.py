@@ -134,7 +134,6 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.addCleanup(self.ports_client.delete_port, self.port2['id'])
 
         # Create server
-        admin_pass = data_utils.rand_password()
         config_drive_enabled = CONF.compute_feature_enabled.config_drive
         validation_resources = self.get_test_validation_resources(
             self.os_primary)
@@ -144,7 +143,6 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
             wait_until='ACTIVE',
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
-            adminPass=admin_pass,
             name=data_utils.rand_name('device-tagging-server'),
             networks=[
                 # Validation network for ssh
@@ -212,8 +210,7 @@ class DeviceTaggingTest(base.BaseV2ComputeTest):
         self.ssh_client = remote_client.RemoteClient(
             self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
-            admin_pass,
-            validation_resources['keypair']['private_key'],
+            pkey=validation_resources['keypair']['private_key'],
             server=server,
             servers_client=self.servers_client)
 
