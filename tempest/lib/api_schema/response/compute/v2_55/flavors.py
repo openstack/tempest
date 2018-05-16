@@ -1,4 +1,4 @@
-# Copyright 2014 NEC Corporation.  All rights reserved.
+# Copyright 2018 NEC Corporation.  All rights reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,6 +14,20 @@
 
 from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
 
+# Note(gmann): This is schema for microversion 2.55 which includes the
+# following changes:
+# Add new PUT API
+# Adds a ``description`` field to the following APIs response:
+#    - ``GET /flavors``
+#    - ``GET /flavors/detail``
+#    - ``GET /flavors/{flavor_id}``
+#    - ``POST /flavors``
+
+flavor_description = {
+    'type': ['string', 'null'],
+    'minLength': 0, 'maxLength': 65535
+}
+
 list_flavors = {
     'status_code': [200],
     'response_body': {
@@ -26,10 +40,11 @@ list_flavors = {
                     'properties': {
                         'name': {'type': 'string'},
                         'links': parameter_types.links,
-                        'id': {'type': 'string'}
+                        'id': {'type': 'string'},
+                        'description': flavor_description
                     },
                     'additionalProperties': False,
-                    'required': ['name', 'links', 'id']
+                    'required': ['name', 'links', 'id', 'description']
                 }
             },
             'flavors_links': parameter_types.links
@@ -56,12 +71,14 @@ common_flavor_info = {
         'OS-FLV-DISABLED:disabled': {'type': 'boolean'},
         'os-flavor-access:is_public': {'type': 'boolean'},
         'rxtx_factor': {'type': 'number'},
-        'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'}
+        'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'},
+        'description': flavor_description
     },
     'additionalProperties': False,
     # 'OS-FLV-DISABLED', 'os-flavor-access', 'rxtx_factor' and
     # 'OS-FLV-EXT-DATA' are API extensions. So they are not 'required'.
-    'required': ['name', 'links', 'ram', 'vcpus', 'swap', 'disk', 'id']
+    'required': ['name', 'links', 'ram', 'vcpus', 'swap', 'disk', 'id',
+                 'description']
 }
 
 list_flavors_details = {
@@ -82,10 +99,6 @@ list_flavors_details = {
     }
 }
 
-unset_flavor_extra_specs = {
-    'status_code': [200]
-}
-
 create_update_get_flavor_details = {
     'status_code': [200],
     'response_body': {
@@ -96,8 +109,4 @@ create_update_get_flavor_details = {
         'additionalProperties': False,
         'required': ['flavor']
     }
-}
-
-delete_flavor = {
-    'status_code': [202]
 }
