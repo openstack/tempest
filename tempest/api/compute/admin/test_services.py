@@ -56,15 +56,3 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         # sort the lists before comparing, to take out dependency
         # on order.
         self.assertEqual(sorted(s1), sorted(s2))
-
-    @decorators.idempotent_id('39397f6f-37b8-4234-8671-281e44c74025')
-    def test_get_service_by_service_and_host_name(self):
-        services = self.client.list_services()['services']
-        host_name = services[0]['host']
-        binary_name = services[0]['binary']
-
-        services = self.client.list_services(host=host_name,
-                                             binary=binary_name)['services']
-        self.assertEqual(1, len(services))
-        self.assertEqual(host_name, services[0]['host'])
-        self.assertEqual(binary_name, services[0]['binary'])
