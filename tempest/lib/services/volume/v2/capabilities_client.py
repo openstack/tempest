@@ -19,7 +19,6 @@ from tempest.lib.common import rest_client
 
 
 class CapabilitiesClient(rest_client.RestClient):
-    api_version = "v2"
 
     def show_backend_capabilities(self, host):
         """Shows capabilities for a storage back end.

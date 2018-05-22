@@ -21,8 +21,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class TypesClient(rest_client.RestClient):
-    """Client class to send CRUD Volume V2 API requests"""
-    api_version = "v2"
+    """Client class to send CRUD Volume API requests"""
 
     def is_resource_deleted(self, id):
         try:

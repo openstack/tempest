@@ -19,9 +19,7 @@ from tempest.lib.common import rest_client
 
 
 class QuotaClassesClient(rest_client.RestClient):
-    """Volume quota class V2 client."""
-
-    api_version = "v2"
+    """Volume quota class client."""
 
     def show_quota_class_set(self, quota_class_id):
         """List quotas for a quota class.

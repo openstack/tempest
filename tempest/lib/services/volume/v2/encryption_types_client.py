@@ -20,7 +20,6 @@ from tempest.lib import exceptions as lib_exc
 
 
 class EncryptionTypesClient(rest_client.RestClient):
-    api_version = "v2"
 
     def is_resource_deleted(self, id):
         try:

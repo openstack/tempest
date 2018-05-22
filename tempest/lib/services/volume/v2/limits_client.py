@@ -19,9 +19,7 @@ from tempest.lib.common import rest_client
 
 
 class LimitsClient(rest_client.RestClient):
-    """Volume V2 limits client."""
-
-    api_version = "v2"
+    """Volume limits client."""
 
     def show_limits(self):
         """Returns the details of a volume absolute limits."""
