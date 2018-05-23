@@ -1,0 +1,13 @@
+---
+deprecations:
+  - |
+    The ``scheduler_available_filters`` option is being deprecated in favor of
+    ``scheduler_enabled_filters``. The new name is more indicative of what the
+    option means. ``scheduler_enabled_filters``'s default value is set to the
+    default value of Nova's ``enabled_filters``.
+    ``scheduler_available_filters``'s default was `all`. There was confusion
+    around this value. Sometimes it was understood to mean the default Nova
+    filters are enabled, other times it was understood to mean all filters are
+    enabled. While `all` is still allowed for ``scheduler_enabled_filters`` for
+    backwards compatibility, it is strongly recommended to provide an explicit
+    list of filters that matches what's configured in nova.conf.

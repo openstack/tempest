@@ -472,20 +472,30 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('config_drive',
                 default=True,
                 help='Enable special configuration drive with metadata.'),
-    cfg.ListOpt('scheduler_available_filters',
-                default=['all'],
-                help="A list of enabled filters that nova will accept as hints"
-                     " to the scheduler when creating a server. A special "
-                     "entry 'all' indicates all filters that are included "
-                     "with nova are enabled. Empty list indicates all filters "
-                     "are disabled. The full list of available filters is in "
-                     "nova.conf: filter_scheduler.enabled_filters. If the "
+    cfg.ListOpt('scheduler_enabled_filters',
+                default=["RetryFilter", "AvailabilityZoneFilter",
+                         "ComputeFilter", "ComputeCapabilitiesFilter",
+                         "ImagePropertiesFilter",
+                         "ServerGroupAntiAffinityFilter",
+                         "ServerGroupAffinityFilter"],
+                help="A list of enabled filters that Nova will accept as "
+                     "hints to the scheduler when creating a server. If the "
                      "default value is overridden in nova.conf by the test "
                      "environment (which means that a different set of "
                      "filters is enabled than what is included in Nova by "
-                     "default) then, this option must be configured to "
+                     "default), then this option must be configured to "
                      "contain the same filters that Nova uses in the test "
-                     "environment."),
+                     "environment. A special entry 'all' indicates all "
+                     "filters that are included with Nova are enabled. If "
+                     "using 'all', be sure to enable all filters in "
+                     "nova.conf, as tests can fail in unpredictable ways if "
+                     "Nova's and Tempest's enabled filters don't match. "
+                     "Empty list indicates all filters are disabled. The "
+                     "full list of enabled filters is in nova.conf: "
+                     "filter_scheduler.enabled_filters.",
+                deprecated_opts=[cfg.DeprecatedOpt(
+                    'scheduler_available_filters',
+                    group='compute-feature-enabled')]),
     cfg.BoolOpt('swap_volume',
                 default=False,
                 help='Does the test environment support in-place swapping of '

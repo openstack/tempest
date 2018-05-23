@@ -44,15 +44,14 @@ LOG = logging.getLogger(__name__)
 def is_scheduler_filter_enabled(filter_name):
     """Check the list of enabled compute scheduler filters from config.
 
-    This function checks whether the given compute scheduler filter is
-    available and configured in the config file. If the
-    scheduler_available_filters option is set to 'all' (Default value. which
-    means default filters are configured in nova) in tempest.conf then, this
-    function returns True with assumption that requested filter 'filter_name'
-    is one of available filter in nova ("nova.scheduler.filters.all_filters").
+    This function checks whether the given compute scheduler filter is enabled
+    in the nova config file. If the scheduler_enabled_filters option is set to
+    'all' in tempest.conf then, this function returns True with assumption that
+    requested filter 'filter_name' is one of the enabled filters in nova
+    ("nova.scheduler.filters.all_filters").
     """
 
-    filters = CONF.compute_feature_enabled.scheduler_available_filters
+    filters = CONF.compute_feature_enabled.scheduler_enabled_filters
     if not filters:
         return False
     if 'all' in filters:
