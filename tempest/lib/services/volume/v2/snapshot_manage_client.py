@@ -12,20 +12,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from debtcollector import moves
 
-from oslo_serialization import jsonutils as json
-
-from tempest.lib.common import rest_client
+from tempest.lib.services.volume.v3 import snapshot_manage_client
 
 
-class SnapshotManageClient(rest_client.RestClient):
-    """Snapshot manage client."""
-
-    def manage_snapshot(self, **kwargs):
-        """Manage a snapshot."""
-        post_body = json.dumps({'snapshot': kwargs})
-        url = 'os-snapshot-manage'
-        resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
-        body = json.loads(body)
-        return rest_client.ResponseBody(resp, body)
+SnapshotManageClient = moves.moved_class(
+    snapshot_manage_client.SnapshotManageClient, 'SnapshotManageClient',
+    __name__, version="Rocky", removal_version='?')

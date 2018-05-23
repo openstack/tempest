@@ -13,15 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_serialization import jsonutils as json
+from debtcollector import moves
 
-from tempest.lib.common import rest_client
+from tempest.lib.services.volume.v3 import availability_zone_client
 
 
-class AvailabilityZoneClient(rest_client.RestClient):
-
-    def list_availability_zones(self):
-        resp, body = self.get('os-availability-zone')
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
+AvailabilityZoneClient = moves.moved_class(
+    availability_zone_client.AvailabilityZoneClient, 'AvailabilityZoneClient',
+    __name__, version="Rocky", removal_version='?')

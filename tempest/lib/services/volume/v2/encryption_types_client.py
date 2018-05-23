@@ -13,78 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_serialization import jsonutils as json
+from debtcollector import moves
 
-from tempest.lib.common import rest_client
-from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.volume.v3 import encryption_types_client
 
 
-class EncryptionTypesClient(rest_client.RestClient):
-
-    def is_resource_deleted(self, id):
-        try:
-            body = self.show_encryption_type(id)
-            if not body:
-                return True
-        except lib_exc.NotFound:
-            return True
-        return False
-
-    @property
-    def resource_type(self):
-        """Returns the primary type of resource this client works with."""
-        return 'encryption-type'
-
-    def show_encryption_type(self, volume_type_id):
-        """Get the volume encryption type for the specified volume type.
-
-        volume_type_id: Id of volume_type.
-        """
-        url = "/types/%s/encryption" % volume_type_id
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def show_encryption_specs_item(self, volume_type_id, key):
-        """Get the encryption specs item for the specified volume type."""
-        url = "/types/%s/encryption/%s" % (volume_type_id, key)
-        resp, body = self.get(url)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def create_encryption_type(self, volume_type_id, **kwargs):
-        """Create encryption type.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#create-an-encryption-type-for-v2
-        """
-        url = "/types/%s/encryption" % volume_type_id
-        post_body = json.dumps({'encryption': kwargs})
-        resp, body = self.post(url, post_body)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def delete_encryption_type(self, volume_type_id):
-        """Delete the encryption type for the specified volume-type."""
-        resp, body = self.delete(
-            "/types/%s/encryption/provider" % volume_type_id)
-        self.expected_success(202, resp.status)
-        return rest_client.ResponseBody(resp, body)
-
-    def update_encryption_type(self, volume_type_id, **kwargs):
-        """Update an encryption type for an existing volume type.
-
-        For a full list of available parameters, please refer to the official
-        API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#update-an-encryption-type-for-v2
-        """
-        url = "/types/%s/encryption/provider" % volume_type_id
-        put_body = json.dumps({'encryption': kwargs})
-        resp, body = self.put(url, put_body)
-        body = json.loads(body)
-        self.expected_success(200, resp.status)
-        return rest_client.ResponseBody(resp, body)
+EncryptionTypesClient = moves.moved_class(
+    encryption_types_client.EncryptionTypesClient, 'EncryptionTypesClient',
+    __name__, version="Rocky", removal_version='?')

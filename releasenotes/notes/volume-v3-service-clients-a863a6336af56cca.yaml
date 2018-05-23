@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Adds volume service clients for v3 APIs. As v3 base API should be
+    identical to v2 APIs, we just copy all existing v2 service client
+    for v3 API.
+deprecations:
+  - |
+    Deprecates the volume service clients for v2 APIs. Volume v2 APIs
+    are deprecated in all supported stable branches, so it's time
+    to deprecate the tempest service clients for v2 APIs and remove in future
+    release.
