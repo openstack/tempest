@@ -236,15 +236,10 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         # Delete the second server which should also delete the second volume
         # created from the volume snapshot.
-        # TODO(mriedem): Currently, the compute service fails to delete the
-        # volume it created because the volume still has the snapshot
-        # associated with it, and the cleanups for the volume snapshot which
-        # were added in create_server_snapshot above, don't run until after
-        # this is called. So we need to delete the volume snapshot and wait for
-        # it to be gone here first before deleting the server, and then we can
-        # also assert that the underlying volume is deleted when the server is
-        # deleted.
         self._delete_server(instance)
+
+        # Assert that the underlying volume is gone.
+        self.volumes_client.wait_for_resource_deletion(created_volume['id'])
 
     @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
     @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
