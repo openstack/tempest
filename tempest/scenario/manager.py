@@ -298,10 +298,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def create_volume_type(self, client=None, name=None, backend_name=None):
         if not client:
             client = self.os_admin.volume_types_v2_client
-        if not name:
-            class_name = self.__class__.__name__
-            name = data_utils.rand_name(class_name + '-volume-type')
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
+        randomized_name = name or data_utils.rand_name(
+            'volume-type-' + self.__class__.__name__)
 
         LOG.debug("Creating a volume type: %s on backend %s",
                   randomized_name, backend_name)
