@@ -12,12 +12,12 @@ As such Tempest tests come in many flavors, each with their own rules
 and guidelines. Below is the overview of the Tempest respository structure
 to make this clear.
 
- .. code-block:: console
+.. code-block:: console
 
-    tempest/
-       api/ - API tests
-       scenario/ - complex scenario tests
-       tests/ - unit tests for Tempest internals
+   tempest/
+      api/ - API tests
+      scenario/ - complex scenario tests
+      tests/ - unit tests for Tempest internals
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
