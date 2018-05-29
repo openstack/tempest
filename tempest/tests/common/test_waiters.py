@@ -106,3 +106,30 @@ class TestInterfaceWaiters(base.TestCase):
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_interface_status,
                           self.client, 'server_id', 'port_id', 'ACTIVE')
+
+    def _one_interface(self):
+        return {'interfaceAttachments': [{'port_id': 'port_one'}]}
+
+    def _two_interfaces(self):
+        return {'interfaceAttachments': [{'port_id': 'port_one'},
+                                         {'port_id': 'port_two'}]}
+
+    def test_wait_for_interface_detach(self):
+        self.client.list_interfaces.side_effect = [self._two_interfaces(),
+                                                   self._one_interface()]
+        with mock.patch.object(time, 'sleep') as sleep_mock:
+            start_time = int(time.time())
+            waiters.wait_for_interface_detach(self.client, 'server_id',
+                                              'port_two')
+            end_time = int(time.time())
+            self.assertLess(end_time, (start_time + self.client.build_timeout))
+            sleep_mock.assert_called_once_with(self.client.build_interval)
+
+    def test_wait_for_interface_detach_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        self.client.list_interfaces.return_value = self._one_interface()
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_interface_detach,
+                          self.client, 'server_id', 'port_one')
