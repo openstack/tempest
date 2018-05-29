@@ -56,3 +56,16 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
 
         self.assertRaises(lib_exc.BadRequest,
                           self.attach_volume, server, volume)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('ee37a796-2afb-11e7-bc0f-fa163e65f5ce')
+    def test_attach_attached_volume_to_different_server(self):
+        server1 = self.create_test_server(wait_until='ACTIVE')
+        volume = self.create_volume()
+
+        self.attach_volume(server1, volume)
+
+        # Create server2 and attach in-use volume
+        server2 = self.create_test_server(wait_until='ACTIVE')
+        self.assertRaises(lib_exc.BadRequest,
+                          self.attach_volume, server2, volume)
