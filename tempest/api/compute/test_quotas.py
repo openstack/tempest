@@ -43,14 +43,19 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         super(QuotasTestJSON, cls).resource_setup()
         cls.tenant_id = cls.client.tenant_id
         cls.user_id = cls.client.user_id
-        cls.default_quota_set = set(('injected_file_content_bytes',
-                                     'metadata_items', 'injected_files',
-                                     'ram', 'floating_ips',
-                                     'fixed_ips', 'key_pairs',
-                                     'injected_file_path_bytes',
-                                     'instances', 'security_group_rules',
-                                     'cores', 'security_groups',
+        cls.default_quota_set = set(('metadata_items', 'ram', 'key_pairs',
+                                     'instances', 'cores',
                                      'server_group_members', 'server_groups'))
+        if cls.is_requested_microversion_compatible('2.35'):
+            cls.default_quota_set = \
+                cls.default_quota_set | set(['fixed_ips', 'floating_ips',
+                                             'security_group_rules',
+                                             'security_groups'])
+        if cls.is_requested_microversion_compatible('2.56'):
+            cls.default_quota_set = \
+                cls.default_quota_set | set(['injected_file_content_bytes',
+                                             'injected_file_path_bytes',
+                                             'injected_files'])
 
     @decorators.idempotent_id('f1ef0a97-dbbb-4cca-adc5-c9fbc4f76107')
     def test_get_quotas(self):
