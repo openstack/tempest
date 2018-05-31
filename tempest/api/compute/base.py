@@ -501,7 +501,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             # is already detached.
             pass
 
-    def attach_volume(self, server, volume, device=None):
+    def attach_volume(self, server, volume, device=None, tag=None):
         """Attaches volume to server and waits for 'in-use' volume status.
 
         The volume will be detached when the test tears down.
@@ -510,10 +510,14 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param volume: The volume to attach.
         :param device: Optional mountpoint for the attached volume. Note that
             this is not guaranteed for all hypervisors and is not recommended.
+        :param tag: Optional device role tag to apply to the volume.
         """
         attach_kwargs = dict(volumeId=volume['id'])
         if device:
             attach_kwargs['device'] = device
+        if tag:
+            attach_kwargs['tag'] = tag
+
         attachment = self.servers_client.attach_volume(
             server['id'], **attach_kwargs)['volumeAttachment']
         # On teardown detach the volume and wait for it to be available. This
