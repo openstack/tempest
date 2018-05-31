@@ -212,6 +212,19 @@
       - openstack/zaqar-tempest-plugin
       - openstack/zun-tempest-plugin
 
+- job:
+    name: tempest-cinder-v2-api
+    parent: devstack-tempest
+    branches:
+      - master
+    description: |
+      This job runs the cinder API test against v2 endpoint.
+    vars:
+      tox_envlist: all
+      tempest_test_regex: api.*volume
+      devstack_localrc:
+        TEMPEST_VOLUME_TYPE: volumev2
+
 - project:
     check:
       jobs:
@@ -299,6 +312,16 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - nova-live-migration:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+        - tempest-cinder-v2-api:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
