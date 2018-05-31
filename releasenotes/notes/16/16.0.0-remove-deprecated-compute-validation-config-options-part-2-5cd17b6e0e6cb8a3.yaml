@@ -8,4 +8,4 @@ upgrade:
     - ``compute.ssh_user`` (available as ``validation.image_ssh_user``)
     - ``scenario.ssh_user`` (available as ``validation.image_ssh_user``)
     - ``compute.network_for_ssh`` (available as ``validation.network_for_ssh``)
-    - ``compute.ping_timeout `` (available as ``validation.ping_timeout``)
+    - ``compute.ping_timeout`` (available as ``validation.ping_timeout``)

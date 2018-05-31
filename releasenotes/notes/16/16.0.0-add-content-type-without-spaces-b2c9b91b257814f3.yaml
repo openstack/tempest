@@ -6,4 +6,4 @@ upgrade:
     The lack of these additional content-type will cause defcore test
     to fail for OpenStack public cloud which uses tomcat module in the
     api gateway. The additions are ``application/json;charset=utf-8``,
-    ``text/html;charset=utf-8``,``text/plain;charset=utf-8``
+    ``text/html;charset=utf-8``, ``text/plain;charset=utf-8``

@@ -1,4 +1,5 @@
 ---
 features:
   - |
-    Add --save-state option to allow saving state of cloud before tempest run.
+    Add ``--save-state`` option to allow saving state of cloud before
+    tempest run.
