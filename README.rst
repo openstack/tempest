@@ -212,18 +212,6 @@ argument is no longer required, however it may perform faster if included.
 For more information on these options and details about stestr, please see the
 `stestr documentation <http://stestr.readthedocs.io/en/latest/MANUAL.html>`_.
 
-Python 2.6
-----------
-
-Starting in the Kilo release the OpenStack services dropped all support for
-python 2.6. This change has been mirrored in Tempest, starting after the
-tempest-2 tag. This means that proposed changes to Tempest which only fix
-python 2.6 compatibility will be rejected, and moving forward more features not
-present in python 2.6 will be used. If you're running your OpenStack services
-on an earlier release with python 2.6 you can easily run Tempest against it
-from a remote system running python 2.7. (or deploy a cloud guest in your cloud
-that has python 2.7)
-
 Python 3.x
 ----------
 
