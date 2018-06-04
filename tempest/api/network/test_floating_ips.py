@@ -15,6 +15,7 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest.common.utils import data_utils
 from tempest.common.utils import net_utils
 from tempest import config
 from tempest.lib import decorators
@@ -158,11 +159,21 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.addCleanup(self.floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
         self.assertEqual(created_floating_ip['router_id'], self.router['id'])
-        network2 = self.create_network()
+        network_name = data_utils.rand_name(self.__class__.__name__)
+        network2 = self.networks_client.create_network(
+            name=network_name)['network']
+        self.addCleanup(self.networks_client.delete_network,
+                        network2['id'])
         subnet2 = self.create_subnet(network2)
+        self.addCleanup(self.subnets_client.delete_subnet, subnet2['id'])
         router2 = self.create_router(external_network_id=self.ext_net_id)
+        self.addCleanup(self.routers_client.delete_router, router2['id'])
         self.create_router_interface(router2['id'], subnet2['id'])
+        self.addCleanup(self.routers_client.remove_router_interface,
+                        router2['id'], subnet_id=subnet2['id'])
         port_other_router = self.create_port(network2)
+        self.addCleanup(self.ports_client.delete_port,
+                        port_other_router['id'])
         # Associate floating IP to the other port on another router
         floating_ip = self.floating_ips_client.update_floatingip(
             created_floating_ip['id'],
