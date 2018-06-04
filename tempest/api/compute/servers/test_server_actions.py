@@ -603,6 +603,20 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         glance_client.wait_for_resource_deletion(images[0]['id'])
 
+    @decorators.idempotent_id('8cf9f450-a871-42cf-9bef-77eba189c0b0')
+    @decorators.related_bug('1745529')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
+    def test_shelve_paused_server(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.client.pause_server(server['id'])
+        waiters.wait_for_server_status(self.client, server['id'], 'PAUSED')
+        # Check if Shelve operation is successful on paused server.
+        compute.shelve_server(self.client, server['id'],
+                              force_shelve_offload=True)
+
     @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
         self.client.stop_server(self.server_id)
