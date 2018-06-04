@@ -18,35 +18,62 @@ from tempest.lib.services.network import base
 class AgentsClient(base.BaseNetworkClient):
 
     def update_agent(self, agent_id, **kwargs):
-        """Update agent."""
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526673
+        """Update an agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#update-agent
+        """
         uri = '/agents/%s' % agent_id
         return self.update_resource(uri, kwargs)
 
     def show_agent(self, agent_id, **fields):
+        """Show details for an agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#show-agent-details
+        """
         uri = '/agents/%s' % agent_id
         return self.show_resource(uri, **fields)
 
     def list_agents(self, **filters):
+        """List all agents.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#list-all-agents
+        """
         uri = '/agents'
         return self.list_resources(uri, **filters)
 
     def list_routers_on_l3_agent(self, agent_id):
+        """List routers that an l3 agent hosts.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#list-routers-hosted-by-an-l3-agent
+        """
         uri = '/agents/%s/l3-routers' % agent_id
         return self.list_resources(uri)
 
     def create_router_on_l3_agent(self, agent_id, **kwargs):
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526670
+        """Add a router to an l3 agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#schedule-router-to-an-l3-agent
+        """
         uri = '/agents/%s/l3-routers' % agent_id
         return self.create_resource(uri, kwargs, expect_empty_body=True)
 
     def delete_router_from_l3_agent(self, agent_id, router_id):
+        """Remove a router to an l3 agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#remove-l3-router-from-an-l3-agent
+        """
         uri = '/agents/%s/l3-routers/%s' % (agent_id, router_id)
         return self.delete_resource(uri)
 
