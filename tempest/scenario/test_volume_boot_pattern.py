@@ -68,6 +68,9 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         waiters.wait_for_server_termination(self.servers_client, server['id'])
 
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
+    # Note: This test is being skipped based on 'public_network_id'.
+    # It is being used in create_floating_ip() method which gets called
+    # from get_server_ip() method
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
