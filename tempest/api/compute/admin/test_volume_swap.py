@@ -142,6 +142,12 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
         if not CONF.compute_feature_enabled.volume_multiattach:
             raise cls.skipException('Volume multi-attach is not available.')
 
+    @classmethod
+    def setup_clients(cls):
+        super(TestMultiAttachVolumeSwap, cls).setup_clients()
+        # Need this to set readonly volumes.
+        cls.admin_volumes_client = cls.os_admin.volumes_client_latest
+
     # NOTE(mriedem): This is an uncommon scenario to call the compute API
     # to swap volumes directly; swap volume is primarily only for volume
     # live migration and retype callbacks from the volume service, and is slow
@@ -162,6 +168,13 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
         # volumes cleanup can happen successfully irrespective of which volume
         # is attached to server.
         volume1 = self.create_volume(multiattach=True)
+        # Make volume1 read-only since you can't swap from a volume with
+        # multiple read/write attachments, and you can't change the readonly
+        # flag on an in-use volume so we have to do this before attaching
+        # volume1 to anything. If the compute API ever supports per-attachment
+        # attach modes, then we can handle this differently.
+        self.admin_volumes_client.update_volume_readonly(
+            volume1['id'], readonly=True)
         volume2 = self.create_volume(multiattach=True)
 
         # Create two servers and wait for them to be ACTIVE.
