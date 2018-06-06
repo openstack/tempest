@@ -117,6 +117,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
             self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'],
                                     name=backup_name, force=True)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'in-use')
         self.assertEqual(backup_name, backup['name'])
 
     @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
@@ -132,6 +134,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 
         # Create a backup
         backup = self.create_backup(volume_id=volume['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Restore the backup
         restored_volume_id = self.restore_backup(backup['id'])['volume_id']
@@ -160,6 +164,8 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
         # Create volume and backup
         volume = self.create_volume()
         backup = self.create_backup(volume_id=volume['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Update backup and assert response body for update_backup method
         update_kwargs = {

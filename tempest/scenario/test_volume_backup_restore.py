@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.common import utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
@@ -56,6 +57,8 @@ class TestVolumeBackupRestore(manager.ScenarioTest):
 
         # Create a backup
         backup = self.create_backup(volume_id=volume['id'])
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
 
         # Restore the backup
         restored_volume_id = self.restore_backup(backup['id'])['volume_id']

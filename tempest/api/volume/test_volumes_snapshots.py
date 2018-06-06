@@ -15,6 +15,7 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest.common import utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -163,6 +164,8 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
         backup = self.create_backup(volume_id=self.volume_origin['id'],
                                     snapshot_id=snapshot['id'])
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot['id'], 'available')
         backup_info = self.backups_client.show_backup(backup['id'])['backup']
         self.assertEqual(self.volume_origin['id'], backup_info['volume_id'])
         self.assertEqual(snapshot['id'], backup_info['snapshot_id'])
