@@ -241,32 +241,32 @@ class Manager(clients.ServiceClients):
         # if only api_v3 is enabled, all these clients should be available
         if (CONF.volume_feature_enabled.api_v2 or
             CONF.volume_feature_enabled.api_v3):
-            self.backups_v2_client = self.volume_v2.BackupsClient()
+            self.backups_v2_client = self.volume_v3.BackupsClient()
             self.encryption_types_v2_client = \
-                self.volume_v2.EncryptionTypesClient()
+                self.volume_v3.EncryptionTypesClient()
             self.snapshot_manage_v2_client = \
-                self.volume_v2.SnapshotManageClient()
-            self.snapshots_v2_client = self.volume_v2.SnapshotsClient()
+                self.volume_v3.SnapshotManageClient()
+            self.snapshots_v2_client = self.volume_v3.SnapshotsClient()
             self.volume_capabilities_v2_client = \
-                self.volume_v2.CapabilitiesClient()
-            self.volume_manage_v2_client = self.volume_v2.VolumeManageClient()
-            self.volume_qos_v2_client = self.volume_v2.QosSpecsClient()
-            self.volume_services_v2_client = self.volume_v2.ServicesClient()
-            self.volume_types_v2_client = self.volume_v2.TypesClient()
-            self.volume_hosts_v2_client = self.volume_v2.HostsClient()
-            self.volume_quotas_v2_client = self.volume_v2.QuotasClient()
+                self.volume_v3.CapabilitiesClient()
+            self.volume_manage_v2_client = self.volume_v3.VolumeManageClient()
+            self.volume_qos_v2_client = self.volume_v3.QosSpecsClient()
+            self.volume_services_v2_client = self.volume_v3.ServicesClient()
+            self.volume_types_v2_client = self.volume_v3.TypesClient()
+            self.volume_hosts_v2_client = self.volume_v3.HostsClient()
+            self.volume_quotas_v2_client = self.volume_v3.QuotasClient()
             self.volume_quota_classes_v2_client = \
-                self.volume_v2.QuotaClassesClient()
+                self.volume_v3.QuotaClassesClient()
             self.volume_scheduler_stats_v2_client = \
-                self.volume_v2.SchedulerStatsClient()
+                self.volume_v3.SchedulerStatsClient()
             self.volume_transfers_v2_client = \
-                self.volume_v2.TransfersClient()
+                self.volume_v3.TransfersClient()
             self.volume_v2_availability_zone_client = \
-                self.volume_v2.AvailabilityZoneClient()
-            self.volume_v2_limits_client = self.volume_v2.LimitsClient()
-            self.volumes_v2_client = self.volume_v2.VolumesClient()
+                self.volume_v3.AvailabilityZoneClient()
+            self.volume_v2_limits_client = self.volume_v3.LimitsClient()
+            self.volumes_v2_client = self.volume_v3.VolumesClient()
             self.volumes_v2_extension_client = \
-                self.volume_v2.ExtensionsClient()
+                self.volume_v3.ExtensionsClient()
 
             # Set default client for users that don't need explicit version
             self.volumes_client_latest = self.volumes_v2_client
