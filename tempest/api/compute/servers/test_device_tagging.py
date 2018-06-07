@@ -13,7 +13,6 @@
 #    under the License.
 
 import json
-import time
 
 from oslo_log import log as logging
 
@@ -80,9 +79,11 @@ class DeviceTaggingBase(base.BaseV2ComputeTest):
                 return True
             cmd = 'curl %s' % md_url
             md_json = ssh_client.exec_command(cmd)
-            verify_method(md_json)
-            return True
-
+            return verify_method(md_json)
+        # NOTE(gmann) Keep refreshing the metadata info until the metadata
+        # cache is refreshed. For safer side, we will go with wait loop of
+        # build_interval till build_timeout. verify_method() above will return
+        # True if all metadata verification is done as expected.
         if not test_utils.call_until_true(get_and_verify_metadata,
                                           CONF.compute.build_timeout,
                                           CONF.compute.build_interval):
@@ -122,16 +123,20 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
                 if d['mac'] == self.net_2_200_mac:
                     self.assertEqual(d['tags'], ['net-2-200'])
 
-            # A hypervisor may present multiple paths to a tagged disk, so
-            # there may be duplicated tags in the metadata, use set() to
-            # remove duplicated tags.
-            # Some hypervisors might report devices with no tags as well.
-            found_devices = [d['tags'][0] for d in md_dict['devices']
-                             if d.get('tags')]
+        # A hypervisor may present multiple paths to a tagged disk, so
+        # there may be duplicated tags in the metadata, use set() to
+        # remove duplicated tags.
+        # Some hypervisors might report devices with no tags as well.
+        found_devices = [d['tags'][0] for d in md_dict['devices']
+                         if d.get('tags')]
+        try:
             self.assertEqual(set(found_devices), set(['port-1', 'port-2',
                                                       'net-1', 'net-2-100',
                                                       'net-2-200', 'boot',
                                                       'other']))
+            return True
+        except Exception:
+            return False
 
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @utils.services('network', 'volume', 'image')
@@ -302,12 +307,21 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
 
     def verify_device_metadata(self, md_json):
         md_dict = json.loads(md_json)
-        found_devices = [d['tags'][0] for d in md_dict['devices']]
-        self.assertItemsEqual(found_devices, ['nic-tag', 'volume-tag'])
+        found_devices = [d['tags'][0] for d in md_dict['devices']
+                         if d.get('tags')]
+        try:
+            self.assertItemsEqual(found_devices, ['nic-tag', 'volume-tag'])
+            return True
+        except Exception:
+            return False
 
     def verify_empty_devices(self, md_json):
         md_dict = json.loads(md_json)
-        self.assertEmpty(md_dict['devices'])
+        try:
+            self.assertEmpty(md_dict['devices'])
+            return True
+        except Exception:
+            return False
 
     @decorators.idempotent_id('3e41c782-2a89-4922-a9d2-9a188c4e7c7c')
     @utils.services('network', 'volume', 'image')
@@ -354,10 +368,6 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
             server=server,
             servers_client=self.servers_client)
 
-        # NOTE(artom) The newly attached tagged nic won't appear in the
-        # metadata until the cache is refreshed. We wait 16 seconds since the
-        # default cache expiry is 15 seconds.
-        time.sleep(16)
         self.verify_metadata_from_api(server, ssh_client,
                                       self.verify_device_metadata)
 
@@ -370,7 +380,5 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
         waiters.wait_for_interface_detach(self.interfaces_client,
                                           server['id'],
                                           interface['port_id'])
-        # NOTE(artom) More waiting until metadata cache is refreshed.
-        time.sleep(16)
         self.verify_metadata_from_api(server, ssh_client,
                                       self.verify_empty_devices)
