@@ -25,7 +25,11 @@ from tempest.lib import exceptions
 CONF = config.CONF
 
 
+# TODO(mriedem): Remove this test class once the nova queens branch goes into
+# extended maintenance mode.
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
+
+    depends_on_nova_network = True
 
     @classmethod
     def setup_credentials(cls):
@@ -50,8 +54,6 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         # for a given server_id
 
         if CONF.service_available.neutron:
-            # TODO(mriedem): After a microversion implements the API for
-            # neutron, a 400 should be a failure for nova-network and neutron.
             with testtools.ExpectedException(exceptions.BadRequest):
                 self.client.list_virtual_interfaces(self.server['id'])
         else:
