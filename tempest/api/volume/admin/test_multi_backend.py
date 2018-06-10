@@ -29,6 +29,10 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
+        if len(set(CONF.volume.backend_names)) < 2:
+            raise cls.skipException("Requires at least two different "
+                                    "backend names")
+
     @classmethod
     def resource_setup(cls):
         super(VolumeMultiBackendTest, cls).resource_setup()
@@ -41,9 +45,6 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
         # Volume/Type creation (uses volume_backend_name)
         # It is not allowed to create the same backend name twice
-        if len(backend_names) < 2:
-            raise cls.skipException("Requires at least two different "
-                                    "backend names")
         for backend_name in backend_names:
             # Volume/Type creation (uses backend_name)
             cls._create_type_and_volume(backend_name, False)
