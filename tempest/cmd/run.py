@@ -244,7 +244,7 @@ class TempestRun(command.Command):
                                  'each newline')
         parser.add_argument('--load-list', '--load_list',
                             help='Path to a non-regex whitelist file, '
-                                 'this file contains a seperate test '
+                                 'this file contains a separate test '
                                  'on each newline. This command'
                                  'supports files created by the tempest'
                                  'run ``--list-tests`` command')
