@@ -384,12 +384,23 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
         rules = self.roles_client.list_all_role_inference_rules()[
             'role_inferences']
+
+        # NOTE(jaosorior): With the work related to the define-default-roles
+        # blueprint, we now have 'admin', 'member' and 'reader' by default. So
+        # we filter every other implied role to only take into account the ones
+        # relates to this test.
+        relevant_roles = (self.roles[0]['id'], self.roles[1]['id'],
+                          self.roles[2]['id'], self.role['id'])
+
+        def is_implied_role_relevant(rule):
+            return any(r for r in rule['implies'] if r['id'] in relevant_roles)
+
+        relevant_rules = filter(is_implied_role_relevant, rules)
         # Sort the rules by the number of inferences, since there should be 1
         # inference between "roles[2]" and "role" and 2 inferences for
         # "roles[0]": between "roles[1]" and "roles[2]".
-        sorted_rules = sorted(rules, key=lambda r: len(r['implies']))
+        sorted_rules = sorted(relevant_rules, key=lambda r: len(r['implies']))
 
-        # Check that 2 sets of rules are returned.
         self.assertEqual(2, len(sorted_rules))
         # Check that only 1 inference rule exists between "roles[2]" and "role"
         self.assertEqual(1, len(sorted_rules[0]['implies']))
