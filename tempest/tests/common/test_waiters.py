@@ -75,61 +75,76 @@ class TestImageWaiters(base.TestCase):
 
 
 class TestInterfaceWaiters(base.TestCase):
-    def setUp(self):
-        super(TestInterfaceWaiters, self).setUp()
-        self.client = mock.MagicMock()
-        self.client.build_timeout = 1
-        self.client.build_interval = 1
 
-    def _port_down(self):
-        return {'interfaceAttachment': {'port_state': 'DOWN'}}
+    build_timeout = 1.
+    build_interval = 1
+    port_down = {'interfaceAttachment': {'port_state': 'DOWN'}}
+    port_active = {'interfaceAttachment': {'port_state': 'ACTIVE'}}
 
-    def _port_active(self):
-        return {'interfaceAttachment': {'port_state': 'ACTIVE'}}
+    def mock_client(self, **kwargs):
+        return mock.MagicMock(
+            build_timeout=self.build_timeout,
+            build_interval=self.build_interval,
+            **kwargs)
 
     def test_wait_for_interface_status(self):
-        self.client.show_interface.side_effect = [self._port_down(),
-                                                  self._port_active()]
-        with mock.patch.object(time, 'sleep') as sleep_mock:
-            start_time = int(time.time())
-            waiters.wait_for_interface_status(self.client, 'server_id',
-                                              'port_id', 'ACTIVE')
-            end_time = int(time.time())
-            self.assertLess(end_time, (start_time + self.client.build_timeout))
-            sleep_mock.assert_called_once_with(self.client.build_interval)
+        show_interface = mock.Mock(
+            side_effect=[self.port_down, self.port_active])
+        client = self.mock_client(show_interface=show_interface)
+        self.patch('time.time', return_value=0.)
+        sleep = self.patch('time.sleep')
+
+        result = waiters.wait_for_interface_status(
+            client, 'server_id', 'port_id', 'ACTIVE')
+
+        self.assertIs(self.port_active['interfaceAttachment'], result)
+        show_interface.assert_has_calls([mock.call('server_id', 'port_id'),
+                                         mock.call('server_id', 'port_id')])
+        sleep.assert_called_once_with(client.build_interval)
 
     def test_wait_for_interface_status_timeout(self):
-        time_mock = self.patch('time.time')
-        time_mock.side_effect = utils.generate_timeout_series(1)
+        show_interface = mock.MagicMock(return_value=self.port_down)
+        client = self.mock_client(show_interface=show_interface)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        sleep = self.patch('time.sleep')
 
-        self.client.show_interface.return_value = self._port_down()
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_interface_status,
-                          self.client, 'server_id', 'port_id', 'ACTIVE')
+                          client, 'server_id', 'port_id', 'ACTIVE')
 
-    def _one_interface(self):
-        return {'interfaceAttachments': [{'port_id': 'port_one'}]}
+        show_interface.assert_has_calls([mock.call('server_id', 'port_id'),
+                                         mock.call('server_id', 'port_id')])
+        sleep.assert_called_once_with(client.build_interval)
 
-    def _two_interfaces(self):
-        return {'interfaceAttachments': [{'port_id': 'port_one'},
-                                         {'port_id': 'port_two'}]}
+    one_interface = {'interfaceAttachments': [{'port_id': 'port_one'}]}
+    two_interfaces = {'interfaceAttachments': [{'port_id': 'port_one'},
+                                               {'port_id': 'port_two'}]}
 
     def test_wait_for_interface_detach(self):
-        self.client.list_interfaces.side_effect = [self._two_interfaces(),
-                                                   self._one_interface()]
-        with mock.patch.object(time, 'sleep') as sleep_mock:
-            start_time = int(time.time())
-            waiters.wait_for_interface_detach(self.client, 'server_id',
-                                              'port_two')
-            end_time = int(time.time())
-            self.assertLess(end_time, (start_time + self.client.build_timeout))
-            sleep_mock.assert_called_once_with(self.client.build_interval)
+        list_interfaces = mock.MagicMock(
+            side_effect=[self.two_interfaces, self.one_interface])
+        client = self.mock_client(list_interfaces=list_interfaces)
+        self.patch('time.time', return_value=0.)
+        sleep = self.patch('time.sleep')
+
+        result = waiters.wait_for_interface_detach(
+            client, 'server_id', 'port_two')
+
+        self.assertIs(self.one_interface['interfaceAttachments'], result)
+        list_interfaces.assert_has_calls([mock.call('server_id'),
+                                          mock.call('server_id')])
+        sleep.assert_called_once_with(client.build_interval)
 
     def test_wait_for_interface_detach_timeout(self):
-        time_mock = self.patch('time.time')
-        time_mock.side_effect = utils.generate_timeout_series(1)
+        list_interfaces = mock.MagicMock(return_value=self.one_interface)
+        client = self.mock_client(list_interfaces=list_interfaces)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        sleep = self.patch('time.sleep')
 
-        self.client.list_interfaces.return_value = self._one_interface()
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_interface_detach,
-                          self.client, 'server_id', 'port_one')
+                          client, 'server_id', 'port_one')
+
+        list_interfaces.assert_has_calls([mock.call('server_id'),
+                                          mock.call('server_id')])
+        sleep.assert_called_once_with(client.build_interval)
