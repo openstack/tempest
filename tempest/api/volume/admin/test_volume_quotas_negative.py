@@ -19,10 +19,11 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
+QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
+              'backup_gigabytes', 'per_volume_gigabytes']
 
 
 class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
-    force_tenant_isolation = True
 
     @classmethod
     def setup_credentials(cls):
@@ -32,11 +33,23 @@ class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeQuotasNegativeTestJSON, cls).resource_setup()
+
+        # Save the current set of quotas, then set up the cleanup method
+        # to restore the quotas to their original values after the tests
+        # from this class are done. This is needed just in case Tempest is
+        # configured to use pre-provisioned projects/user accounts.
+        cls.original_quota_set = (cls.admin_quotas_client.show_quota_set(
+            cls.demo_tenant_id)['quota_set'])
+        cls.cleanup_quota_set = dict(
+            (k, v) for k, v in cls.original_quota_set.items()
+            if k in QUOTA_KEYS)
+        cls.addClassResourceCleanup(cls.admin_quotas_client.update_quota_set,
+                                    cls.demo_tenant_id,
+                                    **cls.cleanup_quota_set)
+
         cls.shared_quota_set = {'gigabytes': 2 * CONF.volume.volume_size,
                                 'volumes': 1}
 
-        # NOTE(gfidente): no need to restore original quota set
-        # after the tests as they only work with dynamic credentials.
         cls.admin_quotas_client.update_quota_set(
             cls.demo_tenant_id,
             **cls.shared_quota_set)

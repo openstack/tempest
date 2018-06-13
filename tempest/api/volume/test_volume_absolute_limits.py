@@ -17,7 +17,6 @@ from tempest.api.volume import base
 from tempest import config
 from tempest.lib import decorators
 
-
 CONF = config.CONF
 
 
@@ -32,8 +31,15 @@ class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa
     @classmethod
     def resource_setup(cls):
         super(AbsoluteLimitsTests, cls).resource_setup()
+
         # Create a shared volume for tests
         cls.volume = cls.create_volume()
+
+    @classmethod
+    def skip_checks(cls):
+        super(AbsoluteLimitsTests, cls).skip_checks()
+        if not CONF.auth.use_dynamic_credentials:
+            raise cls.skipException("Must use dynamic credentials.")
 
     @decorators.idempotent_id('8e943f53-e9d6-4272-b2e9-adcf2f7c29ad')
     def test_get_volume_absolute_limits(self):
