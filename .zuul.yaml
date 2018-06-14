@@ -296,11 +296,6 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-    gate:
-      jobs:
-        - nova-multiattach
-    experimental:
-      jobs:
         - nova-cells-v1:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -311,6 +306,11 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+    gate:
+      jobs:
+        - nova-multiattach
+    experimental:
+      jobs:
         - nova-live-migration:
             irrelevant-files:
               - ^(test-|)requirements.txt$
