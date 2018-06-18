@@ -1,7 +1,13 @@
 - job:
     name: devstack-tempest
     parent: devstack
-    description: Base Tempest job.
+    nodeset: openstack-single-node
+    description: |
+      Base Tempest job.
+
+      This Tempest job provides the base for both the single and multi-node
+      test setup. To run a multi-node test inherit from devstack-tempest and
+      set the nodeset to a multi-node one.
     required-projects:
       - openstack/tempest
     timeout: 7200
@@ -10,6 +16,11 @@
     vars:
       devstack_services:
         tempest: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            compute:
+              min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
       test_results_stage_name: 'test_results'
       zuul_copy_output:
         '{{ devstack_base_dir }}/tempest/etc/tempest.conf': 'logs'
@@ -80,6 +91,36 @@
         s-proxy: false
         # without Swift, c-bak cannot run (in the Gate at least)
         c-bak: false
+
+- job:
+    name: tempest-multinode-full
+    parent: devstack-tempest
+    nodeset: openstack-two-node
+    # Until the devstack changes are backported, only run this on master
+    branches:
+      - master
+    description: |
+      Base multinode integration test with Neutron networking and py27.
+      Former names for this job where:
+        * neutron-tempest-multinode-full
+        * legacy-tempest-dsvm-neutron-multinode-full
+        * gate-tempest-dsvm-neutron-multinode-full-ubuntu-xenial-nv
+      This job includes two nodes, controller / tempest plus a subnode, but
+      it can be used with different topologies, as long as a controller node
+      and a tempest one exist.
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        FORCE_CONFIG_DRIVE: False
+        NOVA_ALLOW_MOVE_TO_SAME_HOST: false
+        LIVE_MIGRATION_AVAILABLE: true
+        USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
+    group-vars:
+      peers:
+        devstack_localrc:
+          NOVA_ALLOW_MOVE_TO_SAME_HOST: false
+          LIVE_MIGRATION_AVAILABLE: true
+          USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
 
 - nodeset:
     name: openstack-bionic-node
@@ -275,6 +316,16 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-full-pike:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+        - tempest-multinode-full:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
