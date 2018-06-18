@@ -101,13 +101,14 @@
       - master
     description: |
       Base multinode integration test with Neutron networking and py27.
-      Former names for this job where:
+      Former names for this job were:
         * neutron-tempest-multinode-full
         * legacy-tempest-dsvm-neutron-multinode-full
         * gate-tempest-dsvm-neutron-multinode-full-ubuntu-xenial-nv
       This job includes two nodes, controller / tempest plus a subnode, but
       it can be used with different topologies, as long as a controller node
       and a tempest one exist.
+    timeout: 10800
     vars:
       tox_envlist: full
       devstack_localrc:
