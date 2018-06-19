@@ -17,6 +17,11 @@ import shutil
 import subprocess
 import tempfile
 
+from mock import patch
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from tempest.cmd import workspace
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base
@@ -140,3 +145,42 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.addCleanup(shutil.rmtree, path, ignore_errors=True)
         self.workspace_manager.register_new_workspace(name, path)
         self.assertIsNotNone(self.workspace_manager.get_workspace(name))
+
+    def test_workspace_name_not_exists(self):
+        nonexistent_name = data_utils.rand_uuid()
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager._name_exists,
+                                   nonexistent_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n" %
+                         nonexistent_name)
+
+    def test_workspace_name_already_exists(self):
+        duplicate_name = self.name
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   _workspace_name_exists,
+                                   duplicate_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace already exists with name: %s.\n"
+                         % duplicate_name)
+
+    def test_workspace_manager_path_not_exist(self):
+        fake_path = "fake_path"
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager._validate_path,
+                                   fake_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "Path does not exist.\n")
+
+    def test_workspace_manager_list_workspaces(self):
+        listed = self.workspace_manager.list_workspaces()
+        self.assertEqual(1, len(listed))
+        self.assertIn(self.name, listed)
+        self.assertEqual(self.path, listed.get(self.name))
