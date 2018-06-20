@@ -119,8 +119,8 @@ deb http://archive.ubuntu.com/ubuntu/ trusty main restricted universe
 deb http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted universe
 " >& /etc/apt/sources.list.d/contrail-tempest.list
 
-apt-get update
-sudo apt-get install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev iputils-ping || exit 1
+#apt-get update
+#sudo yum install -y git sshpass gcc libxml2-dev libxslt-dev python-dev libffi-dev libssl-dev iputils-ping python-openstackclient curl || exit 1
 pip install virtualenv
 rm /etc/apt/sources.list.d/contrail-tempest.list
 
