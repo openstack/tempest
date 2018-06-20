@@ -176,11 +176,12 @@ class SnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_snapshot_metadata_item(self, snapshot_id, id, **kwargs):
-        """Update metadata item for the snapshot."""
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1529064
+        """Update metadata for the snapshot for a specific key.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#update-a-snapshot-s-metadata-for-a-specific-key
+        """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata/%s" % (snapshot_id, id)
         resp, body = self.put(url, put_body)

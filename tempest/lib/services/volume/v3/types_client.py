@@ -91,9 +91,9 @@ class TypesClient(rest_client.RestClient):
     def list_volume_types_extra_specs(self, volume_type_id, **params):
         """List all the volume_types extra specs created.
 
-        TODO: Current api-site doesn't contain this API description.
-        After fixing the api-site, we need to fix here also for putting
-        the link to api-site.
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#show-all-extra-specifications-for-volume-type
         """
         url = 'types/%s/extra_specs' % volume_type_id
         if params:
