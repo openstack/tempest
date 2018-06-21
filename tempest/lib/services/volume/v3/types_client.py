@@ -21,7 +21,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class TypesClient(rest_client.RestClient):
-    """Client class to send CRUD Volume API requests"""
+    """Client class to send CRUD Volume Types API requests"""
 
     def is_resource_deleted(self, id):
         try:
@@ -36,7 +36,7 @@ class TypesClient(rest_client.RestClient):
         return 'volume-type'
 
     def list_volume_types(self, **params):
-        """List all the volume_types created.
+        """List all the volume types created.
 
         For a full list of available parameters, please refer to the official
         API reference:
@@ -52,7 +52,7 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_type(self, volume_type_id):
-        """Returns the details of a single volume_type.
+        """Returns the details of a single volume type.
 
         For a full list of available parameters, please refer to the official
         API reference:
@@ -78,7 +78,7 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_type(self, volume_type_id):
-        """Deletes the Specified Volume_type.
+        """Deletes the specified volume type.
 
         For a full list of available parameters, please refer to the official
         API reference:
@@ -89,7 +89,7 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_volume_types_extra_specs(self, volume_type_id, **params):
-        """List all the volume_types extra specs created.
+        """List all the volume type extra specs created.
 
         For a full list of available parameters, please refer to the official
         API reference:
@@ -105,7 +105,7 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_type_extra_specs(self, volume_type_id, extra_specs_name):
-        """Returns the details of a single volume_type extra spec."""
+        """Returns the details of a single volume type extra spec."""
         url = "types/%s/extra_specs/%s" % (volume_type_id, extra_specs_name)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -113,10 +113,10 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def create_volume_type_extra_specs(self, volume_type_id, extra_specs):
-        """Creates a new Volume_type extra spec.
+        """Creates new volume type extra specs.
 
-        volume_type_id: Id of volume_type.
-        extra_specs: A dictionary of values to be used as extra_specs.
+        :param volume_type_id: Id of volume type.
+        :param extra_specs: A dictionary of values to be used as extra_specs.
         """
         url = "types/%s/extra_specs" % volume_type_id
         post_body = json.dumps({'extra_specs': extra_specs})
@@ -126,7 +126,7 @@ class TypesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_type_extra_specs(self, volume_type_id, extra_spec_name):
-        """Deletes the Specified Volume_type extra spec."""
+        """Deletes the specified volume type extra spec."""
         resp, body = self.delete("types/%s/extra_specs/%s" % (
             volume_type_id, extra_spec_name))
         self.expected_success(202, resp.status)
@@ -149,10 +149,10 @@ class TypesClient(rest_client.RestClient):
                                        extra_specs):
         """Update a volume_type extra spec.
 
-        volume_type_id: Id of volume_type.
-        extra_spec_name: Name of the extra spec to be updated.
-        extra_spec: A dictionary of with key as extra_spec_name and the
-                     updated value.
+        :param volume_type_id: Id of volume type.
+        :param extra_spec_name: Name of the extra spec to be updated.
+        :param extra_specs: A dictionary of with key as extra_spec_name and the
+                            updated value.
         For a full list of available parameters, please refer to the official
         API reference:
         https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-extra-specification-for-volume-type

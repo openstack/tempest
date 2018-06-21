@@ -38,7 +38,7 @@ class EncryptionTypesClient(rest_client.RestClient):
     def show_encryption_type(self, volume_type_id):
         """Get the volume encryption type for the specified volume type.
 
-        volume_type_id: Id of volume_type.
+        :param volume_type_id: Id of volume type.
         """
         url = "/types/%s/encryption" % volume_type_id
         resp, body = self.get(url)
