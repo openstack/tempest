@@ -293,13 +293,16 @@ class TempestAccountGenerator(command.Command):
 
 
 def main(opts=None):
-    setup_logging()
+    log_warning = False
     if not opts:
-        LOG.warning("Use of: 'tempest-account-generator' is deprecated, "
-                    "please use: 'tempest account-generator'")
+        log_warning = True
         opts = get_options()
     if opts.config_file:
         config.CONF.set_config_path(opts.config_file)
+    setup_logging()
+    if log_warning:
+        LOG.warning("Use of: 'tempest-account-generator' is deprecated, "
+                    "please use: 'tempest account-generator'")
     if opts.os_tenant_name:
         LOG.warning("'os-tenant-name' and 'OS_TENANT_NAME' are both "
                     "deprecated, please use 'os-project-name' or "
