@@ -86,6 +86,9 @@ iniset $TEMPEST_CONFIG auth use_dynamic_credentials True
 
 iniset $TEMPEST_CONFIG image http_image $HTTP_IMAGE_PATH
 
+iniset $TEMPEST_CONFIG image-feature-enabled api_v1 False
+iniset $TEMPEST_CONFIG image-feature-enabled api_v2 True
+
 #COMPUTE 
 if [[ $AUTH_PROTOCOL -eq 'https' ]]; then
 neutron="neutron --insecure"
