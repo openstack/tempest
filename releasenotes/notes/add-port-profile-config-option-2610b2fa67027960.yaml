@@ -1,11 +1,9 @@
 ---
-prelude: >
-    When using OVS HW offload feature we need to create
-    Neutron port with a certain capability. This is done
-    by creating Neutron port with binding profile. To be
-    able to test this we need profile capability support
-    in Tempest as well.
 features:
   - A new config option 'port_profile' is added to the section
     'network' to specify capabilities of the port.
-    By default this is set to {}.
+    By default this is set to {}. When using OVS HW offload
+    feature we need to create Neutron port with a certain
+    capability. This is done by creating Neutron port with
+    binding profile. To be able to test this we need profile
+    capability support in Tempest as well.
