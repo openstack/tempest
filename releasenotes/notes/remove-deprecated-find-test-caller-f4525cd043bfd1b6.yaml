@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    ``tempest.lib.common.utils.misc.find_test_caller`` was deprecated during
+    Kilo release cycle in favor of
+    ``tempest.lib.common.utils.test_utils.find_test_caller``. The deprecated
+    version of ``find_test_caller`` is removed.
