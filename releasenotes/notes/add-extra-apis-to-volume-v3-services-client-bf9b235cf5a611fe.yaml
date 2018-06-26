@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add ``enable_service``, ``disable_service`` , ``disable_log_reason``,
+    ``freeze_host`` and ``thaw_host`` API endpoints to volume v3
+    ``services_client``.
