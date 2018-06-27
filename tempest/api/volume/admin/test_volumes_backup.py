@@ -60,6 +60,8 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         # Create backup
         backup_name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'], name=backup_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.assertEqual(backup_name, backup['name'])
 
         # Export Backup
@@ -126,6 +128,8 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         backup_name = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'], name=backup_name)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.assertEqual(backup_name, backup['name'])
         # Reset backup status to error
         self.admin_backups_client.reset_backup_status(backup_id=backup['id'],
