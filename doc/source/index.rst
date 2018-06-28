@@ -80,6 +80,14 @@ Library
 
    library
 
+Support Policy
+--------------
+
+.. toctree::
+   :maxdepth: 2
+
+   stable_branch_support_policy
+
 Indices and tables
 ==================
 
