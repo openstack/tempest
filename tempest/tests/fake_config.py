@@ -32,6 +32,7 @@ class ConfigFixture(conf_fixture.Config):
         super(ConfigFixture, self).setUp()
         self.conf.set_default('build_interval', 10, group='compute')
         self.conf.set_default('build_timeout', 10, group='compute')
+        self.conf.set_default('image_ref', 'fake_image_id', group='compute')
         self.conf.set_default('disable_ssl_certificate_validation', True,
                               group='identity')
         self.conf.set_default('uri', 'http://fake_uri.com/auth',
