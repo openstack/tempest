@@ -443,7 +443,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                        disk_format=img_disk_format,
                                        properties=img_properties)
         except IOError:
-            LOG.debug("A qcow2 image was not found. Try to get a uec image.")
+            LOG.warning(
+                "A(n) %s image was not found. Retrying with uec image.",
+                img_disk_format)
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
             ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
             properties = {'kernel_id': kernel, 'ramdisk_id': ramdisk}
