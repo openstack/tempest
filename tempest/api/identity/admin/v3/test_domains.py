@@ -121,11 +121,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         # Create a domain with a user and a group in it
         domain = self.setup_test_domain()
         user = self.create_test_user(domain_id=domain['id'])
-        group = self.groups_client.create_group(
-            name=data_utils.rand_name('group'),
-            domain_id=domain['id'])['group']
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.groups_client.delete_group, group['id'])
+        group = self.setup_test_group(domain_id=domain['id'])
         # Delete the domain
         self.delete_domain(domain['id'])
         # Check the domain, its users and groups are gone

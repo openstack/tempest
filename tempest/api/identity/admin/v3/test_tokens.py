@@ -201,10 +201,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
             role_id = self.setup_test_role()['id']
 
             # Create a group.
-            group_name = data_utils.rand_name('Group')
-            group_id = self.groups_client.create_group(
-                name=group_name, domain_id=domain_id)['group']['id']
-            self.addCleanup(self.groups_client.delete_group, group_id)
+            group_id = self.setup_test_group(domain_id=domain_id)['id']
 
             # Add the alt user to the group.
             self.groups_client.add_group_user(group_id, alt_user_id)

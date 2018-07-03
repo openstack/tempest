@@ -292,6 +292,20 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
             self.delete_domain, domain['id'])
         return domain
 
+    def setup_test_group(self, **kwargs):
+        """Set up a test group."""
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name(
+                self.__class__.__name__ + '_test_project')
+        if 'description' not in kwargs:
+            kwargs['description'] = data_utils.rand_name(
+                self.__class__.__name__ + '_test_description')
+        group = self.groups_client.create_group(**kwargs)['group']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.groups_client.delete_group, group['id'])
+        return group
+
 
 class BaseApplicationCredentialsV3Test(BaseIdentityV3Test):
 
