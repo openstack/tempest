@@ -130,6 +130,8 @@ class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
         for key in keys_with_change:
             self.assertNotEqual(volume_source[key], volume_dest[key])
 
+        self.assertEqual(volume_dest['volume_type'], self.dst_vol_type['name'])
+
     @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
     def test_available_volume_retype_with_migration(self):
         src_vol = self.create_volume(volume_type=self.src_vol_type['name'])
@@ -167,6 +169,8 @@ class VolumeRetypeWithoutMigrationTest(VolumeRetypeTest):
 
         for key in keys_with_change:
             self.assertNotEqual(volume_source[key], volume_dest[key])
+
+        self.assertEqual(volume_dest['volume_type'], self.dst_vol_type['name'])
 
     @decorators.idempotent_id('b90412ee-465d-46e9-b249-ec84a47d5f25')
     def test_available_volume_retype(self):
