@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    A new parameter ``follow_redirects`` has been added to the class
+    ``RestClient``, which is passed through to ``ClosingHttp`` or
+    ``ClosingProxyHttp`` respectively. The default value is ``True``
+    which corresponds to the previous behaviour of following up to five
+    redirections before returning a response. Setting
+    ``follow_redirects = False`` allows to disable this behaviour, so
+    that any redirect that is received is directly returned to the caller.
+    This allows tests to verify that an API is responding with a redirect.
+fixes:
+  - |
+    [`bug 1616892 <https://bugs.launchpad.net/tempest/+bug/1616892>`_]
+    Tempest now allows tests to verify that an API responds with a
+    redirect.
