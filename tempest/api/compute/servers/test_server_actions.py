@@ -370,6 +370,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
 
     @decorators.idempotent_id('fbbf075f-a812-4022-bc5c-ccb8047eef12')
+    @decorators.related_bug('1737599')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     @utils.services('volume')
