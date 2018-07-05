@@ -284,6 +284,33 @@
       devstack_localrc:
         TEMPEST_VOLUME_TYPE: volumev2
 
+- job:
+    name: tempest-full-test-account-py3
+    parent: tempest-full-py3
+    description: |
+      This job runs the full set of tempest tests using pre-provisioned
+      credentials instead of dynamic credentials and py3.
+      Former names for this job were:
+        - legacy-tempest-dsvm-full-test-accounts
+        - legacy-tempest-dsvm-neutron-full-test-accounts
+        - legacy-tempest-dsvm-identity-v3-test-accounts
+    vars:
+      devstack_localrc:
+        TEMPEST_USE_TEST_ACCOUNTS: True
+
+- job:
+    name: tempest-full-test-account-no-admin-py3
+    parent: tempest-full-test-account-py3
+    description: |
+      This job runs the full set of tempest tests using pre-provisioned
+      credentials and py3 without having an admin account.
+      Former name for this job was:
+        - legacy-tempest-dsvm-neutron-full-non-admin
+
+    vars:
+      devstack_localrc:
+        TEMPEST_HAS_ADMIN: False
+
 - project:
     templates:
       - check-requirements
@@ -365,6 +392,12 @@
         - interop-tempest-consistency:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-test-account-py3:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-test-account-no-admin-py3:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
     gate:
       jobs:
         - nova-multiattach:
@@ -389,14 +422,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-full-test-accounts:
-            irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-full-test-accounts:
-            irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-identity-v3-test-accounts:
-            irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-full-non-admin:
-            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-nova-v20-api:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
@@ -417,7 +442,4 @@
         - legacy-periodic-tempest-dsvm-neutron-full-ocata
     periodic:
       jobs:
-        - legacy-periodic-tempest-dsvm-full-test-accounts-master
-        - legacy-periodic-tempest-dsvm-neutron-full-test-accounts-master
-        - legacy-periodic-tempest-dsvm-neutron-full-non-admin-master
         - legacy-periodic-tempest-dsvm-all-master
