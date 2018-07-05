@@ -32,10 +32,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
-        group = self.groups_client.create_group(
-            name=name, domain_id=self.domain['id'],
-            description=description)['group']
-        self.addCleanup(self.groups_client.delete_group, group['id'])
+        group = self.setup_test_group(name=name, domain_id=self.domain['id'],
+                                      description=description)
         self.assertEqual(group['name'], name)
         self.assertEqual(group['description'], description)
 
@@ -55,10 +53,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_group_update_with_few_fields(self):
         name = data_utils.rand_name('Group')
         old_description = data_utils.rand_name('Description')
-        group = self.groups_client.create_group(
-            name=name, domain_id=self.domain['id'],
-            description=old_description)['group']
-        self.addCleanup(self.groups_client.delete_group, group['id'])
+        group = self.setup_test_group(name=name, domain_id=self.domain['id'],
+                                      description=old_description)
 
         new_name = data_utils.rand_name('UpdateGroup')
         updated_group = self.groups_client.update_group(
@@ -70,10 +66,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
     def test_group_users_add_list_delete(self):
-        name = data_utils.rand_name('Group')
-        group = self.groups_client.create_group(
-            name=name, domain_id=self.domain['id'])['group']
-        self.addCleanup(self.groups_client.delete_group, group['id'])
+        group = self.setup_test_group(domain_id=self.domain['id'])
         # add user into group
         users = []
         for _ in range(3):
@@ -100,11 +93,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # create two groups, and add user into them
         groups = []
         for _ in range(2):
-            name = data_utils.rand_name('Group')
-            group = self.groups_client.create_group(
-                name=name, domain_id=self.domain['id'])['group']
+            group = self.setup_test_group(domain_id=self.domain['id'])
             groups.append(group)
-            self.addCleanup(self.groups_client.delete_group, group['id'])
             self.groups_client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
         user_groups = self.users_client.list_user_groups(user['id'])['groups']
@@ -118,12 +108,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         group_ids = list()
         fetched_ids = list()
         for _ in range(3):
-            name = data_utils.rand_name('Group')
-            description = data_utils.rand_name('Description')
-            group = self.groups_client.create_group(
-                name=name, domain_id=self.domain['id'],
-                description=description)['group']
-            self.addCleanup(self.groups_client.delete_group, group['id'])
+            group = self.setup_test_group(domain_id=self.domain['id'])
             group_ids.append(group['id'])
         # List and Verify Groups
         # When domain specific drivers are enabled the operations
