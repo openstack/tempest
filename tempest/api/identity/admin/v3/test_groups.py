@@ -30,38 +30,41 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
+        # Verify group creation works.
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
         group = self.setup_test_group(name=name, domain_id=self.domain['id'],
                                       description=description)
         self.assertEqual(group['name'], name)
         self.assertEqual(group['description'], description)
+        self.assertEqual(self.domain['id'], group['domain_id'])
 
-        new_name = data_utils.rand_name('UpdateGroup')
-        new_desc = data_utils.rand_name('UpdateDescription')
+        # Verify updating name and description works.
+        first_name_update = data_utils.rand_name('UpdateGroup')
+        first_desc_update = data_utils.rand_name('UpdateDescription')
         updated_group = self.groups_client.update_group(
-            group['id'], name=new_name, description=new_desc)['group']
-        self.assertEqual(updated_group['name'], new_name)
-        self.assertEqual(updated_group['description'], new_desc)
+            group['id'], name=first_name_update,
+            description=first_desc_update)['group']
+        self.assertEqual(updated_group['name'], first_name_update)
+        self.assertEqual(updated_group['description'], first_desc_update)
 
+        # Verify that the updated values are reflected after performing show.
         new_group = self.groups_client.show_group(group['id'])['group']
         self.assertEqual(group['id'], new_group['id'])
-        self.assertEqual(new_name, new_group['name'])
-        self.assertEqual(new_desc, new_group['description'])
+        self.assertEqual(first_name_update, new_group['name'])
+        self.assertEqual(first_desc_update, new_group['description'])
 
-    @decorators.idempotent_id('b66eb441-b08a-4a6d-81ab-fef71baeb26c')
-    def test_group_update_with_few_fields(self):
-        name = data_utils.rand_name('Group')
-        old_description = data_utils.rand_name('Description')
-        group = self.setup_test_group(name=name, domain_id=self.domain['id'],
-                                      description=old_description)
-
-        new_name = data_utils.rand_name('UpdateGroup')
+        # Verify that updating a single field for a group (name) leaves the
+        # other fields (description, domain_id) unchanged.
+        second_name_update = data_utils.rand_name(
+            self.__class__.__name__ + 'UpdateGroup')
         updated_group = self.groups_client.update_group(
-            group['id'], name=new_name)['group']
-        self.assertEqual(new_name, updated_group['name'])
-        # Verify that 'description' is not being updated or deleted.
-        self.assertEqual(old_description, updated_group['description'])
+            group['id'], name=second_name_update)['group']
+        self.assertEqual(second_name_update, updated_group['name'])
+        # Verify that 'description' and 'domain_id' were not updated or
+        # deleted.
+        self.assertEqual(first_desc_update, updated_group['description'])
+        self.assertEqual(self.domain['id'], updated_group['domain_id'])
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
