@@ -26,7 +26,7 @@ from tempest.cmd import workspace
 
 LOG = logging.getLogger(__name__)
 
-STESTR_CONF = """[DEFAULT]
+STESTR_CONF = r"""[DEFAULT]
 test_path=%s
 top_dir=%s
 group_regex=([^\.]*\.)*

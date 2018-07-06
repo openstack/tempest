@@ -34,7 +34,7 @@ class TestTestList(base.TestCase):
                          "error on import %s" % ids)
         ids = six.text_type(ids).split('\n')
         for test_id in ids:
-            if re.match('(\w+\.){3}\w+', test_id):
+            if re.match(r'(\w+\.){3}\w+', test_id):
                 if not test_id.startswith('tempest.'):
                     parts = test_id.partition('tempest')
                     fail_id = parts[1] + parts[2]

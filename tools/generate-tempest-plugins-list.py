@@ -63,11 +63,12 @@ def has_tempest_plugin(proj):
     except HTTPError as err:
         if err.code == 404:
             return False
-    p = re.compile('^tempest\.test_plugins', re.M)
+    p = re.compile(r'^tempest\.test_plugins', re.M)
     if p.findall(r.read().decode('utf-8')):
         return True
     else:
         False
+
 
 r = urllib.urlopen(url)
 # Gerrit prepends 4 garbage octets to the JSON, in order to counter

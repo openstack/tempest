@@ -84,6 +84,6 @@ class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('45fbe5e0-acb5-49aa-837a-ff8d0719db91')
     def test_create_keypair_invalid_name(self):
         # Keypairs with name being an invalid name should not be created
-        k_name = 'key_/.\@:'
+        k_name = r'key_/.\@:'
         self.assertRaises(lib_exc.BadRequest, self.create_keypair,
                           k_name)

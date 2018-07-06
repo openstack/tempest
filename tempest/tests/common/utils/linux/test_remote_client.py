@@ -77,7 +77,7 @@ class TestRemoteClient(base.TestCase):
 
     def test_write_to_console_special_chars(self):
         self._test_write_to_console_helper(
-            '\`',
+            r'\`',
             'sudo sh -c "echo \\"\\\\\\`\\" >/dev/console"')
         self.conn.write_to_console('$')
         self._assert_exec_called_with(

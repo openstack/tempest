@@ -210,6 +210,7 @@ def is_alt_available(identity_version):
     except exceptions.InvalidConfiguration:
         return False
 
+
 # === Credentials
 
 # Type of credentials available from configuration

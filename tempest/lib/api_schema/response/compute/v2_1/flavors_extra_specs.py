@@ -20,7 +20,7 @@ set_get_flavor_extra_specs = {
             'extra_specs': {
                 'type': 'object',
                 'patternProperties': {
-                    '^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
+                    r'^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
                 }
             }
         },
@@ -34,7 +34,7 @@ set_get_flavor_extra_specs_key = {
     'response_body': {
         'type': 'object',
         'patternProperties': {
-            '^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
+            r'^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
         }
     }
 }

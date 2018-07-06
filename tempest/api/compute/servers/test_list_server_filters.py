@@ -227,7 +227,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('24a89b0c-0d55-4a28-847f-45075f19b27b')
     def test_list_servers_filtered_by_name_regex(self):
         # list of regex that should match s1, s2 and s3
-        regexes = ['^.*\-instance\-[0-9]+$', '^.*\-instance\-.*$']
+        regexes = [r'^.*\-instance\-[0-9]+$', r'^.*\-instance\-.*$']
         for regex in regexes:
             params = {'name': regex}
             body = self.client.list_servers(**params)

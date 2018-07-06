@@ -88,7 +88,7 @@ class TestDataUtils(base.TestCase):
     def test_rand_url(self):
         actual = data_utils.rand_url()
         self.assertIsInstance(actual, str)
-        self.assertRegex(actual, "^https://url-[0-9]*\.com$")
+        self.assertRegex(actual, r"^https://url-[0-9]*\.com$")
         actual2 = data_utils.rand_url()
         self.assertNotEqual(actual, actual2)
 

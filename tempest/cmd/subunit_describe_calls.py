@@ -95,7 +95,7 @@ class UrlParser(testtools.TestResult):
     ip_re = re.compile(r'(^|[^0-9])[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]'
                        '{1,3}([^0-9]|$)')
     url_re = re.compile(r'.*INFO.*Request \((?P<name>.*)\): (?P<code>[\d]{3}) '
-                        '(?P<verb>\w*) (?P<url>.*) .*')
+                        r'(?P<verb>\w*) (?P<url>.*) .*')
     port_re = re.compile(r'.*:(?P<port>\d+).*')
     path_re = re.compile(r'http[s]?://[^/]*/(?P<path>.*)')
     request_re = re.compile(r'.* Request - Headers: (?P<headers>.*)')

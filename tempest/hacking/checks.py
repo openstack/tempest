@@ -287,10 +287,10 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
     if pep8.noqa(physical_line):
         return
 
-    if not re.match('class .*Test.*\(.*Admin.*\):', logical_line):
+    if not re.match(r'class .*Test.*\(.*Admin.*\):', logical_line):
         return
 
-    if not re.match('.\/tempest\/api\/.*\/admin\/.*', filename):
+    if not re.match(r'.\/tempest\/api\/.*\/admin\/.*', filename):
         msg = 'T115: All admin tests should exist under admin path.'
         yield(0, msg)
 
