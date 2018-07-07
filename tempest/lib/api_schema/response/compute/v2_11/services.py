@@ -44,3 +44,10 @@ update_forced_down = {
         'required': ['service']
     }
 }
+
+# **** Schemas unchanged in microversion 2.11 since microversion 2.1 ****
+# Note(felipemonteiro): Below are the unchanged schema in this microversion. We
+# need to keep this schema in this file to have the generic way to select the
+# right schema based on self.schema_versions_info mapping in service client.
+enable_disable_service = copy.deepcopy(services.enable_disable_service)
+disable_log_reason = copy.deepcopy(services.disable_log_reason)

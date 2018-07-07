@@ -56,6 +56,20 @@ class TestServicesClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_UPDATE_SERVICE = {
+        "service": {
+            "id": "e81d66a4-ddd3-4aba-8a84-171d1cb4d339",
+            "binary": "nova-compute",
+            "disabled_reason": "test2",
+            "host": "host1",
+            "state": "down",
+            "status": "disabled",
+            "updated_at": "2012-10-29T13:42:05.000000",
+            "forced_down": False,
+            "zone": "nova"
+        }
+    }
+
     def setUp(self):
         super(TestServicesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -119,6 +133,28 @@ class TestServicesClient(base.BaseServiceTest):
             binary="controller",
             disabled_reason='test reason')
 
+    def _test_update_service(self, bytes_body=False, status=None,
+                             disabled_reason=None, forced_down=None):
+        resp_body = copy.deepcopy(self.FAKE_UPDATE_SERVICE)
+        kwargs = {}
+
+        if status is not None:
+            kwargs['status'] = status
+        if disabled_reason is not None:
+            kwargs['disabled_reason'] = disabled_reason
+        if forced_down is not None:
+            kwargs['forced_down'] = forced_down
+
+        resp_body['service'].update(kwargs)
+
+        self.check_service_client_function(
+            self.client.update_service,
+            'tempest.lib.common.rest_client.RestClient.put',
+            resp_body,
+            bytes_body,
+            service_id=resp_body['service']['id'],
+            **kwargs)
+
     def test_log_reason_disabled_service_with_str_body(self):
         self._test_log_reason_disabled_service()
 
@@ -144,3 +180,36 @@ class TestServicesClient(base.BaseServiceTest):
                        new_callable=mock.PropertyMock(return_value='2.11'))
     def test_update_forced_down_with_bytes_body(self, _):
         self._test_update_forced_down(bytes_body=True)
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_disable_scheduling_with_str_body(self, _):
+        self._test_update_service(status='disabled',
+                                  disabled_reason='maintenance')
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_disable_scheduling_with_bytes_body(self, _):
+        self._test_update_service(status='disabled',
+                                  disabled_reason='maintenance',
+                                  bytes_body=True)
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_enable_scheduling_with_str_body(self, _):
+        self._test_update_service(status='enabled')
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_enable_scheduling_with_bytes_body(self, _):
+        self._test_update_service(status='enabled', bytes_body=True)
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_forced_down_with_str_body(self, _):
+        self._test_update_service(forced_down=True)
+
+    @mock.patch.object(base_compute_client, 'COMPUTE_MICROVERSION',
+                       new_callable=mock.PropertyMock(return_value='2.53'))
+    def test_update_service_forced_down_with_bytes_body(self, _):
+        self._test_update_service(forced_down=True, bytes_body=True)

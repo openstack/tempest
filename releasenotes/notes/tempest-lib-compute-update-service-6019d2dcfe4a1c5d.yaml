@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    The ``update_service`` API is added to the ``services_client`` compute
+    library. This API is introduced in microversion 2.53 and supersedes
+    the following APIs:
+
+    * ``PUT /os-services/disable`` (``disable_service``)
+    * ``PUT /os-services/disable-log-reason`` (``disable_log_reason``)
+    * ``PUT /os-services/enable`` (``enable_service``)
+    * ``PUT /os-services/force-down`` (``update_forced_down``)
