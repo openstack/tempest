@@ -25,7 +25,7 @@ from tempest.lib import exceptions
 LOG = logging.getLogger(__name__)
 
 
-delimiter_line = re.compile('^\+\-[\+\-]+\-\+$')
+delimiter_line = re.compile(r'^\+\-[\+\-]+\-\+$')
 
 
 def details_multiple(output_lines, with_label=False):

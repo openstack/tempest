@@ -96,7 +96,7 @@ def scan_content(content, regexp, whitelist):
 def collect_url_logs(url):
     page = urlreq.urlopen(url)
     content = page.read()
-    logs = re.findall('(screen-[\w-]+\.txt\.gz)</a>', content)
+    logs = re.findall(r'(screen-[\w-]+\.txt\.gz)</a>', content)
     return logs
 
 
@@ -161,6 +161,7 @@ def main(opts):
         return 1
     print("ok")
     return 0
+
 
 usage = """
 Find non-white-listed log errors in log files from a devstack-gate run.

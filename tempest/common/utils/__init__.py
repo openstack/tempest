@@ -40,6 +40,7 @@ class DataUtils(object):
         self.__dict__[attr] = attr_obj
         return attr_obj
 
+
 data_utils = DataUtils()
 
 

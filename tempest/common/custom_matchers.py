@@ -225,9 +225,9 @@ class AreAllWellFormatted(object):
             elif key in ('content-type', 'date', 'last-modified',
                          'x-copied-from-last-modified') and not value:
                 return InvalidFormat(key, value)
-            elif key == 'x-timestamp' and not re.match("^\d+\.?\d*\Z", value):
+            elif key == 'x-timestamp' and not re.match(r"^\d+\.?\d*\Z", value):
                 return InvalidFormat(key, value)
-            elif key == 'x-copied-from' and not re.match("\S+/\S+", value):
+            elif key == 'x-copied-from' and not re.match(r"\S+/\S+", value):
                 return InvalidFormat(key, value)
             elif key == 'x-trans-id' and \
                 not re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*", value):

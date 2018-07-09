@@ -26,7 +26,7 @@ flavor = {
         'extra_specs': {
             'type': 'object',
             'patternProperties': {
-                '^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
+                r'^[a-zA-Z0-9_\-\. :]+$': {'type': 'string'}
             }
         }
     },

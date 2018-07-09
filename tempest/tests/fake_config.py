@@ -59,6 +59,7 @@ class FakePrivate(config.TempestConfigPrivate):
         self._set_attrs()
         self.lock_path = cfg.CONF.oslo_concurrency.lock_path
 
+
 fake_service1_group = cfg.OptGroup(name='fake-service1', title='Fake service1')
 
 FakeService1Group = [

@@ -311,5 +311,6 @@ def main(opts=None):
         resources.extend(generate_resources(cred_provider, opts.admin))
     dump_accounts(resources, opts.identity_version, opts.accounts)
 
+
 if __name__ == "__main__":
     main()

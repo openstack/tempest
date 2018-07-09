@@ -59,7 +59,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
         # Try to create a third network while the quota is two
         with self.assertRaisesRegex(
                 lib_exc.Conflict,
-                "Quota exceeded for resources: \['network'\].*"):
+                r"Quota exceeded for resources: \['network'\].*"):
             n3 = self.networks_client.create_network()
             self.addCleanup(self.networks_client.delete_network,
                             n3['network']['id'])
