@@ -205,7 +205,8 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         """
         resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
                                  (flavor_id, key))
-        self.validate_response(schema.unset_flavor_extra_specs, resp, body)
+        self.validate_response(schema_extra_specs.unset_flavor_extra_specs,
+                               resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_flavor_access(self, flavor_id):

@@ -29,6 +29,10 @@ set_get_flavor_extra_specs = {
     }
 }
 
+unset_flavor_extra_specs = {
+    'status_code': [200]
+}
+
 set_get_flavor_extra_specs_key = {
     'status_code': [200],
     'response_body': {
