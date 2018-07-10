@@ -357,12 +357,8 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-    gate:
-      jobs:
-        - nova-multiattach
-    experimental:
-      jobs:
         - nova-live-migration:
+            voting: false
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
@@ -372,6 +368,11 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+    gate:
+      jobs:
+        - nova-multiattach
+    experimental:
+      jobs:
         - tempest-cinder-v2-api:
             irrelevant-files:
               - ^(test-|)requirements.txt$
