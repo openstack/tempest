@@ -87,9 +87,11 @@ class AgentsClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def add_dhcp_agent_to_network(self, agent_id, **kwargs):
-        # TODO(piyush): Current api-site doesn't contain this API description.
-        # After fixing the api-site, we need to fix here also for putting the
-        # link to api-site.
-        # LP: https://bugs.launchpad.net/openstack-api-site/+bug/1526212
+        """Schedule a network to a DHCP agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/#schedule-a-network-to-a-dhcp-agent
+        """
         uri = '/agents/%s/dhcp-networks' % agent_id
         return self.create_resource(uri, kwargs, expect_empty_body=True)

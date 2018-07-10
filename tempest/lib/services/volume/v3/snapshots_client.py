@@ -114,12 +114,12 @@ class SnapshotsClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_snapshot_status(self, snapshot_id, **kwargs):
-        """Update the specified snapshot's status."""
-        # TODO(gmann): api-site doesn't contain doc ref
-        # for this API. After fixing the api-site, we need to
-        # add the link here.
-        # Bug https://bugs.launchpad.net/openstack-api-site/+bug/1532645
+        """Update status of a snapshot.
 
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#update-status-of-a-snapshot
+        """
         post_body = json.dumps({'os-update_snapshot_status': kwargs})
         url = 'snapshots/%s/action' % snapshot_id
         resp, body = self.post(url, post_body)
