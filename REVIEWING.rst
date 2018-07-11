@@ -99,6 +99,39 @@ level docstring linking to the API ref doc in the API tests and a docstring for
 scenario tests this is up to the reviewers discretion whether a docstring is
 required or not.
 
+
+Test Removal and Refactoring
+----------------------------
+Make sure that any test that is renamed, relocated (e.g. moved to another
+class), or removed does not belong to the `interop`_ testing suite -- which
+includes a select suite of Tempest tests for the purposes of validating that
+OpenStack vendor clouds are interoperable -- or a project's `whitelist`_ or
+`blacklist`_ files.
+
+It is of critical importance that no interop, whitelist or blacklist test
+reference be broken by a patch set introduced to Tempest that renames,
+relocates or removes a referenced test.
+
+Please check the existence of code which references Tempest tests with:
+http://codesearch.openstack.org/
+
+Interop
+^^^^^^^
+Make sure that modifications to an `interop`_ test are backwards-compatible.
+This means that code modifications to tests should not undermine the quality of
+the validation currently performed by the test or significantly alter the
+behavior of the test.
+
+Removal
+^^^^^^^
+Reference the :ref:`test-removal` guidelines for understanding best practices
+associated with test removal.
+
+.. _interop: https://www.openstack.org/brand/interop
+.. _whitelist: https://docs.openstack.org/tempest/latest/run.html#test-selection
+.. _blacklist: https://docs.openstack.org/tempest/latest/run.html#test-selection
+
+
 Release Notes
 -------------
 Release notes are how we indicate to users and other consumers of Tempest what
@@ -113,16 +146,18 @@ something extra.
 
 .. _reno: https://docs.openstack.org/reno/latest/
 
+
 Deprecated Code
 ---------------
 Sometimes we have some bugs in deprecated code. Basically, we leave it. Because
 we don't need to maintain it. However, if the bug is critical, we might need to
 fix it. When it will happen, we will deal with it on a case-by-case basis.
 
+
 When to approve
 ---------------
 * Every patch needs two +2s before being approved.
-* Its ok to hold off on an approval until a subject matter expert reviews it
+* It's ok to hold off on an approval until a subject matter expert reviews it
 * If a patch has already been approved but requires a trivial rebase to merge,
   you do not have to wait for a second +2, since the patch has already had
   two +2s.
