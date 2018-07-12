@@ -146,6 +146,9 @@
 - job:
     name: tempest-scenario-multinode-lvm-multibackend
     parent: legacy-dsvm-base-multinode
+    description: |
+      This job will run all scenario tests including slow tests
+      with lvm multibackend setup.
     run: playbooks/tempest-scenario-multinode-lvm-multibackend/run.yaml
     post-run: playbooks/tempest-scenario-multinode-lvm-multibackend/post.yaml
     timeout: 10800
