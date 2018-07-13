@@ -144,11 +144,11 @@
 
 # TODO(gmann): needs to migrate this to zuulv3
 - job:
-    name: tempest-scenario-multinode-lvm-multibackend
+    name: tempest-scenario-all
     parent: legacy-dsvm-base-multinode
     description: |
       This job will run all scenario tests including slow tests
-      with lvm multibackend setup.
+      with lvm multibackend setup. This job will not run any API tests.
     run: playbooks/tempest-scenario-multinode-lvm-multibackend/run.yaml
     post-run: playbooks/tempest-scenario-multinode-lvm-multibackend/post.yaml
     timeout: 10800
@@ -339,8 +339,7 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
-        - tempest-scenario-multinode-lvm-multibackend:
-            voting: false
+        - tempest-scenario-all:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
@@ -350,6 +349,7 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+              - ^tempest/api/.*$
         - nova-cells-v1:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -374,6 +374,17 @@
     gate:
       jobs:
         - nova-multiattach
+        - tempest-scenario-all:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+              - ^tempest/api/.*$
     experimental:
       jobs:
         - tempest-cinder-v2-api:
