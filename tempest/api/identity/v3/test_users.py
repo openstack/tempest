@@ -82,7 +82,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         old_token = self.non_admin_client.token
         new_pass = data_utils.rand_password()
 
-        # to change password back. important for allow_tenant_isolation = false
+        # to change password back. important for use_dynamic_credentials=false
         self.addCleanup(self._restore_password, old_pass, new_pass)
 
         # user updates own password

@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    Remove deprecated config option ``allow_tenant_isolation`` from
+    ``auth`` and ``compute`` groups. Use ``use_dynamic_credentials`` directly
+    instead of the removed option.
