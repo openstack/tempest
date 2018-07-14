@@ -20,6 +20,8 @@ from six.moves.urllib import parse as urllib
 from tempest.lib.api_schema.response.compute.v2_1 import services as schema
 from tempest.lib.api_schema.response.compute.v2_11 import services \
     as schemav211
+from tempest.lib.api_schema.response.compute.v2_53 import services \
+    as schemav253
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -28,7 +30,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [
         {'min': None, 'max': '2.10', 'schema': schema},
-        {'min': '2.11', 'max': None, 'schema': schemav211}]
+        {'min': '2.11', 'max': '2.52', 'schema': schemav211},
+        {'min': '2.53', 'max': None, 'schema': schemav253}]
 
     def list_services(self, **params):
         """Lists all running Compute services for a tenant.
@@ -47,8 +50,29 @@ class ServicesClient(base_compute_client.BaseComputeClient):
         self.validate_response(_schema.list_services, resp, body)
         return rest_client.ResponseBody(resp, body)
 
+    def update_service(self, service_id, **kwargs):
+        """Update a compute service.
+
+        Update a compute service to enable or disable scheduling, including
+        recording a reason why a compute service was disabled from scheduling.
+
+        This API is available starting with microversion 2.53.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/compute/#update-compute-service
+        """
+        put_body = json.dumps(kwargs)
+        resp, body = self.put('os-services/%s' % service_id, put_body)
+        body = json.loads(body)
+        _schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(_schema.update_service, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
     def enable_service(self, **kwargs):
         """Enable service on a host.
+
+        ``update_service`` supersedes this API starting with microversion 2.53.
 
         For a full list of available parameters, please refer to the official
         API reference:
@@ -63,6 +87,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
     def disable_service(self, **kwargs):
         """Disable service on a host.
 
+        ``update_service`` supersedes this API starting with microversion 2.53.
+
         For a full list of available parameters, please refer to the official
         API reference:
         https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service
@@ -76,6 +102,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
     def disable_log_reason(self, **kwargs):
         """Disables scheduling for a Compute service and logs reason.
 
+        ``update_service`` supersedes this API starting with microversion 2.53.
+
         For a full list of available parameters, please refer to the official
         API reference:
         https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service-and-log-disabled-reason
@@ -88,6 +116,8 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
     def update_forced_down(self, **kwargs):
         """Set or unset ``forced_down`` flag for the service.
+
+        ``update_service`` supersedes this API starting with microversion 2.53.
 
         For a full list of available parameters, please refer to the official
         API reference:
