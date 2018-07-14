@@ -416,6 +416,8 @@ class RestClient(object):
                           resp_body=None, extra=None):
         if 'X-Auth-Token' in req_headers:
             req_headers['X-Auth-Token'] = '<omitted>'
+        if 'X-Subject-Token' in req_headers:
+            req_headers['X-Subject-Token'] = '<omitted>'
         # A shallow copy is sufficient
         resp_log = resp.copy()
         if 'x-subject-token' in resp_log:

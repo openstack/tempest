@@ -1,0 +1,7 @@
+---
+security:
+  - |
+    The x-subject-token of a response header is ommitted from log,
+    but clients specify the same token on a request header on
+    Keystone API and that was not omitted. In this release,
+    that has been omitted for a security reason.
