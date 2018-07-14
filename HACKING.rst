@@ -106,7 +106,7 @@ Service tagging is used to specify which services are exercised by a particular
 test method. You specify the services with the ``tempest.common.utils.services``
 decorator. For example:
 
-@utils.services('compute', 'image')
+``@utils.services('compute', 'image')``
 
 Valid service tag names are the same as the list of directories in tempest.api
 that have tests.
@@ -117,6 +117,59 @@ indirectly through another service) that differs from the parent directory
 name. For example, any test that make an API call to a service other than Nova
 in ``tempest.api.compute`` would require a service tag for those services,
 however they do not need to be tagged as ``compute``.
+
+Test Attributes
+---------------
+Tempest leverages `test attributes`_ which are a simple but effective way of
+distinguishing between different "types" of API tests. A test can be "tagged"
+with such attributes using the ``decorators.attr`` decorator, for example::
+
+    @decorators.attr(type=['negative'])
+    def test_aggregate_create_aggregate_name_length_less_than_1(self):
+        [...]
+
+These test attributes can be used for test selection via regular expressions.
+For example, ``(?!.*\[.*\bslow\b.*\])(^tempest\.scenario)`` runs all the tests
+in the ``scenario`` test module, *except* for those tagged with the ``slow``
+attribute (via a negative lookahead in the regular expression). These
+attributes are used in Tempest's ``tox.ini`` as well as Tempest's Zuul job
+definitions for specifying particular batches of Tempest test suites to run.
+
+.. _test attributes: https://testtools.readthedocs.io/en/latest/for-test-authors.html?highlight=attr#test-attributes
+
+Negative Attribute
+^^^^^^^^^^^^^^^^^^
+The ``type='negative'`` attribute is used to signify that a test is a negative
+test, which is a test that handles invalid input gracefully. This attribute
+should be applied to all negative test scenarios.
+
+This attribute must be applied to each test that belongs to a negative test
+class, i.e. a test class name ending with "Negative.*" substring.
+
+.. todo::
+
+  Add a hacking check for ensuring that all classes that contain substring
+  "Negative" have the negative attribute decorator applied above each test.
+
+Slow Attribute
+^^^^^^^^^^^^^^
+The ``type='slow'`` attribute is used to signify that a test takes a long time
+to run, relatively speaking. This attribute is usually applied to
+:ref:`scenario tests <scenario_field_guide>`, which involve a complicated
+series of API operations, the total runtime of which can be relatively long.
+This long runtime has performance implications on `Zuul`_ jobs, which is why
+the ``slow`` attribute is leveraged to run slow tests on a selective basis,
+to keep total `Zuul`_ job runtime down to a reasonable time frame.
+
+.. _Zuul: https://docs.openstack.org/infra/zuul/
+
+Smoke Attribute
+^^^^^^^^^^^^^^^
+The ``type='smoke'`` attribute is used to signify that a test is a so-called
+smoke test, which is a type of test that tests the most vital OpenStack
+functionality, like listing servers or flavors or creating volumes. The
+attribute should be sparingly applied to only the tests that sanity-check the
+most essential functionality of an OpenStack cloud.
 
 Test fixtures and resources
 ---------------------------
