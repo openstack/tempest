@@ -4,7 +4,7 @@ Tempest Test Writing Guide
 ##########################
 
 This guide serves as a starting point for developers working on writing new
-Tempest tests. At a high level tests in Tempest are just tests that conform to
+Tempest tests. At a high level, tests in Tempest are just tests that conform to
 the standard python `unit test`_ framework. But there are several aspects of
 that are unique to Tempest and its role as an integration test suite running
 against a real cloud.

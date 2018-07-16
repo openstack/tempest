@@ -4,12 +4,12 @@ Tempest Library Documentation
 =============================
 
 Tempest provides a stable library interface that provides external tools or
-test suites an interface for reusing pieces of tempest code. Any public
-interface that lives in tempest/lib in the tempest repo is treated as a stable
+test suites an interface for reusing pieces of Tempest code. Any public
+interface that lives in tempest/lib in the Tempest repo is treated as a stable
 public interface and it should be safe to external consume that. Every effort
 goes into maintaining backwards compatibility with any change.
 The library is self contained and doesn't have any dependency on
-other tempest internals outside of lib (including no usage of tempest
+other Tempest internals outside of lib (including no usage of Tempest
 configuration).
 
 Stability
@@ -32,7 +32,7 @@ supporting.
 Making changes
 ''''''''''''''
 When making changes to tempest/lib you have to be conscious of the effect of
-any changes on external consumers. If your proposed changeset will change the
+any changes on external consumers. If your proposed change set will change the
 default behaviour of any interface, or make something which previously worked
 not after your change, then it is not acceptable. Every effort needs to go into
 preserving backwards compatibility in changes.
@@ -40,8 +40,8 @@ preserving backwards compatibility in changes.
 Reviewing
 '''''''''
 When reviewing a proposed change to tempest/lib code we need to be careful to
-ensure that we don't break backwards compatibility. For patches that change
-existing interfaces we have to be careful to make sure we don't break any
+ensure that we don't break backward compatibility. For patches that change
+existing interfaces, we have to be careful to make sure we don't break any
 external consumers. Some common red flags are:
 
 * a change to an existing API requires a change outside the library directory
@@ -52,7 +52,7 @@ Testing
 '''''''
 When adding a new interface to the library we need to at a minimum have unit
 test coverage. A proposed change to add an interface to tempest/lib that
-doesn't have unit tests shouldn't be accepted. Ideally these unit tests will
+doesn't have unit tests shouldn't be accepted. Ideally, these unit tests will
 provide sufficient coverage to ensure a stable interface moving forward.
 
 Current Library APIs
