@@ -93,7 +93,7 @@ you would run the following:
 #. paste the output table with numbers and the mysql command you ran to
    generate it into the etherpad.
 
-Eventually a CLI interface will be created to make that a bit more friendly.
+Eventually, a CLI interface will be created to make that a bit more friendly.
 Also a dashboard is in the works so we don't need to manually run the command.
 
 The intent of the 2nd prong is to verify that moving the test into a project
@@ -104,7 +104,7 @@ testing isn't really being effective in catching that bug (and therefore
 blocking it from landing) and having the testing run in Tempest still has
 value.
 
-However for the 3rd prong verification is a bit more subjective. The original
+However, for the 3rd prong verification is a bit more subjective. The original
 intent of this prong was mostly for refstack/defcore and also for things that
 running on the stable branches. We don't want to remove any tests if that
 would break our API consistency checking between releases, or something that
@@ -138,7 +138,7 @@ nature of ML.
 Exceptions to this procedure
 ----------------------------
 
-For the most part all Tempest test removals have to go through this procedure
+For the most part, all Tempest test removals have to go through this procedure
 there are a couple of exceptions though:
 
 #. The class of testing has been decided to be outside the scope of Tempest.
@@ -150,7 +150,7 @@ there are a couple of exceptions though:
    Such tests cannot live in Tempest because of the branchless nature of
    Tempest. Such tests must still honor `prong #3`_.
 
-For the first exception type the only types of testing in tree which have been
+For the first exception type, the only types of testing in the tree which have been
 declared out of scope at this point are:
 
 * The CLI tests (which should be completely removed at this point)
@@ -159,7 +159,7 @@ declared out of scope at this point are:
 * XML API Tests (which should be completely removed at this point)
 * EC2 API/boto tests (which should be completely removed at this point)
 
-For tests that fit into this category the only criteria for removal is that
+For tests that fit into this category, the only criteria for removal is that
 there is equivalent testing elsewhere.
 
 Tempest Scope
@@ -192,7 +192,7 @@ that API cannot live in Tempest anymore.
 This is because tests would not be able to know or control which API response
 to expect, and thus would not be able to enforce a specific behavior.
 
-If a test exists in Tempest that would meet this criteria as consequence of a
-change, the test must be removed according to the procedure discussed into
+If a test exists in Tempest that would meet these criteria as a consequence of a
+change, the test must be removed according to the procedure discussed in
 this document. The API change should not be merged until all conditions
 required for test removal can be met.

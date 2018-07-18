@@ -172,7 +172,7 @@ used in tests where two different-sized servers are required (for example, a
 resize test).
 
 Using a smaller flavor is generally recommended. When larger flavors are used,
-the extra time required to bring up servers will likely affect total run time
+the extra time required to bring up servers will likely affect the total run time
 and probably require tweaking timeout values to ensure tests have ample time to
 finish.
 
@@ -207,7 +207,7 @@ uploaded.
 
 The behavior of these options is a bit convoluted (which will likely be fixed in
 future versions). You first need to specify ``img_dir``, which is the directory
-in which Tempest will look for the image files. First it will check if the
+in which Tempest will look for the image files. First, it will check if the
 filename set for ``img_file`` could be found in ``img_dir``. If it is found then
 the ``img_container_format`` and ``img_disk_format`` options are used to upload
 that image to glance. However, if it is not found, Tempest will look for the
@@ -239,7 +239,7 @@ Network Creation/Usage for Servers
 """"""""""""""""""""""""""""""""""
 When Tempest creates servers for testing, some tests require being able to
 connect those servers. Depending on the configuration of the cloud, the methods
-for doing this can be different. In certain configurations it is required to
+for doing this can be different. In certain configurations, it is required to
 specify a single network with server create calls. Accordingly, Tempest provides
 a few different methods for providing this information in configuration to try
 and ensure that regardless of the cloud's configuration it'll still be able to
@@ -297,10 +297,10 @@ With Dynamic Credentials
 ''''''''''''''''''''''''
 With dynamic credentials enabled and using nova-network, your only option for
 configuration is to either set a fixed network name or not. However, in most
-cases it shouldn't matter because nova-network should have no problem booting a
+cases, it shouldn't matter because nova-network should have no problem booting a
 server with multiple networks. If this is not the case for your cloud then using
 an accounts file is recommended because it provides the necessary flexibility to
-describe your configuration. Dynamic credentials is not able to dynamically
+describe your configuration. Dynamic credentials are not able to dynamically
 allocate things as necessary if Neutron is not enabled.
 
 With Neutron and dynamic credentials enabled there should not be any additional
@@ -352,7 +352,7 @@ Configuring Available Services
 OpenStack is really a constellation of several different projects which
 are running together to create a cloud. However which projects you're running
 is not set in stone, and which services are running is up to the deployer.
-Tempest however needs to know which services are available so it can figure
+Tempest, however, needs to know which services are available so it can figure
 out which tests it is able to run and certain setup steps which differ based
 on the available services.
 
@@ -390,8 +390,8 @@ changed.
 
 .. note::
 
-    Tempest does not serve all kinds of fancy URLs in the service catalog.  The
-    service catalog should be in a standard format (which is going to be
+    Tempest does not serve all kinds of fancy URLs in the service catalog.
+    The service catalog should be in a standard format (which is going to be
     standardized at the Keystone level).
     Tempest expects URLs in the Service catalog in the following format:
 
@@ -413,10 +413,10 @@ message queues, etc. However, the downside to this configurability is that
 certain operations and features aren't supported depending on the configuration.
 These features may or may not be discoverable from the API so the burden is
 often on the user to figure out what is supported by the cloud they're talking
-to.  Besides the obvious interoperability issues with this it also leaves
+to. Besides the obvious interoperability issues with this, it also leaves
 Tempest in an interesting situation trying to figure out which tests are
 expected to work. However, Tempest tests do not rely on dynamic API discovery
-for a feature (assuming one exists). Instead Tempest has to be explicitly
+for a feature (assuming one exists). Instead, Tempest has to be explicitly
 configured as to which optional features are enabled. This is in order to
 prevent bugs in the discovery mechanisms from masking failures.
 
@@ -432,8 +432,8 @@ API Extensions
 ^^^^^^^^^^^^^^
 The service feature-enabled sections often contain an ``api-extensions`` option
 (or in the case of Swift a ``discoverable_apis`` option). This is used to tell
-Tempest which api extensions (or configurable middleware) is used in your
+Tempest which API extensions (or configurable middleware) is used in your
 deployment. It has two valid config states: either it contains a single value
-``all`` (which is the default) which means that every api extension is assumed
+``all`` (which is the default) which means that every API extension is assumed
 to be enabled, or it is set to a list of each individual extension that is
 enabled for that service.
