@@ -25,6 +25,8 @@ Tempest Specific Commandments
 - [T115] Check that admin tests should exist under admin path
 - [N322] Method's default argument shouldn't be mutable
 - [T116] Unsupported 'message' Exception attribute in PY3
+- [T117] Check negative tests have ``@decorators.attr(type=['negative'])``
+  applied.
 
 Test Data/Configuration
 -----------------------
@@ -145,11 +147,6 @@ should be applied to all negative test scenarios.
 
 This attribute must be applied to each test that belongs to a negative test
 class, i.e. a test class name ending with "Negative.*" substring.
-
-.. todo::
-
-  Add a hacking check for ensuring that all classes that contain substring
-  "Negative" have the negative attribute decorator applied above each test.
 
 Slow Attribute
 ^^^^^^^^^^^^^^
