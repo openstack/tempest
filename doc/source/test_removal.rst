@@ -1,3 +1,5 @@
+.. _test-removal:
+
 Tempest Test Removal Procedure
 ==============================
 
@@ -107,16 +109,19 @@ intent of this prong was mostly for refstack/defcore and also for things that
 running on the stable branches. We don't want to remove any tests if that
 would break our API consistency checking between releases, or something that
 defcore/refstack is depending on being in Tempest. It's worth pointing out
-that if a test is used in defcore as part of interop testing then it will
+that if a test is used in `defcore`_ as part of `interop`_ testing then it will
 probably have continuing value being in Tempest as part of the
 integration/integrated tests in general. This is one area where some overlap
 is expected between testing in projects and Tempest, which is not a bad thing.
+
+.. _defcore: https://wiki.openstack.org/wiki/Governance/InteropWG
+.. _interop: https://www.openstack.org/brand/interop
 
 Discussing the 3rd prong
 """"""""""""""""""""""""
 
 There are 2 approaches to addressing the 3rd prong. Either it can be raised
-during a qa meeting during the Tempest discussion. Please put it on the agenda
+during a QA meeting during the Tempest discussion. Please put it on the agenda
 well ahead of the scheduled meeting. Since the meeting time will be well known
 ahead of time anyone who depends on the tests will have ample time beforehand
 to outline any concerns on the before the meeting. To give ample time for
