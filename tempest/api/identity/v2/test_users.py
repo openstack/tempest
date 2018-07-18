@@ -84,7 +84,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         new_pass = data_utils.rand_password()
         user_id = self.creds.user_id
 
-        # to change password back. important for allow_tenant_isolation = false
+        # to change password back. important for use_dynamic_credentials=false
         self.addCleanup(self._restore_password, user_id, old_pass, new_pass)
 
         # user updates own password

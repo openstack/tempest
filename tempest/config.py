@@ -61,11 +61,7 @@ AuthGroup = [
                      "users. This option requires that OpenStack Identity "
                      "API admin credentials are known. If false, isolated "
                      "test cases and parallel execution, can still be "
-                     "achieved configuring a list of test accounts",
-                deprecated_opts=[cfg.DeprecatedOpt('allow_tenant_isolation',
-                                                   group='auth'),
-                                 cfg.DeprecatedOpt('allow_tenant_isolation',
-                                                   group='compute')]),
+                     "achieved configuring a list of test accounts"),
     cfg.ListOpt('tempest_roles',
                 help="Roles to assign to all users created by tempest",
                 default=[]),
