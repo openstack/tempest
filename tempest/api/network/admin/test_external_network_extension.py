@@ -95,6 +95,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
 
+    @decorators.skip_because(bug="1749820")
     @decorators.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
     @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
                           'Floating ips are not availabled')
