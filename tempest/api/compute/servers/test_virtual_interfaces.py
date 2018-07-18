@@ -28,6 +28,7 @@ CONF = config.CONF
 # TODO(mriedem): Remove this test class once the nova queens branch goes into
 # extended maintenance mode.
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
+    max_microversion = '2.43'
 
     depends_on_nova_network = True
 
