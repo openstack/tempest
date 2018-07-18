@@ -277,7 +277,16 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
-        - nova-multiattach
+        - nova-multiattach:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-full-parallel:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -373,7 +382,16 @@
               - ^tempest/tests/.*$
     gate:
       jobs:
-        - nova-multiattach
+        - nova-multiattach:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-scenario-all:
             irrelevant-files:
               - ^(test-|)requirements.txt$
