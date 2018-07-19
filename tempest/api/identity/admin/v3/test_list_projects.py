@@ -18,7 +18,19 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 
-class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
+class BaseListProjectsTestJSON(base.BaseIdentityV3AdminTest):
+
+    def _list_projects_with_params(self, included, excluded, params, key):
+        # Validate that projects in ``included`` belongs to the projects
+        # returned that match ``params`` but not projects in ``excluded``
+        body = self.projects_client.list_projects(params)['projects']
+        for p in included:
+            self.assertIn(p[key], map(lambda x: x[key], body))
+        for p in excluded:
+            self.assertNotIn(p[key], map(lambda x: x[key], body))
+
+
+class ListProjectsTestJSON(BaseListProjectsTestJSON):
 
     @classmethod
     def resource_setup(cls):
@@ -61,17 +73,20 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_projects_with_domains(self):
         # List projects with domain
         self._list_projects_with_params(
-            {'domain_id': self.domain['id']}, 'domain_id')
+            [self.p1], [self.p2, self.p3], {'domain_id': self.domain['id']},
+            'domain_id')
 
     @decorators.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
         # List the projects with enabled
-        self._list_projects_with_params({'enabled': False}, 'enabled')
+        self._list_projects_with_params(
+            [self.p1], [self.p2, self.p3], {'enabled': False}, 'enabled')
 
     @decorators.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
     def test_list_projects_with_name(self):
         # List projects with name
-        self._list_projects_with_params({'name': self.p1_name}, 'name')
+        self._list_projects_with_params(
+            [self.p1], [self.p2, self.p3], {'name': self.p1_name}, 'name')
 
     @decorators.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
     def test_list_projects_with_parent(self):
@@ -82,8 +97,3 @@ class ListProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotEmpty(fetched_projects)
         for project in fetched_projects:
             self.assertEqual(self.p3['parent_id'], project['parent_id'])
-
-    def _list_projects_with_params(self, params, key):
-        body = self.projects_client.list_projects(params)['projects']
-        self.assertIn(self.p1[key], map(lambda x: x[key], body))
-        self.assertNotIn(self.p2[key], map(lambda x: x[key], body))
