@@ -1,4 +1,3 @@
-
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
@@ -21,6 +20,10 @@ from tempest.lib import exceptions as lib_exc
 
 
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     @classmethod
     def setup_clients(cls):
