@@ -74,8 +74,6 @@ class ServicesAdminNegativeV253TestJSON(ServicesAdminNegativeTestJSON):
     @classmethod
     def resource_setup(cls):
         super(ServicesAdminNegativeV253TestJSON, cls).resource_setup()
-        # Nova returns 400 if `binary` is not nova-compute.
-        cls.binary = 'nova-compute'
         cls.fake_service_id = data_utils.rand_uuid()
 
     @decorators.attr(type=['negative'])
