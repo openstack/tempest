@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Add a new config setting ``immutable_user_source`` in the
+    ``[identity-feature-enabled]`` group that defaults to false.
+    This setting, combined with the usage of the ``@testtools.skipIf()``
+    decorator, will allow tests that require user creation, deletion,
+    or modification to skip instead of failing in environments that
+    are LDAP-backed. In such environments, the user source is read-only,
+    so this feature flag is needed to allow such tests to gracefully skip
+    without having to blacklist them.

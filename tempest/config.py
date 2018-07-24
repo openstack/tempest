@@ -242,7 +242,13 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('application_credentials',
                 default=False,
                 help='Does the environment have application credentials '
-                     'enabled?')
+                     'enabled?'),
+    cfg.BoolOpt('immutable_user_source',
+                default=False,
+                help='Set to True if the environment has a read-only '
+                     'user source. This will skip all tests that attempt to '
+                     'create, delete, or modify users. This should not be set '
+                     'to True if using dynamic credentials')
 ]
 
 compute_group = cfg.OptGroup(name='compute',
