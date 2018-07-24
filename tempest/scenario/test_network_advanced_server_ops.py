@@ -90,9 +90,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         floating_ip_addr = floating_ip['floating_ip_address']
         # Check FloatingIP status before checking the connectivity
         self.check_floating_ip_status(floating_ip, 'ACTIVE')
-        self.check_public_network_connectivity(floating_ip_addr, username,
-                                               private_key, should_connect,
-                                               servers=[server])
+        self.check_vm_connectivity(floating_ip_addr, username,
+                                   private_key, should_connect,
+                                   'Public network connectivity check failed',
+                                   server)
 
     def _wait_server_status_and_check_network_connectivity(self, server,
                                                            keypair,
