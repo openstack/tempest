@@ -59,8 +59,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.server_id, validatable=True)
 
     def tearDown(self):
-        self.server_check_teardown()
         super(ServerActionsTestJSON, self).tearDown()
+        # NOTE(zhufl): Because server_check_teardown will raise Exception
+        # which will prevent other cleanup steps from being executed, so
+        # server_check_teardown should be called after super's tearDown.
+        self.server_check_teardown()
 
     @classmethod
     def setup_credentials(cls):

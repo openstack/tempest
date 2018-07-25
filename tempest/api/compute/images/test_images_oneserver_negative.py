@@ -33,8 +33,11 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
     def tearDown(self):
         """Terminate test instances created after a test is executed."""
-        self.server_check_teardown()
         super(ImagesOneServerNegativeTestJSON, self).tearDown()
+        # NOTE(zhufl): Because server_check_teardown will raise Exception
+        # which will prevent other cleanup steps from being executed, so
+        # server_check_teardown should be called after super's tearDown.
+        self.server_check_teardown()
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
