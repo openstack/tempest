@@ -23,10 +23,9 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(VolumeServicesNegativeTest, cls).resource_setup()
-        cls.services = cls.admin_volume_services_client.list_services()[
-            'services']
-        cls.host = cls.services[0]['host']
-        cls.binary = cls.services[0]['binary']
+        services = cls.admin_volume_services_client.list_services()['services']
+        cls.host = services[0]['host']
+        cls.binary = services[0]['binary']
 
     @decorators.attr(type='negative')
     @decorators.idempotent_id('3246ce65-ba70-4159-aa3b-082c28e4b484')
