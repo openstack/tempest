@@ -33,14 +33,14 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
                                            disk=10,
                                            id=flavor_id)['id']
         # Checking show API response schema
-        self.flavors_client.show_flavor(new_flavor_id)['flavor']
+        self.flavors_client.show_flavor(new_flavor_id)
         # Checking update API response schema
         self.admin_flavors_client.update_flavor(new_flavor_id,
-                                                description='new')['flavor']
+                                                description='new')
         # Checking list details API response schema
-        self.flavors_client.list_flavors(detail=True)['flavors']
+        self.flavors_client.list_flavors(detail=True)
         # Checking list API response schema
-        self.flavors_client.list_flavors()['flavors']
+        self.flavors_client.list_flavors()
 
 
 class FlavorsV261TestJSON(FlavorsV255TestJSON):
