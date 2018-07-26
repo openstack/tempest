@@ -527,10 +527,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     def _get_output(self):
         output = self.client.get_console_output(
-            self.server_id, length=10)['output']
+            self.server_id, length=3)['output']
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
-        self.assertEqual(lines, 10)
+        self.assertEqual(lines, 3)
 
     @decorators.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
@@ -561,8 +561,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
             # NOTE: This test tries to get full length console log, and the
             # length should be bigger than the one of test_get_console_output.
-            self.assertGreater(lines, 10, "Cannot get enough console log "
-                                          "length. (lines: %s)" % lines)
+            self.assertGreater(lines, 3, "Cannot get enough console log "
+                                         "length. (lines: %s)" % lines)
 
         self.wait_for(_check_full_length_console_log)
 
