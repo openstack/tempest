@@ -32,9 +32,10 @@ class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
 
     def _migrate_server_to(self, server_id, dest_host):
         bmflm = CONF.compute_feature_enabled.block_migration_for_live_migration
-        self.admin_servers_client.live_migrate_server(
-            server_id, host=dest_host, block_migration=bmflm,
-            disk_over_commit=False)
+        kwargs = dict(host=dest_host, block_migration=bmflm)
+        if self.is_requested_microversion_compatible('2.24'):
+            kwargs['disk_over_commit'] = False
+        self.admin_servers_client.live_migrate_server(server_id, **kwargs)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7fb7856e-ae92-44c9-861a-af62d7830bcb')

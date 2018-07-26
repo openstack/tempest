@@ -66,7 +66,8 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         kwargs = dict()
         block_migration = getattr(self, 'block_migration', None)
         if self.block_migration is None:
-            kwargs['disk_over_commit'] = False
+            if self.is_requested_microversion_compatible('2.24'):
+                kwargs['disk_over_commit'] = False
             block_migration = (CONF.compute_feature_enabled.
                                block_migration_for_live_migration and
                                not volume_backed)
