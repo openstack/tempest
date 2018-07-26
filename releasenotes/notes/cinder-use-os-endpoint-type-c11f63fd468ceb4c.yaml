@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    Cinder CLI calls have now been updated to use the ``--os-endpoint-type``
+    option instead of ``--endpoint-type``. The latter had been deprecated in
+    Cinder and has been removed in the Rocky release.
