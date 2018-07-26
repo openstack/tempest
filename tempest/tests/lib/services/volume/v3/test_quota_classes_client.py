@@ -15,7 +15,7 @@
 
 import copy
 
-from tempest.lib.services.volume.v2 import quota_classes_client
+from tempest.lib.services.volume.v3 import quota_classes_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 

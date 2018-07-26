@@ -20,6 +20,55 @@ from tempest.tests.lib.services import base
 
 class TestBackupsClient(base.BaseServiceTest):
 
+    FAKE_BACKUP_LIST = {
+        "backups": [
+            {
+                "id": "2ef47aee-8844-490c-804d-2a8efe561c65",
+                "links": [
+                    {
+                        "href": "fake-url-1",
+                        "rel": "self"
+                    },
+                    {
+                        "href": "fake-url-2",
+                        "rel": "bookmark"
+                    }
+                ],
+                "name": "backup001"
+            }
+        ]
+    }
+
+    FAKE_BACKUP_LIST_WITH_DETAIL = {
+        "backups": [
+            {
+                "availability_zone": "az1",
+                "container": "volumebackups",
+                "created_at": "2013-04-02T10:35:27.000000",
+                "description": None,
+                "fail_reason": None,
+                "id": "2ef47aee-8844-490c-804d-2a8efe561c65",
+                "links": [
+                    {
+                        "href": "fake-url-1",
+                        "rel": "self"
+                    },
+                    {
+                        "href": "fake-url-2",
+                        "rel": "bookmark"
+                    }
+                ],
+                "name": "backup001",
+                "object_count": 22,
+                "size": 1,
+                "status": "available",
+                "volume_id": "e5185058-943a-4cb4-96d9-72c184c337d6",
+                "is_incremental": True,
+                "has_dependent_backups": False
+            }
+        ]
+    }
+
     FAKE_BACKUP_UPDATE = {
         "backup": {
             "id": "4c65c15f-a5c5-464b-b92a-90e4c04636a7",
@@ -34,6 +83,46 @@ class TestBackupsClient(base.BaseServiceTest):
         self.client = backups_client.BackupsClient(fake_auth,
                                                    'volume',
                                                    'regionOne')
+
+    def _test_list_backups(self, detail=False, mock_args='backups',
+                           bytes_body=False, **params):
+        if detail:
+            resp_body = self.FAKE_BACKUP_LIST_WITH_DETAIL
+        else:
+            resp_body = self.FAKE_BACKUP_LIST
+        self.check_service_client_function(
+            self.client.list_backups,
+            'tempest.lib.common.rest_client.RestClient.get',
+            resp_body,
+            to_utf=bytes_body,
+            mock_args=[mock_args],
+            detail=detail,
+            **params)
+
+    def test_list_backups_with_str_body(self):
+        self._test_list_backups()
+
+    def test_list_backups_with_bytes_body(self):
+        self._test_list_backups(bytes_body=True)
+
+    def test_list_backups_with_detail_with_str_body(self):
+        mock_args = "backups/detail"
+        self._test_list_backups(detail=True, mock_args=mock_args)
+
+    def test_list_backups_with_detail_with_bytes_body(self):
+        mock_args = "backups/detail"
+        self._test_list_backups(detail=True, mock_args=mock_args,
+                                bytes_body=True)
+
+    def test_list_backups_with_params(self):
+        # Run the test separately for each param, to avoid assertion error
+        # resulting from randomized params order.
+        mock_args = 'backups?sort_key=name'
+        self._test_list_backups(mock_args=mock_args, sort_key='name')
+
+        mock_args = 'backups/detail?limit=10'
+        self._test_list_backups(detail=True, mock_args=mock_args,
+                                bytes_body=True, limit=10)
 
     def _test_update_backup(self, bytes_body=False):
         self.check_service_client_function(

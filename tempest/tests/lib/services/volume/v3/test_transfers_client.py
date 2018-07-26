@@ -18,9 +18,7 @@ import copy
 import mock
 from oslo_serialization import jsonutils as json
 
-from tempest.lib.services.volume.v2 import transfers_client
-from tempest.lib.services.volume.v3 import transfers_client \
-    as transfers_clientv3
+from tempest.lib.services.volume.v3 import transfers_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
@@ -65,7 +63,7 @@ class TestTransfersClient(base.BaseServiceTest):
 
         # NOTE: Use sort_keys for json.dumps so that the expected and actual
         # payloads are guaranteed to be identical for mock_args assert check.
-        with mock.patch.object(transfers_clientv3.json, 'dumps') as mock_dumps:
+        with mock.patch.object(transfers_client.json, 'dumps') as mock_dumps:
             mock_dumps.side_effect = lambda d: json_dumps(d, sort_keys=True)
 
             self.check_service_client_function(
@@ -86,7 +84,7 @@ class TestTransfersClient(base.BaseServiceTest):
 
         # NOTE: Use sort_keys for json.dumps so that the expected and actual
         # payloads are guaranteed to be identical for mock_args assert check.
-        with mock.patch.object(transfers_clientv3.json, 'dumps') as mock_dumps:
+        with mock.patch.object(transfers_client.json, 'dumps') as mock_dumps:
             mock_dumps.side_effect = lambda d: json_dumps(d, sort_keys=True)
 
             self.check_service_client_function(
