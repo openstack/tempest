@@ -47,8 +47,16 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         super(ServerGroupTestJSON, cls).resource_setup()
         cls.policy = ['affinity']
 
-        cls.created_server_group = cls.create_test_server_group(
-            policy=cls.policy)
+    def setUp(self):
+        super(ServerGroupTestJSON, self).setUp()
+        # TODO(zhufl): After microversion 2.13 project_id and user_id are
+        # added to the body of server_group, and microversion is not used
+        # in resource_setup for now, so we should create server group in setUp
+        # in order to use the same microversion as in testcases till
+        # microversion support in resource_setup is fulfilled.
+        if not hasattr(self, 'created_server_group'):
+            self.__class__.created_server_group = \
+                self.create_test_server_group(policy=self.policy)
 
     def _create_server_group(self, name, policy):
         # create the test server-group with given policy
