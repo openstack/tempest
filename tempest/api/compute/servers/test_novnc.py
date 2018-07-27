@@ -58,6 +58,9 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(NoVNCConsoleTestJSON, cls).resource_setup()
         cls.server = cls.create_test_server(wait_until="ACTIVE")
+        cls.use_get_remote_console = False
+        if not cls.is_requested_microversion_compatible('2.5'):
+            cls.use_get_remote_console = True
 
     def _validate_novnc_html(self, vnc_url):
         """Verify we can connect to novnc and get back the javascript."""
@@ -170,8 +173,13 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('c640fdff-8ab4-45a4-a5d8-7e6146cbd0dc')
     def test_novnc(self):
-        body = self.client.get_vnc_console(self.server['id'],
-                                           type='novnc')['console']
+        if self.use_get_remote_console:
+            body = self.client.get_remote_console(
+                self.server['id'], console_type='novnc',
+                protocol='vnc')['remote_console']
+        else:
+            body = self.client.get_vnc_console(self.server['id'],
+                                               type='novnc')['console']
         self.assertEqual('novnc', body['type'])
         # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
         self._validate_novnc_html(body['url'])
@@ -184,8 +192,13 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f9c79937-addc-4aaa-9e0e-841eef02aeb7')
     def test_novnc_bad_token(self):
-        body = self.client.get_vnc_console(self.server['id'],
-                                           type='novnc')['console']
+        if self.use_get_remote_console:
+            body = self.client.get_remote_console(
+                self.server['id'], console_type='novnc',
+                protocol='vnc')['remote_console']
+        else:
+            body = self.client.get_vnc_console(self.server['id'],
+                                               type='novnc')['console']
         self.assertEqual('novnc', body['type'])
         # Do the WebSockify HTTP Request to novncproxy with a bad token
         url = body['url'].replace('token=', 'token=bad')
