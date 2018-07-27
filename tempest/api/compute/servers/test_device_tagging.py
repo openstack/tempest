@@ -382,5 +382,8 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
         waiters.wait_for_interface_detach(self.interfaces_client,
                                           server['id'],
                                           interface['port_id'])
-        self.verify_metadata_from_api(server, ssh_client,
-                                      self.verify_empty_devices)
+        # FIXME(mriedem): The assertion that the tagged devices are removed
+        # from the metadata for the server is being skipped until bug 1775947
+        # is fixed.
+        # self.verify_metadata_from_api(server, ssh_client,
+        #                               self.verify_empty_devices)
