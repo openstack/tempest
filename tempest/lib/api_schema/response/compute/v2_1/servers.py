@@ -430,8 +430,9 @@ instance_action_events = {
             'traceback': {'type': ['string', 'null']}
         },
         'additionalProperties': False,
-        'required': ['event', 'start_time', 'finish_time', 'result',
-                     'traceback']
+        # NOTE(zhufl): events.traceback can only be seen by admin users
+        # with default policy.json, so it shouldn't be a required field.
+        'required': ['event', 'start_time', 'finish_time', 'result']
     }
 }
 
