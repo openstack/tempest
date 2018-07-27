@@ -32,7 +32,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/index.html#update-an-image
+        https://developer.openstack.org/api-ref/image/v2/#update-image
         """
         data = json.dumps(patch)
         headers = {"Content-Type": "application/openstack-images-v2.0"
@@ -47,7 +47,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/index.html#create-an-image
+        https://developer.openstack.org/api-ref/image/v2/#create-image
         """
         data = json.dumps(kwargs)
         resp, body = self.post('images', data)
@@ -84,7 +84,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#delete-an-image
+        https://developer.openstack.org/api-ref/image/v2/#delete-image
          """
         url = 'images/%s' % image_id
         resp, _ = self.delete(url)
@@ -96,7 +96,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#show-images
+        https://developer.openstack.org/api-ref/image/v2/#list-images
         """
         url = 'images'
 
@@ -113,7 +113,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#show-image-details
+        https://developer.openstack.org/api-ref/image/v2/#show-image
         """
         url = 'images/%s' % image_id
         resp, body = self.get(url)
