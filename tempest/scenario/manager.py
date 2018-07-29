@@ -94,6 +94,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not client:
             client = self.ports_client
         name = data_utils.rand_name(self.__class__.__name__)
+        if CONF.network.port_vnic_type and 'binding:vnic_type' not in kwargs:
+            kwargs['binding:vnic_type'] = CONF.network.port_vnic_type
+        if CONF.network.port_profile and 'binding:profile' not in kwargs:
+            kwargs['binding:profile'] = CONF.network.port_profile
         result = client.create_port(
             name=name,
             network_id=network_id,
