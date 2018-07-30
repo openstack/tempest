@@ -197,7 +197,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
-        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
 
         # Verify the server properties after the rebuild completes
         waiters.wait_for_server_status(self.client,
@@ -251,7 +251,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
-        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
 
         # Verify the server properties after the rebuild completes
         waiters.wait_for_server_status(self.client,
@@ -303,7 +303,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                        expected_status)
 
         server = self.client.show_server(server_id)['server']
-        self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref_alt, server['flavor'])
 
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
@@ -367,7 +367,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
         server = self.client.show_server(self.server_id)['server']
-        self.assertEqual(self.flavor_ref, server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, server['flavor'])
 
     @decorators.idempotent_id('fbbf075f-a812-4022-bc5c-ccb8047eef12')
     @decorators.related_bug('1737599')

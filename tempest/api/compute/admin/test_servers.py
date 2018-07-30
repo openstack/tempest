@@ -176,7 +176,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(self.s1_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
-        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
         waiters.wait_for_server_status(self.non_admin_client,
                                        rebuilt_server['id'], 'ACTIVE',
                                        raise_on_error=False)

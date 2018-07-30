@@ -428,21 +428,16 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         except Exception:
             LOG.exception('Failed to delete server %s', server_id)
 
-    @classmethod
-    def resize_server(cls, server_id, new_flavor_id, **kwargs):
+    def resize_server(self, server_id, new_flavor_id, **kwargs):
         """resize and confirm_resize an server, waits for it to be ACTIVE."""
-        cls.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
-        waiters.wait_for_server_status(cls.servers_client, server_id,
+        self.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
+        waiters.wait_for_server_status(self.servers_client, server_id,
                                        'VERIFY_RESIZE')
-        cls.servers_client.confirm_resize_server(server_id)
-        waiters.wait_for_server_status(cls.servers_client, server_id, 'ACTIVE')
-        server = cls.servers_client.show_server(server_id)['server']
-        # Nova API > 2.46 no longer includes flavor.id
-        if server['flavor'].get('id'):
-            if new_flavor_id != server['flavor']['id']:
-                msg = ('Flavor id of %s is not equal to new_flavor_id.'
-                       % server_id)
-                raise lib_exc.TempestException(msg)
+        self.servers_client.confirm_resize_server(server_id)
+        waiters.wait_for_server_status(
+            self.servers_client, server_id, 'ACTIVE')
+        server = self.servers_client.show_server(server_id)['server']
+        self.assert_flavor_equal(new_flavor_id, server['flavor'])
 
     @classmethod
     def delete_volume(cls, volume_id):
@@ -560,6 +555,27 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
         return attachment
+
+    def assert_flavor_equal(self, flavor_id, server_flavor):
+        """Check whether server_flavor equals to flavor.
+
+        :param flavor_id: flavor id
+        :param server_flavor: flavor info returned by show_server.
+        """
+        # Nova API > 2.46 no longer includes flavor.id, and schema check
+        # will cover whether 'id' should be in flavor
+        if server_flavor.get('id'):
+            msg = ('server flavor is not same as flavor!')
+            self.assertEqual(flavor_id, server_flavor['id'], msg)
+        else:
+            flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
+            self.assertEqual(flavor['name'], server_flavor['original_name'],
+                             "original_name in server flavor is not same as "
+                             "flavor name!")
+            for key in ['ram', 'vcpus', 'disk']:
+                msg = ('attribute %s in server flavor is not same as '
+                       'flavor!' % key)
+                self.assertEqual(flavor[key], server_flavor[key], msg)
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
