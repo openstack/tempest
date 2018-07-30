@@ -57,7 +57,8 @@ class TestSnapshotPattern(manager.ScenarioTest):
 
         instance_ip = self.get_server_ip(server)
         timestamp = self.create_timestamp(instance_ip,
-                                          private_key=keypair['private_key'])
+                                          private_key=keypair['private_key'],
+                                          server=server)
 
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
@@ -71,5 +72,6 @@ class TestSnapshotPattern(manager.ScenarioTest):
         # check the existence of the timestamp file in the second instance
         server_from_snapshot_ip = self.get_server_ip(server_from_snapshot)
         timestamp2 = self.get_timestamp(server_from_snapshot_ip,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp2)

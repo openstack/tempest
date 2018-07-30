@@ -63,7 +63,8 @@ class TestShelveInstance(manager.ScenarioTest):
 
         instance_ip = self.get_server_ip(server)
         timestamp = self.create_timestamp(instance_ip,
-                                          private_key=keypair['private_key'])
+                                          private_key=keypair['private_key'],
+                                          server=server)
 
         # Prevent bug #1257594 from coming back
         # Unshelve used to boot the instance with the original image, not
@@ -71,7 +72,8 @@ class TestShelveInstance(manager.ScenarioTest):
         self._shelve_then_unshelve_server(server)
 
         timestamp2 = self.get_timestamp(instance_ip,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=server)
         self.assertEqual(timestamp, timestamp2)
 
     @decorators.attr(type='slow')

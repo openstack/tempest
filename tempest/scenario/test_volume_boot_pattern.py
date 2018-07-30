@@ -108,7 +108,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         LOG.info("Setting timestamp in instance %s", instance_1st)
         ip_instance_1st = self.get_server_ip(instance_1st)
         timestamp = self.create_timestamp(ip_instance_1st,
-                                          private_key=keypair['private_key'])
+                                          private_key=keypair['private_key'],
+                                          server=instance_1st)
 
         # delete instance
         LOG.info("Deleting first instance: %s", instance_1st)
@@ -126,7 +127,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         LOG.info("Getting timestamp in instance %s", instance_2nd)
         ip_instance_2nd = self.get_server_ip(instance_2nd)
         timestamp2 = self.get_timestamp(ip_instance_2nd,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=instance_2nd)
         self.assertEqual(timestamp, timestamp2)
 
         # snapshot a volume
@@ -150,7 +152,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                  server_from_snapshot)
         server_from_snapshot_ip = self.get_server_ip(server_from_snapshot)
         timestamp3 = self.get_timestamp(server_from_snapshot_ip,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp3)
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
