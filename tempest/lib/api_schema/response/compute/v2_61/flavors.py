@@ -99,4 +99,8 @@ create_update_get_flavor_details = {
 # Note(gmann): Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged since microversion 2.55 ***
 list_flavors = copy.deepcopy(flavorsv255.list_flavors)
+
+# ****** Schemas unchanged since microversion 2.1 ***
+delete_flavor = copy.deepcopy(flavorsv255.delete_flavor)

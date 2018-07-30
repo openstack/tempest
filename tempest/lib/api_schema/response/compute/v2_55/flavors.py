@@ -11,7 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import copy
 
+from tempest.lib.api_schema.response.compute.v2_1 import flavors as flavorsv21
 from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
 
 # Note(gmann): This is schema for microversion 2.55 which includes the
@@ -110,3 +112,9 @@ create_update_get_flavor_details = {
         'required': ['flavor']
     }
 }
+
+# Note(zhufl): Below are the unchanged schema in this microversion. We need
+# to keep this schema in this file to have the generic way to select the
+# right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged since microversion 2.1 ***
+delete_flavor = copy.deepcopy(flavorsv21.delete_flavor)
