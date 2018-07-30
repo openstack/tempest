@@ -14,21 +14,22 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_1 import servers
+from tempest.lib.api_schema.response.compute.v2_1 import server_groups
 
 
-common_server_group = copy.deepcopy(servers.common_server_group)
+common_server_group = copy.deepcopy(server_groups.common_server_group)
 common_server_group['properties']['project_id'] = {'type': 'string'}
 common_server_group['properties']['user_id'] = {'type': 'string'}
 common_server_group['required'].append('project_id')
 common_server_group['required'].append('user_id')
 
-create_show_server_group = copy.deepcopy(servers.create_show_server_group)
+create_show_server_group = copy.deepcopy(
+    server_groups.create_show_server_group)
 create_show_server_group['response_body']['properties'][
     'server_group'] = common_server_group
 
-delete_server_group = copy.deepcopy(servers.delete_server_group)
+delete_server_group = copy.deepcopy(server_groups.delete_server_group)
 
-list_server_groups = copy.deepcopy(servers.list_server_groups)
+list_server_groups = copy.deepcopy(server_groups.list_server_groups)
 list_server_groups['response_body']['properties']['server_groups'][
     'items'] = common_server_group

@@ -16,8 +16,10 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.lib.api_schema.response.compute.v2_1 import servers as schema
-from tempest.lib.api_schema.response.compute.v2_13 import servers as schemav213
+from tempest.lib.api_schema.response.compute.v2_1 import server_groups \
+    as schema
+from tempest.lib.api_schema.response.compute.v2_13 import server_groups \
+    as schemav213
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
