@@ -24,10 +24,13 @@ import mock
 import six
 
 from tempest.cmd import run
+from tempest import config
 from tempest.tests import base
 
 DEVNULL = open(os.devnull, 'wb')
 atexit.register(DEVNULL.close)
+
+CONF = config.CONF
 
 
 class TestTempestRun(base.TestCase):
@@ -144,6 +147,35 @@ class TestRunReturnCode(base.TestCase):
         self.assertRunExit(['tempest', 'run',
                             '--config-file', self.stestr_conf_file,
                             '--regex', 'passing'], 0)
+
+
+class TestConfigPathCheck(base.TestCase):
+    def setUp(self):
+        super(TestConfigPathCheck, self).setUp()
+        self.run_cmd = run.TempestRun(None, None)
+
+    def test_tempest_run_set_config_path(self):
+        # Note: (mbindlish) This test is created for the bug id: 1783751
+        # Checking TEMPEST_CONFIG_DIR and TEMPEST_CONFIG is actually
+        # getting set in os environment when some data has passed to
+        # set the environment.
+
+        self.run_cmd._set_env("/fakedir/fakefile")
+        self.assertEqual("/fakedir/fakefile", CONF._path)
+        self.assertIn('TEMPEST_CONFIG_DIR', os.environ)
+        self.assertEqual("/fakedir/fakefile",
+                         os.path.join(os.environ['TEMPEST_CONFIG_DIR'],
+                                      os.environ['TEMPEST_CONFIG']))
+
+    def test_tempest_run_set_config_no_path(self):
+        # Note: (mbindlish) This test is created for the bug id: 1783751
+        # Checking TEMPEST_CONFIG_DIR and TEMPEST_CONFIG should have no value
+        # in os environment when no data has passed to set the environment.
+
+        self.run_cmd._set_env("")
+        self.assertFalse(CONF._path)
+        self.assertNotIn('TEMPEST_CONFIG_DIR', os.environ)
+        self.assertNotIn('TEMPEST_CONFIG', os.environ)
 
 
 class TestTakeAction(base.TestCase):
