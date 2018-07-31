@@ -206,17 +206,19 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
 
-        # Find a host that has not been added to other zone,
-        # for one host can't be added to different zones.
+        # Find a host that has not been added to other availability zone,
+        # for one host can't be added to different availability zones.
         aggregates = self.client.list_aggregates()['aggregates']
         hosts_in_zone = []
-        for v in aggregates:
-            if v['availability_zone']:
-                hosts_in_zone.extend(v['hosts'])
+        for agg in aggregates:
+            if agg['availability_zone']:
+                hosts_in_zone.extend(agg['hosts'])
         hosts = [v for v in self.hosts_available if v not in hosts_in_zone]
         if not hosts:
-            raise self.skipException("All hosts are already in other zones, "
-                                     "so can't add host to aggregate.")
+            raise self.skipException("All hosts are already in other "
+                                     "availability zones, so can't add "
+                                     "host to aggregate. \nAggregates list: "
+                                     "%s" % aggregates)
         host = hosts[0]
 
         self.client.add_host(aggregate['id'], host=host)
