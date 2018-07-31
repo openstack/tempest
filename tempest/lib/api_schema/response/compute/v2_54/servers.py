@@ -39,11 +39,18 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('key_name')
 
-# ****** Schemas unchanged in microversion 2.54 since microversion 2.47 ***
-
 # NOTE(gmann): Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged in microversion 2.54 since microversion 2.47 ***
 get_server = copy.deepcopy(servers247.get_server)
 list_servers_detail = copy.deepcopy(servers247.list_servers_detail)
 update_server = copy.deepcopy(servers247.update_server)
+
+# ****** Schemas unchanged since microversion 2.26 ***
+list_tags = copy.deepcopy(servers247.list_tags)
+update_all_tags = copy.deepcopy(servers247.update_all_tags)
+delete_all_tags = copy.deepcopy(servers247.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers247.check_tag_existence)
+update_tag = copy.deepcopy(servers247.update_tag)
+delete_tag = copy.deepcopy(servers247.delete_tag)
