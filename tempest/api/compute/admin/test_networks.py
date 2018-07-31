@@ -26,6 +26,7 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
     API docs:
     https://developer.openstack.org/api-ref/compute/#networks-os-networks-deprecated
     """
+    max_microversion = '2.35'
 
     @classmethod
     def setup_clients(cls):
