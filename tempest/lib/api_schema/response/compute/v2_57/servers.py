@@ -50,8 +50,9 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 get_server = copy.deepcopy(servers254.get_server)
 list_servers_detail = copy.deepcopy(servers254.list_servers_detail)
 update_server = copy.deepcopy(servers254.update_server)
-
-# ****** Schemas unchanged since microversion 2.26 ***
+list_servers = copy.deepcopy(servers254.list_servers)
+show_server_diagnostics = copy.deepcopy(servers254.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers254.get_remote_consoles)
 list_tags = copy.deepcopy(servers254.list_tags)
 update_all_tags = copy.deepcopy(servers254.update_all_tags)
 delete_all_tags = copy.deepcopy(servers254.delete_all_tags)
