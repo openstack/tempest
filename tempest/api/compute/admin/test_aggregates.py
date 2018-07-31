@@ -48,11 +48,11 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                       if (hyper['hypervisor_type'] ==
                           CONF.compute.hypervisor_type)]
 
-        hosts_available = [hyper['service']['host'] for hyper in hypers
-                           if (hyper['state'] == 'up' and
-                               hyper['status'] == 'enabled')]
-        if hosts_available:
-            cls.host = hosts_available[0]
+        cls.hosts_available = [hyper['service']['host'] for hyper in hypers
+                               if (hyper['state'] == 'up' and
+                                   hyper['status'] == 'enabled')]
+        if cls.hosts_available:
+            cls.host = cls.hosts_available[0]
         else:
             msg = "no available compute node found"
             if CONF.compute.hypervisor_type:
@@ -206,11 +206,23 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
 
-        self.client.add_host(aggregate['id'], host=self.host)
-        self.addCleanup(self.client.remove_host, aggregate['id'],
-                        host=self.host)
+        # Find a host that has not been added to other zone,
+        # for one host can't be added to different zones.
+        aggregates = self.client.list_aggregates()['aggregates']
+        hosts_in_zone = []
+        for v in aggregates:
+            if v['availability_zone']:
+                hosts_in_zone.extend(v['hosts'])
+        hosts = [v for v in self.hosts_available if v not in hosts_in_zone]
+        if not hosts:
+            raise self.skipException("All hosts are already in other zones, "
+                                     "so can't add host to aggregate.")
+        host = hosts[0]
+
+        self.client.add_host(aggregate['id'], host=host)
+        self.addCleanup(self.client.remove_host, aggregate['id'], host=host)
         admin_servers_client = self.os_admin.servers_client
         server = self.create_test_server(availability_zone=az_name,
                                          wait_until='ACTIVE')
         body = admin_servers_client.show_server(server['id'])['server']
-        self.assertEqual(self.host, body['OS-EXT-SRV-ATTR:host'])
+        self.assertEqual(host, body['OS-EXT-SRV-ATTR:host'])
