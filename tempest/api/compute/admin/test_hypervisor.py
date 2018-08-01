@@ -104,6 +104,19 @@ class HypervisorAdminTestJSON(HypervisorAdminTestBase):
             "None of the hypervisors had a valid uptime: %s" % hypers)
 
 
+class HypervisorAdminV228Test(HypervisorAdminTestBase):
+    min_microversion = '2.28'
+
+    @decorators.idempotent_id('d46bab64-0fbe-4eb8-9133-e6ee56188cc5')
+    def test_get_list_hypervisor_details(self):
+        # NOTE(zhufl): This test tests the hypervisor APIs response schema
+        # for 2.28 microversion. No specific assert or behaviour verification
+        # is needed.
+        hypers = self._list_hypervisors()
+        self.assertNotEmpty(hypers, "No hypervisors found.")
+        self.client.show_hypervisor(hypers[0]['id'])
+
+
 class HypervisorAdminUnderV252Test(HypervisorAdminTestBase):
     max_microversion = '2.52'
 
