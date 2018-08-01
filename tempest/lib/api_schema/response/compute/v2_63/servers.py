@@ -12,8 +12,6 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_26 import servers as servers226
-from tempest.lib.api_schema.response.compute.v2_54 import servers as servers254
 from tempest.lib.api_schema.response.compute.v2_57 import servers as servers257
 
 # Nova microversion 2.63 adds 'trusted_image_certificates' (a list of
@@ -30,10 +28,8 @@ trusted_certs = {
         'minLength': 1
     }
 }
-# list response schema wasn't changed for v2.63 so use v2.26
-list_servers = copy.deepcopy(servers226.list_servers)
 
-list_servers_detail = copy.deepcopy(servers254.list_servers_detail)
+list_servers_detail = copy.deepcopy(servers257.list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 list_servers_detail['response_body']['properties']['servers']['items'][
@@ -52,13 +48,13 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('trusted_image_certificates')
 
-update_server = copy.deepcopy(servers254.update_server)
+update_server = copy.deepcopy(servers257.update_server)
 update_server['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 update_server['response_body']['properties']['server'][
     'required'].append('trusted_image_certificates')
 
-get_server = copy.deepcopy(servers254.get_server)
+get_server = copy.deepcopy(servers257.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 get_server['response_body']['properties']['server'][
@@ -67,7 +63,10 @@ get_server['response_body']['properties']['server'][
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
-# ****** Schemas unchanged since microversion 2.26 ***
+# ****** Schemas unchanged since microversion 2.57 ***
+list_servers = copy.deepcopy(servers257.list_servers)
+show_server_diagnostics = copy.deepcopy(servers257.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers257.get_remote_consoles)
 list_tags = copy.deepcopy(servers257.list_tags)
 update_all_tags = copy.deepcopy(servers257.update_all_tags)
 delete_all_tags = copy.deepcopy(servers257.delete_all_tags)
