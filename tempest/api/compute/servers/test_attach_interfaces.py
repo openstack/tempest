@@ -29,11 +29,11 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
+class AttachInterfacesTestBase(base.BaseV2ComputeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(AttachInterfacesTestJSON, cls).skip_checks()
+        super(AttachInterfacesTestBase, cls).skip_checks()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron is required")
         if not CONF.compute_feature_enabled.interface_attach:
@@ -43,13 +43,25 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     def setup_credentials(cls):
         # This test class requires network and subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(AttachInterfacesTestJSON, cls).setup_credentials()
+        super(AttachInterfacesTestBase, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
-        super(AttachInterfacesTestJSON, cls).setup_clients()
+        super(AttachInterfacesTestBase, cls).setup_clients()
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
+
+    def _create_server_get_interfaces(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        ifs = (self.interfaces_client.list_interfaces(server['id'])
+               ['interfaceAttachments'])
+        body = waiters.wait_for_interface_status(
+            self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
+        ifs[0]['port_state'] = body['port_state']
+        return server, ifs
+
+
+class AttachInterfacesTestJSON(AttachInterfacesTestBase):
 
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
@@ -91,15 +103,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(iface['fixed_ips'][0]['ip_address'], fixed_ip)
         if mac_addr:
             self.assertEqual(iface['mac_addr'], mac_addr)
-
-    def _create_server_get_interfaces(self):
-        server = self.create_test_server(wait_until='ACTIVE')
-        ifs = (self.interfaces_client.list_interfaces(server['id'])
-               ['interfaceAttachments'])
-        body = waiters.wait_for_interface_status(
-            self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
-        ifs[0]['port_state'] = body['port_state']
-        return server, ifs
 
     def _test_create_interface(self, server):
         iface = (self.interfaces_client.create_interface(server['id'])
@@ -254,30 +257,6 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
-    @decorators.attr(type='smoke')
-    @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
-    @utils.services('network')
-    def test_add_remove_fixed_ip(self):
-        # Add and Remove the fixed IP to server.
-        server, ifs = self._create_server_get_interfaces()
-        interface_count = len(ifs)
-        self.assertGreater(interface_count, 0)
-        network_id = ifs[0]['net_id']
-        self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
-        # Remove the fixed IP from server.
-        server_detail = self.os_primary.servers_client.show_server(
-            server['id'])['server']
-        # Get the Fixed IP from server.
-        fixed_ip = None
-        for ip_set in server_detail['addresses']:
-            for ip in server_detail['addresses'][ip_set]:
-                if ip['OS-EXT-IPS:type'] == 'fixed':
-                    fixed_ip = ip['addr']
-                    break
-            if fixed_ip is not None:
-                break
-        self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
-
     @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
         """Tests the following:
@@ -314,3 +293,31 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             # API so we have to poll the port until the device_id is unset.
             self.interfaces_client.delete_interface(server['id'], port_id)
             self.wait_for_port_detach(port_id)
+
+
+class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
+    max_microversion = '2.43'
+
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
+    @utils.services('network')
+    def test_add_remove_fixed_ip(self):
+        # Add and Remove the fixed IP to server.
+        server, ifs = self._create_server_get_interfaces()
+        interface_count = len(ifs)
+        self.assertGreater(interface_count, 0)
+        network_id = ifs[0]['net_id']
+        self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
+        # Remove the fixed IP from server.
+        server_detail = self.os_primary.servers_client.show_server(
+            server['id'])['server']
+        # Get the Fixed IP from server.
+        fixed_ip = None
+        for ip_set in server_detail['addresses']:
+            for ip in server_detail['addresses'][ip_set]:
+                if ip['OS-EXT-IPS:type'] == 'fixed':
+                    fixed_ip = ip['addr']
+                    break
+            if fixed_ip is not None:
+                break
+        self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
