@@ -646,9 +646,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return floating_ip
 
     def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                         private_key=None):
+                         private_key=None, server=None):
         ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server)
         if dev_name is not None:
             ssh_client.make_fs(dev_name)
             ssh_client.exec_command('sudo mount /dev/%s %s' % (dev_name,
@@ -662,9 +663,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return timestamp
 
     def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                      private_key=None):
+                      private_key=None, server=None):
         ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server)
         if dev_name is not None:
             ssh_client.mount(dev_name, mount_path)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'

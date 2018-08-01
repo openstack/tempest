@@ -96,7 +96,8 @@ class TestStampPattern(manager.ScenarioTest):
                                                       keypair['private_key'])
         timestamp = self.create_timestamp(ip_for_server,
                                           CONF.compute.volume_device_name,
-                                          private_key=keypair['private_key'])
+                                          private_key=keypair['private_key'],
+                                          server=server)
         self.nova_volume_detach(server, volume)
 
         # snapshot the volume
@@ -126,5 +127,6 @@ class TestStampPattern(manager.ScenarioTest):
         # check the existence of the timestamp file in the volume2
         timestamp2 = self.get_timestamp(ip_for_snapshot,
                                         CONF.compute.volume_device_name,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp2)

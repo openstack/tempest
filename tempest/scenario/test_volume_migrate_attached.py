@@ -114,7 +114,8 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Setting timestamp in instance %s", instance['id'])
         ip_instance = self.get_server_ip(instance)
         timestamp = self.create_timestamp(ip_instance,
-                                          private_key=keypair['private_key'])
+                                          private_key=keypair['private_key'],
+                                          server=instance)
 
         # retype volume with migration from backend #1 to backend #2
         LOG.info("Retyping Volume %s to new type %s", volume_origin['id'],
@@ -125,5 +126,6 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Getting timestamp in postmigrated instance %s",
                  instance['id'])
         timestamp2 = self.get_timestamp(ip_instance,
-                                        private_key=keypair['private_key'])
+                                        private_key=keypair['private_key'],
+                                        server=instance)
         self.assertEqual(timestamp, timestamp2)
