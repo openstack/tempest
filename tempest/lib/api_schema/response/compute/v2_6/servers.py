@@ -16,9 +16,18 @@ import copy
 
 from tempest.lib.api_schema.response.compute.v2_3 import servers
 
+# NOTE: Below are the unchanged schema in this microversion. We need
+# to keep this schema in this file to have the generic way to select the
+# right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged since microversion 2.3 ******
 list_servers = copy.deepcopy(servers.list_servers)
 get_server = copy.deepcopy(servers.get_server)
 list_servers_detail = copy.deepcopy(servers.list_servers_detail)
+update_server = copy.deepcopy(servers.update_server)
+rebuild_server = copy.deepcopy(servers.rebuild_server)
+rebuild_server_with_admin_pass = copy.deepcopy(
+    servers.rebuild_server_with_admin_pass)
+show_server_diagnostics = copy.deepcopy(servers.show_server_diagnostics)
 
 # NOTE: The consolidated remote console API got introduced with v2.6
 # with bp/consolidate-console-api. See Nova commit 578bafeda
