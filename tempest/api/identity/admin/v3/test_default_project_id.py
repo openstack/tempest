@@ -9,6 +9,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
+
 from tempest.api.identity import base
 from tempest import clients
 from tempest import config
@@ -32,6 +34,10 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         self.domains_client.update_domain(domain_id, enabled=False)
         self.domains_client.delete_domain(domain_id)
 
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an '
+                      'immutable user source and solely '
+                      'provides read-only access to users.')
     @decorators.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
         # create a domain
