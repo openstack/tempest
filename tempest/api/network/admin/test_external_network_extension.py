@@ -13,6 +13,7 @@
 import testtools
 
 from tempest.api.network import base
+from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -95,7 +96,6 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(self.network['id'], show_net['id'])
         self.assertFalse(show_net['router:external'])
 
-    @decorators.skip_because(bug="1749820")
     @decorators.idempotent_id('82068503-2cf2-4ed4-b3be-ecb89432e4bb')
     @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
                           'Floating ips are not availabled')
@@ -118,8 +118,15 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_floating_ips_client.delete_floatingip,
                         created_floating_ip['id'])
-        floatingip_list = self.admin_floating_ips_client.list_floatingips(
-            network=external_network['id'])
+        if utils.is_extension_enabled('filter-validation', 'network'):
+            floatingip_list = self.admin_floating_ips_client.list_floatingips(
+                floating_network_id=external_network['id'])
+        else:
+            # NOTE(hongbin): This is for testing the backward-compatibility
+            # of neutron API although the parameter is a wrong filter
+            # for listing floating IPs.
+            floatingip_list = self.admin_floating_ips_client.list_floatingips(
+                invalid_filter=external_network['id'])
         self.assertIn(created_floating_ip['id'],
                       (f['id'] for f in floatingip_list['floatingips']))
         self.admin_networks_client.delete_network(external_network['id'])
