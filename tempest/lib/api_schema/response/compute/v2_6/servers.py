@@ -40,7 +40,7 @@ get_remote_consoles = {
                 'type': 'object',
                 'properties': {
                     'protocol': {'enum': ['vnc', 'rdp', 'serial', 'spice']},
-                    'type': {'enum': ['novnc', 'xpvnc', 'rdp-html5',
+                    'type': {'enum': ['novnc', 'xvpvnc', 'rdp-html5',
                                       'spice-html5', 'serial']},
                     'url': {
                         'type': 'string',
