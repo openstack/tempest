@@ -143,25 +143,24 @@
     voting: false
 
 - job:
-    name: tempest-scenario-all
+    name: tempest-slow
     parent: tempest-multinode-full
     branches:
       - master
     description: |
-      This multinode integration job will run all scenario tests including slow
-      tests with lvm multibackend setup. This job will not run any API tests.
+      This multinode integration job will run all the tests tagged as slow.
+      It enables the lvm multibackend setup to cover few scenario tests.
+      This job will run only slow tests(API or Scenario) serially.
 
       Former names for this job were:
         * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
         * tempest-scenario-multinode-lvm-multibackend
     timeout: 10800
     vars:
-      # 'all' is used for applying the custom regex below.
-      tox_envlist: all
+      tox_envlist: slow-serial
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
       tempest_concurrency: 2
-      tempest_test_regex: (^tempest\.(scenario))
 
 - job:
     name: tempest-full-queens
@@ -353,7 +352,7 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-tox-plugin-sanity-check
-        - tempest-scenario-all:
+        - tempest-slow:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
@@ -363,7 +362,6 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-              - ^tempest/api/.*$
         - nova-cells-v1:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -397,7 +395,7 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-        - tempest-scenario-all:
+        - tempest-slow:
             irrelevant-files:
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
@@ -407,7 +405,6 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-              - ^tempest/api/.*$
     experimental:
       jobs:
         - tempest-cinder-v2-api:
