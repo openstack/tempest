@@ -38,8 +38,8 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(BaseVolumeQuotasAdminTestJSON, cls).setup_clients()
-        cls.transfer_client = cls.os_primary.volume_transfers_v2_client
-        cls.alt_transfer_client = cls.os_alt.volume_transfers_v2_client
+        cls.transfer_client = cls.os_primary.volume_transfers_client_latest
+        cls.alt_transfer_client = cls.os_alt.volume_transfers_client_latest
 
     @classmethod
     def resource_setup(cls):

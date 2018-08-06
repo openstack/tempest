@@ -301,7 +301,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_volume_type(self, client=None, name=None, backend_name=None):
         if not client:
-            client = self.os_admin.volume_types_v2_client
+            client = self.os_admin.volume_types_client_latest
         randomized_name = name or data_utils.rand_name(
             'volume-type-' + self.__class__.__name__)
 
@@ -1208,9 +1208,9 @@ class EncryptionScenarioTest(ScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
-        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
+        cls.admin_volume_types_client = cls.os_admin.volume_types_client_latest
         cls.admin_encryption_types_client =\
-            cls.os_admin.encryption_types_v2_client
+            cls.os_admin.encryption_types_client_latest
 
     def create_encryption_type(self, client=None, type_id=None, provider=None,
                                key_size=None, cipher=None,
