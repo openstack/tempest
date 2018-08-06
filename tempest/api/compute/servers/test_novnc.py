@@ -44,10 +44,13 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         self._websocket = None
 
     def tearDown(self):
-        self.server_check_teardown()
         super(NoVNCConsoleTestJSON, self).tearDown()
         if self._websocket is not None:
             self._websocket.close()
+        # NOTE(zhufl): Because server_check_teardown will raise Exception
+        # which will prevent other cleanup steps from being executed, so
+        # server_check_teardown should be called after super's tearDown.
+        self.server_check_teardown()
 
     @classmethod
     def setup_clients(cls):
