@@ -369,7 +369,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.floating_ips[tenant.access_point['id']]['floating_ip_address']
         private_key = tenant.keypair['private_key']
         access_point_ssh = self.get_remote_client(
-            access_point_ssh, private_key=private_key)
+            access_point_ssh, private_key=private_key,
+            server=tenant.access_point)
         return access_point_ssh
 
     def _test_in_tenant_block(self, tenant):
