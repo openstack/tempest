@@ -108,6 +108,7 @@
       This job includes two nodes, controller / tempest plus a subnode, but
       it can be used with different topologies, as long as a controller node
       and a tempest one exist.
+    timeout: 10800
     vars:
       tox_envlist: full
       devstack_localrc:
