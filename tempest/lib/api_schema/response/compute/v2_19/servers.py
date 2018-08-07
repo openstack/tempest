@@ -17,6 +17,9 @@ import copy
 from tempest.lib.api_schema.response.compute.v2_16 import servers \
     as serversv216
 
+# Compute microversion 2.19:
+# 1. New attributes in 'server' dict.
+#      'description'
 get_server = copy.deepcopy(serversv216.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'description': {'type': ['string', 'null']}})
