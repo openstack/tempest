@@ -331,7 +331,7 @@ class ServiceClients(object):
         self.region = region
         # Check if passed or default credentials are valid
         if not self.credentials.is_valid():
-            raise exceptions.InvalidCredentials()
+            raise exceptions.InvalidCredentials(credentials)
         # Get the identity classes matching the provided credentials
         # TODO(andreaf) Define a new interface in Credentials to get
         # the API version from an instance
@@ -340,7 +340,9 @@ class ServiceClients(object):
                     isinstance(self.credentials, auth.IDENTITY_VERSION[k][0])]
         # Zero matches or more than one are both not valid.
         if len(identity) != 1:
-            raise exceptions.InvalidCredentials()
+            msg = "Zero or %d ambiguous auth provider found. identity: %s, " \
+                "credentials: %s" % (len(identity), identity, credentials)
+            raise exceptions.InvalidCredentials(msg)
         self.auth_version, auth_provider_class = identity[0]
         self.dscv = disable_ssl_certificate_validation
         self.ca_certs = ca_certs
