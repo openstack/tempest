@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest.lib.services.volume.v2 import snapshots_client
+from tempest.lib.services.volume.v3 import snapshots_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
