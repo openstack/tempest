@@ -34,6 +34,9 @@ METHOD_GET_RESOURCE = re.compile(r"^\s*def (list|show)\_.+")
 METHOD_DELETE_RESOURCE = re.compile(r"^\s*def delete_.+")
 CLASS = re.compile(r"^class .+")
 EX_ATTRIBUTE = re.compile(r'(\s+|\()(e|ex|exc|exception).message(\s+|\))')
+NEGATIVE_TEST_DECORATOR = re.compile(
+    r'\s*@decorators\.attr\(type=.*negative.*\)')
+_HAVE_NEGATIVE_DECORATOR = False
 
 
 def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
@@ -306,6 +309,29 @@ def unsupported_exception_attribute_PY3(logical_line):
         yield(0, msg)
 
 
+def negative_test_attribute_always_applied_to_negative_tests(physical_line,
+                                                             filename):
+    """Check ``@decorators.attr(type=['negative'])`` applied to negative tests.
+
+    T117
+    """
+    global _HAVE_NEGATIVE_DECORATOR
+
+    if re.match(r'.\/tempest\/api\/.*_negative.*', filename):
+
+        if NEGATIVE_TEST_DECORATOR.match(physical_line):
+            _HAVE_NEGATIVE_DECORATOR = True
+            return
+
+        if TEST_DEFINITION.match(physical_line):
+            if not _HAVE_NEGATIVE_DECORATOR:
+                return (
+                    0, "T117: Must apply `@decorators.attr(type=['negative'])`"
+                       " to all negative API tests"
+                )
+            _HAVE_NEGATIVE_DECORATOR = False
+
+
 def factory(register):
     register(import_no_clients_in_api_and_scenario_tests)
     register(scenario_tests_need_service_tags)
@@ -322,3 +348,4 @@ def factory(register):
     register(use_rand_uuid_instead_of_uuid4)
     register(dont_put_admin_tests_on_nonadmin_path)
     register(unsupported_exception_attribute_PY3)
+    register(negative_test_attribute_always_applied_to_negative_tests)

@@ -193,3 +193,60 @@ class HackingTestCase(base.TestCase):
             "raise TestCase.failureException(exception.message)"))), 1)
         self.assertEqual(len(list(checks.unsupported_exception_attribute_PY3(
             "raise TestCase.failureException(ee.message)"))), 0)
+
+    def _test_no_negatve_test_attribute_applied_to_negative_test(
+            self, filename, with_other_decorators=False,
+            with_negative_decorator=True, expected_success=True):
+        check = checks.negative_test_attribute_always_applied_to_negative_tests
+        other_decorators = [
+            "@decorators.idempotent_id(123)",
+            "@utils.requires_ext(extension='ext', service='svc')"
+        ]
+
+        if with_other_decorators:
+            # Include multiple decorators to verify that this check works with
+            # arbitrarily many decorators. These insert decorators above the
+            # @decorators.attr(type=['negative']) decorator.
+            for decorator in other_decorators:
+                self.assertIsNone(check(" %s" % decorator, filename))
+        if with_negative_decorator:
+            self.assertIsNone(
+                check("@decorators.attr(type=['negative'])", filename))
+        if with_other_decorators:
+            # Include multiple decorators to verify that this check works with
+            # arbitrarily many decorators. These insert decorators between
+            # the test and the @decorators.attr(type=['negative']) decorator.
+            for decorator in other_decorators:
+                self.assertIsNone(check(" %s" % decorator, filename))
+        final_result = check(" def test_some_negative_case", filename)
+        if expected_success:
+            self.assertIsNone(final_result)
+        else:
+            self.assertIsInstance(final_result, tuple)
+            self.assertFalse(final_result[0])
+
+    def test_no_negatve_test_attribute_applied_to_negative_test(self):
+        # Check negative filename, negative decorator passes
+        self._test_no_negatve_test_attribute_applied_to_negative_test(
+            "./tempest/api/test_something_negative.py")
+        # Check negative filename, negative decorator, other decorators passes
+        self._test_no_negatve_test_attribute_applied_to_negative_test(
+            "./tempest/api/test_something_negative.py",
+            with_other_decorators=True)
+
+        # Check non-negative filename skips check, causing pass
+        self._test_no_negatve_test_attribute_applied_to_negative_test(
+            "./tempest/api/test_something.py")
+
+        # Check negative filename, no negative decorator fails
+        self._test_no_negatve_test_attribute_applied_to_negative_test(
+            "./tempest/api/test_something_negative.py",
+            with_negative_decorator=False,
+            expected_success=False)
+        # Check negative filename, no negative decorator, other decorators
+        # fails
+        self._test_no_negatve_test_attribute_applied_to_negative_test(
+            "./tempest/api/test_something_negative.py",
+            with_other_decorators=True,
+            with_negative_decorator=False,
+            expected_success=False)
