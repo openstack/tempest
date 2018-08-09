@@ -1,0 +1,19 @@
+---
+deprecations:
+  - |
+    The v2 volume API has been deprecated since Pike release.
+    Volume v3 API is current and Tempest volume tests can
+    be run against v2 or v3 API based on config option
+    ``CONF.volume.catalog_type``. If catalog_type is ``volumev2``, then
+    all the volume tests will run against v2 API. If catalog_type is
+    ``volumev3`` which is default in Tempest, then all the volume
+    tests will run against v3 API.
+    That makes below config options unusable in Tempest which used to
+    select the target volume API for volume tests.
+
+    * ``CONF.volume-feature-enabled.api_v2``
+    * ``CONF.volume-feature-enabled.api_v3``
+
+    Tempest deprecate the above two config options in Rocky release
+    and will be removed in future. Alternatively ``CONF.volume.catalog_type``
+    can be used to run the Tempest against volume v2 or v3 API.
