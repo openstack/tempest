@@ -315,7 +315,7 @@ class VolumeService(BaseService):
 class VolumeQuotaService(BaseService):
     def __init__(self, manager, **kwargs):
         super(VolumeQuotaService, self).__init__(kwargs)
-        self.client = manager.volume_quotas_v2_client
+        self.client = manager.volume_quotas_client_latest
 
     def delete(self):
         client = self.client

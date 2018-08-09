@@ -74,24 +74,19 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if CONF.service_available.glance:
             cls.images_client = cls.os_primary.image_client_v2
 
-        if cls._api_version == 3:
-            cls.backups_client = cls.os_primary.backups_v3_client
-            cls.volumes_client = cls.os_primary.volumes_v3_client
-            cls.messages_client = cls.os_primary.volume_v3_messages_client
-            cls.versions_client = cls.os_primary.volume_v3_versions_client
-            cls.groups_client = cls.os_primary.groups_v3_client
-            cls.group_snapshots_client = (
-                cls.os_primary.group_snapshots_v3_client)
-        else:
-            cls.backups_client = cls.os_primary.backups_v2_client
-            cls.volumes_client = cls.os_primary.volumes_v2_client
-
-        cls.snapshots_client = cls.os_primary.snapshots_v2_client
+        cls.backups_client = cls.os_primary.backups_client_latest
+        cls.volumes_client = cls.os_primary.volumes_client_latest
+        cls.messages_client = cls.os_primary.volume_messages_client_latest
+        cls.versions_client = cls.os_primary.volume_versions_client_latest
+        cls.groups_client = cls.os_primary.groups_client_latest
+        cls.group_snapshots_client = (
+            cls.os_primary.group_snapshots_client_latest)
+        cls.snapshots_client = cls.os_primary.snapshots_client_latest
         cls.volumes_extension_client =\
-            cls.os_primary.volumes_v2_extension_client
+            cls.os_primary.volumes_extension_client_latest
         cls.availability_zone_client = (
-            cls.os_primary.volume_v2_availability_zone_client)
-        cls.volume_limits_client = cls.os_primary.volume_v2_limits_client
+            cls.os_primary.volume_availability_zone_client_latest)
+        cls.volume_limits_client = cls.os_primary.volume_limits_client_latest
 
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
@@ -247,34 +242,34 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def setup_clients(cls):
         super(BaseVolumeAdminTest, cls).setup_clients()
 
-        cls.admin_volume_qos_client = cls.os_admin.volume_qos_v2_client
+        cls.admin_volume_qos_client = cls.os_admin.volume_qos_client_latest
         cls.admin_volume_services_client = \
-            cls.os_admin.volume_services_v2_client
-        cls.admin_volume_types_client = cls.os_admin.volume_types_v2_client
-        cls.admin_volume_manage_client = cls.os_admin.volume_manage_v2_client
-        cls.admin_volume_client = cls.os_admin.volumes_v2_client
-        if cls._api_version == 3:
-            cls.admin_volume_client = cls.os_admin.volumes_v3_client
-            cls.admin_groups_client = cls.os_admin.groups_v3_client
-            cls.admin_messages_client = cls.os_admin.volume_v3_messages_client
-            cls.admin_group_snapshots_client = \
-                cls.os_admin.group_snapshots_v3_client
-            cls.admin_group_types_client = cls.os_admin.group_types_v3_client
-        cls.admin_hosts_client = cls.os_admin.volume_hosts_v2_client
+            cls.os_admin.volume_services_client_latest
+        cls.admin_volume_types_client = cls.os_admin.volume_types_client_latest
+        cls.admin_volume_manage_client = (
+            cls.os_admin.volume_manage_client_latest)
+        cls.admin_volume_client = cls.os_admin.volumes_client_latest
+        cls.admin_groups_client = cls.os_admin.groups_client_latest
+        cls.admin_messages_client = cls.os_admin.volume_messages_client_latest
+        cls.admin_group_snapshots_client = \
+            cls.os_admin.group_snapshots_client_latest
+        cls.admin_group_types_client = cls.os_admin.group_types_client_latest
+        cls.admin_hosts_client = cls.os_admin.volume_hosts_client_latest
         cls.admin_snapshot_manage_client = \
-            cls.os_admin.snapshot_manage_v2_client
-        cls.admin_snapshots_client = cls.os_admin.snapshots_v2_client
-        cls.admin_backups_client = cls.os_admin.backups_v2_client
+            cls.os_admin.snapshot_manage_client_latest
+        cls.admin_snapshots_client = cls.os_admin.snapshots_client_latest
+        cls.admin_backups_client = cls.os_admin.backups_client_latest
         cls.admin_encryption_types_client = \
-            cls.os_admin.encryption_types_v2_client
+            cls.os_admin.encryption_types_client_latest
         cls.admin_quota_classes_client = \
-            cls.os_admin.volume_quota_classes_v2_client
-        cls.admin_quotas_client = cls.os_admin.volume_quotas_v2_client
-        cls.admin_volume_limits_client = cls.os_admin.volume_v2_limits_client
+            cls.os_admin.volume_quota_classes_client_latest
+        cls.admin_quotas_client = cls.os_admin.volume_quotas_client_latest
+        cls.admin_volume_limits_client = (
+            cls.os_admin.volume_limits_client_latest)
         cls.admin_capabilities_client = \
-            cls.os_admin.volume_capabilities_v2_client
+            cls.os_admin.volume_capabilities_client_latest
         cls.admin_scheduler_stats_client = \
-            cls.os_admin.volume_scheduler_stats_v2_client
+            cls.os_admin.volume_scheduler_stats_client_latest
 
     @classmethod
     def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):

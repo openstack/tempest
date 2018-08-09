@@ -27,10 +27,10 @@ class VolumesTransfersTest(base.BaseVolumeTest):
     def setup_clients(cls):
         super(VolumesTransfersTest, cls).setup_clients()
 
-        cls.client = cls.os_primary.volume_transfers_v2_client
-        cls.alt_client = cls.os_alt.volume_transfers_v2_client
-        cls.alt_volumes_client = cls.os_alt.volumes_v2_client
-        cls.adm_volumes_client = cls.os_admin.volumes_v2_client
+        cls.client = cls.os_primary.volume_transfers_client_latest
+        cls.alt_client = cls.os_alt.volume_transfers_client_latest
+        cls.alt_volumes_client = cls.os_alt.volumes_client_latest
+        cls.adm_volumes_client = cls.os_admin.volumes_client_latest
 
     @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):

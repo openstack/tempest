@@ -165,7 +165,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     if volume_backed:
         volume_name = data_utils.rand_name(__name__ + '-volume')
-        volumes_client = clients.volumes_v2_client
+        volumes_client = clients.volumes_client_latest
         params = {'name': volume_name,
                   'imageRef': image_id,
                   'size': CONF.volume.volume_size}

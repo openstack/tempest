@@ -241,6 +241,47 @@ class Manager(clients.ServiceClients):
         # if only api_v3 is enabled, all these clients should be available
         if (CONF.volume_feature_enabled.api_v2 or
             CONF.volume_feature_enabled.api_v3):
+            self.backups_client_latest = self.volume_v3.BackupsClient()
+            self.encryption_types_client_latest = \
+                self.volume_v3.EncryptionTypesClient()
+            self.snapshot_manage_client_latest = \
+                self.volume_v3.SnapshotManageClient()
+            self.snapshots_client_latest = self.volume_v3.SnapshotsClient()
+            self.volume_capabilities_client_latest = \
+                self.volume_v3.CapabilitiesClient()
+            self.volume_manage_client_latest = (
+                self.volume_v3.VolumeManageClient())
+            self.volume_qos_client_latest = self.volume_v3.QosSpecsClient()
+            self.volume_services_client_latest = (
+                self.volume_v3.ServicesClient())
+            self.volume_types_client_latest = self.volume_v3.TypesClient()
+            self.volume_hosts_client_latest = self.volume_v3.HostsClient()
+            self.volume_quotas_client_latest = self.volume_v3.QuotasClient()
+            self.volume_quota_classes_client_latest = \
+                self.volume_v3.QuotaClassesClient()
+            self.volume_scheduler_stats_client_latest = \
+                self.volume_v3.SchedulerStatsClient()
+            self.volume_transfers_client_latest = \
+                self.volume_v3.TransfersClient()
+            self.volume_availability_zone_client_latest = \
+                self.volume_v3.AvailabilityZoneClient()
+            self.volume_limits_client_latest = self.volume_v3.LimitsClient()
+            self.volumes_client_latest = self.volume_v3.VolumesClient()
+            self.volumes_extension_client_latest = \
+                self.volume_v3.ExtensionsClient()
+            self.group_types_client_latest = self.volume_v3.GroupTypesClient()
+            self.groups_client_latest = self.volume_v3.GroupsClient()
+            self.group_snapshots_client_latest = \
+                self.volume_v3.GroupSnapshotsClient()
+            self.volume_messages_client_latest = (
+                self.volume_v3.MessagesClient())
+            self.volume_versions_client_latest = (
+                self.volume_v3.VersionsClient())
+
+            # TODO(gmann): Below alias for service clients have been
+            # deprecated and will be removed in future. Start using the alias
+            # defined above with suffix _latest.
+            # ****************Deprecated alias start from here***************
             self.backups_v2_client = self.volume_v3.BackupsClient()
             self.encryption_types_v2_client = \
                 self.volume_v3.EncryptionTypesClient()
@@ -268,11 +309,6 @@ class Manager(clients.ServiceClients):
             self.volumes_v2_extension_client = \
                 self.volume_v3.ExtensionsClient()
 
-            # Set default client for users that don't need explicit version
-            self.volumes_client_latest = self.volumes_v2_client
-            self.snapshots_client_latest = self.snapshots_v2_client
-            self.backups_client_latest = self.backups_v2_client
-
         if CONF.volume_feature_enabled.api_v3:
             self.backups_v3_client = self.volume_v3.BackupsClient()
             self.group_types_v3_client = self.volume_v3.GroupTypesClient()
@@ -283,11 +319,7 @@ class Manager(clients.ServiceClients):
             self.volume_v3_messages_client = self.volume_v3.MessagesClient()
             self.volume_v3_versions_client = self.volume_v3.VersionsClient()
             self.volumes_v3_client = self.volume_v3.VolumesClient()
-
-            # Set default client for users that don't need explicit version
-            self.volumes_client_latest = self.volumes_v3_client
-            self.snapshots_client_latest = self.snapshots_v3_client
-            self.backups_client_latest = self.backups_v3_client
+            # ****************Deprecated alias end here***********************
 
     def _set_object_storage_clients(self):
         self.account_client = self.object_storage.AccountClient()
