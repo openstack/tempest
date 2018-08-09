@@ -23,7 +23,6 @@ from tempest.lib.services.volume import base_client
 
 class GroupSnapshotsClient(base_client.BaseClient):
     """Client class to send CRUD Volume Group Snapshot API requests"""
-    api_version = 'v3'
 
     def create_group_snapshot(self, **kwargs):
         """Creates a group snapshot.

@@ -23,7 +23,6 @@ from tempest.lib.services.volume import base_client
 
 class BackupsClient(base_client.BaseClient):
     """Volume V3 Backups client"""
-    api_version = "v3"
 
     def create_backup(self, **kwargs):
         """Creates a backup of volume.

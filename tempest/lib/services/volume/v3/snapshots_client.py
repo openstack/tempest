@@ -22,7 +22,6 @@ from tempest.lib import exceptions as lib_exc
 
 class SnapshotsClient(rest_client.RestClient):
     """Client class to send CRUD Volume Snapshot V3 API requests."""
-    api_version = "v3"
     create_resp = 202
 
     def list_snapshots(self, detail=False, **params):

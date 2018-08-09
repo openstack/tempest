@@ -20,4 +20,3 @@ from tempest.lib.services.volume import base_client
 
 BaseClient = moves.moved_class(base_client.BaseClient, 'BaseClient', __name__,
                                version="Pike", removal_version='?')
-BaseClient.api_version = 'v3'
