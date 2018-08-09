@@ -225,7 +225,7 @@ class TestDiscovery(base.TestCase):
         # This test verifies that wrong config api_v2 = True is detected
         class FakeClient(object):
             def get_versions(self):
-                return (None, ['v1.0'])
+                return (None, ['v1.1'])
 
         fake_os = mock.MagicMock()
         fake_module = mock.MagicMock()
