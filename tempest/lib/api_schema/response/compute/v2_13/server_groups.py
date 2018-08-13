@@ -16,7 +16,9 @@ import copy
 
 from tempest.lib.api_schema.response.compute.v2_1 import server_groups
 
-
+# Compute microversion 2.13:
+# 1. New attributes in 'server_group' dict.
+#      'project_id', 'user_id'
 common_server_group = copy.deepcopy(server_groups.common_server_group)
 common_server_group['properties']['project_id'] = {'type': 'string'}
 common_server_group['properties']['user_id'] = {'type': 'string'}
