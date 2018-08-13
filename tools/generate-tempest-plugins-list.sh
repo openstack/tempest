@@ -50,7 +50,7 @@ fi
 sorted_plugins=$(python tools/generate-tempest-plugins-list.py)
 
 name_col_len=$(echo "${sorted_plugins}" | wc -L)
-name_col_len=$(( name_col_len + 2 ))
+name_col_len=$(( name_col_len + 20 ))
 
 # Print the title underline for a RST table.
 function title_underline {
@@ -69,11 +69,11 @@ printf "%-3s %-${name_col_len}s %s\n" "SR" "Plugin Name" "URL"
 title_underline ${name_col_len}
 
 i=0
-for k in ${sorted_plugins}; do
+for plugin in ${sorted_plugins}; do
     i=$((i+1))
-    project=${k:0:28}
-    giturl="git://git.openstack.org/openstack/${k:0:26}"
-    printf "%-3s %-${name_col_len}s %s\n" "$i" "${project}" "${giturl}"
+    giturl="git://git.openstack.org/openstack/${plugin}"
+    gitlink="https://git.openstack.org/cgit/openstack/${plugin}"
+    printf "%-3s %-${name_col_len}s %s\n" "$i" "${plugin}" "\`${giturl} <${gitlink}>\`__"
 done
 
 title_underline ${name_col_len}
