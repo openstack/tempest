@@ -25,17 +25,17 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
+class AggregatesAdminTestBase(base.BaseV2ComputeAdminTest):
     """Tests Aggregates API that require admin privileges"""
 
     @classmethod
     def setup_clients(cls):
-        super(AggregatesAdminTestJSON, cls).setup_clients()
+        super(AggregatesAdminTestBase, cls).setup_clients()
         cls.client = cls.os_admin.aggregates_client
 
     @classmethod
     def resource_setup(cls):
-        super(AggregatesAdminTestJSON, cls).resource_setup()
+        super(AggregatesAdminTestBase, cls).resource_setup()
         cls.aggregate_name_prefix = 'test_aggregate'
         cls.az_name_prefix = 'test_az'
 
@@ -68,6 +68,9 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(kwargs['name'], aggregate['name'])
 
         return aggregate
+
+
+class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
@@ -226,3 +229,28 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                                          wait_until='ACTIVE')
         body = admin_servers_client.show_server(server['id'])['server']
         self.assertEqual(host, body['OS-EXT-SRV-ATTR:host'])
+
+
+class AggregatesAdminTestV241(AggregatesAdminTestBase):
+    min_microversion = '2.41'
+
+    # NOTE(gmann): This test tests the Aggregate APIs response schema
+    # for 2.41 microversion. No specific assert or behaviour verification
+    # is needed.
+
+    @decorators.idempotent_id('fdf24d9e-8afa-4700-b6aa-9c498351504f')
+    def test_create_update_show_aggregate_add_remove_host(self):
+        # Update and add a host to the given aggregate and get details.
+        self.useFixture(fixtures.LockFixture('availability_zone'))
+        # Checking create aggregate API response schema
+        aggregate = self._create_test_aggregate()
+
+        new_aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        # Checking update aggregate API response schema
+        self.client.update_aggregate(aggregate['id'], name=new_aggregate_name)
+        # Checking show aggregate API response schema
+        self.client.show_aggregate(aggregate['id'])['aggregate']
+        # Checking add host to aggregate API response schema
+        self.client.add_host(aggregate['id'], host=self.host)
+        # Checking rempve host from aggregate API response schema
+        self.client.remove_host(aggregate['id'], host=self.host)
