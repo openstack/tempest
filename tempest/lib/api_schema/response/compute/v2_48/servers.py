@@ -112,8 +112,6 @@ show_server_diagnostics = {
     }
 }
 
-get_server = copy.deepcopy(servers247.get_server)
-
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
@@ -124,3 +122,4 @@ delete_all_tags = copy.deepcopy(servers247.delete_all_tags)
 check_tag_existence = copy.deepcopy(servers247.check_tag_existence)
 update_tag = copy.deepcopy(servers247.update_tag)
 delete_tag = copy.deepcopy(servers247.delete_tag)
+get_server = copy.deepcopy(servers247.get_server)

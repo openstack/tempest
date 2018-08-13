@@ -128,7 +128,7 @@ server_detail['properties']['addresses']['patternProperties'][
     '^[a-zA-Z0-9-_.]+$']['items']['properties'].update({
         'OS-EXT-IPS:type': {'type': 'string'},
         'OS-EXT-IPS-MAC:mac_addr': parameter_types.mac_address})
-# NOTE(gmann)dd: Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
+# NOTE(gmann): Update OS-EXT-IPS:type and OS-EXT-IPS-MAC:mac_addr
 # attributes in server address. Those are API extension,
 # and some environments return a response without
 # these attributes. So they are not 'required'.
