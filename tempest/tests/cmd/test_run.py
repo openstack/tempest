@@ -40,24 +40,18 @@ class TestTempestRun(base.TestCase):
         args = mock.Mock(spec=argparse.Namespace)
         setattr(args, 'smoke', False)
         setattr(args, 'regex', '')
-        setattr(args, 'whitelist_file', None)
-        setattr(args, 'blacklist_file', None)
         self.assertIsNone(None, self.run_cmd._build_regex(args))
 
     def test__build_regex_smoke(self):
         args = mock.Mock(spec=argparse.Namespace)
         setattr(args, "smoke", True)
         setattr(args, 'regex', '')
-        setattr(args, 'whitelist_file', None)
-        setattr(args, 'blacklist_file', None)
         self.assertEqual(['smoke'], self.run_cmd._build_regex(args))
 
     def test__build_regex_regex(self):
         args = mock.Mock(spec=argparse.Namespace)
         setattr(args, 'smoke', False)
         setattr(args, "regex", 'i_am_a_fun_little_regex')
-        setattr(args, 'whitelist_file', None)
-        setattr(args, 'blacklist_file', None)
         self.assertEqual(['i_am_a_fun_little_regex'],
                          self.run_cmd._build_regex(args))
 
