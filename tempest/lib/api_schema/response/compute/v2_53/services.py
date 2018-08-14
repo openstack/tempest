@@ -42,7 +42,8 @@ update_service = {
                 'properties': {
                     'id': {'type': 'string', 'format': 'uuid'},
                     'binary': {'type': 'string'},
-                    'disabled_reason': {'type': 'string'},
+                    # disabled_reason can be null when status is enabled.
+                    'disabled_reason': {'type': ['string', 'null']},
                     'host': {'type': 'string'},
                     'state': {'type': 'string'},
                     'status': {'type': 'string'},
