@@ -25,22 +25,57 @@ from tempest.lib import decorators
 LOG = logging.getLogger(__name__)
 
 
-class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
+class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
     def setUp(self):
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
-        super(QuotasAdminTestJSON, self).setUp()
+        super(QuotasAdminTestBase, self).setUp()
 
     @classmethod
     def setup_clients(cls):
-        super(QuotasAdminTestJSON, cls).setup_clients()
+        super(QuotasAdminTestBase, cls).setup_clients()
         cls.adm_client = cls.os_admin.quotas_client
+
+    def _get_updated_quotas(self):
+        # Verify that GET shows the updated quota set of project
+        project_name = data_utils.rand_name('cpu_quota_project')
+        project_desc = project_name + '-desc'
+        project = identity.identity_utils(self.os_admin).create_project(
+            name=project_name, description=project_desc)
+        project_id = project['id']
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
+                        project_id)
+
+        self.adm_client.update_quota_set(project_id, ram='5120')
+        # Call show_quota_set with detail=true to cover the
+        # get_quota_set_details response schema for microversion tests
+        quota_set = self.adm_client.show_quota_set(
+            project_id, detail=True)['quota_set']
+        self.assertEqual(5120, quota_set['ram']['limit'])
+
+        # Verify that GET shows the updated quota set of user
+        user_name = data_utils.rand_name('cpu_quota_user')
+        password = data_utils.rand_password()
+        email = user_name + '@testmail.tm'
+        user = identity.identity_utils(self.os_admin).create_user(
+            username=user_name, password=password, project=project,
+            email=email)
+        user_id = user['id']
+        self.addCleanup(identity.identity_utils(self.os_admin).delete_user,
+                        user_id)
+
+        self.adm_client.update_quota_set(project_id,
+                                         user_id=user_id,
+                                         ram='2048')
+        quota_set = self.adm_client.show_quota_set(
+            project_id, user_id=user_id)['quota_set']
+        self.assertEqual(2048, quota_set['ram'])
 
     @classmethod
     def resource_setup(cls):
-        super(QuotasAdminTestJSON, cls).resource_setup()
+        super(QuotasAdminTestBase, cls).resource_setup()
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
@@ -60,6 +95,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                              'injected_file_path_bytes',
                                              'injected_files'])
 
+
+class QuotasAdminTestJSON(QuotasAdminTestBase):
     @decorators.idempotent_id('3b0a7c8f-cf58-46b8-a60c-715a32a8ba7d')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
@@ -103,36 +140,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     # TODO(afazekas): merge these test cases
     @decorators.idempotent_id('ce9e0815-8091-4abd-8345-7fe5b85faa1d')
     def test_get_updated_quotas(self):
-        # Verify that GET shows the updated quota set of project
-        project_name = data_utils.rand_name('cpu_quota_project')
-        project_desc = project_name + '-desc'
-        project = identity.identity_utils(self.os_admin).create_project(
-            name=project_name, description=project_desc)
-        project_id = project['id']
-        self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
-                        project_id)
-
-        self.adm_client.update_quota_set(project_id, ram='5120')
-        quota_set = self.adm_client.show_quota_set(project_id)['quota_set']
-        self.assertEqual(5120, quota_set['ram'])
-
-        # Verify that GET shows the updated quota set of user
-        user_name = data_utils.rand_name('cpu_quota_user')
-        password = data_utils.rand_password()
-        email = user_name + '@testmail.tm'
-        user = identity.identity_utils(self.os_admin).create_user(
-            username=user_name, password=password, project=project,
-            email=email)
-        user_id = user['id']
-        self.addCleanup(identity.identity_utils(self.os_admin).delete_user,
-                        user_id)
-
-        self.adm_client.update_quota_set(project_id,
-                                         user_id=user_id,
-                                         ram='2048')
-        quota_set = self.adm_client.show_quota_set(
-            project_id, user_id=user_id)['quota_set']
-        self.assertEqual(2048, quota_set['ram'])
+        self._get_updated_quotas()
 
     @decorators.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
     def test_delete_quota(self):
@@ -154,6 +162,30 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         quota_set_new = self.adm_client.show_quota_set(project_id)['quota_set']
         self.assertEqual(ram_default, quota_set_new['ram'])
+
+
+class QuotasAdminTestV236(QuotasAdminTestBase):
+    min_microversion = '2.36'
+    # NOTE(gmann): This test tests the Quota APIs response schema
+    # for 2.36 microversion. No specific assert or behaviour verification
+    # is needed.
+
+    @decorators.idempotent_id('4268b5c9-92e5-4adc-acf1-3a2798f3d803')
+    def test_get_updated_quotas(self):
+        # Checking Quota update, get, get details APIs response schema
+        self._get_updated_quotas()
+
+
+class QuotasAdminTestV257(QuotasAdminTestBase):
+    min_microversion = '2.57'
+    # NOTE(gmann): This test tests the Quota APIs response schema
+    # for 2.57 microversion. No specific assert or behaviour verification
+    # is needed.
+
+    @decorators.idempotent_id('e641e6c6-e86c-41a4-9e5c-9493c0ae47ad')
+    def test_get_updated_quotas(self):
+        # Checking Quota update, get, get details APIs response schema
+        self._get_updated_quotas()
 
 
 class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):

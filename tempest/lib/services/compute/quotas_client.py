@@ -17,11 +17,18 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import quotas as schema
+from tempest.lib.api_schema.response.compute.v2_36 import quotas as schemav236
+from tempest.lib.api_schema.response.compute.v2_57 import quotas as schemav257
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class QuotasClient(base_compute_client.BaseComputeClient):
+
+    schema_versions_info = [
+        {'min': None, 'max': '2.35', 'schema': schema},
+        {'min': '2.36', 'max': '2.56', 'schema': schemav236},
+        {'min': '2.57', 'max': None, 'schema': schemav257}]
 
     def show_quota_set(self, tenant_id, user_id=None, detail=False):
         """List the quota set for a tenant.
@@ -42,6 +49,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         if detail:
             self.validate_response(schema.get_quota_set_details, resp, body)
         else:
@@ -57,6 +65,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
         url = 'os-quota-sets/%s/defaults' % tenant_id
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -78,6 +87,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
                                   post_body)
 
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.update_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -87,5 +97,6 @@ class QuotasClient(base_compute_client.BaseComputeClient):
         https://developer.openstack.org/api-ref/compute/#revert-quotas-to-defaults
         """
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_quota, resp, body)
         return rest_client.ResponseBody(resp, body)
