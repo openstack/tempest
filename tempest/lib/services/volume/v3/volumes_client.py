@@ -24,7 +24,6 @@ from tempest.lib.services.volume import base_client
 
 class VolumesClient(base_client.BaseClient):
     """Client class to send CRUD Volume V3 API requests"""
-    api_version = "v3"
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.

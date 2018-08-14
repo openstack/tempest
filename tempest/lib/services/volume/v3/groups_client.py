@@ -23,7 +23,6 @@ from tempest.lib.services.volume import base_client
 
 class GroupsClient(base_client.BaseClient):
     """Client class to send CRUD Volume Group API requests"""
-    api_version = 'v3'
 
     def create_group(self, **kwargs):
         """Creates a group.

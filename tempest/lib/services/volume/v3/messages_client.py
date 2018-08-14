@@ -22,7 +22,6 @@ from tempest.lib.services.volume import base_client
 
 class MessagesClient(base_client.BaseClient):
     """Client class to send user messages API requests."""
-    api_version = 'v3'
 
     def show_message(self, message_id):
         """Show details for a single message."""

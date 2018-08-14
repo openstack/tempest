@@ -22,7 +22,6 @@ from tempest.lib.services.volume import base_client
 
 class GroupTypesClient(base_client.BaseClient):
     """Client class to send CRUD Volume V3 Group Types API requests"""
-    api_version = 'v3'
 
     @property
     def resource_type(self):
