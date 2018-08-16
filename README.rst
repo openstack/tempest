@@ -95,10 +95,12 @@ as it is simpler, and quicker to work with.
    command. Tempest is expecting a ``tempest.conf`` file in etc/ so if only a
    sample exists you must rename or copy it to tempest.conf before making
    any changes to it otherwise Tempest will not know how to load it. For
-   details on configuring Tempest refer to the :ref:`tempest-configuration`.
+   details on configuring Tempest refer to the
+   `Tempest Configuration <https://docs.openstack.org/tempest/latest/configuration.html#tempest-configuration>`_
 
 #. Once the configuration is done you're now ready to run Tempest. This can
-   be done using the :ref:`tempest_run` command. This can be done by either
+   be done using the `Tempest Run <https://docs.openstack.org/tempest/latest/run.html#tempest-run>`_
+   command. This can be done by either
    running::
 
     $ tempest run
@@ -129,7 +131,8 @@ Tempest library interface, other pieces of Tempest do not have the same
 stable interface and there are no guarantees on the Python API unless otherwise
 stated.
 
-For more details refer to the library documentation here: :ref:`library`
+For more details refer to the library documentation here: `Library
+<https://docs.openstack.org/tempest/latest/library.html#library>`_
 
 Release Versioning
 ------------------
@@ -165,8 +168,10 @@ Configuration
 -------------
 
 Detailed configuration of Tempest is beyond the scope of this
-document see :ref:`tempest-configuration` for more details on configuring
-Tempest. The ``etc/tempest.conf.sample`` attempts to be a self-documenting
+document, see `Tempest Configuration Documentation
+<https://docs.openstack.org/tempest/latest/configuration.html#tempest-configuration>`_
+for more details on configuring Tempest.
+The ``etc/tempest.conf.sample`` attempts to be a self-documenting
 version of the configuration.
 
 You can generate a new sample tempest.conf file, run the following
