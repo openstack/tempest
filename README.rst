@@ -131,7 +131,7 @@ Tempest library interface, other pieces of Tempest do not have the same
 stable interface and there are no guarantees on the Python API unless otherwise
 stated.
 
-For more details refer to the library documentation here: `Library
+For more details refer to the `library documentation
 <https://docs.openstack.org/tempest/latest/library.html#library>`_
 
 Release Versioning
