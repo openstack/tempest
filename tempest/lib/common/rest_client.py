@@ -570,8 +570,10 @@ class RestClient(object):
 
         :param str url: Full url to send the request
         :param str method: The HTTP verb to use for the request
-        :param str headers: Headers to use for the request if none are specifed
-                            the headers
+        :param dict headers: Headers to use for the request. If none are
+                             specified, then the headers returned from the
+                             get_headers() method are used. If the request
+                             explicitly requires no headers use an empty dict.
         :param str body: Body to send with the request
         :param bool chunked: sends the body with chunked encoding
         :rtype: tuple
@@ -605,8 +607,8 @@ class RestClient(object):
                                    returned by the get_headers() method are to
                                    be used but additional headers are needed in
                                    the request pass them in as a dict.
-        :param dict headers: Headers to use for the request if none are
-                             specifed the headers returned from the
+        :param dict headers: Headers to use for the request. If none are
+                             specified, then the headers returned from the
                              get_headers() method are used. If the request
                              explicitly requires no headers use an empty dict.
         :param str body: Body to send with the request
@@ -623,10 +625,13 @@ class RestClient(object):
         :raises Gone: If a 410 response code is received
         :raises Conflict: If a 409 response code is received
         :raises PreconditionFailed: If a 412 response code is received
-        :raises OverLimit: If a 413 response code is received and over_limit is
-                          not in the response body
+        :raises OverLimit: If a 413 response code is received and retry-after
+                           is not in the response body or its retry operation
+                           exceeds the limits defined by the server
         :raises RateLimitExceeded: If a 413 response code is received and
-                                   over_limit is in the response body
+                                   retry-after is in the response body and
+                                   its retry operation does not exceeds the
+                                   limits defined by the server
         :raises InvalidContentType: If a 415 response code is received
         :raises UnprocessableEntity: If a 422 response code is received
         :raises InvalidHTTPResponseBody: The response body wasn't valid JSON
