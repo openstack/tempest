@@ -275,6 +275,8 @@
         TEMPEST_VOLUME_TYPE: volumev2
 
 - project:
+    templates:
+      - openstack-python36-jobs
     check:
       jobs:
         - devstack-tempest:
