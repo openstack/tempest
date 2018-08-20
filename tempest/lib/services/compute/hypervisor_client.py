@@ -15,16 +15,24 @@
 
 from oslo_serialization import jsonutils as json
 
-from tempest.lib.api_schema.response.compute.v2_1 import hypervisors as schema
+from tempest.lib.api_schema.response.compute.v2_1 \
+    import hypervisors as schemav21
+from tempest.lib.api_schema.response.compute.v2_28 \
+    import hypervisors as schemav228
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class HypervisorClient(base_compute_client.BaseComputeClient):
 
+    schema_versions_info = [
+        {'min': None, 'max': '2.27', 'schema': schemav21},
+        {'min': '2.28', 'max': None, 'schema': schemav228}]
+
     def list_hypervisors(self, detail=False):
         """List hypervisors information."""
         url = 'os-hypervisors'
+        schema = self.get_schema(self.schema_versions_info)
         _schema = schema.list_search_hypervisors
         if detail:
             url += '/detail'
@@ -39,6 +47,7 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         """Display the details of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s' % hypervisor_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_hypervisor, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -46,6 +55,7 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         """List instances belonging to the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/servers' % hypervisor_name)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_hypervisors_servers, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -53,6 +63,7 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_hypervisor_statistics, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -60,6 +71,7 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         """Display the uptime of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/uptime' % hypervisor_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_hypervisor_uptime, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -69,5 +81,6 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         """Search specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/search' % hypervisor_name)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_search_hypervisors, resp, body)
         return rest_client.ResponseBody(resp, body)
