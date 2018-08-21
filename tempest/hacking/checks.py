@@ -15,7 +15,7 @@
 import os
 import re
 
-import pep8
+import pycodestyle
 
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
@@ -69,7 +69,7 @@ def scenario_tests_need_service_tags(physical_line, filename,
 
 def no_setup_teardown_class_for_tests(physical_line, filename):
 
-    if pep8.noqa(physical_line):
+    if pycodestyle.noqa(physical_line):
         return
 
     if 'tempest/test.py' in filename or 'tempest/lib/' in filename:
@@ -164,7 +164,7 @@ def _common_service_clients_check(logical_line, physical_line, filename,
     if not METHOD.match(physical_line):
         return False
 
-    if pep8.noqa(physical_line):
+    if pycodestyle.noqa(physical_line):
         return False
 
     return True
@@ -287,7 +287,7 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
     if 'tempest/api/' not in filename:
         return
 
-    if pep8.noqa(physical_line):
+    if pycodestyle.noqa(physical_line):
         return
 
     if not re.match(r'class .*Test.*\(.*Admin.*\):', logical_line):
