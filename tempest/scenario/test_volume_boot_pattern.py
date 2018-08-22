@@ -11,6 +11,7 @@
 #    under the License.
 
 from oslo_log import log as logging
+from oslo_serialization import jsonutils
 import testtools
 
 from tempest.common import utils
@@ -49,7 +50,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                                      source_type,
                                      keypair=None,
                                      security_group=None,
-                                     delete_on_termination=False):
+                                     delete_on_termination=False,
+                                     name=None):
         create_kwargs = dict()
         if keypair:
             create_kwargs['key_name'] = keypair['name']
@@ -60,12 +62,18 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
             source_id,
             source_type,
             delete_on_termination=delete_on_termination))
+        if name:
+            create_kwargs['name'] = name
 
         return self.create_server(image_id='', **create_kwargs)
 
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
+
+    def _delete_snapshot(self, snapshot_id):
+        self.snapshots_client.delete_snapshot(snapshot_id)
+        self.snapshots_client.wait_for_resource_deletion(snapshot_id)
 
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
     # Note: This test is being skipped based on 'public_network_id'.
@@ -202,28 +210,29 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     def test_image_defined_boot_from_volume(self):
         # create an instance from image-backed volume
         volume_origin = self._create_volume_from_image()
-        instance = self._boot_instance_from_resource(
+        name = data_utils.rand_name(self.__class__.__name__ +
+                                    '-volume-backed-server')
+        instance1 = self._boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
-            delete_on_termination=True)
+            delete_on_termination=True,
+            name=name)
         # Create a snapshot image from the volume-backed server.
         # The compute service will have the block service create a snapshot of
         # the root volume and store its metadata in the image.
-        image = self.create_server_snapshot(instance)
-
-        # Delete the first server which will also delete the first image-backed
-        # volume.
-        self._delete_server(instance)
+        image = self.create_server_snapshot(instance1)
 
         # Create a server from the image snapshot which has an
         # "image-defined block device mapping (BDM)" in it, i.e. the metadata
         # about the volume snapshot. The compute service will use this to
         # create a volume from the volume snapshot and use that as the root
         # disk for the server.
-        instance = self.create_server(image_id=image['id'])
+        name = data_utils.rand_name(self.__class__.__name__ +
+                                    '-image-snapshot-server')
+        instance2 = self.create_server(image_id=image['id'], name=name)
 
         # Verify the server was created from the image-defined BDM.
-        volume_attachments = instance['os-extended-volumes:volumes_attached']
+        volume_attachments = instance2['os-extended-volumes:volumes_attached']
         self.assertEqual(1, len(volume_attachments),
                          "No volume attachment found.")
         created_volume = self.volumes_client.show_volume(
@@ -232,7 +241,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self.assertEqual(1, len(created_volume['attachments']),
                          "No server attachment found for volume: %s" %
                          created_volume)
-        self.assertEqual(instance['id'],
+        self.assertEqual(instance2['id'],
                          created_volume['attachments'][0]['server_id'])
         self.assertEqual(volume_attachments[0]['id'],
                          created_volume['attachments'][0]['volume_id'])
@@ -242,10 +251,29 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         # Delete the second server which should also delete the second volume
         # created from the volume snapshot.
-        self._delete_server(instance)
+        self._delete_server(instance2)
 
         # Assert that the underlying volume is gone.
         self.volumes_client.wait_for_resource_deletion(created_volume['id'])
+
+        # Delete the volume snapshot. We must do this before deleting the first
+        # server created in this test because the snapshot depends on the first
+        # instance's underlying volume (volume_origin).
+        # In glance v2, the image properties are flattened and in glance v1,
+        # the image properties are under the 'properties' key.
+        bdms = image.get('block_device_mapping')
+        if not bdms:
+            bdms = image['properties']['block_device_mapping']
+        bdms = jsonutils.loads(bdms)
+        snapshot_id = bdms[0]['snapshot_id']
+        self._delete_snapshot(snapshot_id)
+
+        # Now, delete the first server which will also delete the first
+        # image-backed volume.
+        self._delete_server(instance1)
+
+        # Assert that the underlying volume is gone.
+        self.volumes_client.wait_for_resource_deletion(volume_origin['id'])
 
     @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
     @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
