@@ -604,8 +604,9 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         self.addCleanup(client.delete_flavor, flavor['id'])
         return flavor
 
-    def get_host_for_server(self, server_id):
-        server_details = self.admin_servers_client.show_server(server_id)
+    @classmethod
+    def get_host_for_server(cls, server_id):
+        server_details = cls.admin_servers_client.show_server(server_id)
         return server_details['server']['OS-EXT-SRV-ATTR:host']
 
     def get_host_other_than(self, server_id):

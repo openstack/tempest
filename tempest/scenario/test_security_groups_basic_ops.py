@@ -282,11 +282,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
         # Verify servers are on different compute nodes
         if self.multi_node:
-            adm_get_server = self.os_admin.servers_client.show_server
-            new_host = adm_get_server(server["id"])["server"][
-                "OS-EXT-SRV-ATTR:host"]
-            host_list = [adm_get_server(s)["server"]["OS-EXT-SRV-ATTR:host"]
-                         for s in self.servers]
+            new_host = self.get_host_for_server(server["id"])
+            host_list = [self.get_host_for_server(s) for s in self.servers]
             self.assertNotIn(new_host, host_list,
                              message="Failed to boot servers on different "
                                      "Compute nodes.")
