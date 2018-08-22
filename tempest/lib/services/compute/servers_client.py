@@ -33,6 +33,7 @@ from tempest.lib.api_schema.response.compute.v2_54 import servers as schemav254
 from tempest.lib.api_schema.response.compute.v2_57 import servers as schemav257
 from tempest.lib.api_schema.response.compute.v2_6 import servers as schemav26
 from tempest.lib.api_schema.response.compute.v2_63 import servers as schemav263
+from tempest.lib.api_schema.response.compute.v2_8 import servers as schemav28
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
@@ -44,7 +45,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
     schema_versions_info = [
         {'min': None, 'max': '2.2', 'schema': schema},
         {'min': '2.3', 'max': '2.5', 'schema': schemav23},
-        {'min': '2.6', 'max': '2.8', 'schema': schemav26},
+        {'min': '2.6', 'max': '2.7', 'schema': schemav26},
+        {'min': '2.8', 'max': '2.8', 'schema': schemav28},
         {'min': '2.9', 'max': '2.15', 'schema': schemav29},
         {'min': '2.16', 'max': '2.18', 'schema': schemav216},
         {'min': '2.19', 'max': '2.25', 'schema': schemav219},

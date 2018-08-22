@@ -14,16 +14,7 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_1 import servers as servers_21
-from tempest.lib.api_schema.response.compute.v2_6 import servers
-
-# NOTE: Below are the unchanged schema in this microversion. We need
-# to keep this schema in this file to have the generic way to select the
-# right schema based on self.schema_versions_info mapping in service client.
-# ****** Schemas unchanged since microversion 2.6 ******
-list_servers = copy.deepcopy(servers.list_servers)
-show_server_diagnostics = copy.deepcopy(servers.show_server_diagnostics)
-get_remote_consoles = copy.deepcopy(servers.get_remote_consoles)
+from tempest.lib.api_schema.response.compute.v2_8 import servers
 
 get_server = copy.deepcopy(servers.get_server)
 get_server['response_body']['properties']['server'][
@@ -37,21 +28,29 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('locked')
 
-update_server = copy.deepcopy(servers_21.update_server)
+update_server = copy.deepcopy(servers.update_server)
 update_server['response_body']['properties']['server'][
     'properties'].update({'locked': {'type': 'boolean'}})
 update_server['response_body']['properties']['server'][
     'required'].append('locked')
 
-rebuild_server = copy.deepcopy(servers_21.rebuild_server)
+rebuild_server = copy.deepcopy(servers.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update({'locked': {'type': 'boolean'}})
 rebuild_server['response_body']['properties']['server'][
     'required'].append('locked')
 
 rebuild_server_with_admin_pass = copy.deepcopy(
-    servers_21.rebuild_server_with_admin_pass)
+    servers.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'locked': {'type': 'boolean'}})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('locked')
+
+# NOTE: Below are the unchanged schema in this microversion. We need
+# to keep this schema in this file to have the generic way to select the
+# right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged since microversion 2.8 ******
+list_servers = copy.deepcopy(servers.list_servers)
+show_server_diagnostics = copy.deepcopy(servers.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers.get_remote_consoles)
