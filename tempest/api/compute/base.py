@@ -208,19 +208,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 raise
 
     @classmethod
-    def clear_resources(cls, resource_name, resources, resource_del_func):
-        LOG.debug('Clearing %s: %s', resource_name,
-                  ','.join(map(str, resources)))
-        for res_id in resources:
-            try:
-                test_utils.call_and_ignore_notfound_exc(
-                    resource_del_func, res_id)
-            except Exception as exc:
-                LOG.exception('Exception raised deleting %s: %s',
-                              resource_name, res_id)
-                LOG.exception(exc)
-
-    @classmethod
     def create_test_server(cls, validatable=False, volume_backed=False,
                            validation_resources=None, **kwargs):
         """Wrapper utility that returns a test server.
