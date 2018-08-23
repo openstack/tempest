@@ -29,13 +29,11 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class LiveMigrationTest(base.BaseV2ComputeAdminTest):
-    max_microversion = '2.24'
-    block_migration = None
+class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def skip_checks(cls):
-        super(LiveMigrationTest, cls).skip_checks()
+        super(LiveMigrationTestBase, cls).skip_checks()
 
         if not CONF.compute_feature_enabled.live_migration:
             skip_msg = ("%s skipped as live-migration is "
@@ -55,11 +53,11 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         # TODO(mriedem): SSH validation before and after the instance is
         # live migrated would be a nice test wrinkle addition.
         cls.set_network_resources(network=True, subnet=True)
-        super(LiveMigrationTest, cls).setup_credentials()
+        super(LiveMigrationTestBase, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
-        super(LiveMigrationTest, cls).setup_clients()
+        super(LiveMigrationTestBase, cls).setup_clients()
         cls.admin_migration_client = cls.os_admin.migrations_client
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
@@ -90,6 +88,11 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         msg += "]"
         self.assertEqual(target_host, self.get_host_for_server(server_id),
                          msg)
+
+
+class LiveMigrationTest(LiveMigrationTestBase):
+    max_microversion = '2.24'
+    block_migration = None
 
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
         """Tests live migration between two hosts.
@@ -168,7 +171,7 @@ class LiveMigrationTest(base.BaseV2ComputeAdminTest):
         self.assertEqual(volume_id1, volume_id2)
 
 
-class LiveMigrationRemoteConsolesV26Test(LiveMigrationTest):
+class LiveMigrationRemoteConsolesV26Test(LiveMigrationTestBase):
     min_microversion = '2.6'
     max_microversion = 'latest'
 
