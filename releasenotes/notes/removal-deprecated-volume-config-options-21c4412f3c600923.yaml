@@ -1,0 +1,24 @@
+---
+upgrade:
+  - |
+    Below config option was deprecated for removal since juno release.
+    It's time to remove it as all supported stable branches and Tempest plugins
+    are good to handle it.
+
+    * ``[volume_feature_enabled].api_v1``
+
+    Also Tempest removes the below corresponding service clients alias from
+    client.py which were being set based on above removed config option.
+
+    * self.backups_client
+    * self.encryption_types_client
+    * self.snapshots_client
+    * self.volume_availability_zone_client
+    * self.volume_hosts_client
+    * self.volume_limits_client
+    * self.volume_qos_client
+    * self.volume_quotas_client
+    * self.volume_services_client
+    * self.volume_types_client
+    * self.volumes_client
+    * self.volumes_extension_client

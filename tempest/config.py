@@ -836,13 +836,6 @@ VolumeFeaturesGroup = [
                 help='A list of enabled volume extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Empty list indicates all extensions are disabled'),
-    cfg.BoolOpt('api_v1',
-                default=False,
-                help="Is the v1 volume API enabled",
-                deprecated_for_removal=True,
-                deprecated_reason="The v1 volume API has been deprecated "
-                                  "since Juno release, and the API will be "
-                                  "removed."),
     cfg.BoolOpt('api_v2',
                 default=True,
                 help="Is the v2 volume API enabled",

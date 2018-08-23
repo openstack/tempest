@@ -222,22 +222,6 @@ class Manager(clients.ServiceClients):
 
     def _set_volume_clients(self):
 
-        if CONF.volume_feature_enabled.api_v1:
-            self.backups_client = self.volume_v1.BackupsClient()
-            self.encryption_types_client = \
-                self.volume_v1.EncryptionTypesClient()
-            self.snapshots_client = self.volume_v1.SnapshotsClient()
-            self.volume_availability_zone_client = \
-                self.volume_v1.AvailabilityZoneClient()
-            self.volume_hosts_client = self.volume_v1.HostsClient()
-            self.volume_limits_client = self.volume_v1.LimitsClient()
-            self.volume_qos_client = self.volume_v1.QosSpecsClient()
-            self.volume_quotas_client = self.volume_v1.QuotasClient()
-            self.volume_services_client = self.volume_v1.ServicesClient()
-            self.volume_types_client = self.volume_v1.TypesClient()
-            self.volumes_client = self.volume_v1.VolumesClient()
-            self.volumes_extension_client = self.volume_v1.ExtensionsClient()
-
         # if only api_v3 is enabled, all these clients should be available
         if (CONF.volume_feature_enabled.api_v2 or
             CONF.volume_feature_enabled.api_v3):

@@ -205,10 +205,6 @@ def verify_keystone_api_versions(os, update):
 def verify_cinder_api_versions(os, update):
     # Check cinder api versions
     versions = _get_api_versions(os, 'cinder')
-    if (CONF.volume_feature_enabled.api_v1 !=
-            contains_version('v1.', versions)):
-        print_and_or_update('api_v1', 'volume-feature-enabled',
-                            not CONF.volume_feature_enabled.api_v1, update)
     if (CONF.volume_feature_enabled.api_v2 !=
             contains_version('v2.', versions)):
         print_and_or_update('api_v2', 'volume-feature-enabled',
