@@ -164,6 +164,16 @@
       tempest_concurrency: 2
 
 - job:
+    name: tempest-full-rocky
+    parent: tempest-full
+    override-checkout: stable/rocky
+
+- job:
+    name: tempest-full-rocky-py3
+    parent: tempest-full-py3
+    override-checkout: stable/rocky
+
+- job:
     name: tempest-full-queens
     parent: tempest-full
     override-checkout: stable/queens
@@ -314,6 +324,26 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+        - tempest-full-rocky:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+        - tempest-full-rocky-py3:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
         - tempest-full-queens:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -422,6 +452,8 @@
               - ^tempest/tests/.*$
     periodic-stable:
       jobs:
+        - tempest-full-rocky
+        - tempest-full-rocky-py3
         - tempest-full-queens
         - tempest-full-queens-py3
         - tempest-full-pike
