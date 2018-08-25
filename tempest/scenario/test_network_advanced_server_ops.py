@@ -102,10 +102,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                        'ACTIVE')
         self._check_network_connectivity(server, keypair, floating_ip)
 
-    def _get_host_for_server(self, server_id):
-        body = self.admin_servers_client.show_server(server_id)['server']
-        return body['OS-EXT-SRV-ATTR:host']
-
     @decorators.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @decorators.attr(type='slow')
     @utils.services('compute', 'network')
@@ -220,7 +216,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
         floating_ip = self._setup_network(server, keypair)
-        src_host = self._get_host_for_server(server['id'])
+        src_host = self.get_host_for_server(server['id'])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
@@ -230,7 +226,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.confirm_resize_server(server['id'])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
-        dst_host = self._get_host_for_server(server['id'])
+        dst_host = self.get_host_for_server(server['id'])
 
         self.assertNotEqual(src_host, dst_host)
 
@@ -246,7 +242,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         keypair = self.create_keypair()
         server = self._setup_server(keypair)
         floating_ip = self._setup_network(server, keypair)
-        src_host = self._get_host_for_server(server['id'])
+        src_host = self.get_host_for_server(server['id'])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
@@ -256,6 +252,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.servers_client.revert_resize_server(server['id'])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
-        dst_host = self._get_host_for_server(server['id'])
+        dst_host = self.get_host_for_server(server['id'])
 
         self.assertEqual(src_host, dst_host)

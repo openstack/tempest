@@ -28,7 +28,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(ServersOnMultiNodesTest, cls).resource_setup()
         cls.server01 = cls.create_test_server(wait_until='ACTIVE')['id']
-        cls.host01 = cls._get_host(cls.server01)
+        cls.host01 = cls.get_host_for_server(cls.server01)
 
     @classmethod
     def skip_checks(cls):
@@ -37,11 +37,6 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         if CONF.compute.min_compute_nodes < 2:
             raise cls.skipException(
                 "Less than 2 compute nodes, skipping multi-nodes test.")
-
-    @classmethod
-    def _get_host(cls, server_id):
-        return cls.os_admin.servers_client.show_server(
-            server_id)['server']['OS-EXT-SRV-ATTR:host']
 
     def _create_servers_with_group(self, policy):
         group_id = self.create_test_server_group(policy=[policy])['id']
@@ -61,7 +56,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         hosts = {}
         for server in servers:
             self.assertIn(server['id'], server_group['members'])
-            hosts[server['id']] = self._get_host(server['id'])
+            hosts[server['id']] = self.get_host_for_server(server['id'])
 
         return hosts
 
@@ -73,7 +68,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         hints = {'same_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host02 = self._get_host(server02)
+        host02 = self.get_host_for_server(server02)
         self.assertEqual(self.host01, host02)
 
     @decorators.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
@@ -84,7 +79,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         hints = {'different_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host02 = self._get_host(server02)
+        host02 = self.get_host_for_server(server02)
         self.assertNotEqual(self.host01, host02)
 
     @decorators.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
@@ -96,7 +91,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         hints = {'different_host': [self.server01]}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
-        host02 = self._get_host(server02)
+        host02 = self.get_host_for_server(server02)
         self.assertNotEqual(self.host01, host02)
 
     @decorators.idempotent_id('f8bd0867-e459-45f5-ba53-59134552fe04')

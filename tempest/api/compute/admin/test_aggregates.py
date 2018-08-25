@@ -224,11 +224,10 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
         self.client.add_host(aggregate['id'], host=host)
         self.addCleanup(self.client.remove_host, aggregate['id'], host=host)
-        admin_servers_client = self.os_admin.servers_client
         server = self.create_test_server(availability_zone=az_name,
                                          wait_until='ACTIVE')
-        body = admin_servers_client.show_server(server['id'])['server']
-        self.assertEqual(host, body['OS-EXT-SRV-ATTR:host'])
+        server_host = self.get_host_for_server(server['id'])
+        self.assertEqual(host, server_host)
 
 
 class AggregatesAdminTestV241(AggregatesAdminTestBase):

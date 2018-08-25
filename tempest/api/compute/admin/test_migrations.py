@@ -114,8 +114,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
             raise self.skipException(msg)
 
         server = self.create_test_server(wait_until="ACTIVE")
-        src_host = self.admin_servers_client.show_server(
-            server['id'])['server']['OS-EXT-SRV-ATTR:host']
+        src_host = self.get_host_for_server(server['id'])
 
         self.admin_servers_client.migrate_server(server['id'])
 
@@ -131,8 +130,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
-        dst_host = self.admin_servers_client.show_server(
-            server['id'])['server']['OS-EXT-SRV-ATTR:host']
+        dst_host = self.get_host_for_server(server['id'])
         assert_func(src_host, dst_host)
 
     @decorators.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')

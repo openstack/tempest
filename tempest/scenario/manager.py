@@ -704,6 +704,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         else:
             raise lib_exc.InvalidConfiguration()
 
+    @classmethod
+    def get_host_for_server(cls, server_id):
+        server_details = cls.os_admin.servers_client.show_server(server_id)
+        return server_details['server']['OS-EXT-SRV-ATTR:host']
+
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
