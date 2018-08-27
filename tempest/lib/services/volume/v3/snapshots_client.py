@@ -22,7 +22,6 @@ from tempest.lib import exceptions as lib_exc
 
 class SnapshotsClient(rest_client.RestClient):
     """Client class to send CRUD Volume Snapshot V3 API requests."""
-    create_resp = 202
 
     def list_snapshots(self, detail=False, **params):
         """List all the snapshot.
@@ -66,7 +65,7 @@ class SnapshotsClient(rest_client.RestClient):
         post_body = json.dumps({'snapshot': kwargs})
         resp, body = self.post('snapshots', post_body)
         body = json.loads(body)
-        self.expected_success(self.create_resp, resp.status)
+        self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def update_snapshot(self, snapshot_id, **kwargs):
