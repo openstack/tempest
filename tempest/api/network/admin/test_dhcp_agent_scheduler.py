@@ -63,7 +63,6 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     def test_add_remove_network_from_dhcp_agent(self):
         # The agent is now bound to the network, we can free the port
         self.ports_client.delete_port(self.port['id'])
-        self.ports.remove(self.port)
         agent = dict()
         agent['agent_type'] = None
         body = self.admin_agents_client.list_agents()

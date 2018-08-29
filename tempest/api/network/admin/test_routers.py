@@ -32,7 +32,6 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
 
     def _cleanup_router(self, router):
         self.delete_router(router)
-        self.routers.remove(router)
 
     def _create_router(self, name=None, admin_state_up=False,
                        external_network_id=None, enable_snat=None):
