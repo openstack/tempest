@@ -470,7 +470,7 @@ ComputeFeaturesGroup = [
                      "entry 'all' indicates all filters that are included "
                      "with nova are enabled. Empty list indicates all filters "
                      "are disabled. The full list of available filters is in "
-                     "nova.conf: DEFAULT.scheduler_available_filters. If the "
+                     "nova.conf: filter_scheduler.enabled_filters. If the "
                      "default value is overridden in nova.conf by the test "
                      "environment (which means that a different set of "
                      "filters is enabled than what is included in Nova by "
