@@ -43,7 +43,6 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ServerRescueNegativeTestJSON, cls).resource_setup()
-        cls.device = CONF.compute.volume_device_name
         cls.password = data_utils.rand_password()
         rescue_password = data_utils.rand_password()
         # Server for negative tests
@@ -125,8 +124,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.attach_volume,
                           self.server_id,
-                          volumeId=volume['id'],
-                          device='/dev/%s' % self.device)
+                          volumeId=volume['id'])
 
     @decorators.idempotent_id('f56e465b-fe10-48bf-b75d-646cda3a8bc9')
     @utils.services('volume')
@@ -136,7 +134,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
         # Attach the volume to the server
         server = self.servers_client.show_server(self.server_id)['server']
-        self.attach_volume(server, volume, device='/dev/%s' % self.device)
+        self.attach_volume(server, volume)
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id,
