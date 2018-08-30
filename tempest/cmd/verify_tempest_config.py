@@ -279,6 +279,9 @@ def verify_extensions(os, service, results):
     if not results.get(service):
         results[service] = {}
     extensions_opt = get_enabled_extensions(service)
+    if not extensions_opt:
+        LOG.info("'%s' has no api_extensions set.", service)
+        return results
     if extensions_opt[0] == 'all':
         results[service]['extensions'] = extensions
         return results
