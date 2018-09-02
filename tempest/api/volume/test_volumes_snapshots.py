@@ -130,54 +130,39 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # Delete the snapshot
         self.delete_snapshot(snapshot['id'])
 
+    def _create_volume_from_snapshot(self, extra_size=0):
+        src_size = CONF.volume.volume_size
+        size = src_size + extra_size
+
+        src_vol = self.create_volume(size=src_size)
+        src_snap = self.create_snapshot(src_vol['id'])
+
+        dst_vol = self.create_volume(snapshot_id=src_snap['id'],
+                                     size=size)
+        # NOTE(zhufl): dst_vol is created based on snapshot, so dst_vol
+        # should be deleted before deleting snapshot, otherwise deleting
+        # snapshot will end with status 'error-deleting'. This depends on
+        # the implementation mechanism of vendors, generally speaking,
+        # some verdors will use "virtual disk clone" which will promote
+        # disk clone speed, and in this situation the "disk clone"
+        # is just a relationship between volume and snapshot.
+        self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
+
+        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
+        # Should allow
+        self.assertEqual(volume['snapshot_id'], src_snap['id'])
+        self.assertEqual(volume['size'], size)
+
     @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
         # Creates a volume from a snapshot passing a size
         # different from the source
-        src_size = CONF.volume.volume_size
-
-        src_vol = self.create_volume(size=src_size)
-        src_snap = self.create_snapshot(src_vol['id'])
-        # Destination volume bigger than source snapshot
-        dst_vol = self.create_volume(snapshot_id=src_snap['id'],
-                                     size=src_size + 1)
-        # NOTE(zhufl): dst_vol is created based on snapshot, so dst_vol
-        # should be deleted before deleting snapshot, otherwise deleting
-        # snapshot will end with status 'error-deleting'. This depends on
-        # the implementation mechanism of vendors, generally speaking,
-        # some verdors will use "virtual disk clone" which will promote
-        # disk clone speed, and in this situation the "disk clone"
-        # is just a relationship between volume and snapshot.
-        self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
-
-        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
-        # Should allow
-        self.assertEqual(volume['snapshot_id'], src_snap['id'])
-        self.assertEqual(volume['size'], src_size + 1)
+        self._create_volume_from_snapshot(extra_size=1)
 
     @decorators.idempotent_id('053d8870-8282-4fff-9dbb-99cb58bb5e0a')
     def test_volume_from_snapshot_no_size(self):
         # Creates a volume from a snapshot defaulting to original size
-        src_size = CONF.volume.volume_size
-
-        src_vol = self.create_volume(size=src_size)
-        src_snap = self.create_snapshot(src_vol['id'])
-        # Destination volume without specifying a size
-        dst_vol = self.create_volume(snapshot_id=src_snap['id'])
-
-        # NOTE(zhufl): dst_vol is created based on snapshot, so dst_vol
-        # should be deleted before deleting snapshot, otherwise deleting
-        # snapshot will end with status 'error-deleting'. This depends on
-        # the implementation mechanism of vendors, generally speaking,
-        # some verdors will use "virtual disk clone" which will promote
-        # disk clone speed, and in this situation the "disk clone"
-        # is just a relationship between volume and snapshot.
-        self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
-
-        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
-        # Should allow
-        self.assertEqual(volume['snapshot_id'], src_snap['id'])
-        self.assertEqual(volume['size'], src_size)
+        self._create_volume_from_snapshot()
 
     @decorators.idempotent_id('bbcfa285-af7f-479e-8c1a-8c34fc16543c')
     @testtools.skipUnless(CONF.volume_feature_enabled.backup,
