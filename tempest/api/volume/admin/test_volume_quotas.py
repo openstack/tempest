@@ -48,11 +48,10 @@ class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         # Save the current set of quotas so that some tests may use it
         # to restore the quotas to their original values after they are
         # done.
-        cls.original_quota_set = (cls.admin_quotas_client.show_quota_set(
+        original_quota_set = (cls.admin_quotas_client.show_quota_set(
             cls.demo_tenant_id)['quota_set'])
         cls.cleanup_quota_set = dict(
-            (k, v) for k, v in cls.original_quota_set.items()
-            if k in QUOTA_KEYS)
+            (k, v) for k, v in original_quota_set.items() if k in QUOTA_KEYS)
 
     @decorators.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
