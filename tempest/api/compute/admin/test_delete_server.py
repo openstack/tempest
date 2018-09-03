@@ -15,10 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
-from tempest import config
 from tempest.lib import decorators
-
-CONF = config.CONF
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):

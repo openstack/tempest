@@ -14,11 +14,9 @@
 
 from tempest.api.network import base
 from tempest.common import utils
-from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
 
-CONF = config.CONF
 AGENT_TYPE = 'L3 agent'
 AGENT_MODES = (
     'legacy',
