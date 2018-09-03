@@ -23,16 +23,16 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
               'backup_gigabytes', 'per_volume_gigabytes']
 
 
-class BaseVolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
+class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
 
     @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasNegativeTestJSON, cls).setup_credentials()
+        super(VolumeQuotasNegativeTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
 
     @classmethod
     def resource_setup(cls):
-        super(BaseVolumeQuotasNegativeTestJSON, cls).resource_setup()
+        super(VolumeQuotasNegativeTestJSON, cls).resource_setup()
 
         # Save the current set of quotas, then set up the cleanup method
         # to restore the quotas to their original values after the tests
