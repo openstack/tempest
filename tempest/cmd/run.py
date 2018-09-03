@@ -160,8 +160,6 @@ class TempestRun(command.Command):
             sys.exit(2)
         if parsed_args.state:
             self._init_state()
-        else:
-            pass
 
         regex = self._build_regex(parsed_args)
         return_code = 0
