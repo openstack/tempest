@@ -15,11 +15,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest import config
 from tempest.lib import decorators
-
-
-CONF = config.CONF
 
 
 class ApplicationCredentialsV3AdminTest(base.BaseApplicationCredentialsV3Test,

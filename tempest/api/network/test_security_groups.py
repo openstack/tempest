@@ -15,11 +15,8 @@
 
 from tempest.api.network import base_security_groups as base
 from tempest.common import utils
-from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
-
-CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):

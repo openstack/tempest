@@ -17,10 +17,7 @@ import six
 
 from tempest.api.network import base
 from tempest.common import utils
-from tempest import config
 from tempest.lib import decorators
-
-CONF = config.CONF
 
 
 class AllowedAddressPairTestJSON(base.BaseNetworkTest):

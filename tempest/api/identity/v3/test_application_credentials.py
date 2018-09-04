@@ -19,11 +19,7 @@ import datetime
 from oslo_utils import timeutils
 
 from tempest.api.identity import base
-from tempest import config
 from tempest.lib import decorators
-
-
-CONF = config.CONF
 
 
 class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
