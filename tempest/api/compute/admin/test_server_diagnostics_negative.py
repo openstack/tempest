@@ -18,8 +18,6 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ServerDiagnosticsNegativeTest(base.BaseV2ComputeAdminTest):
-    min_microversion = None
-    max_microversion = '2.47'
 
     @classmethod
     def setup_clients(cls):
@@ -33,8 +31,3 @@ class ServerDiagnosticsNegativeTest(base.BaseV2ComputeAdminTest):
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
         self.assertRaises(lib_exc.Forbidden,
                           self.client.show_server_diagnostics, server_id)
-
-
-class ServerDiagnosticsNegativeV248Test(ServerDiagnosticsNegativeTest):
-    min_microversion = '2.48'
-    max_microversion = 'latest'
