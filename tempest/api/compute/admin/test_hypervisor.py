@@ -79,7 +79,8 @@ class HypervisorAdminTestJSON(HypervisorAdminTestBase):
         for hyper in hypers:
             details = (self.client.show_hypervisor(hyper['id'])
                        ['hypervisor'])
-            if details['hypervisor_type'] != 'ironic':
+            if (details['hypervisor_type'] != 'ironic' and
+                    details['state'] == 'up'):
                 hypers_without_ironic.append(hyper)
                 ironic_only = False
 
