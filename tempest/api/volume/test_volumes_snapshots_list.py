@@ -160,3 +160,11 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         # marker(second snapshot), therefore only the first snapshot
         # should displayed.
         self.assertEqual(snapshot_id_list[:1], fetched_list_id)
+
+    @decorators.idempotent_id('ca96d551-17c6-4e11-b0e8-52d3bb8a63c7')
+    def test_snapshot_list_param_offset(self):
+        params = {'offset': 2, 'limit': 3}
+        snap_list = self.snapshots_client.list_snapshots(**params)['snapshots']
+        # Verify the list of snapshots skip offset=2 from the first element
+        # (total 3 elements), therefore only one snapshot should display
+        self.assertEqual(1, len(snap_list))
