@@ -22,28 +22,28 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
 QUOTA_USAGE_KEYS = ['reserved', 'limit', 'in_use']
 
 
-class BaseVolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
+class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     credentials = ['primary', 'alt', 'admin']
 
     def setUp(self):
         # NOTE(jeremy.zhang): Avoid conflicts with volume quota class tests.
         self.useFixture(fixtures.LockFixture('volume_quotas'))
-        super(BaseVolumeQuotasAdminTestJSON, self).setUp()
+        super(VolumeQuotasAdminTestJSON, self).setUp()
 
     @classmethod
     def setup_credentials(cls):
-        super(BaseVolumeQuotasAdminTestJSON, cls).setup_credentials()
+        super(VolumeQuotasAdminTestJSON, cls).setup_credentials()
         cls.demo_tenant_id = cls.os_primary.credentials.tenant_id
 
     @classmethod
     def setup_clients(cls):
-        super(BaseVolumeQuotasAdminTestJSON, cls).setup_clients()
+        super(VolumeQuotasAdminTestJSON, cls).setup_clients()
         cls.transfer_client = cls.os_primary.volume_transfers_client_latest
         cls.alt_transfer_client = cls.os_alt.volume_transfers_client_latest
 
     @classmethod
     def resource_setup(cls):
-        super(BaseVolumeQuotasAdminTestJSON, cls).resource_setup()
+        super(VolumeQuotasAdminTestJSON, cls).resource_setup()
 
         # Save the current set of quotas so that some tests may use it
         # to restore the quotas to their original values after they are
