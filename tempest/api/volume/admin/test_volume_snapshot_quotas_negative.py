@@ -44,14 +44,12 @@ class VolumeSnapshotQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
         # to restore the quotas to their original values after the tests
         # from this class are done. This is needed just in case Tempest is
         # configured to use pre-provisioned projects/user accounts.
-        cls.original_quota_set = (cls.admin_quotas_client.show_quota_set(
+        original_quota_set = (cls.admin_quotas_client.show_quota_set(
             cls.demo_tenant_id)['quota_set'])
-        cls.cleanup_quota_set = dict(
-            (k, v) for k, v in cls.original_quota_set.items()
-            if k in QUOTA_KEYS)
+        cleanup_quota_set = dict(
+            (k, v) for k, v in original_quota_set.items() if k in QUOTA_KEYS)
         cls.addClassResourceCleanup(cls.admin_quotas_client.update_quota_set,
-                                    cls.demo_tenant_id,
-                                    **cls.cleanup_quota_set)
+                                    cls.demo_tenant_id, **cleanup_quota_set)
 
         cls.default_volume_size = CONF.volume.volume_size
         cls.shared_quota_set = {'gigabytes': 3 * cls.default_volume_size,
