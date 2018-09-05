@@ -547,7 +547,7 @@ ImageFeaturesGroup = [
                                   'test v2 APIs only so this config option '
                                   'will be removed.'),
     cfg.BoolOpt('api_v1',
-                default=True,
+                default=False,
                 help="Is the v1 image API enabled",
                 deprecated_for_removal=True,
                 deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
