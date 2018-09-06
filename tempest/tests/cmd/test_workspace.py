@@ -122,6 +122,17 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
         self.assertIsNotNone(self.workspace_manager.get_workspace(new_name))
 
+    def test_workspace_manager_rename_no_name_exist(self):
+        no_name = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.rename_workspace,
+                                   self.name, no_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "None or empty name is specified."
+                         " Please specify correct name for workspace.\n")
+
     def test_workspace_manager_move(self):
         new_path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, new_path, ignore_errors=True)
@@ -184,3 +195,15 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(1, len(listed))
         self.assertIn(self.name, listed)
         self.assertEqual(self.path, listed.get(self.name))
+
+    def test_register_new_workspace_no_name(self):
+        no_name = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   register_new_workspace,
+                                   no_name, self.path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "None or empty name is specified."
+                         " Please specify correct name for workspace.\n")

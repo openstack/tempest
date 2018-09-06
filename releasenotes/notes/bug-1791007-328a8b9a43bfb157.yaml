@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Fixed bug #1791007. ``tempest workspace register`` and ``tempest workspace rename`` CLI will
+    error if None or empty string is passed in --name arguments. Earlier both CLI used to accept
+    the None or empty string as name which was confusing.
+
+
