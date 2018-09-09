@@ -286,12 +286,13 @@
 
 - project:
     templates:
-      - openstack-python36-jobs
       - check-requirements
       - integrated-gate
       - integrated-gate-py35
+      - openstack-cover-jobs
       - openstack-python-jobs
       - openstack-python35-jobs
+      - openstack-python36-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
@@ -514,8 +515,6 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
-        - openstack-tox-cover:
-            voting: false
         - tempest-full:
             irrelevant-files:
               - ^(test-|)requirements.txt$
@@ -749,7 +748,6 @@
               - ^tempest/tests/.*$
     post:
       jobs:
-        - openstack-tox-cover
         - publish-openstack-python-branch-tarball
     periodic:
       jobs:
