@@ -1229,6 +1229,11 @@ class TempestConfigProxy(object):
 
     def set_config_path(self, path):
         self._path = path
+        # FIXME(masayukig): bug#1783751 To pass the config file path to child
+        # processes, we need to set the environment variables here as a
+        # workaround.
+        os.environ['TEMPEST_CONFIG_DIR'] = os.path.dirname(path)
+        os.environ['TEMPEST_CONFIG'] = os.path.basename(path)
 
 
 CONF = TempestConfigProxy()
