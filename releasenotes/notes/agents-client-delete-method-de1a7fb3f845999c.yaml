@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds the new method to AgentsClient that implements agent deletion
+    according to the API [0].
+    [0] https://developer.openstack.org/api-ref/network/v2/index.html#delete-agent
+

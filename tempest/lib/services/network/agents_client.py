@@ -37,6 +37,16 @@ class AgentsClient(base.BaseNetworkClient):
         uri = '/agents/%s' % agent_id
         return self.show_resource(uri, **fields)
 
+    def delete_agent(self, agent_id):
+        """Delete agent.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/network/v2/index.html#delete-agent
+        """
+        uri = '/agents/%s' % agent_id
+        return self.delete_resource(uri)
+
     def list_agents(self, **filters):
         """List all agents.
 
