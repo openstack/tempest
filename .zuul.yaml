@@ -41,10 +41,9 @@
     name: tempest-full
     parent: devstack-tempest
     # This currently works from stable/pike on.
-    branches:
-      - master
-      - stable/queens
-      - stable/pike
+    # Before stable/pike, legacy version of tempest-full
+    # 'legacy-tempest-dsvm-neutron-full' run.
+    branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking and py27.
       Former names for this job where:
@@ -71,9 +70,10 @@
 - job:
     name: tempest-full-py3
     parent: devstack-tempest
-    branches:
-      - master
-      - stable/queens
+    # This currently works from stable/pike on.
+    # Before stable/pike, legacy version of tempest-full
+    # 'legacy-tempest-dsvm-neutron-full' run.
+    branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking and py3.
       Former names for this job where:
