@@ -133,12 +133,89 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
                          "None or empty name is specified."
                          " Please specify correct name for workspace.\n")
 
+    def test_workspace_manager_rename_with_existing_name(self):
+        new_name = self.name
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.rename_workspace,
+                                   self.name, new_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace already exists with name: %s.\n"
+                         % new_name)
+
+    def test_workspace_manager_rename_no_exist_old_name(self):
+        old_name = ""
+        new_name = data_utils.rand_uuid()
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.rename_workspace,
+                                   old_name, new_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n"
+                         % old_name)
+
+    def test_workspace_manager_rename_integer_data(self):
+        old_name = self.name
+        new_name = 12345
+        self.workspace_manager.rename_workspace(old_name, new_name)
+        self.assertIsNone(self.workspace_manager.get_workspace(old_name))
+        self.assertIsNotNone(self.workspace_manager.get_workspace(new_name))
+
+    def test_workspace_manager_rename_alphanumeric_data(self):
+        old_name = self.name
+        new_name = 'abc123'
+        self.workspace_manager.rename_workspace(old_name, new_name)
+        self.assertIsNone(self.workspace_manager.get_workspace(old_name))
+        self.assertIsNotNone(self.workspace_manager.get_workspace(new_name))
+
     def test_workspace_manager_move(self):
         new_path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, new_path, ignore_errors=True)
         self.workspace_manager.move_workspace(self.name, new_path)
         self.assertEqual(
             self.workspace_manager.get_workspace(self.name), new_path)
+        # NOTE(mbindlish): Also checking for the workspace that it
+        # shouldn't exist in old path
+        self.assertNotEqual(
+            self.workspace_manager.get_workspace(self.name), self.path)
+
+    def test_workspace_manager_move_wrong_path(self):
+        new_path = 'wrong/path'
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.move_workspace,
+                                   self.name, new_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "Path does not exist.\n")
+
+    def test_workspace_manager_move_wrong_workspace(self):
+        workspace_name = "wrong_workspace_name"
+        new_path = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, new_path, ignore_errors=True)
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.move_workspace,
+                                   workspace_name, new_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n"
+                         % workspace_name)
+
+    def test_workspace_manager_move_no_workspace_name(self):
+        workspace_name = ""
+        new_path = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, new_path, ignore_errors=True)
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.move_workspace,
+                                   workspace_name, new_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n"
+                         % workspace_name)
 
     def test_workspace_manager_move_no_workspace_path(self):
         new_path = ""
@@ -154,6 +231,30 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
     def test_workspace_manager_remove_entry(self):
         self.workspace_manager.remove_workspace_entry(self.name)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
+
+    def test_workspace_manager_remove_entry_no_name(self):
+        no_name = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   remove_workspace_entry,
+                                   no_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n"
+                         % no_name)
+
+    def test_workspace_manager_remove_entry_wrong_name(self):
+        wrong_name = "wrong_name"
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   remove_workspace_entry,
+                                   wrong_name)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "A workspace was not found with name: %s\n"
+                         % wrong_name)
 
     def test_workspace_manager_remove_directory(self):
         path = self.workspace_manager.remove_workspace_entry(self.name)
@@ -188,8 +289,11 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
                                    nonexistent_name)
         self.assertEqual(1, ex.code)
         self.assertEqual(mock_stdout.getvalue(),
-                         "A workspace was not found with name: %s\n" %
-                         nonexistent_name)
+                         "A workspace was not found with name: %s\n"
+                         % nonexistent_name)
+
+    def test_workspace_name_exists(self):
+        self.assertIsNone(self.workspace_manager._name_exists(self.name))
 
     def test_workspace_name_already_exists(self):
         duplicate_name = self.name
@@ -203,6 +307,11 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
                          "A workspace already exists with name: %s.\n"
                          % duplicate_name)
 
+    def test_workspace_name_exists_check_new_name(self):
+        new_name = "fake_name"
+        self.assertIsNone(self.workspace_manager.
+                          _workspace_name_exists(new_name))
+
     def test_workspace_manager_path_not_exist(self):
         fake_path = "fake_path"
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
@@ -212,6 +321,11 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(1, ex.code)
         self.assertEqual(mock_stdout.getvalue(),
                          "Path does not exist.\n")
+
+    def test_validate_path_exists(self):
+        new_path = self.path
+        self.assertIsNone(self.workspace_manager.
+                          _validate_path(new_path))
 
     def test_workspace_manager_list_workspaces(self):
         listed = self.workspace_manager.list_workspaces()
@@ -242,3 +356,21 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(mock_stdout.getvalue(),
                          "None or empty path is specified for workspace."
                          " Please specify correct workspace path.\n")
+
+    def test_register_new_workspace_integer_data(self):
+        workspace_name = 12345
+        self.workspace_manager.register_new_workspace(
+            workspace_name, self.path)
+        self.assertIsNotNone(
+            self.workspace_manager.get_workspace(workspace_name))
+        self.assertEqual(
+            self.workspace_manager.get_workspace(workspace_name), self.path)
+
+    def test_register_new_workspace_alphanumeric_data(self):
+        workspace_name = 'abc123'
+        self.workspace_manager.register_new_workspace(
+            workspace_name, self.path)
+        self.assertIsNotNone(
+            self.workspace_manager.get_workspace(workspace_name))
+        self.assertEqual(
+            self.workspace_manager.get_workspace(workspace_name), self.path)
