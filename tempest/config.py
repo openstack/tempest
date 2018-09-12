@@ -306,7 +306,7 @@ ComputeGroup = [
                help='Time in seconds before a shelved instance is eligible '
                     'for removing from a host.  -1 never offload, 0 offload '
                     'when shelved. This configuration value should be same as '
-                    '[nova.DEFAULT]->shelved_offload_time in nova.conf, and '
+                    'nova.conf: DEFAULT.shelved_offload_time, and '
                     'some tests will run for as long as the time.'),
     cfg.IntOpt('min_compute_nodes',
                default=1,
@@ -408,7 +408,7 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
-                     'be same as [nova.vnc]->vnc_enabled in nova.conf'),
+                     'be same as nova.conf: vnc.enabled'),
     cfg.StrOpt('vnc_server_header',
                default='WebSockify',
                help='Expected VNC server name (WebSockify, nginx, etc) '
@@ -416,16 +416,16 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('spice_console',
                 default=False,
                 help='Enable Spice console. This configuration value should '
-                     'be same as [nova.spice]->enabled in nova.conf'),
+                     'be same as nova.conf: spice.enabled'),
     cfg.BoolOpt('rdp_console',
                 default=False,
                 help='Enable RDP console. This configuration value should '
-                     'be same as [nova.rdp]->enabled in nova.conf'),
+                     'be same as nova.conf: rdp.enabled'),
     cfg.BoolOpt('serial_console',
                 default=False,
                 help='Enable serial console. This configuration value '
-                     'should be the same as [nova.serial_console]->enabled '
-                     'in nova.conf'),
+                     'should be the same as '
+                     'nova.conf: serial_console.enabled'),
     cfg.BoolOpt('rescue',
                 default=True,
                 help='Does the test environment support instance rescue '
