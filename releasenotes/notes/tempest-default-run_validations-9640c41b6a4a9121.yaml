@@ -1,0 +1,10 @@
+---
+upgrade:
+  - |
+    ``CONF.validation.run_validation`` default enabled.
+    This option required to be set ``true`` in order to run api tests
+    stability when the guest cooperation required. For example when
+    the guest needs react on Volume/Interface detach.
+    The ssh test makes sure the VM is alive and ready
+    when the detach needs to happen.
+    The option was enabled on the gate for a long time.

@@ -672,9 +672,11 @@ validation_group = cfg.OptGroup(name='validation',
 
 ValidationGroup = [
     cfg.BoolOpt('run_validation',
-                default=False,
+                default=True,
                 help='Enable ssh on created servers and creation of additional'
-                     ' validation resources to enable remote access'),
+                     ' validation resources to enable remote access.'
+                     ' In case the guest does not support ssh set it'
+                     ' to false'),
     cfg.BoolOpt('security_group',
                 default=True,
                 help='Enable/disable security groups.'),
