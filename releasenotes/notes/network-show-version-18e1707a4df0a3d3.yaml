@@ -1,0 +1,7 @@
+---
+features:
+- |
+    Add ``show_version`` function to the ``NetworkVersionsClient`` client. This
+    allows the possibility of getting details for Networking API.
+
+    .. API reference: https://developer.openstack.org/api-ref/network/v2/index.html#show-api-v2-details
