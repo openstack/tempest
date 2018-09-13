@@ -33,8 +33,8 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertIn(image_id, self._list_image_ids_as_alt())
         body = self.image_member_client.list_image_members(image_id)
         members = body['members']
-        member = members[0]
         self.assertEqual(len(members), 1, str(members))
+        member = members[0]
         self.assertEqual(member['member_id'], self.alt_tenant_id)
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'accepted')
