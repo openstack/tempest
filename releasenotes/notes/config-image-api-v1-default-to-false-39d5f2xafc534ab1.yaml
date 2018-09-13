@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Changed the default value of 'api_v1' config option in the
+    'image-feature-enabled' group to False from True, because
+    glance v1 APIs are deprecated. Please set True explicitly
+    on the option if still testing glance v1 APIs.

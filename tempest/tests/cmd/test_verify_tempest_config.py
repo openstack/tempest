@@ -234,8 +234,8 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
-                                           False, True)
+        print_mock.assert_called_with('api_v2', 'image-feature-enabled',
+                                      False, True)
 
     def test_verify_glance_version_no_v2_with_v1_0(self):
         # This test verifies that wrong config api_v2 = True is detected
@@ -250,8 +250,8 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v2', 'image-feature-enabled',
-                                           False, True)
+        print_mock.assert_called_with('api_v2', 'image-feature-enabled',
+                                      False, True)
 
     def test_verify_glance_version_no_v1(self):
         # This test verifies that wrong config api_v1 = True is detected
@@ -271,8 +271,7 @@ class TestDiscovery(base.TestCase):
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_called_once_with('api_v1', 'image-feature-enabled',
-                                           False, True)
+        print_mock.assert_not_called()
 
     def test_verify_glance_version_no_version(self):
         # This test verifies that wrong config api_v1 = True is detected
