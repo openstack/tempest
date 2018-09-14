@@ -215,6 +215,7 @@ class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
     max_microversion = 'latest'
 
     @decorators.idempotent_id('3b42c9b9-c984-4444-816e-ca2e1ed30b40')
+    @decorators.skip_because(bug='1770179')
     def test_reset_group_snapshot_status(self):
         # Create volume type
         volume_type = self.create_volume_type()
