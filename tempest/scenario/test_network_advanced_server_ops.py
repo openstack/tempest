@@ -230,6 +230,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         self.assertNotEqual(src_host, dst_host)
 
+    @decorators.skip_because(bug='1788403')
     @decorators.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
