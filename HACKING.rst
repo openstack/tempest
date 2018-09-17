@@ -349,18 +349,19 @@ is required. If there is more than one test case in the class individual
 docstrings for the workflow in each test methods can be used instead. A good
 example of this would be::
 
-    class TestVolumeBootPattern(manager.ScenarioTest):
-        """
-        This test case attempts to reproduce the following steps:
+    class TestServerBasicOps(manager.ScenarioTest):
 
-         * Create in Cinder some bootable volume importing a Glance image
-         * Boot an instance from the bootable volume
-         * Write content to the volume
-         * Delete an instance and Boot a new instance from the volume
-         * Check written content in the instance
-         * Create a volume snapshot while the instance is running
-         * Boot an additional instance from the new snapshot based volume
-         * Check written content in the instance booted from snapshot
+        """The test suite for server basic operations
+
+        This smoke test case follows this basic set of operations:
+         * Create a keypair for use in launching an instance
+         * Create a security group to control network access in instance
+         * Add simple permissive rules to the security group
+         * Launch an instance
+         * Perform ssh to instance
+         * Verify metadata service
+         * Verify metadata on config_drive
+         * Terminate the instance
         """
 
 Test Identification with Idempotent ID
