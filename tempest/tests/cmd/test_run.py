@@ -180,7 +180,6 @@ class TestTakeAction(base.TestCase):
 
         tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
         parsed_args = mock.Mock()
-        parsed_args.config_file = []
 
         parsed_args.workspace = None
         parsed_args.state = None
