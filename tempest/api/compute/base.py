@@ -331,8 +331,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # The compute image proxy APIs were deprecated in 2.35 so
         # use the images client directly if the API microversion being
         # used is >=2.36.
-        if api_version_utils.compare_version_header_to_response(
-                "OpenStack-API-Version", "compute 2.36", image.response, "lt"):
+        if not cls.is_requested_microversion_compatible('2.35'):
             client = cls.images_client
         else:
             client = cls.compute_images_client
@@ -341,6 +340,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
         if wait_until is not None:
             try:
+                wait_until = wait_until.upper()
+                if not cls.is_requested_microversion_compatible('2.35'):
+                    wait_until = wait_until.lower()
                 waiters.wait_for_image_status(client, image_id, wait_until)
             except lib_exc.NotFound:
                 if wait_until.upper() == 'ACTIVE':

@@ -488,8 +488,11 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
-        params = {'name': image_name}
-        images = self.compute_images_client.list_images(**params)['images']
+        if CONF.image_feature_enabled.api_v1:
+            kwargs = {'name': image_name}
+        else:
+            kwargs = {'params': {'name': image_name}}
+        images = self.images_client.list_images(**kwargs)['images']
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 

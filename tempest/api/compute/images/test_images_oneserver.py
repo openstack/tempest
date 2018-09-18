@@ -44,7 +44,10 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ImagesOneServerTestJSON, cls).setup_clients()
-        cls.client = cls.compute_images_client
+        if cls.is_requested_microversion_compatible('2.35'):
+            cls.client = cls.compute_images_client
+        else:
+            cls.client = cls.images_client
 
     def _get_default_flavor_disk_size(self, flavor_id):
         flavor = self.flavors_client.show_flavor(flavor_id)['flavor']
@@ -52,6 +55,13 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
+        if self.is_requested_microversion_compatible('2.35'):
+            MIN_DISK = 'minDisk'
+            MIN_RAM = 'minRam'
+        else:
+            MIN_DISK = 'min_disk'
+            MIN_RAM = 'min_ram'
+
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
@@ -61,17 +71,22 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
         # Verify the image was created correctly
         self.assertEqual(name, image['name'])
-        self.assertEqual('test', image['metadata']['image_type'])
+        if self.is_requested_microversion_compatible('2.35'):
+            self.assertEqual('test', image['metadata']['image_type'])
+        else:
+            self.assertEqual('test', image['image_type'])
 
-        original_image = self.client.show_image(self.image_ref)['image']
+        original_image = self.client.show_image(self.image_ref)
+        if self.is_requested_microversion_compatible('2.35'):
+            original_image = original_image['image']
 
         # Verify minRAM is the same as the original image
-        self.assertEqual(image['minRam'], original_image['minRam'])
+        self.assertEqual(image[MIN_RAM], original_image[MIN_RAM])
 
         # Verify minDisk is the same as the original image or the flavor size
         flavor_disk_size = self._get_default_flavor_disk_size(self.flavor_ref)
-        self.assertIn(str(image['minDisk']),
-                      (str(original_image['minDisk']), str(flavor_disk_size)))
+        self.assertIn(str(image[MIN_DISK]),
+                      (str(original_image[MIN_DISK]), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
         self.client.delete_image(image['id'])
@@ -86,7 +101,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # will return 400(Bad Request) if we attempt to send a name which has
         # 4 byte utf-8 character.
         utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
-        body = self.client.create_image(self.server_id, name=utf8_name)
+        body = self.compute_images_client.create_image(
+            self.server_id, name=utf8_name)
         if api_version_utils.compare_version_header_to_response(
             "OpenStack-API-Version", "compute 2.45", body.response, "lt"):
             image_id = body['image_id']

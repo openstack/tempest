@@ -21,6 +21,7 @@ CONF = config.CONF
 
 
 class ListImagesTestJSON(base.BaseV2ComputeTest):
+    max_microversion = '2.35'
 
     @classmethod
     def skip_checks(cls):
