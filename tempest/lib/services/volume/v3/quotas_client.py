@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import quotas as schema
 from tempest.lib.common import rest_client
 
 
@@ -27,8 +28,8 @@ class QuotasClient(rest_client.RestClient):
 
         url = 'os-quota-sets/%s/defaults' % tenant_id
         resp, body = self.get(url)
-        self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
+        self.validate_response(schema.show_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_quota_set(self, tenant_id, params=None):
@@ -39,8 +40,11 @@ class QuotasClient(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
-        self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
+        if params and params.get('usage', False):
+            self.validate_response(schema.show_quota_set_usage, resp, body)
+        else:
+            self.validate_response(schema.show_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_quota_set(self, tenant_id, **kwargs):
@@ -52,12 +56,12 @@ class QuotasClient(rest_client.RestClient):
         """
         put_body = jsonutils.dumps({'quota_set': kwargs})
         resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)
-        self.expected_success(200, resp.status)
         body = jsonutils.loads(body)
+        self.validate_response(schema.update_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.delete_quota_set, resp, body)
         return rest_client.ResponseBody(resp, body)
