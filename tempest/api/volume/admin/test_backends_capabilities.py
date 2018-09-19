@@ -72,8 +72,8 @@ class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
         ]
 
         # Returns a tuple of VOLUME_STATS values
-        expected_list = list(map(operator.itemgetter(*VOLUME_STATS),
-                             cinder_pools))
-        observed_list = list(map(operator.itemgetter(*VOLUME_STATS),
-                             capabilities))
+        expected_list = sorted(list(map(operator.itemgetter(*VOLUME_STATS),
+                                        cinder_pools)))
+        observed_list = sorted(list(map(operator.itemgetter(*VOLUME_STATS),
+                                        capabilities)))
         self.assertEqual(expected_list, observed_list)
