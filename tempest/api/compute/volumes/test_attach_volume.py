@@ -160,6 +160,9 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
 
     This test checks the attaching and detaching volumes from
     a shelved or shelved offload instance.
+
+    Note that these are uncommon scenarios until blueprint detach-boot-volume
+    is implemented in the compute service.
     """
 
     min_microversion = '2.20'
@@ -220,6 +223,9 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
                 server, validation_resources)
             self.assertEqual(number_of_volumes, counted_volumes)
 
+    # NOTE(mriedem): Marked as slow since this is an uncommon scenario until
+    # attach/detach root volume is supported in nova, and it's slow.
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
     def test_attach_volume_shelved_or_offload_server(self):
         # Create server, count number of volumes on it, shelve
@@ -245,6 +251,9 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
         # case of shelved_offloaded.
         self.assertIsNotNone(volume_attachment['device'])
 
+    # NOTE(mriedem): Marked as slow since this is an uncommon scenario until
+    # attach/detach root volume is supported in nova, and it's slow.
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
     def test_detach_volume_shelved_or_offload_server(self):
         # Count number of volumes on instance, shelve

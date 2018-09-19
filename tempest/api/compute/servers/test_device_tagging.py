@@ -138,6 +138,9 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
         except Exception:
             return False
 
+    # NOTE(mriedem): This is really more like a scenario test and is slow so
+    # it's marked as such.
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @utils.services('network', 'volume', 'image')
     def test_tagged_boot_devices(self):
