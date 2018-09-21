@@ -265,6 +265,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         self.client.start_server(self.server_id)
 
+    # NOTE(mriedem): Marked as slow because while rebuild and volume-backed is
+    # common, we don't actually change the image (you can't with volume-backed
+    # rebuild) so this isn't testing much outside normal rebuild
+    # (and it's slow).
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
     @utils.services('volume')
     def test_rebuild_server_with_volume_attached(self):

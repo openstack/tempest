@@ -45,6 +45,10 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         super(ServerPersonalityTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
 
+    # NOTE(mriedem): Marked as slow because personality (file injection) is
+    # deprecated in nova so we don't care as much about running this all the
+    # time (and it's slow).
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
     def test_create_server_with_personality(self):
         file_contents = 'This is a test file.'
@@ -75,6 +79,10 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                              linux_client.exec_command(
                                  'sudo cat %s' % file_path))
 
+    # NOTE(mriedem): Marked as slow because personality (file injection) is
+    # deprecated in nova so we don't care as much about running this all the
+    # time (and it's slow).
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
     def test_rebuild_server_with_personality(self):
         validation_resources = self.get_test_validation_resources(
@@ -117,6 +125,10 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server, personality=personality)
 
+    # NOTE(mriedem): Marked as slow because personality (file injection) is
+    # deprecated in nova so we don't care as much about running this all the
+    # time (and it's slow).
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
