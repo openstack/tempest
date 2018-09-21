@@ -36,8 +36,11 @@ Unit Tests
 For any change that adds new functionality to either common functionality or an
 out-of-band tool unit tests are required. This is to ensure we don't introduce
 future regressions and to test conditions which we may not hit in the gate runs.
-Tests, and service clients aren't required to have unit tests since they should
-be self verifying by running them in the gate.
+API and scenario tests aren't required to have unit tests since they should
+be self-verifying by running them in the gate. All service clients, on the
+other hand, `must have`_ unit tests, as they belong to ``tempest/lib``.
+
+.. _must have: https://docs.openstack.org/tempest/latest/library.html#testing
 
 
 API Stability
