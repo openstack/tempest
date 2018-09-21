@@ -156,15 +156,19 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
         volume1 = self.create_volume(multiattach=True)
         volume2 = self.create_volume(multiattach=True)
 
-        # TODO(mriedem): Speed this up by waiting for both servers to be active
-        # in parallel.
-        # Boot server1
-        server1 = self.create_test_server(wait_until='ACTIVE')
+        # Create two servers and wait for them to be ACTIVE.
+        reservation_id = self.create_test_server(
+            wait_until='ACTIVE', min_count=2,
+            return_reservation_id=True)['reservation_id']
+        # Get the servers using the reservation_id.
+        servers = self.servers_client.list_servers(
+            reservation_id=reservation_id)['servers']
+        self.assertEqual(2, len(servers))
         # Attach volume1 to server1
+        server1 = servers[0]
         self.attach_volume(server1, volume1)
-        # Boot server2
-        server2 = self.create_test_server(wait_until='ACTIVE')
         # Attach volume1 to server2
+        server2 = servers[1]
         self.attach_volume(server2, volume1)
 
         # Swap volume1 to volume2 on server1, volume1 should remain attached
