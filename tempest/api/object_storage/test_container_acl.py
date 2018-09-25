@@ -38,9 +38,9 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
-        tenant_name = self.os_roles_operator_alt.credentials.tenant_name
-        username = self.os_roles_operator_alt.credentials.username
-        cont_headers = {'X-Container-Read': tenant_name + ':' + username}
+        tenant_id = self.os_roles_operator_alt.credentials.tenant_id
+        user_id = self.os_roles_operator_alt.credentials.user_id
+        cont_headers = {'X-Container-Read': tenant_id + ':' + user_id}
         container_client = self.os_roles_operator.container_client
         resp_meta, _ = (
             container_client.create_update_or_delete_container_metadata(
@@ -66,9 +66,9 @@ class ObjectTestACLs(base.BaseObjectTest):
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL
-        tenant_name = self.os_roles_operator_alt.credentials.tenant_name
-        username = self.os_roles_operator_alt.credentials.username
-        cont_headers = {'X-Container-Write': tenant_name + ':' + username}
+        tenant_id = self.os_roles_operator_alt.credentials.tenant_id
+        user_id = self.os_roles_operator_alt.credentials.user_id
+        cont_headers = {'X-Container-Write': tenant_id + ':' + user_id}
         container_client = self.os_roles_operator.container_client
         resp_meta, _ = (
             container_client.create_update_or_delete_container_metadata(
