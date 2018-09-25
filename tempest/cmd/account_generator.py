@@ -195,7 +195,6 @@ def dump_accounts(resources, identity_version, account_file):
 
         if test_resource.network:
             account['resources'] = {}
-        if test_resource.network:
             account['resources']['network'] = test_resource.network['name']
         accounts.append(account)
     if os.path.exists(account_file):
