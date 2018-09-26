@@ -24,6 +24,7 @@ from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils.linux import remote_client
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -340,20 +341,61 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
-        interface_count = len(ifs)
-        self.assertGreater(interface_count, 0)
+        original_interface_count = len(ifs)  # This is the number of ports.
+        self.assertGreater(original_interface_count, 0)
+        # Get the starting list of IPs on the server.
+        addresses = self.os_primary.servers_client.list_addresses(
+            server['id'])['addresses']
+        # There should be one entry for the single network mapped to a list of
+        # addresses, which at this point should have at least one entry.
+        # Note that we could start with two addresses depending on how tempest
+        # is configured for using floating IPs.
+        self.assertEqual(1, len(addresses), addresses)  # number of networks
+        # Keep track of the original addresses so we can know which IP is new.
+        original_ips = [addr['addr'] for addr in list(addresses.values())[0]]
+        original_ip_count = len(original_ips)
+        self.assertGreater(original_ip_count, 0, addresses)  # at least 1
         network_id = ifs[0]['net_id']
+        # Add another fixed IP to the server. This should result in another
+        # fixed IP on the same network (and same port since we only have one
+        # port).
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
-        # Remove the fixed IP from server.
+        # Wait for the ips count to increase by one.
+
+        def _wait_for_ip_increase():
+            _addresses = self.os_primary.servers_client.list_addresses(
+                server['id'])['addresses']
+            return len(list(_addresses.values())[0]) == original_ip_count + 1
+
+        if not test_utils.call_until_true(
+                _wait_for_ip_increase, CONF.compute.build_timeout,
+                CONF.compute.build_interval):
+            raise lib_exc.TimeoutException(
+                'Timed out while waiting for IP count to increase.')
+
+        # Remove the fixed IP that we just added.
         server_detail = self.os_primary.servers_client.show_server(
             server['id'])['server']
         # Get the Fixed IP from server.
         fixed_ip = None
         for ip_set in server_detail['addresses']:
             for ip in server_detail['addresses'][ip_set]:
-                if ip['OS-EXT-IPS:type'] == 'fixed':
+                if (ip['OS-EXT-IPS:type'] == 'fixed' and
+                        ip['addr'] not in original_ips):
                     fixed_ip = ip['addr']
                     break
             if fixed_ip is not None:
                 break
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
+        # Wait for the interface count to decrease by one.
+
+        def _wait_for_ip_decrease():
+            _addresses = self.os_primary.servers_client.list_addresses(
+                server['id'])['addresses']
+            return len(list(_addresses.values())[0]) == original_ip_count
+
+        if not test_utils.call_until_true(
+                _wait_for_ip_decrease, CONF.compute.build_timeout,
+                CONF.compute.build_interval):
+            raise lib_exc.TimeoutException(
+                'Timed out while waiting for IP count to decrease.')
