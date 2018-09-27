@@ -303,7 +303,8 @@
               - ^roles/
               - ^.zuul.yaml$
         - nova-multiattach:
-            irrelevant-files:
+            # Define list of irrelevant files to use everywhere else
+            irrelevant-files: &tempest-irrelevant-files
               - ^(test-|)requirements.txt$
               - ^.*\.rst$
               - ^doc/.*$
@@ -313,422 +314,98 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
         - tempest-full-parallel:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py36:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky-py3:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-queens:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-queens-py3:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-pike:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check
         - tempest-slow:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - nova-cells-v1:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             voting: false
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest:
             voting: false
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario001-tempest-centos-7:
             voting: false
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^test-requirements.txt$
+            irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario002-tempest-centos-7:
             voting: false
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^test-requirements.txt$
+            irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario003-tempest-centos-7:
             voting: false
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^test-requirements.txt$
+            irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario004-tempest-centos-7:
             voting: false
-            irrelevant-files:
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^test-requirements.txt$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-full-ocata:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
     gate:
       jobs:
         - nova-multiattach:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-slow:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
         - tempest-cinder-v2-api:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-periodic-tempest-dsvm-all-master:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-multinode-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-dvr-multinode-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr-ha-multinode-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-full-test-accounts:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-full-test-accounts:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-identity-v3-test-accounts:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-full-non-admin:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-nova-v20-api:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-cinder-v1:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-pg-full:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-full-opensuse-423:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+            irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
         - tempest-full-rocky
@@ -736,56 +413,10 @@
         - tempest-full-queens
         - tempest-full-queens-py3
         - tempest-full-pike
-        - legacy-periodic-tempest-dsvm-neutron-full-ocata:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
+        - legacy-periodic-tempest-dsvm-neutron-full-ocata
     periodic:
       jobs:
-        - legacy-periodic-tempest-dsvm-full-test-accounts-master:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-        - legacy-periodic-tempest-dsvm-neutron-full-test-accounts-master:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-        - legacy-periodic-tempest-dsvm-neutron-full-non-admin-master:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-        - legacy-periodic-tempest-dsvm-all-master:
-            irrelevant-files:
-              - ^(test-|)requirements.txt$
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-
+        - legacy-periodic-tempest-dsvm-full-test-accounts-master
+        - legacy-periodic-tempest-dsvm-neutron-full-test-accounts-master
+        - legacy-periodic-tempest-dsvm-neutron-full-non-admin-master
+        - legacy-periodic-tempest-dsvm-all-master
