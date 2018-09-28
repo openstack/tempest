@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import scheduler_stats as schema
 from tempest.lib.common import rest_client
 
 
@@ -28,9 +29,11 @@ class SchedulerStatsClient(rest_client.RestClient):
         https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-all-back-end-storage-pools
         """
         url = 'scheduler-stats/get_pools'
+        schema_get_pools = schema.get_pools_no_detail
         if detail:
             url += '?detail=True'
+            schema_get_pools = schema.get_pools_with_detail
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema_get_pools, resp, body)
         return rest_client.ResponseBody(resp, body)

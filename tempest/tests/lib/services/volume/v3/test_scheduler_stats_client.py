@@ -25,12 +25,14 @@ class TestSchedulerStatsClient(base.BaseServiceTest):
                 "name": "pool1",
                 "capabilities": {
                     "updated": "2014-10-28T00:00:00-00:00",
-                    "total_capacity": 1024,
-                    "free_capacity": 100,
+                    "total_capacity_gb": 1024,
+                    "free_capacity_gb": 100,
                     "volume_backend_name": "pool1",
                     "reserved_percentage": 0,
                     "driver_version": "1.0.0",
+                    "timestamp": "2014-10-28T00:00:00-00:00",
                     "storage_protocol": "iSCSI",
+                    "vendor_name": "vendor",
                     "QoS_support": False
                 }
             },
@@ -38,12 +40,14 @@ class TestSchedulerStatsClient(base.BaseServiceTest):
                 "name": "pool2",
                 "capabilities": {
                     "updated": "2014-10-28T00:00:00-00:00",
-                    "total_capacity": 512,
-                    "free_capacity": 200,
+                    "total_capacity_gb": 512,
+                    "free_capacity_gb": 200,
                     "volume_backend_name": "pool2",
                     "reserved_percentage": 0,
                     "driver_version": "1.0.2",
+                    "timestamp": "2014-10-28T00:00:00-00:00",
                     "storage_protocol": "iSER",
+                    "vendor_name": "vendor",
                     "QoS_support": True
                 }
             }
