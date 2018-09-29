@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import groups as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -23,6 +24,7 @@ from tempest.lib.services.volume import base_client
 
 class GroupsClient(base_client.BaseClient):
     """Client class to send CRUD Volume Group API requests"""
+    api_version = 'v3'
 
     def create_group(self, **kwargs):
         """Creates a group.
@@ -35,7 +37,7 @@ class GroupsClient(base_client.BaseClient):
         post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_group(self, group_id, delete_volumes=True):
@@ -49,7 +51,7 @@ class GroupsClient(base_client.BaseClient):
         post_body = json.dumps({'delete': post_body})
         resp, body = self.post('groups/%s/action' % group_id,
                                post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_group(self, group_id):
@@ -62,7 +64,7 @@ class GroupsClient(base_client.BaseClient):
         url = "groups/%s" % str(group_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_groups(self, detail=False, **params):
@@ -74,13 +76,15 @@ class GroupsClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/#list-groups-with-details
         """
         url = "groups"
+        schema_list_groups = schema.list_groups_no_detail
         if detail:
             url += "/detail"
+            schema_list_groups = schema.list_groups_with_detail
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema_list_groups, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def create_group_from_source(self, **kwargs):
@@ -93,7 +97,7 @@ class GroupsClient(base_client.BaseClient):
         post_body = json.dumps({'create-from-src': kwargs})
         resp, body = self.post('groups/action', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_group_from_source, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_group(self, group_id, **kwargs):
@@ -105,7 +109,7 @@ class GroupsClient(base_client.BaseClient):
         """
         put_body = json.dumps({'group': kwargs})
         resp, body = self.put('groups/%s' % group_id, put_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.update_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reset_group_status(self, group_id, status_to_set):
@@ -116,7 +120,7 @@ class GroupsClient(base_client.BaseClient):
         """
         post_body = json.dumps({'reset_status': {'status': status_to_set}})
         resp, body = self.post('groups/%s/action' % group_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.reset_group_status, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
