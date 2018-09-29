@@ -23,8 +23,8 @@ class TestGroupTypesClient(base.BaseServiceTest):
     FAKE_CREATE_GROUP_TYPE = {
         "group_type": {
             "id": "6685584b-1eac-4da6-b5c3-555430cf68ff",
-            "name": "grp-type-001",
-            "description": "group type 001",
+            "name": "group-type-001",
+            "description": "Test group type 1",
             "is_public": True,
             "group_specs": {
                 "consistent_group_snapshot_enabled": "<is> False"
