@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import encryption_types as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 
@@ -43,7 +44,7 @@ class EncryptionTypesClient(rest_client.RestClient):
         url = "/types/%s/encryption" % volume_type_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_encryption_specs_item(self, volume_type_id, key):
@@ -51,7 +52,7 @@ class EncryptionTypesClient(rest_client.RestClient):
         url = "/types/%s/encryption/%s" % (volume_type_id, key)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_encryption_specs_item, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def create_encryption_type(self, volume_type_id, **kwargs):
@@ -65,14 +66,14 @@ class EncryptionTypesClient(rest_client.RestClient):
         post_body = json.dumps({'encryption': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.create_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_encryption_type(self, volume_type_id):
         """Delete the encryption type for the specified volume-type."""
         resp, body = self.delete(
             "/types/%s/encryption/provider" % volume_type_id)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_encryption_type(self, volume_type_id, **kwargs):
@@ -86,5 +87,5 @@ class EncryptionTypesClient(rest_client.RestClient):
         put_body = json.dumps({'encryption': kwargs})
         resp, body = self.put(url, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
