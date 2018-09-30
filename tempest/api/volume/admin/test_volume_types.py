@@ -193,8 +193,13 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
                   'is_public': is_public}
         updated_vol_type = self.admin_volume_types_client.update_volume_type(
             volume_type['id'], **kwargs)['volume_type']
-
-        # Verify volume type details were updated
         self.assertEqual(name, updated_vol_type['name'])
         self.assertEqual(description, updated_vol_type['description'])
         self.assertEqual(is_public, updated_vol_type['is_public'])
+
+        # Verify volume type details were updated
+        fetched_volume_type = self.admin_volume_types_client.show_volume_type(
+            volume_type['id'])['volume_type']
+        self.assertEqual(name, fetched_volume_type['name'])
+        self.assertEqual(description, fetched_volume_type['description'])
+        self.assertEqual(is_public, fetched_volume_type['is_public'])
