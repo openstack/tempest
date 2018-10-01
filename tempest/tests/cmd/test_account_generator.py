@@ -208,9 +208,9 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=True)
         resource_types = [k for k, _ in resources]
-        # all options on, expect six credentials
-        self.assertEqual(6, len(resources))
-        # Ensure create_user was invoked 6 times (6 distinct users)
+        # all options on, expect five credentials
+        self.assertEqual(5, len(resources))
+        # Ensure create_user was invoked 5 times (5 distinct users)
         self.assertEqual(5, self.user_create_fixture.mock.call_count)
         self.assertIn('primary', resource_types)
         self.assertIn('alt', resource_types)
@@ -267,14 +267,14 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         # Ordered args in [0], keyword args in [1]
         accounts, f = yaml_dump_mock.call_args[0]
         self.assertEqual(handle, f)
-        self.assertEqual(6, len(accounts))
+        self.assertEqual(5, len(accounts))
         if self.domain_is_in:
             self.assertIn('domain_name', accounts[0].keys())
         else:
             self.assertNotIn('domain_name', accounts[0].keys())
         self.assertEqual(1, len([x for x in accounts if
                                  x.get('types') == ['admin']]))
-        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
+        self.assertEqual(2, len([x for x in accounts if 'roles' in x]))
         for account in accounts:
             self.assertIn('resources', account)
             self.assertIn('network', account.get('resources'))
@@ -298,14 +298,14 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         # Ordered args in [0], keyword args in [1]
         accounts, f = yaml_dump_mock.call_args[0]
         self.assertEqual(handle, f)
-        self.assertEqual(6, len(accounts))
+        self.assertEqual(5, len(accounts))
         if self.domain_is_in:
             self.assertIn('domain_name', accounts[0].keys())
         else:
             self.assertNotIn('domain_name', accounts[0].keys())
         self.assertEqual(1, len([x for x in accounts if
                                  x.get('types') == ['admin']]))
-        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
+        self.assertEqual(2, len([x for x in accounts if 'roles' in x]))
         for account in accounts:
             self.assertIn('resources', account)
             self.assertIn('network', account.get('resources'))
