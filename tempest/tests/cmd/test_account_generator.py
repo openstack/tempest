@@ -106,6 +106,8 @@ class TestAccountGeneratorV2(base.TestCase, MockHelpersMixin):
         cp = account_generator.get_credential_provider(self.opts)
         admin_creds = cp.default_admin_creds
         self.assertEqual(self.opts.os_tenant_name, admin_creds.tenant_name)
+        self.assertEqual(self.opts.os_username, admin_creds.username)
+        self.assertEqual(self.opts.os_password, admin_creds.password)
 
 
 class TestAccountGeneratorV3(TestAccountGeneratorV2):
@@ -217,6 +219,30 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         self.assertIn('admin', resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
+        for resource in resources:
+            self.assertIsNotNone(resource[1].network)
+            self.assertIsNotNone(resource[1].router)
+            self.assertIsNotNone(resource[1].subnet)
+
+    def test_generate_resources_swift_no_admin(self):
+        cfg.CONF.set_default('swift', True, group='service_available')
+        cfg.CONF.set_default('operator_role', 'fake_operator',
+                             group='object-storage')
+        cfg.CONF.set_default('reseller_admin_role', 'fake_reseller',
+                             group='object-storage')
+        resources = account_generator.generate_resources(
+            self.cred_provider, admin=False)
+        resource_types = [k for k, _ in resources]
+        # No Admin, swift, expect four credentials only
+        self.assertEqual(4, len(resources))
+        # Ensure create_user was invoked 4 times (4 distinct users)
+        self.assertEqual(4, self.user_create_fixture.mock.call_count)
+        self.assertIn('primary', resource_types)
+        self.assertIn('alt', resource_types)
+        self.assertNotIn('admin', resource_types)
+        self.assertIn(['fake_operator'], resource_types)
+        self.assertIn(['fake_reseller'], resource_types)
+        self.assertNotIn(['fake_owner'], resource_types)
         for resource in resources:
             self.assertIsNotNone(resource[1].network)
             self.assertIsNotNone(resource[1].router)
