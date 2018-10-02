@@ -12,11 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 import fixtures
 import mock
 from oslo_serialization import jsonutils as json
 
 from tempest import clients
+from tempest.cmd import init
 from tempest.cmd import verify_tempest_config
 from tempest.common import credentials_factory
 from tempest import config
@@ -565,3 +568,60 @@ class TestDiscovery(base.TestCase):
             extensions_client = verify_tempest_config.get_extension_client(
                 os, service)
             self.assertIsInstance(extensions_client, rest_client.RestClient)
+
+    def test_get_extension_client_sysexit(self):
+        creds = credentials_factory.get_credentials(
+            fill_in=False, username='fake_user', project_name='fake_project',
+            password='fake_password')
+        os = clients.Manager(creds)
+        self.assertRaises(SystemExit,
+                          verify_tempest_config.get_extension_client,
+                          os, 'fakeservice')
+
+    def test_get_config_file(self):
+        default_config_dir = os.path.join(os.getcwd(), 'etc/')
+        default_config_file = "tempest.conf"
+        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
+        conf_file = os.environ.get('TEMPEST_CONFIG', default_config_file)
+        local_sample_conf_file = os.path.join(conf_dir, conf_file)
+
+        init_cmd = init.TempestInit(None, None)
+        init_cmd.generate_sample_config(os.getcwd())
+        self.assertTrue(
+            os.path.isfile('%s/tempest.conf.sample' % (conf_dir)))
+        os.rename('%s/tempest.conf.sample'
+                  % (conf_dir), '%s' % (local_sample_conf_file))
+
+        def fake_environ_get(key, default):
+            return default
+
+        with mock.patch('os.environ.get', side_effect=fake_environ_get):
+            file_pointer = verify_tempest_config._get_config_file()
+        self.assertEqual(local_sample_conf_file, file_pointer.name)
+
+        with open(local_sample_conf_file, 'r+') as f:
+            local_sample_conf_contents = f.read()
+        self.assertEqual(local_sample_conf_contents, file_pointer.read())
+
+    def test_print_and_or_update_true(self):
+        with mock.patch.object(
+            verify_tempest_config, 'change_option') as test_mock:
+            verify_tempest_config.print_and_or_update(
+                'fakeservice', 'fake-service-available', False, True)
+            test_mock.assert_called_once_with(
+                'fakeservice', 'fake-service-available', False)
+
+    def test_print_and_or_update_false(self):
+        with mock.patch.object(
+            verify_tempest_config, 'change_option') as test_mock:
+            verify_tempest_config.print_and_or_update(
+                'fakeservice', 'fake-service-available', False, False)
+            test_mock.assert_not_called()
+
+    def test_contains_version_positive_data(self):
+        self.assertTrue(
+            verify_tempest_config.contains_version('v1.', ['v1.0', 'v2.0']))
+
+    def test_contains_version_negative_data(self):
+        self.assertFalse(
+            verify_tempest_config.contains_version('v5.', ['v1.0', 'v2.0']))
