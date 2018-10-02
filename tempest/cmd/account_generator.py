@@ -162,7 +162,6 @@ def generate_resources(cred_provider, admin):
     if CONF.service_available.swift:
         spec.append([CONF.object_storage.operator_role])
         spec.append([CONF.object_storage.reseller_admin_role])
-        spec.append([CONF.object_storage.operator_role])
     if admin:
         spec.append('admin')
     resources = []
