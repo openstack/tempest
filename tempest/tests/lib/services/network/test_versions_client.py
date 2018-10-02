@@ -12,63 +12,92 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
-
 from tempest.lib.services.network import versions_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
 
 class TestNetworkVersionsClient(base.BaseServiceTest):
-
-    FAKE_INIT_VERSION = {
-        "version": {
-            "id": "v2.0",
-            "links": [
-                {
-                    "href": "http://openstack.example.com/v2.0/",
-                    "rel": "self"
-                },
-                {
-                    "href": "http://docs.openstack.org/",
-                    "rel": "describedby",
-                    "type": "text/html"
-                }
-            ],
-            "status": "CURRENT"
-            }
-        }
+    VERSION = "v2.0"
 
     FAKE_VERSIONS_INFO = {
-        "versions": [FAKE_INIT_VERSION["version"]]
-        }
-
-    FAKE_VERSION_INFO = copy.deepcopy(FAKE_INIT_VERSION)
-
-    FAKE_VERSION_INFO["version"]["media-types"] = [
-        {
-            "base": "application/json",
-            "type": "application/vnd.openstack.network+json;version=2.0"
-        }
+        "versions": [
+            {
+                "id": "v2.0",
+                "links": [
+                    {
+                        "href": "http://openstack.example.com/%s/" % VERSION,
+                        "rel": "self"
+                    }
+                ],
+                "status": "CURRENT"
+            }
         ]
+    }
+
+    FAKE_VERSION_DETAILS = {
+        "resources": [
+            {
+                "collection": "subnets",
+                "links": [
+                    {
+                        "href": "http://openstack.example.com:9696/"
+                                "%s/subnets" % VERSION,
+                        "rel": "self"
+                    }
+                ],
+                "name": "subnet"
+            },
+            {
+                "collection": "networks",
+                "links": [
+                    {
+                        "href": "http://openstack.example.com:9696/"
+                                "%s/networks" % VERSION,
+                        "rel": "self"
+                    }
+                ],
+                "name": "network"
+            },
+            {
+                "collection": "ports",
+                "links": [
+                    {
+                        "href": "http://openstack.example.com:9696/"
+                                "%s/ports" % VERSION,
+                        "rel": "self"
+                    }
+                ],
+                "name": "port"
+            }
+        ]
+    }
 
     def setUp(self):
         super(TestNetworkVersionsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
-        self.versions_client = (
-            versions_client.NetworkVersionsClient
-            (fake_auth, 'compute', 'regionOne'))
+        self.versions_client = versions_client.NetworkVersionsClient(
+            fake_auth, 'compute', 'regionOne')
 
-    def _test_versions_client(self, bytes_body=False):
+    def _test_versions_client(self, func, body, bytes_body=False, **kwargs):
         self.check_service_client_function(
-            self.versions_client.list_versions,
-            'tempest.lib.common.rest_client.RestClient.raw_request',
-            self.FAKE_VERSIONS_INFO,
-            bytes_body,
-            200)
+            func, 'tempest.lib.common.rest_client.RestClient.raw_request',
+            body, bytes_body, 200, **kwargs)
 
     def test_list_versions_client_with_str_body(self):
-        self._test_versions_client()
+        self._test_versions_client(self.versions_client.list_versions,
+                                   self.FAKE_VERSIONS_INFO)
 
     def test_list_versions_client_with_bytes_body(self):
-        self._test_versions_client(bytes_body=True)
+        self._test_versions_client(self.versions_client.list_versions,
+                                   self.FAKE_VERSIONS_INFO, bytes_body=True)
+
+    def test_show_version_client_with_str_body(self):
+        self._test_versions_client(self.versions_client.show_version,
+                                   self.FAKE_VERSION_DETAILS,
+                                   version=self.VERSION)
+
+    def test_show_version_client_with_bytes_body(self):
+        self._test_versions_client(self.versions_client.show_version,
+                                   self.FAKE_VERSION_DETAILS, bytes_body=True,
+                                   version=self.VERSION)

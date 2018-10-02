@@ -29,7 +29,7 @@ class NetworksApiDiscovery(base.BaseNetworkTest):
         """
 
         result = self.network_versions_client.list_versions()
-        expected_versions = ('v2.0')
+        expected_versions = ('v2.0',)
         expected_resources = ('id', 'links', 'status')
         received_list = result.values()
 
@@ -38,3 +38,14 @@ class NetworksApiDiscovery(base.BaseNetworkTest):
                 for resource in expected_resources:
                     self.assertIn(resource, version)
                 self.assertIn(version['id'], expected_versions)
+
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('e64b7216-3178-4263-967c-d389290988bf')
+    def test_show_api_v2_details(self):
+        """Test that GET /v2.0/ returns expected resources."""
+        current_version = 'v2.0'
+        expected_resources = ('subnet', 'network', 'port')
+        result = self.network_versions_client.show_version(current_version)
+        actual_resources = [r['name'] for r in result['resources']]
+        for resource in expected_resources:
+            self.assertIn(resource, actual_resources)
