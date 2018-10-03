@@ -7,6 +7,11 @@
 
 # We run tests only on one node, regardless how many nodes are in the system
 - hosts: tempest
+  environment:
+    # This enviroment variable is used by the optional tempest-gabbi
+    # job provided by the gabbi-tempest plugin. It can be safely ignored
+    # if that plugin is not being used.
+    GABBI_TEMPEST_PATH: "{{ gabbi_tempest_path }}"
   roles:
     - setup-tempest-run-dir
     - setup-tempest-data-dir
