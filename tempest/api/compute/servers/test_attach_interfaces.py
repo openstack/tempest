@@ -20,6 +20,7 @@ import six
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import utils
+from tempest.common.utils.linux import remote_client
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
@@ -38,11 +39,16 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
             raise cls.skipException("Neutron is required")
         if not CONF.compute_feature_enabled.interface_attach:
             raise cls.skipException("Interface attachment is not available.")
+        if not CONF.validation.run_validation:
+            raise cls.skipException('Validation should be enabled to ensure '
+                                    'guest OS is running and capable of '
+                                    'processing ACPI events.')
 
     @classmethod
     def setup_credentials(cls):
         # This test class requires network and subnet
-        cls.set_network_resources(network=True, subnet=True)
+        cls.set_network_resources(network=True, subnet=True, router=True,
+                                  dhcp=True)
         super(AttachInterfacesTestBase, cls).setup_credentials()
 
     @classmethod
@@ -51,8 +57,27 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
 
+    def _wait_for_validation(self, server, validation_resources):
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(server, validation_resources),
+            self.image_ssh_user,
+            self.image_ssh_password,
+            validation_resources['keypair']['private_key'],
+            server=server,
+            servers_client=self.servers_client)
+        linux_client.validate_authentication()
+
     def _create_server_get_interfaces(self):
-        server = self.create_test_server(wait_until='ACTIVE')
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='ACTIVE')
+        # NOTE(artom) self.create_test_server adds cleanups, but this is
+        # apparently not enough? Add cleanup here.
+        self.addCleanup(self.delete_server, server['id'])
+        self._wait_for_validation(server, validation_resources)
         ifs = (self.interfaces_client.list_interfaces(server['id'])
                ['interfaceAttachments'])
         body = waiters.wait_for_interface_status(
@@ -274,15 +299,26 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
 
-        # create two servers
-        _, servers = compute.create_test_server(
-            self.os_primary, tenant_network=network,
-            wait_until='ACTIVE', min_count=2)
+        # NOTE(artom) We create two servers one at a time because
+        # create_test_server doesn't support multiple validatable servers.
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+
+        def _create_validatable_server():
+            _, servers = compute.create_test_server(
+                self.os_primary, tenant_network=network,
+                wait_until='ACTIVE', validatable=True,
+                validation_resources=validation_resources)
+            return servers[0]
+
+        servers = [_create_validatable_server(), _create_validatable_server()]
+
         # add our cleanups for the servers since we bypassed the base class
         for server in servers:
             self.addCleanup(self.delete_server, server['id'])
 
         for server in servers:
+            self._wait_for_validation(server, validation_resources)
             # attach the port to the server
             iface = self.interfaces_client.create_interface(
                 server['id'], port_id=port_id)['interfaceAttachment']
