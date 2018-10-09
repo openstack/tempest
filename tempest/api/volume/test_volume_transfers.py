@@ -63,8 +63,6 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # Accept a volume transfer by alt_tenant
         body = self.alt_client.accept_volume_transfer(
             transfer_id, auth_key=auth_key)['transfer']
-        for key in ['id', 'name', 'links', 'volume_id']:
-            self.assertIn(key, body)
         waiters.wait_for_volume_resource_status(self.alt_volumes_client,
                                                 volume['id'], 'available')
         accepted_volume = self.alt_volumes_client.show_volume(
@@ -95,8 +93,6 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         # elements, and look for the created transfer.
         transfers = self.client.list_volume_transfers(detail=True)['transfers']
         self.assertNotEmpty(transfers)
-        for transfer in transfers:
-            self.assertIn('created_at', transfer)
         volume_list = [transfer['volume_id'] for transfer in transfers]
         self.assertIn(volume['id'], volume_list,
                       'Transfer not found for volume %s' % volume['id'])
