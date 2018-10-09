@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import manage_volume as schema
 from tempest.lib.common import rest_client
 
 
@@ -30,6 +31,6 @@ class VolumeManageClient(rest_client.RestClient):
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('os-volume-manage', post_body)
-        self.expected_success(202, resp.status)
         body = json.loads(body)
+        self.validate_response(schema.manage_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
