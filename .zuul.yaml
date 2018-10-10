@@ -398,8 +398,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-cinder-v1:
-            irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-pg-full:
