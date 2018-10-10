@@ -330,6 +330,17 @@
       devstack_localrc:
         TEMPEST_HAS_ADMIN: False
 
+- job:
+    name: tempest-pg-full
+    parent: tempest-full
+    description: |
+      Base integration test with Neutron networking and py27 and PostgreSQL.
+      Former name for this job was legacy-tempest-dsvm-neutron-pg-full.
+    vars:
+      devstack_localrc:
+        ENABLE_FILE_INJECTION: true
+        DATABASE_TYPE: postgresql
+
 - project:
     templates:
       - check-requirements
@@ -447,7 +458,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-pg-full:
+        - tempest-pg-full:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3-opensuse150:
             irrelevant-files: *tempest-irrelevant-files
