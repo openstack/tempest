@@ -579,29 +579,33 @@ class TestDiscovery(base.TestCase):
                           os, 'fakeservice')
 
     def test_get_config_file(self):
-        default_config_dir = os.path.join(os.getcwd(), 'etc/')
-        default_config_file = "tempest.conf"
-        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
-        conf_file = os.environ.get('TEMPEST_CONFIG', default_config_file)
+        conf_dir = os.path.join(os.getcwd(), 'etc/')
+        conf_file = "tempest.conf.sample"
         local_sample_conf_file = os.path.join(conf_dir, conf_file)
 
-        init_cmd = init.TempestInit(None, None)
-        init_cmd.generate_sample_config(os.getcwd())
-        self.assertTrue(
-            os.path.isfile('%s/tempest.conf.sample' % (conf_dir)))
-        os.rename('%s/tempest.conf.sample'
-                  % (conf_dir), '%s' % (local_sample_conf_file))
-
-        def fake_environ_get(key, default):
+        def fake_environ_get(key, default=None):
+            if key == 'TEMPEST_CONFIG_DIR':
+                return conf_dir
+            elif key == 'TEMPEST_CONFIG':
+                return 'tempest.conf.sample'
             return default
 
-        with mock.patch('os.environ.get', side_effect=fake_environ_get):
-            file_pointer = verify_tempest_config._get_config_file()
-        self.assertEqual(local_sample_conf_file, file_pointer.name)
+        with mock.patch('os.environ.get', side_effect=fake_environ_get,
+                        autospec=True):
+            init_cmd = init.TempestInit(None, None)
+            init_cmd.generate_sample_config(os.path.join(conf_dir, os.pardir))
+            self.assertTrue(os.path.isfile(local_sample_conf_file),
+                            local_sample_conf_file)
 
-        with open(local_sample_conf_file, 'r+') as f:
-            local_sample_conf_contents = f.read()
-        self.assertEqual(local_sample_conf_contents, file_pointer.read())
+            file_pointer = verify_tempest_config._get_config_file()
+            self.assertEqual(local_sample_conf_file, file_pointer.name)
+
+            with open(local_sample_conf_file, 'r+') as f:
+                local_sample_conf_contents = f.read()
+            self.assertEqual(local_sample_conf_contents, file_pointer.read())
+
+            if file_pointer:
+                file_pointer.close()
 
     def test_print_and_or_update_true(self):
         with mock.patch.object(
