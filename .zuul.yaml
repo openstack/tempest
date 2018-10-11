@@ -143,6 +143,25 @@
       Base integration test with Neutron networking and py36.
     voting: false
 
+- nodeset:
+    name: openstack-opensuse150-node
+    nodes:
+      - name: controller
+        label: opensuse-150
+    groups:
+      - name: tempest
+        nodes:
+          - controller
+
+- job:
+    name: tempest-full-py3-opensuse150
+    parent: tempest-full-py3
+    nodeset: openstack-opensuse150-node
+    description: |
+      Base integration test with Neutron networking and py36 running
+      on openSUSE Leap 15.0
+    voting: false
+
 - job:
     name: tempest-slow
     parent: tempest-multinode-full
@@ -405,7 +424,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-neutron-pg-full:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-full-opensuse-423:
+        - tempest-full-py3-opensuse150:
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
