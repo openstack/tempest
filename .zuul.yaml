@@ -425,7 +425,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-full:
+        - tempest-full:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade:
             irrelevant-files: *tempest-irrelevant-files
