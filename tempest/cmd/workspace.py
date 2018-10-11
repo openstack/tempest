@@ -86,6 +86,7 @@ class WorkspaceManager(object):
     def rename_workspace(self, old_name, new_name):
         self._populate()
         self._name_exists(old_name)
+        self._invalid_name_check(new_name)
         self._workspace_name_exists(new_name)
         self.workspaces[new_name] = self.workspaces.pop(old_name)
         self._write_file()
@@ -128,6 +129,12 @@ class WorkspaceManager(object):
                 name))
             sys.exit(1)
 
+    def _invalid_name_check(self, name):
+        if not name:
+            print("None or empty name is specified."
+                  " Please specify correct name for workspace.")
+            sys.exit(1)
+
     def _validate_path(self, path):
         if not os.path.exists(path):
             print("Path does not exist.")
@@ -141,6 +148,7 @@ class WorkspaceManager(object):
         # This only happens when register is called from outside of init
         if not init:
             self._validate_path(path)
+        self._invalid_name_check(name)
         self._workspace_name_exists(name)
         self.workspaces[name] = path
         self._write_file()
