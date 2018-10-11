@@ -35,9 +35,7 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
     def test_delete_attached_volume(self):
         server = self.create_test_server(wait_until='ACTIVE')
         volume = self.create_volume()
-
-        path = "/dev/%s" % CONF.compute.volume_device_name
-        self.attach_volume(server, volume, device=path)
+        self.attach_volume(server, volume)
 
         self.assertRaises(lib_exc.BadRequest,
                           self.delete_volume, volume['id'])
