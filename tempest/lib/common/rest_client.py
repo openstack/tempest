@@ -70,6 +70,7 @@ class RestClient(object):
     :param str http_timeout: Timeout in seconds to wait for the http request to
                              return
     :param str proxy_url: http proxy url to use.
+    :param bool follow_redirects: Set to false to stop following redirects.
     """
 
     # The version of the API this client implements
@@ -82,7 +83,7 @@ class RestClient(object):
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
                  trace_requests='', name=None, http_timeout=None,
-                 proxy_url=None):
+                 proxy_url=None, follow_redirects=True):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
@@ -107,11 +108,11 @@ class RestClient(object):
             self.http_obj = http.ClosingProxyHttp(
                 proxy_url,
                 disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
-                timeout=http_timeout)
+                timeout=http_timeout, follow_redirects=follow_redirects)
         else:
             self.http_obj = http.ClosingHttp(
                 disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
-                timeout=http_timeout)
+                timeout=http_timeout, follow_redirects=follow_redirects)
 
     def get_headers(self, accept_type=None, send_type=None):
         """Return the default headers which will be used with outgoing requests

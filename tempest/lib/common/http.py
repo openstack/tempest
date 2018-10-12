@@ -19,7 +19,8 @@ import urllib3
 
 class ClosingProxyHttp(urllib3.ProxyManager):
     def __init__(self, proxy_url, disable_ssl_certificate_validation=False,
-                 ca_certs=None, timeout=None):
+                 ca_certs=None, timeout=None, follow_redirects=True):
+        self.follow_redirects = follow_redirects
         kwargs = {}
 
         if disable_ssl_certificate_validation:
@@ -50,9 +51,14 @@ class ClosingProxyHttp(urllib3.ProxyManager):
         new_headers = dict(original_headers, connection='close')
         new_kwargs = dict(kwargs, headers=new_headers)
 
-        # Follow up to 5 redirections. Don't raise an exception if
-        # it's exceeded but return the HTTP 3XX response instead.
-        retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+        if self.follow_redirects:
+            # Follow up to 5 redirections. Don't raise an exception if
+            # it's exceeded but return the HTTP 3XX response instead.
+            retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+        else:
+            # Do not follow redirections. Don't raise an exception if
+            # a redirect is found, but return the HTTP 3XX response instead.
+            retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingProxyHttp, self).request(method, url, retries=retry,
                                                   *args, **new_kwargs)
         return Response(r), r.data
@@ -60,7 +66,8 @@ class ClosingProxyHttp(urllib3.ProxyManager):
 
 class ClosingHttp(urllib3.poolmanager.PoolManager):
     def __init__(self, disable_ssl_certificate_validation=False,
-                 ca_certs=None, timeout=None):
+                 ca_certs=None, timeout=None, follow_redirects=True):
+        self.follow_redirects = follow_redirects
         kwargs = {}
 
         if disable_ssl_certificate_validation:
@@ -93,9 +100,14 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
         new_headers = dict(original_headers, connection='close')
         new_kwargs = dict(kwargs, headers=new_headers)
 
-        # Follow up to 5 redirections. Don't raise an exception if
-        # it's exceeded but return the HTTP 3XX response instead.
-        retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+        if self.follow_redirects:
+            # Follow up to 5 redirections. Don't raise an exception if
+            # it's exceeded but return the HTTP 3XX response instead.
+            retry = urllib3.util.Retry(raise_on_redirect=False, redirect=5)
+        else:
+            # Do not follow redirections. Don't raise an exception if
+            # a redirect is found, but return the HTTP 3XX response instead.
+            retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingHttp, self).request(method, url, retries=retry,
                                              *args, **new_kwargs)
         return Response(r), r.data
