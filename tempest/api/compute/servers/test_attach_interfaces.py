@@ -331,6 +331,16 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
     @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @utils.services('network')
     def test_add_remove_fixed_ip(self):
+        # NOTE(zhufl) By default only project that is admin or network owner
+        # or project with role advsvc is authorised to add interfaces with
+        # fixed-ip, so if we don't create network for each project, do not
+        # test
+        if not (CONF.auth.use_dynamic_credentials and
+                CONF.auth.create_isolated_networks and
+                not CONF.network.shared_physical_network):
+            raise self.skipException("Only owner network supports "
+                                     "creating interface by fixed ip.")
+
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
         original_interface_count = len(ifs)  # This is the number of ports.
