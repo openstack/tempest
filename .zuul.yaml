@@ -68,6 +68,37 @@
         ENABLE_FILE_INJECTION: true
 
 - job:
+    name: tempest-full-oslo-master
+    parent: tempest-full
+    description: |
+      Integration test using current git of oslo libs.
+      This ensures that when oslo libs get released that they
+      do not break OpenStack server projects.
+
+      Former name for this job was
+      periodic-tempest-dsvm-oslo-latest-full-master.
+    timeout: 10800
+    required-projects:
+      - git.openstack.org/openstack/oslo.cache
+      - git.openstack.org/openstack/oslo.concurrency
+      - git.openstack.org/openstack/oslo.config
+      - git.openstack.org/openstack/oslo.context
+      - git.openstack.org/openstack/oslo.db
+      - git.openstack.org/openstack/oslo.i18n
+      - git.openstack.org/openstack/oslo.log
+      - git.openstack.org/openstack/oslo.messaging
+      - git.openstack.org/openstack/oslo.middleware
+      - git.openstack.org/openstack/oslo.policy
+      - git.openstack.org/openstack/oslo.privsep
+      - git.openstack.org/openstack/oslo.reports
+      - git.openstack.org/openstack/oslo.rootwrap
+      - git.openstack.org/openstack/oslo.serialization
+      - git.openstack.org/openstack/oslo.service
+      - git.openstack.org/openstack/oslo.utils
+      - git.openstack.org/openstack/oslo.versionedobjects
+      - git.openstack.org/openstack/oslo.vmware
+
+- job:
     name: tempest-full-parallel
     parent: tempest-full
     voting: false
@@ -486,3 +517,4 @@
     periodic:
       jobs:
         - tempest-all
+        - tempest-full-oslo-master
