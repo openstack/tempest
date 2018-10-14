@@ -20,10 +20,10 @@ import six
 from tempest.api.compute import base
 from tempest.common import compute
 from tempest.common import utils
-from tempest.common.utils.linux import remote_client
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils.linux import remote_client
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
