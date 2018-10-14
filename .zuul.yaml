@@ -51,6 +51,41 @@
         ENABLE_FILE_INJECTION: true
 
 - job:
+    name: devstack-tempest-ipv6
+    parent: devstack-ipv6
+    nodeset: openstack-single-node
+    description: |
+      Base Tempest IPv6 job.
+    required-projects:
+      - git.openstack.org/openstack/tempest
+    timeout: 7200
+    roles:
+      - zuul: git.openstack.org/openstack-dev/devstack
+    vars:
+      devstack_services:
+        tempest: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            compute:
+              min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
+      test_results_stage_name: test_results
+      zuul_copy_output:
+        '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
+        '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': logs
+        '{{ devstack_base_dir }}/tempest/tempest.log': logs
+        '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': logs
+        '{{ stage_dir }}/{{ test_results_stage_name }}.html': logs
+        '{{ stage_dir }}/stackviz': logs
+      extensions_to_txt:
+        conf: true
+        log: true
+        yaml: true
+        yml: true
+    run: playbooks/devstack-tempest.yaml
+    post-run: playbooks/post-tempest.yaml
+
+- job:
     name: tempest-full
     parent: devstack-tempest
     # This currently works from stable/pike on.
@@ -123,6 +158,28 @@
       Former names for this job where:
         * legacy-tempest-dsvm-py35
         * gate-tempest-dsvm-py35
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        # without Swift, c-bak cannot run (in the Gate at least)
+        c-bak: false
+
+- job:
+    name: tempest-full-py3-ipv6
+    parent: devstack-tempest-ipv6
+    # This currently works from stable/pike on.
+    # Before stable/pike, legacy version of tempest-full
+    # 'legacy-tempest-dsvm-neutron-full' run.
+    branches: ^(?!stable/ocata).*$
+    description: |
+      Base integration test with Neutron networking, IPv6 and py3.
     vars:
       tox_envlist: full
       devstack_localrc:
@@ -403,6 +460,12 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
+        - devstack-tempest-ipv6:
+            voting: false
+            files:
+              - ^playbooks/
+              - ^roles/
+              - ^.zuul.yaml$
         - nova-multiattach:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
@@ -419,6 +482,9 @@
         - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py36:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-py3-ipv6:
+            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky:
             irrelevant-files: *tempest-irrelevant-files
