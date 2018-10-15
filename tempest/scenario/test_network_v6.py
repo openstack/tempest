@@ -12,13 +12,18 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from oslo_log import log as logging
+
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest.scenario import manager
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class TestGettingAddress(manager.NetworkScenarioTest):
@@ -154,7 +159,30 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                          % (network_id, ports))
         mac6 = ports[0]
         nic = ssh.get_nic_name_by_mac(mac6)
+        # NOTE(slaweq): on RHEL based OS ifcfg file for new interface is
+        # needed to make IPv6 working on it, so if
+        # /etc/sysconfig/network-scripts directory exists ifcfg-%(nic)s file
+        # should be added in it
+        if self._sysconfig_network_scripts_dir_exists(ssh):
+            try:
+                ssh.exec_command(
+                    'echo -e "DEVICE=%(nic)s\\nIPV6INIT=yes" | '
+                    'sudo tee /etc/sysconfig/network-scripts/ifcfg-%(nic)s; '
+                    'sudo /sbin/service network restart' % {'nic': nic})
+            except exceptions.SSHExecCommandFailed as e:
+                # NOTE(slaweq): Sometimes it can happen that this SSH command
+                # will fail because of some error from network manager in
+                # guest os.
+                # But even then doing ip link set up below is fine and
+                # IP address should be configured properly.
+                LOG.debug("Error during restarting %(nic)s interface on "
+                          "instance. Error message: %(error)s",
+                          {'nic': nic, 'error': e})
         ssh.exec_command("sudo ip link set %s up" % nic)
+
+    def _sysconfig_network_scripts_dir_exists(self, ssh):
+        return "False" not in ssh.exec_command(
+            'test -d /etc/sysconfig/network-scripts/ || echo "False"')
 
     def _prepare_and_test(self, address6_mode, n_subnets6=1, dualnet=False):
         net_list = self.prepare_network(address6_mode=address6_mode,
