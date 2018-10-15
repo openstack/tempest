@@ -178,7 +178,16 @@ IdentityGroup = [
     cfg.IntOpt('user_unique_last_password_count',
                default=2,
                help="The number of passwords for a user that must be unique "
-                    "before an old password can be reused."),
+                    "before an old password can be reused. This only takes "
+                    "effect when identity-feature-enabled.security_compliance "
+                    "is set to 'True'."
+                    "This config option corresponds to keystone.conf: "
+                    "security_compliance.unique_last_password_count, whose "
+                    "default value is 0 meaning disabling this feature. "
+                    "NOTE: This config option value must be same as "
+                    "keystone.conf: security_compliance.unique_last_password_"
+                    "count otherwise test might fail"
+               ),
 ]
 
 service_clients_group = cfg.OptGroup(name='service-clients',
