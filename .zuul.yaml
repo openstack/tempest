@@ -38,6 +38,19 @@
     post-run: playbooks/post-tempest.yaml
 
 - job:
+    name: tempest-all
+    parent: devstack-tempest
+    description: |
+      Integration test that runs all tests.
+      Former name for this job was:
+        * legacy-periodic-tempest-dsvm-all-master
+    vars:
+      tox_envlist: all
+      tempest_test_regex: tempest
+      devstack_localrc:
+        ENABLE_FILE_INJECTION: true
+
+- job:
     name: tempest-full
     parent: devstack-tempest
     # This currently works from stable/pike on.
@@ -170,7 +183,7 @@
     description: |
       This multinode integration job will run all the tests tagged as slow.
       It enables the lvm multibackend setup to cover few scenario tests.
-      This job will run only slow tests(API or Scenario) serially.
+      This job will run only slow tests (API or Scenario) serially.
 
       Former names for this job were:
         * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
@@ -444,7 +457,7 @@
       jobs:
         - tempest-cinder-v2-api:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-periodic-tempest-dsvm-all-master:
+        - tempest-all:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
@@ -472,4 +485,4 @@
         - legacy-periodic-tempest-dsvm-neutron-full-ocata
     periodic:
       jobs:
-        - legacy-periodic-tempest-dsvm-all-master
+        - tempest-all
