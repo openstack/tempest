@@ -194,12 +194,8 @@
         c-bak: false
 
 - job:
-    name: tempest-multinode-full
+    name: tempest-multinode-full-base
     parent: devstack-tempest
-    nodeset: openstack-two-node-bionic
-    # Until the devstack changes are backported, only run this on master
-    branches:
-      - master
     description: |
       Base multinode integration test with Neutron networking and py27.
       Former names for this job were:
@@ -223,6 +219,26 @@
           NOVA_ALLOW_MOVE_TO_SAME_HOST: false
           LIVE_MIGRATION_AVAILABLE: true
           USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
+
+- job:
+    name: tempest-multinode-full
+    parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-bionic
+    # This job runs on Bionic from stable/stein on.
+    branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
+
+- job:
+    name: tempest-multinode-full
+    parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-xenial
+    # This job runs on Xenial and this is for stable/pike, stable/queens
+    # and stable/rocky. This job is prepared to make sure all stable branches
+    # before stable/stein will keep running on xenial. This job can be
+    # removed once stable/rocky is EOL.
+    branches:
+      - stable/pike
+      - stable/queens
+      - stable/rocky
 
 - job:
     name: tempest-multinode-full-py3
