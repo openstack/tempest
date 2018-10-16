@@ -476,9 +476,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_network_internal_connectivity(network=self.network)
         self._check_network_external_connectivity()
         self._create_new_network(create_gateway=True)
-        self._create_server(self.new_net)
-        self._check_network_internal_connectivity(network=self.new_net,
-                                                  should_connect=False)
+        new_server = self._create_server(self.new_net)
+        new_server_ips = [addr['addr'] for addr in
+                          new_server['addresses'][self.new_net['name']]]
+
+        # Assert that pinging the new VM fails since the new network is not
+        # connected to a router
+        self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
+                                        new_server_ips, should_connect=False)
         router_id = self.router['id']
         self.routers_client.add_router_interface(
             router_id, subnet_id=self.new_subnet['id'])
@@ -486,8 +491,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.routers_client.remove_router_interface,
                         router_id, subnet_id=self.new_subnet['id'])
-        self._check_network_internal_connectivity(network=self.new_net,
-                                                  should_connect=True)
+
+        self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
+                                        new_server_ips, should_connect=True)
 
     @decorators.idempotent_id('c5adff73-e961-41f1-b4a9-343614f18cfa')
     @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
