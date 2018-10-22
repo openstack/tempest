@@ -133,6 +133,13 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                           'Security compliance not available.')
     @decorators.idempotent_id('a7ad8bbf-2cff-4520-8c1d-96332e151658')
     def test_user_account_lockout(self):
+        if (CONF.identity.user_lockout_failure_attempts <= 0 or
+                CONF.identity.user_lockout_duration <= 0):
+            raise self.skipException(
+                "Both CONF.identity.user_lockout_failure_attempts and "
+                "CONF.identity.user_lockout_duration should be greater than "
+                "zero to test this feature")
+
         password = self.creds.password
 
         # First, we login using the correct credentials
