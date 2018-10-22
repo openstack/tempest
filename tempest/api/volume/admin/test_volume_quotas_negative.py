@@ -45,13 +45,6 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
         cls.addClassResourceCleanup(cls.admin_quotas_client.update_quota_set,
                                     cls.demo_tenant_id, **cleanup_quota_set)
 
-        cls.shared_quota_set = {'gigabytes': 2 * CONF.volume.volume_size,
-                                'volumes': 1}
-
-        cls.admin_quotas_client.update_quota_set(
-            cls.demo_tenant_id,
-            **cls.shared_quota_set)
-
         # NOTE(gfidente): no need to delete in tearDown as
         # they are created using utility wrapper methods.
         cls.volume = cls.create_volume()
@@ -59,6 +52,8 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
+        self.admin_quotas_client.update_quota_set(self.demo_tenant_id,
+                                                  volumes=1, gigabytes=-1)
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
                           size=CONF.volume.volume_size)
@@ -66,17 +61,18 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
-        # NOTE(gfidente): quota set needs to be changed for this test
-        # or we may be limited by the volumes or snaps quota number, not by
-        # actual gigs usage; next line ensures shared set is restored.
-        self.addCleanup(self.admin_quotas_client.update_quota_set,
-                        self.demo_tenant_id,
-                        **self.shared_quota_set)
-        new_quota_set = {'gigabytes': CONF.volume.volume_size,
-                         'volumes': 2, 'snapshots': 1}
         self.admin_quotas_client.update_quota_set(
-            self.demo_tenant_id,
-            **new_quota_set)
+            self.demo_tenant_id, gigabytes=CONF.volume.volume_size, volumes=-1)
         self.assertRaises(lib_exc.OverLimit,
                           self.volumes_client.create_volume,
-                          size=CONF.volume.volume_size)
+                          size=CONF.volume.volume_size * 2)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('d321dc21-d8c6-401f-95fe-49f4845f1a6d')
+    def test_volume_extend_gigabytes_quota_deviation(self):
+        self.admin_quotas_client.update_quota_set(
+            self.demo_tenant_id, gigabytes=CONF.volume.volume_size)
+        self.assertRaises(lib_exc.OverLimit,
+                          self.volumes_client.extend_volume,
+                          self.volume['id'],
+                          new_size=CONF.volume.volume_size * 2)
