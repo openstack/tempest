@@ -73,8 +73,17 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         # search filter
         fetched_list = (self.client.list_security_groups(all_tenants='true')
                         ['security_groups'])
-        # Now check if all created Security Groups are present in fetched list
-        for sec_group in fetched_list:
-            self.assertEqual(sec_group['tenant_id'], client_tenant_id,
-                             "Failed to get all security groups for "
-                             "non admin user.")
+        sec_group_id_list = [sg['id'] for sg in fetched_list]
+        # Now check that 'all_tenants='true' filter for non-admin user only
+        # provide the requested non-admin user's created security groups,
+        # not all security groups which include security groups created by
+        # other users.
+        for sec_group in security_group_list:
+            if sec_group['tenant_id'] == client_tenant_id:
+                self.assertIn(sec_group['id'], sec_group_id_list,
+                              "Failed to get all security groups for "
+                              "non admin user.")
+            else:
+                self.assertNotIn(sec_group['id'], sec_group_id_list,
+                                 "Non admin user shouldn't get other user's "
+                                 "security groups.")
