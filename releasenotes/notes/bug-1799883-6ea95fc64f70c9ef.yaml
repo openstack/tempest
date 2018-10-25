@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixed bug #1799883. ``tempest workspace register`` and ``tempest workspace move`` CLI
+    will now validate the value of the ``--path`` CLI argument and raise an exception if
+    it is None or empty string. Earlier both CLI actions were accepting None or empty path
+    which was confusing.
