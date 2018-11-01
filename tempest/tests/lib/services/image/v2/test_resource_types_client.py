@@ -17,7 +17,7 @@ from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
 
 
-class TestResouceTypesClient(base.BaseServiceTest):
+class TestResourceTypesClient(base.BaseServiceTest):
     FAKE_LIST_RESOURCETYPES = {
         "resource_types": [
             {
@@ -49,21 +49,21 @@ class TestResouceTypesClient(base.BaseServiceTest):
     }
 
     def setUp(self):
-        super(TestResouceTypesClient, self).setUp()
+        super(TestResourceTypesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = resource_types_client.ResourceTypesClient(fake_auth,
                                                                 'image',
                                                                 'regionOne')
 
-    def _test_list_resouce_types(self, bytes_body=False):
+    def _test_list_resource_types(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_resource_types,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_RESOURCETYPES,
             bytes_body)
 
-    def test_list_resouce_types_with_str_body(self):
-        self._test_list_resouce_types()
+    def test_list_resource_types_with_str_body(self):
+        self._test_list_resource_types()
 
-    def test_list_resouce_types_with_bytes_body(self):
-        self._test_list_resouce_types(bytes_body=True)
+    def test_list_resource_types_with_bytes_body(self):
+        self._test_list_resource_types(bytes_body=True)
