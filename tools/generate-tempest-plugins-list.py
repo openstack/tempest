@@ -74,7 +74,8 @@ r = urllib.urlopen(url)
 # Gerrit prepends 4 garbage octets to the JSON, in order to counter
 # cross-site scripting attacks.  Therefore we must discard it so the
 # json library won't choke.
-projects = sorted(filter(is_in_openstack_namespace, json.loads(r.read()[4:])))
+content = r.read().decode('utf-8')[4:]
+projects = sorted(filter(is_in_openstack_namespace, json.loads(content)))
 
 # Retrieve projects having no deb, puppet, ui or spec namespace as those
 # namespaces do not contains tempest plugins.
