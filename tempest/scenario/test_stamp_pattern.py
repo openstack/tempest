@@ -70,7 +70,6 @@ class TestStampPattern(manager.ScenarioTest):
             raise lib_exc.TimeoutException
 
     @decorators.attr(type='slow')
-    @decorators.skip_because(bug="1664793")
     @decorators.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
@@ -90,6 +89,11 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server1
         ip_for_server = self.get_server_ip(server)
+
+        # Make sure the machine ssh-able before attaching the volume
+        self.get_remote_client(ip_for_server,
+                               private_key=keypair['private_key'],
+                               server=server)
 
         self.nova_volume_attach(server, volume)
         self._wait_for_volume_available_on_the_system(ip_for_server,
@@ -118,6 +122,13 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create and add floating IP to server_from_snapshot
         ip_for_snapshot = self.get_server_ip(server_from_snapshot)
+
+        # Make sure the machine ssh-able before attaching the volume
+        # Just a live machine is responding
+        # for device attache/detach as expected
+        self.get_remote_client(ip_for_snapshot,
+                               private_key=keypair['private_key'],
+                               server=server_from_snapshot)
 
         # attach volume2 to instance2
         self.nova_volume_attach(server_from_snapshot, volume_from_snapshot)
