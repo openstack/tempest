@@ -477,6 +477,7 @@
               - ^setup.cfg$
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
+              - ^tools/.*$
         - tempest-full-parallel:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
