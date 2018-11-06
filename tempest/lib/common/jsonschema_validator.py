@@ -12,9 +12,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import base64
-
 import jsonschema
+from oslo_serialization import base64
 from oslo_utils import timeutils
 import six
 
@@ -46,9 +45,7 @@ def _validate_base64_format(instance):
     try:
         if isinstance(instance, six.text_type):
             instance = instance.encode('utf-8')
-        base64.decodestring(instance)
-    except base64.binascii.Error:
-        return False
+        base64.decode_as_bytes(instance)
     except TypeError:
         # The name must be string type. If instance isn't string type, the
         # TypeError will be raised at here.
