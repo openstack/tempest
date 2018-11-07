@@ -47,7 +47,7 @@ set -ex
 # retrieve a list of projects having tempest plugins
 PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # List of projects having tempest plugin stale or unmaintained from long time
-BLACKLIST="trio2o"
+BLACKLIST="networking-plumgrid,trio2o"
 
 # Function to clone project using zuul-cloner or from git
 function clone_project() {
@@ -105,8 +105,8 @@ function uninstall_project() {
 
 # Function to run sanity check on each project
 function plugin_sanity_check() {
-        clone_project "$1"  &&  install_project "$1"  &&  tempest_sanity "$1" \
-        &&  uninstall_project "$1"  &&  "$TVENV" pip install .
+    clone_project "$1"  &&  install_project "$1"  &&  tempest_sanity "$1" \
+    &&  uninstall_project "$1"  &&  "$TVENV" pip install .
 }
 
 # Log status
