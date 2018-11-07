@@ -280,6 +280,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                dualnet=True)
 
     @decorators.idempotent_id('9178ad42-10e4-47e9-8987-e02b170cc5cd')
+    @decorators.attr(type='slow')
     @utils.services('compute', 'network')
     def test_dualnet_multi_prefix_slaac(self):
         self._prepare_and_test(address6_mode='slaac', n_subnets6=2,
