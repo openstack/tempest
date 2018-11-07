@@ -24,11 +24,11 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class ServerRescueTestJSON(base.BaseV2ComputeTest):
+class ServerRescueTestBase(base.BaseV2ComputeTest):
 
     @classmethod
     def skip_checks(cls):
-        super(ServerRescueTestJSON, cls).skip_checks()
+        super(ServerRescueTestBase, cls).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise cls.skipException(msg)
@@ -36,11 +36,11 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
-        super(ServerRescueTestJSON, cls).setup_credentials()
+        super(ServerRescueTestBase, cls).setup_credentials()
 
     @classmethod
     def resource_setup(cls):
-        super(ServerRescueTestJSON, cls).resource_setup()
+        super(ServerRescueTestBase, cls).resource_setup()
 
         password = data_utils.rand_password()
         server = cls.create_test_server(adminPass=password,
@@ -49,6 +49,9 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(cls.servers_client, server['id'],
                                        'RESCUE')
         cls.rescued_server_id = server['id']
+
+
+class ServerRescueTestJSON(ServerRescueTestBase):
 
     @decorators.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
@@ -61,6 +64,15 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.servers_client.unrescue_server(server['id'])
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
+
+
+class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
+
+    max_microversion = '2.35'
+
+    # TODO(zhufl): After 2.35 we should switch to neutron client to create
+    # floating ip, but that will need admin credential, so the testcases will
+    # have to be added in somewhere in admin directory.
 
     @decorators.idempotent_id('4842e0cf-e87d-4d9d-b61f-f4791da3cacc')
     @testtools.skipUnless(CONF.network.public_network_id,
