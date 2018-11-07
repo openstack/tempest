@@ -56,3 +56,14 @@ Run Tempest
                (?x)    # Ignore comments and whitespaces
                # Line with only a comment.
                (tempest.api.identity).*$
+
+.. zuul:rolevar:: tox_extra_args
+   :default: ''
+
+   String of extra command line options to pass to tox.
+
+   Here is an example of running tox with --sitepackages option:
+
+       ::
+           vars:
+             tox_extra_args: --sitepackages
