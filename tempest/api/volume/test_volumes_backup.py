@@ -80,11 +80,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         self.assertEqual('container', backup['container'])
 
         # Get all backups with detail
-        backups = self.backups_client.list_backups(
-            detail=True)['backups']
-        for backup_info in backups:
-            self.assertIn('created_at', backup_info)
-            self.assertIn('links', backup_info)
+        backups = self.backups_client.list_backups(detail=True)['backups']
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
@@ -176,7 +172,6 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
             backup['id'], **update_kwargs)['backup']
         self.assertEqual(backup['id'], update_backup['id'])
         self.assertEqual(update_kwargs['name'], update_backup['name'])
-        self.assertIn('links', update_backup)
 
         # Assert response body for show_backup method
         retrieved_backup = self.backups_client.show_backup(

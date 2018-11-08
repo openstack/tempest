@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import backups as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -34,7 +35,7 @@ class BackupsClient(base_client.BaseClient):
         post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_backup(self, backup_id, **kwargs):
@@ -47,7 +48,7 @@ class BackupsClient(base_client.BaseClient):
         put_body = json.dumps({'backup': kwargs})
         resp, body = self.put('backups/%s' % backup_id, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def restore_backup(self, backup_id, **kwargs):
@@ -60,13 +61,13 @@ class BackupsClient(base_client.BaseClient):
         post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.restore_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_backup(self, backup_id):
         """Delete a backup of volume."""
         resp, body = self.delete('backups/%s' % backup_id)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_backup(self, backup_id):
@@ -74,7 +75,7 @@ class BackupsClient(base_client.BaseClient):
         url = "backups/%s" % backup_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_backups(self, detail=False, **params):
@@ -86,13 +87,15 @@ class BackupsClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-backups-with-detail
         """
         url = "backups"
+        list_backups_schema = schema.list_backups_no_detail
         if detail:
             url += "/detail"
+            list_backups_schema = schema.list_backups_with_detail
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(list_backups_schema, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def export_backup(self, backup_id):
@@ -100,7 +103,7 @@ class BackupsClient(base_client.BaseClient):
         url = "backups/%s/export_record" % backup_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.export_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def import_backup(self, **kwargs):
@@ -113,14 +116,14 @@ class BackupsClient(base_client.BaseClient):
         post_body = json.dumps({'backup-record': kwargs})
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
-        self.expected_success(201, resp.status)
+        self.validate_response(schema.import_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reset_backup_status(self, backup_id, status):
         """Reset the specified backup's status."""
         post_body = json.dumps({'os-reset_status': {"status": status}})
         resp, body = self.post('backups/%s/action' % backup_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.reset_backup_status, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
