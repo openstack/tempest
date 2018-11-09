@@ -17,6 +17,7 @@ from oslo_serialization import jsonutils as json
 import six
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import volumes as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -55,14 +56,16 @@ class VolumesClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes
         """
         url = 'volumes'
+        list_schema = schema.list_volumes_no_detail
         if detail:
+            list_schema = schema.list_volumes_with_detail
             url += '/detail'
         if params:
             url += '?%s' % self._prepare_params(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(list_schema, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def migrate_volume(self, volume_id, **kwargs):
@@ -83,7 +86,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def create_volume(self, **kwargs):
@@ -96,7 +99,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume(self, volume_id, **kwargs):
@@ -109,7 +112,7 @@ class VolumesClient(base_client.BaseClient):
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume(self, volume_id, **params):
@@ -123,7 +126,7 @@ class VolumesClient(base_client.BaseClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.delete(url)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_summary(self, **params):
@@ -138,7 +141,7 @@ class VolumesClient(base_client.BaseClient):
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume_summary, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def upload_volume(self, volume_id, **kwargs):
@@ -152,6 +155,10 @@ class VolumesClient(base_client.BaseClient):
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        # TODO(zhufl): This is under discussion, so will be merged
+        # in a seperate patch.
+        # https://bugs.launchpad.net/cinder/+bug/1880566
+        # self.validate_response(schema.upload_volume, resp, body)
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
@@ -165,7 +172,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.attach_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def set_bootable_volume(self, volume_id, **kwargs):
@@ -178,7 +185,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-set_bootable': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.set_bootable_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def detach_volume(self, volume_id):
@@ -186,7 +193,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-detach': {}})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.detach_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reserve_volume(self, volume_id):
@@ -194,7 +201,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-reserve': {}})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.reserve_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def unreserve_volume(self, volume_id):
@@ -202,7 +209,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-unreserve': {}})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.unreserve_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
@@ -237,7 +244,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.extend_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reset_volume_status(self, volume_id, **kwargs):
@@ -249,7 +256,7 @@ class VolumesClient(base_client.BaseClient):
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.reset_volume_status, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_readonly(self, volume_id, **kwargs):
@@ -262,14 +269,14 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-update_readonly_flag': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.update_volume_readonly, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def force_delete_volume(self, volume_id):
         """Force Delete Volume."""
         post_body = json.dumps({'os-force_delete': {}})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.force_delete_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def create_volume_metadata(self, volume_id, metadata):
@@ -283,7 +290,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/metadata" % volume_id
         resp, body = self.post(url, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.create_volume_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_metadata(self, volume_id):
@@ -291,7 +298,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/metadata" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_metadata(self, volume_id, metadata):
@@ -305,7 +312,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/metadata" % volume_id
         resp, body = self.put(url, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_volume_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_metadata_item(self, volume_id, id):
@@ -313,7 +320,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/metadata/%s" % (volume_id, id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume_metadata_item, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_metadata_item(self, volume_id, id, meta_item):
@@ -322,14 +329,14 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/metadata/%s" % (volume_id, id)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_volume_metadata_item, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_metadata_item(self, volume_id, id):
         """Delete metadata item for the volume."""
         url = "volumes/%s/metadata/%s" % (volume_id, id)
         resp, body = self.delete(url)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.delete_volume_metadata_item, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def retype_volume(self, volume_id, **kwargs):
@@ -341,7 +348,7 @@ class VolumesClient(base_client.BaseClient):
         """
         post_body = json.dumps({'os-retype': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.retype_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def force_detach_volume(self, volume_id, **kwargs):
@@ -354,7 +361,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-force_detach': kwargs})
         url = 'volumes/%s/action' % volume_id
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.force_detach_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_image_metadata(self, volume_id, **kwargs):
@@ -368,7 +375,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/action" % (volume_id)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.update_volume_image_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_image_metadata(self, volume_id, key_name):
@@ -376,7 +383,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'os-unset_image_metadata': {'key': key_name}})
         url = "volumes/%s/action" % (volume_id)
         resp, body = self.post(url, post_body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.delete_volume_image_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_image_metadata(self, volume_id):
@@ -385,7 +392,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s/action" % volume_id
         resp, body = self.post(url, post_body)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume_image_metadata, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def unmanage_volume(self, volume_id):
@@ -397,5 +404,5 @@ class VolumesClient(base_client.BaseClient):
         """
         post_body = json.dumps({'os-unmanage': {}})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.unmanage_volume, resp, body)
         return rest_client.ResponseBody(resp, body)

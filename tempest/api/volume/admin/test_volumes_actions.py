@@ -102,5 +102,4 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume_id, 'available')
         vol_info = self.volumes_client.show_volume(volume_id)['volume']
-        self.assertIn('attachments', vol_info)
         self.assertEmpty(vol_info['attachments'])

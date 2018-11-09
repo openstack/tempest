@@ -26,10 +26,6 @@ class TestVolumesClient(base.BaseServiceTest):
         "volume-summary": {
             "total_size": 4,
             "total_count": 4,
-            "metadata": {
-                "key1": ["value1", "value2"],
-                "key2": ["value2"]
-            }
         }
     }
 

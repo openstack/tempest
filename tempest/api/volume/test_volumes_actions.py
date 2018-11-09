@@ -84,7 +84,6 @@ class VolumesActionsTest(base.BaseVolumeTest):
                         self.volume['id'], 'available')
         self.addCleanup(self.volumes_client.detach_volume, self.volume['id'])
         volume = self.volumes_client.show_volume(self.volume['id'])['volume']
-        self.assertIn('attachments', volume)
         attachment = volume['attachments'][0]
 
         self.assertEqual('/dev/%s' %
