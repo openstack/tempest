@@ -96,7 +96,7 @@ they simply need to pip install the plugin in that namespace. It also means
 that users don't have to worry about inadvertently installing a Tempest plugin
 when they install another package.
 
-.. _Branchless Tempest Spec: http://specs.openstack.org/openstack/qa-specs/specs/tempest/implemented/branchless-tempest.html
+.. _Branchless Tempest Spec: https://specs.openstack.org/openstack/qa-specs/specs/tempest/implemented/branchless-tempest.html
 
 The sole advantage to integrating a plugin into an existing python project is
 that it enables you to land code changes at the same time you land test changes

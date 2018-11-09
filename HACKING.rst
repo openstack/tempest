@@ -431,7 +431,7 @@ in which the feature isn't available. In DevStack, this can be accomplished
 by modifying Tempest's `lib installation script`_ for previous branches
 (because DevStack is branched).
 
-.. _lib installation script: http://git.openstack.org/cgit/openstack-dev/devstack/tree/lib/tempest
+.. _lib installation script: https://git.openstack.org/cgit/openstack-dev/devstack/tree/lib/tempest
 
 2. Bug fix on core project needing Tempest changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

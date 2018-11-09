@@ -165,7 +165,7 @@ interface. When Y is incremented we've added functionality to the library
 interface and when Z is incremented it's a bug fix release for the library.
 Also note that both Y and Z are reset to 0 at each increment of X.
 
-.. _semver: http://semver.org/
+.. _semver: https://semver.org/
 
 Configuration
 -------------
@@ -218,7 +218,7 @@ Additionally, when running a single test, or test-file, the ``-n/--no-discover``
 argument is no longer required, however it may perform faster if included.
 
 For more information on these options and details about stestr, please see the
-`stestr documentation <http://stestr.readthedocs.io/en/latest/MANUAL.html>`_.
+`stestr documentation <https://stestr.readthedocs.io/en/latest/MANUAL.html>`_.
 
 Python 3.x
 ----------
