@@ -56,7 +56,7 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
         self.assertEqual(first_keyname, keypair_detail['name'])
         self.assertEqual(user_id, keypair_detail['user_id'],
                          "The fetched keypair is not for requested user!")
-        # Create a admin keypair
+        # Create an admin keypair
         admin_keypair = self.create_keypair(keypair_type='ssh',
                                             client=self.client)
         admin_keypair.pop('private_key', None)

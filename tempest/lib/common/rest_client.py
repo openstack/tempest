@@ -374,7 +374,7 @@ class RestClient(object):
         return self.request('COPY', url, extra_headers, headers)
 
     def get_versions(self):
-        """Get the versions on a endpoint from the keystone catalog
+        """Get the versions on an endpoint from the keystone catalog
 
         This method will make a GET request on the baseurl from the keystone
         catalog to return a list of API versions. It is expected that a GET
