@@ -104,7 +104,12 @@ class BackupsClient(base_client.BaseClient):
         return rest_client.ResponseBody(resp, body)
 
     def import_backup(self, **kwargs):
-        """Import backup metadata record."""
+        """Import backup metadata record.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/index.html#import-a-backup
+        """
         post_body = json.dumps({'backup-record': kwargs})
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
