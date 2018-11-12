@@ -39,7 +39,6 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         # Use alt_username as the trustee
         self.trust_id = None
         self.create_trustor_and_roles()
-        self.addCleanup(self.cleanup_user_and_roles)
 
     def tearDown(self):
         if self.trust_id:
@@ -55,6 +54,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
             trustor_project_name,
             domain_id=CONF.identity.default_domain_id)['project']
         self.trustor_project_id = project['id']
+        self.addCleanup(self.projects_client.delete_project, project['id'])
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
@@ -69,6 +69,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
             email=u_email,
             project_id=self.trustor_project_id,
             domain_id=CONF.identity.default_domain_id)['user']
+        self.addCleanup(self.users_client.delete_user, user['id'])
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
@@ -76,10 +77,12 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.not_delegated_role = data_utils.rand_name('NotDelegatedRole')
 
         role = self.roles_client.create_role(name=self.delegated_role)['role']
+        self.addCleanup(self.roles_client.delete_role, role['id'])
         self.delegated_role_id = role['id']
 
         role = self.roles_client.create_role(
             name=self.not_delegated_role)['role']
+        self.addCleanup(self.roles_client.delete_role, role['id'])
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
@@ -108,16 +111,6 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
             domain_id=CONF.identity.default_domain_id)
         os = clients.Manager(credentials=creds)
         self.trustor_client = os.trusts_client
-
-    def cleanup_user_and_roles(self):
-        if self.trustor_user_id:
-            self.users_client.delete_user(self.trustor_user_id)
-        if self.trustor_project_id:
-            self.projects_client.delete_project(self.trustor_project_id)
-        if self.delegated_role_id:
-            self.roles_client.delete_role(self.delegated_role_id)
-        if self.not_delegated_role_id:
-            self.roles_client.delete_role(self.not_delegated_role_id)
 
     def create_trust(self, impersonate=True, expires=None):
 
