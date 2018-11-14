@@ -57,18 +57,19 @@ class EC2CredentialsTest(base.BaseIdentityV2Test):
             self.creds.user_id,
             tenant_id=self.creds.tenant_id)["credential"]
         created_creds.append(creds1['access'])
+        self.addCleanup(
+            self.non_admin_users_client.delete_user_ec2_credential,
+            self.creds.user_id, creds1['access'])
+
         # create second ec2 credentials
         creds2 = self.non_admin_users_client.create_user_ec2_credential(
             self.creds.user_id,
             tenant_id=self.creds.tenant_id)["credential"]
         created_creds.append(creds2['access'])
-        # add credentials to be cleaned up
-        self.addCleanup(
-            self.non_admin_users_client.delete_user_ec2_credential,
-            self.creds.user_id, creds1['access'])
         self.addCleanup(
             self.non_admin_users_client.delete_user_ec2_credential,
             self.creds.user_id, creds2['access'])
+
         # get the list of user ec2 credentials
         resp = self.non_admin_users_client.list_user_ec2_credentials(
             self.creds.user_id)["credentials"]

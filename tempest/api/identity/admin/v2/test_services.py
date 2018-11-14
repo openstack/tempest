@@ -89,14 +89,10 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
             service = self.services_client.create_service(
                 name=name, type=s_type,
                 description=description)['OS-KSADM:service']
+            self.addCleanup(self.services_client.delete_service, service['id'])
             services.append(service)
         service_ids = [svc['id'] for svc in services]
 
-        def delete_services():
-            for service_id in service_ids:
-                self.services_client.delete_service(service_id)
-
-        self.addCleanup(delete_services)
         # List and Verify Services
         body = self.services_client.list_services()['OS-KSADM:services']
         found = [serv for serv in body if serv['id'] in service_ids]
