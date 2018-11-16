@@ -135,7 +135,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             real_ip, eui_ip = self._get_ips_from_subnet(**kwargs)
             self._clean_network()
             self.assertEqual(eui_ip, real_ip,
-                             ('Real port IP %s shall be equal to EUI-64 %s'
+                             ('Real port IP %s shall be equal to EUI-64 %s '
                               'when ipv6_ra_mode=%s,ipv6_address_mode=%s') % (
                                  real_ip, eui_ip,
                                  ra_mode if ra_mode else "Off",
