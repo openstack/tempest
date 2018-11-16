@@ -50,7 +50,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
                          'been sent in response for create')
         body = self.tenants_client.show_tenant(tenant_id)['tenant']
         desc2 = body['description']
-        self.assertEqual(desc2, tenant_desc, 'Description does not appear'
+        self.assertEqual(desc2, tenant_desc, 'Description does not appear '
                          'to be set')
         self.tenants_client.delete_tenant(tenant_id)
 

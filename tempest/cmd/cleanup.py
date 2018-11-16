@@ -279,7 +279,7 @@ class TempestCleanup(command.Command):
                                                        self.admin_id,
                                                        self.admin_role_id)
             except Exception as ex:
-                LOG.exception("Failed removing role from project which still"
+                LOG.exception("Failed removing role from project which still "
                               "exists, exception: %s", ex)
 
     def _project_exists(self, project_id):
