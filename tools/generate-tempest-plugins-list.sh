@@ -41,8 +41,6 @@
 set -ex
 
 (
-declare -A plugins
-
 if [[ -r doc/source/data/tempest-plugins-registry.header ]]; then
     cat doc/source/data/tempest-plugins-registry.header
 fi
