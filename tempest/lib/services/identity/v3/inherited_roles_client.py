@@ -114,8 +114,7 @@ class InheritedRolesClient(rest_client.RestClient):
 
     def check_user_has_flag_on_inherited_to_project(
             self, project_id, user_id, role_id):
-        """Checks whether a user has a role assignment"""
-        """with the inherited_to_projects flag on a project."""
+        """Check if user has an inherited project role on project"""
         resp, body = self.head(
             "OS-INHERIT/projects/%s/users/%s/roles/%s/inherited_to_projects"
             % (project_id, user_id, role_id))
@@ -142,8 +141,7 @@ class InheritedRolesClient(rest_client.RestClient):
 
     def check_group_has_flag_on_inherited_to_project(
             self, project_id, group_id, role_id):
-        """Checks whether a group has a role assignment"""
-        """with the inherited_to_projects flag on a project."""
+        """Check if group has an inherited project role on project"""
         resp, body = self.head(
             "OS-INHERIT/projects/%s/groups/%s/roles/%s/inherited_to_projects"
             % (project_id, group_id, role_id))

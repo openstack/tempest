@@ -101,7 +101,7 @@ AuthGroup = [
                deprecated_group='identity'),
     cfg.StrOpt('admin_domain_name',
                default='Default',
-               help="Admin domain name for authentication (Keystone V3)."
+               help="Admin domain name for authentication (Keystone V3). "
                     "The same domain applies to user and project",
                deprecated_group='identity'),
 ]
@@ -191,7 +191,7 @@ IdentityGroup = [
                help="The number of passwords for a user that must be unique "
                     "before an old password can be reused. This only takes "
                     "effect when identity-feature-enabled.security_compliance "
-                    "is set to 'True'."
+                    "is set to 'True'. "
                     "This config option corresponds to keystone.conf: "
                     "security_compliance.unique_last_password_count, whose "
                     "default value is 0 meaning disabling this feature. "
