@@ -170,11 +170,22 @@ IdentityGroup = [
     cfg.IntOpt('user_lockout_failure_attempts',
                default=2,
                help="The number of unsuccessful login attempts the user is "
-                    "allowed before having the account locked."),
+                    "allowed before having the account locked. This only "
+                    "takes effect when identity-feature-enabled."
+                    "security_compliance is set to 'True'. For more details, "
+                    "refer to keystone config options keystone.conf:"
+                    "security_compliance.lockout_failure_attempts. "
+                    "This feature is disabled by default in keystone."),
     cfg.IntOpt('user_lockout_duration',
                default=5,
                help="The number of seconds a user account will remain "
-                    "locked."),
+                    "locked. This only takes "
+                    "effect when identity-feature-enabled.security_compliance "
+                    "is set to 'True'. For more details, refer to "
+                    "keystone config options "
+                    "keystone.conf:security_compliance.lockout_duration. "
+                    "Setting this option will have no effect unless you also "
+                    "set identity.user_lockout_failure_attempts."),
     cfg.IntOpt('user_unique_last_password_count',
                default=2,
                help="The number of passwords for a user that must be unique "
