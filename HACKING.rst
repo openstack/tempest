@@ -35,6 +35,30 @@ Test Data/Configuration
 - Clean up test data at the completion of each test
 - Use configuration files for values that will vary by environment
 
+Supported OpenStack Components
+------------------------------
+
+Tempest's :ref:`library` and :ref:`plugin interface <tempest_plugin>` can be
+leveraged to support integration testing for virtually any OpenStack component.
+
+However, Tempest only offers **in-tree** integration testing coverage for the
+following components:
+
+* Cinder
+* Glance
+* Keystone
+* Neutron
+* Nova
+* Swift
+
+Historically, Tempest offered in-tree testing for other components as well, but
+since the introduction of the `External Plugin Interface`_, Tempest's in-tree
+testing scope has been limited to the projects above. Integration tests for
+projects not included above should go into one of the
+`relevant plugin projects`_.
+
+.. _External Plugin Interface: https://specs.openstack.org/openstack/qa-specs/specs/tempest/implemented/tempest-external-plugin-interface.html
+.. _relevant plugin projects: https://docs.openstack.org/tempest/latest/plugin-registry.html#detected-plugins
 
 Exception Handling
 ------------------
