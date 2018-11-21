@@ -326,22 +326,26 @@
       - ^tempest/hacking/.*$
       - ^tempest/tests/.*$
     required-projects:
+      - git.openstack.org/openstack/airship-tempest-plugin
       - git.openstack.org/openstack/almanach
       - git.openstack.org/openstack/aodh
       - git.openstack.org/openstack/barbican-tempest-plugin
+      - git.openstack.org/openstack/blazar-tempest-plugin
       - git.openstack.org/openstack/ceilometer
-      - git.openstack.org/openstack/cinder
-      - git.openstack.org/openstack/congress
+      - git.openstack.org/openstack/cinder-tempest-plugin
+      - git.openstack.org/openstack/cloudkitty-tempest-plugin
+      - git.openstack.org/openstack/congress-tempest-plugin
       - git.openstack.org/openstack/designate-tempest-plugin
-      - git.openstack.org/openstack/ec2-api
+      - git.openstack.org/openstack/ec2api-tempest-plugin
       - git.openstack.org/openstack/freezer
       - git.openstack.org/openstack/freezer-api
       - git.openstack.org/openstack/freezer-tempest-plugin
+      - git.openstack.org/openstack/gabbi-tempest
       - git.openstack.org/openstack/gce-api
       - git.openstack.org/openstack/glare
-      - git.openstack.org/openstack/heat
+      - git.openstack.org/openstack/heat-tempest-plugin
       - git.openstack.org/openstack/intel-nfv-ci-tests
-      - git.openstack.org/openstack/ironic
+      - git.openstack.org/openstack/ironic-tempest-plugin
       - git.openstack.org/openstack/ironic-inspector
       - git.openstack.org/openstack/keystone-tempest-plugin
       - git.openstack.org/openstack/kingbird
@@ -350,19 +354,21 @@
       - git.openstack.org/openstack/magnum-tempest-plugin
       - git.openstack.org/openstack/manila
       - git.openstack.org/openstack/manila-tempest-plugin
-      - git.openstack.org/openstack/mistral
+      - git.openstack.org/openstack/mistral-tempest-plugin
       - git.openstack.org/openstack/mogan
       - git.openstack.org/openstack/monasca-api
       - git.openstack.org/openstack/monasca-log-api
-      - git.openstack.org/openstack/murano
+      - git.openstack.org/openstack/monasca-tempest-plugin
+      - git.openstack.org/openstack/murano-tempest-plugin
+      - git.openstack.org/openstack/networking-ansible
       - git.openstack.org/openstack/networking-bgpvpn
       - git.openstack.org/openstack/networking-cisco
       - git.openstack.org/openstack/networking-fortinet
       - git.openstack.org/openstack/networking-generic-switch
-      - git.openstack.org/openstack/networking-l2gw
+      - git.openstack.org/openstack/networking-l2gw-tempest-plugin
       - git.openstack.org/openstack/networking-midonet
-      - git.openstack.org/openstack/networking-plumgrid
       - git.openstack.org/openstack/networking-sfc
+      - git.openstack.org/openstack/networking-spp
       - git.openstack.org/openstack/neutron
       - git.openstack.org/openstack/neutron-dynamic-routing
       - git.openstack.org/openstack/neutron-fwaas
@@ -371,21 +377,25 @@
       - git.openstack.org/openstack/neutron-vpnaas
       - git.openstack.org/openstack/nova-lxd
       - git.openstack.org/openstack/novajoin-tempest-plugin
+      - git.openstack.org/openstack/octavia
       - git.openstack.org/openstack/octavia-tempest-plugin
       - git.openstack.org/openstack/oswin-tempest-plugin
       - git.openstack.org/openstack/panko
       - git.openstack.org/openstack/patrole
+      - git.openstack.org/openstack/python-watcherclient
       - git.openstack.org/openstack/qinling
       - git.openstack.org/openstack/requirements
       - git.openstack.org/openstack/sahara-tests
       - git.openstack.org/openstack/senlin
       - git.openstack.org/openstack/senlin-tempest-plugin
       - git.openstack.org/openstack/tap-as-a-service
+      - git.openstack.org/openstack/telemetry-tempest-plugin
       - git.openstack.org/openstack/tempest-horizon
-      - git.openstack.org/openstack/trio2o
-      - git.openstack.org/openstack/trove
+      - git.openstack.org/openstack/tobiko
+      - git.openstack.org/openstack/tripleo-common-tempest-plugin
+      - git.openstack.org/openstack/trove-tempest-plugin
       - git.openstack.org/openstack/valet
-      - git.openstack.org/openstack/vitrage
+      - git.openstack.org/openstack/vitrage-tempest-plugin
       - git.openstack.org/openstack/vmware-nsx-tempest-plugin
       - git.openstack.org/openstack/watcher-tempest-plugin
       - git.openstack.org/openstack/zaqar-tempest-plugin
@@ -499,7 +509,17 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-tox-plugin-sanity-check
+        - tempest-tox-plugin-sanity-check:
+            irrelevant-files:
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+              # tools/ is not here since this relies on a script in tools/.
         - tempest-slow:
             irrelevant-files: *tempest-irrelevant-files
         - nova-cells-v1:
