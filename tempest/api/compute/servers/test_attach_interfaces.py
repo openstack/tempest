@@ -169,7 +169,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         iface = self.interfaces_client.create_interface(
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
-        self.addCleanup(self.ports_client.delete_port, iface['port_id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.ports_client.delete_port,
+                        iface['port_id'])
         self._check_interface(iface, server_id=server['id'],
                               fixed_ip=ip_list[0])
         return iface
@@ -260,16 +262,6 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
-
-        try:
-            iface = self._test_create_interface(server)
-        except lib_exc.BadRequest as e:
-            msg = ('Multiple possible networks found, use a Network ID to be '
-                   'more specific.')
-            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
-                raise
-        else:
-            ifs.append(iface)
 
         iface = self._test_create_interface_by_fixed_ips(server, ifs)
         ifs.append(iface)
