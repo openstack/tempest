@@ -581,7 +581,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     def setUp(self):
         super(BaseTestCase, self).setUp()
         if not self.__setupclass_called:
-            raise RuntimeError("setUpClass does not calls the super's"
+            raise RuntimeError("setUpClass does not calls the super's "
                                "setUpClass in the " +
                                self.__class__.__name__)
         at_exit_set.add(self.__class__)

@@ -324,7 +324,7 @@ class KeystoneAuthProvider(AuthProvider):
                 pass
         if expiry is None:
             raise ValueError(
-                "time data '{data}' does not match any of the"
+                "time data '{data}' does not match any of the "
                 "expected formats: {formats}".format(
                     data=expiry_string, formats=self.EXPIRY_DATE_FORMATS))
         return expiry

@@ -31,7 +31,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
                          'been sent in response for create')
         body = self.projects_client.show_project(project_id)['project']
         desc2 = body['description']
-        self.assertEqual(desc2, project_desc, 'Description does not appear'
+        self.assertEqual(desc2, project_desc, 'Description does not appear '
                          'to be set')
 
     @decorators.idempotent_id('5f50fe07-8166-430b-a882-3b2ee0abe26f')
