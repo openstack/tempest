@@ -94,7 +94,7 @@ class WorkspaceManager(object):
     @lockutils.synchronized('workspaces', external=True)
     def move_workspace(self, name, path):
         self._populate()
-        path = os.path.abspath(os.path.expanduser(path))
+        path = os.path.abspath(os.path.expanduser(path)) if path else path
         self._name_exists(name)
         self._validate_path(path)
         self.workspaces[name] = path
@@ -115,6 +115,7 @@ class WorkspaceManager(object):
 
     @lockutils.synchronized('workspaces', external=True)
     def remove_workspace_directory(self, workspace_path):
+        self._validate_path(workspace_path)
         shutil.rmtree(workspace_path)
 
     @lockutils.synchronized('workspaces', external=True)
@@ -136,6 +137,10 @@ class WorkspaceManager(object):
             sys.exit(1)
 
     def _validate_path(self, path):
+        if not path:
+            print("None or empty path is specified for workspace."
+                  " Please specify correct workspace path.")
+            sys.exit(1)
         if not os.path.exists(path):
             print("Path does not exist.")
             sys.exit(1)
@@ -144,7 +149,7 @@ class WorkspaceManager(object):
     def register_new_workspace(self, name, path, init=False):
         """Adds the new workspace and writes out the new workspace config"""
         self._populate()
-        path = os.path.abspath(os.path.expanduser(path))
+        path = os.path.abspath(os.path.expanduser(path)) if path else path
         # This only happens when register is called from outside of init
         if not init:
             self._validate_path(path)

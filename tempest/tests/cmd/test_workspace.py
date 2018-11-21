@@ -140,6 +140,17 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(
             self.workspace_manager.get_workspace(self.name), new_path)
 
+    def test_workspace_manager_move_no_workspace_path(self):
+        new_path = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.move_workspace,
+                                   self.name, new_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "None or empty path is specified for workspace."
+                         " Please specify correct workspace path.\n")
+
     def test_workspace_manager_remove_entry(self):
         self.workspace_manager.remove_workspace_entry(self.name)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
@@ -148,6 +159,18 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         path = self.workspace_manager.remove_workspace_entry(self.name)
         self.workspace_manager.remove_workspace_directory(path)
         self.assertIsNone(self.workspace_manager.get_workspace(self.name))
+
+    def test_workspace_manager_remove_directory_no_path(self):
+        no_path = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   remove_workspace_directory,
+                                   no_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "None or empty path is specified for workspace."
+                         " Please specify correct workspace path.\n")
 
     def test_path_expansion(self):
         name = data_utils.rand_uuid()
@@ -207,3 +230,15 @@ class TestTempestWorkspaceManager(TestTempestWorkspaceBase):
         self.assertEqual(mock_stdout.getvalue(),
                          "None or empty name is specified."
                          " Please specify correct name for workspace.\n")
+
+    def test_register_new_workspace_no_path(self):
+        no_path = ""
+        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            ex = self.assertRaises(SystemExit,
+                                   self.workspace_manager.
+                                   register_new_workspace,
+                                   self.name, no_path)
+        self.assertEqual(1, ex.code)
+        self.assertEqual(mock_stdout.getvalue(),
+                         "None or empty path is specified for workspace."
+                         " Please specify correct workspace path.\n")
