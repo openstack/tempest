@@ -6,7 +6,7 @@ Tempest Coding Guide
 - Step 2: Read on
 
 Tempest Specific Commandments
-------------------------------
+-----------------------------
 
 - [T102] Cannot import OpenStack python clients in tempest/api &
   tempest/scenario tests

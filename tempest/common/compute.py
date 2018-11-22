@@ -78,23 +78,22 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     :param wait_until: Server status to wait for the server to reach after
         its creation.
     :param volume_backed: Whether the server is volume backed or not.
-                          If this is true, a volume will be created and
-                          create server will be requested with
-                          'block_device_mapping_v2' populated with below
-                          values:
-                          --------------------------------------------
-                          bd_map_v2 = [{
-                              'uuid': volume['volume']['id'],
-                              'source_type': 'volume',
-                              'destination_type': 'volume',
-                              'boot_index': 0,
-                              'delete_on_termination': True}]
-                          kwargs['block_device_mapping_v2'] = bd_map_v2
-                          ---------------------------------------------
-                          If server needs to be booted from volume with other
-                          combination of bdm inputs than mentioned above, then
-                          pass the bdm inputs explicitly as kwargs and image_id
-                          as empty string ('').
+        If this is true, a volume will be created and create server will be
+        requested with 'block_device_mapping_v2' populated with below values:
+
+        .. code-block:: python
+
+            bd_map_v2 = [{
+                'uuid': volume['volume']['id'],
+                'source_type': 'volume',
+                'destination_type': 'volume',
+                'boot_index': 0,
+                'delete_on_termination': True}]
+            kwargs['block_device_mapping_v2'] = bd_map_v2
+
+        If server needs to be booted from volume with other combination of bdm
+        inputs than mentioned above, then pass the bdm inputs explicitly as
+        kwargs and image_id as empty string ('').
     :param name: Name of the server to be provisioned. If not defined a random
         string ending with '-instance' will be generated.
     :param flavor: Flavor of the server to be provisioned. If not defined,

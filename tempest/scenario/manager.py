@@ -378,12 +378,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
                           server=None):
         """Get a SSH client to a remote server
 
-        @param ip_address the server floating or fixed IP address to use
-                          for ssh validation
-        @param username name of the Linux account on the remote server
-        @param private_key the SSH private key to use
-        @param server: server dict, used for debugging purposes
-        @return a RemoteClient object
+        :param ip_address: the server floating or fixed IP address to use
+                           for ssh validation
+        :param username: name of the Linux account on the remote server
+        :param private_key: the SSH private key to use
+        :param server: server dict, used for debugging purposes
+        :return: a RemoteClient object
         """
 
         if username is None:

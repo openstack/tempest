@@ -63,28 +63,28 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 a. a security group open to incoming ssh connection
                 b. a VM with a floating ip
             5. create a general empty security group (same as "default", but
-            without rules allowing in-tenant traffic)
+               without rules allowing in-tenant traffic)
 
     tests:
         1. _verify_network_details
         2. _verify_mac_addr: for each access point verify that
-        (subnet, fix_ip, mac address) are as defined in the port list
+           (subnet, fix_ip, mac address) are as defined in the port list
         3. _test_in_tenant_block: test that in-tenant traffic is disabled
-        without rules allowing it
+           without rules allowing it
         4. _test_in_tenant_allow: test that in-tenant traffic is enabled
-        once an appropriate rule has been created
+           once an appropriate rule has been created
         5. _test_cross_tenant_block: test that cross-tenant traffic is disabled
-        without a rule allowing it on destination tenant
+           without a rule allowing it on destination tenant
         6. _test_cross_tenant_allow:
             * test that cross-tenant traffic is enabled once an appropriate
-            rule has been created on destination tenant.
+              rule has been created on destination tenant.
             * test that reverse traffic is still blocked
             * test than reverse traffic is enabled once an appropriate rule has
-            been created on source tenant
-        7._test_port_update_new_security_group:
-           * test that traffic is blocked with default security group
-           * test that traffic is enabled after updating port with new security
-           group having appropriate rule
+              been created on source tenant
+        7. _test_port_update_new_security_group:
+            * test that traffic is blocked with default security group
+            * test that traffic is enabled after updating port with new
+              security group having appropriate rule
         8. _test_multiple_security_groups: test multiple security groups can be
            associated with the vm
 
@@ -93,11 +93,13 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         2. Public network is defined and reachable from the Tempest host
         3. Public router can either be:
             * defined, in which case all tenants networks can connect directly
-            to it, and cross tenant check will be done on the private IP of the
-            destination tenant
+              to it, and cross tenant check will be done on the private IP of
+              the destination tenant
+
             or
+
             * not defined (empty string), in which case each tenant will have
-            its own router connected to the public network
+              its own router connected to the public network
     """
 
     credentials = ['primary', 'alt', 'admin']

@@ -182,7 +182,7 @@ class VolumesClient(base_client.BaseClient):
 
         :param id: A checked resource id
         :raises lib_exc.DeleteErrorException: If the specified resource is on
-        the status the delete was failed.
+            the status the delete was failed.
         """
         try:
             volume = self.show_volume(id)

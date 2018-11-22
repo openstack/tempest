@@ -477,7 +477,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         """Create a volume and wait for it to become 'available'.
 
         :param image_ref: Specify an image id to create a bootable volume.
-        :**kwargs: other parameters to create volume.
+        :param kwargs: other parameters to create volume.
         :returns: The available volume.
         """
         if 'size' not in kwargs:

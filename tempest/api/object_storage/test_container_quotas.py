@@ -31,9 +31,10 @@ class ContainerQuotasTest(base.BaseObjectTest):
 
         Quotas are set by adding meta values to the container,
         and are validated when set:
-          - X-Container-Meta-Quota-Bytes:
+
+        - X-Container-Meta-Quota-Bytes:
                      Maximum size of the container, in bytes.
-          - X-Container-Meta-Quota-Count:
+        - X-Container-Meta-Quota-Count:
                      Maximum object count of the container.
         """
         super(ContainerQuotasTest, self).setUp()

@@ -3,9 +3,9 @@
   job.  You should edit the files data/tempest-plugins-registry.footer
   and data/tempest-plugins-registry.header instead of this one.
 
-==========================
- Tempest Plugin Registry
-==========================
+=======================
+Tempest Plugin Registry
+=======================
 
 Since we've created the external plugin mechanism, it's gotten used by
 a lot of projects. The following is a list of plugins that currently

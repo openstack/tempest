@@ -153,6 +153,7 @@ class TypesClient(rest_client.RestClient):
         :param extra_spec_name: Name of the extra spec to be updated.
         :param extra_specs: A dictionary of with key as extra_spec_name and the
                             updated value.
+
         For a full list of available parameters, please refer to the official
         API reference:
         https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-extra-specification-for-volume-type

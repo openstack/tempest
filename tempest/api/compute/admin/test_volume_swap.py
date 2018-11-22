@@ -70,6 +70,7 @@ class TestVolumeSwap(TestVolumeSwapBase):
     """The test suite for swapping of volume with admin user.
 
     The following is the scenario outline:
+
     1. Create a volume "volume1" with non-admin.
     2. Create a volume "volume2" with non-admin.
     3. Boot an instance "instance1" with non-admin.

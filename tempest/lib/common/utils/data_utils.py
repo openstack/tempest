@@ -65,9 +65,9 @@ def rand_password(length=15):
     :param int length: The length of password that you expect to set
                        (If it's smaller than 3, it's same as 3.)
     :return: a random password. The format is
-             '<random upper letter>-<random number>-<random special character>
-              -<random ascii letters or digit characters or special symbols>'
-             (e.g. 'G2*ac8&lKFFgh%2')
+        ``'<random upper letter>-<random number>-<random special character>
+        -<random ascii letters or digit characters or special symbols>'``
+        (e.g. ``G2*ac8&lKFFgh%2``)
     :rtype: string
     """
     upper = random.choice(string.ascii_uppercase)

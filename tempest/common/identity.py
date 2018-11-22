@@ -64,7 +64,8 @@ def identity_utils(clients):
     should not be used for testing identity features.
 
     :param clients: a client manager.
-    :return
+    :return: v2 or v3 of CredsClient
+    :rtype: V2CredsClient or V3CredsClient
     """
     if CONF.identity.auth_version == 'v2':
         client = clients.identity_client

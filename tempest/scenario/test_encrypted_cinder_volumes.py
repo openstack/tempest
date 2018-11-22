@@ -29,11 +29,12 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
 
     For both LUKS and cryptsetup encryption types, this test performs
     the following:
-        * Creates an image in Glance
-        * Boots an instance from the image
-        * Creates an encryption type (as admin)
-        * Creates a volume of that encryption type (as a regular user)
-        * Attaches and detaches the encrypted volume to the instance
+
+    * Creates an image in Glance
+    * Boots an instance from the image
+    * Creates an encryption type (as admin)
+    * Creates a volume of that encryption type (as a regular user)
+    * Attaches and detaches the encrypted volume to the instance
     """
 
     @classmethod

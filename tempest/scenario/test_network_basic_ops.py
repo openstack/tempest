@@ -374,39 +374,37 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_network_basic_ops(self):
         """Basic network operation test
 
-        For a freshly-booted VM with an IP address ("port") on a given
-            network:
+        For a freshly-booted VM with an IP address ("port") on a given network:
 
         - the Tempest host can ping the IP address.  This implies, but
-         does not guarantee (see the ssh check that follows), that the
-         VM has been assigned the correct IP address and has
-         connectivity to the Tempest host.
+            does not guarantee (see the ssh check that follows), that the
+            VM has been assigned the correct IP address and has
+            connectivity to the Tempest host.
 
         - the Tempest host can perform key-based authentication to an
-         ssh server hosted at the IP address.  This check guarantees
-         that the IP address is associated with the target VM.
+            ssh server hosted at the IP address.  This check guarantees
+            that the IP address is associated with the target VM.
 
         - the Tempest host can ssh into the VM via the IP address and
-         successfully execute the following:
+            successfully execute the following:
 
-         - ping an external IP address, implying external connectivity.
+            - ping an external IP address, implying external connectivity.
 
-         - ping an external hostname, implying that dns is correctly
-           configured.
+            - ping an external hostname, implying that dns is correctly
+                configured.
 
-         - ping an internal IP address, implying connectivity to another
-           VM on the same network.
+            - ping an internal IP address, implying connectivity to another
+               VM on the same network.
 
         - detach the floating-ip from the VM and verify that it becomes
-        unreachable
+            unreachable
 
         - associate detached floating ip to a new VM and verify connectivity.
-        VMs are created with unique keypair so connectivity also asserts that
-        floating IP is associated with the new VM instead of the old one
+            VMs are created with unique keypair so connectivity also asserts
+            that floating IP is associated with the new VM instead of the old
+            one
 
         Verifies that floating IP status is updated correctly after each change
-
-
         """
         self._setup_network_and_servers()
         self._check_public_network_connectivity(should_connect=True)
@@ -445,30 +443,25 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_connectivity_between_vms_on_different_networks(self):
         """Test connectivity between VMs on different networks
 
-        For a freshly-booted VM with an IP address ("port") on a given
-            network:
+        For a freshly-booted VM with an IP address ("port") on a given network:
 
         - the Tempest host can ping the IP address.
-
         - the Tempest host can ssh into the VM via the IP address and
-         successfully execute the following:
+            successfully execute the following:
 
-         - ping an external IP address, implying external connectivity.
-
-         - ping an external hostname, implying that dns is correctly
-           configured.
-
-         - ping an internal IP address, implying connectivity to another
-           VM on the same network.
+            - ping an external IP address, implying external connectivity.
+            - ping an external hostname, implying that dns is correctly
+               configured.
+            - ping an internal IP address, implying connectivity to another
+               VM on the same network.
 
         - Create another network on the same tenant with subnet, create
-        an VM on the new network.
+            an VM on the new network.
 
-         - Ping the new VM from previous VM failed since the new network
-         was not attached to router yet.
-
-         - Attach the new network to the router, Ping the new VM from
-         previous VM succeed.
+            - Ping the new VM from previous VM failed since the new network
+                was not attached to router yet.
+            - Attach the new network to the router, Ping the new VM from
+                previous VM succeed.
 
         """
         self._setup_network_and_servers()
@@ -561,24 +554,25 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_subnet_details(self):
         """Tests that subnet's extra configuration details are affecting VMs.
 
-         This test relies on non-shared, isolated tenant networks.
+        This test relies on non-shared, isolated tenant networks.
 
-         NOTE: Neutron subnets push data to servers via dhcp-agent, so any
-         update in subnet requires server to actively renew its DHCP lease.
+        NOTE: Neutron subnets push data to servers via dhcp-agent, so any
+        update in subnet requires server to actively renew its DHCP lease.
 
-         1. Configure subnet with dns nameserver
-         2. retrieve the VM's configured dns and verify it matches the one
-         configured for the subnet.
-         3. update subnet's dns
-         4. retrieve the VM's configured dns and verify it matches the new one
-         configured for the subnet.
+        1. Configure subnet with dns nameserver
+        2. retrieve the VM's configured dns and verify it matches the one
+           configured for the subnet.
+        3. update subnet's dns
+        4. retrieve the VM's configured dns and verify it matches the new one
+           configured for the subnet.
 
-         TODO(yfried): add host_routes
+        TODO(yfried): add host_routes
 
-         any resolution check would be testing either:
-            * l3 forwarding (tested in test_network_basic_ops)
-            * Name resolution of an external DNS nameserver - out of scope for
-            Tempest
+        any resolution check would be testing either:
+
+        * l3 forwarding (tested in test_network_basic_ops)
+        * Name resolution of an external DNS nameserver - out of scope for
+          Tempest
         """
         # this test check only updates (no actual resolution) so using
         # arbitrary ip addresses as nameservers, instead of parsing CONF
@@ -748,7 +742,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         2. Remove router from all l3-agents
         3. Verify connectivity is down
         4. Assign router to new l3-agent (or old one if no new agent is
-         available)
+           available)
         5. Verify connectivity
         """
 
@@ -829,7 +823,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         prevents traffic to pass through the VM. Anti-spoof rules are not
         required in cases where the VM routes traffic through it.
 
-        The test steps are :
+        The test steps are:
+
         1. Create a new network.
         2. Connect (hotplug) the VM to a new network.
         3. Check the VM can ping a server on the new network ("peer")
@@ -838,7 +833,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
            spoofed interface (VM cannot ping the peer).
         6. Disable port-security of the spoofed port- set the flag to false.
         7. Retest 3rd step and check that the Security Group allows pings via
-        the spoofed interface.
+           the spoofed interface.
         """
 
         spoof_mac = "00:00:00:00:00:01"

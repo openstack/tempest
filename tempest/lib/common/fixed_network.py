@@ -24,7 +24,7 @@ def get_network_from_name(name, compute_networks_client):
     """Get a full network dict from just a network name
 
     :param str name: the name of the network to use
-    :param NetworksClient compute_networks_client: The network client
+    :param network.NetworksClient compute_networks_client: The network client
         object to use for making the network lists api request
     :return: The full dictionary for the network in question
     :rtype: dict

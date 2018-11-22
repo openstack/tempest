@@ -24,15 +24,15 @@ class TestObjectStorageBasicOps(manager.ObjectStorageScenarioTest):
     def test_swift_basic_ops(self):
         """Test swift basic ops.
 
-         * get swift stat.
-         * create container.
-         * upload a file to the created container.
-         * list container's objects and assure that the uploaded file is
-         present.
-         * download the object and check the content
-         * delete object from container.
-         * list container's objects and assure that the deleted file is gone.
-         * delete a container.
+        * get swift stat.
+        * create container.
+        * upload a file to the created container.
+        * list container's objects and assure that the uploaded file is
+          present.
+        * download the object and check the content
+        * delete object from container.
+        * list container's objects and assure that the deleted file is gone.
+        * delete a container.
         """
         self.get_swift_stat()
         container_name = self.create_container()
