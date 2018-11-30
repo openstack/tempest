@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Add basic read-only Placement client to Tempest to make possible the
+    testing of the placement based bandwidth allocation feature.
+    The following API calls are available for tempest from now:
+
+    * GET /allocation_candidates
+    * GET /allocations/{consumer_uuid}
+
+    Add new config group ``placement``, with the config options:
+
+    * ``endpoint_type`` to use for communication with placement service.
+    * ``catalog_type`` of the placement service.
+    * ``region`` as the placement region name to use.
+    * ``min_microversion`` and ``max_microversion`` as the range between
+      placement API requests are sent.

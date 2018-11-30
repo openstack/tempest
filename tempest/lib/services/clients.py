@@ -32,6 +32,7 @@ from tempest.lib.services import identity
 from tempest.lib.services import image
 from tempest.lib.services import network
 from tempest.lib.services import object_storage
+from tempest.lib.services import placement
 from tempest.lib.services import volume
 
 warnings.simplefilter("once")
@@ -46,6 +47,7 @@ def tempest_modules():
     """
     return {
         'compute': compute,
+        'placement': placement,
         'identity.v2': identity.v2,
         'identity.v3': identity.v3,
         'image.v1': image.v1,

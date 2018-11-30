@@ -365,6 +365,38 @@ ComputeGroup = [
                     "with format 'X.Y' or string 'latest'"),
 ]
 
+placement_group = cfg.OptGroup(name='placement',
+                               title='Placement Service Options')
+
+PlacementGroup = [
+    cfg.StrOpt('endpoint_type',
+               default='public',
+               choices=['public', 'admin', 'internal'],
+               help="The endpoint type to use for the placement service."),
+    cfg.StrOpt('catalog_type',
+               default='placement',
+               help="Catalog type of the Placement service."),
+    cfg.StrOpt('region',
+               default='RegionOne',
+               help="The placement region name to use. If empty, the value "
+                    "of [identity]/region is used instead. If no such region "
+                    "is found in the service catalog, the first region found "
+                    "is used."),
+    cfg.StrOpt('min_microversion',
+               default=None,
+               help="Lower version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Valid values are string with format 'X.Y' or string "
+                    "'latest'"),
+    cfg.StrOpt('max_microversion',
+               default=None,
+               help="Upper version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Valid values are string with format 'X.Y' or string "
+                    "'latest'"),
+]
+
+
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
@@ -1096,6 +1128,7 @@ _opts = [
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
     (debug_group, DebugGroup),
+    (placement_group, PlacementGroup),
     (None, DefaultGroup)
 ]
 
