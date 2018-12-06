@@ -28,6 +28,14 @@ CONF = config.CONF
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
+    @classmethod
+    def skip_checks(cls):
+        super(UsersV3TestJSON, cls).skip_checks()
+        if CONF.identity_feature_enabled.immutable_user_source:
+            raise cls.skipException('Skipped because environment has an '
+                                    'immutable user source and solely '
+                                    'provides read-only access to users.')
+
     @decorators.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
