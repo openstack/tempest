@@ -48,11 +48,6 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
             agent.pop('configurations', None)
         self.assertIn(self.agent, agents)
 
-    @decorators.idempotent_id('e335be47-b9a1-46fd-be30-0874c0b751e6')
-    def test_list_agents_non_admin(self):
-        body = self.agents_client.list_agents()
-        self.assertEmpty(body["agents"])
-
     @decorators.idempotent_id('869bc8e8-0fda-4a30-9b71-f8a7cf58ca9f')
     def test_show_agent(self):
         body = self.admin_agents_client.show_agent(self.agent['id'])
@@ -95,4 +90,4 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         non_existent_id = data_utils.rand_uuid()
         self.assertRaises(
             lib_exc.NotFound,
-            self.agents_client.delete_agent, non_existent_id)
+            self.admin_agents_client.delete_agent, non_existent_id)
