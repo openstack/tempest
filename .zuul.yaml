@@ -522,8 +522,6 @@
               # tools/ is not here since this relies on a script in tools/.
         - tempest-slow:
             irrelevant-files: *tempest-irrelevant-files
-        - nova-cells-v1:
-            irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -582,6 +580,8 @@
         - legacy-tempest-dsvm-neutron-dvr-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr-ha-multinode-full:
+            irrelevant-files: *tempest-irrelevant-files
+        - nova-cells-v1:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-nova-v20-api:
             irrelevant-files: *tempest-irrelevant-files
