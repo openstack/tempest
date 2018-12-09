@@ -9,7 +9,7 @@ implementations for both correctness, as well as a burn in tool for
 OpenStack clouds.
 
 As such Tempest tests come in many flavors, each with their own rules
-and guidelines. Below is the overview of the Tempest respository structure
+and guidelines. Below is the overview of the Tempest repository structure
 to make this clear.
 
 .. code-block:: console
