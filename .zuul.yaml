@@ -531,6 +531,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade:
             irrelevant-files: *tempest-irrelevant-files
+        - grenade-py3:
+            irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -572,6 +574,8 @@
         - tempest-full:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade:
+            irrelevant-files: *tempest-irrelevant-files
+        - grenade-py3:
             irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
