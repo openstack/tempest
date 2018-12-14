@@ -29,6 +29,10 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base
 
+if six.PY2:
+    # Python 2 has not FileNotFoundError exception
+    FileNotFoundError = IOError
+
 DEVNULL = open(os.devnull, 'wb')
 atexit.register(DEVNULL.close)
 
@@ -244,14 +248,22 @@ class TestConfigPathCheck(base.TestCase):
         # getting set in os environment when some data has passed to
         # set the environment.
 
-        self.run_cmd._set_env("/fakedir/fakefile")
-        self.assertEqual("/fakedir/fakefile", CONF._path)
-        self.assertIn('TEMPEST_CONFIG_DIR', os.environ)
-        self.assertEqual("/fakedir/fakefile",
-                         os.path.join(os.environ['TEMPEST_CONFIG_DIR'],
-                                      os.environ['TEMPEST_CONFIG']))
+        _, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
 
-    def test_tempest_run_set_config_no_path(self):
+        self.run_cmd._set_env(path)
+        self.assertEqual(path, CONF._path)
+        self.assertIn('TEMPEST_CONFIG_DIR', os.environ)
+        self.assertEqual(path, os.path.join(os.environ['TEMPEST_CONFIG_DIR'],
+                                            os.environ['TEMPEST_CONFIG']))
+
+    def test_tempest_run_set_config_no_exist_path(self):
+        path = "fake/path"
+        self.assertRaisesRegex(FileNotFoundError,
+                               'Config file: .* doesn\'t exist',
+                               self.run_cmd._set_env, path)
+
+    def test_tempest_run_no_config_path(self):
         # Note: (mbindlish) This test is created for the bug id: 1783751
         # Checking TEMPEST_CONFIG_DIR and TEMPEST_CONFIG should have no value
         # in os environment when no data has passed to set the environment.
@@ -313,13 +325,15 @@ class TestTakeAction(base.TestCase):
 
     def test_config_file_specified(self):
         self._setup_test_dirs()
+        _, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
         tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
         parsed_args = mock.Mock()
 
         parsed_args.workspace = None
         parsed_args.state = None
         parsed_args.list_tests = False
-        parsed_args.config_file = '.stestr.conf'
+        parsed_args.config_file = path
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -341,13 +355,15 @@ class TestTakeAction(base.TestCase):
 
     def test_config_file_workspace_registered(self):
         self._setup_test_dirs()
+        _, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
         tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
         parsed_args = mock.Mock()
         parsed_args.workspace = self.name
         parsed_args.workspace_path = self.store_file
         parsed_args.state = None
         parsed_args.list_tests = False
-        parsed_args.config_file = '.stestr.conf'
+        parsed_args.config_file = path
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -406,13 +422,15 @@ class TestTakeAction(base.TestCase):
     @mock.patch('tempest.cmd.run.TempestRun._init_state')
     def test_no_workspace_config_file_state_true(self, mock_init_state):
         self._setup_test_dirs()
+        _, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
         tempest_run = run.TempestRun(app=mock.Mock(), app_args=mock.Mock())
         parsed_args = mock.Mock()
         parsed_args.workspace = None
         parsed_args.workspace_path = self.store_file
         parsed_args.state = True
         parsed_args.list_tests = False
-        parsed_args.config_file = '.stestr.conf'
+        parsed_args.config_file = path
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
