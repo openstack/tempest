@@ -15,6 +15,8 @@
 
 import time
 
+import testtools
+
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -78,6 +80,10 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
         self.non_admin_users_client.auth_provider.set_auth()
 
     @decorators.idempotent_id('165859c9-277f-4124-9479-a7d1627b0ca7')
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an '
+                      'immutable user source and solely '
+                      'provides read-only access to users.')
     def test_user_update_own_password(self):
         old_pass = self.creds.password
         old_token = self.non_admin_users_client.token
