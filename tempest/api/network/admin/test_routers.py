@@ -111,7 +111,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     def _verify_gateway_port(self, router_id):
         list_body = self.admin_ports_client.list_ports(
             network_id=CONF.network.public_network_id,
-            device_id=router_id)
+            device_id=router_id,
+            device_owner="network:router_gateway")
         self.assertEqual(len(list_body['ports']), 1)
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
