@@ -167,7 +167,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         self._clean_network()
         self.assertNotEqual(eui_ip, real_ip,
                             ('Real port IP %s equal to EUI-64 %s when '
-                             'ipv6_ra_mode=Off and ipv6_address_mode=Off,'
+                             'ipv6_ra_mode=Off and ipv6_address_mode=Off, '
                              'but shall be taken from fixed IPs') % (
                                 real_ip, eui_ip))
 
