@@ -80,7 +80,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('fcdf192d-0f74-4d89-911f-1ec002b822c4')
     def test_list_servers_status_non_existing(self):
         # When invalid status is specified, up to microversion 2.37,
-        # an empty list is returnd, and starting from microversion 2.38,
+        # an empty list is returned, and starting from microversion 2.38,
         # a 400 error is returned in that case.
         if self.is_requested_microversion_compatible('2.37'):
             body = self.client.list_servers(status='non_existing_status')
