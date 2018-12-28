@@ -50,8 +50,7 @@ def rand_name(name='', prefix='tempest'):
              (e.g. 'prefixfoo-namebar-154876201')
     :rtype: string
     """
-    randbits = str(random.randint(1, 0x7fffffff))
-    rand_name = randbits
+    rand_name = str(random.randint(1, 0x7fffffff))
     if name:
         rand_name = name + '-' + rand_name
     if prefix:
