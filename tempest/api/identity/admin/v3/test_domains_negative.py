@@ -20,6 +20,10 @@ from tempest.lib import exceptions as lib_exc
 
 
 class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     @decorators.attr(type=['negative', 'gate'])
     @decorators.idempotent_id('1f3fbff5-4e44-400d-9ca1-d953f05f609b')
