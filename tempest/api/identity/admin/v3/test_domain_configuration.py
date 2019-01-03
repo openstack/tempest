@@ -21,6 +21,10 @@ from tempest.lib import exceptions as lib_exc
 
 
 class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     custom_config = {
         "identity": {
