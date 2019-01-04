@@ -21,6 +21,9 @@ from tempest.lib.services.network.metering_labels_client import \
     MeteringLabelsClient
 from tempest.lib.services.network.networks_client import NetworksClient
 from tempest.lib.services.network.ports_client import PortsClient
+from tempest.lib.services.network.qos_client import QosClient
+from tempest.lib.services.network.qos_minimum_bandwidth_rules_client import \
+    QosMinimumBandwidthRulesClient
 from tempest.lib.services.network.quotas_client import QuotasClient
 from tempest.lib.services.network.routers_client import RoutersClient
 from tempest.lib.services.network.security_group_rules_client import \
@@ -37,6 +40,7 @@ from tempest.lib.services.network.versions_client import NetworkVersionsClient
 __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'MeteringLabelRulesClient', 'MeteringLabelsClient',
            'NetworksClient', 'NetworkVersionsClient', 'PortsClient',
-           'QuotasClient', 'RoutersClient', 'SecurityGroupRulesClient',
-           'SecurityGroupsClient', 'ServiceProvidersClient',
-           'SubnetpoolsClient', 'SubnetsClient', 'TagsClient']
+           'QosClient', 'QosMinimumBandwidthRulesClient', 'QuotasClient',
+           'RoutersClient', 'SecurityGroupRulesClient', 'SecurityGroupsClient',
+           'ServiceProvidersClient', 'SubnetpoolsClient', 'SubnetsClient',
+           'TagsClient']

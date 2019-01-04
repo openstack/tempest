@@ -1,0 +1,25 @@
+---
+features:
+  - |
+    Add ``qos-policies`` and ``qos-minimum-bandwidth-rule`` clients
+    to Tempest to make possible the testing of the placement based
+    bandwidth allocation feature.
+    The following API calls are available for tempest from now:
+
+    ``QoS policies`` client:
+
+    * GET /qos/policies
+    * POST /qos/policies
+    * GET /qos/policies/{policy_id}
+    * PUT /qos/policies/{policy_id}
+    * DELETE /qos/policies/{policy_id}
+
+
+    ``QoS minimum bandwidth rules`` client:
+
+    * GET qos/policies/{policy_id}/minimum_bandwidth_rules
+    * POST /qos/policies/{policy_id}/minimum_bandwidth_rules
+    * GET qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id}
+    * PUT qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id}
+    * DELETE /qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id}
+
