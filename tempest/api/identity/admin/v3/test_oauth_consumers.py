@@ -21,6 +21,10 @@ from tempest.lib import exceptions
 
 
 class OAUTHConsumersV3Test(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     def _create_consumer(self):
         """Creates a consumer with a random description."""
