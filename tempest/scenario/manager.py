@@ -826,13 +826,15 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_network(self, networks_client=None,
                         tenant_id=None,
                         namestart='network-smoke-',
-                        port_security_enabled=True):
+                        port_security_enabled=True, **net_dict):
         if not networks_client:
             networks_client = self.networks_client
         if not tenant_id:
             tenant_id = networks_client.tenant_id
         name = data_utils.rand_name(namestart)
         network_kwargs = dict(name=name, tenant_id=tenant_id)
+        if net_dict:
+            network_kwargs.update(net_dict)
         # Neutron disables port security by default so we have to check the
         # config before trying to create the network with port_security_enabled
         if CONF.network_feature_enabled.port_security:
@@ -1257,7 +1259,7 @@ class NetworkScenarioTest(ScenarioTest):
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,
                         tenant_id=None, dns_nameservers=None,
-                        port_security_enabled=True):
+                        port_security_enabled=True, **net_dict):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
@@ -1265,6 +1267,11 @@ class NetworkScenarioTest(ScenarioTest):
 
         :param tenant_id: id of tenant to create resources in.
         :param dns_nameservers: list of dns servers to send to subnet.
+        :param port_security_enabled: whether or not port_security is enabled
+        :param: net_dict: a dict containing experimental network information in
+                a form like this: {'provider:network_type': 'vlan',
+                                   'provider:physical_network': 'foo',
+                                   'provider:segmentation_id': '42'}
         :returns: network, subnet, router
         """
         if CONF.network.shared_physical_network:
@@ -1284,7 +1291,8 @@ class NetworkScenarioTest(ScenarioTest):
             network = self._create_network(
                 networks_client=networks_client,
                 tenant_id=tenant_id,
-                port_security_enabled=port_security_enabled)
+                port_security_enabled=port_security_enabled,
+                **net_dict)
             router = self._get_router(client=routers_client,
                                       tenant_id=tenant_id)
             subnet_kwargs = dict(network=network,

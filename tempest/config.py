@@ -738,7 +738,13 @@ NetworkFeaturesGroup = [
                 help="Does the test environment support port security?"),
     cfg.BoolOpt('floating_ips',
                 default=True,
-                help='Does the test environment support floating_ips')
+                help='Does the test environment support floating_ips'),
+    cfg.StrOpt('qos_placement_physnet', default=None,
+               help='Name of the physnet for placement based minimum '
+                    'bandwidth allocation.'),
+    cfg.StrOpt('provider_net_base_segmentation_id', default=3000,
+               help='Base segmentation ID to create provider networks. '
+                    'This value will be increased in case of conflict.')
 ]
 
 validation_group = cfg.OptGroup(name='validation',
