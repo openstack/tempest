@@ -170,9 +170,6 @@ class TestClosingProxyHttp(TestClosingHttp):
 
 
 class TestClosingHttpRedirects(base.TestCase):
-    def setUp(self):
-        super(TestClosingHttpRedirects, self).setUp()
-
     def test_redirect_default(self):
         connection = http.ClosingHttp()
         self.assertTrue(connection.follow_redirects)
@@ -183,9 +180,6 @@ class TestClosingHttpRedirects(base.TestCase):
 
 
 class TestClosingProxyHttpRedirects(base.TestCase):
-    def setUp(self):
-        super(TestClosingProxyHttpRedirects, self).setUp()
-
     def test_redirect_default(self):
         connection = http.ClosingProxyHttp(proxy_url=PROXY_URL)
         self.assertTrue(connection.follow_redirects)
