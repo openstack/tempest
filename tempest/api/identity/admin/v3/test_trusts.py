@@ -49,7 +49,8 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     def create_trustor_and_roles(self):
         # create a project that trusts will be granted on
-        trustor_project_name = data_utils.rand_name(name='project')
+        trustor_project_name = data_utils.rand_name(
+            name=self.__class__.__name__)
         project = self.projects_client.create_project(
             trustor_project_name,
             domain_id=CONF.identity.default_domain_id)['project']
