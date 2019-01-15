@@ -82,10 +82,8 @@ class Manager(clients.ServiceClients):
             self.schemas_client = self.image_v2.SchemasClient()
             self.namespace_properties_client = \
                 self.image_v2.NamespacePropertiesClient()
-            self.namespace_tags_client = \
-                self.image_v2.NamespaceTagsClient()
-            self.image_versions_client = \
-                self.image_v2.VersionsClient()
+            self.namespace_tags_client = self.image_v2.NamespaceTagsClient()
+            self.image_versions_client = self.image_v2.VersionsClient()
 
     def _set_compute_clients(self):
         self.agents_client = self.compute.AgentsClient()
@@ -284,8 +282,7 @@ class Manager(clients.ServiceClients):
                 self.volume_v3.QuotaClassesClient()
             self.volume_scheduler_stats_v2_client = \
                 self.volume_v3.SchedulerStatsClient()
-            self.volume_transfers_v2_client = \
-                self.volume_v3.TransfersClient()
+            self.volume_transfers_v2_client = self.volume_v3.TransfersClient()
             self.volume_v2_availability_zone_client = \
                 self.volume_v3.AvailabilityZoneClient()
             self.volume_v2_limits_client = self.volume_v3.LimitsClient()
