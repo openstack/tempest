@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.identity import base
 from tempest import config
@@ -68,6 +69,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('1598521a-2f36-4606-8df9-30772bd51339')
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an '
+                      'immutable user source and solely '
+                      'provides read-only access to users.')
     def test_group_users_add_list_delete(self):
         group = self.setup_test_group(domain_id=self.domain['id'])
         # add user into group
@@ -90,6 +95,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(group_users), 0)
 
     @decorators.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an '
+                      'immutable user source and solely '
+                      'provides read-only access to users.')
     def test_list_user_groups(self):
         # create a user
         user = self.create_test_user()
