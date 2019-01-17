@@ -22,6 +22,22 @@ from tempest.lib import exceptions as lib_exc
 class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('8d68c012-89e0-4394-8d6b-ccd7196def97')
+    def test_project_delete_by_unauthorized_user(self):
+        # Non-admin user should not be able to delete a project
+        project = self.setup_test_project()
+        self.assertRaises(
+            lib_exc.Forbidden, self.non_admin_projects_client.delete_project,
+            project['id'])
+
+
+class ProjectsNegativeStaticTestJSON(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
+
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('24c49279-45dd-4155-887a-cb738c2385aa')
     def test_list_projects_by_unauthorized_user(self):
         # Non-admin user should not be able to list projects
@@ -61,15 +77,6 @@ class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         project_name = 'a' * 65
         self.assertRaises(lib_exc.BadRequest,
                           self.projects_client.create_project, project_name)
-
-    @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('8d68c012-89e0-4394-8d6b-ccd7196def97')
-    def test_project_delete_by_unauthorized_user(self):
-        # Non-admin user should not be able to delete a project
-        project = self.setup_test_project()
-        self.assertRaises(
-            lib_exc.Forbidden, self.non_admin_projects_client.delete_project,
-            project['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7965b581-60c1-43b7-8169-95d4ab7fc6fb')
