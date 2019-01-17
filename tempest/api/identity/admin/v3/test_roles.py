@@ -25,6 +25,10 @@ CONF = config.CONF
 
 
 class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     @classmethod
     def resource_setup(cls):
