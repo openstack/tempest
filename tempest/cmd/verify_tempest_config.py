@@ -365,11 +365,11 @@ def check_service_availability(os, update):
         catalog_type = getattr(cfg, 'catalog_type', None)
         if not catalog_type:
             continue
-        else:
-            if cfgname == 'identity':
-                # Keystone is a required service for tempest
-                continue
-            if catalog_type not in services:
+        if cfgname == 'identity':
+            # Keystone is a required service for tempest
+            continue
+        if catalog_type not in services:
+            try:
                 if getattr(CONF.service_available, codename_match[cfgname]):
                     print('Endpoint type %s not found either disable service '
                           '%s or fix the catalog_type in the config file' % (
@@ -377,7 +377,13 @@ def check_service_availability(os, update):
                     if update:
                         change_option(codename_match[cfgname],
                                       'service_available', False)
-            else:
+            except KeyError:
+                print('%s is a third party plugin, cannot be verified '
+                      'automatically, but it is suggested that it is set to '
+                      'False because %s service is not available ' % (
+                          cfgname, catalog_type))
+        else:
+            try:
                 if not getattr(CONF.service_available,
                                codename_match[cfgname]):
                     print('Endpoint type %s is available, service %s should be'
@@ -391,6 +397,11 @@ def check_service_availability(os, update):
                         avail_services.append(codename_match[cfgname])
                 else:
                     avail_services.append(codename_match[cfgname])
+            except KeyError:
+                print('%s is a third party plugin, cannot be verified '
+                      'automatically, but it is suggested that it is set to '
+                      'True because %s service is available ' % (
+                          cfgname, catalog_type))
     return avail_services
 
 
