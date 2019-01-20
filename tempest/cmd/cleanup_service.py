@@ -101,7 +101,7 @@ class BaseService(object):
 
         self.tenant_filter = {}
         if hasattr(self, 'tenant_id'):
-            self.tenant_filter['tenant_id'] = self.tenant_id
+            self.tenant_filter['project_id'] = self.tenant_id
 
     def _filter_by_tenant_id(self, item_list):
         if (item_list is None or
@@ -320,13 +320,13 @@ class VolumeQuotaService(BaseService):
     def delete(self):
         client = self.client
         try:
-            client.delete_quota_set(self.tenant_id)
+            client.delete_quota_set(self.project_id)
         except Exception:
             LOG.exception("Delete Volume Quotas exception.")
 
     def dry_run(self):
         quotas = self.client.show_quota_set(
-            self.tenant_id, params={'usage': True})['quota_set']
+            self.project_id, params={'usage': True})['quota_set']
         self.data['volume_quotas'] = quotas
 
 
@@ -339,7 +339,7 @@ class NovaQuotaService(BaseService):
     def delete(self):
         client = self.client
         try:
-            client.delete_quota_set(self.tenant_id)
+            client.delete_quota_set(self.project_id)
         except Exception:
             LOG.exception("Delete Quotas exception.")
 
