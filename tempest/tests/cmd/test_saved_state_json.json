@@ -1,0 +1,16 @@
+{
+  "domains": {
+    "default": "Default"
+  },
+  "flavors": {
+    "1": "m1.tiny"
+  },
+  "images": {},
+  "projects": {
+    "268bcb63488b4aa2942ecaac0f85ed62": "demo"
+  },
+  "roles": {},
+  "users": {
+    "023e65a5922a454585a91c6af8310968": "demo"
+  }
+}
