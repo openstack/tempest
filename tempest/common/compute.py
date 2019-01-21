@@ -168,10 +168,19 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                   'imageRef': image_id,
                   'size': CONF.volume.volume_size}
         volume = volumes_client.create_volume(**params)
-        waiters.wait_for_volume_resource_status(volumes_client,
-                                                volume['volume']['id'],
-                                                'available')
-
+        try:
+            waiters.wait_for_volume_resource_status(volumes_client,
+                                                    volume['volume']['id'],
+                                                    'available')
+        except Exception:
+            with excutils.save_and_reraise_exception():
+                try:
+                    volumes_client.delete_volume(volume['volume']['id'])
+                    volumes_client.wait_for_resource_deletion(
+                        volume['volume']['id'])
+                except Exception as exc:
+                    LOG.exception("Deleting volume %s failed, exception %s",
+                                  volume['volume']['id'], exc)
         bd_map_v2 = [{
             'uuid': volume['volume']['id'],
             'source_type': 'volume',
