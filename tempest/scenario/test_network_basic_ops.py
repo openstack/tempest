@@ -544,7 +544,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
-    @decorators.skip_because(bug='1813198')
     @decorators.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'network isolation not available')
@@ -580,10 +579,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         initial_dns_server = '1.2.3.4'
         alt_dns_server = '9.8.7.6'
 
-        # renewal should be immediate.
-        # Timeouts are suggested by salvatore-orlando in
+        # Original timeouts are suggested by salvatore-orlando in
         # https://bugs.launchpad.net/neutron/+bug/1412325/comments/3
-        renew_delay = CONF.network.build_interval
+        #
+        # Compared to that renew_delay was increased, because
+        # busybox's udhcpc accepts SIGUSR1 as a renew request. Internally
+        # it goes into RENEW_REQUESTED state. If it receives a 2nd SIGUSR1
+        # signal while in that state then it calls the deconfig script
+        # ("/sbin/cirros-dhcpc deconfig" in sufficiently new cirros versions)
+        # which leads to the address being transiently deconfigured which
+        # for our case is unwanted.
+        renew_delay = 3 * CONF.network.build_interval
         renew_timeout = CONF.network.build_timeout
 
         self._setup_network_and_servers(dns_nameservers=[initial_dns_server])
