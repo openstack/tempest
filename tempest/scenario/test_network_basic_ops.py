@@ -544,6 +544,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             should_connect=True, msg="after updating "
             "admin_state_up of router to True")
 
+    @decorators.skip_because(bug='1813198')
     @decorators.idempotent_id('d8bb918e-e2df-48b2-97cd-b73c95450980')
     @testtools.skipIf(CONF.network.shared_physical_network,
                       'network isolation not available')
