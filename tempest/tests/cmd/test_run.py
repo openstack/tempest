@@ -150,6 +150,49 @@ class TestRunReturnCode(base.TestCase):
                             '--config-file', self.stestr_conf_file,
                             '--regex', 'passing'], 0)
 
+    def test_tempest_run_with_blacklist_failing(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        blacklist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(blacklist_file.close)
+        blacklist_file.write('failing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path], 0)
+
+    def test_tempest_run_with_blacklist_passing(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        blacklist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(blacklist_file.close)
+        blacklist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path], 1)
+
+    def test_tempest_run_with_blacklist_regex_exclude_fail_check_pass(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        blacklist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(blacklist_file.close)
+        blacklist_file.write('failing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+                            '--regex', 'pass'], 0)
+
+    def test_tempest_run_with_blacklist_regex_exclude_pass_check_pass(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        blacklist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(blacklist_file.close)
+        blacklist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+                            '--regex', 'pass'], 1)
+
+    def test_tempest_run_with_blacklist_regex_exclude_pass_check_fail(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        blacklist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(blacklist_file.close)
+        blacklist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+                            '--regex', 'fail'], 1)
+
 
 class TestConfigPathCheck(base.TestCase):
     def setUp(self):
