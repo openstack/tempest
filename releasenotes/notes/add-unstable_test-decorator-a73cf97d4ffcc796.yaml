@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    New decorator ``unstable_test`` is added to ``tempest.lib.decorators``.
+    It can be used to mark some test as unstable thus it will be still run
+    by tempest but job will not fail if this test will fail. Such test will
+    be skipped in case of failure.
+    It can be used for example when there is known bug related which cause
+    irregular tests failures. Marking such test as unstable will help other
+    developers to get their job done and still run this test to get additional
+    debug data or to confirm if some potential fix really solved the issue.
