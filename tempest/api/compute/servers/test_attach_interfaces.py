@@ -256,8 +256,8 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         if not (CONF.auth.use_dynamic_credentials and
                 CONF.auth.create_isolated_networks and
                 not CONF.network.shared_physical_network):
-                raise self.skipException("Only owner network supports "
-                                         "creating interface by fixed ip.")
+            raise self.skipException("Only owner network supports "
+                                     "creating interface by fixed ip.")
 
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)

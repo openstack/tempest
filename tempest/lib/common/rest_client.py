@@ -526,7 +526,7 @@ class RestClient(object):
         if (resp.status == 205 and
             0 != len(set(resp.keys()) - set(('status',)) -
                      self.response_header_lc - self.general_header_lc)):
-                        raise exceptions.ResponseWithEntity()
+            raise exceptions.ResponseWithEntity()
         # NOTE(afazekas)
         # Now the swift sometimes (delete not empty container)
         # returns with non json error response, we can create new rest class
