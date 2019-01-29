@@ -108,6 +108,27 @@ class TestRunReturnCode(base.TestCase):
         subprocess.call(['stestr', 'init'])
         self.assertRunExit(['tempest', 'run', '--regex', 'passing'], 0)
 
+    def test_tempest_run_failing(self):
+        self.assertRunExit(['tempest', 'run', '--regex', 'failing'], 1)
+
+    def test_tempest_run_failing_with_stestr_repository(self):
+        subprocess.call(['stestr', 'init'])
+        self.assertRunExit(['tempest', 'run', '--regex', 'failing'], 1)
+
+    def test_tempest_run_blackregex_failing(self):
+        self.assertRunExit(['tempest', 'run', '--black-regex', 'failing'], 0)
+
+    def test_tempest_run_blackregex_failing_with_stestr_repository(self):
+        subprocess.call(['stestr', 'init'])
+        self.assertRunExit(['tempest', 'run', '--black-regex', 'failing'], 0)
+
+    def test_tempest_run_blackregex_passing(self):
+        self.assertRunExit(['tempest', 'run', '--black-regex', 'passing'], 1)
+
+    def test_tempest_run_blackregex_passing_with_stestr_repository(self):
+        subprocess.call(['stestr', 'init'])
+        self.assertRunExit(['tempest', 'run', '--black-regex', 'passing'], 1)
+
     def test_tempest_run_fails(self):
         self.assertRunExit(['tempest', 'run'], 1)
 
