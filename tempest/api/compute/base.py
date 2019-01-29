@@ -457,7 +457,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             else:
                 msg = ('When validation.connect_method equals floating, '
                        'validation_resources cannot be None')
-                raise exceptions.InvalidParam(invalid_param=msg)
+                raise lib_exc.InvalidParam(invalid_param=msg)
         elif CONF.validation.connect_method == 'fixed':
             addresses = server['addresses'][CONF.validation.network_for_ssh]
             for address in addresses:
