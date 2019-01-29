@@ -25,6 +25,10 @@ CONF = config.CONF
 
 
 class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
+    # NOTE: force_tenant_isolation is true in the base class by default but
+    # overridden to false here to allow test execution for clouds using the
+    # pre-provisioned credentials provider.
+    force_tenant_isolation = False
 
     @decorators.idempotent_id('7c123aac-999d-416a-a0fb-84b915ab10de')
     @testtools.skipUnless(CONF.identity_feature_enabled.project_tags,
