@@ -105,7 +105,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         asserts the servers are in the group and on different hosts.
         """
         hosts = self._create_servers_with_group('anti-affinity')
-        hostnames = hosts.values()
+        hostnames = list(hosts.values())
         self.assertNotEqual(hostnames[0], hostnames[1],
                             'Servers are on the same host: %s' % hosts)
 
@@ -120,6 +120,6 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         asserts the servers are in the group and on same host.
         """
         hosts = self._create_servers_with_group('affinity')
-        hostnames = hosts.values()
+        hostnames = list(hosts.values())
         self.assertEqual(hostnames[0], hostnames[1],
                          'Servers are on the different hosts: %s' % hosts)
