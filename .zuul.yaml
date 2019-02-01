@@ -272,6 +272,20 @@
       tempest_concurrency: 2
 
 - job:
+    name: tempest-slow-py3
+    parent: tempest-slow
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        # without Swift, c-bak cannot run (in the Gate at least)
+        c-bak: false
+
+- job:
     name: tempest-full-rocky
     parent: tempest-full
     nodeset: openstack-single-node-xenial
@@ -513,6 +527,8 @@
               # tools/ is not here since this relies on a script in tools/.
         - tempest-slow:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-slow-py3:
+            irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -556,7 +572,7 @@
       jobs:
         - nova-multiattach:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-slow:
+        - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
