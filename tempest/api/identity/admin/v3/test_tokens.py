@@ -42,10 +42,10 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         user = self.create_test_user(password=user_password)
 
         # Create a couple projects
-        project1_name = data_utils.rand_name(name='project')
+        project1_name = data_utils.rand_name(name=self.__class__.__name__)
         project1 = self.setup_test_project(name=project1_name)
 
-        project2_name = data_utils.rand_name(name='project')
+        project2_name = data_utils.rand_name(name=self.__class__.__name__)
         project2 = self.setup_test_project(name=project2_name)
         self.addCleanup(self.projects_client.delete_project, project2['id'])
 
