@@ -222,6 +222,13 @@
           LIVE_MIGRATION_AVAILABLE: true
           USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
 
+- job:
+    name: tempest-multinode-full-py3
+    parent: tempest-multinode-full
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: true
+
 - nodeset:
     name: openstack-bionic-node
     nodes:
@@ -513,6 +520,8 @@
         - tempest-full-pike:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
             irrelevant-files:
