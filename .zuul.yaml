@@ -569,7 +569,6 @@
         - tempest-full:
             irrelevant-files: *tempest-irrelevant-files
         - interop-tempest-consistency:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-test-account-py3:
             voting: false
