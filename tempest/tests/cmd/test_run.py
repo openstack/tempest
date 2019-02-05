@@ -157,7 +157,7 @@ class TestRunReturnCode(base.TestCase):
         whitelist_file.write('passing'.encode('utf-8'))
         self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path], 0)
 
-    def test_tempest_run_with_whitelist_with_regex(self):
+    def test_tempest_run_with_whitelist_regex_include_pass_check_fail(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
         whitelist_file = os.fdopen(fd, 'wb', 0)
@@ -165,6 +165,24 @@ class TestRunReturnCode(base.TestCase):
         whitelist_file.write('passing'.encode('utf-8'))
         self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
                             '--regex', 'fail'], 1)
+
+    def test_tempest_run_with_whitelist_regex_include_pass_check_pass(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        whitelist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(whitelist_file.close)
+        whitelist_file.write('passing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+                            '--regex', 'passing'], 0)
+
+    def test_tempest_run_with_whitelist_regex_include_fail_check_pass(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        whitelist_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(whitelist_file.close)
+        whitelist_file.write('failing'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+                            '--regex', 'pass'], 1)
 
     def test_tempest_run_passes_with_config_file(self):
         self.assertRunExit(['tempest', 'run',
