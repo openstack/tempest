@@ -12,10 +12,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
@@ -176,6 +180,10 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp2_en, resp3_en)
 
     @decorators.idempotent_id('59398d4a-5dc5-4f86-9a4c-c26cc804d6c6')
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an '
+                      'immutable user source and solely '
+                      'provides read-only access to users.')
     def test_associate_user_to_project(self):
         # Associate a user to a project
         # Create a Project
