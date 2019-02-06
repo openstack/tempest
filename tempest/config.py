@@ -20,6 +20,7 @@ import tempfile
 
 from oslo_concurrency import lockutils
 from oslo_config import cfg
+from oslo_config import types
 from oslo_log import log as logging
 
 from tempest.lib import exceptions
@@ -627,6 +628,7 @@ ImageFeaturesGroup = [
 network_group = cfg.OptGroup(name='network',
                              title='Network Service Options')
 
+ProfileType = types.Dict(types.List(types.String(), bounds=True))
 NetworkGroup = [
     cfg.StrOpt('catalog_type',
                default='network',
@@ -690,10 +692,11 @@ NetworkGroup = [
                     " with pre-configured ports."
                     " Supported ports are:"
                     " ['normal','direct','macvtap']"),
-    cfg.DictOpt('port_profile',
-                default={},
-                help="port profile to use when launching instances"
-                     " with pre-configured ports."),
+    cfg.Opt('port_profile',
+            type=ProfileType,
+            default={},
+            help="port profile to use when launching instances"
+                 " with pre-configured ports."),
     cfg.ListOpt('default_network',
                 default=["1.0.0.0/16", "2.0.0.0/16"],
                 help="List of ip pools"
