@@ -1,0 +1,10 @@
+---
+upgrade:
+  - |
+    The ``tempest-full``, ``tempest-full-py3`` and ``tempest-slow`` zuul v3
+    job configurations now set ``ENABLE_VOLUME_MULTIATTACH: true`` in the
+    ``devstack_localrc`` variables section. If you have a plugin job
+    configuration that inherits from one of these jobs and the backend cinder
+    volume driver or nova compute driver do not support volume multiattach then
+    you should override and set this variable to
+    ``ENABLE_VOLUME_MULTIATTACH: false`` in your job configuration.

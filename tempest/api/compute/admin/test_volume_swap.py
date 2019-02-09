@@ -148,6 +148,13 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
     # so it's marked as such.
     @decorators.attr(type='slow')
     @decorators.idempotent_id('e8f8f9d1-d7b7-4cd2-8213-ab85ef697b6e')
+    # For some reason this test intermittently fails on teardown when there are
+    # multiple compute nodes and the servers are split across the computes.
+    # For now, just skip this test if there are multiple computes.
+    # Alternatively we could put the servers in an affinity group if there are
+    # multiple computes but that would just side-step the underlying bug.
+    @decorators.skip_because(bug='1807723',
+                             condition=CONF.compute.min_compute_nodes > 1)
     @utils.services('volume')
     def test_volume_swap_with_multiattach(self):
         # Create two volumes.

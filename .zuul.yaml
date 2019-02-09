@@ -99,6 +99,7 @@
       tox_envlist: full
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
+        ENABLE_VOLUME_MULTIATTACH: true
 
 - job:
     name: tempest-full-oslo-master
@@ -161,6 +162,7 @@
       devstack_localrc:
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
+        ENABLE_VOLUME_MULTIATTACH: true
       devstack_services:
         s-account: false
         s-container: false
@@ -276,6 +278,7 @@
       tox_envlist: slow-serial
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
+        ENABLE_VOLUME_MULTIATTACH: true
       tempest_concurrency: 2
 
 - job:
@@ -490,7 +493,7 @@
               - ^playbooks/
               - ^roles/
               - ^.zuul.yaml$
-        - nova-multiattach:
+        - tempest-full-parallel:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
               - ^(test-|)requirements.txt$
@@ -502,8 +505,6 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
               - ^tools/.*$
-        - tempest-full-parallel:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3-ipv6:
@@ -578,8 +579,6 @@
             irrelevant-files: *tempest-irrelevant-files
     gate:
       jobs:
-        - nova-multiattach:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
