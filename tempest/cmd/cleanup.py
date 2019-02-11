@@ -309,9 +309,9 @@ class TempestCleanup(command.Command):
             f.write(json.dumps(data,
                     sort_keys=True, indent=2, separators=(',', ': ')))
 
-    def _load_json(self):
+    def _load_json(self, saved_state_json=SAVED_STATE_JSON):
         try:
-            with open(SAVED_STATE_JSON) as json_file:
+            with open(saved_state_json, 'rb') as json_file:
                 self.json_data = json.load(json_file)
 
         except IOError as ex:
