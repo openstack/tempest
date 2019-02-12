@@ -74,6 +74,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         scheme, netloc, path, params, query, fragment = urlparse.urlparse(uri)
         scheme = scheme.lower()
         netloc = netloc.lower()
+        path = path.replace('//', '/')
         normalized_uri = urlparse.urlunparse((scheme, netloc, path,
                                               params, '', ''))
 
