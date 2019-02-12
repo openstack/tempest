@@ -236,57 +236,6 @@ class KeyPairService(BaseService):
         self.data['keypairs'] = keypairs
 
 
-class SecurityGroupService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(SecurityGroupService, self).__init__(kwargs)
-        self.client = manager.compute_security_groups_client
-
-    def list(self):
-        client = self.client
-        secgrps = client.list_security_groups()['security_groups']
-        secgrp_del = [grp for grp in secgrps if grp['name'] != 'default']
-        LOG.debug("List count, %s Security Groups", len(secgrp_del))
-        return secgrp_del
-
-    def delete(self):
-        client = self.client
-        secgrp_del = self.list()
-        for g in secgrp_del:
-            try:
-                client.delete_security_group(g['id'])
-            except Exception:
-                LOG.exception("Delete Security Groups exception.")
-
-    def dry_run(self):
-        secgrp_del = self.list()
-        self.data['security_groups'] = secgrp_del
-
-
-class FloatingIpService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(FloatingIpService, self).__init__(kwargs)
-        self.client = manager.compute_floating_ips_client
-
-    def list(self):
-        client = self.client
-        floating_ips = client.list_floating_ips()['floating_ips']
-        LOG.debug("List count, %s Floating IPs", len(floating_ips))
-        return floating_ips
-
-    def delete(self):
-        client = self.client
-        floating_ips = self.list()
-        for f in floating_ips:
-            try:
-                client.delete_floating_ip(f['id'])
-            except Exception:
-                LOG.exception("Delete Floating IPs exception.")
-
-    def dry_run(self):
-        floating_ips = self.list()
-        self.data['floating_ips'] = floating_ips
-
-
 class VolumeService(BaseService):
     def __init__(self, manager, **kwargs):
         super(VolumeService, self).__init__(kwargs)
@@ -449,102 +398,6 @@ class NetworkRouterService(NetworkService):
     def dry_run(self):
         routers = self.list()
         self.data['routers'] = routers
-
-
-class NetworkHealthMonitorService(NetworkService):
-
-    def list(self):
-        client = self.client
-        hms = client.list_health_monitors()
-        hms = hms['health_monitors']
-        hms = self._filter_by_tenant_id(hms)
-        LOG.debug("List count, %s Health Monitors", len(hms))
-        return hms
-
-    def delete(self):
-        client = self.client
-        hms = self.list()
-        for hm in hms:
-            try:
-                client.delete_health_monitor(hm['id'])
-            except Exception:
-                LOG.exception("Delete Health Monitor exception.")
-
-    def dry_run(self):
-        hms = self.list()
-        self.data['health_monitors'] = hms
-
-
-class NetworkMemberService(NetworkService):
-
-    def list(self):
-        client = self.client
-        members = client.list_members()
-        members = members['members']
-        members = self._filter_by_tenant_id(members)
-        LOG.debug("List count, %s Members", len(members))
-        return members
-
-    def delete(self):
-        client = self.client
-        members = self.list()
-        for member in members:
-            try:
-                client.delete_member(member['id'])
-            except Exception:
-                LOG.exception("Delete Member exception.")
-
-    def dry_run(self):
-        members = self.list()
-        self.data['members'] = members
-
-
-class NetworkVipService(NetworkService):
-
-    def list(self):
-        client = self.client
-        vips = client.list_vips()
-        vips = vips['vips']
-        vips = self._filter_by_tenant_id(vips)
-        LOG.debug("List count, %s VIPs", len(vips))
-        return vips
-
-    def delete(self):
-        client = self.client
-        vips = self.list()
-        for vip in vips:
-            try:
-                client.delete_vip(vip['id'])
-            except Exception:
-                LOG.exception("Delete VIP exception.")
-
-    def dry_run(self):
-        vips = self.list()
-        self.data['vips'] = vips
-
-
-class NetworkPoolService(NetworkService):
-
-    def list(self):
-        client = self.client
-        pools = client.list_pools()
-        pools = pools['pools']
-        pools = self._filter_by_tenant_id(pools)
-        LOG.debug("List count, %s Pools", len(pools))
-        return pools
-
-    def delete(self):
-        client = self.client
-        pools = self.list()
-        for pool in pools:
-            try:
-                client.delete_pool(pool['id'])
-            except Exception:
-                LOG.exception("Delete Pool exception.")
-
-    def dry_run(self):
-        pools = self.list()
-        self.data['pools'] = pools
 
 
 class NetworkMeteringLabelRuleService(NetworkService):
@@ -754,12 +607,6 @@ class ImageService(BaseService):
             self.data['images'][image['id']] = image['name']
 
 
-class IdentityService(BaseService):
-    def __init__(self, manager, **kwargs):
-        super(IdentityService, self).__init__(kwargs)
-        self.client = manager.identity_v3_client
-
-
 class UserService(BaseService):
 
     def __init__(self, manager, **kwargs):
@@ -929,10 +776,7 @@ def get_project_cleanup_services():
     if IS_NOVA:
         project_services.append(ServerService)
         project_services.append(KeyPairService)
-        project_services.append(SecurityGroupService)
         project_services.append(ServerGroupService)
-        if not IS_NEUTRON:
-            project_services.append(FloatingIpService)
         project_services.append(NovaQuotaService)
     if IS_NEUTRON:
         project_services.append(NetworkFloatingIpService)
