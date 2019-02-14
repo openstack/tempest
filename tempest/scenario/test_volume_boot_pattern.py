@@ -76,6 +76,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self.snapshots_client.wait_for_resource_deletion(snapshot_id)
 
     @decorators.idempotent_id('557cd2c2-4eb8-4dce-98be-f86765ff311b')
+    @decorators.attr(type='slow')
     # Note: This test is being skipped based on 'public_network_id'.
     # It is being used in create_floating_ip() method which gets called
     # from get_server_ip() method
