@@ -119,6 +119,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             server, keypair, floating_ip)
 
     @decorators.idempotent_id('7b6860c2-afa3-4846-9522-adeb38dfbe08')
+    @decorators.attr(type='slow')
     @utils.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         keypair = self.create_keypair()
