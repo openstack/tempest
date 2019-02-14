@@ -32,9 +32,17 @@ class TestAttrDecorator(base.TestCase):
         # By our decorators.attr decorator the attribute __testtools_attrs
         # will be set only for 'type' argument, so we test it first.
         if 'type' in decorator_args:
-            # this is what testtools sets
-            self.assertEqual(getattr(foo, '__testtools_attrs'),
-                             set(expected_attrs))
+            if 'condition' in decorator_args:
+                if decorator_args['condition']:
+                    # The expected attrs should be in the function.
+                    self.assertEqual(set(expected_attrs),
+                                     getattr(foo, '__testtools_attrs'))
+                else:
+                    # The expected attrs should not be in the function.
+                    self.assertNotIn('__testtools_attrs', foo)
+            else:
+                self.assertEqual(set(expected_attrs),
+                                 getattr(foo, '__testtools_attrs'))
 
     def test_attr_without_type(self):
         self._test_attr_helper(expected_attrs='baz', bar='baz')
@@ -49,6 +57,13 @@ class TestAttrDecorator(base.TestCase):
 
     def test_attr_decorator_with_duplicated_type(self):
         self._test_attr_helper(expected_attrs=['foo'], type=['foo', 'foo'])
+
+    def test_attr_decorator_condition_false(self):
+        self._test_attr_helper(None, type='slow', condition=False)
+
+    def test_attr_decorator_condition_true(self):
+        self._test_attr_helper(expected_attrs=['slow'], type='slow',
+                               condition=True)
 
 
 class TestSkipBecauseDecorator(base.TestCase):
