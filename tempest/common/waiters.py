@@ -213,6 +213,31 @@ def wait_for_volume_resource_status(client, resource_id, status):
              resource_name, resource_id, status, time.time() - start)
 
 
+def wait_for_volume_migration(client, volume_id, new_host):
+    """Waits for a Volume to move to a new host."""
+    body = client.show_volume(volume_id)['volume']
+    host = body['os-vol-host-attr:host']
+    migration_status = body['migration_status']
+    start = int(time.time())
+
+    # new_host is hostname@backend while current_host is hostname@backend#type
+    while migration_status != 'success' or new_host not in host:
+        time.sleep(client.build_interval)
+        body = client.show_volume(volume_id)['volume']
+        host = body['os-vol-host-attr:host']
+        migration_status = body['migration_status']
+
+        if migration_status == 'error':
+            message = ('volume %s failed to migrate.' % (volume_id))
+            raise lib_exc.TempestException(message)
+
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Volume %s failed to migrate to %s (current %s) '
+                       'within the required time (%s s).' %
+                       (volume_id, new_host, host, client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+
+
 def wait_for_volume_retype(client, volume_id, new_volume_type):
     """Waits for a Volume to have a new volume type."""
     body = client.show_volume(volume_id)['volume']

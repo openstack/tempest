@@ -97,7 +97,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
     @utils.services('compute', 'volume')
-    def test_volume_migrate_attached(self):
+    def test_volume_retype_attached(self):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
         security_group = self._create_security_group()
@@ -149,3 +149,68 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         attached_volumes = self.servers_client.list_volume_attachments(
             instance['id'])['volumeAttachments']
         self.assertEqual(volume_id, attached_volumes[0]['id'])
+
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('fe47b1ed-640e-4e3b-a090-200e25607362')
+    @utils.services('compute', 'volume')
+    def test_volume_migrate_attached(self):
+        LOG.info("Creating keypair and security group")
+        keypair = self.create_keypair()
+        security_group = self._create_security_group()
+
+        LOG.info("Creating volume")
+        # Create a unique volume type to avoid using the backend default
+        migratable_type = self.create_volume_type()['name']
+        volume_id = self.create_volume(imageRef=CONF.compute.image_ref,
+                                       volume_type=migratable_type)['id']
+        volume = self.admin_volumes_client.show_volume(volume_id)
+
+        LOG.info("Booting instance from volume")
+        instance = self._boot_instance_from_volume(volume_id, keypair,
+                                                   security_group)
+
+        # Identify the source and destination hosts for the migration
+        src_host = volume['volume']['os-vol-host-attr:host']
+
+        # Select the first c-vol host that isn't hosting the volume as the dest
+        # host['host_name'] should take the format of host@backend.
+        # src_host should take the format of host@backend#type
+        hosts = self.admin_volumes_client.list_hosts()['hosts']
+        for host in hosts:
+            if (host['service'] == 'cinder-volume' and
+                not src_host.startswith(host['host_name'])):
+                dest_host = host['host_name']
+                break
+
+        ip_instance = self.get_server_ip(instance)
+        timestamp = self.create_timestamp(ip_instance,
+                                          private_key=keypair['private_key'],
+                                          server=instance)
+
+        LOG.info("Migrating Volume %s from host %s to host %s",
+                 volume_id, src_host, dest_host)
+        self.admin_volumes_client.migrate_volume(volume_id, host=dest_host)
+
+        # This waiter asserts that the migration_status is success and that
+        # the volume has moved to the dest_host
+        waiters.wait_for_volume_migration(self.admin_volumes_client, volume_id,
+                                          dest_host)
+
+        # check the content of written file
+        LOG.info("Getting timestamp in postmigrated instance %s",
+                 instance['id'])
+        timestamp2 = self.get_timestamp(ip_instance,
+                                        private_key=keypair['private_key'],
+                                        server=instance)
+        self.assertEqual(timestamp, timestamp2)
+
+        # Assert that the volume is in-use
+        volume = self.admin_volumes_client.show_volume(volume_id)['volume']
+        self.assertEqual('in-use', volume['status'])
+
+        # Assert that the same volume id is attached to the instance, ensuring
+        # the os-migrate_volume_completion Cinder API has been called
+        attached_volumes = self.servers_client.list_volume_attachments(
+            instance['id'])['volumeAttachments']
+        attached_volume_id = attached_volumes[0]['id']
+        self.assertEqual(volume_id, attached_volume_id)
