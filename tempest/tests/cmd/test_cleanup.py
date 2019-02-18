@@ -19,7 +19,7 @@ from tempest.tests import base
 class TestTempestCleanup(base.TestCase):
 
     def test_load_json(self):
-        # instatiate "empty" TempestCleanup
+        # instantiate "empty" TempestCleanup
         c = cleanup.TempestCleanup(None, None, 'test')
         test_saved_json = 'tempest/tests/cmd/test_saved_state_json.json'
         # test if the file is loaded without any issues/exceptions
