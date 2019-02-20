@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 from oslo_log import log as logging
+from oslo_serialization import jsonutils as json
 
 from tempest.api.compute import base
 from tempest.common import utils

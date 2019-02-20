@@ -12,9 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
-
 import mock
+from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions
