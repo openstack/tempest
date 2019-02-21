@@ -144,6 +144,10 @@ class SnapshotService(BaseService):
     def list(self):
         client = self.client
         snaps = client.list_snapshots()['snapshots']
+        if not self.is_save_state:
+            # recreate list removing saved snapshots
+            snaps = [snap for snap in snaps if snap['id']
+                     not in self.saved_state_json['snapshots'].keys()]
         LOG.debug("List count, %s Snapshots", len(snaps))
         return snaps
 
@@ -160,6 +164,12 @@ class SnapshotService(BaseService):
         snaps = self.list()
         self.data['snapshots'] = snaps
 
+    def save_state(self):
+        snaps = self.list()
+        self.data['snapshots'] = {}
+        for snap in snaps:
+            self.data['snapshots'][snap['id']] = snap['name']
+
 
 class ServerService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -171,6 +181,10 @@ class ServerService(BaseService):
         client = self.client
         servers_body = client.list_servers()
         servers = servers_body['servers']
+        if not self.is_save_state:
+            # recreate list removing saved servers
+            servers = [server for server in servers if server['id']
+                       not in self.saved_state_json['servers'].keys()]
         LOG.debug("List count, %s Servers", len(servers))
         return servers
 
@@ -187,17 +201,27 @@ class ServerService(BaseService):
         servers = self.list()
         self.data['servers'] = servers
 
+    def save_state(self):
+        servers = self.list()
+        self.data['servers'] = {}
+        for server in servers:
+            self.data['servers'][server['id']] = server['name']
+
 
 class ServerGroupService(ServerService):
 
     def list(self):
         client = self.server_groups_client
         sgs = client.list_server_groups()['server_groups']
+        if not self.is_save_state:
+            # recreate list removing saved server_groups
+            sgs = [sg for sg in sgs if sg['id']
+                   not in self.saved_state_json['server_groups'].keys()]
         LOG.debug("List count, %s Server Groups", len(sgs))
         return sgs
 
     def delete(self):
-        client = self.client
+        client = self.server_groups_client
         sgs = self.list()
         for sg in sgs:
             try:
@@ -209,6 +233,12 @@ class ServerGroupService(ServerService):
         sgs = self.list()
         self.data['server_groups'] = sgs
 
+    def save_state(self):
+        sgs = self.list()
+        self.data['server_groups'] = {}
+        for sg in sgs:
+            self.data['server_groups'][sg['id']] = sg['name']
+
 
 class KeyPairService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -218,6 +248,11 @@ class KeyPairService(BaseService):
     def list(self):
         client = self.client
         keypairs = client.list_keypairs()['keypairs']
+        if not self.is_save_state:
+            # recreate list removing saved keypairs
+            keypairs = [keypair for keypair in keypairs
+                        if keypair['keypair']['name']
+                        not in self.saved_state_json['keypairs'].keys()]
         LOG.debug("List count, %s Keypairs", len(keypairs))
         return keypairs
 
@@ -235,6 +270,13 @@ class KeyPairService(BaseService):
         keypairs = self.list()
         self.data['keypairs'] = keypairs
 
+    def save_state(self):
+        keypairs = self.list()
+        self.data['keypairs'] = {}
+        for keypair in keypairs:
+            keypair = keypair['keypair']
+            self.data['keypairs'][keypair['name']] = keypair
+
 
 class VolumeService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -244,6 +286,10 @@ class VolumeService(BaseService):
     def list(self):
         client = self.client
         vols = client.list_volumes()['volumes']
+        if not self.is_save_state:
+            # recreate list removing saved volumes
+            vols = [vol for vol in vols if vol['id']
+                    not in self.saved_state_json['volumes'].keys()]
         LOG.debug("List count, %s Volumes", len(vols))
         return vols
 
@@ -259,6 +305,12 @@ class VolumeService(BaseService):
     def dry_run(self):
         vols = self.list()
         self.data['volumes'] = vols
+
+    def save_state(self):
+        vols = self.list()
+        self.data['volumes'] = {}
+        for vol in vols:
+            self.data['volumes'][vol['id']] = vol['name']
 
 
 class VolumeQuotaService(BaseService):
@@ -299,9 +351,9 @@ class NovaQuotaService(BaseService):
 
 
 # Begin network service classes
-class NetworkService(BaseService):
+class BaseNetworkService(BaseService):
     def __init__(self, manager, **kwargs):
-        super(NetworkService, self).__init__(kwargs)
+        super(BaseNetworkService, self).__init__(kwargs)
         self.networks_client = manager.networks_client
         self.subnets_client = manager.subnets_client
         self.ports_client = manager.ports_client
@@ -318,10 +370,18 @@ class NetworkService(BaseService):
         return [item for item in item_list if item['network_id']
                 not in CONF_NETWORKS]
 
+
+class NetworkService(BaseNetworkService):
+
     def list(self):
         client = self.networks_client
         networks = client.list_networks(**self.tenant_filter)
         networks = networks['networks']
+
+        if not self.is_save_state:
+            # recreate list removing saved networks
+            networks = [network for network in networks if network['id']
+                        not in self.saved_state_json['networks'].keys()]
         # filter out networks declared in tempest.conf
         if self.is_preserve:
             networks = [network for network in networks
@@ -342,18 +402,29 @@ class NetworkService(BaseService):
         networks = self.list()
         self.data['networks'] = networks
 
+    def save_state(self):
+        networks = self.list()
+        self.data['networks'] = {}
+        for network in networks:
+            self.data['networks'][network['id']] = network
 
-class NetworkFloatingIpService(NetworkService):
+
+class NetworkFloatingIpService(BaseNetworkService):
 
     def list(self):
         client = self.floating_ips_client
         flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
+
+        if not self.is_save_state:
+            # recreate list removing saved flips
+            flips = [flip for flip in flips if flip['id']
+                     not in self.saved_state_json['floatingips'].keys()]
         LOG.debug("List count, %s Network Floating IPs", len(flips))
         return flips
 
     def delete(self):
-        client = self.client
+        client = self.floating_ips_client
         flips = self.list()
         for flip in flips:
             try:
@@ -363,15 +434,26 @@ class NetworkFloatingIpService(NetworkService):
 
     def dry_run(self):
         flips = self.list()
-        self.data['floating_ips'] = flips
+        self.data['floatingips'] = flips
+
+    def save_state(self):
+        flips = self.list()
+        self.data['floatingips'] = {}
+        for flip in flips:
+            self.data['floatingips'][flip['id']] = flip
 
 
-class NetworkRouterService(NetworkService):
+class NetworkRouterService(BaseNetworkService):
 
     def list(self):
         client = self.routers_client
         routers = client.list_routers(**self.tenant_filter)
         routers = routers['routers']
+
+        if not self.is_save_state:
+            # recreate list removing saved routers
+            routers = [router for router in routers if router['id']
+                       not in self.saved_state_json['routers'].keys()]
         if self.is_preserve:
             routers = [router for router in routers
                        if router['id'] != CONF_PUB_ROUTER]
@@ -399,6 +481,12 @@ class NetworkRouterService(NetworkService):
         routers = self.list()
         self.data['routers'] = routers
 
+    def save_state(self):
+        routers = self.list()
+        self.data['routers'] = {}
+        for router in routers:
+            self.data['routers'][router['id']] = router['name']
+
 
 class NetworkMeteringLabelRuleService(NetworkService):
 
@@ -407,6 +495,11 @@ class NetworkMeteringLabelRuleService(NetworkService):
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
+
+        if not self.is_save_state:
+            saved_rules = self.saved_state_json['metering_label_rules'].keys()
+            # recreate list removing saved rules
+            rules = [rule for rule in rules if rule['id'] not in saved_rules]
         LOG.debug("List count, %s Metering Label Rules", len(rules))
         return rules
 
@@ -421,16 +514,27 @@ class NetworkMeteringLabelRuleService(NetworkService):
 
     def dry_run(self):
         rules = self.list()
-        self.data['rules'] = rules
+        self.data['metering_label_rules'] = rules
+
+    def save_state(self):
+        rules = self.list()
+        self.data['metering_label_rules'] = {}
+        for rule in rules:
+            self.data['metering_label_rules'][rule['id']] = rule
 
 
-class NetworkMeteringLabelService(NetworkService):
+class NetworkMeteringLabelService(BaseNetworkService):
 
     def list(self):
         client = self.metering_labels_client
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
+
+        if not self.is_save_state:
+            # recreate list removing saved labels
+            labels = [label for label in labels if label['id']
+                      not in self.saved_state_json['metering_labels'].keys()]
         LOG.debug("List count, %s Metering Labels", len(labels))
         return labels
 
@@ -445,10 +549,16 @@ class NetworkMeteringLabelService(NetworkService):
 
     def dry_run(self):
         labels = self.list()
-        self.data['labels'] = labels
+        self.data['metering_labels'] = labels
+
+    def save_state(self):
+        labels = self.list()
+        self.data['metering_labels'] = {}
+        for label in labels:
+            self.data['metering_labels'][label['id']] = label['name']
 
 
-class NetworkPortService(NetworkService):
+class NetworkPortService(BaseNetworkService):
 
     def list(self):
         client = self.ports_client
@@ -457,6 +567,10 @@ class NetworkPortService(NetworkService):
                  if port["device_owner"] == "" or
                  port["device_owner"].startswith("compute:")]
 
+        if not self.is_save_state:
+            # recreate list removing saved ports
+            ports = [port for port in ports if port['id']
+                     not in self.saved_state_json['ports'].keys()]
         if self.is_preserve:
             ports = self._filter_by_conf_networks(ports)
 
@@ -476,8 +590,14 @@ class NetworkPortService(NetworkService):
         ports = self.list()
         self.data['ports'] = ports
 
+    def save_state(self):
+        ports = self.list()
+        self.data['ports'] = {}
+        for port in ports:
+            self.data['ports'][port['id']] = port['name']
 
-class NetworkSecGroupService(NetworkService):
+
+class NetworkSecGroupService(BaseNetworkService):
     def list(self):
         client = self.security_groups_client
         filter = self.tenant_filter
@@ -486,31 +606,48 @@ class NetworkSecGroupService(NetworkService):
                      client.list_security_groups(**filter)['security_groups']
                      if secgroup['name'] != 'default']
 
+        if not self.is_save_state:
+            # recreate list removing saved security_groups
+            secgroups = [secgroup for secgroup in secgroups if secgroup['id']
+                         not in self.saved_state_json['security_groups'].keys()
+                         ]
         if self.is_preserve:
-            secgroups = self._filter_by_conf_networks(secgroups)
+            secgroups = [secgroup for secgroup in secgroups
+                         if secgroup['security_group_rules'][0]['project_id']
+                         not in CONF_PROJECTS]
         LOG.debug("List count, %s security_groups", len(secgroups))
         return secgroups
 
     def delete(self):
-        client = self.client
+        client = self.security_groups_client
         secgroups = self.list()
         for secgroup in secgroups:
             try:
-                client.delete_secgroup(secgroup['id'])
+                client.delete_security_group(secgroup['id'])
             except Exception:
                 LOG.exception("Delete security_group exception.")
 
     def dry_run(self):
         secgroups = self.list()
-        self.data['secgroups'] = secgroups
+        self.data['security_groups'] = secgroups
+
+    def save_state(self):
+        secgroups = self.list()
+        self.data['security_groups'] = {}
+        for secgroup in secgroups:
+            self.data['security_groups'][secgroup['id']] = secgroup['name']
 
 
-class NetworkSubnetService(NetworkService):
+class NetworkSubnetService(BaseNetworkService):
 
     def list(self):
         client = self.subnets_client
         subnets = client.list_subnets(**self.tenant_filter)
         subnets = subnets['subnets']
+        if not self.is_save_state:
+            # recreate list removing saved subnets
+            subnets = [subnet for subnet in subnets if subnet['id']
+                       not in self.saved_state_json['subnets'].keys()]
         if self.is_preserve:
             subnets = self._filter_by_conf_networks(subnets)
         LOG.debug("List count, %s Subnets", len(subnets))
@@ -528,6 +665,12 @@ class NetworkSubnetService(NetworkService):
     def dry_run(self):
         subnets = self.list()
         self.data['subnets'] = subnets
+
+    def save_state(self):
+        subnets = self.list()
+        self.data['subnets'] = {}
+        for subnet in subnets:
+            self.data['subnets'][subnet['id']] = subnet['name']
 
 
 # begin global services

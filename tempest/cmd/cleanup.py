@@ -197,7 +197,7 @@ class TempestCleanup(command.Command):
             **kwargs))
         kwargs = {'data': project_data,
                   'is_dry_run': is_dry_run,
-                  'saved_state_json': None,
+                  'saved_state_json': self.json_data,
                   'is_preserve': is_preserve,
                   'is_save_state': False,
                   'project_id': project_id}
@@ -302,6 +302,10 @@ class TempestCleanup(command.Command):
                   'is_preserve': False,
                   'is_save_state': True}
         for service in self.global_services:
+            svc = service(admin_mgr, **kwargs)
+            svc.run()
+
+        for service in self.project_services:
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
