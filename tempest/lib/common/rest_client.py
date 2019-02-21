@@ -282,7 +282,7 @@ class RestClient(object):
     def get(self, url, headers=None, extra_headers=False):
         """Send a HTTP GET request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the get request to
         :param dict headers: The headers to use for the request
         :param bool extra_headers: Boolean value than indicates if the headers
                                    returned by the get_headers() method are to
@@ -297,7 +297,7 @@ class RestClient(object):
     def delete(self, url, headers=None, body=None, extra_headers=False):
         """Send a HTTP DELETE request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the delete request to
         :param dict headers: The headers to use for the request
         :param dict body: the request body
         :param bool extra_headers: Boolean value than indicates if the headers
@@ -313,7 +313,7 @@ class RestClient(object):
     def patch(self, url, body, headers=None, extra_headers=False):
         """Send a HTTP PATCH request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the patch request to
         :param dict body: the request body
         :param dict headers: The headers to use for the request
         :param bool extra_headers: Boolean value than indicates if the headers
@@ -329,7 +329,7 @@ class RestClient(object):
     def put(self, url, body, headers=None, extra_headers=False, chunked=False):
         """Send a HTTP PUT request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the put request to
         :param dict body: the request body
         :param dict headers: The headers to use for the request
         :param bool extra_headers: Boolean value than indicates if the headers
@@ -346,7 +346,7 @@ class RestClient(object):
     def head(self, url, headers=None, extra_headers=False):
         """Send a HTTP HEAD request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the head request to
         :param dict headers: The headers to use for the request
         :param bool extra_headers: Boolean value than indicates if the headers
                                    returned by the get_headers() method are to
@@ -361,7 +361,7 @@ class RestClient(object):
     def copy(self, url, headers=None, extra_headers=False):
         """Send a HTTP COPY request using keystone service catalog and auth
 
-        :param str url: the relative url to send the post request to
+        :param str url: the relative url to send the copy request to
         :param dict headers: The headers to use for the request
         :param bool extra_headers: Boolean value than indicates if the headers
                                    returned by the get_headers() method are to
