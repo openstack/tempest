@@ -21,7 +21,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
-class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
+class TestDefaultProjectId(base.BaseIdentityV3AdminTest):
 
     @classmethod
     def setup_credentials(cls):
@@ -57,9 +57,10 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
         # create a user in the domain, with the previous project as his
         # default project
         user_name = data_utils.rand_name('user')
+        user_pass = data_utils.rand_password()
         user_body = self.users_client.create_user(
             name=user_name,
-            password=user_name,
+            password=user_pass,
             domain_id=dom_id,
             default_project_id=proj_id)['user']
         user_id = user_body['id']
@@ -78,7 +79,7 @@ class TestDefaultProjectId (base.BaseIdentityV3AdminTest):
 
         # create a new client with user's credentials (NOTE: unscoped token!)
         creds = auth.KeystoneV3Credentials(username=user_name,
-                                           password=user_name,
+                                           password=user_pass,
                                            user_domain_name=dom_name)
         auth_provider = clients.get_auth_provider(creds)
         creds = auth_provider.fill_credentials()
