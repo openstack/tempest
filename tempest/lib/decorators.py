@@ -136,9 +136,16 @@ def attr(**kwargs):
 
     This decorator applies the testtools.testcase.attr if it is in the list of
     attributes to testtools we want to apply.
+
+    :param condition: Optional condition which if true will apply the attr. If
+        a condition is specified which is false the attr will not be applied to
+        the test function. If not specified, the attr is always applied.
     """
 
     def decorator(f):
+        # Check to see if the attr should be conditional applied.
+        if 'condition' in kwargs and not kwargs.get('condition'):
+            return f
         if 'type' in kwargs and isinstance(kwargs['type'], str):
             f = testtools.testcase.attr(kwargs['type'])(f)
         elif 'type' in kwargs and isinstance(kwargs['type'], list):

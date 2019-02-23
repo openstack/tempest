@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The ``tempest.lib.decorators.attr`` decorator now supports a ``condition``
+    kwarg which can be used to conditionally apply the attr to the test
+    function if the condition evaluates to True.
