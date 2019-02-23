@@ -65,6 +65,8 @@ class BaseAttachVolumeTest(base.BaseV2ComputeTest):
 class AttachVolumeTestJSON(BaseAttachVolumeTest):
 
     @decorators.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
+    # This test is conditionally marked slow if SSH validation is enabled.
+    @decorators.attr(type='slow', condition=CONF.validation.run_validation)
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
