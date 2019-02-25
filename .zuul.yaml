@@ -279,8 +279,6 @@
 - job:
     name: tempest-slow
     parent: tempest-multinode-full
-    branches:
-      - master
     description: |
       This multinode integration job will run all the tests tagged as slow.
       It enables the lvm multibackend setup to cover few scenario tests.
