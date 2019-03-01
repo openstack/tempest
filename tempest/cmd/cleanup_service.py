@@ -362,6 +362,7 @@ class BaseNetworkService(BaseService):
         self.metering_label_rules_client = manager.metering_label_rules_client
         self.security_groups_client = manager.security_groups_client
         self.routers_client = manager.routers_client
+        self.subnetpools_client = manager.subnetpools_client
 
     def _filter_by_conf_networks(self, item_list):
         if not item_list or not all(('network_id' in i for i in item_list)):
@@ -673,6 +674,41 @@ class NetworkSubnetService(BaseNetworkService):
             self.data['subnets'][subnet['id']] = subnet['name']
 
 
+class NetworkSubnetPoolsService(BaseNetworkService):
+
+    def list(self):
+        client = self.subnetpools_client
+        pools = client.list_subnetpools(**self.tenant_filter)['subnetpools']
+        if not self.is_save_state:
+            # recreate list removing saved subnet pools
+            pools = [pool for pool in pools if pool['id']
+                     not in self.saved_state_json['subnetpools'].keys()]
+        if self.is_preserve:
+            pools = [pool for pool in pools if pool['project_id']
+                     not in CONF_PROJECTS]
+        LOG.debug("List count, %s Subnet Pools", len(pools))
+        return pools
+
+    def delete(self):
+        client = self.subnetpools_client
+        pools = self.list()
+        for pool in pools:
+            try:
+                client.delete_subnetpool(pool['id'])
+            except Exception:
+                LOG.exception("Delete Subnet Pool exception.")
+
+    def dry_run(self):
+        pools = self.list()
+        self.data['subnetpools'] = pools
+
+    def save_state(self):
+        pools = self.list()
+        self.data['subnetpools'] = {}
+        for pool in pools:
+            self.data['subnetpools'][pool['id']] = pool['name']
+
+
 # begin global services
 class FlavorService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -931,6 +967,7 @@ def get_project_cleanup_services():
         project_services.append(NetworkSubnetService)
         project_services.append(NetworkService)
         project_services.append(NetworkSecGroupService)
+        project_services.append(NetworkSubnetPoolsService)
     if IS_CINDER:
         project_services.append(SnapshotService)
         project_services.append(VolumeService)

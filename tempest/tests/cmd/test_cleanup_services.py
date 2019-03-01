@@ -104,6 +104,7 @@ class BaseCmdServiceTests(MockFunctionsBase):
                                 cleanup_service.CONF_PROJECTS[0],
                             "ports": cleanup_service.CONF_PUB_NETWORK,
                             "routers": cleanup_service.CONF_PUB_ROUTER,
+                            "subnetpools": cleanup_service.CONF_PROJECTS[0],
                             }
 
     saved_state = {
@@ -139,7 +140,8 @@ class BaseCmdServiceTests(MockFunctionsBase):
         "metering_labels": {u'723b346ce866-4c7q': u'saved-label'},
         "ports": {u'aa74aa4v-741a': u'saved-port'},
         "security_groups": {u'7q844add-3697': u'saved-sec-group'},
-        "subnets": {u'55ttda4a-2584': u'saved-subnet'}
+        "subnets": {u'55ttda4a-2584': u'saved-subnet'},
+        "subnetpools": {u'8acf64c1-43fc': u'saved-subnet-pool'}
     }
     # Mocked methods
     get_method = 'tempest.lib.common.rest_client.RestClient.get'
@@ -1093,6 +1095,74 @@ class TestNetworkSubnetService(BaseCmdServiceTests):
                 "service_types": [],
                 "tags": ["tag1,tag2"],
                 "updated_at": "2018-10-10T14:35:34Z"
+            })
+        self._test_is_preserve_true([(self.get_method, self.response, 200)])
+
+
+class TestNetworkSubnetPoolsService(BaseCmdServiceTests):
+
+    service_class = 'NetworkSubnetPoolsService'
+    service_name = 'subnetpools'
+    response = {
+        "subnetpools": [
+            {
+                "min_prefixlen": "64",
+                "default_prefixlen": "64",
+                "id": "03f761e6-eee0-43fc-a921-8acf64c14988",
+                "max_prefixlen": "64",
+                "name": "my-subnet-pool-ipv6",
+                "is_default": False,
+                "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
+                "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
+                "prefixes": [
+                    "2001:db8:0:2::/64",
+                    "2001:db8::/63"
+                ],
+                "ip_version": 6,
+                "shared": False,
+                "description": "",
+                "created_at": "2016-03-08T20:19:41",
+                "updated_at": "2016-03-08T20:19:41",
+                "revision_number": 2,
+                "tags": ["tag1,tag2"]
+            },
+            {
+                "id": "8acf64c1-43fc",
+                "name": "saved-subnet-pool"
+            }
+        ]
+    }
+
+    def test_delete_fail(self):
+        delete_mock = [(self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock, fail=True)
+
+    def test_delete_pass(self):
+        delete_mock = [(self.get_method, self.response, 200),
+                       (self.delete_method, None, 204),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock)
+
+    def test_dry_run(self):
+        dry_mock = [(self.get_method, self.response, 200),
+                    (self.delete_method, "delete", None)]
+        self._test_dry_run_true(dry_mock)
+
+    def test_save_state(self):
+        self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_preserve_list(self):
+        self.response['subnetpools'].append(
+            {
+                "min_prefixlen": "64",
+                "default_prefixlen": "64",
+                "id": "9acf64c1-43fc",
+                "name": "preserve-pool",
+                "project_id": cleanup_service.CONF_PROJECTS[0],
+                "created_at": "2016-03-08T20:19:41",
+                "updated_at": "2016-03-08T20:19:41"
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
