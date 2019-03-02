@@ -101,3 +101,6 @@ delete_tag = {'status_code': [204]}
 list_servers = copy.deepcopy(servers219.list_servers)
 show_server_diagnostics = copy.deepcopy(servers219.show_server_diagnostics)
 get_remote_consoles = copy.deepcopy(servers219.get_remote_consoles)
+attach_volume = copy.deepcopy(servers219.attach_volume)
+show_volume_attachment = copy.deepcopy(servers219.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers219.list_volume_attachments)

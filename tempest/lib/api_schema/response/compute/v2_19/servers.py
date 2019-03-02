@@ -58,3 +58,6 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 list_servers = copy.deepcopy(serversv216.list_servers)
 show_server_diagnostics = copy.deepcopy(serversv216.show_server_diagnostics)
 get_remote_consoles = copy.deepcopy(serversv216.get_remote_consoles)
+attach_volume = copy.deepcopy(serversv216.attach_volume)
+show_volume_attachment = copy.deepcopy(serversv216.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(serversv216.list_volume_attachments)
