@@ -252,6 +252,7 @@ class TempestRun(command.Command):
                             default=False)
         # execution args
         parser.add_argument('--concurrency', '-w',
+                            type=int,
                             help="The number of workers to use, defaults to "
                                  "the number of cpus")
         parallel = parser.add_mutually_exclusive_group()
