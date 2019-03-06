@@ -153,18 +153,3 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         expected_data = {'name': d_name, 'enabled': True}
         self.assertEqual('', domain['description'])
         self.assertDictContainsSubset(expected_data, domain)
-
-
-class DefaultDomainTestJSON(base.BaseIdentityV3AdminTest):
-
-    @classmethod
-    def resource_setup(cls):
-        cls.domain_id = CONF.identity.default_domain_id
-        super(DefaultDomainTestJSON, cls).resource_setup()
-
-    @decorators.attr(type='smoke')
-    @decorators.idempotent_id('17a5de24-e6a0-4e4a-a9ee-d85b6e5612b5')
-    def test_default_domain_exists(self):
-        domain = self.domains_client.show_domain(self.domain_id)['domain']
-
-        self.assertTrue(domain['enabled'])
