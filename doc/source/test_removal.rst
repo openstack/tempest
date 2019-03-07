@@ -128,8 +128,9 @@ to outline any concerns on the before the meeting. To give ample time for
 people to respond to removal proposals please add things to the agenda by the
 Monday before the meeting.
 
-The other option is to raise the removal on the openstack-dev mailing list.
-(for example see: http://lists.openstack.org/pipermail/openstack-dev/2016-February/086218.html )
+The other option is to raise the removal on the openstack-discuss mailing list.
+(for example see: http://lists.openstack.org/pipermail/openstack-dev/2016-February/086218.html
+or http://lists.openstack.org/pipermail/openstack-discuss/2019-March/003574.html )
 This will raise the issue to the wider community and attract at least the same
 (most likely more) attention than discussing it during the irc meeting. The
 only downside is that it might take more time to get a response, given the
