@@ -26,7 +26,7 @@ def get_project_by_name(client, project_name):
         if project['name'] == project_name:
             return project
     raise lib_exc.NotFound('No such project(%s) in %s' % (project_name,
-                           projects))
+                                                          projects))
 
 
 def get_tenant_by_name(client, tenant_name):

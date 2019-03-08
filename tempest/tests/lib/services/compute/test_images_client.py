@@ -186,15 +186,19 @@ class TestImagesClient(base.BaseServiceTest):
     def _test_resource_deleted(self, bytes_body=False):
         params = {"id": self.FAKE_IMAGE_ID}
         expected_op = self.FAKE_IMAGE_DATA['show']
-        self.useFixture(fixtures.MockPatch('tempest.lib.services.compute'
-                        '.images_client.ImagesClient.show_image',
-                                           side_effect=lib_exc.NotFound))
+        self.useFixture(
+            fixtures.MockPatch(
+                'tempest.lib.services.compute'
+                '.images_client.ImagesClient.show_image',
+                side_effect=lib_exc.NotFound))
         self.assertEqual(True, self.client.is_resource_deleted(**params))
         tempdata = copy.deepcopy(self.FAKE_IMAGE_DATA['show'])
         tempdata['image']['id'] = None
-        self.useFixture(fixtures.MockPatch('tempest.lib.services.compute'
-                        '.images_client.ImagesClient.show_image',
-                                           return_value=expected_op))
+        self.useFixture(
+            fixtures.MockPatch(
+                'tempest.lib.services.compute'
+                '.images_client.ImagesClient.show_image',
+                return_value=expected_op))
         self.assertEqual(False, self.client.is_resource_deleted(**params))
 
     def test_list_images_with_str_body(self):

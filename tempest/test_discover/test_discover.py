@@ -37,7 +37,7 @@ def load_tests(loader, tests, pattern):
                                            top_level_dir=base_path))
         else:
             suite.addTests(loader.discover(full_test_dir, pattern=pattern,
-                           top_level_dir=base_path))
+                                           top_level_dir=base_path))
 
     plugin_load_tests = ext_plugins.get_plugin_load_tests_tuple()
     if not plugin_load_tests:

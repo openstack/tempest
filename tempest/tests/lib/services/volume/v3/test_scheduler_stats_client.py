@@ -62,7 +62,7 @@ class TestSchedulerStatsClient(base.BaseServiceTest):
             resp_body = self.FAKE_POOLS_LIST
         else:
             resp_body = {'pools': [{'name': pool['name']}
-                         for pool in self.FAKE_POOLS_LIST['pools']]}
+                                   for pool in self.FAKE_POOLS_LIST['pools']]}
         self.check_service_client_function(
             self.client.list_pools,
             'tempest.lib.common.rest_client.RestClient.get',

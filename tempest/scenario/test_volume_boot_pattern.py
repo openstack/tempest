@@ -86,7 +86,6 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                           'Cinder volume snapshots are disabled')
     @utils.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
-
         """This test case attempts to reproduce the following steps:
 
         * Create in Cinder some bootable volume importing a Glance image

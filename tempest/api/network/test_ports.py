@@ -107,7 +107,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         address = self.cidr
         address.prefixlen = self.mask_bits
         if ((address.version == 4 and address.prefixlen >= 30) or
-           (address.version == 6 and address.prefixlen >= 126)):
+            (address.version == 6 and address.prefixlen >= 126)):
             msg = ("Subnet %s isn't large enough for the test" % address.cidr)
             raise exceptions.InvalidConfiguration(msg)
         allocation_pools = {'allocation_pools': [{'start': str(address[2]),

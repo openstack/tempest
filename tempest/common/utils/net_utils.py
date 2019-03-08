@@ -19,7 +19,6 @@ from tempest.lib import exceptions as lib_exc
 
 def get_unused_ip_addresses(ports_client, subnets_client,
                             network_id, subnet_id, count):
-
     """Return a list with the specified number of unused IP addresses
 
     This method uses the given ports_client to find the specified number of

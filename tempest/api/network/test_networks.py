@@ -317,7 +317,7 @@ class NetworksTest(BaseNetworkTestResources):
 
         subnet = self.create_subnet(
             network, **self.subnet_dict(['gateway', 'host_routes',
-                                        'dns_nameservers',
+                                         'dns_nameservers',
                                          'allocation_pools']))
         subnet_id = subnet['id']
         new_gateway = str(netaddr.IPAddress(

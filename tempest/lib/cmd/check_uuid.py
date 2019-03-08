@@ -110,7 +110,7 @@ class TestChecker(object):
             for item in files:
                 if item.endswith('.py'):
                     module_name = '.'.join((root_package,
-                                           os.path.splitext(item)[0]))
+                                            os.path.splitext(item)[0]))
                     if not module_name.startswith(UNIT_TESTS_EXCLUDE):
                         modules.append(module_name)
         return modules

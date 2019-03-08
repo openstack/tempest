@@ -172,7 +172,7 @@ class FlavorsClient(base_compute_client.BaseComputeClient):
         https://developer.openstack.org/api-ref/compute/#show-an-extra-spec-for-a-flavor
         """
         resp, body = self.get('flavors/%s/os-extra_specs/%s' % (flavor_id,
-                              key))
+                                                                key))
         body = json.loads(body)
         self.validate_response(
             schema_extra_specs.set_get_flavor_extra_specs_key,
