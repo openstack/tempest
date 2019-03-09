@@ -78,11 +78,11 @@ Output file JSON structure
 import argparse
 import collections
 import io
-import json
 import os
 import re
 import sys
 
+from oslo_serialization import jsonutils as json
 import subunit
 import testtools
 

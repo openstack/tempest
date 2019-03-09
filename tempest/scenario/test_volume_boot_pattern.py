@@ -11,7 +11,7 @@
 #    under the License.
 
 from oslo_log import log as logging
-from oslo_serialization import jsonutils
+from oslo_serialization import jsonutils as json
 import testtools
 
 from tempest.common import utils
@@ -265,7 +265,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         bdms = image.get('block_device_mapping')
         if not bdms:
             bdms = image['properties']['block_device_mapping']
-        bdms = jsonutils.loads(bdms)
+        bdms = json.loads(bdms)
         snapshot_id = bdms[0]['snapshot_id']
         self._delete_snapshot(snapshot_id)
 

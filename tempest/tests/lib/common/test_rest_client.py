@@ -13,10 +13,10 @@
 #    under the License.
 
 import copy
-import json
 
 import fixtures
 import jsonschema
+from oslo_serialization import jsonutils as json
 import six
 
 from tempest.lib.common import http
