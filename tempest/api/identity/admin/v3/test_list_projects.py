@@ -13,11 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
@@ -26,6 +29,9 @@ class BaseListProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def _list_projects_with_params(self, included, excluded, params, key):
         # Validate that projects in ``included`` belongs to the projects
         # returned that match ``params`` but not projects in ``excluded``
+        all_projects = self.projects_client.list_projects()['projects']
+        LOG.debug("Complete list of projects available in keystone: %s",
+                  all_projects)
         body = self.projects_client.list_projects(params)['projects']
         for p in included:
             self.assertIn(p[key], map(lambda x: x[key], body))
@@ -39,13 +45,12 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
     def resource_setup(cls):
         super(ListProjectsTestJSON, cls).resource_setup()
         cls.project_ids = list()
-        # Create a domain
-        cls.domain = cls.create_domain()
+        cls.domain_id = cls.os_admin.credentials.domain_id
         # Create project with domain
         cls.p1_name = data_utils.rand_name('project')
         cls.p1 = cls.projects_client.create_project(
             cls.p1_name, enabled=False,
-            domain_id=cls.domain['id'])['project']
+            domain_id=cls.domain_id)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p1['id'])
         cls.project_ids.append(cls.p1['id'])
