@@ -146,7 +146,7 @@ def attr(**kwargs):
         # Check to see if the attr should be conditional applied.
         if 'condition' in kwargs and not kwargs.get('condition'):
             return f
-        if 'type' in kwargs and isinstance(kwargs['type'], str):
+        if 'type' in kwargs and isinstance(kwargs['type'], six.string_types):
             f = testtools.testcase.attr(kwargs['type'])(f)
         elif 'type' in kwargs and isinstance(kwargs['type'], list):
             for attr in kwargs['type']:
