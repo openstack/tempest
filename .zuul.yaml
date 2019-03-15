@@ -294,6 +294,13 @@
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
         ENABLE_VOLUME_MULTIATTACH: true
       tempest_concurrency: 2
+    group-vars:
+      # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
+      # the controller and subnode prior to Rocky so we have to make sure the
+      # variable is set in both locations.
+      subnode:
+        devstack_localrc:
+          ENABLE_VOLUME_MULTIATTACH: true
 
 - job:
     name: tempest-slow-py3
