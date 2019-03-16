@@ -202,8 +202,8 @@ class TempestRun(command.Command):
             svc.run()
 
         with open(SAVED_STATE_JSON, 'w+') as f:
-            f.write(json.dumps(data,
-                    sort_keys=True, indent=2, separators=(',', ': ')))
+            f.write(json.dumps(data, sort_keys=True,
+                               indent=2, separators=(',', ': ')))
 
     def get_parser(self, prog_name):
         parser = super(TempestRun, self).get_parser(prog_name)

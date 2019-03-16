@@ -109,8 +109,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             return_value=(rest_client.ResponseBody
                           (200,
                            {'roles': [{'id': id, 'name': name},
-                            {'id': '1', 'name': 'FakeRole'},
-                            {'id': '2', 'name': 'Member'}]}))))
+                                      {'id': '1', 'name': 'FakeRole'},
+                                      {'id': '2', 'name': 'Member'}]}))))
         return roles_fix
 
     def _mock_list_2_roles(self):
@@ -120,8 +120,8 @@ class TestDynamicCredentialProvider(base.TestCase):
             return_value=(rest_client.ResponseBody
                           (200,
                            {'roles': [{'id': '1234', 'name': 'role1'},
-                            {'id': '1', 'name': 'FakeRole'},
-                            {'id': '12345', 'name': 'role2'}]}))))
+                                      {'id': '1', 'name': 'FakeRole'},
+                                      {'id': '12345', 'name': 'role2'}]}))))
         return roles_fix
 
     def _mock_assign_user_role(self):

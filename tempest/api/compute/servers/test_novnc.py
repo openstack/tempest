@@ -143,7 +143,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         data_length = len(data) if data is not None else 0
         self.assertFalse(data_length <= 24 or
                          data_length != (struct.unpack(">L",
-                                         data[20:24])[0] + 24),
+                                                       data[20:24])[0] + 24),
                          'Server initialization was not the right format.')
         # Since the rest of the data on the screen is arbitrary, we will
         # close the socket and end our validation of the data at this point
@@ -151,7 +151,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         # initialization was the right format
         self.assertFalse(data_length <= 24 or
                          data_length != (struct.unpack(">L",
-                                         data[20:24])[0] + 24))
+                                                       data[20:24])[0] + 24))
 
     def _validate_websocket_upgrade(self):
         self.assertTrue(

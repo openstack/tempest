@@ -54,7 +54,7 @@ def check_skip_with_microversion(test_min_version, test_max_version,
     config_min_version = api_version_request.APIVersionRequest(cfg_min_version)
     config_max_version = api_version_request.APIVersionRequest(cfg_max_version)
     if ((min_version > max_version) or
-       (config_min_version > config_max_version)):
+        (config_min_version > config_max_version)):
         msg = ("Test Class versions [%s - %s]. "
                "Configuration versions [%s - %s]."
                % (min_version.get_string(),

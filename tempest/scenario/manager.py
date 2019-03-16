@@ -166,7 +166,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         clients.security_groups_client.list_security_groups(
                         ).get('security_groups')
                     sec_dict = dict([(s['name'], s['id'])
-                                    for s in security_groups])
+                                     for s in security_groups])
 
                     sec_groups_names = [s['name'] for s in kwargs.pop(
                         'security_groups')]

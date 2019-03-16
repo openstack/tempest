@@ -48,6 +48,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     10. Check SSH connection to instance after reboot
 
     """
+
     def nova_show(self, server):
         got_server = (self.servers_client.show_server(server['id'])
                       ['server'])

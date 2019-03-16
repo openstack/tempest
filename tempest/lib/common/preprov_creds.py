@@ -273,7 +273,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             # NOTE(andreaf) Not all fields may be available on all credentials
             # so defaulting to None for that case.
             if all([getattr(creds, k, None) == hash_attributes.get(k, None) for
-                   k in init_attributes]):
+                    k in init_attributes]):
                 return _hash
         raise AttributeError('Invalid credentials %s' % creds)
 

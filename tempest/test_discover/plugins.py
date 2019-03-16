@@ -179,6 +179,7 @@ class TempestTestPluginManager(object):
     This class is used to manage the lifecycle of external tempest test
     plugins. It provides functions for getting set
     """
+
     def __init__(self):
         self.ext_plugins = stevedore.ExtensionManager(
             'tempest.test_plugins', invoke_on_load=True,

@@ -636,7 +636,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def list_virtual_interfaces(self, server_id):
         """List the virtual interfaces used in an instance."""
         resp, body = self.get('/'.join(['servers', server_id,
-                              'os-virtual-interfaces']))
+                                        'os-virtual-interfaces']))
         body = json.loads(body)
         self.validate_response(schema.list_virtual_interfaces, resp, body)
         return rest_client.ResponseBody(resp, body)

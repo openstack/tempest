@@ -48,6 +48,7 @@ class HackingTestCase(base.TestCase):
     just assertTrue if the check is expected to fail and assertFalse if it
     should pass.
     """
+
     def test_no_setup_teardown_class_for_tests(self):
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
             "  def setUpClass(cls):", './tempest/tests/fake_test.py'))

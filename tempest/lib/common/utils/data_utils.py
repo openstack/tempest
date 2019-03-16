@@ -170,7 +170,7 @@ def random_bytes(size=1024):
     :rtype: string
     """
     return b''.join([six.int2byte(random.randint(0, 255))
-                    for i in range(size)])
+                     for i in range(size)])
 
 
 # Courtesy of http://stackoverflow.com/a/312464

@@ -48,7 +48,7 @@ class TestTempestWorkspace(TestTempestWorkspaceBase):
         stdout, stderr = process.communicate()
         return_code = process.returncode
         msg = ("%s failed with:\nstdout: %s\nstderr: %s" % (' '.join(cmd),
-               stdout, stderr))
+                                                            stdout, stderr))
         self.assertEqual(return_code, expected, msg)
 
     def test_run_workspace_list(self):

@@ -310,8 +310,8 @@ class TempestCleanup(command.Command):
             svc.run()
 
         with open(SAVED_STATE_JSON, 'w+') as f:
-            f.write(json.dumps(data,
-                    sort_keys=True, indent=2, separators=(',', ': ')))
+            f.write(json.dumps(data, sort_keys=True,
+                               indent=2, separators=(',', ': ')))
 
     def _load_json(self, saved_state_json=SAVED_STATE_JSON):
         try:
