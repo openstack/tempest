@@ -351,7 +351,7 @@
     parent: tox
     description: |
       Run tempest plugin sanity check script using tox.
-    nodeset: ubuntu-xenial
+    nodeset: ubuntu-bionic
     vars:
       tox_envlist: plugin-sanity-check
     voting: false
