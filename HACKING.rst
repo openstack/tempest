@@ -28,6 +28,8 @@ Tempest Specific Commandments
 - [T117] Check negative tests have ``@decorators.attr(type=['negative'])``
   applied.
 
+It is recommended to use ``tox -eautopep8`` before submitting a patch.
+
 Test Data/Configuration
 -----------------------
 - Assume nothing about existing test data
