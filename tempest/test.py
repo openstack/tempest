@@ -28,6 +28,7 @@ from tempest.common import credentials_factory as credentials
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common import fixed_network
+from tempest.lib.common import profiler
 from tempest.lib.common import validation_resources as vr
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -230,6 +231,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # insert pdb breakpoint when pause_teardown is enabled
         if CONF.pause_teardown:
             BaseTestCase.insert_pdb_breakpoint()
+
+        if CONF.profiler.key:
+            profiler.disable()
 
     @classmethod
     def insert_pdb_breakpoint(cls):
@@ -608,6 +612,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
                                                    format=self.log_format,
                                                    level=None))
+        if CONF.profiler.key:
+            profiler.enable(CONF.profiler.key)
 
     @property
     def credentials_provider(self):
