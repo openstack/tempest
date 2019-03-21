@@ -103,6 +103,9 @@ from tempest.cmd import workspace
 from tempest.common import credentials_factory as credentials
 from tempest import config
 
+if six.PY2:
+    # Python 2 has not FileNotFoundError exception
+    FileNotFoundError = IOError
 
 CONF = config.CONF
 SAVED_STATE_JSON = "saved_state.json"
@@ -112,7 +115,12 @@ class TempestRun(command.Command):
 
     def _set_env(self, config_file=None):
         if config_file:
-            CONF.set_config_path(os.path.abspath(config_file))
+            if os.path.exists(os.path.abspath(config_file)):
+                CONF.set_config_path(os.path.abspath(config_file))
+            else:
+                raise FileNotFoundError(
+                    "Config file: %s doesn't exist" % config_file)
+
         # NOTE(mtreinish): This is needed so that stestr doesn't gobble up any
         # stacktraces on failure.
         if 'TESTR_PDB' in os.environ:

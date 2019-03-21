@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixed bug #1808473. ``tempest run`` CLI will error if a non-exist config file is
+    input to parameter --config-file. Earlier non-exist config value was silently
+    getting ignored and the default config file was used instead which used to give
+    false behavior to the user on using the passed config file.
