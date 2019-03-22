@@ -569,8 +569,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-neutron-full-ocata:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full:
             irrelevant-files: *tempest-irrelevant-files
         - interop-tempest-consistency:
