@@ -81,11 +81,11 @@ vitrage-tempest-plugin
 function clone_project() {
     if [ -e /usr/zuul-env/bin/zuul-cloner ]; then
         /usr/zuul-env/bin/zuul-cloner --cache-dir /opt/git \
-        git://git.openstack.org \
+        https://git.openstack.org \
         openstack/"$1"
 
     elif [ -e /usr/bin/git ]; then
-        /usr/bin/git clone git://git.openstack.org/openstack/"$1" \
+        /usr/bin/git clone https://git.openstack.org/openstack/"$1" \
         openstack/"$1"
 
     fi
