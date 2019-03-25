@@ -288,6 +288,17 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('in-use', vol_after_rebuild['status'])
         self.assertEqual(self.server_id,
                          vol_after_rebuild['attachments'][0]['server_id'])
+        if CONF.validation.run_validation:
+            validation_resources = self.get_class_validation_resources(
+                self.os_primary)
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server, validation_resources),
+                self.ssh_user,
+                password=None,
+                pkey=validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.client)
+            linux_client.validate_authentication()
 
     def _test_resize_server_confirm(self, server_id, stop=False):
         # The server's RAM and disk space should be modified to that of
