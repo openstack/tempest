@@ -160,15 +160,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         """
         self._test_reboot_server('HARD')
 
-    @decorators.skip_because(bug="1014647")
-    @decorators.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
-    def test_reboot_server_soft(self):
-        """Test soft rebooting server
-
-        The server should be signaled to reboot gracefully.
-        """
-        self._test_reboot_server('SOFT')
-
     @decorators.idempotent_id('1d1c9104-1b0a-11e7-a3d4-fa163e65f5ce')
     def test_remove_server_all_security_groups(self):
         """Test removing all security groups from server"""
