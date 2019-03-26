@@ -605,7 +605,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - nova-cells-v1:
             irrelevant-files: *tempest-irrelevant-files
-        - legacy-tempest-dsvm-nova-v20-api:
+        - nova-tempest-v2-api:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
             irrelevant-files: *tempest-irrelevant-files
