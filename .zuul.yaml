@@ -297,6 +297,16 @@
         c-bak: false
 
 - job:
+    name: tempest-full-stein
+    parent: tempest-full
+    override-checkout: stable/stein
+
+- job:
+    name: tempest-full-stein-py3
+    parent: tempest-full-py3
+    override-checkout: stable/stein
+
+- job:
     name: tempest-full-rocky
     parent: tempest-full
     nodeset: openstack-single-node-xenial
@@ -514,6 +524,10 @@
         - tempest-full-py3-ipv6:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-stein:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-stein-py3:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky-py3:
@@ -617,6 +631,8 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
+        - tempest-full-stein
+        - tempest-full-stein-py3
         - tempest-full-rocky
         - tempest-full-rocky-py3
         - tempest-full-queens
