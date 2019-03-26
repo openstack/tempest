@@ -69,7 +69,7 @@ title_underline ${name_col_len}
 i=0
 for plugin in ${sorted_plugins}; do
     i=$((i+1))
-    giturl="git://git.openstack.org/openstack/${plugin}"
+    giturl="https://git.openstack.org/openstack/${plugin}"
     gitlink="https://git.openstack.org/cgit/openstack/${plugin}"
     printf "%-3s %-${name_col_len}s %s\n" "$i" "${plugin}" "\`${giturl} <${gitlink}>\`__"
 done
