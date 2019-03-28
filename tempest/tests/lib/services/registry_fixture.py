@@ -37,8 +37,9 @@ class RegistryFixture(fixtures.Fixture):
     def __init__(self):
         """Initialise the registry fixture"""
         self.services = set(['compute', 'identity.v2', 'identity.v3',
-                             'image.v1', 'image.v2', 'network', 'volume.v1',
-                             'volume.v2', 'volume.v3', 'object-storage'])
+                             'image.v1', 'image.v2', 'network', 'placement',
+                             'volume.v1', 'volume.v2', 'volume.v3',
+                             'object-storage'])
 
     def _setUp(self):
         # Cleanup the registry
