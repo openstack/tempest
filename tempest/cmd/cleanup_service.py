@@ -471,12 +471,16 @@ class NetworkRouterService(BaseNetworkService):
         routers = self.list()
         for router in routers:
             rid = router['id']
-            try:
-                ports = [port for port
-                         in ports_client.list_ports(device_id=rid)['ports']
-                         if net_info.is_router_interface_port(port)]
-                for port in ports:
+            ports = [port for port
+                     in ports_client.list_ports(device_id=rid)['ports']
+                     if net_info.is_router_interface_port(port)]
+            for port in ports:
+                try:
                     client.remove_router_interface(rid, port_id=port['id'])
+                except Exception:
+                    LOG.exception("Delete Router Interface exception for "
+                                  "'port %s' of 'router %s'.", port['id'], rid)
+            try:
                 client.delete_router(rid)
             except Exception:
                 LOG.exception("Delete Router %s exception.", rid)
