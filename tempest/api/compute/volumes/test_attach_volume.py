@@ -126,7 +126,7 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
     @decorators.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
         # List volume attachment of the server
-        server, _ = self._create_server()
+        server, validation_resources = self._create_server()
         volume_1st = self.create_volume()
         attachment_1st = self.attach_volume(server, volume_1st)
         body = self.servers_client.list_volume_attachments(
@@ -148,6 +148,16 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
         body = self.servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(2, len(body))
+
+        if CONF.validation.run_validation:
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server, validation_resources),
+                self.image_ssh_user,
+                self.image_ssh_password,
+                validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.servers_client)
+            linux_client.validate_authentication()
 
         for attachment in [attachment_1st, attachment_2nd]:
             body = self.servers_client.show_volume_attachment(
