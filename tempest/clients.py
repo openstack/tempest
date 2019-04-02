@@ -44,6 +44,7 @@ class Manager(clients.ServiceClients):
         self._set_object_storage_clients()
         self._set_image_clients()
         self._set_network_clients()
+        self.placement_client = self.placement.PlacementClient()
         # TODO(andreaf) This is maintained for backward compatibility
         # with plugins, but it should removed eventually, since it was
         # never a stable interface and it's not useful anyways
