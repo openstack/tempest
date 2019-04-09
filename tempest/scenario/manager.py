@@ -324,6 +324,25 @@ class ScenarioTest(tempest.test.BaseTestCase):
             snapshot['id'])['snapshot']
         return snapshot
 
+    def _cleanup_volume_type(self, volume_type):
+        """Clean up a given volume type.
+
+        Ensuring all volumes associated to a type are first removed before
+        attempting to remove the type itself. This includes any image volume
+        cache volumes stored in a separate tenant to the original volumes
+        created from the type.
+        """
+        admin_volume_type_client = self.os_admin.volume_types_client_latest
+        admin_volumes_client = self.os_admin.volumes_client_latest
+        volumes = admin_volumes_client.list_volumes(
+            detail=True, params={'all_tenants': 1})['volumes']
+        type_name = volume_type['name']
+        for volume in [v for v in volumes if v['volume_type'] == type_name]:
+            test_utils.call_and_ignore_notfound_exc(
+                admin_volumes_client.delete_volume, volume['id'])
+            admin_volumes_client.wait_for_resource_deletion(volume['id'])
+        admin_volume_type_client.delete_volume_type(volume_type['id'])
+
     def create_volume_type(self, client=None, name=None, backend_name=None):
         if not client:
             client = self.os_admin.volume_types_client_latest
@@ -338,7 +357,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         volume_type = client.create_volume_type(
             name=randomized_name, extra_specs=extra_specs)['volume_type']
-        self.addCleanup(client.delete_volume_type, volume_type['id'])
+        self.addCleanup(self._cleanup_volume_type, volume_type)
         return volume_type
 
     def _create_loginable_secgroup_rule(self, secgroup_id=None):
