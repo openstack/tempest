@@ -510,7 +510,6 @@
         - tempest-full-parallel:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
-              - ^(test-|)requirements.txt$
               - ^.*\.rst$
               - ^doc/.*$
               - ^etc/.*$
@@ -544,7 +543,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
             irrelevant-files:
-              - ^(test-|)requirements.txt$
               - ^.*\.rst$
               - ^doc/.*$
               - ^etc/.*$
