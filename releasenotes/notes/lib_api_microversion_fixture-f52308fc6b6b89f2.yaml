@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    New library interface to set the API microversion on Service Clients.
+    ``APIMicroversionFixture,`` can be used to set the API microversion
+    on multiple services. This Fixture will take care of reseting the service
+    microversion to None once test is finished.
