@@ -16,6 +16,7 @@
 from tempest.api.network import base_security_groups as base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -49,8 +50,8 @@ class SecGroupTest(base.BaseSecGroupTest):
         )
 
         sec_group_rule = rule_create_body['security_group_rule']
-        self.addCleanup(self._delete_security_group_rule,
-                        sec_group_rule['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self._delete_security_group_rule, sec_group_rule['id'])
 
         expected = {'direction': direction, 'protocol': protocol,
                     'ethertype': ethertype, 'port_range_min': port_range_min,
@@ -104,6 +105,8 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertEqual(show_body['security_group']['name'], new_name)
         self.assertEqual(show_body['security_group']['description'],
                          new_description)
+        # Delete security group
+        self._delete_security_group(group_create_body['security_group']['id'])
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('cfb99e0e-7410-4a3d-8a0c-959a63ee77e9')
@@ -138,6 +141,8 @@ class SecGroupTest(base.BaseSecGroupTest):
                          for rule in rule_list_body['security_group_rules']]
             self.assertIn(rule_create_body['security_group_rule']['id'],
                           rule_list)
+            self._delete_security_group_rule(
+                rule_create_body['security_group_rule']['id'])
 
     @decorators.idempotent_id('87dfbcf9-1849-43ea-b1e4-efa3eeae9f71')
     def test_create_security_group_rule_with_additional_args(self):

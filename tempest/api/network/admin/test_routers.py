@@ -20,6 +20,7 @@ from tempest.common import identity
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -38,7 +39,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         # associate a cleanup with created routers to avoid quota limits
         router = self.create_router(name, admin_state_up,
                                     external_network_id, enable_snat)
-        self.addCleanup(self._cleanup_router, router)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self._cleanup_router, router)
         return router
 
     @classmethod
@@ -62,7 +64,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         name = data_utils.rand_name('router-')
         create_body = self.admin_routers_client.create_router(
             name=name, tenant_id=project_id)
-        self.addCleanup(self.admin_routers_client.delete_router,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_routers_client.delete_router,
                         create_body['router']['id'])
         self.assertEqual(project_id, create_body['router']['tenant_id'])
 
@@ -92,7 +95,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
                 'enable_snat': enable_snat}
             create_body = self.admin_routers_client.create_router(
                 name=name, external_gateway_info=external_gateway_info)
-            self.addCleanup(self.admin_routers_client.delete_router,
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.admin_routers_client.delete_router,
                             create_body['router']['id'])
             # Verify snat attributes after router creation
             self._verify_router_gateway(create_body['router']['id'],

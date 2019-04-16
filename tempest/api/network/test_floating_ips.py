@@ -18,6 +18,7 @@ from tempest.common import utils
 from tempest.common.utils import data_utils
 from tempest.common.utils import net_utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -77,8 +78,10 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             floating_network_id=self.ext_net_id,
             port_id=self.ports[0]['id'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
-                        created_floating_ip['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.floating_ips_client.delete_floatingip,
+            created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['tenant_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])
@@ -125,14 +128,19 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(updated_floating_ip['fixed_ip_address'])
         self.assertIsNone(updated_floating_ip['router_id'])
 
+        # Explicity test deletion of floating IP
+        self.floating_ips_client.delete_floatingip(created_floating_ip['id'])
+
     @decorators.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
     def test_floating_ip_delete_port(self):
         # Create a floating IP
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
-                        created_floating_ip['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.floating_ips_client.delete_floatingip,
+            created_floating_ip['id'])
         # Create a port
         port = self.ports_client.create_port(network_id=self.network['id'])
         created_port = port['port']
@@ -158,24 +166,36 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             floating_network_id=self.ext_net_id,
             port_id=self.ports[1]['id'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
-                        created_floating_ip['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.floating_ips_client.delete_floatingip,
+            created_floating_ip['id'])
         self.assertEqual(created_floating_ip['router_id'], self.router['id'])
         network_name = data_utils.rand_name(self.__class__.__name__)
         network2 = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network2['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.networks_client.delete_network,
+            network2['id'])
         subnet2 = self.create_subnet(network2)
-        self.addCleanup(self.subnets_client.delete_subnet, subnet2['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.subnets_client.delete_subnet, subnet2['id'])
         router2 = self.create_router(external_network_id=self.ext_net_id)
-        self.addCleanup(self.routers_client.delete_router, router2['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.routers_client.delete_router, router2['id'])
         self.create_router_interface(router2['id'], subnet2['id'])
-        self.addCleanup(self.routers_client.remove_router_interface,
-                        router2['id'], subnet_id=subnet2['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.routers_client.remove_router_interface,
+            router2['id'], subnet_id=subnet2['id'])
         port_other_router = self.create_port(network2)
-        self.addCleanup(self.ports_client.delete_port,
-                        port_other_router['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.ports_client.delete_port,
+            port_other_router['id'])
         # Associate floating IP to the other port on another router
         floating_ip = self.floating_ips_client.update_floatingip(
             created_floating_ip['id'],
@@ -194,8 +214,10 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             port_id=self.ports[1]['id'],
             fixed_ip_address=self.ports[1]['fixed_ips'][0]['ip_address'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
-                        created_floating_ip['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.floating_ips_client.delete_floatingip,
+            created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertEqual(created_floating_ip['fixed_ip_address'],
                          self.ports[1]['fixed_ips'][0]['ip_address'])
@@ -218,14 +240,16 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         body = self.ports_client.create_port(network_id=self.network['id'],
                                              fixed_ips=fixed_ips)
         port = body['port']
-        self.addCleanup(self.ports_client.delete_port, port['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.ports_client.delete_port, port['id'])
         # Create floating ip
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
             port_id=port['id'],
             fixed_ip_address=list_ips[0])
         floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.floating_ips_client.delete_floatingip,
                         floating_ip['id'])
         self.assertIsNotNone(floating_ip['id'])
         self.assertEqual(floating_ip['fixed_ip_address'], list_ips[0])

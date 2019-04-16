@@ -17,6 +17,7 @@ from tempest.api.network import base
 from tempest.common import identity
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -58,11 +59,13 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
         # Create two networks
         n1 = self.admin_networks_client.create_network(
             tenant_id=self.project['id'])
-        self.addCleanup(self.admin_networks_client.delete_network,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_networks_client.delete_network,
                         n1['network']['id'])
         n2 = self.admin_networks_client.create_network(
             tenant_id=self.project['id'])
-        self.addCleanup(self.admin_networks_client.delete_network,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_networks_client.delete_network,
                         n2['network']['id'])
 
         # Try to create a third network while the quota is two
@@ -71,5 +74,6 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
                 r"Quota exceeded for resources: \['network'\].*"):
             n3 = self.admin_networks_client.create_network(
                 tenant_id=self.project['id'])
-            self.addCleanup(self.admin_networks_client.delete_network,
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.admin_networks_client.delete_network,
                             n3['network']['id'])

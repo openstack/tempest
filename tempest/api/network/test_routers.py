@@ -20,6 +20,7 @@ from tempest.api.network import base
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -89,10 +90,11 @@ class RoutersTest(base.BaseNetworkTest):
         network_name = data_utils.rand_name(self.__class__.__name__)
         network = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.subnets_client.delete_subnet, subnet['id'])
         router = self.create_router()
         self.addCleanup(self.delete_router, router)
         # Add router interface with subnet id
@@ -114,8 +116,8 @@ class RoutersTest(base.BaseNetworkTest):
         network_name = data_utils.rand_name(self.__class__.__name__)
         network = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
         self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
         router = self.create_router()
@@ -126,7 +128,8 @@ class RoutersTest(base.BaseNetworkTest):
         interface = self.routers_client.add_router_interface(
             router['id'],
             port_id=port_body['port']['id'])
-        self.addCleanup(self.routers_client.remove_router_interface,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.routers_client.remove_router_interface,
                         router['id'], port_id=port_body['port']['id'])
         self.assertIn('subnet_id', interface.keys())
         self.assertIn('port_id', interface.keys())
@@ -135,6 +138,8 @@ class RoutersTest(base.BaseNetworkTest):
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
+        self.routers_client.remove_router_interface(
+            router['id'], port_id=port_body['port']['id'])
 
     @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
     @utils.requires_ext(extension='ext-gw-mode', service='network')
@@ -160,7 +165,8 @@ class RoutersTest(base.BaseNetworkTest):
         # Create a router and set gateway to fixed_ip
         router = self.admin_routers_client.create_router(
             external_gateway_info=external_gateway_info)['router']
-        self.addCleanup(self.admin_routers_client.delete_router,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_routers_client.delete_router,
                         router_id=router['id'])
         # Examine router's gateway is equal to fixed_ip
         self.assertEqual(router['external_gateway_info'][
@@ -188,10 +194,12 @@ class RoutersTest(base.BaseNetworkTest):
             network_name = data_utils.rand_name(self.__class__.__name__)
             network = self.networks_client.create_network(
                 name=network_name)['network']
-            self.addCleanup(self.networks_client.delete_network,
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.networks_client.delete_network,
                             network['id'])
             subnet = self.create_subnet(network, cidr=next_cidr)
-            self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.subnets_client.delete_subnet, subnet['id'])
             next_cidr = next_cidr.next()
 
             # Add router interface with subnet id
@@ -254,18 +262,20 @@ class RoutersTest(base.BaseNetworkTest):
         network_name = data_utils.rand_name(self.__class__.__name__)
         network01 = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network01['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network01['id'])
         network_name = data_utils.rand_name(self.__class__.__name__)
         network02 = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network02['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network02['id'])
         subnet01 = self.create_subnet(network01)
-        self.addCleanup(self.subnets_client.delete_subnet, subnet01['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.subnets_client.delete_subnet, subnet01['id'])
         sub02_cidr = self.cidr.next()
         subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
-        self.addCleanup(self.subnets_client.delete_subnet, subnet02['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.subnets_client.delete_subnet, subnet02['id'])
         router = self.create_router()
         self.addCleanup(self.delete_router, router)
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
@@ -282,10 +292,11 @@ class RoutersTest(base.BaseNetworkTest):
         network_name = data_utils.rand_name(self.__class__.__name__)
         network = self.networks_client.create_network(
             name=network_name)['network']
-        self.addCleanup(self.networks_client.delete_network,
-                        network['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network['id'])
         subnet = self.create_subnet(network)
-        self.addCleanup(self.subnets_client.delete_subnet, subnet['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.subnets_client.delete_subnet, subnet['id'])
         router = self.create_router()
         self.addCleanup(self.delete_router, router)
         fixed_ip = [{'subnet_id': subnet['id']}]
