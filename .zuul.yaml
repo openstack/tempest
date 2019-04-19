@@ -8,10 +8,10 @@
       test setup. To run a multi-node test inherit from devstack-tempest and
       set the nodeset to a multi-node one.
     required-projects:
-      - git.openstack.org/openstack/tempest
+      - opendev.org/openstack/tempest
     timeout: 7200
     roles:
-      - zuul: git.openstack.org/openstack-dev/devstack
+      - zuul: opendev.org/openstack/devstack
     vars:
       devstack_services:
         tempest: true
@@ -55,10 +55,10 @@
     description: |
       Base Tempest IPv6 job.
     required-projects:
-      - git.openstack.org/openstack/tempest
+      - opendev.org/openstack/tempest
     timeout: 7200
     roles:
-      - zuul: git.openstack.org/openstack-dev/devstack
+      - zuul: opendev.org/openstack/devstack
     vars:
       devstack_services:
         tempest: true
@@ -113,24 +113,24 @@
       periodic-tempest-dsvm-oslo-latest-full-master.
     timeout: 10800
     required-projects:
-      - git.openstack.org/openstack/oslo.cache
-      - git.openstack.org/openstack/oslo.concurrency
-      - git.openstack.org/openstack/oslo.config
-      - git.openstack.org/openstack/oslo.context
-      - git.openstack.org/openstack/oslo.db
-      - git.openstack.org/openstack/oslo.i18n
-      - git.openstack.org/openstack/oslo.log
-      - git.openstack.org/openstack/oslo.messaging
-      - git.openstack.org/openstack/oslo.middleware
-      - git.openstack.org/openstack/oslo.policy
-      - git.openstack.org/openstack/oslo.privsep
-      - git.openstack.org/openstack/oslo.reports
-      - git.openstack.org/openstack/oslo.rootwrap
-      - git.openstack.org/openstack/oslo.serialization
-      - git.openstack.org/openstack/oslo.service
-      - git.openstack.org/openstack/oslo.utils
-      - git.openstack.org/openstack/oslo.versionedobjects
-      - git.openstack.org/openstack/oslo.vmware
+      - opendev.org/openstack/oslo.cache
+      - opendev.org/openstack/oslo.concurrency
+      - opendev.org/openstack/oslo.config
+      - opendev.org/openstack/oslo.context
+      - opendev.org/openstack/oslo.db
+      - opendev.org/openstack/oslo.i18n
+      - opendev.org/openstack/oslo.log
+      - opendev.org/openstack/oslo.messaging
+      - opendev.org/openstack/oslo.middleware
+      - opendev.org/openstack/oslo.policy
+      - opendev.org/openstack/oslo.privsep
+      - opendev.org/openstack/oslo.reports
+      - opendev.org/openstack/oslo.rootwrap
+      - opendev.org/openstack/oslo.serialization
+      - opendev.org/openstack/oslo.service
+      - opendev.org/openstack/oslo.utils
+      - opendev.org/openstack/oslo.versionedobjects
+      - opendev.org/openstack/oslo.vmware
 
 - job:
     name: tempest-full-parallel
@@ -354,82 +354,82 @@
       - ^tempest/hacking/.*$
       - ^tempest/tests/.*$
     required-projects:
-      - git.openstack.org/openstack/airship-tempest-plugin
-      - git.openstack.org/openstack/almanach
-      - git.openstack.org/openstack/aodh
-      - git.openstack.org/openstack/barbican-tempest-plugin
-      - git.openstack.org/openstack/blazar-tempest-plugin
-      - git.openstack.org/openstack/ceilometer
-      - git.openstack.org/openstack/cinder-tempest-plugin
-      - git.openstack.org/openstack/cloudkitty-tempest-plugin
-      - git.openstack.org/openstack/congress-tempest-plugin
-      - git.openstack.org/openstack/designate-tempest-plugin
-      - git.openstack.org/openstack/ec2api-tempest-plugin
-      - git.openstack.org/openstack/freezer
-      - git.openstack.org/openstack/freezer-api
-      - git.openstack.org/openstack/freezer-tempest-plugin
-      - git.openstack.org/openstack/gabbi-tempest
-      - git.openstack.org/openstack/gce-api
-      - git.openstack.org/openstack/glare
-      - git.openstack.org/openstack/heat-tempest-plugin
-      - git.openstack.org/openstack/intel-nfv-ci-tests
-      - git.openstack.org/openstack/ironic-tempest-plugin
-      - git.openstack.org/openstack/ironic-inspector
-      - git.openstack.org/openstack/keystone-tempest-plugin
-      - git.openstack.org/openstack/kingbird
-      - git.openstack.org/openstack/kuryr-tempest-plugin
-      - git.openstack.org/openstack/magnum
-      - git.openstack.org/openstack/magnum-tempest-plugin
-      - git.openstack.org/openstack/manila
-      - git.openstack.org/openstack/manila-tempest-plugin
-      - git.openstack.org/openstack/mistral-tempest-plugin
-      - git.openstack.org/openstack/mogan
-      - git.openstack.org/openstack/monasca-api
-      - git.openstack.org/openstack/monasca-log-api
-      - git.openstack.org/openstack/monasca-tempest-plugin
-      - git.openstack.org/openstack/murano-tempest-plugin
-      - git.openstack.org/openstack/networking-ansible
-      - git.openstack.org/openstack/networking-bgpvpn
-      - git.openstack.org/openstack/networking-cisco
-      - git.openstack.org/openstack/networking-fortinet
-      - git.openstack.org/openstack/networking-generic-switch
-      - git.openstack.org/openstack/networking-l2gw-tempest-plugin
-      - git.openstack.org/openstack/networking-midonet
-      - git.openstack.org/openstack/networking-sfc
-      - git.openstack.org/openstack/networking-spp
-      - git.openstack.org/openstack/neutron
-      - git.openstack.org/openstack/neutron-dynamic-routing
-      - git.openstack.org/openstack/neutron-fwaas
-      - git.openstack.org/openstack/neutron-lbaas
-      - git.openstack.org/openstack/neutron-tempest-plugin
-      - git.openstack.org/openstack/neutron-vpnaas
-      - git.openstack.org/openstack/nova-lxd
-      - git.openstack.org/openstack/novajoin-tempest-plugin
-      - git.openstack.org/openstack/octavia
-      - git.openstack.org/openstack/octavia-tempest-plugin
-      - git.openstack.org/openstack/oswin-tempest-plugin
-      - git.openstack.org/openstack/panko
-      - git.openstack.org/openstack/patrole
-      - git.openstack.org/openstack/python-watcherclient
-      - git.openstack.org/openstack/qinling
-      - git.openstack.org/openstack/requirements
-      - git.openstack.org/openstack/sahara-tests
-      - git.openstack.org/openstack/senlin
-      - git.openstack.org/openstack/senlin-tempest-plugin
-      - git.openstack.org/openstack/solum-tempest-plugin
-      - git.openstack.org/openstack/tap-as-a-service
-      - git.openstack.org/openstack/telemetry-tempest-plugin
-      - git.openstack.org/openstack/tempest-horizon
-      - git.openstack.org/openstack/tobiko
-      - git.openstack.org/openstack/trio2o
-      - git.openstack.org/openstack/tripleo-common-tempest-plugin
-      - git.openstack.org/openstack/trove-tempest-plugin
-      - git.openstack.org/openstack/valet
-      - git.openstack.org/openstack/vitrage-tempest-plugin
-      - git.openstack.org/openstack/vmware-nsx-tempest-plugin
-      - git.openstack.org/openstack/watcher-tempest-plugin
-      - git.openstack.org/openstack/zaqar-tempest-plugin
-      - git.openstack.org/openstack/zun-tempest-plugin
+      - opendev.org/airship/tempest-plugin
+      - opendev.org/x/almanach
+      - opendev.org/openstack/aodh
+      - opendev.org/openstack/barbican-tempest-plugin
+      - opendev.org/openstack/blazar-tempest-plugin
+      - opendev.org/openstack/ceilometer
+      - opendev.org/openstack/cinder-tempest-plugin
+      - opendev.org/openstack/cloudkitty-tempest-plugin
+      - opendev.org/openstack/congress-tempest-plugin
+      - opendev.org/openstack/designate-tempest-plugin
+      - opendev.org/openstack/ec2api-tempest-plugin
+      - opendev.org/openstack/freezer
+      - opendev.org/openstack/freezer-api
+      - opendev.org/openstack/freezer-tempest-plugin
+      - opendev.org/x/gabbi-tempest
+      - opendev.org/x/gce-api
+      - opendev.org/x/glare
+      - opendev.org/openstack/heat-tempest-plugin
+      - opendev.org/x/intel-nfv-ci-tests
+      - opendev.org/openstack/ironic-tempest-plugin
+      - opendev.org/openstack/ironic-inspector
+      - opendev.org/openstack/keystone-tempest-plugin
+      - opendev.org/x/kingbird
+      - opendev.org/openstack/kuryr-tempest-plugin
+      - opendev.org/openstack/magnum
+      - opendev.org/openstack/magnum-tempest-plugin
+      - opendev.org/openstack/manila
+      - opendev.org/openstack/manila-tempest-plugin
+      - opendev.org/openstack/mistral-tempest-plugin
+      - opendev.org/x/mogan
+      - opendev.org/openstack/monasca-api
+      - opendev.org/openstack/monasca-log-api
+      - opendev.org/openstack/monasca-tempest-plugin
+      - opendev.org/openstack/murano-tempest-plugin
+      - opendev.org/x/networking-ansible
+      - opendev.org/openstack/networking-bgpvpn
+      - opendev.org/x/networking-cisco
+      - opendev.org/x/networking-fortinet
+      - opendev.org/openstack/networking-generic-switch
+      - opendev.org/openstack/networking-l2gw-tempest-plugin
+      - opendev.org/openstack/networking-midonet
+      - opendev.org/openstack/networking-sfc
+      - opendev.org/x/networking-spp
+      - opendev.org/openstack/neutron
+      - opendev.org/openstack/neutron-dynamic-routing
+      - opendev.org/openstack/neutron-fwaas
+      - opendev.org/openstack/neutron-lbaas
+      - opendev.org/openstack/neutron-tempest-plugin
+      - opendev.org/openstack/neutron-vpnaas
+      - opendev.org/x/nova-lxd
+      - opendev.org/x/novajoin-tempest-plugin
+      - opendev.org/openstack/octavia
+      - opendev.org/openstack/octavia-tempest-plugin
+      - opendev.org/openstack/oswin-tempest-plugin
+      - opendev.org/openstack/panko
+      - opendev.org/openstack/patrole
+      - opendev.org/openstack/python-watcherclient
+      - opendev.org/openstack/qinling
+      - opendev.org/openstack/requirements
+      - opendev.org/openstack/sahara-tests
+      - opendev.org/openstack/senlin
+      - opendev.org/openstack/senlin-tempest-plugin
+      - opendev.org/openstack/solum-tempest-plugin
+      - opendev.org/x/tap-as-a-service
+      - opendev.org/openstack/telemetry-tempest-plugin
+      - opendev.org/openstack/tempest-horizon
+      - opendev.org/x/tobiko
+      - opendev.org/x/trio2o
+      - opendev.org/openstack/tripleo-common-tempest-plugin
+      - opendev.org/openstack/trove-tempest-plugin
+      - opendev.org/x/valet
+      - opendev.org/openstack/vitrage-tempest-plugin
+      - opendev.org/x/vmware-nsx-tempest-plugin
+      - opendev.org/openstack/watcher-tempest-plugin
+      - opendev.org/openstack/zaqar-tempest-plugin
+      - opendev.org/openstack/zun-tempest-plugin
 
 - job:
     name: tempest-cinder-v2-api
