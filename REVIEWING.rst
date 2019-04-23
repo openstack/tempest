@@ -187,4 +187,4 @@ When to approve
   Note that such a policy should be used judiciously, as we should strive to
   have two +2's on each patch set, prior to approval.
 
-.. _example: https://review.openstack.org/#/c/611032/
+.. _example: https://review.opendev.org/#/c/611032/

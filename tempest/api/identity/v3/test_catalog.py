@@ -22,8 +22,8 @@ class IdentityCatalogTest(base.BaseIdentityV3Test):
 
     @decorators.idempotent_id('56b57ced-22b8-4127-9b8a-565dfb0207e2')
     def test_catalog_standardization(self):
-        # http://git.openstack.org/cgit/openstack/service-types-authority
-        # /tree/service-types.yaml
+        # https://opendev.org/openstack/service-types-authority
+        # /src/branch/master/service-types.yaml
         standard_service_values = [{'name': 'keystone', 'type': 'identity'},
                                    {'name': 'nova', 'type': 'compute'},
                                    {'name': 'glance', 'type': 'image'},

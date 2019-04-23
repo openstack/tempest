@@ -61,7 +61,7 @@ as it is simpler, and quicker to work with.
 #. You first need to install Tempest. This is done with pip after you check out
    the Tempest repo::
 
-    $ git clone https://git.openstack.org/openstack/tempest
+    $ git clone https://opendev.org/openstack/tempest
     $ pip install tempest/
 
    This can be done within a venv, but the assumption for this guide is that

@@ -46,20 +46,20 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # List of projects having tempest plugin stale or unmaintained for a long time
 # (6 months or more)
 # TODO(masayukig): Some of these can be removed from BLACKLIST in the future.
-# barbican-tempest-plugin: https://review.openstack.org/#/c/634631/
+# barbican-tempest-plugin: https://review.opendev.org/#/c/634631/
 # cyborg-tempest-plugin: https://review.opendev.org/659687
-# intel-nfv-ci-tests: https://review.openstack.org/#/c/634640/
-# networking-ansible: https://review.openstack.org/#/c/634647/
-# networking-generic-switch: https://review.openstack.org/#/c/634846/
-# networking-l2gw-tempest-plugin: https://review.openstack.org/#/c/635093/
-# networking-midonet: https://review.openstack.org/#/c/635096/
-# networking-plumgrid: https://review.openstack.org/#/c/635096/
-# networking-spp: https://review.openstack.org/#/c/635098/
-# neutron-dynamic-routing: https://review.openstack.org/#/c/637718/
-# neutron-vpnaas: https://review.openstack.org/#/c/637719/
-# nova-lxd: https://review.openstack.org/#/c/638334/
-# valet: https://review.openstack.org/#/c/638339/
-# vitrage-tempest-plugin: https://review.openstack.org/#/c/639003/
+# intel-nfv-ci-tests: https://review.opendev.org/#/c/634640/
+# networking-ansible: https://review.opendev.org/#/c/634647/
+# networking-generic-switch: https://review.opendev.org/#/c/634846/
+# networking-l2gw-tempest-plugin: https://review.opendev.org/#/c/635093/
+# networking-midonet: https://review.opendev.org/#/c/635096/
+# networking-plumgrid: https://review.opendev.org/#/c/635096/
+# networking-spp: https://review.opendev.org/#/c/635098/
+# neutron-dynamic-routing: https://review.opendev.org/#/c/637718/
+# neutron-vpnaas: https://review.opendev.org/#/c/637719/
+# nova-lxd: https://review.opendev.org/#/c/638334/
+# valet: https://review.opendev.org/#/c/638339/
+# vitrage-tempest-plugin: https://review.opendev.org/#/c/639003/
 BLACKLIST="
 barbican-tempest-plugin
 cyborg-tempest-plugin
@@ -81,11 +81,11 @@ vitrage-tempest-plugin
 function clone_project() {
     if [ -e /usr/zuul-env/bin/zuul-cloner ]; then
         /usr/zuul-env/bin/zuul-cloner --cache-dir /opt/git \
-        https://git.openstack.org \
+        https://opendev.org \
         openstack/"$1"
 
     elif [ -e /usr/bin/git ]; then
-        /usr/bin/git clone https://git.openstack.org/openstack/"$1" \
+        /usr/bin/git clone https://opendev.org/openstack/"$1" \
         openstack/"$1"
 
     fi

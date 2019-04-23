@@ -1,7 +1,7 @@
 ---
 fixes:
   - |
-    Patch https://review.openstack.org/#/c/499575/ introduced
+    Patch https://review.opendev.org/#/c/499575/ introduced
     support creating Neutron port with certain capabilities.
     Currently capabilities list interpreted as string this change
     fix it.
