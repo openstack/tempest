@@ -212,7 +212,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     # 'danger' flag.
     @decorators.idempotent_id('7932ab0f-5136-4075-b201-c0e2338df51a')
     def test_update_default_quotas(self):
-        LOG.debug("get the current 'default' quota class values")
+        # get the current 'default' quota class values
         body = (self.adm_client.show_quota_class_set('default')
                 ['quota_class_set'])
         self.assertEqual('default', body.pop('id'))
@@ -224,9 +224,14 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
             # there is a real chance that we go from -1 (unlimited)
             # to a very small number which causes issues.
             body[quota] = default + 100
-        LOG.debug("update limits for the default quota class set")
+        # update limits for the default quota class set
         update_body = self.adm_client.update_quota_class_set(
             'default', **body)['quota_class_set']
-        LOG.debug("assert that the response has all of the changed values")
+        # assert that the response has all of the changed values
         self.assertThat(update_body.items(),
+                        matchers.ContainsAll(body.items()))
+        # check quota values are changed
+        show_body = self.adm_client.show_quota_class_set(
+            'default')['quota_class_set']
+        self.assertThat(show_body.items(),
                         matchers.ContainsAll(body.items()))
