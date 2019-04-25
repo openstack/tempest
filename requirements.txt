@@ -3,7 +3,7 @@
 # process, which may cause wedges in the gate later.
 pbr!=2.1.0,>=2.0.0 # Apache-2.0
 cliff!=2.9.0,>=2.8.0 # Apache-2.0
-jsonschema<3.0.0,>=2.6.0 # MIT
+jsonschema>=2.6.0 # MIT
 testtools>=2.2.0 # MIT
 paramiko>=2.0.0 # LGPLv2.1+
 netaddr>=0.7.18 # BSD
