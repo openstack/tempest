@@ -16,6 +16,7 @@
 import struct
 
 import six
+import six.moves.urllib.parse as urlparse
 import urllib3
 
 from tempest.api.compute import base
@@ -73,8 +74,9 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                          'initial call: ' + six.text_type(resp.status))
         # Do some basic validation to make sure it is an expected HTML document
         resp_data = resp.data.decode()
-        self.assertIn('<html>', resp_data,
-                      'Not a valid html document in the response.')
+        # This is needed in the case of example: <html lang="en">
+        self.assertRegex(resp_data, '<html.*>',
+                         'Not a valid html document in the response.')
         self.assertIn('</html>', resp_data,
                       'Not a valid html document in the response.')
         # Just try to make sure we got JavaScript back for noVNC, since we
@@ -204,7 +206,18 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                                                type='novnc')['console']
         self.assertEqual('novnc', body['type'])
         # Do the WebSockify HTTP Request to novncproxy with a bad token
-        url = body['url'].replace('token=', 'token=bad')
+        parts = urlparse.urlparse(body['url'])
+        qparams = urlparse.parse_qs(parts.query)
+        if 'path' in qparams:
+            qparams['path'] = urlparse.unquote(qparams['path'][0]).replace(
+                'token=', 'token=bad')
+        elif 'token' in qparams:
+            qparams['token'] = 'bad' + qparams['token'][0]
+        new_query = urlparse.urlencode(qparams)
+        new_parts = urlparse.ParseResult(parts.scheme, parts.netloc,
+                                         parts.path, parts.params, new_query,
+                                         parts.fragment)
+        url = urlparse.urlunparse(new_parts)
         self._websocket = compute.create_websocket(url)
         # Make sure the novncproxy rejected the connection and closed it
         data = self._websocket.receive_frame()
