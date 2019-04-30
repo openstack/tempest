@@ -92,6 +92,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             validatable=True,
             validation_resources=validation_resources,
             wait_until='ACTIVE')
+        self.addCleanup(self.delete_server, newserver['id'])
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
         self.client.change_password(newserver['id'], adminPass=new_password)
