@@ -50,7 +50,6 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                                 'available')
         return restored_volume
 
-    @decorators.skip_because(bug="1483434")
     @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
                       'ceph does not support arbitrary container names')
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
