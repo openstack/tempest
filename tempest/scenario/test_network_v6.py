@@ -166,9 +166,10 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if self._sysconfig_network_scripts_dir_exists(ssh):
             try:
                 ssh.exec_command(
-                    'echo -e "DEVICE=%(nic)s\\nIPV6INIT=yes" | '
+                    'echo -e "DEVICE=%(nic)s\\nNAME=%(nic)s\\nIPV6INIT=yes" | '
                     'sudo tee /etc/sysconfig/network-scripts/ifcfg-%(nic)s; '
-                    'sudo /sbin/service network restart' % {'nic': nic})
+                    'sudo nmcli connection reload' % {'nic': nic})
+                ssh.exec_command('sudo nmcli connection up %s' % nic)
             except exceptions.SSHExecCommandFailed as e:
                 # NOTE(slaweq): Sometimes it can happen that this SSH command
                 # will fail because of some error from network manager in
