@@ -104,8 +104,8 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
         body = client.show_server(server_id)['server']
     except lib_exc.NotFound:
         return
-    old_status = server_status = body['status']
-    old_task_state = task_state = _get_task_state(body)
+    old_status = body['status']
+    old_task_state = _get_task_state(body)
     start_time = int(time.time())
     while True:
         time.sleep(client.build_interval)
