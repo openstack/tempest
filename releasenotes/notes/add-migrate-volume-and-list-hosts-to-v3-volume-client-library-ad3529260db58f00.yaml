@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add list host API support to the volume v3 client library.
+    This feature enables callers to list all hosts for a given project.
+  - |
+    Add migrate volume API support to the volume v3 client library.
+    This features allows callers to migrate volumes between backends.

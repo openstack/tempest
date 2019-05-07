@@ -35,6 +35,16 @@ class VolumesClient(base_client.BaseClient):
             return params
         return urllib.urlencode(params)
 
+    def list_hosts(self):
+        """Lists all hosts summary info that is not disabled.
+
+        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-all-hosts-for-a-project
+        """
+        resp, body = self.get('os-hosts')
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def list_volumes(self, detail=False, params=None):
         """List all the volumes created.
 
@@ -53,6 +63,19 @@ class VolumesClient(base_client.BaseClient):
         resp, body = self.get(url)
         body = json.loads(body)
         self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def migrate_volume(self, volume_id, **kwargs):
+        """Migrate a volume to a new backend
+
+        For a full list of available parameters please refer to the offical
+        API reference:
+
+        https://developer.openstack.org/api-ref/block-storage/v3/index.html#migrate-a-volume
+        """
+        post_body = json.dumps({'os-migrate_volume': kwargs})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume(self, volume_id):

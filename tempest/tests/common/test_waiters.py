@@ -148,3 +148,68 @@ class TestInterfaceWaiters(base.TestCase):
         list_interfaces.assert_has_calls([mock.call('server_id'),
                                           mock.call('server_id')])
         sleep.assert_called_once_with(client.build_interval)
+
+
+class TestVolumeWaiters(base.TestCase):
+    vol_migrating_src_host = {
+        'volume': {'migration_status': 'migrating',
+                   'os-vol-host-attr:host': 'src_host@backend#type'}}
+    vol_migrating_dst_host = {
+        'volume': {'migration_status': 'migrating',
+                   'os-vol-host-attr:host': 'dst_host@backend#type'}}
+    vol_migration_success = {
+        'volume': {'migration_status': 'success',
+                   'os-vol-host-attr:host': 'dst_host@backend#type'}}
+    vol_migration_error = {
+        'volume': {'migration_status': 'error',
+                   'os-vol-host-attr:host': 'src_host@backend#type'}}
+
+    def test_wait_for_volume_migration_timeout(self):
+        show_volume = mock.MagicMock(return_value=self.vol_migrating_src_host)
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_migration,
+                          client, mock.sentinel.volume_id, 'dst_host')
+
+    def test_wait_for_volume_migration_error(self):
+        show_volume = mock.MagicMock(side_effect=[
+            self.vol_migrating_src_host,
+            self.vol_migrating_src_host,
+            self.vol_migration_error])
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', return_value=0.)
+        self.patch('time.sleep')
+        self.assertRaises(lib_exc.TempestException,
+                          waiters.wait_for_volume_migration,
+                          client, mock.sentinel.volume_id, 'dst_host')
+
+    def test_wait_for_volume_migration_success_and_dst(self):
+        show_volume = mock.MagicMock(side_effect=[
+            self.vol_migrating_src_host,
+            self.vol_migrating_dst_host,
+            self.vol_migration_success])
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', return_value=0.)
+        self.patch('time.sleep')
+        waiters.wait_for_volume_migration(
+            client, mock.sentinel.volume_id, 'dst_host')
+
+        # Assert that we wait until migration_status is success and dst_host is
+        # part of the returned os-vol-host-attr:host.
+        show_volume.assert_has_calls([mock.call(mock.sentinel.volume_id),
+                                      mock.call(mock.sentinel.volume_id),
+                                      mock.call(mock.sentinel.volume_id)])
