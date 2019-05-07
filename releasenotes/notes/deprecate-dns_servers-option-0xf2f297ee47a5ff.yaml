@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    The config option ``CONF.network.dns_servers`` is no longer used
+    anywhere, so it is deprecated and will be removed in the future.
+

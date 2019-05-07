@@ -685,7 +685,10 @@ NetworkGroup = [
     cfg.ListOpt('dns_servers',
                 default=["8.8.8.8", "8.8.4.4"],
                 help="List of dns servers which should be used"
-                     " for subnet creation"),
+                     " for subnet creation",
+                deprecated_for_removal=True,
+                deprecated_reason="This config option is no longer "
+                                  "used anywhere, so it can be removed."),
     cfg.StrOpt('port_vnic_type',
                choices=[None, 'normal', 'direct', 'macvtap'],
                help="vnic_type to use when launching instances"
