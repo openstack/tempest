@@ -292,11 +292,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                               % CONF.network.build_timeout)
 
         _, new_nic = self.diff_list[0]
-        ssh_client.exec_command("sudo ip addr add %s/%s dev %s" % (
-                                new_port['fixed_ips'][0]['ip_address'],
-                                CONF.network.project_network_mask_bits,
-                                new_nic))
-        ssh_client.exec_command("sudo ip link set %s up" % new_nic)
+        ip_output = ssh_client.exec_command('ip a')
+        ip_address = new_port['fixed_ips'][0]['ip_address']
+        ip_mask = CONF.network.project_network_mask_bits
+        # check if the address is not already in use, if not, set it
+        if ' ' + ip_address + '/' + str(ip_mask) not in ip_output:
+            ssh_client.exec_command("sudo ip addr add %s/%s dev %s" % (
+                                    ip_address, ip_mask, new_nic))
+            ssh_client.exec_command("sudo ip link set %s up" % new_nic)
 
     def _get_server_nics(self, ssh_client):
         reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+)[@]?.*:')
