@@ -50,7 +50,8 @@ create_get_volume = {
                             # If it would come as empty array "[]" then,
                             # those elements can be defined as 'required'.
                         }
-                    }
+                    },
+                    'os-vol-host-attr:host': {'type': 'string'},
                 },
                 'additionalProperties': False,
                 'required': ['id', 'status', 'displayName', 'availabilityZone',
