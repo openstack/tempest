@@ -634,7 +634,6 @@
         - tempest-full-queens
         - tempest-full-queens-py3
         - tempest-full-pike
-        - legacy-periodic-tempest-dsvm-neutron-full-ocata
     periodic:
       jobs:
         - tempest-all
