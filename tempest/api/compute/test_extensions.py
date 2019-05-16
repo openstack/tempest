@@ -37,7 +37,7 @@ class ExtensionsTest(base.BaseV2ComputeTest):
         ext = CONF.compute_feature_enabled.api_extensions[0]
 
         # Log extensions list
-        extension_list = map(lambda x: x['alias'], extensions)
+        extension_list = [x['alias'] for x in extensions]
         LOG.debug("Nova extensions: %s", ','.join(extension_list))
 
         if ext == 'all':
