@@ -46,7 +46,6 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # List of projects having tempest plugin stale or unmaintained for a long time
 # (6 months or more)
 # TODO(masayukig): Some of these can be removed from BLACKLIST in the future.
-# airship-tempest-plugin: https://review.openstack.org/#/c/634387/
 # barbican-tempest-plugin: https://review.openstack.org/#/c/634631/
 # intel-nfv-ci-tests: https://review.openstack.org/#/c/634640/
 # networking-ansible: https://review.openstack.org/#/c/634647/
@@ -61,7 +60,6 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # valet: https://review.openstack.org/#/c/638339/
 # vitrage-tempest-plugin: https://review.openstack.org/#/c/639003/
 BLACKLIST="
-airship-tempest-plugin
 barbican-tempest-plugin
 intel-nfv-ci-tests
 networking-ansible
@@ -94,7 +92,7 @@ function clone_project() {
 # function to create virtualenv to perform sanity operation
 function prepare_workspace() {
     SANITY_DIR=$(pwd)
-    virtualenv --clear "$SANITY_DIR"/.venv
+    virtualenv -p python3 --clear "$SANITY_DIR"/.venv
     export TVENV="$SANITY_DIR/tools/with_venv.sh"
     cd "$SANITY_DIR"
 
