@@ -363,6 +363,7 @@
       - opendev.org/openstack/cinder-tempest-plugin
       - opendev.org/openstack/cloudkitty-tempest-plugin
       - opendev.org/openstack/congress-tempest-plugin
+      - opendev.org/openstack/cyborg-tempest-plugin
       - opendev.org/openstack/designate-tempest-plugin
       - opendev.org/openstack/ec2api-tempest-plugin
       - opendev.org/openstack/freezer
@@ -405,7 +406,6 @@
       - opendev.org/openstack/neutron-vpnaas
       - opendev.org/x/nova-lxd
       - opendev.org/x/novajoin-tempest-plugin
-      - opendev.org/openstack/octavia
       - opendev.org/openstack/octavia-tempest-plugin
       - opendev.org/openstack/oswin-tempest-plugin
       - opendev.org/openstack/panko
