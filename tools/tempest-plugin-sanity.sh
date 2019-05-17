@@ -47,6 +47,7 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # (6 months or more)
 # TODO(masayukig): Some of these can be removed from BLACKLIST in the future.
 # barbican-tempest-plugin: https://review.openstack.org/#/c/634631/
+# cyborg-tempest-plugin: https://review.opendev.org/659687
 # intel-nfv-ci-tests: https://review.openstack.org/#/c/634640/
 # networking-ansible: https://review.openstack.org/#/c/634647/
 # networking-generic-switch: https://review.openstack.org/#/c/634846/
@@ -61,6 +62,7 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # vitrage-tempest-plugin: https://review.openstack.org/#/c/639003/
 BLACKLIST="
 barbican-tempest-plugin
+cyborg-tempest-plugin
 intel-nfv-ci-tests
 networking-ansible
 networking-generic-switch
