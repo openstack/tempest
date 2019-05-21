@@ -170,7 +170,14 @@ class SecGroupTest(base.BaseSecGroupTest):
 
         sg_id = group_create_body['security_group']['id']
         direction = 'ingress'
-        protocol = 'icmp'
+        # The Neutron API accepts 'icmp', 'icmpv6' and 'ipv6-icmp' for
+        # IPv6 ICMP protocol names, but the latter is preferred and the
+        # others considered "legacy".  Use 'ipv6-icmp' as the API could
+        # change to return only that value, see
+        # https://review.opendev.org/#/c/453346/
+        # The neutron-tempest-plugin API tests pass all three and verify
+        # the output, so there is no need to duplicate that here.
+        protocol = 'ipv6-icmp' if self._ip_version == 6 else 'icmp'
         icmp_type_codes = [(3, 2), (3, 0), (8, 0), (0, 0), (11, None)]
         for icmp_type, icmp_code in icmp_type_codes:
             self._create_verify_security_group_rule(sg_id, direction,
