@@ -43,42 +43,8 @@ set -ex
 
 # retrieve a list of projects having tempest plugins
 PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
-# List of projects having tempest plugin stale or unmaintained for a long time
-# (6 months or more)
-# TODO(masayukig): Some of these can be removed from BLACKLIST in the future.
-# barbican-tempest-plugin: https://review.opendev.org/#/c/634631/
-# cyborg-tempest-plugin: https://review.opendev.org/659687
-# gce-api: It looks gce-api doesn't support python3 yet.
-# intel-nfv-ci-tests: https://review.opendev.org/#/c/634640/
-# networking-ansible: https://review.opendev.org/#/c/634647/
-# networking-bgpvpn: https://review.opendev.org/#/c/662142/
-# networking-generic-switch: https://review.opendev.org/#/c/634846/
-# networking-l2gw-tempest-plugin: https://review.opendev.org/#/c/635093/
-# networking-midonet: https://review.opendev.org/#/c/635096/
-# networking-plumgrid: https://review.opendev.org/#/c/635096/
-# networking-spp: https://review.opendev.org/#/c/635098/
-# neutron-dynamic-routing: https://review.opendev.org/#/c/637718/
-# neutron-vpnaas: https://review.opendev.org/#/c/637719/
-# nova-lxd: https://review.opendev.org/#/c/638334/
-# valet: https://review.opendev.org/#/c/638339/
 
-BLACKLIST="
-openstack/barbican-tempest-plugin
-openstack/cyborg-tempest-plugin
-x/gce-api
-x/intel-nfv-ci-tests
-x/networking-ansible
-openstack/networking-bgpvpn
-openstack/networking-generic-switch
-openstack/networking-l2gw-tempest-plugin
-openstack/networking-midonet
-x/networking-plumgrid
-x/networking-spp
-openstack/neutron-dynamic-routing
-openstack/neutron-vpnaas
-x/nova-lxd
-x/valet
-"
+BLACKLIST="$(python tools/generate-tempest-plugins-list.py blacklist)"
 
 # Function to clone project using zuul-cloner or from git
 function clone_project() {

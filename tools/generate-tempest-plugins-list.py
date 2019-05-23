@@ -25,6 +25,7 @@
 
 import json
 import re
+import sys
 
 try:
     # For Python 3.0 and later
@@ -35,6 +36,25 @@ except ImportError:
     import urllib2 as urllib
     from urllib2 import HTTPError
 
+# List of projects having tempest plugin stale or unmaintained for a long time
+# (6 months or more)
+# TODO(masayukig): Some of these can be removed from BLACKLIST in the future
+# when the patches are merged.
+BLACKLIST = [
+    'barbican-tempest-plugin',  # https://review.opendev.org/#/c/634631/
+    'cyborg-tempest-plugin',  # https://review.opendev.org/659687
+    'intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
+    'networking-ansible',  # https://review.opendev.org/#/c/634647/
+    'networking-generic-switch',  # https://review.opendev.org/#/c/634846/
+    'networking-l2gw-tempest-plugin',  # https://review.opendev.org/#/c/635093/
+    'networking-midonet',  # https://review.opendev.org/#/c/635096/
+    'networking-plumgrid',  # https://review.opendev.org/#/c/635096/
+    'networking-spp',  # https://review.opendev.org/#/c/635098/
+    'neutron-dynamic-routing',  # https://review.opendev.org/#/c/637718/
+    'neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
+    'nova-lxd',  # https://review.opendev.org/#/c/638334/
+    'valet',  # https://review.opendev.org/#/c/638339/
+]
 
 url = 'https://review.opendev.org/projects/'
 
@@ -65,6 +85,13 @@ def has_tempest_plugin(proj):
     else:
         False
 
+
+if len(sys.argv) > 1 and sys.argv[1] == 'blacklist':
+    for black_plugin in BLACKLIST:
+        print(black_plugin)
+    # We just need BLACKLIST when we use this `blacklist` option.
+    # So, this exits here.
+    sys.exit()
 
 r = urllib.urlopen(url)
 # Gerrit prepends 4 garbage octets to the JSON, in order to counter

@@ -1,0 +1,7 @@
+Blacklisted Plugins
+===================
+
+List of Tempest plugin projects that are stale or unmaintained for a long
+time (6 months or more). They can be moved out of blacklist state once one
+of the relevant patches gets merged:
+https://review.opendev.org/#/q/topic:tempest-sanity-gate+%28status:open%29
