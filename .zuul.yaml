@@ -613,8 +613,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
-        - nova-cells-v1:
-            irrelevant-files: *tempest-irrelevant-files
         - nova-tempest-v2-api:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
