@@ -59,7 +59,7 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 # neutron-vpnaas: https://review.opendev.org/#/c/637719/
 # nova-lxd: https://review.opendev.org/#/c/638334/
 # valet: https://review.opendev.org/#/c/638339/
-# vitrage-tempest-plugin: https://review.opendev.org/#/c/639003/
+
 BLACKLIST="
 barbican-tempest-plugin
 cyborg-tempest-plugin
@@ -74,7 +74,6 @@ neutron-dynamic-routing
 neutron-vpnaas
 nova-lxd
 valet
-vitrage-tempest-plugin
 "
 
 # Function to clone project using zuul-cloner or from git
