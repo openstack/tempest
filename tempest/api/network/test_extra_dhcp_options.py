@@ -16,6 +16,7 @@
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -62,7 +63,8 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
             network_id=self.network['id'],
             extra_dhcp_opts=self.extra_dhcp_opts)
         port_id = body['port']['id']
-        self.addCleanup(self.ports_client.delete_port, port_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.ports_client.delete_port, port_id)
 
         # Confirm port created has Extra DHCP Options
         body = self.ports_client.list_ports()

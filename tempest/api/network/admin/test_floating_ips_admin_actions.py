@@ -16,6 +16,7 @@
 from tempest.api.network import base
 from tempest.common import utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -57,14 +58,18 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         # Create floating ip from admin user
         floating_ip_admin = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
-        self.addCleanup(self.admin_floating_ips_client.delete_floatingip,
-                        floating_ip_admin['floatingip']['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.admin_floating_ips_client.delete_floatingip,
+            floating_ip_admin['floatingip']['id'])
         # Create floating ip from alt user
         body = self.alt_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
         floating_ip_alt = body['floatingip']
-        self.addCleanup(self.alt_floating_ips_client.delete_floatingip,
-                        floating_ip_alt['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.alt_floating_ips_client.delete_floatingip,
+            floating_ip_alt['id'])
         # List floating ips from admin
         body = self.admin_floating_ips_client.list_floatingips()
         floating_ip_ids_admin = [f['id'] for f in body['floatingips']]
@@ -91,8 +96,10 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
             tenant_id=self.network['tenant_id'],
             port_id=self.port['id'])
         created_floating_ip = body['floatingip']
-        self.addCleanup(self.floating_ips_client.delete_floatingip,
-                        created_floating_ip['id'])
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.floating_ips_client.delete_floatingip,
+            created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['tenant_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])

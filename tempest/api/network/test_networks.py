@@ -160,7 +160,8 @@ class NetworksTest(BaseNetworkTestResources):
     def test_create_update_delete_network_subnet(self):
         # Create a network
         network = self.create_network()
-        self.addCleanup(self.networks_client.delete_network, network['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network['id'])
         net_id = network['id']
         self.assertEqual('ACTIVE', network['status'])
         # Verify network update
@@ -176,6 +177,8 @@ class NetworksTest(BaseNetworkTestResources):
         body = self.subnets_client.update_subnet(subnet_id, name=new_name)
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_name)
+        # Verify network delete
+        self.networks_client.delete_network(network['id'])
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('2bf13842-c93f-4a69-83ed-717d2ec3b44e')
@@ -313,7 +316,8 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('3d3852eb-3009-49ec-97ac-5ce83b73010a')
     def test_update_subnet_gw_dns_host_routes_dhcp(self):
         network = self.create_network()
-        self.addCleanup(self.networks_client.delete_network, network['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.networks_client.delete_network, network['id'])
 
         subnet = self.create_subnet(
             network, **self.subnet_dict(['gateway', 'host_routes',

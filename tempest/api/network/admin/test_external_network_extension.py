@@ -36,6 +36,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         body = self.admin_networks_client.create_network(**post_body)
         network = body['network']
         self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
             self.admin_networks_client.delete_network, network['id'])
         return network
 

@@ -15,6 +15,7 @@
 
 from tempest.api.network import base
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 
 
 class BaseSecGroupTest(base.BaseNetworkTest):
@@ -24,7 +25,8 @@ class BaseSecGroupTest(base.BaseNetworkTest):
         name = data_utils.rand_name('secgroup-')
         group_create_body = (
             self.security_groups_client.create_security_group(name=name))
-        self.addCleanup(self._delete_security_group,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self._delete_security_group,
                         group_create_body['security_group']['id'])
         self.assertEqual(group_create_body['security_group']['name'], name)
         return group_create_body, name

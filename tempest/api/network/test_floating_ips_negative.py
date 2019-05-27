@@ -17,6 +17,7 @@
 from tempest.api.network import base
 from tempest.common import utils
 from tempest import config
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -81,6 +82,7 @@ class FloatingIPNegativeTestJSON(base.BaseNetworkTest):
             floating_network_id=self.ext_net_id)
         floating_ip = body['floatingip']
         self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
             self.floating_ips_client.delete_floatingip, floating_ip['id'])
         # Associate floating IP to the other port
         self.assertRaises(

@@ -18,6 +18,7 @@ import testtools
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
@@ -62,7 +63,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         name = data_utils.rand_name('router')
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=True)
-        self.addCleanup(self.admin_routers_client.delete_router,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertTrue(router['router']['distributed'])
 
@@ -82,7 +84,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         name = data_utils.rand_name('router')
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False)
-        self.addCleanup(self.admin_routers_client.delete_router,
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_routers_client.delete_router,
                         router['router']['id'])
         self.assertFalse(router['router']['distributed'])
 
@@ -112,8 +115,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
                                                          ha=False,
                                                          tenant_id=tenant_id)
         router_id = router['router']['id']
-        self.addCleanup(self.admin_routers_client.delete_router,
-                        router_id)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_routers_client.delete_router, router_id)
         self.assertFalse(router['router']['distributed'])
         router = self.admin_routers_client.update_router(
             router_id, distributed=True)
