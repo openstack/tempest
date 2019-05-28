@@ -84,27 +84,20 @@ AuthGroup = [
     cfg.StrOpt('admin_username',
                help="Username for an administrative user. This is needed for "
                     "authenticating requests made by project isolation to "
-                    "create users and projects",
-               deprecated_group='identity'),
+                    "create users and projects"),
     cfg.StrOpt('admin_project_name',
                help="Project name to use for an administrative user. This is "
                     "needed for authenticating requests made by project "
-                    "isolation to create users and projects",
-               deprecated_opts=[cfg.DeprecatedOpt('admin_tenant_name',
-                                                  group='auth'),
-                                cfg.DeprecatedOpt('admin_tenant_name',
-                                                  group='identity')]),
+                    "isolation to create users and projects"),
     cfg.StrOpt('admin_password',
                help="Password to use for an administrative user. This is "
                     "needed for authenticating requests made by project "
                     "isolation to create users and projects",
-               secret=True,
-               deprecated_group='identity'),
+               secret=True),
     cfg.StrOpt('admin_domain_name',
                default='Default',
                help="Admin domain name for authentication (Keystone V3). "
-                    "The same domain applies to user and project",
-               deprecated_group='identity'),
+                    "The same domain applies to user and project"),
 ]
 
 identity_group = cfg.OptGroup(name='identity',
