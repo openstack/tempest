@@ -129,3 +129,6 @@ update_server = copy.deepcopy(servers247.update_server)
 rebuild_server = copy.deepcopy(servers247.rebuild_server)
 rebuild_server_with_admin_pass = copy.deepcopy(
     servers247.rebuild_server_with_admin_pass)
+attach_volume = copy.deepcopy(servers247.attach_volume)
+show_volume_attachment = copy.deepcopy(servers247.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers247.list_volume_attachments)

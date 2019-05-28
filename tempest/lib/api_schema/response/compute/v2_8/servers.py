@@ -35,3 +35,6 @@ rebuild_server = copy.deepcopy(servers.rebuild_server)
 rebuild_server_with_admin_pass = copy.deepcopy(
     servers.rebuild_server_with_admin_pass)
 show_server_diagnostics = copy.deepcopy(servers.show_server_diagnostics)
+attach_volume = copy.deepcopy(servers.attach_volume)
+show_volume_attachment = copy.deepcopy(servers.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers.list_volume_attachments)
