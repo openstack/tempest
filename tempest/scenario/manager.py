@@ -979,24 +979,33 @@ class NetworkScenarioTest(ScenarioTest):
             raise
 
     def check_remote_connectivity(self, source, dest, should_succeed=True,
-                                  nic=None):
-        """assert ping server via source ssh connection
+                                  nic=None, protocol='icmp'):
+        """check server connectivity via source ssh connection
 
-        :param source: RemoteClient: an ssh connection from which to ping
-        :param dest: an IP to ping against
-        :param should_succeed: boolean: should ping succeed or not
-        :param nic: specific network interface to ping from
+        :param source: RemoteClient: an ssh connection from which to execute
+            the check
+        :param dest: an IP to check connectivity against
+        :param should_succeed: boolean should connection succeed or not
+        :param nic: specific network interface to test connectivity from
+        :param protocol: the protocol used to test connectivity with.
+        :returns: True, if the connection succeeded and it was expected to
+            succeed. False otherwise.
         """
-        def ping_remote():
+        method_name = '%s_check' % protocol
+        connectivity_checker = getattr(source, method_name)
+
+        def connect_remote():
             try:
-                source.ping_host(dest, nic=nic)
+                connectivity_checker(dest, nic=nic)
             except lib_exc.SSHExecCommandFailed:
-                LOG.warning('Failed to ping IP: %s via a ssh connection '
-                            'from: %s.', dest, source.ssh_client.host)
+                LOG.warning('Failed to check %(protocol)s connectivity for '
+                            'IP %(dest)s via a ssh connection from: %(src)s.',
+                            dict(protocol=protocol, dest=dest,
+                                 src=source.ssh_client.host))
                 return not should_succeed
             return should_succeed
 
-        result = test_utils.call_until_true(ping_remote,
+        result = test_utils.call_until_true(connect_remote,
                                             CONF.validation.ping_timeout, 1)
         if result:
             return
