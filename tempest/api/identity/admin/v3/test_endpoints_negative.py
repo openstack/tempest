@@ -70,14 +70,16 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def _assert_update_raises_bad_request(self, enabled):
 
         # Create an endpoint
-        region1 = data_utils.rand_name('region')
+        region1_name = data_utils.rand_name('region')
         url1 = data_utils.rand_url()
         interface1 = 'public'
         endpoint_for_update = (
             self.client.create_endpoint(service_id=self.service_id,
                                         interface=interface1,
-                                        url=url1, region=region1,
+                                        url=url1, region=region1_name,
                                         enabled=True)['endpoint'])
+        region1 = self.regions_client.show_region(region1_name)['region']
+        self.addCleanup(self.regions_client.delete_region, region1['id'])
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
         self.assertRaises(lib_exc.BadRequest, self.client.update_endpoint,

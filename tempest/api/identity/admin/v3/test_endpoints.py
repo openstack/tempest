@@ -44,11 +44,14 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             cls.addClassResourceCleanup(
                 cls.services_client.delete_service, service['id'])
 
-            region = data_utils.rand_name('region')
+            region_name = data_utils.rand_name('region')
             url = data_utils.rand_url()
             endpoint = cls.client.create_endpoint(
                 service_id=cls.service_ids[i], interface=interfaces[i],
-                url=url, region=region, enabled=True)['endpoint']
+                url=url, region=region_name, enabled=True)['endpoint']
+            region = cls.regions_client.show_region(region_name)['region']
+            cls.addClassResourceCleanup(
+                cls.regions_client.delete_region, region['id'])
             cls.addClassResourceCleanup(
                 cls.client.delete_endpoint, endpoint['id'])
             cls.setup_endpoint_ids.append(endpoint['id'])
@@ -108,17 +111,19 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
     def test_create_list_show_delete_endpoint(self):
-        region = data_utils.rand_name('region')
+        region_name = data_utils.rand_name('region')
         url = data_utils.rand_url()
         interface = 'public'
         endpoint = self.client.create_endpoint(service_id=self.service_ids[0],
                                                interface=interface,
-                                               url=url, region=region,
+                                               url=url, region=region_name,
                                                enabled=True)['endpoint']
+        region = self.regions_client.show_region(region_name)['region']
+        self.addCleanup(self.regions_client.delete_region, region['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.client.delete_endpoint, endpoint['id'])
         # Asserting Create Endpoint response body
-        self.assertEqual(region, endpoint['region'])
+        self.assertEqual(region_name, endpoint['region'])
         self.assertEqual(url, endpoint['url'])
 
         # Checking if created endpoint is present in the list of endpoints
@@ -133,7 +138,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.service_ids[0], fetched_endpoint['service_id'])
         self.assertEqual(interface, fetched_endpoint['interface'])
         self.assertEqual(url, fetched_endpoint['url'])
-        self.assertEqual(region, fetched_endpoint['region'])
+        self.assertEqual(region_name, fetched_endpoint['region'])
         self.assertEqual(True, fetched_endpoint['enabled'])
 
         # Deleting the endpoint created in this method
@@ -161,28 +166,33 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.services_client.delete_service, service2['id'])
 
         # Creating an endpoint so as to check update endpoint with new values
-        region1 = data_utils.rand_name('region')
+        region1_name = data_utils.rand_name('region')
         url1 = data_utils.rand_url()
         interface1 = 'public'
         endpoint_for_update = (
             self.client.create_endpoint(service_id=self.service_ids[0],
                                         interface=interface1,
-                                        url=url1, region=region1,
+                                        url=url1, region=region1_name,
                                         enabled=True)['endpoint'])
-        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
+        region1 = self.regions_client.show_region(region1_name)['region']
+        self.addCleanup(self.regions_client.delete_region, region1['id'])
 
         # Updating endpoint with new values
-        region2 = data_utils.rand_name('region')
+        region2_name = data_utils.rand_name('region')
         url2 = data_utils.rand_url()
         interface2 = 'internal'
         endpoint = self.client.update_endpoint(endpoint_for_update['id'],
                                                service_id=service2['id'],
                                                interface=interface2,
-                                               url=url2, region=region2,
+                                               url=url2, region=region2_name,
                                                enabled=False)['endpoint']
+        region2 = self.regions_client.show_region(region2_name)['region']
+        self.addCleanup(self.regions_client.delete_region, region2['id'])
+        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
+
         # Asserting if the attributes of endpoint are updated
         self.assertEqual(service2['id'], endpoint['service_id'])
         self.assertEqual(interface2, endpoint['interface'])
         self.assertEqual(url2, endpoint['url'])
-        self.assertEqual(region2, endpoint['region'])
+        self.assertEqual(region2_name, endpoint['region'])
         self.assertEqual(False, endpoint['enabled'])
