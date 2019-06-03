@@ -44,7 +44,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         server = self.create_server()
         # NOTE(zhufl) Here we create volume from self.image_ref for adding
         # coverage for "creating snapshot from non-blank volume".
-        volume = self.create_volume(image_ref=self.image_ref)
+        volume = self.create_volume(imageRef=self.image_ref)
         self.attach_volume(server['id'], volume['id'])
 
         # Snapshot a volume which attached to an instance with force=False
