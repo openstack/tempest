@@ -202,6 +202,8 @@ def wait_for_volume_resource_status(client, resource_id, status):
                 resource_name=resource_name, resource_id=resource_id)
         if resource_name == 'volume' and resource_status == 'error_restoring':
             raise exceptions.VolumeRestoreErrorException(volume_id=resource_id)
+        if resource_status == 'error_extending' and resource_status != status:
+            raise exceptions.VolumeExtendErrorException(volume_id=resource_id)
 
         if int(time.time()) - start >= client.build_timeout:
             message = ('%s %s failed to reach %s status (current %s) '
