@@ -1,0 +1,11 @@
+upgrade:
+  - |
+    Remove deprecated config option ``admin_username`` from
+    ``identity`` groups. Use ``admin_username`` from ``auth`` instead.
+    Remove deprecated config option ``admin_tenant_name`` from
+    ``auth`` and ``identity`` groups. Use ``admin_project_name`` from
+    ``auth`` instead.
+    Remove deprecated config option ``admin_password`` from
+    ``identity`` groups. Use ``admin_password`` from ``auth`` instead.
+    Remove deprecated config option ``admin_domain_name`` from
+    ``identity`` groups. Use ``admin_domain_name`` from ``auth`` instead.
