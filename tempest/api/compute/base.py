@@ -487,6 +487,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             kwargs['display_name'] = vol_name
         if image_ref is not None:
             kwargs['imageRef'] = image_ref
+        if CONF.compute.compute_volume_common_az:
+            kwargs.setdefault('availability_zone',
+                              CONF.compute.compute_volume_common_az)
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
         cls.addClassResourceCleanup(
             cls.volumes_client.wait_for_resource_deletion, volume['id'])

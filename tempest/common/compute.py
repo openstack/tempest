@@ -167,6 +167,9 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         params = {'name': volume_name,
                   'imageRef': image_id,
                   'size': CONF.volume.volume_size}
+        if CONF.compute.compute_volume_common_az:
+            params.setdefault('availability_zone',
+                              CONF.compute.compute_volume_common_az)
         volume = volumes_client.create_volume(**params)
         try:
             waiters.wait_for_volume_resource_status(volumes_client,
@@ -193,6 +196,9 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         # to be specified.
         image_id = ''
 
+    if CONF.compute.compute_volume_common_az:
+        kwargs.setdefault('availability_zone',
+                          CONF.compute.compute_volume_common_az)
     body = clients.servers_client.create_server(name=name, imageRef=image_id,
                                                 flavorRef=flavor,
                                                 **kwargs)
