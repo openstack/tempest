@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Add microversion support for scenario tests. Scenario test calls
+    multiple service API within same test and many services like compute,
+    volume and placement etc support API microversion. With microversion
+    support in scenario test, we can call different service API with
+    different microvesion. Which means we can implement scenario tests
+    for microversion also.
+    Currently Scenario manager support below services microversion:
+
+    * Compute
+    * Volume
+    * Placement
