@@ -119,6 +119,17 @@ as it is simpler, and quicker to work with.
    will run the same set of tests as the default gate jobs. Or you can
    use `unittest`_ compatible test runners such as `testr`_, `pytest`_ etc.
 
+   Tox also contains several existing job configurations. For example::
+
+    $ tox -e full
+
+   which will run the same set of tests as the OpenStack gate. (it's exactly how
+   the gate invokes Tempest) Or::
+
+    $ tox -e smoke
+
+   to run the tests tagged as smoke.
+
 .. _unittest: https://docs.python.org/3/library/unittest.html
 .. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
 .. _stestr: https://stestr.readthedocs.org/en/latest/MANUAL.html
@@ -270,14 +281,3 @@ tests by using ``testr`` ::
 To run one single test serially ::
 
     $ testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
-
-Tox also contains several existing job configurations. For example::
-
-    $ tox -e full
-
-which will run the same set of tests as the OpenStack gate. (it's exactly how
-the gate invokes Tempest) Or::
-
-    $ tox -e smoke
-
-to run the tests tagged as smoke.
