@@ -186,10 +186,17 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
     min_microversion = '2.63'
     max_microversion = 'latest'
 
+    @testtools.skipUnless(CONF.compute.certified_image_ref,
+                          '``[compute]/certified_image_ref`` required to test '
+                          'image certificate validation.')
+    @testtools.skipUnless(CONF.compute.certified_image_trusted_certs,
+                          '``[compute]/certified_image_trusted_certs`` '
+                          'required to test image certificate validation.')
     @decorators.idempotent_id('71b8e3d5-11d2-494f-b917-b094a4afed3c')
     def test_show_update_rebuild_list_server(self):
-        trusted_certs = ['test-cert-1', 'test-cert-2']
+        trusted_certs = CONF.compute.certified_image_trusted_certs
         server = self.create_test_server(
+            imageRef=CONF.compute.certified_image_ref,
             trusted_image_certificates=trusted_certs,
             wait_until='ACTIVE')
 
