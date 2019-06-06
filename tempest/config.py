@@ -69,10 +69,7 @@ AuthGroup = [
     cfg.StrOpt('default_credentials_domain_name',
                default='Default',
                help="Default domain used when getting v3 credentials. "
-                    "This is the name keystone uses for v2 compatibility.",
-               deprecated_opts=[cfg.DeprecatedOpt(
-                                'tenant_isolation_domain_name',
-                                group='auth')]),
+                    "This is the name keystone uses for v2 compatibility."),
     cfg.BoolOpt('create_isolated_networks',
                 default=True,
                 help="If use_dynamic_credentials is set to True and Neutron "
@@ -139,9 +136,7 @@ IdentityGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The public endpoint type to use for OpenStack Identity "
-                    "(Keystone) API v2",
-               deprecated_opts=[cfg.DeprecatedOpt('endpoint_type',
-                                                  group='identity')]),
+                    "(Keystone) API v2"),
     cfg.StrOpt('v3_endpoint_type',
                default='adminURL',
                choices=['public', 'admin', 'internal',

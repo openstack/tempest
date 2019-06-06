@@ -1,0 +1,8 @@
+upgrade:
+  - |
+    Remove deprecated config option ``endpoint_type`` from
+    ``identity`` group. Use ``v2_public_endpoint_type`` from
+    ``identity`` group instead.
+    Remove deprecated config option ``tenant_isolation_domain_name``
+    from ``auth`` group. Use ``default_credentials_domain_name`` from
+    ``auth`` group instead.
