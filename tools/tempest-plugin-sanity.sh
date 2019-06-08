@@ -151,8 +151,10 @@ for project in $PROJECT_LIST; do
     fi
 done
 
+echo "Passed Plugins: $passed_plugin"
+echo "Failed Plugins: $failed_plugin"
+
 # Check for failed status
 if [[ -n $failed_plugin ]]; then
-    echo "Failed Plugins: $failed_plugin"
     exit 1
 fi
