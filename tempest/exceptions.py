@@ -42,6 +42,11 @@ class VolumeRestoreErrorException(exceptions.TempestException):
     message = "Volume %(volume_id)s failed to restore and is in ERROR status"
 
 
+class VolumeExtendErrorException(exceptions.TempestException):
+    message = ("Volume %(volume_id)s failed to extend and "
+               "is in error_extending status")
+
+
 class StackBuildErrorException(exceptions.TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
