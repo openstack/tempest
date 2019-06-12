@@ -22,6 +22,7 @@ from tempest.common import identity
 from tempest.common import utils
 from tempest.common.utils import net_info
 from tempest import config
+from tempest.lib import exceptions
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
@@ -127,12 +128,23 @@ class BaseService(object):
         pass
 
     def run(self):
-        if self.is_dry_run:
-            self.dry_run()
-        elif self.is_save_state:
-            self.save_state()
-        else:
-            self.delete()
+        try:
+            if self.is_dry_run:
+                self.dry_run()
+            elif self.is_save_state:
+                self.save_state()
+            else:
+                self.delete()
+        except exceptions.NotImplemented as exc:
+            # Many OpenStack services use extensions logic to implement the
+            # features or resources. Tempest cleanup tries to clean up the test
+            # resources without having much logic of extensions checks etc.
+            # If any of the extension is missing then, service will return
+            # NotImplemented error.
+            msg = ("Got NotImplemented error in %s, full exception: %s" %
+                   (str(self.__class__), str(exc)))
+            LOG.exception(msg)
+            self.got_exceptions.append(msg)
 
 
 class SnapshotService(BaseService):

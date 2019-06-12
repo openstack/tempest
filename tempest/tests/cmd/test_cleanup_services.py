@@ -19,6 +19,7 @@ from oslo_serialization import jsonutils as json
 from tempest import clients
 from tempest.cmd import cleanup_service
 from tempest import config
+from tempest.lib import exceptions
 from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests.lib import fake_credentials
@@ -27,13 +28,24 @@ from tempest.tests.lib import fake_http
 
 class TestBaseService(base.TestCase):
 
+    class TestException(cleanup_service.BaseService):
+        def delete(self):
+            raise exceptions.NotImplemented
+
+        def dry_run(self):
+            raise exceptions.NotImplemented
+
+        def save_state(self):
+            raise exceptions.NotImplemented
+
     def test_base_service_init(self):
         kwargs = {'data': {'data': 'test'},
                   'is_dry_run': False,
                   'saved_state_json': {'saved': 'data'},
                   'is_preserve': False,
                   'is_save_state': True,
-                  'tenant_id': 'project_id'}
+                  'tenant_id': 'project_id',
+                  'got_exceptions': []}
         base = cleanup_service.BaseService(kwargs)
         self.assertEqual(base.data, kwargs['data'])
         self.assertFalse(base.is_dry_run)
@@ -41,6 +53,28 @@ class TestBaseService(base.TestCase):
         self.assertFalse(base.is_preserve)
         self.assertTrue(base.is_save_state)
         self.assertEqual(base.tenant_filter['project_id'], kwargs['tenant_id'])
+        self.assertEqual(base.got_exceptions, kwargs['got_exceptions'])
+
+    def test_not_implemented_ex(self):
+        kwargs = {'data': {'data': 'test'},
+                  'is_dry_run': False,
+                  'saved_state_json': {'saved': 'data'},
+                  'is_preserve': False,
+                  'is_save_state': False,
+                  'tenant_id': 'project_id',
+                  'got_exceptions': []}
+        base = self.TestException(kwargs)
+        # delete
+        base.run()
+        self.assertEqual(len(base.got_exceptions), 1)
+        # save_state
+        base.save_state = True
+        base.run()
+        self.assertEqual(len(base.got_exceptions), 2)
+        # dry_run
+        base.is_dry_run = True
+        base.run()
+        self.assertEqual(len(base.got_exceptions), 3)
 
 
 class MockFunctionsBase(base.TestCase):

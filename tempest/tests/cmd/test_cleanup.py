@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
+
 from tempest.cmd import cleanup
 from tempest.tests import base
 
@@ -24,3 +26,17 @@ class TestTempestCleanup(base.TestCase):
         test_saved_json = 'tempest/tests/cmd/test_saved_state_json.json'
         # test if the file is loaded without any issues/exceptions
         c._load_json(test_saved_json)
+
+    @mock.patch('tempest.cmd.cleanup.TempestCleanup.init')
+    @mock.patch('tempest.cmd.cleanup.TempestCleanup._cleanup')
+    def test_take_action_got_exception(self, mock_cleanup, mock_init):
+        c = cleanup.TempestCleanup(None, None, 'test')
+        c.GOT_EXCEPTIONS.append('exception')
+        mock_cleanup.return_value = True
+        mock_init.return_value = True
+        try:
+            c.take_action(mock.Mock())
+        except Exception as exc:
+            self.assertEqual(str(exc), '[\'exception\']')
+            return
+        assert False
