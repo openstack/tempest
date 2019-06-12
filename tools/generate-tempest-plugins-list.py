@@ -47,15 +47,10 @@ url = 'https://review.opendev.org/projects/'
 '''
 
 
-def is_in_openstack_namespace(proj):
-    return proj.startswith('openstack/')
-
 # Rather than returning a 404 for a nonexistent file, cgit delivers a
 # 0-byte response to a GET request.  It also does not provide a
 # Content-Length in a HEAD response, so the way we tell if a file exists
 # is to check the length of the entire GET response body.
-
-
 def has_tempest_plugin(proj):
     try:
         r = urllib.urlopen(
@@ -76,19 +71,33 @@ r = urllib.urlopen(url)
 # cross-site scripting attacks.  Therefore we must discard it so the
 # json library won't choke.
 content = r.read().decode('utf-8')[4:]
-projects = sorted(filter(is_in_openstack_namespace, json.loads(content)))
+projects = sorted(json.loads(content))
 
-# Retrieve projects having no deb, puppet, ui or spec namespace as those
+# Retrieve projects having no deployment tool repo (such as deb,
+# puppet, ansible, etc.), infra repos, ui or spec namespace as those
 # namespaces do not contains tempest plugins.
 projects_list = [i for i in projects if not (
+    i.startswith('openstack-dev/') or
+    i.startswith('openstack-infra/') or
+    i.startswith('openstack/ansible-') or
+    i.startswith('openstack/charm-') or
+    i.startswith('openstack/cookbook-openstack-') or
+    i.startswith('openstack/devstack-') or
+    i.startswith('openstack/fuel-') or
     i.startswith('openstack/deb-') or
     i.startswith('openstack/puppet-') or
+    i.startswith('openstack/openstack-ansible-') or
+    i.startswith('x/deb-') or
+    i.startswith('x/fuel-') or
+    i.startswith('x/python-') or
+    i.startswith('zuul/') or
     i.endswith('-ui') or
     i.endswith('-specs'))]
 
 found_plugins = list(filter(has_tempest_plugin, projects_list))
 
-# Every element of the found_plugins list begins with "openstack/".
-# We drop those initial 10 octets when printing the list.
+# We have tempest plugins not only in 'openstack/' namespace but also the
+# other name spaces such as 'airship/', 'x/', etc.
+# So, we print all of them here.
 for project in found_plugins:
-    print(project[10:])
+    print(project)

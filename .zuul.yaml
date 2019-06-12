@@ -418,6 +418,7 @@
       - opendev.org/openstack/senlin-tempest-plugin
       - opendev.org/openstack/solum-tempest-plugin
       - opendev.org/x/tap-as-a-service
+      - opendev.org/x/tap-as-a-service-tempest-plugin
       - opendev.org/openstack/telemetry-tempest-plugin
       - opendev.org/openstack/tempest-horizon
       - opendev.org/x/tobiko
@@ -428,6 +429,7 @@
       - opendev.org/openstack/vitrage-tempest-plugin
       - opendev.org/x/vmware-nsx-tempest-plugin
       - opendev.org/openstack/watcher-tempest-plugin
+      - opendev.org/x/whitebox-tempest-plugin
       - opendev.org/openstack/zaqar-tempest-plugin
       - opendev.org/openstack/zun-tempest-plugin
 
