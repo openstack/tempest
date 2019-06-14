@@ -212,7 +212,9 @@ class VolumesClient(base_client.BaseClient):
         except lib_exc.NotFound:
             return True
         if volume["volume"]["status"] == "error_deleting":
-            raise lib_exc.DeleteErrorException(resource_id=id)
+            raise lib_exc.DeleteErrorException(
+                "Volume %s failed to delete and is in error_deleting status" %
+                volume['id'])
         return False
 
     @property
