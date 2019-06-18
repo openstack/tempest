@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new parameter, compute/compute_volume_common_az is introduced to
+    specify availability zone where tempest creates instances and volumes
+    for scenario tests, to allow us to run scenario tests in the deployment
+    which has multiple availability zones and cinder/cross_az_attach in
+    nova.conf is set to False.
