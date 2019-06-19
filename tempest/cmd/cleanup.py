@@ -94,6 +94,8 @@ CONF = config.CONF
 
 class TempestCleanup(command.Command):
 
+    GOT_EXCEPTIONS = []
+
     def take_action(self, parsed_args):
         try:
             self.init(parsed_args)
@@ -103,6 +105,8 @@ class TempestCleanup(command.Command):
             LOG.exception("Failure during cleanup")
             traceback.print_exc()
             raise
+        if self.GOT_EXCEPTIONS:
+            raise Exception(self.GOT_EXCEPTIONS)
 
     def init(self, parsed_args):
         cleanup_service.init_conf()
@@ -159,7 +163,8 @@ class TempestCleanup(command.Command):
                   'is_dry_run': is_dry_run,
                   'saved_state_json': self.json_data,
                   'is_preserve': is_preserve,
-                  'is_save_state': is_save_state}
+                  'is_save_state': is_save_state,
+                  'got_exceptions': self.GOT_EXCEPTIONS}
         for service in self.global_services:
             svc = service(admin_mgr, **kwargs)
             svc.run()
@@ -200,7 +205,8 @@ class TempestCleanup(command.Command):
                   'saved_state_json': self.json_data,
                   'is_preserve': is_preserve,
                   'is_save_state': False,
-                  'project_id': project_id}
+                  'project_id': project_id,
+                  'got_exceptions': self.GOT_EXCEPTIONS}
         for service in self.project_services:
             svc = service(mgr, **kwargs)
             svc.run()
@@ -300,7 +306,8 @@ class TempestCleanup(command.Command):
                   'is_dry_run': False,
                   'saved_state_json': data,
                   'is_preserve': False,
-                  'is_save_state': True}
+                  'is_save_state': True,
+                  'got_exceptions': self.GOT_EXCEPTIONS}
         for service in self.global_services:
             svc = service(admin_mgr, **kwargs)
             svc.run()
