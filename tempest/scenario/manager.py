@@ -1277,7 +1277,7 @@ class NetworkScenarioTest(ScenarioTest):
         :param tenant_id: id of tenant to create resources in.
         :param dns_nameservers: list of dns servers to send to subnet.
         :param port_security_enabled: whether or not port_security is enabled
-        :param: net_dict: a dict containing experimental network information in
+        :param net_dict: a dict containing experimental network information in
                 a form like this: {'provider:network_type': 'vlan',
                                    'provider:physical_network': 'foo',
                                    'provider:segmentation_id': '42'}
