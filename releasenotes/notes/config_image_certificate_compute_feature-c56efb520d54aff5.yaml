@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    New configuration options ``[compute]/certified_image_ref`` and
+    ``[compute]/certified_image_trusted_certs`` have been introduced. These
+    are required in order to run the ``ServerShowV263Test`` test and allow a
+    signed image with the required img_signature_* properties set along
+    with a list of trusted certificates to be used during the test.

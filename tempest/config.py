@@ -271,6 +271,17 @@ ComputeGroup = [
                help="Valid secondary image reference to be used in tests. "
                     "This is a required option, but if only one image is "
                     "available duplicate the value of image_ref above"),
+    cfg.StrOpt('certified_image_ref',
+               help="Valid image reference to be used in image certificate "
+                    "validation tests when enabled. This image must also "
+                    "have the required img_signature_* properties set. "
+                    "Additional details available within the following Nova "
+                    "documentation: https://docs.openstack.org/nova/latest/"
+                    "user/certificate-validation.html"),
+    cfg.ListOpt('certified_image_trusted_certs',
+                help="A list of trusted certificates to be used when the "
+                     "image certificate validation compute feature is "
+                     "enabled."),
     cfg.StrOpt('flavor_ref',
                default="1",
                help="Valid primary flavor to use in tests."),
