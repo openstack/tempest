@@ -79,6 +79,8 @@ def has_tempest_plugin(proj):
     except HTTPError as err:
         if err.code == 404:
             return False
+        # We should not ignore non 404 errors.
+        raise err
     p = re.compile(r'^tempest\.test_plugins', re.M)
     if p.findall(r.read().decode('utf-8')):
         return True
