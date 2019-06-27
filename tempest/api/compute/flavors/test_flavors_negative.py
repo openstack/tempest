@@ -70,9 +70,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
         self.assertEqual(min_img_ram, image['min_ram'])
 
         # Try to create server with flavor of insufficient ram size
-        self.assertRaisesRegex(lib_exc.BadRequest,
-                               "Flavor's memory is too small for "
-                               "requested image",
-                               self.create_test_server,
-                               image_id=image['id'],
-                               flavor=flavor['id'])
+        self.assertRaises(lib_exc.BadRequest,
+                          self.create_test_server,
+                          image_id=image['id'],
+                          flavor=flavor['id'])
