@@ -535,9 +535,8 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enable special configuration drive with metadata.'),
     cfg.ListOpt('scheduler_enabled_filters',
-                default=["RetryFilter", "AvailabilityZoneFilter",
-                         "ComputeFilter", "ComputeCapabilitiesFilter",
-                         "ImagePropertiesFilter",
+                default=["AvailabilityZoneFilter", "ComputeFilter",
+                         "ComputeCapabilitiesFilter", "ImagePropertiesFilter",
                          "ServerGroupAntiAffinityFilter",
                          "ServerGroupAffinityFilter"],
                 help="A list of enabled filters that Nova will accept as "
