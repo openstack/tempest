@@ -41,19 +41,24 @@ except ImportError:
 # TODO(masayukig): Some of these can be removed from BLACKLIST in the future
 # when the patches are merged.
 BLACKLIST = [
-    'barbican-tempest-plugin',  # https://review.opendev.org/#/c/634631/
-    'cyborg-tempest-plugin',  # https://review.opendev.org/659687
-    'intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
-    'networking-ansible',  # https://review.opendev.org/#/c/634647/
-    'networking-generic-switch',  # https://review.opendev.org/#/c/634846/
-    'networking-l2gw-tempest-plugin',  # https://review.opendev.org/#/c/635093/
-    'networking-midonet',  # https://review.opendev.org/#/c/635096/
-    'networking-plumgrid',  # https://review.opendev.org/#/c/635096/
-    'networking-spp',  # https://review.opendev.org/#/c/635098/
-    'neutron-dynamic-routing',  # https://review.opendev.org/#/c/637718/
-    'neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
-    'nova-lxd',  # https://review.opendev.org/#/c/638334/
-    'valet',  # https://review.opendev.org/#/c/638339/
+    'openstack/barbican-tempest-plugin',
+    # https://review.opendev.org/#/c/634631/
+    'openstack/cyborg-tempest-plugin',  # https://review.opendev.org/659687
+    'x/gce-api',  # It looks gce-api doesn't support python3 yet.
+    'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
+    'x/networking-ansible',  # https://review.opendev.org/#/c/634647/
+    'openstack/networking-generic-switch',
+    # https://review.opendev.org/#/c/634846/
+    'openstack/networking-l2gw-tempest-plugin',
+    # https://review.opendev.org/#/c/635093/
+    'openstack/networking-midonet',  # https://review.opendev.org/#/c/635096/
+    'x/networking-plumgrid',  # https://review.opendev.org/#/c/635096/
+    'x/networking-spp',  # https://review.opendev.org/#/c/635098/
+    'openstack/neutron-dynamic-routing',
+    # https://review.opendev.org/#/c/637718/
+    'openstack/neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
+    'x/nova-lxd',  # https://review.opendev.org/#/c/638334/
+    'x/valet',  # https://review.opendev.org/#/c/638339/
 ]
 
 url = 'https://review.opendev.org/projects/'
