@@ -196,7 +196,7 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
     def test_show_update_rebuild_list_server(self):
         trusted_certs = CONF.compute.certified_image_trusted_certs
         server = self.create_test_server(
-            imageRef=CONF.compute.certified_image_ref,
+            image_id=CONF.compute.certified_image_ref,
             trusted_image_certificates=trusted_certs,
             wait_until='ACTIVE')
 
