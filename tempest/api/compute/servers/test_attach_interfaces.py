@@ -15,6 +15,7 @@
 
 import time
 
+from oslo_log import log
 import six
 
 from tempest.api.compute import base
@@ -29,6 +30,8 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
+
+LOG = log.getLogger(__name__)
 
 
 class AttachInterfacesTestBase(base.BaseV2ComputeTest):
@@ -364,10 +367,34 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
         # Wait for the ips count to increase by one.
 
+        def _get_server_floating_ips():
+            _floating_ips = []
+            _server = self.os_primary.servers_client.show_server(
+                server['id'])['server']
+            for _ip_set in _server['addresses']:
+                for _ip in _server['addresses'][_ip_set]:
+                    if _ip['OS-EXT-IPS:type'] == 'floating':
+                        _floating_ips.append(_ip['addr'])
+            return _floating_ips
+
         def _wait_for_ip_increase():
             _addresses = self.os_primary.servers_client.list_addresses(
                 server['id'])['addresses']
-            return len(list(_addresses.values())[0]) == original_ip_count + 1
+            _ips = [addr['addr'] for addr in list(_addresses.values())[0]]
+            LOG.debug("Wait for IP increase. All IPs still associated to "
+                      "the server %(id)s: %(ips)s",
+                      {'id': server['id'], 'ips': _ips})
+            if len(_ips) == original_ip_count + 1:
+                return True
+            elif len(_ips) == original_ip_count:
+                return False
+            # If not, lets remove any floating IP from the list and check again
+            _fips = _get_server_floating_ips()
+            _ips = [_ip for _ip in _ips if _ip not in _fips]
+            LOG.debug("Wait for IP increase. Fixed IPs still associated to "
+                      "the server %(id)s: %(ips)s",
+                      {'id': server['id'], 'ips': _ips})
+            return len(_ips) == original_ip_count + 1
 
         if not test_utils.call_until_true(
                 _wait_for_ip_increase, CONF.compute.build_timeout,
@@ -394,7 +421,19 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
         def _wait_for_ip_decrease():
             _addresses = self.os_primary.servers_client.list_addresses(
                 server['id'])['addresses']
-            return len(list(_addresses.values())[0]) == original_ip_count
+            _ips = [addr['addr'] for addr in list(_addresses.values())[0]]
+            LOG.debug("Wait for IP decrease. All IPs still associated to "
+                      "the server %(id)s: %(ips)s",
+                      {'id': server['id'], 'ips': _ips})
+            if len(_ips) == original_ip_count:
+                return True
+            # If not, lets remove any floating IP from the list and check again
+            _fips = _get_server_floating_ips()
+            _ips = [_ip for _ip in _ips if _ip not in _fips]
+            LOG.debug("Wait for IP decrease. Fixed IPs still associated to "
+                      "the server %(id)s: %(ips)s",
+                      {'id': server['id'], 'ips': _ips})
+            return len(_ips) == original_ip_count
 
         if not test_utils.call_until_true(
                 _wait_for_ip_decrease, CONF.compute.build_timeout,
