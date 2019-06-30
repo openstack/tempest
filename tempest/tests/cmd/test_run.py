@@ -49,7 +49,7 @@ class TestTempestRun(base.TestCase):
         args = mock.Mock(spec=argparse.Namespace)
         setattr(args, 'smoke', False)
         setattr(args, 'regex', '')
-        self.assertIsNone(None, self.run_cmd._build_regex(args))
+        self.assertIsNone(self.run_cmd._build_regex(args))
 
     def test__build_regex_smoke(self):
         args = mock.Mock(spec=argparse.Namespace)
