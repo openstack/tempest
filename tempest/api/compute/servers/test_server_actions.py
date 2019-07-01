@@ -417,10 +417,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         # Make sure everything still looks OK.
         server = self.client.show_server(self.server_id)['server']
-        # The flavor id is not returned in the server response after
-        # microversion 2.46 so handle that gracefully.
-        if server['flavor'].get('id'):
-            self.assertEqual(self.flavor_ref, server['flavor']['id'])
+        self.assert_flavor_equal(self.flavor_ref, server['flavor'])
         attached_volumes = server['os-extended-volumes:volumes_attached']
         self.assertEqual(1, len(attached_volumes))
         self.assertEqual(volume['id'], attached_volumes[0]['id'])
