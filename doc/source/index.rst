@@ -88,7 +88,12 @@ Support Policy
 
    stable_branch_support_policy
 
-Indices and tables
-==================
+Search
+======
 
-* :ref:`search`
+.. only:: html
+
+  * :ref:`Tempest document search <search>`: Search the contents of this document.
+
+* `OpenStack wide search <https://docs.openstack.org>`_: Search the wider
+  set of OpenStack documentation, including forums.
