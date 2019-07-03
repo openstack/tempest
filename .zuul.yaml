@@ -172,6 +172,26 @@
         c-bak: false
 
 - job:
+    name: tempest-integrated-networking
+    parent: devstack-tempest
+    branches: ^(?!stable/ocata).*$
+    description: |
+      This  job runs integration tests for networking. This is subset of
+      'tempest-full' job and run only Neutron and Nova related tests.
+      This is meant to be run on neutron gate only.
+    vars:
+      tox_envlist: integrated-network
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        c-bak: false
+
+- job:
     name: tempest-full-py3-ipv6
     parent: devstack-tempest-ipv6
     # This currently works from stable/pike on.
@@ -498,6 +518,21 @@
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
         DATABASE_TYPE: postgresql
+
+- project-template:
+    name: integrated-gate-networking
+    description: |
+      Run the python3 Tempest network integration tests (Nova and Neutron related)
+      in check and gate for the neutron integrated gate. This is meant to be
+      run on neutron gate only.
+    check:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-networking
+    gate:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-networking
 
 - project:
     templates:
