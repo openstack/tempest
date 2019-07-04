@@ -404,7 +404,6 @@
       - opendev.org/openstack/monasca-log-api
       - opendev.org/openstack/monasca-tempest-plugin
       - opendev.org/openstack/murano-tempest-plugin
-      - opendev.org/x/networking-ansible
       - opendev.org/openstack/networking-bgpvpn
       - opendev.org/x/networking-cisco
       - opendev.org/x/networking-fortinet
