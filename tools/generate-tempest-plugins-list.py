@@ -57,7 +57,6 @@ BLACKLIST = [
     'openstack/neutron-dynamic-routing',
     # https://review.opendev.org/#/c/637718/
     'openstack/neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
-    'x/nova-lxd',  # https://review.opendev.org/#/c/638334/
     'x/valet',  # https://review.opendev.org/#/c/638339/
 ]
 
