@@ -249,6 +249,22 @@
         ENABLE_VOLUME_MULTIATTACH: true
 
 - job:
+    name: tempest-integrated-object-storage
+    parent: devstack-tempest
+    branches: ^(?!stable/ocata).*$
+    description: |
+      This job runs integration tests for object storage. This is
+      subset of 'tempest-full' job and run Swift, Cinder and Glance
+      related tests. This is meant to be run on Swift gate only.
+    vars:
+      tox_envlist: integrated-object-storage
+      devstack_localrc:
+        # NOTE(gmann): swift is not ready on python3 yet and devstack
+        # install it on python2.7 only. But settting the USE_PYTHON3
+        # for future once swift is ready on py3.
+        USE_PYTHON3: true
+
+- job:
     name: tempest-full-py3-ipv6
     parent: devstack-tempest-ipv6
     # This currently works from stable/pike on.
@@ -637,6 +653,22 @@
       jobs:
         - grenade-py3
         - tempest-integrated-storage
+
+- project-template:
+    name: integrated-gate-object-storage
+    description: |
+      Run the python3 Tempest object storage integration tests
+      (Swift, Cinder and Glance related) in check and gate
+      for the swift integrated gate. This is meant to be
+      run on swift gate only.
+    check:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-object-storage
+    gate:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-object-storage
 
 - project:
     templates:

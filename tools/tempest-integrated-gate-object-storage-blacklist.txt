@@ -1,0 +1,17 @@
+# This file includes the backlist of tests which need to be
+# skipped for Integrated-gate-object-storage template. Integrated-gate-object-storage template
+# needs to run only Swift, Cinder and Glance related tests and rest all
+# tests will be skipped by below list.
+
+# Skip network, compute, keystone API tests.
+tempest.api.network
+tempest.api.compute
+tempest.api.identity
+
+# Skip network, compute, keystone only scenario tests
+tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_network_advanced_server_ops
+tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops
+tempest.scenario.test_network_v6.TestGettingAddress.test_security_groups_basic_ops
+tempest.scenario.test_server_advanced_ops.TestServerAdvancedOps.test_server_sequence_suspend_resume
+tempest.scenario.test_server_basic_ops.TestServerBasicOps.test_server_basic_ops
+tempest.scenario.test_server_multinode.TestServerMultinode.test_schedule_to_all_nodes
