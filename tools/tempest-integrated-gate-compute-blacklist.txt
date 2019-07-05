@@ -1,0 +1,13 @@
+# This file includes the backlist of tests which need to be
+# skipped for Integrated-gate-compute template. Integrated-gate-compute template
+# needs to run only Nova, Neutron, Cinder and Glance related tests and rest all
+# tests will be skipped by below list.
+
+# Skip keystone and Swift API tests.
+tempest.api.identity
+tempest.api.object_storage
+
+# Skip Swift only scenario tests.
+tempest.scenario.test_object_storage_basic_ops.TestObjectStorageBasicOps.test_swift_basic_ops
+tempest.scenario.test_object_storage_basic_ops.TestObjectStorageBasicOps.test_swift_acl_anonymous_download
+tempest.scenario.test_volume_backup_restore.TestVolumeBackupRestore.test_volume_backup_restore

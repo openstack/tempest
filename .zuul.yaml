@@ -192,6 +192,27 @@
         c-bak: false
 
 - job:
+    name: tempest-integrated-compute
+    parent: devstack-tempest
+    branches: ^(?!stable/ocata).*$
+    description: |
+      This job runs integration tests for compute. This is
+      subset of 'tempest-full' job and run Nova, Neutron, Cinder (except backup tests)
+      and Glance related tests. This is meant to be run on Nova gate only.
+    vars:
+      tox_envlist: integrated-compute
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+        ENABLE_VOLUME_MULTIATTACH: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        c-bak: false
+
+- job:
     name: tempest-integrated-placement
     parent: devstack-tempest
     branches: ^(?!stable/ocata).*$
@@ -568,6 +589,22 @@
       jobs:
         - grenade-py3
         - tempest-integrated-networking
+
+- project-template:
+    name: integrated-gate-compute
+    description: |
+      Run the python3 Tempest compute integration tests
+      (Nova, Neutron, Cinder and Glance related) in check and gate
+      for the Nova integrated gate. This is meant to be
+      run on Nova gate only.
+    check:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-compute
+    gate:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-compute
 
 - project-template:
     name: integrated-gate-placement
