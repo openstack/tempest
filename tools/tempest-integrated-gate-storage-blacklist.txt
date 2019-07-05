@@ -1,0 +1,13 @@
+# This file includes the backlist of tests which need to be
+# skipped for Integrated-gate-storage template. Integrated-gate-storage template
+# needs to run only Cinder, Glance, Swift and Nova related tests and rest all
+# tests will be skipped by below list.
+
+# Skip network, keystone API tests.
+tempest.api.network
+tempest.api.identity
+
+# Skip network only scenario tests.
+tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_network_advanced_server_ops
+tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops
+tempest.scenario.test_network_v6.TestGettingAddress.test_security_groups_basic_ops
