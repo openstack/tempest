@@ -192,6 +192,27 @@
         c-bak: false
 
 - job:
+    name: tempest-integrated-placement
+    parent: devstack-tempest
+    branches: ^(?!stable/ocata).*$
+    description: |
+      This job runs integration tests for placement. This is
+      subset of 'tempest-full' job and run Nova and Neutron
+      related tests. This is meant to be run on Placement gate only.
+    vars:
+      tox_envlist: integrated-placement
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+        ENABLE_VOLUME_MULTIATTACH: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        c-bak: false
+
+- job:
     name: tempest-integrated-storage
     parent: devstack-tempest
     branches: ^(?!stable/ocata).*$
@@ -547,6 +568,22 @@
       jobs:
         - grenade-py3
         - tempest-integrated-networking
+
+- project-template:
+    name: integrated-gate-placement
+    description: |
+      Run the python3 Tempest placement integration tests
+      (Nova and Neutron related) in check and gate
+      for the Placement integrated gate. This is meant to be
+      run on Placement gate only.
+    check:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-placement
+    gate:
+      jobs:
+        - grenade-py3
+        - tempest-integrated-placement
 
 - project-template:
     name: integrated-gate-storage
