@@ -19,11 +19,11 @@ Test Selection
 ==============
 Tempest run has several options:
 
- * **--regex/-r**: This is a selection regex like what stestr uses. It will run
-                   any tests that match on re.match() with the regex
- * **--smoke/-s**: Run all the tests tagged as smoke
- * **--black-regex**: It allows to do simple test exclusion via passing a
-                      rejection/black regexp
+* ``--regex/-r``: This is a selection regex like what stestr uses. It will run
+  any tests that match on re.match() with the regex
+* ``--smoke/-s``: Run all the tests tagged as smoke
+* ``--black-regex``: It allows to do simple test exclusion via passing a
+  rejection/black regexp
 
 There are also the ``--blacklist-file`` and ``--whitelist-file`` options that
 let you pass a filepath to tempest run with the file format being a line
