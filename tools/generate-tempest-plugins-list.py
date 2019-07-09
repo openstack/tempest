@@ -43,7 +43,6 @@ except ImportError:
 BLACKLIST = [
     'openstack/barbican-tempest-plugin',
     # https://review.opendev.org/#/c/634631/
-    'openstack/cyborg-tempest-plugin',  # https://review.opendev.org/659687
     'x/gce-api',  # It looks gce-api doesn't support python3 yet.
     'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
     'x/networking-ansible',  # https://review.opendev.org/#/c/634647/
