@@ -204,7 +204,10 @@ class ServersClient(base_compute_client.BaseComputeClient):
     def action(self, server_id, action_name,
                schema=schema.server_actions_common_schema,
                **kwargs):
-        post_body = json.dumps({action_name: kwargs})
+        if 'body' in kwargs:
+            post_body = json.dumps(kwargs['body'])
+        else:
+            post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body)
         if body:
@@ -598,6 +601,15 @@ class ServersClient(base_compute_client.BaseComputeClient):
         API reference:
         https://developer.openstack.org/api-ref/compute/#unshelve-restore-shelved-server-unshelve-action
         """
+        # NOTE(gmann): pass None as request body if nothing is requested.
+        # Nova started the request body check since 2.77 microversion and only
+        # accept AZ or None as valid req body and reject the empty dict {}.
+        # Before 2.77 microverison anything is valid body as Nova does not
+        # check the request body but as per api-ref None is valid request
+        # body to pass so we do not need to check the requested microversion
+        # here and always default req body to None.
+        if not kwargs:
+            kwargs['body'] = {'unshelve': None}
         return self.action(server_id, 'unshelve', **kwargs)
 
     def shelve_offload_server(self, server_id, **kwargs):
