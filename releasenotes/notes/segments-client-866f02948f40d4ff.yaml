@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Add ``segments`` client to Tempest to make possible the testing of the
+    Routed Provider Networks feature.
+    The following API calls are available for tempest from now:
+
+    * POST /segments
+    * PUT /segments/{segment_id}
+    * GET /segment/{segment_id}
+    * DELETE /segments/{segment_id}
+    * GET /segments
