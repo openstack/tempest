@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show default group type details API to v3 group_types_client library.
+
+    * show_default_group_type

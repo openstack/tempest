@@ -40,6 +40,16 @@ class TestGroupTypesClient(base.BaseServiceTest):
         }
     }
 
+    FAKE_INFO_DEFAULT_GROUP_TYPE = {
+        "group_type": {
+            "id": "7270c56e-6354-4528-8e8b-f54dee2232c8",
+            "name": "group-type-default",
+            "description": "default group type",
+            "is_public": True,
+            "group_specs": {},
+        }
+    }
+
     FAKE_LIST_GROUP_TYPES = {
         "group_types": [
             {
@@ -113,6 +123,13 @@ class TestGroupTypesClient(base.BaseServiceTest):
             self.FAKE_INFO_GROUP_TYPE,
             bytes_body,
             group_type_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
+
+    def _test_show_default_group_type(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_default_group_type,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_INFO_DEFAULT_GROUP_TYPE,
+            bytes_body)
 
     def _test_list_group_types(self, bytes_body=False):
         self.check_service_client_function(
@@ -191,6 +208,12 @@ class TestGroupTypesClient(base.BaseServiceTest):
 
     def test_show_group_type_with_bytes_body(self):
         self._test_show_group_type(bytes_body=True)
+
+    def test_show_default_group_type_with_str_body(self):
+        self._test_show_default_group_type()
+
+    def test_show_default_group_type_with_bytes_body(self):
+        self._test_show_default_group_type(bytes_body=True)
 
     def test_list_group_types_with_str_body(self):
         self._test_list_group_types()

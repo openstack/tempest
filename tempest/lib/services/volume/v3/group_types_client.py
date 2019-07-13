@@ -63,6 +63,18 @@ class GroupTypesClient(base_client.BaseClient):
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
 
+    def show_default_group_type(self):
+        """Returns the details of default group_type.
+
+        For more information, please refer to the official API reference:
+        https://developer.openstack.org/api-ref/block-storage/v3/#show-default-group-type-details
+        """
+        url = 'group_types/default'
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
     def show_group_type(self, group_type_id):
         """Returns the details of a single group_type.
 
