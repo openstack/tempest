@@ -1,0 +1,12 @@
+---
+prelude: >
+    This is an intermediate release during the Train development cycle to
+    mark the end of support for Pike in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+      * Stein
+      * Rocky
+      * Queens
+
+    Current development of Tempest is for OpenStack Train development
+    cycle.
