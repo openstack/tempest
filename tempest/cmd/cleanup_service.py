@@ -855,7 +855,7 @@ class RoleService(BaseService):
 
     def __init__(self, manager, **kwargs):
         super(RoleService, self).__init__(kwargs)
-        self.client = manager.roles_client
+        self.client = manager.roles_v3_client
 
     def list(self):
         try:
