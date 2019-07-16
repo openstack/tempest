@@ -183,6 +183,9 @@ When to approve
     * the project's PTL +1's the change
     * the patch does not affect any other project's testing gates
     * the patch does not cause any negative side effects
+  * If fixing and removing the faulty plugin (which leads to fail
+    voting ``tempest-tox-plugin-sanity-check`` job) and unblock the
+    tempest gate
 
   Note that such a policy should be used judiciously, as we should strive to
   have two +2's on each patch set, prior to approval.
