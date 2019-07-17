@@ -7,12 +7,12 @@
       This Tempest job provides the base for both the single and multi-node
       test setup. To run a multi-node test inherit from devstack-tempest and
       set the nodeset to a multi-node one.
-    required-projects:
+    required-projects: &base_required-projects
       - opendev.org/openstack/tempest
     timeout: 7200
-    roles:
+    roles: &base_roles
       - zuul: opendev.org/openstack/devstack
-    vars:
+    vars: &base_vars
       devstack_services:
         tempest: true
       devstack_local_conf:
@@ -53,35 +53,35 @@
     name: devstack-tempest-ipv6
     parent: devstack-ipv6
     description: |
-      Base Tempest IPv6 job.
-    required-projects:
-      - opendev.org/openstack/tempest
+      Base Tempest IPv6 job. This job is derived from 'devstack-ipv6'
+      which set the IPv6-only setting for OpenStack services. As part of
+      run phase, this job will verify the IPv6 setting and check the services
+      endpoints and listen addresses are IPv6. Basically it will run the script
+      ./tool/verify-ipv6-only-deployments.sh
+
+      Child jobs of this job can run their own set of tests and can
+      add post-run playebooks to extend the IPv6 verification specific
+      to their deployed services.
+      Check the wiki page for more details about project jobs setup
+      - https://wiki.openstack.org/wiki/Goal-IPv6-only-deployments-and-testing
+    required-projects: *base_required-projects
     timeout: 7200
-    roles:
-      - zuul: opendev.org/openstack/devstack
-    vars:
-      devstack_services:
-        tempest: true
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            compute:
-              min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
-      test_results_stage_name: test_results
-      zuul_copy_output:
-        '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
-        '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': logs
-        '{{ devstack_base_dir }}/tempest/tempest.log': logs
-        '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': logs
-        '{{ stage_dir }}/{{ test_results_stage_name }}.html': logs
-        '{{ stage_dir }}/stackviz': logs
-      extensions_to_txt:
-        conf: true
-        log: true
-        yaml: true
-        yml: true
-    run: playbooks/devstack-tempest.yaml
+    roles: *base_roles
+    vars: *base_vars
+    run: playbooks/devstack-tempest-ipv6.yaml
     post-run: playbooks/post-tempest.yaml
+
+- job:
+    name: tempest-ipv6-only
+    parent: devstack-tempest-ipv6
+    # This currently works from stable/pike on.
+    branches: ^(?!stable/ocata).*$
+    description: |
+      Integration test of IPv6-only deployments. This job runs
+      smoke and IPv6 relates tests only. Basic idea is to test
+      whether OpenStack Services listen on IPv6 addrress or not.
+    vars:
+      tox_envlist: ipv6-only
 
 - job:
     name: tempest-full
@@ -729,7 +729,7 @@
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
-            irrelevant-files:
+            irrelevant-files: &tempest-irrelevant-files-2
               - ^.*\.rst$
               - ^doc/.*$
               - ^etc/.*$
@@ -738,6 +738,8 @@
               - ^tempest/hacking/.*$
               - ^tempest/tests/.*$
               # tools/ is not here since this relies on a script in tools/.
+        - tempest-ipv6-only:
+            irrelevant-files: *tempest-irrelevant-files-2
         - tempest-slow:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-py3:
@@ -790,6 +792,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - grenade-py3:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-ipv6-only:
+            irrelevant-files: *tempest-irrelevant-files-2
     experimental:
       jobs:
         - tempest-cinder-v2-api:
