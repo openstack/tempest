@@ -35,7 +35,7 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-server-group
+        https://docs.openstack.org/api-ref/compute/#create-server-group
         """
         post_body = json.dumps({'server_group': kwargs})
         resp, body = self.post('os-server-groups', post_body)

@@ -34,7 +34,7 @@ class FixedIPsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#reserve-or-release-a-fixed-ip
+        https://docs.openstack.org/api-ref/compute/#reserve-or-release-a-fixed-ip
         """
         url = "os-fixed-ips/%s/action" % fixed_ip
         resp, body = self.post(url, json.dumps(kwargs))

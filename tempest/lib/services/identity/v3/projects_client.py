@@ -27,7 +27,7 @@ class ProjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-project
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-project
 
         """
         # Include the project name to the kwargs parameters
@@ -52,7 +52,7 @@ class ProjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-project
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-project
 
         """
         post_body = json.dumps({'project': kwargs})

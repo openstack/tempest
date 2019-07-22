@@ -26,7 +26,7 @@ class VolumeManageClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#manage-an-existing-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#manage-an-existing-volume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('os-volume-manage', post_body)

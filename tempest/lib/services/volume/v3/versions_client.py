@@ -28,7 +28,7 @@ class VersionsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-all-api-versions
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-all-api-versions
         """
         version_url = self._get_base_version_url()
 

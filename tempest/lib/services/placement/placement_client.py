@@ -26,7 +26,7 @@ class PlacementClient(base_placement_client.BasePlacementClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/placement/#list-allocation-candidates
+        https://docs.openstack.org/api-ref/placement/#list-allocation-candidates
         """
         url = '/allocation_candidates'
         if params:
@@ -41,7 +41,7 @@ class PlacementClient(base_placement_client.BasePlacementClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/placement/#list-allocations
+        https://docs.openstack.org/api-ref/placement/#list-allocations
         """
         url = '/allocations/%s' % consumer_uuid
         resp, body = self.get(url)

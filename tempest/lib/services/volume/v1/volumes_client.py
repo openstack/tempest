@@ -41,8 +41,8 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#list-volumes
-        https://developer.openstack.org/api-ref/block-storage/v2/#list-volumes-with-details
+        https://docs.openstack.org/api-ref/block-storage/v2/#list-volumes
+        https://docs.openstack.org/api-ref/block-storage/v2/#list-volumes-with-details
         """
         url = 'volumes'
         if detail:
@@ -68,7 +68,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#create-volume
+        https://docs.openstack.org/api-ref/block-storage/v2/#create-volume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
@@ -81,7 +81,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#update-volume
+        https://docs.openstack.org/api-ref/block-storage/v2/#update-volume
         """
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
@@ -109,7 +109,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#attach-volume-to-server
+        https://docs.openstack.org/api-ref/block-storage/v2/#attach-volume-to-server
         """
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -166,7 +166,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#extend-volume-size
+        https://docs.openstack.org/api-ref/block-storage/v2/#extend-volume-size
         """
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -179,7 +179,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#reset-volume-statuses
+        https://docs.openstack.org/api-ref/block-storage/v2/#reset-volume-statuses
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -191,7 +191,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#create-volume-transfer
+        https://docs.openstack.org/api-ref/block-storage/v2/#create-volume-transfer
         """
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post('os-volume-transfer', post_body)
@@ -212,7 +212,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#list-volume-transfers
+        https://docs.openstack.org/api-ref/block-storage/v2/#list-volume-transfers
         """
         url = 'os-volume-transfer'
         if params:
@@ -233,7 +233,7 @@ class VolumesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#accept-volume-transfer
+        https://docs.openstack.org/api-ref/block-storage/v2/#accept-volume-transfer
         """
         url = 'os-volume-transfer/%s/accept' % transfer_id
         post_body = json.dumps({'accept': kwargs})

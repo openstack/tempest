@@ -30,7 +30,7 @@ class ContainerClient(rest_client.RestClient):
         with optional metadata passed in as a dictionary.
         Full list of allowed headers or value, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/object-store/#create-container
+        https://docs.openstack.org/api-ref/object-store/#create-container
         """
         url = str(container_name)
 
@@ -61,7 +61,7 @@ class ContainerClient(rest_client.RestClient):
         Container Metadata can be created, updated or deleted based on
         metadata header or value. For detailed info, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/object-store/#create-update-or-delete-container-metadata
+        https://docs.openstack.org/api-ref/object-store/#create-update-or-delete-container-metadata
         """
         url = str(container_name)
         headers = {}
@@ -97,7 +97,7 @@ class ContainerClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/object-store/#show-container-details-and-list-objects
+        https://docs.openstack.org/api-ref/object-store/#show-container-details-and-list-objects
         """
 
         url = str(container_name)

@@ -15,7 +15,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#application-credentials
+https://docs.openstack.org/api-ref/identity/v3/index.html#application-credentials
 """
 
 from oslo_serialization import jsonutils as json
@@ -32,7 +32,7 @@ class ApplicationCredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3/index.html#create-application-credential
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-application-credential
         """
         post_body = json.dumps({'application_credential': kwargs})
         resp, body = self.post('users/%s/application_credentials' % user_id,
@@ -46,7 +46,7 @@ class ApplicationCredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3/index.html#show-application-credential-details
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-application-credential-details
         """
         resp, body = self.get('users/%s/application_credentials/%s' %
                               (user_id, application_credential_id))
@@ -59,7 +59,7 @@ class ApplicationCredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3/index.html#list-application-credentials
+        https://docs.openstack.org/api-ref/identity/v3/index.html#list-application-credentials
         """
         url = 'users/%s/application_credentials' % user_id
         if params:
@@ -75,7 +75,7 @@ class ApplicationCredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3/index.html#delete-application-credential
+        https://docs.openstack.org/api-ref/identity/v3/index.html#delete-application-credential
         """
         resp, body = self.delete('users/%s/application_credentials/%s' %
                                  (user_id, application_credential_id))

@@ -22,7 +22,7 @@ class QosClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#create-qos-policy
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-qos-policy
         """
         uri = '/qos/policies'
         post_data = {'policy': kwargs}
@@ -33,7 +33,7 @@ class QosClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#update-qos-policy
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-qos-policy
         """
         uri = '/qos/policies/%s' % qos_policy_id
         post_data = {'policy': kwargs}
@@ -44,7 +44,7 @@ class QosClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#show-qos-policy-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-qos-policy-details
         """
         uri = '/qos/policies/%s' % qos_policy_id
         return self.show_resource(uri, **fields)
@@ -54,7 +54,7 @@ class QosClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#delete-qos-policy
+        https://docs.openstack.org/api-ref/network/v2/index.html#delete-qos-policy
         """
         uri = '/qos/policies/%s' % qos_policy_id
         return self.delete_resource(uri)
@@ -64,7 +64,7 @@ class QosClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#list-qos-policies
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-qos-policies
         """
         uri = '/qos/policies'
         return self.list_resources(uri, **filters)

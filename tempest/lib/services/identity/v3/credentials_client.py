@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-http://developer.openstack.org/api-ref/identity/v3/index.html#credentials
+https://docs.openstack.org/api-ref/identity/v3/index.html#credentials
 """
 
 from oslo_serialization import jsonutils as json
@@ -31,7 +31,7 @@ class CredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-credential
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-credential
         """
         post_body = json.dumps({'credential': kwargs})
         resp, body = self.post('credentials', post_body)
@@ -44,7 +44,7 @@ class CredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-credential
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-credential
         """
         post_body = json.dumps({'credential': kwargs})
         resp, body = self.patch('credentials/%s' % credential_id, post_body)
@@ -57,7 +57,7 @@ class CredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-credential-details
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-credential-details
         """
         resp, body = self.get('credentials/%s' % credential_id)
         self.expected_success(200, resp.status)
@@ -69,7 +69,7 @@ class CredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-credentials
+        https://docs.openstack.org/api-ref/identity/v3/#list-credentials
         """
         url = 'credentials'
         if params:
@@ -84,7 +84,7 @@ class CredentialsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#delete-credential
+        https://docs.openstack.org/api-ref/identity/v3/#delete-credential
         """
         resp, body = self.delete('credentials/%s' % credential_id)
         self.expected_success(204, resp.status)

@@ -26,7 +26,7 @@ class NamespacePropertiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-properties
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-properties
         """
         url = 'metadefs/namespaces/%s/properties' % namespace
         resp, body = self.get(url)
@@ -39,7 +39,7 @@ class NamespacePropertiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-property
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-property
         """
         url = 'metadefs/namespaces/%s/properties' % namespace
         data = json.dumps(kwargs)
@@ -53,7 +53,7 @@ class NamespacePropertiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#show-property-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#show-property-definition
         """
         url = 'metadefs/namespaces/%s/properties/%s' % (namespace,
                                                         property_name)
@@ -67,7 +67,7 @@ class NamespacePropertiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#update-property-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#update-property-definition
         """
         url = 'metadefs/namespaces/%s/properties/%s' % (namespace,
                                                         property_name)
@@ -82,7 +82,7 @@ class NamespacePropertiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#remove-property-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#remove-property-definition
         """
         url = 'metadefs/namespaces/%s/properties/%s' % (namespace,
                                                         property_name)

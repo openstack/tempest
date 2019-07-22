@@ -38,7 +38,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-compute-services
+        https://docs.openstack.org/api-ref/compute/#list-compute-services
         """
         url = 'os-services'
         if params:
@@ -60,7 +60,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-compute-service
+        https://docs.openstack.org/api-ref/compute/#update-compute-service
         """
         put_body = json.dumps(kwargs)
         resp, body = self.put('os-services/%s' % service_id, put_body)
@@ -76,7 +76,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#enable-scheduling-for-a-compute-service
+        https://docs.openstack.org/api-ref/compute/#enable-scheduling-for-a-compute-service
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/enable', post_body)
@@ -91,7 +91,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service
+        https://docs.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/disable', post_body)
@@ -106,7 +106,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service-and-log-disabled-reason
+        https://docs.openstack.org/api-ref/compute/#disable-scheduling-for-a-compute-service-and-log-disabled-reason
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/disable-log-reason', post_body)
@@ -121,7 +121,7 @@ class ServicesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-forced-down
+        https://docs.openstack.org/api-ref/compute/#update-forced-down
         """
         post_body = json.dumps(kwargs)
         resp, body = self.put('os-services/force-down', post_body)

@@ -59,7 +59,7 @@ class IdentityClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/identity/v2-admin/#validate-token
+        https://docs.openstack.org/api-ref/identity/v2-admin/#validate-token
         """
         url = "tokens/%s" % token_id
         if params:

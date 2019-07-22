@@ -25,7 +25,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-default-configuration-settings
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-default-configuration-settings
         """
         url = 'domains/config/default'
         resp, body = self.get(url)
@@ -38,7 +38,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-default-configuration-for-a-group
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-default-configuration-for-a-group
         """
         url = 'domains/config/%s/default' % group
         resp, body = self.get(url)
@@ -51,7 +51,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-default-option-for-a-group
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-default-option-for-a-group
         """
         url = 'domains/config/%s/%s/default' % (group, option)
         resp, body = self.get(url)
@@ -64,7 +64,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-domain-group-option-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-domain-group-option-configuration
         """
         url = 'domains/%s/config/%s/%s' % (domain_id, group, option)
         resp, body = self.get(url)
@@ -78,7 +78,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-domain-group-option-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-domain-group-option-configuration
         """
         url = 'domains/%s/config/%s/%s' % (domain_id, group, option)
         resp, body = self.patch(url, json.dumps({'config': kwargs}))
@@ -91,7 +91,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#delete-domain-group-option-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#delete-domain-group-option-configuration
         """
         url = 'domains/%s/config/%s/%s' % (domain_id, group, option)
         resp, body = self.delete(url)
@@ -103,7 +103,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-domain-group-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-domain-group-configuration
         """
         url = 'domains/%s/config/%s' % (domain_id, group)
         resp, body = self.get(url)
@@ -116,7 +116,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-domain-group-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-domain-group-configuration
         """
         url = 'domains/%s/config/%s' % (domain_id, group)
         resp, body = self.patch(url, json.dumps({'config': kwargs}))
@@ -129,7 +129,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#delete-domain-group-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#delete-domain-group-configuration
         """
         url = 'domains/%s/config/%s' % (domain_id, group)
         resp, body = self.delete(url)
@@ -141,7 +141,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-domain-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-domain-configuration
         """
         url = 'domains/%s/config' % domain_id
         resp, body = self.put(url, json.dumps({'config': kwargs}))
@@ -154,7 +154,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-domain-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-domain-configuration
         """
         url = 'domains/%s/config' % domain_id
         resp, body = self.get(url)
@@ -167,7 +167,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-domain-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-domain-configuration
         """
         url = 'domains/%s/config' % domain_id
         resp, body = self.patch(url, json.dumps({'config': kwargs}))
@@ -180,7 +180,7 @@ class DomainConfigurationClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#delete-domain-configuration
+        https://docs.openstack.org/api-ref/identity/v3/index.html#delete-domain-configuration
         """
         url = 'domains/%s/config' % domain_id
         resp, body = self.delete(url)

@@ -38,7 +38,7 @@ class VolumesClient(base_client.BaseClient):
     def list_hosts(self):
         """Lists all hosts summary info that is not disabled.
 
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-all-hosts-for-a-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-all-hosts-for-a-project
         """
         resp, body = self.get('os-hosts')
         body = json.loads(body)
@@ -51,8 +51,8 @@ class VolumesClient(base_client.BaseClient):
         Params can be a string (must be urlencoded) or a dictionary.
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes-with-details
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes-with-details
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes
         """
         url = 'volumes'
         if detail:
@@ -71,7 +71,7 @@ class VolumesClient(base_client.BaseClient):
         For a full list of available parameters please refer to the offical
         API reference:
 
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#migrate-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#migrate-a-volume
         """
         post_body = json.dumps({'os-migrate_volume': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -91,7 +91,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-volume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
@@ -104,7 +104,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume
         """
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
@@ -117,7 +117,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#delete-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#delete-a-volume
         """
         url = 'volumes/%s' % volume_id
         if params:
@@ -131,7 +131,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#get-volumes-summary
+        https://docs.openstack.org/api-ref/block-storage/v3/#get-volumes-summary
         """
         url = 'volumes/summary'
         if params:
@@ -155,7 +155,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#attach-volume-to-a-server
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#attach-volume-to-a-server
         """
         post_body = json.dumps({'os-attach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -168,7 +168,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume-s-bootable-status
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume-s-bootable-status
         """
         post_body = json.dumps({'os-set_bootable': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -227,7 +227,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#extend-a-volume-size
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#extend-a-volume-size
         """
         post_body = json.dumps({'os-extend': kwargs})
         url = 'volumes/%s/action' % (volume_id)
@@ -240,7 +240,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#reset-a-volume-s-statuses
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#reset-a-volume-s-statuses
         """
         post_body = json.dumps({'os-reset_status': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -267,7 +267,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-metadata-for-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-metadata-for-volume
         """
         put_body = json.dumps({'metadata': metadata})
         url = "volumes/%s/metadata" % volume_id
@@ -289,7 +289,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume-s-metadata
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-a-volume-s-metadata
         """
         put_body = json.dumps({'metadata': metadata})
         url = "volumes/%s/metadata" % volume_id
@@ -327,7 +327,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#retype-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#retype-a-volume
         """
         post_body = json.dumps({'os-retype': kwargs})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
@@ -339,7 +339,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#force-delete-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#force-delete-a-volume
         """
         post_body = json.dumps({'os-force_detach': kwargs})
         url = 'volumes/%s/action' % volume_id
@@ -352,7 +352,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#set-image-metadata-for-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#set-image-metadata-for-a-volume
         """
         post_body = json.dumps({'os-set_image_metadata': {'metadata': kwargs}})
         url = "volumes/%s/action" % (volume_id)
@@ -383,7 +383,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#unmanage-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#unmanage-a-volume
         """
         post_body = json.dumps({'os-unmanage': {}})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)

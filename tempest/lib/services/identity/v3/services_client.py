@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#service-catalog-and-endpoints
+https://docs.openstack.org/api-ref/identity/v3/index.html#service-catalog-and-endpoints
 """
 
 from oslo_serialization import jsonutils as json
@@ -31,7 +31,7 @@ class ServicesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-service
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-service
         """
         patch_body = json.dumps({'service': kwargs})
         resp, body = self.patch('services/%s' % service_id, patch_body)
@@ -52,7 +52,7 @@ class ServicesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-service
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-service
         """
         body = json.dumps({'service': kwargs})
         resp, body = self.post("services", body)
@@ -71,7 +71,7 @@ class ServicesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-services
+        https://docs.openstack.org/api-ref/identity/v3/#list-services
         """
         url = 'services'
         if params:

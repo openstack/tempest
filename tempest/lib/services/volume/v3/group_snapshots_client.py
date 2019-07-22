@@ -29,7 +29,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/#create-group-snapshot
         """
         post_body = json.dumps({'group_snapshot': kwargs})
         resp, body = self.post('group_snapshots', post_body)
@@ -41,7 +41,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         """Deletes a group snapshot.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#delete-group-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/#delete-group-snapshot
         """
         resp, body = self.delete('group_snapshots/%s' % group_snapshot_id)
         self.expected_success(202, resp.status)
@@ -51,7 +51,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         """Returns the details of a single group snapshot.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#show-group-snapshot-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#show-group-snapshot-details
         """
         url = "group_snapshots/%s" % str(group_snapshot_id)
         resp, body = self.get(url)
@@ -63,8 +63,8 @@ class GroupSnapshotsClient(base_client.BaseClient):
         """Information for all the tenant's group snapshots.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-group-snapshots
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-group-snapshots-with-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-group-snapshots
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-group-snapshots-with-details
         """
         url = "group_snapshots"
         if detail:
@@ -80,7 +80,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         """Resets group snapshot status.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#reset-group-snapshot-status
+        https://docs.openstack.org/api-ref/block-storage/v3/#reset-group-snapshot-status
         """
         post_body = json.dumps({'reset_status': {'status': status_to_set}})
         resp, body = self.post('group_snapshots/%s/action' % group_snapshot_id,

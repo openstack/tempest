@@ -26,7 +26,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#create-user
+        https://docs.openstack.org/api-ref/identity/v3/#create-user
         """
         post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
@@ -39,7 +39,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#update-user
+        https://docs.openstack.org/api-ref/identity/v3/#update-user
         """
         if 'id' not in kwargs:
             kwargs['id'] = user_id
@@ -54,7 +54,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#change-password-for-user
+        https://docs.openstack.org/api-ref/identity/v3/index.html#change-password-for-user
         """
         update_user = json.dumps({'user': kwargs})
         resp, _ = self.post('users/%s/password' % user_id, update_user)
@@ -66,7 +66,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-projects-for-user
+        https://docs.openstack.org/api-ref/identity/v3/#list-projects-for-user
         """
         url = 'users/%s/projects' % user_id
         if params:
@@ -81,7 +81,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-users
+        https://docs.openstack.org/api-ref/identity/v3/#list-users
         """
         url = 'users'
         if params:
@@ -109,7 +109,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-groups-to-which-a-user-belongs
+        https://docs.openstack.org/api-ref/identity/v3/#list-groups-to-which-a-user-belongs
         """
         url = 'users/%s/groups' % user_id
         if params:

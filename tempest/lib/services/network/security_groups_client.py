@@ -21,7 +21,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-security-group
+        https://docs.openstack.org/api-ref/networking/v2/index.html#create-security-group
         """
         uri = '/security-groups'
         post_data = {'security_group': kwargs}
@@ -32,7 +32,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-security-group
+        https://docs.openstack.org/api-ref/networking/v2/index.html#update-security-group
         """
         uri = '/security-groups/%s' % security_group_id
         post_data = {'security_group': kwargs}
@@ -43,7 +43,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-security-group
+        https://docs.openstack.org/api-ref/networking/v2/index.html#show-security-group
         """
         uri = '/security-groups/%s' % security_group_id
         return self.show_resource(uri, **fields)
@@ -53,7 +53,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#delete-security-group
+        https://docs.openstack.org/api-ref/networking/v2/index.html#delete-security-group
         """
         uri = '/security-groups/%s' % security_group_id
         return self.delete_resource(uri)
@@ -63,7 +63,7 @@ class SecurityGroupsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-security-groups
+        https://docs.openstack.org/api-ref/networking/v2/index.html#list-security-groups
         """
         uri = '/security-groups'
         return self.list_resources(uri, **filters)

@@ -22,7 +22,7 @@ class QuotasClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#update-quota-for-a-project
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-quota-for-a-project
         """
         put_body = {'quota': kwargs}
         uri = '/quotas/%s' % tenant_id

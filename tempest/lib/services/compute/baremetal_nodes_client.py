@@ -29,7 +29,7 @@ class BaremetalNodesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-bare-metal-nodes
+        https://docs.openstack.org/api-ref/compute/#list-bare-metal-nodes
         """
         url = 'os-baremetal-nodes'
         if params:
@@ -43,7 +43,7 @@ class BaremetalNodesClient(base_compute_client.BaseComputeClient):
         """Show the details of a single baremetal node.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/compute/#show-bare-metal-node-details
+        https://docs.openstack.org/api-ref/compute/#show-bare-metal-node-details
         """
         url = 'os-baremetal-nodes/%s' % baremetal_node_id
         resp, body = self.get(url)

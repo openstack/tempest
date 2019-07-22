@@ -40,7 +40,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#list-all-volume-types-for-v2
+        https://docs.openstack.org/api-ref/block-storage/v2/#list-all-volume-types-for-v2
         """
         url = 'types'
         if params:
@@ -56,7 +56,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#show-volume-type-details-for-v2
+        https://docs.openstack.org/api-ref/block-storage/v2/#show-volume-type-details-for-v2
         """
         url = "types/%s" % volume_type_id
         resp, body = self.get(url)
@@ -69,7 +69,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#create-volume-type-for-v2
+        https://docs.openstack.org/api-ref/block-storage/v2/#create-volume-type-for-v2
         """
         post_body = json.dumps({'volume_type': kwargs})
         resp, body = self.post('types', post_body)
@@ -82,7 +82,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#delete-volume-type
+        https://docs.openstack.org/api-ref/block-storage/v2/#delete-volume-type
         """
         resp, body = self.delete("types/%s" % volume_type_id)
         self.expected_success(202, resp.status)
@@ -137,7 +137,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#update-volume-type
+        https://docs.openstack.org/api-ref/block-storage/v2/#update-volume-type
         """
         put_body = json.dumps({'volume_type': kwargs})
         resp, body = self.put('types/%s' % volume_type_id, put_body)
@@ -156,7 +156,7 @@ class TypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#update-extra-specs-for-a-volume-type
+        https://docs.openstack.org/api-ref/block-storage/v2/#update-extra-specs-for-a-volume-type
         """
         url = "types/%s/extra_specs/%s" % (volume_type_id, extra_spec_name)
         put_body = json.dumps(extra_specs)

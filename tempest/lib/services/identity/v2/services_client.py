@@ -26,7 +26,7 @@ class ServicesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v2-ext/#create-service-admin-extension
+        https://docs.openstack.org/api-ref/identity/v2-ext/#create-service-admin-extension
         """
         post_body = json.dumps({'OS-KSADM:service': kwargs})
         resp, body = self.post('/OS-KSADM/services', post_body)
@@ -47,7 +47,7 @@ class ServicesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v2-ext/#list-services-admin-extension
+        https://docs.openstack.org/api-ref/identity/v2-ext/#list-services-admin-extension
         """
         url = '/OS-KSADM/services'
         if params:

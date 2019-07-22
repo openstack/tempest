@@ -26,7 +26,7 @@ class RoleAssignmentsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-role-assignments
+        https://docs.openstack.org/api-ref/identity/v3/#list-role-assignments
 
         :param effective: If True, returns the effective assignments, including
                           any assignments gained by virtue of group membership

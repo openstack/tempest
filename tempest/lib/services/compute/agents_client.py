@@ -28,7 +28,7 @@ class AgentsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-agent-builds
+        https://docs.openstack.org/api-ref/compute/#list-agent-builds
         """
         url = 'os-agents'
         if params:
@@ -43,7 +43,7 @@ class AgentsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-agent-build
+        https://docs.openstack.org/api-ref/compute/#create-agent-build
         """
         post_body = json.dumps({'agent': kwargs})
         resp, body = self.post('os-agents', post_body)
@@ -56,7 +56,7 @@ class AgentsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-agent-build
+        https://docs.openstack.org/api-ref/compute/#delete-agent-build
         """
         resp, body = self.delete("os-agents/%s" % agent_id)
         self.validate_response(schema.delete_agent, resp, body)
@@ -67,7 +67,7 @@ class AgentsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-agent-build
+        https://docs.openstack.org/api-ref/compute/#update-agent-build
         """
         put_body = json.dumps({'para': kwargs})
         resp, body = self.put('os-agents/%s' % agent_id, put_body)

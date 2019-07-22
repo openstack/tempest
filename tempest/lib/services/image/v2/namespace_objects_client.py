@@ -27,7 +27,7 @@ class NamespaceObjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-objects
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-objects
         """
         url = 'metadefs/namespaces/%s/objects' % namespace
         if kwargs:
@@ -42,7 +42,7 @@ class NamespaceObjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-object
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-object
         """
         url = 'metadefs/namespaces/%s/objects' % namespace
         data = json.dumps(kwargs)
@@ -56,7 +56,7 @@ class NamespaceObjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#update-object
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#update-object
         """
         url = 'metadefs/namespaces/%s/objects/%s' % (namespace, object_name)
         data = json.dumps(kwargs)
@@ -70,7 +70,7 @@ class NamespaceObjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#show-object
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#show-object
         """
         url = 'metadefs/namespaces/%s/objects/%s' % (namespace, object_name)
         resp, body = self.get(url)
@@ -83,7 +83,7 @@ class NamespaceObjectsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#delete-object
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#delete-object
         """
         url = 'metadefs/namespaces/%s/objects/%s' % (namespace, object_name)
         resp, _ = self.delete(url)

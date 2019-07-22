@@ -51,7 +51,7 @@ class EncryptionTypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#create-an-encryption-type-for-v2
+        https://docs.openstack.org/api-ref/block-storage/v2/#create-an-encryption-type-for-v2
         """
         url = "/types/%s/encryption" % volume_type_id
         post_body = json.dumps({'encryption': kwargs})

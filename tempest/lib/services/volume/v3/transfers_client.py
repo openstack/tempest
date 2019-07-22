@@ -27,7 +27,7 @@ class TransfersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-a-volume-transfer
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-volume-transfer
         """
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post('os-volume-transfer', post_body)
@@ -48,8 +48,8 @@ class TransfersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-for-a-project
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-and-details
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-for-a-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-and-details
         """
         url = 'os-volume-transfer'
         if detail:
@@ -72,7 +72,7 @@ class TransfersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#accept-a-volume-transfer
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#accept-a-volume-transfer
         """
         url = 'os-volume-transfer/%s/accept' % transfer_id
         post_body = json.dumps({'accept': kwargs})

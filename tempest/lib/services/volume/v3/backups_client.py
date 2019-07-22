@@ -29,7 +29,7 @@ class BackupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-a-backup
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-backup
         """
         post_body = json.dumps({'backup': kwargs})
         resp, body = self.post('backups', post_body)
@@ -42,7 +42,7 @@ class BackupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-a-backup
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-a-backup
         """
         put_body = json.dumps({'backup': kwargs})
         resp, body = self.put('backups/%s' % backup_id, put_body)
@@ -55,7 +55,7 @@ class BackupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#restore-a-backup
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#restore-a-backup
         """
         post_body = json.dumps({'restore': kwargs})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
@@ -82,8 +82,8 @@ class BackupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-backups-for-project
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-backups-with-detail
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-backups-for-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-backups-with-detail
         """
         url = "backups"
         if detail:
@@ -108,7 +108,7 @@ class BackupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#import-a-backup
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#import-a-backup
         """
         post_body = json.dumps({'backup-record': kwargs})
         resp, body = self.post("backups/import_record", post_body)

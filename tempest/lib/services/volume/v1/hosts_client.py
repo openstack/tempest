@@ -27,7 +27,7 @@ class HostsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/#list-all-hosts
+        https://docs.openstack.org/api-ref/block-storage/v2/#list-all-hosts
         """
         url = 'os-hosts'
         if params:

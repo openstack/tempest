@@ -29,7 +29,7 @@ class SnapshotsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-snapshot
+        https://docs.openstack.org/api-ref/compute/#create-snapshot
         """
         post_body = {
             'volume_id': volume_id
@@ -53,7 +53,7 @@ class SnapshotsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-snapshots
+        https://docs.openstack.org/api-ref/compute/#list-snapshots
         """
         url = 'os-snapshots'
 

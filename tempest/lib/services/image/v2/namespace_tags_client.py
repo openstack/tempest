@@ -27,7 +27,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-tag-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-tag-definition
         """
         url = 'metadefs/namespaces/%s/tags/%s' % (namespace,
                                                   tag_name)
@@ -41,7 +41,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/metadefs-index.html#get-tag-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#get-tag-definition
         """
         url = 'metadefs/namespaces/%s/tags/%s' % (namespace,
                                                   tag_name)
@@ -55,7 +55,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#update-tag-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#update-tag-definition
         """
         url = 'metadefs/namespaces/%s/tags/%s' % (namespace,
                                                   tag_name)
@@ -70,7 +70,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#delete-tag-definition
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#delete-tag-definition
         """
         url = 'metadefs/namespaces/%s/tags/%s' % (namespace, tag_name)
         resp, _ = self.delete(url)
@@ -82,7 +82,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-tags
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-tags
         """
         url = 'metadefs/namespaces/%s/tags' % namespace
         data = json.dumps(kwargs)
@@ -96,7 +96,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-tags
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-tags
         """
         url = 'metadefs/namespaces/%s/tags' % namespace
         if params:
@@ -111,7 +111,7 @@ class NamespaceTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#delete-all-tag-definitions
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#delete-all-tag-definitions
         """
         url = 'metadefs/namespaces/%s/tags' % namespace
         resp, _ = self.delete(url)

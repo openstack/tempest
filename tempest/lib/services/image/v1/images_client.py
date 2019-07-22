@@ -61,7 +61,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v1/index.html#create-image
+        https://docs.openstack.org/api-ref/image/v1/index.html#create-image
         """
         if headers is None:
             headers = {}
@@ -79,7 +79,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v1/index.html#update-image
+        https://docs.openstack.org/api-ref/image/v1/index.html#update-image
         """
         if headers is None:
             headers = {}
@@ -104,7 +104,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v1/#list-images
+        https://docs.openstack.org/api-ref/image/v1/#list-images
 
         Most parameters except the following are passed to the API without
         any changes.

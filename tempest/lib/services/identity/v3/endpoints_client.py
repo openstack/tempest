@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#service-catalog-and-endpoints
+https://docs.openstack.org/api-ref/identity/v3/index.html#service-catalog-and-endpoints
 """
 
 from oslo_serialization import jsonutils as json
@@ -31,7 +31,7 @@ class EndPointsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-endpoints
+        https://docs.openstack.org/api-ref/identity/v3/#list-endpoints
         """
         url = 'endpoints'
         if params:
@@ -46,7 +46,7 @@ class EndPointsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-endpoint
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-endpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.post('endpoints', post_body)
@@ -59,7 +59,7 @@ class EndPointsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-endpoint
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-endpoint
         """
         post_body = json.dumps({'endpoint': kwargs})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)

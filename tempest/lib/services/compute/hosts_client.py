@@ -27,7 +27,7 @@ class HostsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-hosts
+        https://docs.openstack.org/api-ref/compute/#list-hosts
         """
 
         url = 'os-hosts'
@@ -52,7 +52,7 @@ class HostsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-host-status
+        https://docs.openstack.org/api-ref/compute/#update-host-status
         """
 
         request_body = {

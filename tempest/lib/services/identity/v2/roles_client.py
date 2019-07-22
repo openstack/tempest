@@ -24,7 +24,7 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#create-a-role
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#create-a-role
         """
         post_body = json.dumps({'role': kwargs})
         resp, body = self.post('OS-KSADM/roles', post_body)
@@ -37,9 +37,9 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#show-a-role
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#show-a-role
         OR
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#show-role-information-by-name
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#show-role-information-by-name
         """
         resp, body = self.get('OS-KSADM/roles/%s' % role_id_or_name)
         self.expected_success(200, resp.status)
@@ -51,7 +51,7 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#list-all-roles
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#list-all-roles
         """
         url = 'OS-KSADM/roles'
         if params:
@@ -66,7 +66,7 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#delete-a-role
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#delete-a-role
         """
         resp, body = self.delete('OS-KSADM/roles/%s' % role_id)
         self.expected_success(204, resp.status)
@@ -77,7 +77,7 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#grant-roles-to-user-on-tenant
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#grant-roles-to-user-on-tenant
         """
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), "")
@@ -101,7 +101,7 @@ class RolesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#revoke-role-from-user-on-tenant
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#revoke-role-from-user-on-tenant
         """
         resp, body = self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                                  (tenant_id, user_id, role_id))

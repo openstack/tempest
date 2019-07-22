@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#regions
+https://docs.openstack.org/api-ref/identity/v3/index.html#regions
 """
 
 from oslo_serialization import jsonutils as json
@@ -31,7 +31,7 @@ class RegionsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-region
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-region
         """
         if region_id is not None:
             method = self.put
@@ -50,7 +50,7 @@ class RegionsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-region
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-region
         """
         post_body = json.dumps({'region': kwargs})
         resp, body = self.patch('regions/%s' % region_id, post_body)

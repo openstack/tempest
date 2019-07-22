@@ -28,7 +28,7 @@ class TenantUsagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-tenant-usage-statistics-for-all-tenants
+        https://docs.openstack.org/api-ref/compute/#list-tenant-usage-statistics-for-all-tenants
         """
         url = 'os-simple-tenant-usage'
         if params:
@@ -44,7 +44,7 @@ class TenantUsagesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-usage-statistics-for-tenant
+        https://docs.openstack.org/api-ref/compute/#show-usage-statistics-for-tenant
         """
         url = 'os-simple-tenant-usage/%s' % tenant_id
         if params:
