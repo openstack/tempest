@@ -14,7 +14,6 @@
 #    under the License.
 
 import netaddr
-import testtools
 
 from tempest.api.compute import base
 from tempest import config
@@ -25,6 +24,12 @@ CONF = config.CONF
 
 
 class ServersTestMultiNic(base.BaseV2ComputeTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ServersTestMultiNic, cls).skip_checks()
+        if not CONF.service_available.neutron:
+            raise cls.skipException('Neutron service must be available.')
 
     @classmethod
     def setup_credentials(cls):
@@ -53,8 +58,6 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         return net
 
     @decorators.idempotent_id('0578d144-ed74-43f8-8e57-ab10dbf9b3c2')
-    @testtools.skipUnless(CONF.service_available.neutron,
-                          'Neutron service must be available.')
     def test_verify_multiple_nics_order(self):
         # Verify that the networks order given at the server creation is
         # preserved within the server.
@@ -91,8 +94,6 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
             self.assertIn(address, network)
 
     @decorators.idempotent_id('1678d144-ed74-43f8-8e57-ab10dbf9b3c2')
-    @testtools.skipUnless(CONF.service_available.neutron,
-                          'Neutron service must be available.')
     def test_verify_duplicate_network_nics(self):
         # Verify that server creation does not fail when more than one nic
         # is created on the same network.
