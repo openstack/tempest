@@ -117,7 +117,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Create request token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#create-request-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#create-request-token
         """
         endpoint = 'OS-OAUTH1/request_token'
         headers = {'Requested-Project-Id': project_id}
@@ -142,7 +142,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Authorize request token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#authorize-request-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#authorize-request-token
         """
         roles = [{'id': role_id} for role_id in role_ids]
         body = {'roles': roles}
@@ -158,7 +158,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Create access token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#create-access-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#create-access-token
         """
         endpoint = 'OS-OAUTH1/access_token'
         oauth_params = self._generate_params_with_signature(
@@ -181,7 +181,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Get access token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#get-access-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#get-access-token
         """
         resp, body = self.get("users/%s/OS-OAUTH1/access_tokens/%s"
                               % (user_id, access_token_id))
@@ -193,7 +193,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Revoke access token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#revoke-access-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#revoke-access-token
         """
         resp, body = self.delete("users/%s/OS-OAUTH1/access_tokens/%s"
                                  % (user_id, access_token_id))
@@ -204,7 +204,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """List access tokens.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#list-access-tokens
+        https://docs.openstack.org/api-ref/identity/v3-ext/#list-access-tokens
         """
         resp, body = self.get("users/%s/OS-OAUTH1/access_tokens"
                               % (user_id))
@@ -216,7 +216,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """List roles for an access token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#list-roles-for-an-access-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#list-roles-for-an-access-token
         """
         resp, body = self.get("users/%s/OS-OAUTH1/access_tokens/%s/roles"
                               % (user_id, access_token_id))
@@ -228,7 +228,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         """Show role details for an access token.
 
         For more information, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#show-role-details-for-an-access-token
+        https://docs.openstack.org/api-ref/identity/v3-ext/#show-role-details-for-an-access-token
         """
         resp, body = self.get("users/%s/OS-OAUTH1/access_tokens/%s/roles/%s"
                               % (user_id, access_token_id, role_id))

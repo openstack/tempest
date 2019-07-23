@@ -28,7 +28,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     # These tests will fail with a 404 starting from microversion 2.36. For
     # more information, see:
-    # https://developer.openstack.org/api-ref/compute/#volume-extension-os-volumes-os-snapshots-deprecated
+    # https://docs.openstack.org/api-ref/compute/#volume-extension-os-volumes-os-snapshots-deprecated
     max_microversion = '2.35'
 
     @classmethod

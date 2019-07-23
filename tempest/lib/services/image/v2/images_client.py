@@ -32,7 +32,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/#update-image
+        https://docs.openstack.org/api-ref/image/v2/#update-image
         """
         data = json.dumps(patch)
         headers = {"Content-Type": "application/openstack-images-v2.0"
@@ -47,7 +47,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/#create-image
+        https://docs.openstack.org/api-ref/image/v2/#create-image
         """
         data = json.dumps(kwargs)
         resp, body = self.post('images', data)
@@ -60,7 +60,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#deactivate-image
+        https://docs.openstack.org/api-ref/image/v2/#deactivate-image
         """
         url = 'images/%s/actions/deactivate' % image_id
         resp, body = self.post(url, None)
@@ -72,7 +72,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#reactivate-image
+        https://docs.openstack.org/api-ref/image/v2/#reactivate-image
         """
         url = 'images/%s/actions/reactivate' % image_id
         resp, body = self.post(url, None)
@@ -84,7 +84,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/#delete-image
+        https://docs.openstack.org/api-ref/image/v2/#delete-image
          """
         url = 'images/%s' % image_id
         resp, _ = self.delete(url)
@@ -96,7 +96,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/#list-images
+        https://docs.openstack.org/api-ref/image/v2/#list-images
         """
         url = 'images'
 
@@ -113,7 +113,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/image/v2/#show-image
+        https://docs.openstack.org/api-ref/image/v2/#show-image
         """
         url = 'images/%s' % image_id
         resp, body = self.get(url)
@@ -138,7 +138,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#upload-binary-image-data
+        https://docs.openstack.org/api-ref/image/v2/#upload-binary-image-data
         """
         url = 'images/%s/file' % image_id
 
@@ -157,7 +157,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#download-binary-image-data
+        https://docs.openstack.org/api-ref/image/v2/#download-binary-image-data
         """
         url = 'images/%s/file' % image_id
         resp, body = self.get(url)
@@ -169,7 +169,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#add-image-tag
+        https://docs.openstack.org/api-ref/image/v2/#add-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
@@ -181,7 +181,7 @@ class ImagesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#delete-image-tag
+        https://docs.openstack.org/api-ref/image/v2/#delete-image-tag
         """
         url = 'images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)

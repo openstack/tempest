@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#policies
+https://docs.openstack.org/api-ref/identity/v3/index.html#policies
 """
 
 from oslo_serialization import jsonutils as json
@@ -30,7 +30,7 @@ class PoliciesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-policy
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-policy
         """
         post_body = json.dumps({'policy': kwargs})
         resp, body = self.post('policies', post_body)
@@ -58,7 +58,7 @@ class PoliciesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-policy
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-policy
         """
         post_body = json.dumps({'policy': kwargs})
         url = 'policies/%s' % policy_id
@@ -79,7 +79,7 @@ class PoliciesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-endpoint
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-endpoint
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/endpoints/{1}"\
               .format(policy_id, endpoint_id)
@@ -91,7 +91,7 @@ class PoliciesClient(rest_client.RestClient):
         """Get policy association of endpoint.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-endpoint-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-endpoint-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/endpoints/{1}"\
               .format(policy_id, endpoint_id)
@@ -103,7 +103,7 @@ class PoliciesClient(rest_client.RestClient):
         """Delete policy association with endpoint.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-endpoint-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-endpoint-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/endpoints/{1}"\
               .format(policy_id, endpoint_id)
@@ -115,7 +115,7 @@ class PoliciesClient(rest_client.RestClient):
         """Create policy association with service.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-service-type-endpoint
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-service-type-endpoint
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}"\
               .format(policy_id, service_id)
@@ -127,7 +127,7 @@ class PoliciesClient(rest_client.RestClient):
         """Get policy association of service.
 
         API Reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-service-type-endpoint-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-service-type-endpoint-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}"\
               .format(policy_id, service_id)
@@ -139,7 +139,7 @@ class PoliciesClient(rest_client.RestClient):
         """Delete policy association with service.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-service-type-endpoint-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-service-type-endpoint-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}"\
               .format(policy_id, service_id)
@@ -152,7 +152,7 @@ class PoliciesClient(rest_client.RestClient):
         """Create policy association with service and region.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-service-type-endpoint-in-a-region
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#associate-policy-and-service-type-endpoint-in-a-region
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}/regions/{2}"\
               .format(policy_id, service_id, region_id)
@@ -165,7 +165,7 @@ class PoliciesClient(rest_client.RestClient):
         """Get policy association of service and region.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-service-type-endpoint-in-a-region-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#verify-a-policy-and-service-type-endpoint-in-a-region-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}/regions/{2}"\
               .format(policy_id, service_id, region_id)
@@ -178,7 +178,7 @@ class PoliciesClient(rest_client.RestClient):
         """Delete policy association with service and region.
 
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-service-type-endpoint-in-a-region-association
+        https://docs.openstack.org/api-ref/identity/v3-ext/index.html#delete-a-policy-and-service-type-endpoint-in-a-region-association
         """
         url = "policies/{0}/OS-ENDPOINT-POLICY/services/{1}/regions/{2}"\
               .format(policy_id, service_id, region_id)

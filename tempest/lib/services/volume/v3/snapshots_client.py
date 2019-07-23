@@ -28,8 +28,8 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-snapshots
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-snapshots-and-details
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-snapshots
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-snapshots-and-details
         """
         url = 'snapshots'
         if detail:
@@ -47,7 +47,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#show-a-snapshot-s-details
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#show-a-snapshot-s-details
         """
         url = "snapshots/%s" % snapshot_id
         resp, body = self.get(url)
@@ -60,7 +60,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-a-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-snapshot
         """
         post_body = json.dumps({'snapshot': kwargs})
         resp, body = self.post('snapshots', post_body)
@@ -73,7 +73,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-a-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-a-snapshot
         """
         put_body = json.dumps({'snapshot': kwargs})
         resp, body = self.put('snapshots/%s' % snapshot_id, put_body)
@@ -86,7 +86,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#delete-a-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#delete-a-snapshot
         """
         resp, body = self.delete("snapshots/%s" % snapshot_id)
         self.expected_success(202, resp.status)
@@ -116,7 +116,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-status-of-a-snapshot
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-status-of-a-snapshot
         """
         post_body = json.dumps({'os-update_snapshot_status': kwargs})
         url = 'snapshots/%s/action' % snapshot_id
@@ -129,7 +129,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#create-a-snapshot-s-metadata
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-snapshot-s-metadata
         """
         put_body = json.dumps({'metadata': metadata})
         url = "snapshots/%s/metadata" % snapshot_id
@@ -143,7 +143,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#show-a-snapshot-s-metadata
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#show-a-snapshot-s-metadata
         """
         url = "snapshots/%s/metadata" % snapshot_id
         resp, body = self.get(url)
@@ -156,7 +156,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-a-snapshot-s-metadata
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-a-snapshot-s-metadata
         """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata" % snapshot_id
@@ -178,7 +178,7 @@ class SnapshotsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-a-snapshot-s-metadata-for-a-specific-key
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-a-snapshot-s-metadata-for-a-specific-key
         """
         put_body = json.dumps(kwargs)
         url = "snapshots/%s/metadata/%s" % (snapshot_id, id)

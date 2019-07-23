@@ -21,7 +21,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-port
+        https://docs.openstack.org/api-ref/networking/v2/index.html#create-port
         """
         uri = '/ports'
         post_data = {'port': kwargs}
@@ -32,7 +32,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-port
+        https://docs.openstack.org/api-ref/networking/v2/index.html#update-port
         """
         uri = '/ports/%s' % port_id
         post_data = {'port': kwargs}
@@ -43,7 +43,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-port-details
+        https://docs.openstack.org/api-ref/networking/v2/index.html#show-port-details
         """
         uri = '/ports/%s' % port_id
         return self.show_resource(uri, **fields)
@@ -53,7 +53,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#delete-port
+        https://docs.openstack.org/api-ref/networking/v2/index.html#delete-port
         """
         uri = '/ports/%s' % port_id
         return self.delete_resource(uri)
@@ -63,7 +63,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-ports
+        https://docs.openstack.org/api-ref/networking/v2/index.html#list-ports
         """
         uri = '/ports'
         return self.list_resources(uri, **filters)
@@ -73,7 +73,7 @@ class PortsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#bulk-create-ports
+        https://docs.openstack.org/api-ref/networking/v2/index.html#bulk-create-ports
         """
         uri = '/ports'
         return self.create_resource(uri, kwargs)

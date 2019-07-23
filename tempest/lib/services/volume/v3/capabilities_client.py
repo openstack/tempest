@@ -25,7 +25,7 @@ class CapabilitiesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v2/index.html#show-back-end-capabilities
+        https://docs.openstack.org/api-ref/block-storage/v2/index.html#show-back-end-capabilities
         """
         url = 'capabilities/%s' % host
         resp, body = self.get(url)

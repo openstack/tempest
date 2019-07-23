@@ -48,7 +48,7 @@ class ProjectTagsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3/#modify-tag-list-for-a-project
+        https://docs.openstack.org/api-ref/identity/v3/#modify-tag-list-for-a-project
         """
         body = {'tags': tags}
         if kwargs:

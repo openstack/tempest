@@ -30,7 +30,7 @@ class GroupsClient(base_client.BaseClient):
         group_type and volume_types are required parameters in kwargs.
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-group
+        https://docs.openstack.org/api-ref/block-storage/v3/#create-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
@@ -43,7 +43,7 @@ class GroupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#delete-group
+        https://docs.openstack.org/api-ref/block-storage/v3/#delete-group
         """
         post_body = {'delete-volumes': delete_volumes}
         post_body = json.dumps({'delete': post_body})
@@ -57,7 +57,7 @@ class GroupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#show-group-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#show-group-details
         """
         url = "groups/%s" % str(group_id)
         resp, body = self.get(url)
@@ -70,8 +70,8 @@ class GroupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-groups
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-groups-with-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-groups
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-groups-with-details
         """
         url = "groups"
         if detail:
@@ -88,7 +88,7 @@ class GroupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-from-source
+        https://docs.openstack.org/api-ref/block-storage/v3/#create-group-from-source
         """
         post_body = json.dumps({'create-from-src': kwargs})
         resp, body = self.post('groups/action', post_body)
@@ -101,7 +101,7 @@ class GroupsClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-group
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-group
         """
         put_body = json.dumps({'group': kwargs})
         resp, body = self.put('groups/%s' % group_id, put_body)
@@ -112,7 +112,7 @@ class GroupsClient(base_client.BaseClient):
         """Resets group status.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#reset-group-status
+        https://docs.openstack.org/api-ref/block-storage/v3/#reset-group-status
         """
         post_body = json.dumps({'reset_status': {'status': status_to_set}})
         resp, body = self.post('groups/%s/action' % group_id, post_body)

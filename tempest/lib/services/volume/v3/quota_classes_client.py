@@ -26,7 +26,7 @@ class QuotaClassesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#show-quota-classes-for-a-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#show-quota-classes-for-a-project
         """
         url = 'os-quota-class-sets/%s' % quota_class_id
         resp, body = self.get(url)
@@ -39,7 +39,7 @@ class QuotaClassesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-quota-classes-for-a-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-quota-classes-for-a-project
         """
         url = 'os-quota-class-sets/%s' % quota_class_id
         put_body = json.dumps({'quota_class_set': kwargs})

@@ -34,7 +34,7 @@ class AccountClient(rest_client.RestClient):
         Account Metadata can be created, updated or deleted based on
         metadata header or value. For detailed info, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/object-store/#create-update-or-delete-account-metadata
+        https://docs.openstack.org/api-ref/object-store/#create-update-or-delete-account-metadata
         """
         headers = {}
         if create_update_metadata:
@@ -63,7 +63,7 @@ class AccountClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/object-store/#show-account-details-and-list-containers
+        https://docs.openstack.org/api-ref/object-store/#show-account-details-and-list-containers
         """
         url = '?%s' % urllib.urlencode(params) if params else ''
 

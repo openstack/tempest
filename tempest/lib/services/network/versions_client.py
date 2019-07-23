@@ -24,7 +24,7 @@ class NetworkVersionsClient(base.BaseNetworkClient):
         """Do a GET / to fetch available API version information.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#list-api-versions
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-api-versions
         """
 
         # Note: we do a self.get('/') here because we want to use
@@ -38,7 +38,7 @@ class NetworkVersionsClient(base.BaseNetworkClient):
         """Do a GET /<version> to fetch available resources.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#show-api-v2-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-api-v2-details
         """
 
         resp, body = self.get(version + '/')

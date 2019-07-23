@@ -72,7 +72,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/compute/#create-server
+        https://docs.openstack.org/api-ref/compute/#create-server
 
         :param name: Server name
         :param imageRef: Image reference (UUID)
@@ -117,7 +117,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-server
+        https://docs.openstack.org/api-ref/compute/#update-server
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -138,7 +138,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-server-details
+        https://docs.openstack.org/api-ref/compute/#show-server-details
         """
         resp, body = self.get("servers/%s" % server_id)
         body = json.loads(body)
@@ -151,7 +151,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-server
+        https://docs.openstack.org/api-ref/compute/#delete-server
         """
         resp, body = self.delete("servers/%s" % server_id)
         self.validate_response(schema.delete_server, resp, body)
@@ -162,8 +162,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-servers
-        https://developer.openstack.org/api-ref/compute/#list-servers-detailed
+        https://docs.openstack.org/api-ref/compute/#list-servers
+        https://docs.openstack.org/api-ref/compute/#list-servers-detailed
         """
 
         url = 'servers'
@@ -186,7 +186,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-ips
+        https://docs.openstack.org/api-ref/compute/#list-ips
         """
         resp, body = self.get("servers/%s/ips" % server_id)
         body = json.loads(body)
@@ -217,7 +217,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-server-back-up-createbackup-action
+        https://docs.openstack.org/api-ref/compute/#create-server-back-up-createbackup-action
         """
         return self.action(server_id, "createBackup", **kwargs)
 
@@ -226,7 +226,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#change-administrative-password-changepassword-action
+        https://docs.openstack.org/api-ref/compute/#change-administrative-password-changepassword-action
         """
         return self.action(server_id, 'changePassword', **kwargs)
 
@@ -254,7 +254,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#reboot-server-reboot-action
+        https://docs.openstack.org/api-ref/compute/#reboot-server-reboot-action
         """
         return self.action(server_id, 'reboot', **kwargs)
 
@@ -263,7 +263,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#rebuild-server-rebuild-action
+        https://docs.openstack.org/api-ref/compute/#rebuild-server-rebuild-action
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -285,7 +285,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#resize-server-resize-action
+        https://docs.openstack.org/api-ref/compute/#resize-server-resize-action
 
         Most parameters except the following are passed to the API without
         any changes.
@@ -301,7 +301,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#confirm-resized-server-confirmresize-action
+        https://docs.openstack.org/api-ref/compute/#confirm-resized-server-confirmresize-action
         """
         return self.action(server_id, 'confirmResize',
                            schema.server_actions_confirm_resize,
@@ -312,7 +312,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#revert-resized-server-revertresize-action
+        https://docs.openstack.org/api-ref/compute/#revert-resized-server-revertresize-action
         """
         return self.action(server_id, 'revertResize', **kwargs)
 
@@ -321,7 +321,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-all-metadata
+        https://docs.openstack.org/api-ref/compute/#list-all-metadata
         """
         resp, body = self.get("servers/%s/metadata" % server_id)
         body = json.loads(body)
@@ -333,7 +333,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#replace-metadata-items
+        https://docs.openstack.org/api-ref/compute/#replace-metadata-items
         """
         if no_metadata_field:
             post_body = ""
@@ -350,7 +350,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-or-update-metadata-items
+        https://docs.openstack.org/api-ref/compute/#create-or-update-metadata-items
         """
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % server_id,
@@ -365,7 +365,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-metadata-item-details
+        https://docs.openstack.org/api-ref/compute/#show-metadata-item-details
         """
         resp, body = self.get("servers/%s/metadata/%s" % (server_id, key))
         body = json.loads(body)
@@ -378,7 +378,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-or-update-metadata-item
+        https://docs.openstack.org/api-ref/compute/#create-or-update-metadata-item
         """
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (server_id, key),
@@ -393,7 +393,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-metadata-item
+        https://docs.openstack.org/api-ref/compute/#delete-metadata-item
         """
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (server_id, key))
@@ -406,7 +406,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#stop-server-os-stop-action
+        https://docs.openstack.org/api-ref/compute/#stop-server-os-stop-action
         """
         return self.action(server_id, 'os-stop', **kwargs)
 
@@ -415,7 +415,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#start-server-os-start-action
+        https://docs.openstack.org/api-ref/compute/#start-server-os-start-action
         """
         return self.action(server_id, 'os-start', **kwargs)
 
@@ -424,7 +424,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#attach-a-volume-to-an-instance
+        https://docs.openstack.org/api-ref/compute/#attach-a-volume-to-an-instance
         """
         post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
@@ -448,7 +448,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#detach-a-volume-from-an-instance
+        https://docs.openstack.org/api-ref/compute/#detach-a-volume-from-an-instance
         """
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
@@ -460,7 +460,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-a-detail-of-a-volume-attachment
+        https://docs.openstack.org/api-ref/compute/#show-a-detail-of-a-volume-attachment
         """
         resp, body = self.get('servers/%s/os-volume_attachments/%s' % (
             server_id, volume_id))
@@ -474,7 +474,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-volume-attachments-for-an-instance
+        https://docs.openstack.org/api-ref/compute/#list-volume-attachments-for-an-instance
         """
         resp, body = self.get('servers/%s/os-volume_attachments' % (
             server_id))
@@ -488,7 +488,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#add-security-group-to-a-server-addsecuritygroup-action
+        https://docs.openstack.org/api-ref/compute/#add-security-group-to-a-server-addsecuritygroup-action
         """
         return self.action(server_id, 'addSecurityGroup', **kwargs)
 
@@ -497,7 +497,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#remove-security-group-from-a-server-removesecuritygroup-action
+        https://docs.openstack.org/api-ref/compute/#remove-security-group-from-a-server-removesecuritygroup-action
         """
         return self.action(server_id, 'removeSecurityGroup', **kwargs)
 
@@ -506,7 +506,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#live-migrate-server-os-migratelive-action
+        https://docs.openstack.org/api-ref/compute/#live-migrate-server-os-migratelive-action
         """
         return self.action(server_id, 'os-migrateLive', **kwargs)
 
@@ -515,7 +515,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#migrate-server-migrate-action
+        https://docs.openstack.org/api-ref/compute/#migrate-server-migrate-action
         """
         return self.action(server_id, 'migrate', **kwargs)
 
@@ -524,7 +524,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#lock-server-lock-action
+        https://docs.openstack.org/api-ref/compute/#lock-server-lock-action
         """
         return self.action(server_id, 'lock', **kwargs)
 
@@ -533,7 +533,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#unlock-server-unlock-action
+        https://docs.openstack.org/api-ref/compute/#unlock-server-unlock-action
         """
         return self.action(server_id, 'unlock', **kwargs)
 
@@ -542,7 +542,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#suspend-server-suspend-action
+        https://docs.openstack.org/api-ref/compute/#suspend-server-suspend-action
         """
         return self.action(server_id, 'suspend', **kwargs)
 
@@ -551,7 +551,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#resume-suspended-server-resume-action
+        https://docs.openstack.org/api-ref/compute/#resume-suspended-server-resume-action
         """
         return self.action(server_id, 'resume', **kwargs)
 
@@ -560,7 +560,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#pause-server-pause-action
+        https://docs.openstack.org/api-ref/compute/#pause-server-pause-action
         """
         return self.action(server_id, 'pause', **kwargs)
 
@@ -569,7 +569,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#unpause-server-unpause-action
+        https://docs.openstack.org/api-ref/compute/#unpause-server-unpause-action
         """
         return self.action(server_id, 'unpause', **kwargs)
 
@@ -578,7 +578,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#reset-server-state-os-resetstate-action
+        https://docs.openstack.org/api-ref/compute/#reset-server-state-os-resetstate-action
         """
         return self.action(server_id, 'os-resetState', **kwargs)
 
@@ -587,7 +587,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#shelve-server-shelve-action
+        https://docs.openstack.org/api-ref/compute/#shelve-server-shelve-action
         """
         return self.action(server_id, 'shelve', **kwargs)
 
@@ -596,7 +596,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#unshelve-restore-shelved-server-unshelve-action
+        https://docs.openstack.org/api-ref/compute/#unshelve-restore-shelved-server-unshelve-action
         """
         return self.action(server_id, 'unshelve', **kwargs)
 
@@ -605,7 +605,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#shelf-offload-remove-server-shelveoffload-action
+        https://docs.openstack.org/api-ref/compute/#shelf-offload-remove-server-shelveoffload-action
         """
         return self.action(server_id, 'shelveOffload', **kwargs)
 
@@ -614,7 +614,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-console-output-os-getconsoleoutput-action
+        https://docs.openstack.org/api-ref/compute/#show-console-output-os-getconsoleoutput-action
         """
         return self.action(server_id, 'os-getConsoleOutput',
                            schema.get_console_output, **kwargs)
@@ -624,7 +624,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-remote-console
+        https://docs.openstack.org/api-ref/compute/#create-remote-console
         """
         param = {
             'remote_console': {
@@ -653,7 +653,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#rescue-server-rescue-action
+        https://docs.openstack.org/api-ref/compute/#rescue-server-rescue-action
         """
         if self.enable_instance_password:
             rescue_schema = schema.rescue_server_with_admin_pass
@@ -666,7 +666,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#unrescue-server-unrescue-action
+        https://docs.openstack.org/api-ref/compute/#unrescue-server-unrescue-action
         """
         return self.action(server_id, 'unrescue')
 
@@ -699,7 +699,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#force-delete-server-forcedelete-action
+        https://docs.openstack.org/api-ref/compute/#force-delete-server-forcedelete-action
         """
         return self.action(server_id, 'forceDelete', **kwargs)
 
@@ -708,7 +708,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#restore-soft-deleted-instance-restore-action
+        https://docs.openstack.org/api-ref/compute/#restore-soft-deleted-instance-restore-action
         """
         return self.action(server_id, 'restore', **kwargs)
 
@@ -717,7 +717,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#reset-networking-on-a-server-resetnetwork-action
+        https://docs.openstack.org/api-ref/compute/#reset-networking-on-a-server-resetnetwork-action
         """
         return self.action(server_id, 'resetNetwork', **kwargs)
 
@@ -726,7 +726,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#inject-network-information-injectnetworkinfo-action
+        https://docs.openstack.org/api-ref/compute/#inject-network-information-injectnetworkinfo-action
         """
         return self.action(server_id, 'injectNetworkInfo', **kwargs)
 
@@ -735,7 +735,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#get-vnc-console-os-getvncconsole-action-deprecated
+        https://docs.openstack.org/api-ref/compute/#get-vnc-console-os-getvncconsole-action-deprecated
         """
         return self.action(server_id, "os-getVNCConsole",
                            schema.get_vnc_console, **kwargs)
@@ -745,7 +745,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#add-associate-fixed-ip-addfixedip-action-deprecated
+        https://docs.openstack.org/api-ref/compute/#add-associate-fixed-ip-addfixedip-action-deprecated
         """
         return self.action(server_id, 'addFixedIp', **kwargs)
 
@@ -754,7 +754,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#remove-disassociate-fixed-ip-removefixedip-action-deprecated
+        https://docs.openstack.org/api-ref/compute/#remove-disassociate-fixed-ip-removefixedip-action-deprecated
         """
         return self.action(server_id, 'removeFixedIp', **kwargs)
 
@@ -763,7 +763,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-security-groups-by-server
+        https://docs.openstack.org/api-ref/compute/#list-security-groups-by-server
         """
         resp, body = self.get("servers/%s/os-security-groups" % server_id)
         body = json.loads(body)
@@ -776,7 +776,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-tags
+        https://docs.openstack.org/api-ref/compute/#list-tags
         """
         url = 'servers/%s/tags' % server_id
         resp, body = self.get(url)
@@ -790,7 +790,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#replace-tags
+        https://docs.openstack.org/api-ref/compute/#replace-tags
 
         :param tags: List of tags to replace current server tags with.
         """
@@ -807,7 +807,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-all-tags
+        https://docs.openstack.org/api-ref/compute/#delete-all-tags
         """
         url = 'servers/%s/tags' % server_id
         resp, body = self.delete(url)
@@ -820,7 +820,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#check-tag-existence
+        https://docs.openstack.org/api-ref/compute/#check-tag-existence
 
         :param tag: Check for existence of tag on specified server.
         """
@@ -835,7 +835,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#add-a-single-tag
+        https://docs.openstack.org/api-ref/compute/#add-a-single-tag
 
         :param tag: Tag to be added to the specified server.
         """
@@ -850,7 +850,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-a-single-tag
+        https://docs.openstack.org/api-ref/compute/#delete-a-single-tag
 
         :param tag: Tag to be removed from the specified server.
         """
@@ -865,7 +865,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#evacuate-server-evacuate-action
+        https://docs.openstack.org/api-ref/compute/#evacuate-server-evacuate-action
         """
         if self.enable_instance_password:
             evacuate_schema = schema.evacuate_server_with_admin_pass

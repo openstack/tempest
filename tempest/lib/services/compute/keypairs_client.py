@@ -32,7 +32,7 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-keypairs
+        https://docs.openstack.org/api-ref/compute/#list-keypairs
         """
         url = 'os-keypairs'
         if params:
@@ -48,7 +48,7 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-keypair-details
+        https://docs.openstack.org/api-ref/compute/#show-keypair-details
         """
         url = "os-keypairs/%s" % keypair_name
         if params:
@@ -64,7 +64,7 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-or-import-keypair
+        https://docs.openstack.org/api-ref/compute/#create-or-import-keypair
         """
         post_body = json.dumps({'keypair': kwargs})
         resp, body = self.post("os-keypairs", body=post_body)
@@ -78,7 +78,7 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-keypair
+        https://docs.openstack.org/api-ref/compute/#delete-keypair
         """
         url = "os-keypairs/%s" % keypair_name
         if params:

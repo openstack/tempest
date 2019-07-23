@@ -23,7 +23,7 @@ class ImageMembersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#list-image-members
+        https://docs.openstack.org/api-ref/image/v2/#list-image-members
         """
         url = 'images/%s/members' % image_id
         resp, body = self.get(url)
@@ -36,7 +36,7 @@ class ImageMembersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#create-image-member
+        https://docs.openstack.org/api-ref/image/v2/#create-image-member
         """
         url = 'images/%s/members' % image_id
         data = json.dumps(kwargs)
@@ -50,7 +50,7 @@ class ImageMembersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#update-image-member
+        https://docs.openstack.org/api-ref/image/v2/#update-image-member
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         data = json.dumps(kwargs)
@@ -64,7 +64,7 @@ class ImageMembersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#show-image-member-details
+        https://docs.openstack.org/api-ref/image/v2/#show-image-member-details
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
@@ -76,7 +76,7 @@ class ImageMembersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/#delete-image-member
+        https://docs.openstack.org/api-ref/image/v2/#delete-image-member
         """
         url = 'images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)

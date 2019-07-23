@@ -33,7 +33,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-group-type
+        https://docs.openstack.org/api-ref/block-storage/v3/#create-group-type
         """
         post_body = json.dumps({'group_type': kwargs})
         resp, body = self.post('group_types', post_body)
@@ -52,7 +52,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#list-group-types
+        https://docs.openstack.org/api-ref/block-storage/v3/#list-group-types
         """
         url = 'group_types'
         if params:
@@ -67,7 +67,7 @@ class GroupTypesClient(base_client.BaseClient):
         """Returns the details of default group_type.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#show-default-group-type-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#show-default-group-type-details
         """
         url = 'group_types/default'
         resp, body = self.get(url)
@@ -79,7 +79,7 @@ class GroupTypesClient(base_client.BaseClient):
         """Returns the details of a single group_type.
 
         For more information, please refer to the official API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#show-group-type-details
+        https://docs.openstack.org/api-ref/block-storage/v3/#show-group-type-details
         """
         url = "group_types/%s" % group_type_id
         resp, body = self.get(url)
@@ -92,7 +92,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-group-type
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-group-type
         """
         post_body = json.dumps({'group_type': kwargs})
         resp, body = self.put('group_types/%s' % group_type_id, post_body)
@@ -105,7 +105,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#create-or-update-group-specs-for-a-group-type
+        https://docs.openstack.org/api-ref/block-storage/v3/#create-or-update-group-specs-for-a-group-type
         """
         url = "group_types/%s/group_specs" % group_type_id
         post_body = json.dumps({'group_specs': group_specs})
@@ -135,7 +135,7 @@ class GroupTypesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/#update-one-specific-group-spec-for-a-group-type
+        https://docs.openstack.org/api-ref/block-storage/v3/#update-one-specific-group-spec-for-a-group-type
         """
         url = "group_types/%s/group_specs/%s" % (group_type_id, spec_id)
         put_body = json.dumps(spec)

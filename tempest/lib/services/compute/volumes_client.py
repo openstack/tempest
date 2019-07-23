@@ -29,8 +29,8 @@ class VolumesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#list-volumes
-        https://developer.openstack.org/api-ref/compute/#list-volumes-with-details
+        https://docs.openstack.org/api-ref/compute/#list-volumes
+        https://docs.openstack.org/api-ref/compute/#list-volumes-with-details
         """
         url = 'os-volumes'
 
@@ -49,7 +49,7 @@ class VolumesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-volume-details
+        https://docs.openstack.org/api-ref/compute/#show-volume-details
         """
         url = "os-volumes/%s" % volume_id
         resp, body = self.get(url)
@@ -62,7 +62,7 @@ class VolumesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-volume
+        https://docs.openstack.org/api-ref/compute/#create-volume
         """
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('os-volumes', post_body)
@@ -75,7 +75,7 @@ class VolumesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#delete-volume
+        https://docs.openstack.org/api-ref/compute/#delete-volume
         """
         resp, body = self.delete("os-volumes/%s" % volume_id)
         self.validate_response(schema.delete_volume, resp, body)

@@ -28,7 +28,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#create-consumer
+        https://docs.openstack.org/api-ref/identity/v3-ext/#create-consumer
         """
         post_body = {"description": description}
         post_body = json.dumps({'consumer': post_body})
@@ -44,7 +44,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#delete-consumer
+        https://docs.openstack.org/api-ref/identity/v3-ext/#delete-consumer
         """
         resp, body = self.delete('OS-OAUTH1/consumers/%s' % consumer_id)
         self.expected_success(204, resp.status)
@@ -58,7 +58,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/#update-consumer
+        https://docs.openstack.org/api-ref/identity/v3-ext/#update-consumer
         """
         post_body = {"description": description}
         post_body = json.dumps({'consumer': post_body})
@@ -75,7 +75,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#show-consumer-details
+        https://docs.openstack.org/api-ref/identity/v3-ext/#show-consumer-details
         """
         resp, body = self.get('OS-OAUTH1/consumers/%s' % consumer_id)
         self.expected_success(200, resp.status)
@@ -87,7 +87,7 @@ class OAUTHConsumerClient(rest_client.RestClient):
 
         For more information, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3-ext/#list-consumers
+        https://docs.openstack.org/api-ref/identity/v3-ext/#list-consumers
         """
         resp, body = self.get('OS-OAUTH1/consumers')
         self.expected_success(200, resp.status)

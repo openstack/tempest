@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3/index.html#groups
+https://docs.openstack.org/api-ref/identity/v3/index.html#groups
 """
 
 from oslo_serialization import jsonutils as json
@@ -31,7 +31,7 @@ class GroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-group
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.post('groups', post_body)
@@ -51,7 +51,7 @@ class GroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-groups
+        https://docs.openstack.org/api-ref/identity/v3/#list-groups
         """
         url = 'groups'
         if params:
@@ -66,7 +66,7 @@ class GroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-group
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-group
         """
         post_body = json.dumps({'group': kwargs})
         resp, body = self.patch('groups/%s' % group_id, post_body)
@@ -92,7 +92,7 @@ class GroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/#list-users-in-group
+        https://docs.openstack.org/api-ref/identity/v3/#list-users-in-group
         """
         url = 'groups/%s/users' % group_id
         if params:

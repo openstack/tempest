@@ -25,7 +25,7 @@ class SchedulerStatsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#list-all-back-end-storage-pools
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-all-back-end-storage-pools
         """
         url = 'scheduler-stats/get_pools'
         if detail:

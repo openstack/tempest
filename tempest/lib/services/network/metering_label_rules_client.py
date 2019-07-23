@@ -20,7 +20,7 @@ class MeteringLabelRulesClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#create-metering-label-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-metering-label-rule
         """
         uri = '/metering/metering-label-rules'
         post_data = {'metering_label_rule': kwargs}
@@ -39,7 +39,7 @@ class MeteringLabelRulesClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#list-metering-label-rules
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-metering-label-rules
         """
         uri = '/metering/metering-label-rules'
         return self.list_resources(uri, **filters)

@@ -48,7 +48,7 @@ class QuotasClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/block-storage/v3/index.html#update-quotas-for-a-project
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-quotas-for-a-project
         """
         put_body = jsonutils.dumps({'quota_set': kwargs})
         resp, body = self.put('os-quota-sets/%s' % tenant_id, put_body)

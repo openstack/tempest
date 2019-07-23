@@ -26,7 +26,7 @@ class EndPointGroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/#create-endpoint-group
+        https://docs.openstack.org/api-ref/identity/v3-ext/#create-endpoint-group
         """
         post_body = json.dumps({'endpoint_group': kwargs})
         resp, body = self.post('OS-EP-FILTER/endpoint_groups', post_body)
@@ -39,7 +39,7 @@ class EndPointGroupsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the
         official API reference:
-        https://developer.openstack.org/api-ref/identity/v3-ext/#update-endpoint-group
+        https://docs.openstack.org/api-ref/identity/v3-ext/#update-endpoint-group
         """
         post_body = json.dumps({'endpoint_group': kwargs})
         resp, body = self.patch(

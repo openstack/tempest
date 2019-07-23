@@ -24,7 +24,7 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
     """Tests Nova Networks API that usually requires admin privileges.
 
     API docs:
-    https://developer.openstack.org/api-ref/compute/#networks-os-networks-deprecated
+    https://docs.openstack.org/api-ref/compute/#networks-os-networks-deprecated
     """
     max_microversion = '2.35'
 

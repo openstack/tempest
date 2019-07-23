@@ -22,7 +22,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#create-minimum-bandwidth-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-minimum-bandwidth-rule
         """
         uri = '/qos/policies/%s/minimum_bandwidth_rules' % qos_policy_id
         post_data = {'minimum_bandwidth_rule': kwargs}
@@ -33,7 +33,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#update-minimum-bandwidth-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-minimum-bandwidth-rule
         """
         uri = '/qos/policies/%s/minimum_bandwidth_rules/%s' % (
             qos_policy_id, rule_id)
@@ -45,7 +45,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#show-minimum-bandwidth-rule-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-minimum-bandwidth-rule-details
         """
         uri = '/qos/policies/%s/minimum_bandwidth_rules/%s' % (
             qos_policy_id, rule_id)
@@ -56,7 +56,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#delete-minimum-bandwidth-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#delete-minimum-bandwidth-rule
         """
         uri = '/qos/policies/%s/minimum_bandwidth_rules/%s' % (
             qos_policy_id, rule_id)
@@ -67,7 +67,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
 
         For full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/network/v2/index.html#list-minimum-bandwidth-rules-for-qos-policy
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-minimum-bandwidth-rules-for-qos-policy
         """
         uri = '/qos/policies/%s/minimum_bandwidth_rules' % qos_policy_id
         return self.list_resources(uri, **filters)

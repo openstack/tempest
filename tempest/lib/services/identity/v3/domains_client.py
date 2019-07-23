@@ -26,7 +26,7 @@ class DomainsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#create-domain
+        https://docs.openstack.org/api-ref/identity/v3/index.html#create-domain
         """
         post_body = json.dumps({'domain': kwargs})
         resp, body = self.post('domains', post_body)
@@ -38,7 +38,7 @@ class DomainsClient(rest_client.RestClient):
         """Deletes a domain.
 
         For APi details, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#delete-domain
+        https://docs.openstack.org/api-ref/identity/v3/index.html#delete-domain
         """
         resp, body = self.delete('domains/%s' % domain_id)
         self.expected_success(204, resp.status)
@@ -49,7 +49,7 @@ class DomainsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#list-domains
+        https://docs.openstack.org/api-ref/identity/v3/index.html#list-domains
         """
         url = 'domains'
         if params:
@@ -64,7 +64,7 @@ class DomainsClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#update-domain
+        https://docs.openstack.org/api-ref/identity/v3/index.html#update-domain
         """
         post_body = json.dumps({'domain': kwargs})
         resp, body = self.patch('domains/%s' % domain_id, post_body)
@@ -76,7 +76,7 @@ class DomainsClient(rest_client.RestClient):
         """Get Domain details.
 
         For API details, please refer to the official API reference:
-        http://developer.openstack.org/api-ref/identity/v3/index.html#show-domain-details
+        https://docs.openstack.org/api-ref/identity/v3/index.html#show-domain-details
         """
         resp, body = self.get('domains/%s' % domain_id)
         self.expected_success(200, resp.status)

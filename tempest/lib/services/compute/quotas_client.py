@@ -35,8 +35,8 @@ class QuotasClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#show-a-quota
-        https://developer.openstack.org/api-ref/compute/#show-the-detail-of-quota
+        https://docs.openstack.org/api-ref/compute/#show-a-quota
+        https://docs.openstack.org/api-ref/compute/#show-the-detail-of-quota
         """
 
         params = {}
@@ -59,7 +59,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
     def show_default_quota_set(self, tenant_id):
         """List the default quota set for a tenant.
 
-        https://developer.openstack.org/api-ref/compute/#list-default-quotas-for-tenant
+        https://docs.openstack.org/api-ref/compute/#list-default-quotas-for-tenant
         """
 
         url = 'os-quota-sets/%s/defaults' % tenant_id
@@ -74,7 +74,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#update-quotas
+        https://docs.openstack.org/api-ref/compute/#update-quotas
         """
 
         post_body = json.dumps({'quota_set': kwargs})
@@ -94,7 +94,7 @@ class QuotasClient(base_compute_client.BaseComputeClient):
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set.
 
-        https://developer.openstack.org/api-ref/compute/#revert-quotas-to-defaults
+        https://docs.openstack.org/api-ref/compute/#revert-quotas-to-defaults
         """
         resp, body = self.delete('os-quota-sets/%s' % tenant_id)
         schema = self.get_schema(self.schema_versions_info)

@@ -28,7 +28,7 @@ class SecurityGroupDefaultRulesClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/compute/#create-default-security-group-rule
+        https://docs.openstack.org/api-ref/compute/#create-default-security-group-rule
         """
         post_body = json.dumps({'security_group_default_rule': kwargs})
         url = 'os-security-group-default-rules'

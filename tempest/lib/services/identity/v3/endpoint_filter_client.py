@@ -14,7 +14,7 @@
 #    under the License.
 
 """
-https://developer.openstack.org/api-ref/identity/v3-ext/#os-ep-filter-api
+https://docs.openstack.org/api-ref/identity/v3-ext/#os-ep-filter-api
 """
 
 from oslo_serialization import jsonutils as json

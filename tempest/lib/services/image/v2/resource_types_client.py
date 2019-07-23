@@ -26,7 +26,7 @@ class ResourceTypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-resource-types
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-resource-types
         """
         url = 'metadefs/resource_types'
         resp, body = self.get(url)
@@ -39,7 +39,7 @@ class ResourceTypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#create-resource-type-association
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#create-resource-type-association
         """
         url = 'metadefs/namespaces/%s/resource_types' % namespace_id
         data = json.dumps(kwargs)
@@ -53,7 +53,7 @@ class ResourceTypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#list-resource-type-associations
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#list-resource-type-associations
         """
         url = 'metadefs/namespaces/%s/resource_types' % namespace_id
         resp, body = self.get(url)
@@ -66,7 +66,7 @@ class ResourceTypesClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/image/v2/metadefs-index.html#remove-resource-type-association
+        https://docs.openstack.org/api-ref/image/v2/metadefs-index.html#remove-resource-type-association
         """
         url = 'metadefs/namespaces/%s/resource_types/%s' % (namespace_id,
                                                             resource_name)

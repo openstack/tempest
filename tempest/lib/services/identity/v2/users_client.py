@@ -24,7 +24,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#create-user-admin-endpoint
+        https://docs.openstack.org/api-ref/identity/v2-admin/index.html#create-user-admin-endpoint
         """
         post_body = json.dumps({'user': kwargs})
         resp, body = self.post('users', post_body)
@@ -37,7 +37,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#update-user-admin-endpoint
+        https://docs.openstack.org/api-ref/identity/v2-admin/index.html#update-user-admin-endpoint
         """
         put_body = json.dumps({'user': kwargs})
         resp, body = self.put('users/%s' % user_id, put_body)
@@ -50,7 +50,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#show-user-details-admin-endpoint
+        https://docs.openstack.org/api-ref/identity/v2-admin/index.html#show-user-details-admin-endpoint
         """
         resp, body = self.get("users/%s" % user_id)
         self.expected_success(200, resp.status)
@@ -62,7 +62,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-admin/index.html#delete-user-admin-endpoint
+        https://docs.openstack.org/api-ref/identity/v2-admin/index.html#delete-user-admin-endpoint
         """
         resp, body = self.delete("users/%s" % user_id)
         self.expected_success(204, resp.status)
@@ -73,7 +73,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/identity/v2-admin/index.html#list-users-admin-endpoint
+        https://docs.openstack.org/api-ref/identity/v2-admin/index.html#list-users-admin-endpoint
         """
         url = "users"
         if params:
@@ -88,7 +88,7 @@ class UsersClient(rest_client.RestClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://developer.openstack.org/api-ref/identity/v2-ext/index.html#enable-disable-user
+        https://docs.openstack.org/api-ref/identity/v2-ext/index.html#enable-disable-user
         """
         # NOTE: The URL (users/<id>/enabled) is different from the api-site
         # one (users/<id>/OS-KSADM/enabled) , but they are the same API

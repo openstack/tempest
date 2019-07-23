@@ -22,7 +22,7 @@ class SubnetpoolsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-subnet-pools
+        https://docs.openstack.org/api-ref/networking/v2/index.html#list-subnet-pools
         """
         uri = '/subnetpools'
         return self.list_resources(uri, **filters)
@@ -32,7 +32,7 @@ class SubnetpoolsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-subnet-pool
+        https://docs.openstack.org/api-ref/networking/v2/index.html#create-subnet-pool
         """
         uri = '/subnetpools'
         post_data = {'subnetpool': kwargs}
@@ -43,7 +43,7 @@ class SubnetpoolsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-subnet-pool
+        https://docs.openstack.org/api-ref/networking/v2/index.html#show-subnet-pool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         return self.show_resource(uri, **fields)
@@ -53,7 +53,7 @@ class SubnetpoolsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-subnet-pool
+        https://docs.openstack.org/api-ref/networking/v2/index.html#update-subnet-pool
         """
         uri = '/subnetpools/%s' % subnetpool_id
         post_data = {'subnetpool': kwargs}
