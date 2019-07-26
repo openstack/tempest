@@ -33,6 +33,10 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         super(TrustsV3TestJSON, cls).skip_checks()
         if not CONF.identity_feature_enabled.trust:
             raise cls.skipException("Trusts aren't enabled")
+        if CONF.identity_feature_enabled.immutable_user_source:
+            raise cls.skipException('Skipped because environment has an '
+                                    'immutable user source and solely '
+                                    'provides read-only access to users.')
 
     def setUp(self):
         super(TrustsV3TestJSON, self).setUp()
