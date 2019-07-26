@@ -34,6 +34,14 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          map(lambda x: x[key], body))
 
     @classmethod
+    def skip_checks(cls):
+        super(UsersV3TestJSON, cls).skip_checks()
+        if CONF.identity_feature_enabled.immutable_user_source:
+            raise cls.skipException('Skipped because environment has an '
+                                    'immutable user source and solely '
+                                    'provides read-only access to users.')
+
+    @classmethod
     def resource_setup(cls):
         super(UsersV3TestJSON, cls).resource_setup()
         alt_user = data_utils.rand_name('test_user')
