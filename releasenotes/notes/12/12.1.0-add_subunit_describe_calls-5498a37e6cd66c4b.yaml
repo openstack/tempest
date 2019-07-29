@@ -4,5 +4,5 @@ features:
     Adds subunit-describe-calls. A parser for subunit streams to determine what
     REST API calls are made inside of a test and in what order they are called.
 
-      * Input can be piped in or a file can be specified
-      * Output is shortened for stdout, the output file has more information
+    * Input can be piped in or a file can be specified
+    * Output is shortened for stdout, the output file has more information

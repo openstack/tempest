@@ -1,12 +1,12 @@
 ---
-prelude: >
+prelude: |
     This release is to tag the Tempest for OpenStack Rocky release.
     After this release, Tempest will support below OpenStack Releases:
 
-      * Rocky
-      * Queens
-      * Pike
-      * Ocata
+    * Rocky
+    * Queens
+    * Pike
+    * Ocata
 
     Current development of Tempest is for OpenStack Stein development
     cycle. Every Tempest commit is also tested against master during

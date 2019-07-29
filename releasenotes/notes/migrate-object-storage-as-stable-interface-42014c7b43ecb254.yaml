@@ -6,5 +6,5 @@ features:
     other projects can use these modules as stable libraries
     without any maintenance changes.
 
-      * bulk_middleware_client
-      * capabilities_client
+    * bulk_middleware_client
+    * capabilities_client

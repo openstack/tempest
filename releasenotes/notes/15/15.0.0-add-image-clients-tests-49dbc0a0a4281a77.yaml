@@ -5,6 +5,6 @@ features:
     http://developer.openstack.org/api-ref/image/v2/metadefs-index.html,
     there are some apis are not included, add them.
 
-      * namespace_objects_client(v2)
-      * namespace_tags_client(v2)
+    * namespace_objects_client(v2)
+    * namespace_tags_client(v2)
 

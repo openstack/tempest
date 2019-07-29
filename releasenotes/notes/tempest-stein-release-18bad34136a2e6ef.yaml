@@ -1,14 +1,14 @@
 ---
-prelude: >
+prelude: |
     This release is to tag the Tempest for OpenStack Stein release.
     This release marks the start of Stein release support in Tempest and
     the end of support for Ocata in Tempest.
     After this release, Tempest will support below OpenStack Releases:
 
-      * Stein
-      * Rocky
-      * Queens
-      * Pike
+    * Stein
+    * Rocky
+    * Queens
+    * Pike
 
     Current development of Tempest is for OpenStack Train development
     cycle. Every Tempest commit is also tested against master during

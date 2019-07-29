@@ -6,8 +6,8 @@ features:
     so the other projects can use these modules as stable libraries without
     any maintenance changes.
 
-      * endpoints_client(v2)
-      * roles_client(v2)
-      * services_client(v2)
-      * tenants_client(v2)
-      * users_client(v2)
+    * endpoints_client(v2)
+    * roles_client(v2)
+    * services_client(v2)
+    * tenants_client(v2)
+    * users_client(v2)
