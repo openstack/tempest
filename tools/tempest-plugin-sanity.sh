@@ -47,7 +47,7 @@ PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 BLACKLIST="$(python tools/generate-tempest-plugins-list.py blacklist)"
 
 # Function to clone project using zuul-cloner or from git
-function clone_project() {
+function clone_project {
     if [ -e /usr/zuul-env/bin/zuul-cloner ]; then
         /usr/zuul-env/bin/zuul-cloner --cache-dir /opt/git \
         https://opendev.org \
@@ -61,7 +61,7 @@ function clone_project() {
 }
 
 # function to create virtualenv to perform sanity operation
-function prepare_workspace() {
+function prepare_workspace {
     SANITY_DIR=$(pwd)
     virtualenv -p python3 --clear "$SANITY_DIR"/.venv
     export TVENV="$SANITY_DIR/tools/with_venv.sh"
@@ -72,7 +72,7 @@ function prepare_workspace() {
 }
 
 # Function to install project
-function install_project() {
+function install_project {
     "$TVENV" pip install "$SANITY_DIR"/"$1"
     # Check for test-requirements.txt file in a project then install it.
     if [ -e "$SANITY_DIR"/"$1"/test-requirements.txt ]; then
@@ -81,7 +81,7 @@ function install_project() {
 }
 
 # Function to perform sanity checking on Tempest plugin
-function tempest_sanity() {
+function tempest_sanity {
     "$TVENV" tempest init "$SANITY_DIR"/tempest_sanity && \
     cd "$SANITY_DIR"/tempest_sanity && \
     "$TVENV" tempest list-plugins && \
@@ -100,7 +100,7 @@ function tempest_sanity() {
 }
 
 # Function to run sanity check on each project
-function plugin_sanity_check() {
+function plugin_sanity_check {
     prepare_workspace && \
     clone_project "$1" && \
     install_project "$1" && \
