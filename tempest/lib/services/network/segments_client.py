@@ -20,7 +20,7 @@ class SegmentsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#create-segment
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-segment
         """
         uri = '/segments'
         post_data = {'segment': kwargs}
@@ -31,7 +31,7 @@ class SegmentsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#update-segment
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-segment
         """
         uri = '/segments/%s' % segment_id
         post_data = {'segment': kwargs}
@@ -42,7 +42,7 @@ class SegmentsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#show-segment
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-segment-details
         """
         uri = '/segments/%s' % segment_id
         return self.show_resource(uri, **fields)
@@ -57,7 +57,7 @@ class SegmentsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        http://developer.openstack.org/api-ref/networking/v2/index.html#list-segments
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-segments
         """
         uri = '/segments'
         return self.list_resources(uri, **filters)
