@@ -16,16 +16,6 @@
       devstack_services:
         tempest: true
       devstack_local_conf:
-        post-config:
-          # TODO(slaweq): remove this hardcoded options when
-          # https://bugs.launchpad.net/devstack/+bug/1837980
-          # will be fixed and Devstack will support configuration
-          # of cache in Nova
-          $NOVA_CONF:
-            cache:
-              memcache_servers: "localhost:11211"
-              backend: "dogpile.cache.memcached"
-              enabled: "True"
         test-config:
           $TEMPEST_CONFIG:
             compute:
