@@ -1,0 +1,12 @@
+---
+deprecations:
+  - |
+    The config option ``CONF.compute.vnc_server_header`` is deprecated because
+    it has become obsolete with the usage of different response header fields
+    to accomplish the same goal in accordance with RFC7231 Section 6.2.2.
+
+fixes:
+  - |
+    Adequately validates WebSocket upgrade in test_novnc and removes unneeded
+    configuration complexity. Closes bug #1838777 and #1840788.
+
