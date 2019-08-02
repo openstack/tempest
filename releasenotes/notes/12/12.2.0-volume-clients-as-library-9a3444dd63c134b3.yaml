@@ -6,13 +6,13 @@ features:
     so the other projects can use these modules as stable libraries
     without any maintenance changes.
 
-      * availability_zone_client(v1)
-      * availability_zone_client(v2)
-      * extensions_client(v1)
-      * extensions_client(v2)
-      * hosts_client(v1)
-      * hosts_client(v2)
-      * quotas_client(v1)
-      * quotas_client(v2)
-      * services_client(v1)
-      * services_client(v2)
+    * availability_zone_client(v1)
+    * availability_zone_client(v2)
+    * extensions_client(v1)
+    * extensions_client(v2)
+    * hosts_client(v1)
+    * hosts_client(v2)
+    * quotas_client(v1)
+    * quotas_client(v2)
+    * services_client(v1)
+    * services_client(v2)

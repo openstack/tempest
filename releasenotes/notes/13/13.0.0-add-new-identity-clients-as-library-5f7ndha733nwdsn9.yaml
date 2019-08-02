@@ -5,11 +5,11 @@ features:
     Add new service clients to the library interface so the other projects can use these modules as stable libraries without
     any maintenance changes.
 
-      * identity_client(v2)
-      * groups_client(v3)
-      * trusts_client(v3)
-      * users_client(v3)
-      * identity_client(v3)
-      * roles_client(v3)
-      * inherited_roles_client(v3)
-      * credentials_client(v3)
+    * identity_client(v2)
+    * groups_client(v3)
+    * trusts_client(v3)
+    * users_client(v3)
+    * identity_client(v3)
+    * roles_client(v3)
+    * inherited_roles_client(v3)
+    * credentials_client(v3)

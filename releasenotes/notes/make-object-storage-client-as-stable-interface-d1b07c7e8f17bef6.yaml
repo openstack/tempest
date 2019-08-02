@@ -6,6 +6,6 @@ features:
     other projects can use these modules as stable libraries
     without any maintenance changes.
 
-      * account_client
-      * container_client
-      * object_client
+    * account_client
+    * container_client
+    * object_client

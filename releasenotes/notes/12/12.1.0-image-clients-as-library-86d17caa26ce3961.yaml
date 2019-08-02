@@ -6,10 +6,10 @@ features:
     so the other projects can use these modules as stable libraries
     without any maintenance changes.
 
-      * image_members_client(v1)
-      * images_client(v1)
-      * image_members_client(v2)
-      * images_client(v2)
-      * namespaces_client(v2)
-      * resource_types_client(v2)
-      * schemas_client(v2)
+    * image_members_client(v1)
+    * images_client(v1)
+    * image_members_client(v2)
+    * images_client(v2)
+    * namespaces_client(v2)
+    * resource_types_client(v2)
+    * schemas_client(v2)
