@@ -20,7 +20,7 @@ class NetworksClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#create-network
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-network
         """
         uri = '/networks'
         post_data = {'network': kwargs}
@@ -31,7 +31,7 @@ class NetworksClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#update-network
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-network
         """
         uri = '/networks/%s' % network_id
         post_data = {'network': kwargs}
@@ -42,7 +42,7 @@ class NetworksClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#show-network-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-network-details
         """
         uri = '/networks/%s' % network_id
         return self.show_resource(uri, **fields)
@@ -56,7 +56,7 @@ class NetworksClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#list-networks
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-networks
         """
         uri = '/networks'
         return self.list_resources(uri, **filters)
@@ -66,7 +66,7 @@ class NetworksClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#bulk-create-networks
+        https://docs.openstack.org/api-ref/network/v2/index.html#bulk-create-networks
         """
         uri = '/networks'
         return self.create_resource(uri, kwargs)

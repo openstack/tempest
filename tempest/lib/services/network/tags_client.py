@@ -25,7 +25,7 @@ class TagsClient(base.BaseNetworkClient):
         """Adds a tag on the resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#add-a-tag
+        https://docs.openstack.org/api-ref/network/v2/index.html#add-a-tag
         """
         uri = '/%s/%s/tags/%s' % (resource_type, resource_id, tag)
         return self.update_resource(
@@ -36,7 +36,7 @@ class TagsClient(base.BaseNetworkClient):
         """Confirm that a given tag is set on the resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#confirm-a-tag
+        https://docs.openstack.org/api-ref/network/v2/index.html#confirm-a-tag
         """
         # TODO(felipemonteiro): Use the "check_resource" method in
         # ``BaseNetworkClient`` once it has been implemented.
@@ -50,7 +50,7 @@ class TagsClient(base.BaseNetworkClient):
         """Replace all tags on the resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#replace-all-tags
+        https://docs.openstack.org/api-ref/network/v2/index.html#replace-all-tags
         """
         uri = '/%s/%s/tags' % (resource_type, resource_id)
         put_body = {"tags": tags}
@@ -60,7 +60,7 @@ class TagsClient(base.BaseNetworkClient):
         """Removes a tag on the resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#remove-a-tag
+        https://docs.openstack.org/api-ref/network/v2/index.html#remove-a-tag
         """
         uri = '/%s/%s/tags/%s' % (resource_type, resource_id, tag)
         return self.delete_resource(uri)
@@ -69,7 +69,7 @@ class TagsClient(base.BaseNetworkClient):
         """Removes all tags on the resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#remove-all-tags
+        https://docs.openstack.org/api-ref/network/v2/index.html#remove-all-tags
         """
         uri = '/%s/%s/tags' % (resource_type, resource_id)
         return self.delete_resource(uri)
@@ -78,7 +78,7 @@ class TagsClient(base.BaseNetworkClient):
         """Retrieves the tags for a resource.
 
         For more information, please refer to the official API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#obtain-tag-list
+        https://docs.openstack.org/api-ref/network/v2/index.html#obtain-tag-list
         """
         uri = '/%s/%s/tags' % (resource_type, resource_id)
         return self.list_resources(uri)

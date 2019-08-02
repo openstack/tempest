@@ -20,7 +20,7 @@ class MeteringLabelsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#create-metering-label
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-metering-label
         """
         uri = '/metering/metering-labels'
         post_data = {'metering_label': kwargs}
@@ -31,7 +31,7 @@ class MeteringLabelsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#show-metering-label-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-metering-label-details
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.show_resource(uri, **fields)
@@ -41,7 +41,7 @@ class MeteringLabelsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#delete-metering-label
+        https://docs.openstack.org/api-ref/network/v2/index.html#delete-metering-label
         """
         uri = '/metering/metering-labels/%s' % metering_label_id
         return self.delete_resource(uri)
@@ -51,7 +51,7 @@ class MeteringLabelsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#list-metering-labels
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-metering-labels
         """
         uri = '/metering/metering-labels'
         return self.list_resources(uri, **filters)

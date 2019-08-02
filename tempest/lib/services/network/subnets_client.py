@@ -20,7 +20,7 @@ class SubnetsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#create-subnet
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-subnet
         """
         uri = '/subnets'
         post_data = {'subnet': kwargs}
@@ -31,7 +31,7 @@ class SubnetsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#update-subnet
+        https://docs.openstack.org/api-ref/network/v2/index.html#update-subnet
         """
         uri = '/subnets/%s' % subnet_id
         post_data = {'subnet': kwargs}
@@ -42,7 +42,7 @@ class SubnetsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#show-subnet-details
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-subnet-details
         """
         uri = '/subnets/%s' % subnet_id
         return self.show_resource(uri, **fields)
@@ -56,7 +56,7 @@ class SubnetsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#list-subnets
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-subnets
         """
         uri = '/subnets'
         return self.list_resources(uri, **filters)
@@ -66,7 +66,7 @@ class SubnetsClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#bulk-create-subnet
+        https://docs.openstack.org/api-ref/network/v2/index.html#bulk-create-subnet
         """
         uri = '/subnets'
         return self.create_resource(uri, kwargs)

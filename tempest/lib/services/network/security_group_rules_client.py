@@ -20,7 +20,7 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#create-security-group-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#create-security-group-rule
         """
         uri = '/security-group-rules'
         post_data = {'security_group_rule': kwargs}
@@ -31,7 +31,7 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#show-security-group-rule
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-security-group-rule
         """
         uri = '/security-group-rules/%s' % security_group_rule_id
         return self.show_resource(uri, **fields)
@@ -45,7 +45,7 @@ class SecurityGroupRulesClient(base.BaseNetworkClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/networking/v2/index.html#list-security-group-rules
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-security-group-rules
         """
         uri = '/security-group-rules'
         return self.list_resources(uri, **filters)
