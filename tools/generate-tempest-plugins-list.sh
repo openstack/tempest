@@ -61,7 +61,7 @@ function title_underline {
     printf " ===\n"
 }
 
-function print_plugin_table() {
+function print_plugin_table {
     title_underline ${name_col_len}
     printf "%-3s %-${name_col_len}s %s\n" "SR" "Plugin Name" "URL"
     title_underline ${name_col_len}

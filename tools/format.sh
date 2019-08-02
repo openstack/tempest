@@ -15,7 +15,8 @@ fi
 
 # isort is not compatible with the default flake8 (H306), maybe flake8-isort
 # isort -rc -sl -fss ../tempest ../setup.py
-$AUTOPEP8 --exit-code --max-line-length=79 --experimental --in-place -r ../tempest ../setup.py
+$AUTOPEP8 --exit-code --max-line-length=79 --experimental --in-place \
+          -r ../tempest ../setup.py
 ERROR=$?
 
 if [[ $ERROR -eq 0 ]]; then
