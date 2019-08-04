@@ -439,12 +439,6 @@
     override-checkout: stable/queens
 
 - job:
-    name: tempest-full-pike
-    parent: tempest-full
-    nodeset: openstack-single-node-xenial
-    override-checkout: stable/pike
-
-- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
@@ -715,8 +709,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-queens-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-pike:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
@@ -816,7 +808,6 @@
         - tempest-full-rocky-py3
         - tempest-full-queens
         - tempest-full-queens-py3
-        - tempest-full-pike
     periodic:
       jobs:
         - tempest-all
