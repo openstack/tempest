@@ -72,6 +72,15 @@ Runtime Arguments
     deleted unless the ``--delete-tempest-conf-objects`` flag is used to
     force their deletion.
 
+.. note::
+
+    If during execution of ``tempest cleanup`` NotImplemented exception
+    occurres, ``tempest cleanup`` won't fail on that, it will be logged only.
+    NotImplemented errors are ignored because they are an outcome of some
+    extensions being disabled and ``tempest cleanup`` is not checking their
+    availability as it tries to clean up as much as possible without any
+    complicated logic.
+
 """
 import sys
 import traceback
@@ -85,6 +94,7 @@ from tempest.cmd import cleanup_service
 from tempest.common import credentials_factory as credentials
 from tempest.common import identity
 from tempest import config
+from tempest.lib import exceptions
 
 SAVED_STATE_JSON = "saved_state.json"
 DRY_RUN_JSON = "dry_run.json"
@@ -105,7 +115,13 @@ class TempestCleanup(command.Command):
             LOG.exception("Failure during cleanup")
             traceback.print_exc()
             raise
-        if self.GOT_EXCEPTIONS:
+        # ignore NotImplemented errors as those are an outcome of some
+        # extensions being disabled and cleanup is not checking their
+        # availability as it tries to clean up as much as possible without
+        # any complicated logic
+        critical_exceptions = [ex for ex in self.GOT_EXCEPTIONS if
+                               not isinstance(ex, exceptions.NotImplemented)]
+        if critical_exceptions:
             raise Exception(self.GOT_EXCEPTIONS)
 
     def init(self, parsed_args):

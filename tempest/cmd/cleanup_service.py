@@ -144,7 +144,7 @@ class BaseService(object):
             msg = ("Got NotImplemented error in %s, full exception: %s" %
                    (str(self.__class__), str(exc)))
             LOG.exception(msg)
-            self.got_exceptions.append(msg)
+            self.got_exceptions.append(exc)
 
 
 class SnapshotService(BaseService):
