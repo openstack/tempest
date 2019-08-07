@@ -88,7 +88,7 @@ class TestRemoteClient(base.TestCase):
     # the information using gnu/linux tools.
 
     def _assert_exec_called_with(self, cmd):
-        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin; " + cmd
+        cmd = "set -eu -o pipefail; PATH=$PATH:/sbin:/usr/sbin; " + cmd
         self.ssh_mock.mock.exec_command.assert_called_with(cmd)
 
     def test_get_disks(self):

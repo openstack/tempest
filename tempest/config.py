@@ -806,7 +806,7 @@ ValidationGroup = [
                default="password",
                help="Password used to authenticate to an instance."),
     cfg.StrOpt('ssh_shell_prologue',
-               default="set -eu -o pipefail; PATH=$$PATH:/sbin;",
+               default="set -eu -o pipefail; PATH=$$PATH:/sbin:/usr/sbin;",
                help="Shell fragments to use before executing a command "
                     "when sshing to a guest."),
     cfg.IntOpt('ping_size',
