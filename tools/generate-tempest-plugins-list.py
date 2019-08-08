@@ -27,14 +27,8 @@ import json
 import re
 import sys
 
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    import urllib.request as urllib
-except ImportError:
-    # Fall back to Python 2's urllib2
-    import urllib2 as urllib
-    from urllib2 import HTTPError
+import urllib3
+from urllib3.util import retry
 
 # List of projects having tempest plugin stale or unmaintained for a long time
 # (6 months or more)
@@ -69,23 +63,21 @@ url = 'https://review.opendev.org/projects/'
   },
 '''
 
+http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
+retries = retry.Retry(status_forcelist=[500], backoff_factor=1.0)
 
-# Rather than returning a 404 for a nonexistent file, cgit delivers a
-# 0-byte response to a GET request.  It also does not provide a
-# Content-Length in a HEAD response, so the way we tell if a file exists
-# is to check the length of the entire GET response body.
+
 def has_tempest_plugin(proj):
     try:
-        r = urllib.urlopen(
-            "https://opendev.org/%s/raw/branch/"
-            "master/setup.cfg" % proj)
-    except HTTPError as err:
-        if err.code == 404:
+        r = http.request('GET', "https://opendev.org/%s/raw/branch/"
+                         "master/setup.cfg" % proj, retries=retries)
+        if r.status == 404:
             return False
+    except urllib3.exceptions.MaxRetryError as err:
         # We should not ignore non 404 errors.
         raise err
     p = re.compile(r'^tempest\.test_plugins', re.M)
-    if p.findall(r.read().decode('utf-8')):
+    if p.findall(r.data.decode('utf-8')):
         return True
     else:
         False
@@ -98,11 +90,11 @@ if len(sys.argv) > 1 and sys.argv[1] == 'blacklist':
     # So, this exits here.
     sys.exit()
 
-r = urllib.urlopen(url)
+r = http.request('GET', url, retries=retries)
 # Gerrit prepends 4 garbage octets to the JSON, in order to counter
 # cross-site scripting attacks.  Therefore we must discard it so the
 # json library won't choke.
-content = r.read().decode('utf-8')[4:]
+content = r.data.decode('utf-8')[4:]
 projects = sorted(json.loads(content))
 
 # Retrieve projects having no deployment tool repo (such as deb,
