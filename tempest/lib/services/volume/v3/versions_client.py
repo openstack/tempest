@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import time
 
 from oslo_serialization import jsonutils as json
@@ -44,4 +45,18 @@ class VersionsClient(base_client.BaseClient):
 
         body = json.loads(body)
         self.validate_response(schema.list_versions, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_version(self, version):
+        """Show API version details
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/#show-api-v3-details
+        """
+
+        version_url = os.path.join(self._get_base_version_url(), version)
+        resp, body = self.get(version_url)
+        body = json.loads(body)
+        self.validate_response(schema.volume_api_version_details, resp, body)
         return rest_client.ResponseBody(resp, body)

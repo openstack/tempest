@@ -58,3 +58,49 @@ list_versions = {
         'required': ['versions'],
     }
 }
+
+volume_api_version_details = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'versions': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'status': {'type': 'string'},
+                        'updated': {'type': 'string'},
+                        'id': {'type': 'string'},
+                        'links': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'href': {'type': 'string',
+                                             'format': 'uri'},
+                                    'rel': {'type': 'string'},
+                                    'type': {'type': 'string'},
+                                },
+                                'required': ['href', 'rel']
+                            }
+                        },
+                        'min_version': {'type': 'string'},
+                        'version': {'type': 'string'},
+                        'media-types': {
+                            'type': 'array',
+                            'properties': {
+                                'base': {'type': 'string'},
+                                'type': {'type': 'string'}
+                            },
+                            'required': ['base', 'type']
+                        }
+                    },
+                    'required': ['status', 'updated', 'id', 'links',
+                                 'min_version', 'version', 'media-types']
+                }
+            }
+        },
+        'required': ['versions'],
+    }
+}

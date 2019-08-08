@@ -69,6 +69,27 @@ class TestVersionsClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_VERSION_DETAILS = {
+        "versions": [
+            {
+                "id": "v3.0",
+                "links": [
+                    {"href": "https://docs.openstack.org/",
+                     "type": "text/html", "rel": "describedby"},
+                    {"href": "http://127.0.0.1:44895/v3/", "rel": "self"}
+                ],
+                "media-types": [
+                    {"base": "application/json",
+                     "type": "application/vnd.openstack.volume+json;version=3"}
+                ],
+                "min_version": "3.0",
+                "status": "CURRENT",
+                "updated": "2018-07-17T00:00:00Z",
+                "version": "3.59"
+            }
+        ]
+    }
+
     def setUp(self):
         super(TestVersionsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -89,3 +110,17 @@ class TestVersionsClient(base.BaseServiceTest):
 
     def test_list_versions_with_bytes_body(self):
         self._test_list_versions(bytes_body=True)
+
+    def _test_show_version(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_version,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_VERSION_DETAILS,
+            bytes_body,
+            200, version='v3')
+
+    def test_show_version_details_with_str_body(self):
+        self._test_show_version()
+
+    def test_show_version_details_with_bytes_body(self):
+        self._test_show_version(bytes_body=True)

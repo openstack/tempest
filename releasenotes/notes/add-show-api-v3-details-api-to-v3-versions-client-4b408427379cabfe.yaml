@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add show api version details function to v3
+    versions_client library for cinder.
+
+    * show_version
