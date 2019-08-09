@@ -35,10 +35,22 @@ class QuotasClient(base.BaseNetworkClient):
         return self.delete_resource(uri)
 
     def show_quotas(self, tenant_id, **fields):
+        """Show quota for a project.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-quotas-for-a-project
+        """
         uri = '/quotas/%s' % tenant_id
         return self.show_resource(uri, **fields)
 
     def list_quotas(self, **filters):
+        """List quotas for projects with non default quota values.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-quotas-for-projects-with-non-default-quota-values
+        """
         uri = '/quotas'
         return self.list_resources(uri, **filters)
 
