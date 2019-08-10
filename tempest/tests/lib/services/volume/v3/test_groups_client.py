@@ -20,27 +20,22 @@ from tempest.tests.lib.services import base
 class TestGroupsClient(base.BaseServiceTest):
     FAKE_CREATE_GROUP = {
         "group": {
-            "name": "group-001",
-            "description": "Test group 1",
-            "group_type": "0e58433f-d108-4bf3-a22c-34e6b71ef86b",
-            "volume_types": ["2103099d-7cc3-4e52-a2f1-23a5284416f3"],
-            "availability_zone": "az1",
+            "id": "6f519a48-3183-46cf-a32f-41815f816666",
+            "name": "first_group"
         }
     }
 
     FAKE_CREATE_GROUP_FROM_GROUP_SNAPSHOT = {
-        "create-from-src": {
-            "name": "group-002",
-            "description": "Test group 2",
-            "group_snapshot_id": "79c9afdb-7e46-4d71-9249-1f022886963c",
+        "group": {
+            "id": "6f519a48-3183-46cf-a32f-41815f816668",
+            "name": "first_group"
         }
     }
 
     FAKE_CREATE_GROUP_FROM_GROUP = {
-        "create-from-src": {
-            "name": "group-003",
-            "description": "Test group 3",
-            "source_group_id": "e92f9dc7-0b20-492d-8ab2-3ad8fdac270e",
+        "group": {
+            "id": "6f519a48-3183-46cf-a32f-41815f816667",
+            "name": "other_group"
         }
     }
 
