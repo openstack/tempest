@@ -108,12 +108,12 @@ wanted to enable parallel execution of Tempest tests. However, this was
 insufficient for certain use cases because of the admin credentials requirement
 to create the credential sets on demand. To get around that the accounts.yaml
 file was introduced and with that a new internal credential provider to enable
-using the list of credentials instead of creating them on demand. With locking
-test accounts each test class will reserve a set of credentials from the
-accounts.yaml before executing any of its tests so that each class is isolated
-like with dynamic credentials.
+using the list of credentials instead of creating them on demand. With
+pre-provisioned credentials (also known as locking test accounts) each test
+class will reserve a set of credentials from the accounts.yaml before executing
+any of its tests so that each class is isolated like with dynamic credentials.
 
-To enable and use locking test accounts you need do a few things:
+To enable and use pre-provisioned credentials you need do a few things:
 
 #. Create an accounts.yaml file which contains the set of pre-existing
    credentials to use for testing. To make sure you don't have a credentials
