@@ -47,6 +47,10 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     def test_delete_saving_image(self):
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
+        # wait for server active to avoid conflict when deleting server
+        # in task_state image_snapshot
+        self.addCleanup(waiters.wait_for_server_status, self.servers_client,
+                        server['id'], 'ACTIVE')
         image = self.create_image_from_server(server['id'],
                                               wait_until='SAVING')
         self.client.delete_image(image['id'])
