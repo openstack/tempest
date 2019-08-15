@@ -200,7 +200,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             self.assertEqual(resize_flavor, server['flavor']['id'])
         else:
             flavor = self.flavors_client.show_flavor(resize_flavor)['flavor']
-            for key in ['original_name', 'ram', 'vcpus', 'disk']:
+            self.assertEqual(flavor['name'], server['original_name'])
+            for key in ['ram', 'vcpus', 'disk']:
                 self.assertEqual(flavor[key], server['flavor'][key])
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
