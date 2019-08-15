@@ -50,7 +50,6 @@ BLACKLIST = [
     # https://review.opendev.org/#/c/637718/
     'openstack/neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
     'x/valet',  # https://review.opendev.org/#/c/638339/
-    'x/ranger-tempest-plugin',  # It looks this doesn't work correctly yet.
 ]
 
 url = 'https://review.opendev.org/projects/'
