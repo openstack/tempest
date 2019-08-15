@@ -15,10 +15,14 @@ source $TOP_DIR/stackrc
 source $TOP_DIR/openrc admin admin
 
 function verify_devstack_ipv6_setting {
-    local _service_host=$(echo $SERVICE_HOST | tr -d [])
-    local _host_ipv6=$(echo $HOST_IPV6 | tr -d [])
-    local _service_listen_address=$(echo $SERVICE_LISTEN_ADDRESS | tr -d [])
-    local _service_local_host=$(echo $SERVICE_LOCAL_HOST | tr -d [])
+    local _service_host=''
+    _service_host=$(echo $SERVICE_HOST | tr -d [])
+    local _host_ipv6=''
+    _host_ipv6=$(echo $HOST_IPV6 | tr -d [])
+    local _service_listen_address=''
+    _service_listen_address=$(echo $SERVICE_LISTEN_ADDRESS | tr -d [])
+    local _service_local_host=''
+    _service_local_host=$(echo $SERVICE_LOCAL_HOST | tr -d [])
     if [[ "$SERVICE_IP_VERSION" != 6 ]]; then
         echo $SERVICE_IP_VERSION "SERVICE_IP_VERSION is not set to 6 which is must for devstack to deploy services with IPv6 address."
         exit 1
@@ -61,9 +65,11 @@ function verify_service_listen_address_is_ipv6 {
     local all_ipv6=True
     endpoints=$(openstack endpoint list -f value -c URL)
     for endpoint in ${endpoints}; do
-        local endpoint_address=$(echo "$endpoint" | awk -F/ '{print $3}' | awk -F] '{print $1}')
+        local endpoint_address=''
+        endpoint_address=$(echo "$endpoint" | awk -F/ '{print $3}' | awk -F] '{print $1}')
         endpoint_address=$(echo $endpoint_address | tr -d [])
-        local is_endpoint_ipv6=$(python3 -c 'import oslo_utils.netutils as nutils; print(nutils.is_valid_ipv6("'$endpoint_address'"))')
+        local is_endpoint_ipv6=''
+        is_endpoint_ipv6=$(python3 -c 'import oslo_utils.netutils as nutils; print(nutils.is_valid_ipv6("'$endpoint_address'"))')
         if [[ "$is_endpoint_ipv6" != "True" ]]; then
             all_ipv6=False
             echo $endpoint ": This is not ipv6 endpoint which means corresponding service is not listening on IPv6 address."
