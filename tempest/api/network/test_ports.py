@@ -197,14 +197,14 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                          'Ports from multiple tenants are in the list resp')
         port_ids = [port['id'] for port in ports]
         fixed_ips = [port['fixed_ips'] for port in ports]
-        port_ips = []
-        for addr in fixed_ips:
-            port_ips.extend([port['ip_address'] for port in addr])
-
         port_net_ids = [port['network_id'] for port in ports]
         self.assertIn(port_1['port']['id'], port_ids)
-        self.assertIn(port_1_fixed_ip, port_ips)
         self.assertIn(network['id'], port_net_ids)
+        # Check that every port has a fixed_ip that matches the query
+        for addr in fixed_ips:
+            port_ips = [port['ip_address'] for port in addr]
+            self.assertIn(port_1_fixed_ip, port_ips,
+                          'Port not matching IP filter found')
 
     @decorators.idempotent_id('79895408-85d5-460d-94e7-9531c5fd9123')
     @testtools.skipUnless(
