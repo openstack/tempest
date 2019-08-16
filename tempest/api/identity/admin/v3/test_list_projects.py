@@ -94,40 +94,43 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
     @classmethod
     def resource_setup(cls):
         super(ListProjectsStaticTestJSON, cls).resource_setup()
-        cls.domain_id = CONF.identity.default_domain_id
-        cls.project_ids = list()
-        cls.p1_name = cls.os_primary.credentials.project_name
+        # Fetch an existing project from os_primary
         cls.p1 = cls.projects_client.show_project(
             cls.os_primary.credentials.project_id)['project']
-        cls.project_ids.append(cls.p1['id'])
+        # Create a test project
         p2_name = data_utils.rand_name('project')
+        p2_domain_id = CONF.identity.default_domain_id
         cls.p2 = cls.projects_client.create_project(
-            p2_name, domain_id=cls.domain_id)['project']
+            p2_name, domain_id=p2_domain_id)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p2['id'])
-        cls.project_ids.append(cls.p2['id'])
 
     @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_list_projects(self):
         # List projects
         list_projects = self.projects_client.list_projects()['projects']
 
-        for p in self.project_ids:
-            show_project = self.projects_client.show_project(p)['project']
+        for p in [self.p1, self.p2]:
+            show_project = self.projects_client.show_project(p['id'])[
+                'project']
             self.assertIn(show_project, list_projects)
 
     @decorators.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
     def test_list_projects_with_name(self):
         # List projects with name
         self._list_projects_with_params(
-            [self.p1], [self.p2], {'name': self.p1_name}, 'name')
+            [self.p1], [self.p2], {'name': self.p1['name']}, 'name')
 
     @decorators.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):
-        # List projects with domain
+        # Verify project list filtered by domain
         key = 'domain_id'
-        params = {key: self.domain_id}
-        # Verify both projects are in the self.domain_id which is the default
-        # domain
-        self._list_projects_with_params(
-            [self.p1, self.p2], [], params, key)
+        for p in [self.p1, self.p2]:
+            params = {key: p[key]}
+            # Verify filter shows both projects in their respective domains
+            self._list_projects_with_params([p], [], params, key)
+        # Verify filter excludes projects that are filtered out
+        if self.p1[key] != self.p2[key]:
+            exclude = [self.p2]
+            params = {key: self.p1[key]}
+            self._list_projects_with_params([self.p1], exclude, params, key)
