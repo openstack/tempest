@@ -69,7 +69,7 @@ function print_plugin_table {
     i=0
     for plugin in $1; do
         i=$((i+1))
-        giturl="https://opendev.org/openstack/${plugin}"
+        giturl="https://opendev.org/${plugin}"
         printf "%-3s %-${name_col_len}s %s\n" "$i" "${plugin}" "${giturl}"
     done
 
