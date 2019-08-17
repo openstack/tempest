@@ -61,6 +61,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         # Create a port with Extra DHCP Options
         body = self.ports_client.create_port(
             network_id=self.network['id'],
+            name=data_utils.rand_name(self.__class__.__name__),
             extra_dhcp_opts=self.extra_dhcp_opts)
         port_id = body['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

@@ -123,7 +123,8 @@ class RoutersTest(base.BaseNetworkTest):
         router = self.create_router()
         self.addCleanup(self.delete_router, router)
         port_body = self.ports_client.create_port(
-            network_id=network['id'])
+            network_id=network['id'],
+            name=data_utils.rand_name(self.__class__.__name__))
         # add router interface to port created above
         interface = self.routers_client.add_router_interface(
             router['id'],
@@ -150,6 +151,7 @@ class RoutersTest(base.BaseNetworkTest):
         # Don't know public_network_address, so at first create address
         # from public_network and delete
         port = self.admin_ports_client.create_port(
+            name=data_utils.rand_name(self.__class__.__name__),
             network_id=CONF.network.public_network_id)['port']
         self.admin_ports_client.delete_port(port_id=port['id'])
 

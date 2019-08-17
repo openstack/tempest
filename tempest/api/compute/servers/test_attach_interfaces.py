@@ -24,6 +24,7 @@ from tempest.common import utils
 from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils.linux import remote_client
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
@@ -150,7 +151,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
 
     def _test_create_interface_by_port_id(self, server, ifs):
         network_id = ifs[0]['net_id']
-        port = self.ports_client.create_port(network_id=network_id)
+        port = self.ports_client.create_port(
+            network_id=network_id,
+            name=data_utils.rand_name(self.__class__.__name__))
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
         iface = self.interfaces_client.create_interface(
@@ -291,7 +294,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         """
         network = self.get_tenant_network()
         network_id = network['id']
-        port = self.ports_client.create_port(network_id=network_id)
+        port = self.ports_client.create_port(
+            network_id=network_id,
+            name=data_utils.rand_name(self.__class__.__name__))
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
 
