@@ -94,7 +94,7 @@ class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
         super(VolumeRetypeTest, cls).skip_checks()
 
         if not CONF.volume_feature_enabled.multi_backend:
-            raise cls.skipException("Cinder multi-backend feature disabled.")
+            raise cls.skipException("Cinder multi-backend feature disabled")
 
         if len(set(CONF.volume.backend_names)) < 2:
             raise cls.skipException("Requires at least two different "
