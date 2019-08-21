@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import messages as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -28,7 +29,7 @@ class MessagesClient(base_client.BaseClient):
         url = 'messages/%s' % str(message_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_message, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_messages(self):
@@ -36,14 +37,14 @@ class MessagesClient(base_client.BaseClient):
         url = 'messages'
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.list_messages, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_message(self, message_id):
         """Delete a single message."""
         url = 'messages/%s' % str(message_id)
         resp, body = self.delete(url)
-        self.expected_success(204, resp.status)
+        self.validate_response(schema.delete_message, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):

@@ -20,18 +20,6 @@ from tempest.lib import decorators
 
 CONF = config.CONF
 
-MESSAGE_KEYS = [
-    'created_at',
-    'event_id',
-    'guaranteed_until',
-    'id',
-    'message_level',
-    'request_id',
-    'resource_type',
-    'resource_uuid',
-    'user_message',
-    'links']
-
 
 class UserMessagesTest(base.BaseVolumeAdminTest):
     _api_version = 3
@@ -66,18 +54,11 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
         message_id = self._create_user_message()
         self.addCleanup(self.messages_client.delete_message, message_id)
 
-        # show message
-        message = self.messages_client.show_message(message_id)['message']
-        for key in MESSAGE_KEYS:
-            self.assertIn(key, message.keys(), 'Missing expected key %s' % key)
+        # show message, check response schema
+        self.messages_client.show_message(message_id)
 
-        # list messages
-        messages = self.messages_client.list_messages()['messages']
-        self.assertIsInstance(messages, list)
-        for message in messages:
-            for key in MESSAGE_KEYS:
-                self.assertIn(key, message.keys(),
-                              'Missing expected key %s' % key)
+        # list messages, check response schema
+        self.messages_client.list_messages()
 
     @decorators.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
     def test_delete_message(self):
