@@ -17,7 +17,7 @@
 import operator
 import random
 
-from six.moves.urllib import parse
+from six.moves.urllib.parse import urlparse
 from testtools import matchers
 
 from tempest.api.volume import base
@@ -333,7 +333,19 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             # If the current iteration is from a 'next' link, check that the
             # absolute url is the same as the one used for this request
             if next:
-                self.assertEqual(next, response.response['content-location'])
+                curr = response.response['content-location']
+                currparsed = urlparse(curr)
+                nextparsed = urlparse(next)
+                # Depending on the environment, certain fields are omitted
+                # from url (ie port). The fields to check are defined here.
+                fieldscheck = ['scheme', 'hostname', 'path', 'query', 'params',
+                               'fragment']
+                for field in fieldscheck:
+                    self.assertEqual(getattr(currparsed, field),
+                                     getattr(nextparsed, field),
+                                     'Incorrect link to next page. URLs do '
+                                     'not match at %s:\n%s\n%s' % (field, curr,
+                                                                   next))
 
             # Get next from response
             next = None
@@ -352,7 +364,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
             # If we can follow to the next page, get params from url to make
             # request in the form of a relative URL
             if next:
-                params = parse.urlparse(next).query
+                params = urlparse(next).query
 
             # If cannot follow make sure it's because we have finished
             else:
