@@ -22,7 +22,12 @@ class SnapshotManageClient(rest_client.RestClient):
     """Snapshot manage client."""
 
     def manage_snapshot(self, **kwargs):
-        """Manage a snapshot."""
+        """Manage a snapshot.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#manage-an-existing-snapshot
+        """
         post_body = json.dumps({'snapshot': kwargs})
         url = 'os-snapshot-manage'
         resp, body = self.post(url, post_body)
