@@ -44,29 +44,24 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
     @classmethod
     def resource_setup(cls):
         super(ListProjectsTestJSON, cls).resource_setup()
-        cls.project_ids = list()
-        cls.domain_id = cls.os_admin.credentials.domain_id
+        domain_id = cls.os_admin.credentials.domain_id
         # Create project with domain
-        cls.p1_name = data_utils.rand_name('project')
+        p1_name = data_utils.rand_name(cls.__name__)
         cls.p1 = cls.projects_client.create_project(
-            cls.p1_name, enabled=False,
-            domain_id=cls.domain_id)['project']
+            p1_name, enabled=False, domain_id=domain_id)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p1['id'])
-        cls.project_ids.append(cls.p1['id'])
         # Create default project
-        p2_name = data_utils.rand_name('project')
+        p2_name = data_utils.rand_name(cls.__name__)
         cls.p2 = cls.projects_client.create_project(p2_name)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p2['id'])
-        cls.project_ids.append(cls.p2['id'])
         # Create a new project (p3) using p2 as parent project
-        p3_name = data_utils.rand_name('project')
+        p3_name = data_utils.rand_name(cls.__name__)
         cls.p3 = cls.projects_client.create_project(
             p3_name, parent_id=cls.p2['id'])['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p3['id'])
-        cls.project_ids.append(cls.p3['id'])
 
     @decorators.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
@@ -98,7 +93,7 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
         cls.p1 = cls.projects_client.show_project(
             cls.os_primary.credentials.project_id)['project']
         # Create a test project
-        p2_name = data_utils.rand_name('project')
+        p2_name = data_utils.rand_name(cls.__name__)
         p2_domain_id = CONF.identity.default_domain_id
         cls.p2 = cls.projects_client.create_project(
             p2_name, domain_id=p2_domain_id)['project']
