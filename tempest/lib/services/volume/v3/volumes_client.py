@@ -142,7 +142,12 @@ class VolumesClient(base_client.BaseClient):
         return rest_client.ResponseBody(resp, body)
 
     def upload_volume(self, volume_id, **kwargs):
-        """Uploads a volume in Glance."""
+        """Uploads a volume in Glance.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#upload-volume-to-image
+        """
         post_body = json.dumps({'os-volume_upload_image': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
@@ -248,7 +253,12 @@ class VolumesClient(base_client.BaseClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_volume_readonly(self, volume_id, **kwargs):
-        """Update the Specified Volume readonly."""
+        """Update the Specified Volume readonly.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#updates-volume-read-only-access-mode-flag
+        """
         post_body = json.dumps({'os-update_readonly_flag': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)

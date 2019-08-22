@@ -435,7 +435,12 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return rest_client.ResponseBody(resp, body)
 
     def update_attached_volume(self, server_id, attachment_id, **kwargs):
-        """Swaps a volume attached to an instance for another volume"""
+        """Swaps a volume attached to an instance for another volume
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#update-a-volume-attachment
+        """
         post_body = json.dumps({'volumeAttachment': kwargs})
         resp, body = self.put('servers/%s/os-volume_attachments/%s' %
                               (server_id, attachment_id),
