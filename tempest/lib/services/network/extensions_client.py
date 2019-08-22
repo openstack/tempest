@@ -16,9 +16,21 @@ from tempest.lib.services.network import base
 class ExtensionsClient(base.BaseNetworkClient):
 
     def show_extension(self, ext_alias, **fields):
+        """Show extension details.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/network/v2/index.html#show-extension-details
+        """
         uri = '/extensions/%s' % ext_alias
         return self.show_resource(uri, **fields)
 
     def list_extensions(self, **filters):
+        """List extensions.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/network/v2/index.html#list-extensions
+        """
         uri = '/extensions'
         return self.list_resources(uri, **filters)
