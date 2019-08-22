@@ -156,6 +156,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_port(cls, network, **kwargs):
+        if 'name' not in kwargs:
+            kwargs['name'] = data_utils.rand_name(cls.__name__)
         """Wrapper utility that returns a test port."""
         body = cls.ports_client.create_port(network_id=network['id'],
                                             **kwargs)

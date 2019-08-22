@@ -175,11 +175,13 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
         # Create ports
         self.port1 = self.ports_client.create_port(
             network_id=net1['id'],
+            name=data_utils.rand_name(self.__class__.__name__),
             fixed_ips=[{'subnet_id': subnet1['id']}])['port']
         self.addCleanup(self.ports_client.delete_port, self.port1['id'])
 
         self.port2 = self.ports_client.create_port(
             network_id=net1['id'],
+            name=data_utils.rand_name(self.__class__.__name__),
             fixed_ips=[{'subnet_id': subnet1['id']}])['port']
         self.addCleanup(self.ports_client.delete_port, self.port2['id'])
 

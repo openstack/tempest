@@ -17,6 +17,7 @@ import six
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
@@ -61,6 +62,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
                                   'mac_address': self.mac_address}]
         body = self.ports_client.create_port(
             network_id=self.network['id'],
+            name=data_utils.rand_name(self.__class__.__name__),
             allowed_address_pairs=allowed_address_pairs)
         port_id = body['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -76,7 +78,9 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
     def _update_port_with_address(self, address, mac_address=None, **kwargs):
         # Create a port without allowed address pair
-        body = self.ports_client.create_port(network_id=self.network['id'])
+        body = self.ports_client.create_port(
+            network_id=self.network['id'],
+            name=data_utils.rand_name(self.__class__.__name__))
         port_id = body['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_id)
@@ -107,7 +111,9 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
     def test_update_port_with_multiple_ip_mac_address_pair(self):
         # Create an ip _address and mac_address through port create
-        resp = self.ports_client.create_port(network_id=self.network['id'])
+        resp = self.ports_client.create_port(
+            network_id=self.network['id'],
+            name=data_utils.rand_name(self.__class__.__name__))
         newportid = resp['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, newportid)

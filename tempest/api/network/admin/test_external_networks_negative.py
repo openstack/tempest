@@ -16,6 +16,7 @@ import testtools
 
 from tempest.api.network import base
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -50,5 +51,6 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
         # create a port which will internally create an instance-ip
         self.assertRaises(lib_exc.Conflict,
                           self.admin_ports_client.create_port,
+                          name=data_utils.rand_name(self.__class__.__name__),
                           network_id=CONF.network.public_network_id,
                           fixed_ips=fixed_ips)

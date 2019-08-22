@@ -79,7 +79,8 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
         non_exist_net_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.ports_client.create_port,
-                          network_id=non_exist_net_id)
+                          network_id=non_exist_net_id,
+                          name=data_utils.rand_name(self.__class__.__name__))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('cf8eef21-4351-4f53-adcd-cc5cb1e76b92')
