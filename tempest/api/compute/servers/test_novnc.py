@@ -156,22 +156,24 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                                                        data[20:24])[0] + 24))
 
     def _validate_websocket_upgrade(self):
+        """Verify that the websocket upgrade was successful.
+
+        Parses response and ensures that required response
+        fields are present and accurate.
+        (https://tools.ietf.org/html/rfc7231#section-6.2.2)
+        """
+
         self.assertTrue(
             self._websocket.response.startswith(b'HTTP/1.1 101 Switching '
-                                                b'Protocols\r\n'),
-            'Did not get the expected 101 on the {} call: {}'.format(
-                CONF.compute_feature_enabled.vnc_server_header,
+                                                b'Protocols'),
+            'Incorrect HTTP return status code: {}'.format(
                 six.text_type(self._websocket.response)
             )
         )
-        # Since every other server type returns Headers with different case
-        # (for example 'nginx'), lowercase must be applied to eliminate issues.
-        _desired_header = "server: {0}".format(
-            CONF.compute_feature_enabled.vnc_server_header
-        ).lower()
+        _required_header = 'upgrade: websocket'
         _response = six.text_type(self._websocket.response).lower()
         self.assertIn(
-            _desired_header,
+            _required_header,
             _response,
             'Did not get the expected WebSocket HTTP Response.'
         )
