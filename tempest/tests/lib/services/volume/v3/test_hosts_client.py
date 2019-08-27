@@ -48,7 +48,7 @@ class TestHostsClient(base.BaseServiceTest):
                     "total_volume_gb": "2",
                     "total_snapshot_gb": "0",
                     "project": "(total)",
-                    "host": "fake-host",
+                    "host": "fake-host@rbd",
                     "snapshot_count": "0"
                 }
             },
@@ -58,7 +58,7 @@ class TestHostsClient(base.BaseServiceTest):
                     "total_volume_gb": "2",
                     "total_snapshot_gb": "0",
                     "project": "f21a9c86d7114bf99c711f4874d80474",
-                    "host": "fake-host",
+                    "host": "fake-host@lvm",
                     "snapshot_count": "0"
                 }
             }

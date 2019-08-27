@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import hosts as schema
 from tempest.lib.common import rest_client
 
 
@@ -35,13 +36,13 @@ class HostsClient(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.list_hosts, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_host(self, host_name):
         """Show host details."""
         url = 'os-hosts/%s' % host_name
         resp, body = self.get(url)
-        self.expected_success(200, resp.status)
         body = json.loads(body)
+        self.validate_response(schema.show_host, resp, body)
         return rest_client.ResponseBody(resp, body)
