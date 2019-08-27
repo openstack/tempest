@@ -21,17 +21,6 @@ from tempest.lib import decorators
 
 class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
 
-    CAPABILITIES = ('namespace',
-                    'vendor_name',
-                    'volume_backend_name',
-                    'pool_name',
-                    'driver_version',
-                    'storage_protocol',
-                    'display_name',
-                    'description',
-                    'visibility',
-                    'properties')
-
     @classmethod
     def resource_setup(cls):
         super(BackendsCapabilitiesAdminTestsJSON, cls).resource_setup()
@@ -44,12 +33,8 @@ class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('3750af44-5ea2-4cd4-bc3e-56e7e6caf854')
     def test_get_capabilities_backend(self):
         # Test backend properties
-        backend = self.admin_capabilities_client.show_backend_capabilities(
-            self.hosts[0])
-
-        # Verify getting capabilities parameters from a backend
-        for key in self.CAPABILITIES:
-            self.assertIn(key, backend)
+        # Check response schema
+        self.admin_capabilities_client.show_backend_capabilities(self.hosts[0])
 
     @decorators.idempotent_id('a9035743-d46a-47c5-9cb7-3c80ea16dea0')
     def test_compare_volume_stats_values(self):

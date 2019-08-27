@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import capabilities as schema
 from tempest.lib.common import rest_client
 
 
@@ -30,5 +31,5 @@ class CapabilitiesClient(rest_client.RestClient):
         url = 'capabilities/%s' % host
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_backend_capabilities, resp, body)
         return rest_client.ResponseBody(resp, body)
