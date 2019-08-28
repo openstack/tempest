@@ -42,8 +42,12 @@ class RolesClient(rest_client.RestClient):
         return rest_client.ResponseBody(resp, body)
 
     def list_roles(self, **params):
-        """Get the list of Roles."""
+        """Get the list of Roles.
 
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/identity/v3/index.html#list-roles
+        """
         url = 'roles'
         if params:
             url += '?%s' % urllib.urlencode(params)
