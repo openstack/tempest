@@ -38,6 +38,7 @@ BLACKLIST = [
     'openstack/barbican-tempest-plugin',
     # https://review.opendev.org/#/c/634631/
     'x/gce-api',  # It looks gce-api doesn't support python3 yet.
+    'x/group-based-policy',  # It looks this doesn't support python3 yet.
     'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
     'openstack/networking-generic-switch',
     # https://review.opendev.org/#/c/634846/
