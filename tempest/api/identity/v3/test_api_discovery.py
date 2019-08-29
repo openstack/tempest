@@ -14,11 +14,23 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib import decorators
+
+
+CONF = config.CONF
 
 
 class TestApiDiscovery(base.BaseIdentityV3Test):
     """Tests for API discovery features."""
+
+    @decorators.idempotent_id('79aec9ae-710f-4c54-a4fc-3aa25b4feac3')
+    def test_identity_v3_existence(self):
+        versions = self.non_admin_versions_client.list_versions()
+        found = any(
+            "v3" in version.get('id')
+            for version in versions['versions']['values'])
+        self.assertEqual(CONF.identity_feature_enabled.api_v3, found)
 
     @decorators.idempotent_id('721f480f-35b6-46c7-846e-047e6acea0dc')
     @decorators.attr(type='smoke')
