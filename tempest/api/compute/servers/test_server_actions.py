@@ -345,6 +345,9 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # from setUp is not volume-backed.
         server = self.create_test_server(
             volume_backed=True, wait_until='ACTIVE')
+        # NOTE(mgoddard): Get detailed server to ensure addresses are present
+        # in fixed IP case.
+        server = self.servers_client.show_server(server['id'])['server']
         self._test_resize_server_confirm(server['id'])
         if CONF.compute_feature_enabled.console_output:
             # Now do something interactive with the guest like get its console

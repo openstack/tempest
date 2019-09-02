@@ -361,6 +361,10 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
             networks=[{'uuid': self.get_tenant_network()['id']}])
         self.addCleanup(self.delete_server, server['id'])
 
+        # NOTE(mgoddard): Get detailed server to ensure addresses are present
+        # in fixed IP case.
+        server = self.servers_client.show_server(server['id'])['server']
+
         # Attach tagged nic and volume
         interface = self.interfaces_client.create_interface(
             server['id'], net_id=net['id'],
