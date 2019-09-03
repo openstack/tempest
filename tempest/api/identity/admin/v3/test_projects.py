@@ -230,8 +230,14 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         _projects = self.projects_client.list_projects()['projects']
         project_list = next(x for x in _projects if x['id'] == project['id'])
 
-        # Assert the list of fields is correct (one is enough to check here)
-        self.assertSetEqual(set(fields), set(project_get.keys()))
+        # Assert the expected fields exist. More fields than expected may
+        # be in this list. This is for future proofind as keystone does not
+        # and has no plans to support microservices. Any fields in the future
+        # that are added to the response of the API should eventually be added
+        # to the expected fields. The expected fields must be a subset of
+        # the project_get fields (all keys in fields must exist in project_get,
+        # but project_get.keys() may have additional fields)
+        self.assertTrue(set(fields).issubset(project_get.keys()))
 
         # Ensure the set of tags is identical and match the expected one
         get_tags = set(project_get.pop("tags"))
