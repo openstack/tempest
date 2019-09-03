@@ -79,6 +79,9 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
             validatable=True,
             validation_resources=validation_resources,
             wait_until='ACTIVE')
+        # NOTE(mgoddard): Get detailed server to ensure addresses are present
+        # in fixed IP case.
+        server = self.servers_client.show_server(server['id'])['server']
         # NOTE(artom) self.create_test_server adds cleanups, but this is
         # apparently not enough? Add cleanup here.
         self.addCleanup(self.delete_server, server['id'])
@@ -319,6 +322,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
             self.addCleanup(self.delete_server, server['id'])
 
         for server in servers:
+            # NOTE(mgoddard): Get detailed server to ensure addresses are
+            # present in fixed IP case.
+            server = self.servers_client.show_server(server['id'])['server']
             self._wait_for_validation(server, validation_resources)
             # attach the port to the server
             iface = self.interfaces_client.create_interface(
