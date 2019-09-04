@@ -31,7 +31,7 @@ show_host = {
                                 'total_volume_gb': {'type': 'string'},
                                 'total_snapshot_gb': {'type': 'string'},
                                 'project': {'type': 'string'},
-                                'host': {'type': 'string', 'pattern': '.+@.+'},
+                                'host': {'type': 'string'},
                                 'snapshot_count': {'type': 'string'},
                             },
                             'additionalProperties': False,
