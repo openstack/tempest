@@ -15,6 +15,7 @@
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume import manage_snapshot as schema
 from tempest.lib.common import rest_client
 
 
@@ -31,6 +32,6 @@ class SnapshotManageClient(rest_client.RestClient):
         post_body = json.dumps({'snapshot': kwargs})
         url = 'os-snapshot-manage'
         resp, body = self.post(url, post_body)
-        self.expected_success(202, resp.status)
         body = json.loads(body)
+        self.validate_response(schema.manage_snapshot, resp, body)
         return rest_client.ResponseBody(resp, body)
