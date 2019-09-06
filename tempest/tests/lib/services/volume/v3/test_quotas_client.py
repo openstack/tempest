@@ -20,15 +20,26 @@ from tempest.tests.lib.services import base
 class TestQuotasClient(base.BaseServiceTest):
     FAKE_QUOTAS = {
         "quota_set": {
+            "id": '730a1cbd-68ca-4d68-8e09-d603f2dfa72b',
             "gigabytes": 5,
             "snapshots": 10,
-            "volumes": 20
+            "volumes": 20,
+            'backups': 10,
+            'groups': 10,
+            'per_volume_gigabytes': 1000,
+            'backup_gigabytes': 2000
         }
     }
 
-    FAKE_UPDATE_QUOTAS_REQUEST = {
+    FAKE_UPDATE_QUOTAS_RESPONSE = {
         "quota_set": {
-            "security_groups": 45
+            "gigabytes": 6,
+            "snapshots": 11,
+            "volumes": 21,
+            'backups': 11,
+            'groups': 11,
+            'per_volume_gigabytes': 1001,
+            'backup_gigabytes': 2001
         }
     }
 
@@ -57,7 +68,7 @@ class TestQuotasClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.update_quota_set,
             'tempest.lib.common.rest_client.RestClient.put',
-            self.FAKE_UPDATE_QUOTAS_REQUEST,
+            self.FAKE_UPDATE_QUOTAS_RESPONSE,
             bytes_body, tenant_id="fake_tenant")
 
     def test_show_default_quota_set_with_str_body(self):
