@@ -67,3 +67,8 @@ Run Tempest
        ::
            vars:
              tox_extra_args: --sitepackages
+
+.. zuul:rolevar:: tempest_test_timeout
+   :default: ''
+
+   The timeout (in seconds) for each test.

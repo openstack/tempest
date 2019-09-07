@@ -42,3 +42,4 @@
     chdir: "{{devstack_base_dir}}/tempest"
   become: true
   become_user: tempest
+  environment: '{{ {"OS_TEST_TIMEOUT": tempest_test_timeout} if tempest_test_timeout else {} }}'
