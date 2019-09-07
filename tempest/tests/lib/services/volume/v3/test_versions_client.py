@@ -97,6 +97,14 @@ class TestVersionsClient(base.BaseServiceTest):
                                                      'volume',
                                                      'regionOne')
 
+    def _test_get_base_version_url(self, url, expected_base_url):
+        fake_auth = fake_auth_provider.FakeAuthProvider(fake_base_url=url)
+        client = versions_client.VersionsClient(fake_auth,
+                                                'volume',
+                                                'regionOne')
+        self.assertEqual(expected_base_url,
+                         client._get_base_version_url())
+
     def _test_list_versions(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_versions,
@@ -105,22 +113,30 @@ class TestVersionsClient(base.BaseServiceTest):
             bytes_body,
             300)
 
+    def _test_show_version(self, version, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_version,
+            'tempest.lib.common.rest_client.RestClient.raw_request',
+            self.FAKE_VERSION_DETAILS,
+            bytes_body,
+            200, version=version)
+
     def test_list_versions_with_str_body(self):
         self._test_list_versions()
 
     def test_list_versions_with_bytes_body(self):
         self._test_list_versions(bytes_body=True)
 
-    def _test_show_version(self, bytes_body=False):
-        self.check_service_client_function(
-            self.client.show_version,
-            'tempest.lib.common.rest_client.RestClient.get',
-            self.FAKE_VERSION_DETAILS,
-            bytes_body,
-            200, version='v3')
-
     def test_show_version_details_with_str_body(self):
-        self._test_show_version()
+        self._test_show_version('v3')
 
     def test_show_version_details_with_bytes_body(self):
-        self._test_show_version(bytes_body=True)
+        self._test_show_version('v3', bytes_body=True)
+
+    def test_get_base_version_url_app_name(self):
+        self._test_get_base_version_url('https://bar.org/volume/v1/123',
+                                        'https://bar.org/volume/')
+        self._test_get_base_version_url('https://bar.org/volume/v2/123',
+                                        'https://bar.org/volume/')
+        self._test_get_base_version_url('https://bar.org/volume/v3/123',
+                                        'https://bar.org/volume/')
