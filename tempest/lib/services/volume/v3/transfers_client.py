@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import transfers as schema
 from tempest.lib.common import rest_client
 
 
@@ -32,7 +33,7 @@ class TransfersClient(rest_client.RestClient):
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post('os-volume-transfer', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_transfer(self, transfer_id):
@@ -40,7 +41,7 @@ class TransfersClient(rest_client.RestClient):
         url = "os-volume-transfer/%s" % transfer_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_volume_transfers(self, detail=False, **params):
@@ -52,19 +53,21 @@ class TransfersClient(rest_client.RestClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-and-details
         """
         url = 'os-volume-transfer'
+        schema_list_transfers = schema.list_volume_transfers_no_detail
         if detail:
             url += '/detail'
+            schema_list_transfers = schema.list_volume_transfers_with_detail
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema_list_transfers, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
         resp, body = self.delete("os-volume-transfer/%s" % transfer_id)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def accept_volume_transfer(self, transfer_id, **kwargs):
@@ -78,5 +81,5 @@ class TransfersClient(rest_client.RestClient):
         post_body = json.dumps({'accept': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.accept_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
