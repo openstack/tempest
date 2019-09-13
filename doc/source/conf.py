@@ -52,6 +52,7 @@ def setup(app):
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
+              'sphinxcontrib.rsvgconverter',
               'openstackdocstheme',
               'oslo_config.sphinxconfiggen',
              ]
@@ -196,3 +197,16 @@ html_use_index = False
 
 # A list of warning types to suppress arbitrary warning messages.
 suppress_warnings = ['image.nonlocal_uri']
+
+# -- Options for LaTeX output -------------------------------------------------
+
+# Grouping the document tree into LaTeX files. List of tuples
+# (source start file, target name, title, author, documentclass
+# [howto/manual]).
+latex_documents = [
+    ('index', 'doc-tempest.tex', u'Tempest Testing Project',
+     u'OpenStack Foundation', 'manual'),
+]
+
+# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
+latex_use_xindy = False
