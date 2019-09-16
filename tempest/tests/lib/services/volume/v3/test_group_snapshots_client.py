@@ -20,9 +20,9 @@ from tempest.tests.lib.services import base
 class TestGroupSnapshotsClient(base.BaseServiceTest):
     FAKE_CREATE_GROUP_SNAPSHOT = {
         "group_snapshot": {
-            "group_id": "49c8c114-0d68-4e89-b8bc-3f5a674d54be",
-            "name": "group-snapshot-001",
-            "description": "Test group snapshot 1"
+            "id": "6f519a48-3183-46cf-a32f-41815f816666",
+            "name": "first_group_snapshot",
+            "group_type_id": "58737af7-786b-48b7-ab7c-2447e74b0ef4"
         }
     }
 
@@ -34,7 +34,7 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
             "description": "Test group snapshot 1",
             "group_type_id": "0e58433f-d108-4bf3-a22c-34e6b71ef86b",
             "status": "available",
-            "created_at": "20127-06-20T03:50:07Z"
+            "created_at": "2017-06-20T03:50:07Z"
         }
     }
 
@@ -102,8 +102,7 @@ class TestGroupSnapshotsClient(base.BaseServiceTest):
             resp_body = {
                 'group_snapshots': [{
                     'id': group_snapshot['id'],
-                    'name': group_snapshot['name'],
-                    'group_type_id': group_snapshot['group_type_id']}
+                    'name': group_snapshot['name']}
                     for group_snapshot in
                     self.FAKE_LIST_GROUP_SNAPSHOTS['group_snapshots']
                 ]
