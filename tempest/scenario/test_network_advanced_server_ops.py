@@ -80,8 +80,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         return floating_ip
 
     def _check_network_connectivity(self, server, keypair, floating_ip,
-                                    should_connect=True):
-        username = CONF.validation.image_ssh_user
+                                    should_connect=True,
+                                    username=CONF.validation.image_ssh_user):
         private_key = keypair['private_key']
         self.check_tenant_network_connectivity(
             server, username, private_key,
@@ -95,12 +95,13 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                    'Public network connectivity check failed',
                                    server)
 
-    def _wait_server_status_and_check_network_connectivity(self, server,
-                                                           keypair,
-                                                           floating_ip):
+    def _wait_server_status_and_check_network_connectivity(
+        self, server, keypair, floating_ip,
+        username=CONF.validation.image_ssh_user):
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
-        self._check_network_connectivity(server, keypair, floating_ip)
+        self._check_network_connectivity(server, keypair, floating_ip,
+                                         username=username)
 
     @decorators.idempotent_id('61f1aa9a-1573-410e-9054-afa557cab021')
     @decorators.attr(type='slow')
@@ -137,10 +138,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         server = self._setup_server(keypair)
         floating_ip = self._setup_network(server, keypair)
         image_ref_alt = CONF.compute.image_ref_alt
+        username_alt = CONF.validation.image_alt_ssh_user
         self.servers_client.rebuild_server(server['id'],
                                            image_ref=image_ref_alt)
         self._wait_server_status_and_check_network_connectivity(
-            server, keypair, floating_ip)
+            server, keypair, floating_ip, username_alt)
 
     @decorators.idempotent_id('2b2642db-6568-4b35-b812-eceed3fa20ce')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,

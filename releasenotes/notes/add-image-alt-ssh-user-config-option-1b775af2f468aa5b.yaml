@@ -1,0 +1,10 @@
+---
+features:
+  - A new config option in the validation section, image_alt_ssh_user,
+    to specify the user name used to authenticate to an alternative
+    instance (instance using image_ref_alt) in tests. By default this
+    is set to root.
+  - A new config option in the validation section, image_alt_ssh_password,
+    to specify the password used to authenticate to an alternative
+    instance (instance using image_ref_alt) in tests. By default this
+    is set to password.

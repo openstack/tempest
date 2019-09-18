@@ -171,8 +171,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.flavor_ref = CONF.compute.flavor_ref
         cls.flavor_ref_alt = CONF.compute.flavor_ref_alt
         cls.ssh_user = CONF.validation.image_ssh_user
+        cls.ssh_alt_user = CONF.validation.image_alt_ssh_user
         cls.image_ssh_user = CONF.validation.image_ssh_user
+        cls.image_alt_ssh_user = CONF.validation.image_alt_ssh_user
         cls.image_ssh_password = CONF.validation.image_ssh_password
+        cls.image_alt_ssh_password = CONF.validation.image_alt_ssh_password
 
     @classmethod
     def is_requested_microversion_compatible(cls, max_version):
