@@ -83,6 +83,9 @@ class BackupsClient(rest_client.RestClient):
 
     def import_backup(self, **kwargs):
         """Import backup metadata record."""
+        # TODO(linanbj): Current api-site doesn't contain this API description.
+        # After fixing the api-site, we need to fix here also for putting the
+        # link to api-site.
         post_body = json.dumps({'backup-record': kwargs})
         resp, body = self.post("backups/import_record", post_body)
         body = json.loads(body)
