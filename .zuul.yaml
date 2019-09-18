@@ -345,8 +345,16 @@
     parent: tempest-full-py3
     nodeset: devstack-single-node-opensuse-150
     description: |
+      ** DEPRECATED - please use tempest-full-py3-opensuse15 instead.
+    voting: false
+
+- job:
+    name: tempest-full-py3-opensuse15
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-opensuse-15
+    description: |
       Base integration test with Neutron networking and py36 running
-      on openSUSE Leap 15.0
+      on openSUSE Leap 15.x
     voting: false
 
 - job:
@@ -727,7 +735,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-pg-full:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3-opensuse150:
+        - tempest-full-py3-opensuse15:
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
