@@ -579,7 +579,7 @@ class TestDiscovery(base.TestCase):
                           os, 'fakeservice')
 
     def test_get_config_file(self):
-        conf_dir = os.path.join(os.getcwd(), 'etc/')
+        conf_dir = os.path.join(os.getcwd(), 'etc')
         conf_file = "tempest.conf.sample"
         local_sample_conf_file = os.path.join(conf_dir, conf_file)
 

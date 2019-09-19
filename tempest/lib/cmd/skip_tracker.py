@@ -31,10 +31,11 @@ try:
 except ImportError:
     launchpad = None
 
-LPCACHEDIR = os.path.expanduser('~/.launchpadlib/cache')
+LPCACHEDIR = os.path.expanduser(os.path.join('~', '.launchpadlib', 'cache'))
 LOG = logging.getLogger(__name__)
 
-BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                       '..', '..', '..'))
 TESTDIR = os.path.join(BASEDIR, 'tempest')
 
 

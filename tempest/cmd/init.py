@@ -44,11 +44,14 @@ def get_tempest_default_config_dir():
 
     :return: default config dir
     """
+    # NOTE: The default directory should be on a Linux box.
     global_conf_dir = '/etc/tempest'
     xdg_config = os.environ.get('XDG_CONFIG_HOME',
-                                os.path.expanduser('~/.config'))
+                                os.path.expanduser(os.path.join('~',
+                                                                '.config')))
     user_xdg_global_path = os.path.join(xdg_config, 'tempest')
-    user_global_path = os.path.join(os.path.expanduser('~'), '.tempest/etc')
+    user_global_path = os.path.join(os.path.expanduser('~'),
+                                    '.tempest', 'etc')
     if os.path.isdir(global_conf_dir):
         return global_conf_dir
     elif os.path.isdir(user_xdg_global_path):
@@ -121,7 +124,7 @@ class TempestInit(command.Command):
     def generate_sample_config(self, local_dir):
         conf_generator = os.path.join(os.path.dirname(__file__),
                                       'config-generator.tempest.conf')
-        output_file = os.path.join(local_dir, 'etc/tempest.conf.sample')
+        output_file = os.path.join(local_dir, 'etc', 'tempest.conf.sample')
         if os.path.isfile(conf_generator):
             generator.main(['--config-file', conf_generator, '--output-file',
                             output_file])
