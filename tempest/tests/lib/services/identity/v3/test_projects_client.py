@@ -62,7 +62,8 @@ class TestProjectsClient(base.BaseServiceTest):
                             "/0c4e939acacf4376bdcd1129f1a054ad"
                 },
                 "name": "admin",
-                "parent_id": None
+                "parent_id": None,
+                "tags": []
             },
             {
                 "is_domain": False,
@@ -75,7 +76,8 @@ class TestProjectsClient(base.BaseServiceTest):
                             "/0cbd49cbf76d405d9c86562e1d579bd3"
                 },
                 "name": "demo",
-                "parent_id": None
+                "parent_id": None,
+                "tags": []
             },
             {
                 "is_domain": False,
@@ -88,7 +90,8 @@ class TestProjectsClient(base.BaseServiceTest):
                             "/2db68fed84324f29bb73130c6c2094fb"
                 },
                 "name": "swifttenanttest2",
-                "parent_id": None
+                "parent_id": None,
+                "tags": []
             },
             {
                 "is_domain": False,
@@ -101,7 +104,8 @@ class TestProjectsClient(base.BaseServiceTest):
                             "/3d594eb0f04741069dbbb521635b21c7"
                 },
                 "name": "service",
-                "parent_id": None
+                "parent_id": None,
+                "tags": []
             }
         ]
     }
