@@ -24,6 +24,7 @@ class VolumePoolsAdminTestsJSON(base.BaseVolumeAdminTest):
     def _assert_pools(self, with_detail=False):
         cinder_pools = self.admin_scheduler_stats_client.list_pools(
             detail=with_detail)['pools']
+        self.assertNotEmpty(cinder_pools, "no cinder pools listed.")
         self.assertIn('name', cinder_pools[0])
         if with_detail:
             self.assertIn(CONF.volume.vendor_name,
