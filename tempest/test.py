@@ -20,6 +20,7 @@ import sys
 import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
+import pkg_resources
 import six
 import testtools
 
@@ -75,6 +76,10 @@ def validate_tearDownClass():
 
 
 atexit.register(validate_tearDownClass)
+
+
+class DummyException(Exception):
+    pass
 
 
 class BaseTestCase(testtools.testcase.WithAttributes,
@@ -140,6 +145,26 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls._teardowns = []
 
     @classmethod
+    def handle_skip_exception(cls):
+        try:
+            stestr_version = pkg_resources.parse_version(
+                pkg_resources.get_distribution("stestr").version)
+            stestr_min = pkg_resources.parse_version('2.5.0')
+            new_stestr = (stestr_version >= stestr_min)
+            import unittest
+            import unittest2
+            if sys.version_info >= (3, 5) and new_stestr:
+                exc = unittest2.case.SkipTest
+                exc_to_raise = unittest.case.SkipTest
+            else:
+                exc = unittest.case.SkipTest
+                exc_to_raise = unittest2.case.SkipTest
+        except Exception:
+            exc = DummyException
+            exc_to_raise = DummyException
+        return exc, exc_to_raise
+
+    @classmethod
     def setUpClass(cls):
         cls.__setupclass_called = True
         # Reset state
@@ -148,11 +173,24 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
         # All the configuration checks that may generate a skip
-        cls.skip_checks()
-        if not cls.__skip_checks_called:
-            raise RuntimeError("skip_checks for %s did not call the super's "
-                               "skip_checks" % cls.__name__)
+        # TODO(gmann): cls.handle_skip_exception is really workaround for
+        # testtools bug- https://github.com/testing-cabal/testtools/issues/272
+        # stestr which is used by Tempest internally to run the test switch
+        # the customize test runner(which use stdlib unittest) for >=py3.5
+        # else testtools.run.- https://github.com/mtreinish/stestr/pull/265
+        # These two test runner are not compatible due to skip exception
+        # handling(due to unittest2). testtools.run treat unittestt.SkipTest
+        # as error and stdlib unittest treat unittest2.case.SkipTest raised
+        # by testtools.TestCase.skipException.
+        # The below workaround can be removed once testtools fix issue# 272.
         try:
+            exc, exc_to_raise = cls.handle_skip_exception()
+            cls.skip_checks()
+
+            if not cls.__skip_checks_called:
+                raise RuntimeError(
+                    "skip_checks for %s did not call the super's "
+                    "skip_checks" % cls.__name__)
             # Allocation of all required credentials and client managers
             cls._teardowns.append(('credentials', cls.clear_credentials))
             cls.setup_credentials()
@@ -164,6 +202,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # Additional class-wide test resources
             cls._teardowns.append(('resources', cls.resource_cleanup))
             cls.resource_setup()
+        except exc as e:
+            raise exc_to_raise(e.args)
         except Exception:
             etype, value, trace = sys.exc_info()
             LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass.",

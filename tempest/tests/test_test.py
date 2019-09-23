@@ -531,8 +531,8 @@ class TestTempestBaseTestClassFixtures(base.TestCase):
     def test_skip_only(self):
         # If a skip condition is hit in the test, no credentials or resource
         # is provisioned / cleaned-up
-        self.mocks['skip_checks'].side_effect = (
-            testtools.testcase.TestSkipped())
+        exc, _ = test.BaseTestCase.handle_skip_exception()
+        self.mocks['skip_checks'].side_effect = (exc)
         suite = unittest.TestSuite((self.test,))
         log = []
         result = LoggingTestResult(log)
