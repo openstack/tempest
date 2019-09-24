@@ -35,8 +35,6 @@ from urllib3.util import retry
 # TODO(masayukig): Some of these can be removed from BLACKLIST in the future
 # when the patches are merged.
 BLACKLIST = [
-    'openstack/barbican-tempest-plugin',
-    # https://review.opendev.org/#/c/634631/
     'x/gce-api',  # It looks gce-api doesn't support python3 yet.
     'x/group-based-policy',  # It looks this doesn't support python3 yet.
     'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
