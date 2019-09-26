@@ -104,6 +104,38 @@ class TestUsersClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_PROJECT_LIST = {
+        "links": {
+            "self": "http://example.com/identity/v3/users/313233/projects",
+            "previous": None,
+            "next": None
+        },
+        "projects": [
+            {
+                "description": "description of this project",
+                "domain_id": "161718",
+                "enabled": True,
+                "id": "456788",
+                "links": {
+                    "self": "http://example.com/identity/v3/projects/456788"
+                },
+                "name": "a project name",
+                "parent_id": "212223"
+            },
+            {
+                "description": "description of this project",
+                "domain_id": "161718",
+                "enabled": True,
+                "id": "456789",
+                "links": {
+                    "self": "http://example.com/identity/v3/projects/456789"
+                },
+                "name": "another domain",
+                "parent_id": "212223"
+            },
+        ]
+    }
+
     def setUp(self):
         super(TestUsersClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -155,6 +187,15 @@ class TestUsersClient(base.BaseServiceTest):
             user_id='817fb3c23fd7465ba6d7fe1b1320121d',
         )
 
+    def _test_list_user_projects(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_user_projects,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_PROJECT_LIST,
+            bytes_body,
+            user_id='817fb3c23fd7465ba6d7fe1b1320121d',
+        )
+
     def test_create_user_with_string_body(self):
         self._test_create_user()
 
@@ -184,6 +225,12 @@ class TestUsersClient(base.BaseServiceTest):
 
     def test_list_user_groups_with_bytes_body(self):
         self._test_list_user_groups(bytes_body=True)
+
+    def test_list_user_projects_with_string_body(self):
+        self._test_list_user_projects()
+
+    def test_list_user_projects_with_bytes_body(self):
+        self._test_list_user_projects(bytes_body=True)
 
     def test_delete_user(self):
         self.check_service_client_function(
