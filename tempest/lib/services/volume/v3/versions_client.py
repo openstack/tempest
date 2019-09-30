@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from six.moves.urllib.parse import urljoin
 
 from oslo_serialization import jsonutils as json
@@ -34,14 +32,10 @@ class VersionsClient(base_client.BaseClient):
         """
         version_url = self._get_base_version_url()
 
-        start = time.time()
         resp, body = self.raw_request(version_url, 'GET')
-        end = time.time()
         # NOTE: We need a raw_request() here instead of request() call because
         # "list API versions" API doesn't require an authentication and we can
         # skip it with raw_request() call.
-        self._log_request('GET', version_url, resp, secs=(end - start),
-                          resp_body=body)
         self._error_checker(resp, body)
 
         body = json.loads(body)

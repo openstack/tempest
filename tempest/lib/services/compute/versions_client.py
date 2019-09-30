@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import time
-
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import versions as schema
@@ -26,11 +24,7 @@ class VersionsClient(base_compute_client.BaseComputeClient):
     def list_versions(self):
         version_url = self._get_base_version_url()
 
-        start = time.time()
         resp, body = self.raw_request(version_url, 'GET')
-        end = time.time()
-        self._log_request('GET', version_url, resp, secs=(end - start),
-                          resp_body=body)
 
         self._error_checker(resp, body)
         body = json.loads(body)
