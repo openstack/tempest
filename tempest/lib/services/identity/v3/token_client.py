@@ -51,7 +51,7 @@ class V3TokenClient(rest_client.RestClient):
     def auth(self, user_id=None, username=None, password=None, project_id=None,
              project_name=None, user_domain_id=None, user_domain_name=None,
              project_domain_id=None, project_domain_name=None, domain_id=None,
-             domain_name=None, token=None, app_cred_id=None,
+             domain_name=None, system=None, token=None, app_cred_id=None,
              app_cred_secret=None):
         """Obtains a token from the authentication service
 
@@ -65,6 +65,7 @@ class V3TokenClient(rest_client.RestClient):
         :param domain_name: a domain name to scope to
         :param project_id: a project id to scope to
         :param project_name: a project name to scope to
+        :param system: whether the token should be scoped to the system
         :param token: a token to re-scope.
 
         Accepts different combinations of credentials.
@@ -74,6 +75,7 @@ class V3TokenClient(rest_client.RestClient):
         - user_id, password
         - username, password, user_domain_id
         - username, password, project_name, user_domain_id, project_domain_id
+        - username, password, user_domain_id, system
         Validation is left to the server side.
         """
         creds = {
@@ -135,6 +137,8 @@ class V3TokenClient(rest_client.RestClient):
             creds['auth']['scope'] = dict(domain={'id': domain_id})
         elif domain_name:
             creds['auth']['scope'] = dict(domain={'name': domain_name})
+        elif system:
+            creds['auth']['scope'] = dict(system={system: True})
 
         body = json.dumps(creds, sort_keys=True)
         resp, body = self.post(self.auth_url, body=body)

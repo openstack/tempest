@@ -786,6 +786,19 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
                 self.assertIn(attr, auth_params.keys())
                 self.assertEqual(getattr(all_creds, attr), auth_params[attr])
 
+    def test_auth_parameters_with_system_scope(self):
+        all_creds = fake_credentials.FakeKeystoneV3AllCredentials()
+        self.auth_provider.credentials = all_creds
+        self.auth_provider.scope = 'system'
+        auth_params = self.auth_provider._auth_params()
+        self.assertNotIn('scope', auth_params.keys())
+        for attr in all_creds.get_init_attributes():
+            if attr.startswith('project_') or attr.startswith('domain_'):
+                self.assertNotIn(attr, auth_params.keys())
+            else:
+                self.assertIn(attr, auth_params.keys())
+                self.assertEqual(getattr(all_creds, attr), auth_params[attr])
+
 
 class TestKeystoneV3Credentials(base.TestCase):
     def testSetAttrUserDomain(self):

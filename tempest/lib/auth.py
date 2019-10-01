@@ -428,7 +428,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 class KeystoneV3AuthProvider(KeystoneAuthProvider):
     """Provides authentication based on the Identity V3 API"""
 
-    SCOPES = set(['project', 'domain', 'unscoped', None])
+    SCOPES = set(['system', 'project', 'domain', 'unscoped', None])
 
     def _auth_client(self, auth_url):
         return json_v3id.V3TokenClient(
@@ -441,8 +441,8 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
         Fields available in Credentials are passed to the token request,
         depending on the value of scope. Valid values for scope are: "project",
-        "domain". Any other string (e.g. "unscoped") or None will lead to an
-        unscoped token request.
+        "domain", or "system". Any other string (e.g. "unscoped") or None will
+        lead to an unscoped token request.
         """
 
         auth_params = dict(
@@ -465,12 +465,16 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                 domain_id=self.credentials.domain_id,
                 domain_name=self.credentials.domain_name)
 
+        if self.scope == 'system':
+            auth_params.update(system='all')
+
         return auth_params
 
     def _fill_credentials(self, auth_data_body):
-        # project or domain, depending on the scope
+        # project, domain, or system depending on the scope
         project = auth_data_body.get('project', None)
         domain = auth_data_body.get('domain', None)
+        system = auth_data_body.get('system', None)
         # user is always there
         user = auth_data_body['user']
         # Set project fields
@@ -490,6 +494,9 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                 self.credentials.domain_id = domain['id']
             if self.credentials.domain_name is None:
                 self.credentials.domain_name = domain['name']
+        # Set system scope
+        if system is not None:
+            self.credentials.system = 'all'
         # Set user fields
         if self.credentials.username is None:
             self.credentials.username = user['name']
@@ -677,7 +684,8 @@ class Credentials(object):
                 raise exceptions.InvalidCredentials(msg)
         for key in attr:
             if key in self.ATTRIBUTES:
-                setattr(self, key, attr[key])
+                if attr[key] is not None:
+                    setattr(self, key, attr[key])
             else:
                 msg = '%s is not a valid attr for %s' % (key, self.__class__)
                 raise exceptions.InvalidCredentials(msg)
@@ -779,7 +787,7 @@ class KeystoneV3Credentials(Credentials):
     ATTRIBUTES = ['domain_id', 'domain_name', 'password', 'username',
                   'project_domain_id', 'project_domain_name', 'project_id',
                   'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
-                  'user_domain_name', 'user_id']
+                  'user_domain_name', 'user_id', 'system']
     COLLISIONS = [('project_name', 'tenant_name'), ('project_id', 'tenant_id')]
 
     def __setattr__(self, key, value):

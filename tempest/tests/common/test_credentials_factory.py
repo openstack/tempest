@@ -173,10 +173,15 @@ class TestCredentialsFactory(base.TestCase):
     @mock.patch.object(cf, 'get_credentials')
     def test_get_configured_admin_credentials(self, mock_get_credentials):
         cfg.CONF.set_default('auth_version', 'v3', 'identity')
-        all_params = [('admin_username', 'username', 'my_name'),
-                      ('admin_password', 'password', 'secret'),
-                      ('admin_project_name', 'project_name', 'my_pname'),
-                      ('admin_domain_name', 'domain_name', 'my_dname')]
+        all_params = [
+            ('admin_username', 'username', 'my_name'),
+            ('admin_user_domain_name', 'user_domain_name', 'my_dname'),
+            ('admin_password', 'password', 'secret'),
+            ('admin_project_name', 'project_name', 'my_pname'),
+            ('admin_project_domain_name', 'project_domain_name', 'my_dname'),
+            ('admin_domain_name', 'domain_name', 'my_dname'),
+            ('admin_system', 'system', None),
+        ]
         expected_result = 'my_admin_credentials'
         mock_get_credentials.return_value = expected_result
         for config_item, _, value in all_params:
@@ -194,10 +199,15 @@ class TestCredentialsFactory(base.TestCase):
     def test_get_configured_admin_credentials_not_fill_valid(
             self, mock_get_credentials):
         cfg.CONF.set_default('auth_version', 'v2', 'identity')
-        all_params = [('admin_username', 'username', 'my_name'),
-                      ('admin_password', 'password', 'secret'),
-                      ('admin_project_name', 'project_name', 'my_pname'),
-                      ('admin_domain_name', 'domain_name', 'my_dname')]
+        all_params = [
+            ('admin_username', 'username', 'my_name'),
+            ('admin_user_domain_name', 'user_domain_name', 'my_dname'),
+            ('admin_password', 'password', 'secret'),
+            ('admin_project_domain_name', 'project_domain_name', 'my_dname'),
+            ('admin_project_name', 'project_name', 'my_pname'),
+            ('admin_domain_name', 'domain_name', 'my_dname'),
+            ('admin_system', 'system', None),
+        ]
         expected_result = mock.Mock()
         expected_result.is_valid.return_value = True
         mock_get_credentials.return_value = expected_result
@@ -270,6 +280,23 @@ class TestCredentialsFactory(base.TestCase):
         cfg.CONF.set_default('default_credentials_domain_name',
                              expected_domain, 'auth')
         params = {'foo': 'bar', 'user_domain_name': expected_domain}
+        expected_params = params.copy()
+        expected_params.update(config.service_client_config())
+        result = cf.get_credentials(fill_in=False, identity_version='v3',
+                                    **params)
+        self.assertEqual(expected_result, result)
+        mock_auth_get_credentials.assert_called_once_with(
+            expected_uri, fill_in=False, identity_version='v3',
+            **expected_params)
+
+    @mock.patch('tempest.lib.auth.get_credentials')
+    def test_get_credentials_v3_system(self, mock_auth_get_credentials):
+        expected_uri = 'V3_URI'
+        expected_result = 'my_creds'
+        mock_auth_get_credentials.return_value = expected_result
+        cfg.CONF.set_default('uri_v3', expected_uri, 'identity')
+        cfg.CONF.set_default('admin_system', 'all', 'auth')
+        params = {'system': 'all'}
         expected_params = params.copy()
         expected_params.update(config.service_client_config())
         result = cf.get_credentials(fill_in=False, identity_version='v3',
