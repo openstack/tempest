@@ -538,7 +538,8 @@ class TestTempestBaseTestClassFixtures(base.TestCase):
         result = LoggingTestResult(log)
         suite.run(result)
         # If we trigger a skip condition, teardown is not invoked at all
-        self.assertEqual(self.SETUP_FIXTURES[:2],
+        self.assertEqual((self.SETUP_FIXTURES[:2] +
+                          [self.TEARDOWN_FIXTURES[0]]),
                          self.test.fixtures_invoked)
 
     def test_skip_credentials_fails(self):

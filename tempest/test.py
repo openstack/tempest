@@ -203,6 +203,10 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             cls._teardowns.append(('resources', cls.resource_cleanup))
             cls.resource_setup()
         except exc as e:
+            # NOTE(dviroel): the exception may be raised after setting up the
+            # user credentials, so we must call tearDownClass to release all
+            # allocated resources.
+            cls.tearDownClass()
             raise exc_to_raise(e.args)
         except Exception:
             etype, value, trace = sys.exc_info()
