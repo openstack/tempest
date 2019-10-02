@@ -160,10 +160,8 @@ class V3TokenClient(rest_client.RestClient):
                 headers = self.get_headers(accept_type="json")
 
         resp, resp_body = self.raw_request(url, method,
-                                           headers=headers, body=body)
-        self._log_request(method, url, resp, req_headers=headers,
-                          req_body='<omitted>', resp_body=resp_body)
-
+                                           headers=headers, body=body,
+                                           log_req_body='<omitted>')
         if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
             raise exceptions.Unauthorized(resp_body['error']['message'])

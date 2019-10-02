@@ -136,6 +136,9 @@ class TestTokenClientV3(base.TestCase):
             mock_raw_r.return_value = (
                 fake_identity._fake_v3_response(None, None))
             resp, body = token_client_v3.request('GET', 'fake_uri')
+        mock_raw_r.assert_called_once_with('fake_uri', 'GET',
+                                           headers=mock.ANY, body=None,
+                                           log_req_body='<omitted>')
 
         self.assertIsInstance(body, dict)
 

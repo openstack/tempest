@@ -86,6 +86,9 @@ class TestTokenClientV2(base.TestCase):
         with mock.patch.object(token_client_v2, 'raw_request') as mock_raw_r:
             mock_raw_r.return_value = response, body
             resp, body = token_client_v2.request('GET', 'fake_uri')
+        mock_raw_r.assert_called_once_with('fake_uri', 'GET',
+                                           headers=mock.ANY, body=None,
+                                           log_req_body='<omitted>')
         self.assertIsInstance(body, dict)
 
     def test_request_with_bytes_body(self):

@@ -192,7 +192,7 @@ ALT_IDENTITY_V3 = IDENTITY_V3_RESPONSE
 
 
 def _fake_v3_response(self, uri, method="GET", body=None, headers=None,
-                      redirections=5, connection_type=None):
+                      redirections=5, connection_type=None, log_req_body=None):
     fake_headers = {
         "x-subject-token": TOKEN
     }
@@ -202,7 +202,7 @@ def _fake_v3_response(self, uri, method="GET", body=None, headers=None,
 
 def _fake_v3_response_domain_scope(self, uri, method="GET", body=None,
                                    headers=None, redirections=5,
-                                   connection_type=None):
+                                   connection_type=None, log_req_body=None):
     fake_headers = {
         "status": "201",
         "x-subject-token": TOKEN
@@ -213,7 +213,7 @@ def _fake_v3_response_domain_scope(self, uri, method="GET", body=None,
 
 def _fake_v3_response_no_scope(self, uri, method="GET", body=None,
                                headers=None, redirections=5,
-                               connection_type=None):
+                               connection_type=None, log_req_body=None):
     fake_headers = {
         "status": "201",
         "x-subject-token": TOKEN
@@ -223,7 +223,7 @@ def _fake_v3_response_no_scope(self, uri, method="GET", body=None,
 
 
 def _fake_v2_response(self, uri, method="GET", body=None, headers=None,
-                      redirections=5, connection_type=None):
+                      redirections=5, connection_type=None, log_req_body=None):
     return (fake_http.fake_http_response({}, status=200),
             json.dumps(IDENTITY_V2_RESPONSE))
 
