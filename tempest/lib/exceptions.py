@@ -294,3 +294,7 @@ class ConsistencyGroupException(TempestException):
 class ConsistencyGroupSnapshotException(TempestException):
     message = ("Consistency group snapshot %(cgsnapshot_id)s failed and is "
                "in ERROR status")
+
+
+class InvalidScopeType(TempestException):
+    message = "Invalid scope %(scope)s"

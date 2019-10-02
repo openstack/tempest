@@ -257,7 +257,7 @@ class ServiceClients(object):
     # class should only be used by tests hosted in Tempest.
 
     @removals.removed_kwarg('client_parameters')
-    def __init__(self, credentials, identity_uri, region=None, scope='project',
+    def __init__(self, credentials, identity_uri, region=None, scope=None,
                  disable_ssl_certificate_validation=True, ca_certs=None,
                  trace_requests='', client_parameters=None, proxy_url=None):
         """Service Clients provider
@@ -348,6 +348,14 @@ class ServiceClients(object):
         self.ca_certs = ca_certs
         self.trace_requests = trace_requests
         self.proxy_url = proxy_url
+        if self.credentials.project_id or self.credentials.project_name:
+            scope = 'project'
+        elif self.credentials.system:
+            scope = 'system'
+        elif self.credentials.domain_id or self.credentials.domain_name:
+            scope = 'domain'
+        else:
+            scope = 'project'
         # Creates an auth provider for the credentials
         self.auth_provider = auth_provider_class(
             self.credentials, self.identity_uri, scope=scope,

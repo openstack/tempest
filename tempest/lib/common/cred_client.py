@@ -39,11 +39,15 @@ class CredsClient(object):
         self.projects_client = projects_client
         self.roles_client = roles_client
 
-    def create_user(self, username, password, project, email):
+    def create_user(self, username, password, project=None, email=None):
         params = {'name': username,
-                  'password': password,
-                  self.project_id_param: project['id'],
-                  'email': email}
+                  'password': password}
+        # with keystone v3, a default project is not required
+        if project:
+            params[self.project_id_param] = project['id']
+        # email is not a first-class attribute of a user
+        if email:
+            params['email'] = email
         user = self.users_client.create_user(**params)
         if 'user' in user:
             user = user['user']
@@ -160,6 +164,15 @@ class V3CredsClient(CredsClient):
     def delete_project(self, project_id):
         self.projects_client.delete_project(project_id)
 
+    def create_domain(self, name, description):
+        domain = self.domains_client.create_domain(
+            name=name, description=description)['domain']
+        return domain
+
+    def delete_domain(self, domain_id):
+        self.domains_client.update_domain(domain_id, enabled=False)
+        self.domains_client.delete_domain(domain_id)
+
     def get_credentials(
             self, user, project, password, domain=None, system=None):
         # User, project and domain already include both ID and name here,
@@ -214,6 +227,23 @@ class V3CredsClient(CredsClient):
         except lib_exc.Conflict:
             LOG.debug("Role %s already assigned on domain %s for user %s",
                       role['id'], domain['id'], user['id'])
+
+    def assign_user_role_on_system(self, user, role_name):
+        """Assign the specified role on the system
+
+        :param user: a user dict
+        :param role_name: name of the role to be assigned
+        """
+        role = self._check_role_exists(role_name)
+        if not role:
+            msg = 'No "%s" role found' % role_name
+            raise lib_exc.NotFound(msg)
+        try:
+            self.roles_client.create_user_role_on_system(
+                user['id'], role['id'])
+        except lib_exc.Conflict:
+            LOG.debug("Role %s already assigned on the system for user %s",
+                      role['id'], user['id'])
 
 
 def get_creds_client(identity_client,
