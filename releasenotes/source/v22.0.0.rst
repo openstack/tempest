@@ -1,0 +1,6 @@
+=====================
+v22.0.0 Release Notes
+=====================
+
+.. release-notes:: 22.0.0 Release Notes
+   :version: 22.0.0
