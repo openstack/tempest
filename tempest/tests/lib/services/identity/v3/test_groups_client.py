@@ -211,3 +211,13 @@ class TestGroupsClient(base.BaseServiceTest):
             group_id='6e13e2068cf9466e98950595baf6bb35',
             user_id='642688fa65a84217b86cef3c063de2b9',
         )
+
+    def test_delete_group_user(self):
+        self.check_service_client_function(
+            self.client.delete_group_user,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            status=204,
+            group_id='6e13e2068cf9466e98950595baf6bb35',
+            user_id='642688fa65a84217b86cef3c063de2b9',
+        )
