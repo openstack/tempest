@@ -20,7 +20,6 @@ import sys
 import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
-import pkg_resources
 import six
 import testtools
 
@@ -28,6 +27,7 @@ from tempest import clients
 from tempest.common import credentials_factory as credentials
 from tempest.common import utils
 from tempest import config
+from tempest.lib import base as lib_base
 from tempest.lib.common import fixed_network
 from tempest.lib.common import profiler
 from tempest.lib.common import validation_resources as vr
@@ -76,10 +76,6 @@ def validate_tearDownClass():
 
 
 atexit.register(validate_tearDownClass)
-
-
-class DummyException(Exception):
-    pass
 
 
 class BaseTestCase(testtools.testcase.WithAttributes,
@@ -145,26 +141,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls._teardowns = []
 
     @classmethod
-    def handle_skip_exception(cls):
-        try:
-            stestr_version = pkg_resources.parse_version(
-                pkg_resources.get_distribution("stestr").version)
-            stestr_min = pkg_resources.parse_version('2.5.0')
-            new_stestr = (stestr_version >= stestr_min)
-            import unittest
-            import unittest2
-            if sys.version_info >= (3, 5) and new_stestr:
-                exc = unittest2.case.SkipTest
-                exc_to_raise = unittest.case.SkipTest
-            else:
-                exc = unittest.case.SkipTest
-                exc_to_raise = unittest2.case.SkipTest
-        except Exception:
-            exc = DummyException
-            exc_to_raise = DummyException
-        return exc, exc_to_raise
-
-    @classmethod
     def setUpClass(cls):
         cls.__setupclass_called = True
         # Reset state
@@ -183,8 +159,9 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # as error and stdlib unittest treat unittest2.case.SkipTest raised
         # by testtools.TestCase.skipException.
         # The below workaround can be removed once testtools fix issue# 272.
+        orig_skip_exception = testtools.TestCase.skipException
+        lib_base._handle_skip_exception()
         try:
-            exc, exc_to_raise = cls.handle_skip_exception()
             cls.skip_checks()
 
             if not cls.__skip_checks_called:
@@ -202,12 +179,6 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # Additional class-wide test resources
             cls._teardowns.append(('resources', cls.resource_cleanup))
             cls.resource_setup()
-        except exc as e:
-            # NOTE(dviroel): the exception may be raised after setting up the
-            # user credentials, so we must call tearDownClass to release all
-            # allocated resources.
-            cls.tearDownClass()
-            raise exc_to_raise(e.args)
         except Exception:
             etype, value, trace = sys.exc_info()
             LOG.info("%s raised in %s.setUpClass. Invoking tearDownClass.",
@@ -217,6 +188,8 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                 six.reraise(etype, value, trace)
             finally:
                 del trace  # to avoid circular refs
+        finally:
+            testtools.TestCase.skipException = orig_skip_exception
 
     @classmethod
     def tearDownClass(cls):

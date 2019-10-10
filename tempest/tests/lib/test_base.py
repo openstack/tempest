@@ -48,6 +48,7 @@ class TestSetUpClass(base.BaseTestCase):
     @classmethod
     def setUpClass(cls):  # noqa
         """Simulate absence of super() call."""
+        cls.orig_skip_exception = cls.skipException
 
     def setUp(self):
         try:
