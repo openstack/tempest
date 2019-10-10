@@ -25,6 +25,11 @@ class TestUsersClient(base.BaseServiceTest):
             'enabled': True,
             'name': 'Tempest User',
             'password': 'TempestPassword',
+            "description": "Tempest User",
+            "email": "TempestUser@example.com",
+            "options": {
+                "ignore_password_expiry": True
+            }
         }
     }
 
