@@ -1,6 +1,6 @@
 ---
 fixes:
   - |
-    Bug#1847749. This privides the workaround of Skip Exception raised instead of skipping
+    Bug#1847749. This provides the workaround of Skip Exception raised instead of skipping
     the CLI tests. If you are running Tempest with stestr > 2.5.0 then use this fix.
     Ref- https://github.com/testing-cabal/testtools/issues/272
