@@ -24,27 +24,25 @@ class TestVolumesClient(base.BaseServiceTest):
 
     FAKE_VOLUME_SUMMARY = {
         "volume-summary": {
-            "total_size": 20,
-            "total_count": 5
+            "total_size": 4,
+            "total_count": 4,
+            "metadata": {
+                "key1": ["value1", "value2"],
+                "key2": ["value2"]
+            }
         }
     }
 
     FAKE_VOLUME_METADATA_ITEM = {
         "meta": {
-            "key1": "value1"
+            "name": "metadata1"
         }
     }
 
     FAKE_VOLUME_IMAGE_METADATA = {
         "metadata": {
-            "container_format": "bare",
-            "min_ram": "0",
-            "disk_format": "raw",
-            "image_name": "xly-ubuntu16-server",
-            "image_id": "3e087b0c-10c5-4255-b147-6e8e9dbad6fc",
-            "checksum": "008f5d22fe3cb825d714da79607a90f9",
-            "min_disk": "0",
-            "size": "8589934592"
+            "key1": "value1",
+            "key2": "value2"
         }
     }
 
