@@ -14,9 +14,27 @@
 #    under the License.
 
 import os
+import sys
 
 import fixtures
+import pkg_resources
 import testtools
+
+
+def _handle_skip_exception():
+    try:
+        stestr_version = pkg_resources.parse_version(
+            pkg_resources.get_distribution("stestr").version)
+        stestr_min = pkg_resources.parse_version('2.5.0')
+        new_stestr = (stestr_version >= stestr_min)
+        import unittest
+        import unittest2
+        if sys.version_info >= (3, 5) and new_stestr:
+            testtools.TestCase.skipException = unittest.case.SkipTest
+        else:
+            testtools.TestCase.skipException = unittest2.case.SkipTest
+    except Exception:
+        pass
 
 
 class BaseTestCase(testtools.testcase.WithAttributes, testtools.TestCase):
@@ -33,6 +51,18 @@ class BaseTestCase(testtools.testcase.WithAttributes, testtools.TestCase):
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
         cls.setUpClassCalled = True
+        # TODO(gmann): cls.handle_skip_exception is really workaround for
+        # testtools bug- https://github.com/testing-cabal/testtools/issues/272
+        # stestr which is used by Tempest internally to run the test switch
+        # the customize test runner(which use stdlib unittest) for >=py3.5
+        # else testtools.run.- https://github.com/mtreinish/stestr/pull/265
+        # These two test runner are not compatible due to skip exception
+        # handling(due to unittest2). testtools.run treat unittestt.SkipTest
+        # as error and stdlib unittest treat unittest2.case.SkipTest raised
+        # by testtools.TestCase.skipException.
+        # The below workaround can be removed once testtools fix issue# 272.
+        cls.orig_skip_exception = testtools.TestCase.skipException
+        _handle_skip_exception()
 
     @classmethod
     def tearDownClass(cls):
@@ -40,6 +70,7 @@ class BaseTestCase(testtools.testcase.WithAttributes, testtools.TestCase):
             super(BaseTestCase, cls).tearDownClass()
 
     def setUp(self):
+        testtools.TestCase.skipException = self.orig_skip_exception
         super(BaseTestCase, self).setUp()
         if not self.setUpClassCalled:
             raise RuntimeError("setUpClass does not calls the super's "
