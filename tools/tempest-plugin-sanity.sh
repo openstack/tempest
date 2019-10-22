@@ -60,6 +60,9 @@ function clone_project {
     fi
 }
 
+: ${UPPER_CONSTRAINTS_FILE:="https://releases.openstack.org/constraints/upper/master"}
+DEPS="-c${UPPER_CONSTRAINTS_FILE}"
+
 # function to create virtualenv to perform sanity operation
 function prepare_workspace {
     SANITY_DIR=$(pwd)
@@ -73,10 +76,10 @@ function prepare_workspace {
 
 # Function to install project
 function install_project {
-    "$TVENV" pip install "$SANITY_DIR"/"$1"
+    "$TVENV" pip install $DEPS "$SANITY_DIR"/"$1"
     # Check for test-requirements.txt file in a project then install it.
     if [ -e "$SANITY_DIR"/"$1"/test-requirements.txt ]; then
-        "$TVENV" pip install -r "$SANITY_DIR"/"$1"/test-requirements.txt
+        "$TVENV" pip install $DEPS -r "$SANITY_DIR"/"$1"/test-requirements.txt
     fi
 }
 
