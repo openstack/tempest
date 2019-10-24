@@ -178,7 +178,13 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         for rp, resources in allocations['allocations'].items():
             if self.INGRESS_RESOURCE_CLASS in resources['resources']:
                 bw_resource_in_alloc = True
+                allocation_rp = rp
         self.assertTrue(bw_resource_in_alloc)
+        # Check that binding_profile of the port is not empty and equals with
+        # the rp uuid
+        port = self.os_admin.ports_client.show_port(valid_port['id'])
+        self.assertEqual(allocation_rp,
+                         port['port']['binding:profile']['allocation'])
 
         # boot another vm with max int bandwidth
         not_valid_port = self.create_port(
@@ -196,3 +202,6 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         server2 = self.servers_client.show_server(server2['id'])
         self.assertIn('fault', server2['server'])
         self.assertIn('No valid host', server2['server']['fault']['message'])
+        # Check that binding_profile of the port is empty
+        port = self.os_admin.ports_client.show_port(not_valid_port['id'])
+        self.assertEqual(0, len(port['port']['binding:profile']))
