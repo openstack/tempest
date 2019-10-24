@@ -26,13 +26,13 @@ class TestSubnetsClient(base.BaseServiceTest):
         "subnetpools": [
             {
                 "min_prefixlen": "64",
-                "address_scope_id": None,
+                "address_scope_id": "null",
                 "default_prefixlen": "64",
                 "id": "03f761e6-eee0-43fc-a921-8acf64c14988",
                 "max_prefixlen": "64",
                 "name": "my-subnet-pool-ipv6",
-                "default_quota": None,
-                "is_default": False,
+                "default_quota": "null",
+                "is_default": "false",
                 "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "prefixes": [
@@ -40,19 +40,22 @@ class TestSubnetsClient(base.BaseServiceTest):
                     "2001:db8::/63"
                 ],
                 "ip_version": 6,
-                "shared": False,
+                "shared": "false",
                 "description": "",
-                "revision_number": 2
+                "created_at": "2016-03-08T20:19:41",
+                "updated_at": "2016-03-08T20:19:41",
+                "revision_number": 2,
+                "tags": ["tag1,tag2"]
             },
             {
                 "min_prefixlen": "24",
-                "address_scope_id": None,
+                "address_scope_id": "null",
                 "default_prefixlen": "25",
                 "id": "f49a1319-423a-4ee6-ba54-1d95a4f6cc68",
                 "max_prefixlen": "30",
                 "name": "my-subnet-pool-ipv4",
-                "default_quota": None,
-                "is_default": False,
+                "default_quota": "null",
+                "is_default": "false",
                 "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "prefixes": [
@@ -60,9 +63,12 @@ class TestSubnetsClient(base.BaseServiceTest):
                     "192.168.0.0/16"
                 ],
                 "ip_version": 4,
-                "shared": False,
+                "shared": "false",
                 "description": "",
-                "revision_number": 2
+                "created_at": "2016-03-08T20:19:41",
+                "updated_at": "2016-03-08T20:19:41",
+                "revision_number": 2,
+                "tags": ["tag1,tag2"]
             }
         ]
     }
