@@ -60,8 +60,11 @@ class TestBackupsClient(base.BaseServiceTest):
                 ],
                 "name": "backup001",
                 "object_count": 22,
+                "os-backup-project-attr:project_id": "2c67a14be9314c5dae2ee6",
+                "user_id": "515ba0dd59f84f25a6a084a45d8d93b2",
                 "size": 1,
                 "status": "available",
+                "updated_at": "2013-04-02T10:35:27.000000",
                 "volume_id": "e5185058-943a-4cb4-96d9-72c184c337d6",
                 "is_incremental": True,
                 "has_dependent_backups": False
@@ -73,7 +76,16 @@ class TestBackupsClient(base.BaseServiceTest):
         "backup": {
             "id": "4c65c15f-a5c5-464b-b92a-90e4c04636a7",
             "name": "fake-backup-name",
-            "links": "fake-links"
+            "links": [
+                {
+                    "href": "fake-url-1",
+                    "rel": "self"
+                },
+                {
+                    "href": "fake-url-2",
+                    "rel": "bookmark"
+                }
+            ]
         }
     }
 
