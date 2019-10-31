@@ -22,13 +22,12 @@ class HealthcheckTest(base.BaseObjectTest):
 
     def setUp(self):
         super(HealthcheckTest, self).setUp()
-        # Turning http://.../v1/foobar into http://.../
-        self.account_client.skip_path()
 
     @decorators.idempotent_id('db5723b1-f25c-49a9-bfeb-7b5640caf337')
     def test_get_healthcheck(self):
-
-        resp, _ = self.account_client.get("healthcheck", {})
+        url = self.account_client._get_base_version_url() + "healthcheck"
+        resp, body = self.account_client.raw_request(url, "GET")
+        self.account_client._error_checker(resp, body)
 
         # The target of the request is not any Swift resource. Therefore, the
         # existence of response header is checked without a custom matcher.

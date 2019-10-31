@@ -34,13 +34,12 @@ class CrossdomainTest(base.BaseObjectTest):
     def setUp(self):
         super(CrossdomainTest, self).setUp()
 
-        # Turning http://.../v1/foobar into http://.../
-        self.account_client.skip_path()
-
     @decorators.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @utils.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
-        resp, body = self.account_client.get("crossdomain.xml", {})
+        url = self.account_client._get_base_version_url() + "crossdomain.xml"
+        resp, body = self.account_client.raw_request(url, "GET")
+        self.account_client._error_checker(resp, body)
         body = body.decode()
 
         self.assertTrue(body.startswith(self.xml_start) and

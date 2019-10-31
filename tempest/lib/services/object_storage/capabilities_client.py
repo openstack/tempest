@@ -21,9 +21,10 @@ from tempest.lib.common import rest_client
 class CapabilitiesClient(rest_client.RestClient):
 
     def list_capabilities(self):
-        self.skip_path()
         try:
-            resp, body = self.get('info')
+            url = self._get_base_version_url() + 'info'
+            resp, body = self.raw_request(url, 'GET')
+            self._error_checker(resp, body)
         finally:
             self.reset_path()
         body = json.loads(body)
