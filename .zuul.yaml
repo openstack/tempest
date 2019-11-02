@@ -100,6 +100,13 @@
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
         ENABLE_VOLUME_MULTIATTACH: true
+      devstack_services:
+        # NOTE(mriedem): Disable the cinder-backup service from tempest-full
+        # since tempest-full is in the integrated-gate project template but
+        # the backup tests do not really involve other services so they should
+        # be run in some more cinder-specific job, especially because the
+        # tests fail at a high rate (see bugs 1483434, 1813217, 1745168)
+        c-bak: false
 
 - job:
     name: tempest-full-oslo-master
@@ -169,6 +176,12 @@
         s-object: false
         s-proxy: false
         # without Swift, c-bak cannot run (in the Gate at least)
+        # NOTE(mriedem): Disable the cinder-backup service from
+        # tempest-full-py3 since tempest-full-py3 is in the integrated-gate-py3
+        # project template but the backup tests do not really involve other
+        # services so they should be run in some more cinder-specific job,
+        # especially because the tests fail at a high rate (see bugs 1483434,
+        # 1813217, 1745168)
         c-bak: false
 
 - job:
