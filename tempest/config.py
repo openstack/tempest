@@ -483,6 +483,12 @@ ComputeFeaturesGroup = [
                                   'MIN_LIBVIRT_VERSION is >= 1.2.17 on all '
                                   'branches from stable/rocky and will be '
                                   'removed in a future release.'),
+    cfg.BoolOpt('can_migrate_between_any_hosts',
+                default=True,
+                help="Does the test environment support migrating between "
+                     "any hosts? In environments with non-homogeneous compute "
+                     "nodes you can set this to False so that it will select "
+                     "destination host for migrating automatically"),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
