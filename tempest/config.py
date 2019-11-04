@@ -667,7 +667,7 @@ NetworkGroup = [
                default=28,
                help="The mask bits for project ipv4 subnets"),
     cfg.StrOpt('project_network_v6_cidr',
-               default="2003::/48",
+               default="2001:db8::/48",
                help="The cidr block to allocate project ipv6 subnets from"),
     cfg.IntOpt('project_network_v6_mask_bits',
                default=64,
