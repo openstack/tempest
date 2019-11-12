@@ -354,14 +354,6 @@
         USE_PYTHON3: true
 
 - job:
-    name: tempest-full-py3-opensuse150
-    parent: tempest-full-py3
-    nodeset: devstack-single-node-opensuse-150
-    description: |
-      ** DEPRECATED - please use tempest-full-py3-opensuse15 instead.
-    voting: false
-
-- job:
     name: tempest-full-py3-opensuse15
     parent: tempest-full-py3
     nodeset: devstack-single-node-opensuse-15
