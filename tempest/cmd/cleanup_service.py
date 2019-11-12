@@ -730,6 +730,44 @@ class NetworkSubnetPoolsService(BaseNetworkService):
 
 
 # begin global services
+class RegionService(BaseService):
+
+    def __init__(self, manager, **kwargs):
+        super(RegionService, self).__init__(kwargs)
+        self.client = manager.regions_client
+
+    def list(self):
+        client = self.client
+        regions = client.list_regions()
+        if not self.is_save_state:
+            regions = [region for region in regions['regions'] if region['id']
+                       not in self.saved_state_json['regions'].keys()]
+            return regions
+        else:
+            return regions['regions']
+
+    def delete(self):
+        client = self.client
+        regions = self.list()
+        for region in regions:
+            try:
+                client.delete_region(region['id'])
+            except Exception:
+                LOG.exception("Delete Region %s exception.", region['id'])
+
+    def dry_run(self):
+        regions = self.list()
+        self.data['regions'] = {}
+        for region in regions:
+            self.data['regions'][region['id']] = region
+
+    def save_state(self):
+        regions = self.list()
+        self.data['regions'] = {}
+        for region in regions:
+            self.data['regions'][region['id']] = region
+
+
 class FlavorService(BaseService):
     def __init__(self, manager, **kwargs):
         super(FlavorService, self).__init__(kwargs)
@@ -1005,4 +1043,5 @@ def get_global_cleanup_services():
     global_services.append(ProjectService)
     global_services.append(DomainService)
     global_services.append(RoleService)
+    global_services.append(RegionService)
     return global_services
