@@ -136,7 +136,10 @@ class TempestCleanup(command.Command):
         self._init_admin_ids()
 
         # available services
-        self.project_services = cleanup_service.get_project_cleanup_services()
+        self.project_associated_services = (
+            cleanup_service.get_project_associated_cleanup_services())
+        self.resource_cleanup_services = (
+            cleanup_service.get_resource_cleanup_services())
         self.global_services = cleanup_service.get_global_cleanup_services()
 
         if parsed_args.init_saved_state:
@@ -180,6 +183,10 @@ class TempestCleanup(command.Command):
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
+        for service in self.resource_cleanup_services:
+            svc = service(self.admin_mgr, **kwargs)
+            svc.run()
+
         if is_dry_run:
             with open(DRY_RUN_JSON, 'w+') as f:
                 f.write(json.dumps(self.dry_run_data, sort_keys=True,
@@ -204,7 +211,7 @@ class TempestCleanup(command.Command):
                   'is_save_state': False,
                   'project_id': project_id,
                   'got_exceptions': self.GOT_EXCEPTIONS}
-        for service in self.project_services:
+        for service in self.project_associated_services:
             svc = service(self.admin_mgr, **kwargs)
             svc.run()
 
@@ -269,7 +276,11 @@ class TempestCleanup(command.Command):
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
-        for service in self.project_services:
+        for service in self.project_associated_services:
+            svc = service(admin_mgr, **kwargs)
+            svc.run()
+
+        for service in self.resource_cleanup_services:
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
