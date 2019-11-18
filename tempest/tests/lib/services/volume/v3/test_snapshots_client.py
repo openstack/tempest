@@ -20,61 +20,85 @@ from tempest.tests.lib.services import base
 class TestSnapshotsClient(base.BaseServiceTest):
     FAKE_CREATE_SNAPSHOT = {
         "snapshot": {
-            "display_name": "snap-001",
-            "display_description": "Daily backup",
-            "volume_id": "521752a6-acf6-4b2d-bc7a-119f9148cd8c",
-            "force": True
+            "created_at": "2019-03-11T16:24:34.469003",
+            "description": "Daily backup",
+            "id": "b36476e5-d18b-47f9-ac69-4818cb43ee21",
+            "metadata": {
+                "key": "v3"
+            },
+            "name": "snap-001",
+            "size": 10,
+            "status": "creating",
+            "updated_at": None,
+            "volume_id": "d291b81c-6e40-4525-8231-90aa1588121e"
         }
     }
 
-    FAKE_UPDATE_SNAPSHOT_REQUEST = {
-        "metadata": {
-            "key": "v1"
+    FAKE_UPDATE_SNAPSHOT_RESPONSE = {
+        "snapshot": {
+            "created_at": "2019-03-12T04:53:53.426591",
+            "description": "This is yet, another snapshot.",
+            "id": "4a584cae-e4ce-429b-9154-d4c9eb8fda4c",
+            "metadata": {
+                "key": "v3"
+            },
+            "name": "snap-002",
+            "size": 10,
+            "status": "creating",
+            "updated_at": None,
+            "volume_id": "070c942d-9909-42e9-a467-7a781f150c58"
         }
     }
 
     FAKE_INFO_SNAPSHOT = {
         "snapshot": {
-            "id": "3fbbcccf-d058-4502-8844-6feeffdf4cb5",
-            "display_name": "snap-001",
-            "display_description": "Daily backup",
-            "volume_id": "521752a6-acf6-4b2d-bc7a-119f9148cd8c",
-            "status": "available",
-            "size": 30,
-            "created_at": "2012-02-29T03:50:07Z"
+            "created_at": "2019-03-12T04:42:00.809352",
+            "description": "Daily backup",
+            "id": "4a584cae-e4ce-429b-9154-d4c9eb8fda4c",
+            "metadata": {
+                "key": "v3"
+            },
+            "name": "snap-001",
+            "os-extended-snapshot-attributes:progress": "0%",
+            "os-extended-snapshot-attributes:project_id":
+                "89afd400-b646-4bbc-b12b-c0a4d63e5bd3",
+            "size": 10,
+            "status": "creating",
+            "updated_at": None,
+            "volume_id": "b72c48f1-64b7-4cd8-9745-b12e0be82d37"
         }
     }
 
     FAKE_LIST_SNAPSHOTS = {
         "snapshots": [
             {
-                "id": "3fbbcccf-d058-4502-8844-6feeffdf4cb5",
-                "display_name": "snap-001",
-                "display_description": "Daily backup",
-                "volume_id": "521752a6-acf6-4b2d-bc7a-119f9148cd8c",
-                "status": "available",
-                "size": 30,
-                "created_at": "2012-02-29T03:50:07Z",
+                "created_at": "2019-03-11T16:24:36.464445",
+                "description": "Daily backup",
+                "id": "d0083dc5-8795-4c1a-bc9c-74f70006c205",
                 "metadata": {
-                    "contents": "junk"
-                }
-            },
-            {
-                "id": "e479997c-650b-40a4-9dfe-77655818b0d2",
-                "display_name": "snap-002",
-                "display_description": "Weekly backup",
-                "volume_id": "76b8950a-8594-4e5b-8dce-0dfa9c696358",
-                "status": "available",
-                "size": 25,
-                "created_at": "2012-03-19T01:52:47Z",
-                "metadata": {}
+                    "key": "v3"
+                },
+                "name": "snap-001",
+                "os-extended-snapshot-attributes:progress": "0%",
+                "os-extended-snapshot-attributes:project_id":
+                    "89afd400-b646-4bbc-b12b-c0a4d63e5bd3",
+                "size": 10,
+                "status": "creating",
+                "updated_at": None,
+                "volume_id": "7acd675e-4e06-4653-af9f-2ecd546342d6"
             }
         ]
     }
 
     FAKE_SNAPSHOT_METADATA_ITEM = {
+        "metadata": {
+            "key": "value"
+        }
+    }
+
+    FAKE_SNAPSHOT_KEY = {
         "meta": {
-            "key1": "value1"
+            "key": "new_value"
         }
     }
 
@@ -99,7 +123,7 @@ class TestSnapshotsClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_INFO_SNAPSHOT,
             bytes_body,
-            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
+            snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c")
 
     def _test_list_snapshots(self, bytes_body=False):
         self.check_service_client_function(
@@ -113,48 +137,48 @@ class TestSnapshotsClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.create_snapshot_metadata,
             'tempest.lib.common.rest_client.RestClient.post',
-            self.FAKE_INFO_SNAPSHOT,
+            self.FAKE_SNAPSHOT_METADATA_ITEM,
             bytes_body,
-            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5",
-            metadata={"key": "v1"})
+            snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c",
+            metadata={"key": "value"})
 
     def _test_update_snapshot(self, bytes_body=False):
         self.check_service_client_function(
             self.client.update_snapshot,
             'tempest.lib.common.rest_client.RestClient.put',
-            self.FAKE_UPDATE_SNAPSHOT_REQUEST,
+            self.FAKE_UPDATE_SNAPSHOT_RESPONSE,
             bytes_body,
-            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
+            snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c")
 
     def _test_show_snapshot_metadata(self, bytes_body=False):
         self.check_service_client_function(
             self.client.show_snapshot_metadata,
             'tempest.lib.common.rest_client.RestClient.get',
-            self.FAKE_UPDATE_SNAPSHOT_REQUEST,
+            self.FAKE_SNAPSHOT_METADATA_ITEM,
             bytes_body,
-            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
+            snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c")
 
     def _test_update_snapshot_metadata(self, bytes_body=False):
         self.check_service_client_function(
             self.client.update_snapshot_metadata,
             'tempest.lib.common.rest_client.RestClient.put',
-            self.FAKE_UPDATE_SNAPSHOT_REQUEST,
-            bytes_body, snapshot_id="cbc36478b0bd8e67e89")
+            self.FAKE_SNAPSHOT_METADATA_ITEM,
+            bytes_body, snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c")
 
     def _test_update_snapshot_metadata_item(self, bytes_body=False):
         self.check_service_client_function(
             self.client.update_snapshot_metadata_item,
             'tempest.lib.common.rest_client.RestClient.put',
-            self.FAKE_INFO_SNAPSHOT,
+            self.FAKE_SNAPSHOT_KEY,
             bytes_body, volume_type_id="cbc36478b0bd8e67e89")
 
     def _test_show_snapshot_metadata_item(self, bytes_body=False):
         self.check_service_client_function(
             self.client.show_snapshot_metadata_item,
             'tempest.lib.common.rest_client.RestClient.get',
-            self.FAKE_SNAPSHOT_METADATA_ITEM,
+            self.FAKE_SNAPSHOT_KEY,
             bytes_body,
-            snapshot_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5",
+            snapshot_id="4a584cae-e4ce-429b-9154-d4c9eb8fda4c",
             id="key1")
 
     def test_create_snapshot_with_str_body(self):
