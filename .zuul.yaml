@@ -721,7 +721,8 @@
         - tempest-full-test-account-no-admin-py3:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - openstack-tox-bashate
+        - openstack-tox-bashate:
+            irrelevant-files: *tempest-irrelevant-files-2
     gate:
       jobs:
         - tempest-slow-py3:
