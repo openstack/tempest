@@ -46,10 +46,8 @@ class TestTypesClient(base.BaseServiceTest):
     FAKE_UPDATE_VOLUME_TYPE = {
         'volume_type': {
             'id': '6685584b-1eac-4da6-b5c3-555430cf68ff',
-            'qos_specs_id': None,
             'name': 'volume-type-test',
             'description': 'default volume type',
-            'os-volume-type-access:is_public': True,
             'is_public': True,
             'extra_specs': {
                 'volume_backend_name': 'rbd'
