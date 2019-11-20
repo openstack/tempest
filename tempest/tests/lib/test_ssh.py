@@ -170,7 +170,8 @@ class TestSshClient(base.TestCase):
 
     @mock.patch('select.POLLIN', SELECT_POLLIN, create=True)
     def test_timeout_in_exec_command(self):
-        chan_mock, poll_mock, _ = self._set_mocks_for_select([0, 0, 0], True)
+        chan_mock, poll_mock, _, _ = (
+            self._set_mocks_for_select([0, 0, 0], True))
 
         # Test for a timeout condition immediately raised
         client = ssh.Client('localhost', 'root', timeout=2)
@@ -187,7 +188,7 @@ class TestSshClient(base.TestCase):
 
     @mock.patch('select.POLLIN', SELECT_POLLIN, create=True)
     def test_exec_command(self):
-        chan_mock, poll_mock, select_mock = (
+        chan_mock, poll_mock, select_mock, client_mock = (
             self._set_mocks_for_select([[1, 0, 0]], True))
 
         chan_mock.recv_exit_status.return_value = 0
@@ -210,6 +211,8 @@ class TestSshClient(base.TestCase):
         chan_mock.recv_stderr_ready.assert_called_once_with()
         chan_mock.recv_stderr.assert_called_once_with(1024)
         chan_mock.recv_exit_status.assert_called_once_with()
+
+        client_mock.close.assert_called_once_with()
 
     def _set_mocks_for_select(self, poll_data, ito_value=False):
         gsc_mock = self.patch('tempest.lib.common.ssh.Client.'
@@ -235,14 +238,15 @@ class TestSshClient(base.TestCase):
         else:
             poll_mock.poll.return_value = poll_data
 
-        return chan_mock, poll_mock, select_mock
+        return chan_mock, poll_mock, select_mock, client_mock
 
     _utf8_string = six.unichr(1071)
     _utf8_bytes = _utf8_string.encode("utf-8")
 
     @mock.patch('select.POLLIN', SELECT_POLLIN, create=True)
     def test_exec_good_command_output(self):
-        chan_mock, poll_mock, _ = self._set_mocks_for_select([1, 0, 0])
+        chan_mock, poll_mock, _, _ = (
+            self._set_mocks_for_select([1, 0, 0]))
         closed_prop = mock.PropertyMock(return_value=True)
         type(chan_mock).closed = closed_prop
 
@@ -257,7 +261,8 @@ class TestSshClient(base.TestCase):
 
     @mock.patch('select.POLLIN', SELECT_POLLIN, create=True)
     def test_exec_bad_command_output(self):
-        chan_mock, poll_mock, _ = self._set_mocks_for_select([1, 0, 0])
+        chan_mock, poll_mock, _, _ = (
+            self._set_mocks_for_select([1, 0, 0]))
         closed_prop = mock.PropertyMock(return_value=True)
         type(chan_mock).closed = closed_prop
 
