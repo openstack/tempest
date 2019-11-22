@@ -59,11 +59,11 @@ class TestGroupsClient(base.BaseServiceTest):
             "volume_types": ["2103099d-7cc3-4e52-a2f1-23a5284416f3"],
             "status": "available",
             "availability_zone": "az1",
-            "created_at": "20127-06-20T03:50:07Z"
+            "created_at": "2017-06-20T03:50:07Z"
         }
     }
 
-    FAKE_LIST_GROUPS = {
+    FAKE_LIST_GROUP_DETAILS = {
         "groups": [
             {
                 "id": "0e701ab8-1bec-4b9f-b026-a7ba4af13578",
@@ -100,6 +100,19 @@ class TestGroupsClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_LIST_GROUPS = {
+        "groups": [
+            {
+                "id": "0e701ab8-1bec-4b9f-b026-a7ba4af13578",
+                "name": "group-001",
+            },
+            {
+                "id": "e479997c-650b-40a4-9dfe-77655818b0d2",
+                "name": "group-002",
+            }
+        ]
+    }
+
     def setUp(self):
         super(TestGroupsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -123,13 +136,21 @@ class TestGroupsClient(base.BaseServiceTest):
             bytes_body,
             group_id="3fbbcccf-d058-4502-8844-6feeffdf4cb5")
 
+    def _test_list_group_details(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_groups,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_GROUP_DETAILS,
+            bytes_body,
+            detail=True)
+
     def _test_list_groups(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_groups,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_GROUPS,
             bytes_body,
-            detail=True)
+            detail=False)
 
     def test_create_group_with_str_body(self):
         self._test_create_group()
@@ -142,6 +163,12 @@ class TestGroupsClient(base.BaseServiceTest):
 
     def test_show_group_with_bytes_body(self):
         self._test_show_group(bytes_body=True)
+
+    def test_list_group_details_with_str_body(self):
+        self._test_list_group_details()
+
+    def test_list_group_details_with_bytes_body(self):
+        self._test_list_group_details(bytes_body=True)
 
     def test_list_groups_with_str_body(self):
         self._test_list_groups()
