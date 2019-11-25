@@ -352,6 +352,10 @@
     vars:
       devstack_localrc:
         USE_PYTHON3: true
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: true
 
 - job:
     name: tempest-full-py3-opensuse15
@@ -416,6 +420,10 @@
         s-proxy: false
         # without Swift, c-bak cannot run (in the Gate at least)
         c-bak: false
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: true
 
 - job:
     name: tempest-full-train
