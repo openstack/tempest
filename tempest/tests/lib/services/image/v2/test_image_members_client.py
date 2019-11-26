@@ -27,12 +27,42 @@ class TestImageMembersClient(base.BaseServiceTest):
         "schema": "/v2/schemas/member"
     }
 
+    FAKE_LIST_IMAGE_MEMBERS = {
+        "members": [
+            {
+                "created_at": "2013-10-07T17:58:03Z",
+                "image_id": "dbc999e3-c52f-4200-bedd-3b18fe7f87fe",
+                "member_id": "123456789",
+                "schema": "/v2/schemas/member",
+                "status": "pending",
+                "updated_at": "2013-10-07T17:58:03Z"
+            },
+            {
+                "created_at": "2013-10-07T17:58:55Z",
+                "image_id": "dbc999e3-c52f-4200-bedd-3b18fe7f87fe",
+                "member_id": "987654321",
+                "schema": "/v2/schemas/member",
+                "status": "accepted",
+                "updated_at": "2013-10-08T12:08:55Z"
+            }
+        ],
+        "schema": "/v2/schemas/members"
+    }
+
     def setUp(self):
         super(TestImageMembersClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
         self.client = image_members_client.ImageMembersClient(fake_auth,
                                                               'image',
                                                               'regionOne')
+
+    def _test_list_image_members(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_image_members,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_IMAGE_MEMBERS,
+            bytes_body,
+            image_id="dbc999e3-c52f-4200-bedd-3b18fe7f87fe")
 
     def _test_show_image_member(self, bytes_body=False):
         self.check_service_client_function(
@@ -61,6 +91,12 @@ class TestImageMembersClient(base.BaseServiceTest):
             image_id="0ae74cc5-5147-4239-9ce2-b0c580f7067e",
             member_id="8989447062e04a818baf9e073fd04fa7",
             schema="/v2/schemas/member2")
+
+    def test_list_image_members_with_str_body(self):
+        self._test_list_image_members()
+
+    def test_list_image_members_with_bytes_body(self):
+        self._test_list_image_members(bytes_body=True)
 
     def test_show_image_member_with_str_body(self):
         self._test_show_image_member()
