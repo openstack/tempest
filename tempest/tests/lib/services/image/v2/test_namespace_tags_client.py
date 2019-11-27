@@ -122,5 +122,5 @@ class TestNamespaceTagsClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.delete_namespace_tags,
             'tempest.lib.common.rest_client.RestClient.delete',
-            {}, status=200,
+            {}, status=204,
             namespace="OS::Compute::Hypervisor")
