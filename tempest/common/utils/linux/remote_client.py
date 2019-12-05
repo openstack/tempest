@@ -73,6 +73,13 @@ class RemoteClient(remote_client.RemoteClient):
             msg = "'TYPE' column is required but the output doesn't have it: "
             raise tempest.lib.exceptions.TempestException(msg + output)
 
+    def count_disks(self):
+        disks_list = self.get_disks()
+        disks_list = [line[0] for line in
+                      [device_name.split()
+                       for device_name in disks_list.splitlines()][1:]]
+        return len(disks_list)
+
     def get_boot_time(self):
         cmd = 'cut -f1 -d. /proc/uptime'
         boot_secs = self.exec_command(cmd)
