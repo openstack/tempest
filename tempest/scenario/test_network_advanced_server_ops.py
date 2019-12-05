@@ -249,11 +249,15 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         block_migration = (CONF.compute_feature_enabled.
                            block_migration_for_live_migration)
+        old_host = self.get_host_for_server(server['id'])
         self.admin_servers_client.live_migrate_server(
             server['id'], host=None, block_migration=block_migration,
             disk_over_commit=False)
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
+
+        new_host = self.get_host_for_server(server['id'])
+        self.assertNotEqual(old_host, new_host, 'Server did not migrate')
 
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
