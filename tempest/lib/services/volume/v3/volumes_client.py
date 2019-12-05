@@ -349,7 +349,7 @@ class VolumesClient(base_client.BaseClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/block-storage/v3/index.html#force-delete-a-volume
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#force-detach-a-volume
         """
         post_body = json.dumps({'os-force_detach': kwargs})
         url = 'volumes/%s/action' % volume_id
