@@ -103,3 +103,75 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
         # Delete Security group
         self.servers_client.remove_security_group(self.rescued_server_id,
                                                   name=sg['name'])
+
+
+class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
+
+    @classmethod
+    def skip_checks(self):
+        super(ServerStableDeviceRescueTest, self).skip_checks()
+        if not CONF.compute_feature_enabled.rescue:
+            msg = "Server rescue not available."
+            raise self.skipException(msg)
+        if not CONF.compute_feature_enabled.stable_rescue:
+            msg = "Stable rescue not available."
+            raise self.skipException(msg)
+
+    def _create_server_and_rescue_image(self, hw_rescue_device=None,
+                                        hw_rescue_bus=None):
+        server_id = self.create_test_server(wait_until='ACTIVE')['id']
+        image_id = self.create_image_from_server(server_id,
+                                                 wait_until='ACTIVE')['id']
+        if hw_rescue_bus:
+            self.images_client.update_image(
+                image_id, [dict(add='/hw_rescue_bus',
+                                value=hw_rescue_bus)])
+        if hw_rescue_device:
+            self.images_client.update_image(
+                image_id, [dict(add='/hw_rescue_device',
+                                value=hw_rescue_device)])
+        return server_id, image_id
+
+    def _test_stable_device_rescue(self, server_id, rescue_image_id):
+        self.servers_client.rescue_server(
+            server_id, rescue_image_ref=rescue_image_id)
+        waiters.wait_for_server_status(
+            self.servers_client, server_id, 'RESCUE')
+        self.servers_client.unrescue_server(server_id)
+        waiters.wait_for_server_status(
+            self.servers_client, server_id, 'ACTIVE')
+
+    @decorators.idempotent_id('947004c3-e8ef-47d9-9f00-97b74f9eaf96')
+    def test_stable_device_rescue_cdrom_ide(self):
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='cdrom', hw_rescue_bus='ide')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('16865750-1417-4854-bcf7-496e6753c01e')
+    def test_stable_device_rescue_disk_virtio(self):
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('12340157-6306-4745-bdda-cfa019908b48')
+    def test_stable_device_rescue_disk_scsi(self):
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='scsi')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('647d04cf-ad35-4956-89ab-b05c5c16f30c')
+    def test_stable_device_rescue_disk_usb(self):
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='usb')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('a3772b42-00bf-4310-a90b-1cc6fd3e7eab')
+    def test_stable_device_rescue_disk_virtio_with_volume_attached(self):
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio')
+        server = self.servers_client.show_server(server_id)['server']
+        volume = self.create_volume()
+        self.attach_volume(server, volume)
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'in-use')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
