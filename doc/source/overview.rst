@@ -116,7 +116,7 @@ as it is simpler, and quicker to work with.
     $ stestr run --black-regex '\[.*\bslow\b.*\]' '^tempest\.(api|scenario)'
 
    will run the same set of tests as the default gate jobs. Or you can
-   use `unittest`_ compatible test runners such as `testr`_, `pytest`_ etc.
+   use `unittest`_ compatible test runners such as `stestr`_, `pytest`_ etc.
 
    Tox also contains several existing job configurations. For example::
 
@@ -130,7 +130,6 @@ as it is simpler, and quicker to work with.
    to run the tests tagged as smoke.
 
 .. _unittest: https://docs.python.org/3/library/unittest.html
-.. _testr: https://testrepository.readthedocs.org/en/latest/MANUAL.html
 .. _stestr: https://stestr.readthedocs.org/en/latest/MANUAL.html
 .. _pytest: https://docs.pytest.org/en/latest/
 
@@ -269,14 +268,14 @@ and reference data to be used in testing.
     will have a configuration file already set up to work with your
     DevStack installation.
 
-Tempest is not tied to any single test runner, but `testr`_ is the most commonly
+Tempest is not tied to any single test runner, but `stestr`_ is the most commonly
 used tool. Also, the nosetests test runner is **not** recommended to run Tempest.
 
 After setting up your configuration file, you can execute the set of Tempest
-tests by using ``testr`` ::
+tests by using ``stestr``. By default, ``stestr`` runs tests in parallel ::
 
-    $ testr run --parallel
+    $ stestr run
 
 To run one single test serially ::
 
-    $ testr run tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
+    $ stestr run --serial tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
