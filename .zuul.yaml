@@ -698,8 +698,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade:
-            irrelevant-files: *tempest-irrelevant-files
         - grenade-py3:
             irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest:
@@ -738,8 +736,6 @@
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full:
-            irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade:
             irrelevant-files: *tempest-irrelevant-files
         - grenade-py3:
             irrelevant-files: *tempest-irrelevant-files
