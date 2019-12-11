@@ -47,6 +47,11 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.server_check_teardown()
 
     @classmethod
+    def setup_credentials(cls):
+        cls.set_network_resources(network=True, subnet=True)
+        super(ServersNegativeTestJSON, cls).setup_credentials()
+
+    @classmethod
     def setup_clients(cls):
         super(ServersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
