@@ -55,19 +55,23 @@ class TestStampPattern(manager.ScenarioTest):
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 
-    def _wait_for_volume_available_on_the_system(self, ip_address,
-                                                 private_key):
+    def _attached_volume_name(
+            self, disks_list_before_attach, ip_address, private_key):
         ssh = self.get_remote_client(ip_address, private_key=private_key)
 
-        def _func():
-            disks = ssh.get_disks()
-            LOG.debug("Disks: %s", disks)
-            return CONF.compute.volume_device_name in disks
+        def _wait_for_volume_available_on_system():
+            disks_list_after_attach = ssh.list_disks()
+            return len(disks_list_after_attach) > len(disks_list_before_attach)
 
-        if not test_utils.call_until_true(_func,
+        if not test_utils.call_until_true(_wait_for_volume_available_on_system,
                                           CONF.compute.build_timeout,
                                           CONF.compute.build_interval):
             raise lib_exc.TimeoutException
+
+        disks_list_after_attach = ssh.list_disks()
+        volume_name = [item for item in disks_list_after_attach
+                       if item not in disks_list_before_attach][0]
+        return volume_name
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('10fd234a-515c-41e5-b092-8323060598c5')
@@ -91,15 +95,16 @@ class TestStampPattern(manager.ScenarioTest):
         ip_for_server = self.get_server_ip(server)
 
         # Make sure the machine ssh-able before attaching the volume
-        self.get_remote_client(ip_for_server,
-                               private_key=keypair['private_key'],
-                               server=server)
-
+        linux_client = self.get_remote_client(
+            ip_for_server, private_key=keypair['private_key'],
+            server=server)
+        disks_list_before_attach = linux_client.list_disks()
         self.nova_volume_attach(server, volume)
-        self._wait_for_volume_available_on_the_system(ip_for_server,
-                                                      keypair['private_key'])
+        volume_device_name = self._attached_volume_name(
+            disks_list_before_attach, ip_for_server, keypair['private_key'])
+
         timestamp = self.create_timestamp(ip_for_server,
-                                          CONF.compute.volume_device_name,
+                                          volume_device_name,
                                           private_key=keypair['private_key'],
                                           server=server)
         self.nova_volume_detach(server, volume)
@@ -126,18 +131,19 @@ class TestStampPattern(manager.ScenarioTest):
         # Make sure the machine ssh-able before attaching the volume
         # Just a live machine is responding
         # for device attache/detach as expected
-        self.get_remote_client(ip_for_snapshot,
-                               private_key=keypair['private_key'],
-                               server=server_from_snapshot)
+        linux_client = self.get_remote_client(
+            ip_for_snapshot, private_key=keypair['private_key'],
+            server=server_from_snapshot)
+        disks_list_before_attach = linux_client.list_disks()
 
         # attach volume2 to instance2
         self.nova_volume_attach(server_from_snapshot, volume_from_snapshot)
-        self._wait_for_volume_available_on_the_system(ip_for_snapshot,
-                                                      keypair['private_key'])
+        volume_device_name = self._attached_volume_name(
+            disks_list_before_attach, ip_for_snapshot, keypair['private_key'])
 
         # check the existence of the timestamp file in the volume2
         timestamp2 = self.get_timestamp(ip_for_snapshot,
-                                        CONF.compute.volume_device_name,
+                                        volume_device_name,
                                         private_key=keypair['private_key'],
                                         server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp2)

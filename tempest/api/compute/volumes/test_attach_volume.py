@@ -79,7 +79,7 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
             # NOTE(andreaf) We need to ensure the ssh key has been
             # injected in the guest before we power cycle
             linux_client.validate_authentication()
-            disks_before_attach = linux_client.count_disks()
+            disks_before_attach = linux_client.list_disks()
 
         volume = self.create_volume()
 
@@ -101,8 +101,10 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
                                        'ACTIVE')
 
         if CONF.validation.run_validation:
-            disks_after_attach = linux_client.count_disks()
-            self.assertGreater(disks_after_attach, disks_before_attach)
+            disks_after_attach = linux_client.list_disks()
+            self.assertGreater(
+                len(disks_after_attach),
+                len(disks_before_attach))
 
         self.servers_client.detach_volume(server['id'], attachment['volumeId'])
         waiters.wait_for_volume_resource_status(
@@ -117,8 +119,8 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
                                        'ACTIVE')
 
         if CONF.validation.run_validation:
-            disks_after_detach = linux_client.count_disks()
-            self.assertEqual(disks_before_attach, disks_after_detach)
+            disks_after_detach = linux_client.list_disks()
+            self.assertEqual(len(disks_before_attach), len(disks_after_detach))
 
     @decorators.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
