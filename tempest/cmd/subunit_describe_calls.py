@@ -81,13 +81,19 @@ import io
 import os
 import re
 import sys
+import traceback
 
+from cliff.command import Command
 from oslo_serialization import jsonutils as json
 import subunit
 import testtools
 
 
+DESCRIPTION = "Outputs all HTTP calls a given test made that were logged."
+
+
 class UrlParser(testtools.TestResult):
+
     uuid_re = re.compile(r'(^|[^0-9a-f])[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-'
                          '[0-9a-f]{4}-[0-9a-f]{12}([^0-9a-f]|$)')
     id_re = re.compile(r'(^|[^0-9a-z])[0-9a-z]{8}[0-9a-z]{4}[0-9a-z]{4}'
@@ -241,33 +247,12 @@ class FileAccumulator(testtools.StreamResult):
 
 
 class ArgumentParser(argparse.ArgumentParser):
+
     def __init__(self):
-        desc = "Outputs all HTTP calls a given test made that were logged."
+        desc = DESCRIPTION
         super(ArgumentParser, self).__init__(description=desc)
-
         self.prog = "subunit-describe-calls"
-
-        self.add_argument(
-            "-s", "--subunit", metavar="<subunit file>",
-            nargs="?", type=argparse.FileType('rb'), default=sys.stdin,
-            help="The path to the subunit output file.")
-
-        self.add_argument(
-            "-n", "--non-subunit-name", metavar="<non subunit name>",
-            default="pythonlogging",
-            help="The name used in subunit to describe the file contents.")
-
-        self.add_argument(
-            "-o", "--output-file", metavar="<output file>", default=None,
-            help="The output file name for the json.")
-
-        self.add_argument(
-            "-p", "--ports", metavar="<ports file>", default=None,
-            help="A JSON file describing the ports for each service.")
-
-        self.add_argument(
-            "-v", "--verbose", action='store_true', default=False,
-            help="Add Request and Response header and body data to stdout.")
+        _parser_add_args(self)
 
 
 def parse(stream, non_subunit_name, ports):
@@ -321,10 +306,62 @@ def output(url_parser, output_file, verbose):
         sys.stdout.write('\n')
 
 
-def entry_point():
-    cl_args = ArgumentParser().parse_args()
+def entry_point(cl_args=None):
+    print('Running subunit_describe_calls ...')
+    if not cl_args:
+        print("Use of: 'subunit-describe-calls' is deprecated, "
+              "please use: 'tempest subunit-describe-calls'")
+        cl_args = ArgumentParser().parse_args()
     parser = parse(cl_args.subunit, cl_args.non_subunit_name, cl_args.ports)
     output(parser, cl_args.output_file, cl_args.verbose)
+
+
+def _parser_add_args(parser):
+    parser.add_argument(
+        "-s", "--subunit", metavar="<subunit file>",
+        nargs="?", type=argparse.FileType('rb'), default=sys.stdin,
+        help="The path to the subunit output file(default:stdin v1/v2 stream)"
+    )
+
+    parser.add_argument(
+        "-n", "--non-subunit-name", metavar="<non subunit name>",
+        default="pythonlogging",
+        help="The name used in subunit to describe the file contents."
+    )
+
+    parser.add_argument(
+        "-o", "--output-file", metavar="<output file>", default=None,
+        help="The output file name for the json."
+    )
+
+    parser.add_argument(
+        "-p", "--ports", metavar="<ports file>", default=None,
+        help="A JSON file describing the ports for each service."
+    )
+
+    parser.add_argument(
+        "-v", "--verbose", action='store_true', default=False,
+        help="Add Request and Response header and body data to stdout."
+    )
+
+
+class TempestSubunitDescribeCalls(Command):
+
+    def get_parser(self, prog_name):
+        parser = super(TempestSubunitDescribeCalls, self).get_parser(prog_name)
+        _parser_add_args(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        try:
+            entry_point(parsed_args)
+
+        except Exception:
+            traceback.print_exc()
+            raise
+
+    def get_description(self):
+        return DESCRIPTION
 
 
 if __name__ == "__main__":

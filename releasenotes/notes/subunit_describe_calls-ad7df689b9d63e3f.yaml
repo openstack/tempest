@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    Deprecated command for subunit-describe-calls
+
+features:
+  - |
+    Added new tempest subcommand for subunit-describe-calls
