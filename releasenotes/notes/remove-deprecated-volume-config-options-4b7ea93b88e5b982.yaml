@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    Deprecated config options to select the Volume API version have been
+    removed. Use ``CONF.volume.catalog_type`` to run volume tests under v3
+    or v2 APIs.
+
+    * ``CONF.volume-feature-enabled.api_v2``
+    * ``CONF.volume-feature-enabled.api_v3``

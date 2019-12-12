@@ -20,7 +20,6 @@ from tempest import config
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
-from tempest.lib import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -34,11 +33,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     # https://bugs.launchpad.net/tempest/+bug/1844568
     create_default_network = False
     _api_version = 2
-    # if api_v2 is not enabled while api_v3 is enabled, the volume v2 classes
-    # should be transferred to volume v3 classes.
-    if (not CONF.volume_feature_enabled.api_v2 and
-        CONF.volume_feature_enabled.api_v3):
-        _api_version = 3
     credentials = ['primary']
 
     @classmethod
@@ -48,17 +42,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        if cls._api_version == 2:
-            if not CONF.volume_feature_enabled.api_v2:
-                msg = "Volume API v2 is disabled"
-                raise cls.skipException(msg)
-        elif cls._api_version == 3:
-            if not CONF.volume_feature_enabled.api_v3:
-                msg = "Volume API v3 is disabled"
-                raise cls.skipException(msg)
-        else:
-            msg = ("Invalid Cinder API version (%s)" % cls._api_version)
-            raise exceptions.InvalidConfiguration(msg)
 
         api_version_utils.check_skip_with_microversion(
             cls.min_microversion, cls.max_microversion,
