@@ -154,8 +154,11 @@
       Base integration test with Neutron networking.
       It includes all scenarios as it was in the past.
       This job runs all scenario tests in parallel!
+    timeout: 9000
     vars:
       tox_envlist: full-parallel
+      run_tempest_cleanup: true
+      run_tempest_dry_cleanup: true
       devstack_localrc:
         USE_PYTHON3: True
 

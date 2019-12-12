@@ -1,0 +1,3 @@
+devstack_base_dir: /opt/stack
+init_saved_state: false
+dry_run: false
