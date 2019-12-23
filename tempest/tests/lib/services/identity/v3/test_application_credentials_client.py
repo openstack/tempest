@@ -146,7 +146,7 @@ class TestApplicationCredentialsClient(base.BaseServiceTest):
     def test_list_application_credential_with_bytes_body(self):
         self._test_list_app_creds(bytes_body=True)
 
-    def test_delete_trust(self):
+    def test_delete_application_credential(self):
         self.check_service_client_function(
             self.client.delete_application_credential,
             'tempest.lib.common.rest_client.RestClient.delete',
