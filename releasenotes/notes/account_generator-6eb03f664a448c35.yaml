@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Remove the deprecated CLI ``tempest-account-generator`` in favor of
+    ``tempest account-generator`` command.
+    You can use ``tempest account-generator`` CLI to generate the accounts
+    yaml file.

@@ -96,7 +96,7 @@ Optional Arguments
 To see help on specific argument, please do: ``tempest account-generator
 [OPTIONS] <accounts_file.yaml> -h``.
 """
-import argparse
+
 import os
 import traceback
 
@@ -248,21 +248,6 @@ def _parser_add_args(parser):
                         help='Output accounts yaml file')
 
 
-def get_options():
-    usage_string = ('tempest account-generator [-h] <ARG> ...\n\n'
-                    'To see help on specific argument, do:\n'
-                    'tempest account-generator <ARG> -h')
-    parser = argparse.ArgumentParser(
-        description=DESCRIPTION,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        usage=usage_string
-    )
-
-    _parser_add_args(parser)
-    opts = parser.parse_args()
-    return opts
-
-
 class TempestAccountGenerator(command.Command):
 
     def get_parser(self, prog_name):
@@ -272,7 +257,19 @@ class TempestAccountGenerator(command.Command):
 
     def take_action(self, parsed_args):
         try:
-            main(parsed_args)
+            if parsed_args.config_file:
+                config.CONF.set_config_path(parsed_args.config_file)
+            setup_logging()
+            resources = []
+            for count in range(parsed_args.concurrency):
+                # Use N different cred_providers to obtain different
+                # sets of creds
+                cred_provider = get_credential_provider(parsed_args)
+                resources.extend(generate_resources(cred_provider,
+                                                    parsed_args.admin))
+            dump_accounts(resources, parsed_args.identity_version,
+                          parsed_args.accounts)
+
         except Exception:
             LOG.exception("Failure generating test accounts.")
             traceback.print_exc()
@@ -280,26 +277,3 @@ class TempestAccountGenerator(command.Command):
 
     def get_description(self):
         return DESCRIPTION
-
-
-def main(opts=None):
-    log_warning = False
-    if not opts:
-        log_warning = True
-        opts = get_options()
-    if opts.config_file:
-        config.CONF.set_config_path(opts.config_file)
-    setup_logging()
-    if log_warning:
-        LOG.warning("Use of: 'tempest-account-generator' is deprecated, "
-                    "please use: 'tempest account-generator'")
-    resources = []
-    for count in range(opts.concurrency):
-        # Use N different cred_providers to obtain different sets of creds
-        cred_provider = get_credential_provider(opts)
-        resources.extend(generate_resources(cred_provider, opts.admin))
-    dump_accounts(resources, opts.identity_version, opts.accounts)
-
-
-if __name__ == "__main__":
-    main()
