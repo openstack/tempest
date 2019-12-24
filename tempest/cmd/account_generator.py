@@ -46,7 +46,6 @@ Param    CLI                          Environment Variable
 Username ``--os-username``            OS_USERNAME
 Password ``--os-password``            OS_PASSWORD
 Project  ``--os-project-name``        OS_PROJECT_NAME
-Tenant   ``--os-tenant-name`` (depr.) OS_TENANT_NAME
 Domain   ``--os-domain-name``         OS_DOMAIN_NAME
 ======== ============================ ====================
 
@@ -74,9 +73,6 @@ Optional Arguments
 
 * ``--os-project-name <auth-project-name>`` (Optional) Project to request
   authorization on. Defaults to env[OS_PROJECT_NAME].
-
-* ``--os-tenant-name <auth-tenant-name>`` (Optional, deprecated) Tenant to
-  request authorization on. Defaults to env[OS_TENANT_NAME].
 
 * ``--os-domain-name <auth-domain-name>`` (Optional) Domain the user and
   project belong to. Defaults to env[OS_DOMAIN_NAME].
@@ -139,7 +135,7 @@ def get_credential_provider(opts):
                          'dhcp': True}
     admin_creds_dict = {'username': opts.os_username,
                         'password': opts.os_password}
-    _project_name = opts.os_project_name or opts.os_tenant_name
+    _project_name = opts.os_project_name
     if opts.identity_version == 3:
         admin_creds_dict['project_name'] = _project_name
         admin_creds_dict['domain_name'] = opts.os_domain_name or 'Default'
@@ -221,10 +217,6 @@ def _parser_add_args(parser):
                         metavar='<auth-project-name>',
                         default=os.environ.get('OS_PROJECT_NAME'),
                         help='Defaults to env[OS_PROJECT_NAME].')
-    parser.add_argument('--os-tenant-name',
-                        metavar='<auth-tenant-name>',
-                        default=os.environ.get('OS_TENANT_NAME'),
-                        help='Defaults to env[OS_TENANT_NAME].')
     parser.add_argument('--os-domain-name',
                         metavar='<auth-domain-name>',
                         default=os.environ.get('OS_DOMAIN_NAME'),
@@ -301,10 +293,6 @@ def main(opts=None):
     if log_warning:
         LOG.warning("Use of: 'tempest-account-generator' is deprecated, "
                     "please use: 'tempest account-generator'")
-    if opts.os_tenant_name:
-        LOG.warning("'os-tenant-name' and 'OS_TENANT_NAME' are both "
-                    "deprecated, please use 'os-project-name' or "
-                    "'OS_PROJECT_NAME' instead")
     resources = []
     for count in range(opts.concurrency):
         # Use N different cred_providers to obtain different sets of creds
