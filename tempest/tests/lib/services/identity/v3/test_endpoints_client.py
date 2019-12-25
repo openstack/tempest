@@ -54,12 +54,44 @@ class TestEndpointsClient(base.BaseServiceTest):
     }
 
     FAKE_SERVICE_ID = "a4dc5060-f757-4662-b658-edd2aefbb41d"
+    FAKE_ENDPOINT_ID = "b335d394-cdb9-4519-b95d-160b7706e54ew"
+
+    FAKE_UPDATE_ENDPOINT = {
+        "endpoint": {
+            "id": "828384",
+            "interface": "internal",
+            "links": {
+                "self": "http://example.com/identity/v3/"
+                        "endpoints/828384"
+            },
+            "region_id": "north",
+            "service_id": "686766",
+            "url": "http://example.com/identity/v3/"
+                   "endpoints/828384"
+        }
+    }
+
+    FAKE_SHOW_ENDPOINT = {
+        "endpoint": {
+            "enabled": True,
+            "id": "01c3d5b92f7841ac83fb4b26173c12c7",
+            "interface": "admin",
+            "links": {
+                "self": "http://example.com/identity/v3/"
+                        "endpoints/828384"
+            },
+            "region": "RegionOne",
+            "region_id": "RegionOne",
+            "service_id": "3b2d6ad7e02c4cde8498a547601f1b8f",
+            "url": "http://23.253.211.234:9696/"
+        }
+    }
 
     def setUp(self):
         super(TestEndpointsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
-        self.client = endpoints_client.EndPointsClient(fake_auth,
-                                                       'identity', 'regionOne')
+        self.client = endpoints_client.EndPointsClient(
+            fake_auth, 'identity', 'regionOne')
 
     def _test_create_endpoint(self, bytes_body=False):
         self.check_service_client_function(
@@ -83,6 +115,38 @@ class TestEndpointsClient(base.BaseServiceTest):
             bytes_body,
             mock_args=[mock_args],
             **params)
+
+    def _test_update_endpoint(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.update_endpoint,
+            'tempest.lib.common.rest_client.RestClient.patch',
+            self.FAKE_UPDATE_ENDPOINT,
+            bytes_body,
+            endpoint_id=self.FAKE_ENDPOINT_ID,
+            interface="public",
+            region_id="north",
+            url="http://example.com/identity/v3/endpoints/828384",
+            service_id=self.FAKE_SERVICE_ID)
+
+    def _test_show_endpoint(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_endpoint,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_SHOW_ENDPOINT,
+            bytes_body,
+            endpoint_id="3456")
+
+    def test_update_endpoint_with_str_body(self):
+        self._test_update_endpoint()
+
+    def test_update_endpoint_with_bytes_body(self):
+        self._test_update_endpoint(bytes_body=True)
+
+    def test_show_endpoint_with_str_body(self):
+        self._test_show_endpoint()
+
+    def test_show_endpoint_with_bytes_body(self):
+        self._test_show_endpoint(bytes_body=True)
 
     def test_create_endpoint_with_str_body(self):
         self._test_create_endpoint()
