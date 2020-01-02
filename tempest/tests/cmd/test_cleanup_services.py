@@ -175,7 +175,8 @@ class BaseCmdServiceTests(MockFunctionsBase):
         "ports": {u'aa74aa4v-741a': u'saved-port'},
         "security_groups": {u'7q844add-3697': u'saved-sec-group'},
         "subnets": {u'55ttda4a-2584': u'saved-subnet'},
-        "subnetpools": {u'8acf64c1-43fc': u'saved-subnet-pool'}
+        "subnetpools": {u'8acf64c1-43fc': u'saved-subnet-pool'},
+        "regions": {u'RegionOne': {}}
     }
     # Mocked methods
     get_method = 'tempest.lib.common.rest_client.RestClient.get'
@@ -1202,6 +1203,57 @@ class TestNetworkSubnetPoolsService(BaseCmdServiceTests):
 
 
 # begin global services
+class TestRegionService(BaseCmdServiceTests):
+    service_class = 'RegionService'
+    service_name = 'regions'
+    response = {
+        "regions": [{
+            "parent_region_id": None,
+            "id": "RegionOne",
+            "links": {
+                    "self":
+                    "http://10.0.145.61:5000/v3/regions/RegionOne"
+                    },
+            "description": ""
+        },
+            {
+            "parent_region_id": None,
+            "id": "RegionTwo",
+            "links": {
+                "self":
+                    "http://10.0.145.61:5000/v3/regions/RegionTwo"
+                },
+            "description": ""
+            }],
+        "links": {
+            "self":
+                "http://10.0.145.61:5000/v3/regions",
+                "next": None,
+                "previous": None
+        }
+    }
+
+    def test_delete_pass(self):
+        delete_mock = [(self.get_method, self.response, 200),
+                       (self.delete_method, None, 204),
+                       (self.log_method, "exception", None)]
+        self._test_delete(delete_mock)
+
+    def test_delete_fail(self):
+        delete_mock = [(self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, "exception", None)]
+        self._test_delete(delete_mock, fail=True)
+
+    def test_dry_run(self):
+        dry_mock = [(self.get_method, self.response, 200),
+                    (self.delete_method, "delete", None)]
+        self._test_dry_run_true(dry_mock)
+
+    def test_save_state(self):
+        self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+
 class TestDomainService(BaseCmdServiceTests):
 
     service_class = 'DomainService'

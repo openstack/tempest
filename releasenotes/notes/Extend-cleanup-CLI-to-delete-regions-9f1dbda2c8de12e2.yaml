@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    tempest cleanup CLI is extended about region deletion. Until now, the
+    regions have been neglected by tempest cleanup. From now on, tempest
+    cleanup is able to delete leftover regions as well.
