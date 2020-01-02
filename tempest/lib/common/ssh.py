@@ -196,11 +196,13 @@ class Client(object):
 
             exit_status = channel.recv_exit_status()
 
-            if 0 != exit_status:
-                raise exceptions.SSHExecCommandFailed(
-                    command=cmd, exit_status=exit_status,
-                    stderr=err_data, stdout=out_data)
-            return out_data
+        ssh.close()
+
+        if 0 != exit_status:
+            raise exceptions.SSHExecCommandFailed(
+                command=cmd, exit_status=exit_status,
+                stderr=err_data, stdout=out_data)
+        return out_data
 
     def test_connection_auth(self):
         """Raises an exception when we can not connect to server via ssh."""
