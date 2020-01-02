@@ -1006,31 +1006,52 @@ class DomainService(BaseService):
             self.data['domains'][domain['id']] = domain['name']
 
 
-def get_project_cleanup_services():
-    project_services = []
+def get_project_associated_cleanup_services():
+    """Returns list of project service classes.
+
+    The list contains services whose resources need to be deleted prior,
+    the project they are associated with, deletion. The resources cannot be
+    most likely deleted after the project is deleted first.
+    """
+    project_associated_services = []
     # TODO(gmann): Tempest should provide some plugin hook for cleanup
     # script extension to plugin tests also.
     if IS_NOVA:
-        project_services.append(ServerService)
-        project_services.append(KeyPairService)
-        project_services.append(ServerGroupService)
-        project_services.append(NovaQuotaService)
-    if IS_NEUTRON:
-        project_services.append(NetworkFloatingIpService)
-        if utils.is_extension_enabled('metering', 'network'):
-            project_services.append(NetworkMeteringLabelRuleService)
-            project_services.append(NetworkMeteringLabelService)
-        project_services.append(NetworkRouterService)
-        project_services.append(NetworkPortService)
-        project_services.append(NetworkSubnetService)
-        project_services.append(NetworkService)
-        project_services.append(NetworkSecGroupService)
-        project_services.append(NetworkSubnetPoolsService)
+        project_associated_services.append(NovaQuotaService)
     if IS_CINDER:
-        project_services.append(SnapshotService)
-        project_services.append(VolumeService)
-        project_services.append(VolumeQuotaService)
-    return project_services
+        project_associated_services.append(VolumeQuotaService)
+    return project_associated_services
+
+
+def get_resource_cleanup_services():
+    """Returns list of project related classes.
+
+    The list contains services whose resources are associated with a project,
+    however, their deletion is possible also after the project is deleted
+    first.
+    """
+    resource_cleanup_services = []
+    # TODO(gmann): Tempest should provide some plugin hook for cleanup
+    # script extension to plugin tests also.
+    if IS_NOVA:
+        resource_cleanup_services.append(ServerService)
+        resource_cleanup_services.append(KeyPairService)
+        resource_cleanup_services.append(ServerGroupService)
+    if IS_NEUTRON:
+        resource_cleanup_services.append(NetworkFloatingIpService)
+        if utils.is_extension_enabled('metering', 'network'):
+            resource_cleanup_services.append(NetworkMeteringLabelRuleService)
+            resource_cleanup_services.append(NetworkMeteringLabelService)
+        resource_cleanup_services.append(NetworkRouterService)
+        resource_cleanup_services.append(NetworkPortService)
+        resource_cleanup_services.append(NetworkSubnetService)
+        resource_cleanup_services.append(NetworkService)
+        resource_cleanup_services.append(NetworkSecGroupService)
+        resource_cleanup_services.append(NetworkSubnetPoolsService)
+    if IS_CINDER:
+        resource_cleanup_services.append(SnapshotService)
+        resource_cleanup_services.append(VolumeService)
+    return resource_cleanup_services
 
 
 def get_global_cleanup_services():
