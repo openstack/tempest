@@ -707,16 +707,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled.')
     def test_get_vnc_console(self):
-        # Get the VNC console of type 'novnc' and 'xvpvnc'
-        console_types = ['novnc', 'xvpvnc']
-        for console_type in console_types:
-            if self.is_requested_microversion_compatible('2.5'):
-                body = self.client.get_vnc_console(
-                    self.server_id, type=console_type)['console']
-            else:
-                body = self.client.get_remote_console(
-                    self.server_id, console_type=console_type,
-                    protocol='vnc')['remote_console']
-            self.assertEqual(console_type, body['type'])
-            self.assertNotEqual('', body['url'])
-            self._validate_url(body['url'])
+        if self.is_requested_microversion_compatible('2.5'):
+            body = self.client.get_vnc_console(
+                self.server_id, type='novnc')['console']
+        else:
+            body = self.client.get_remote_console(
+                self.server_id, console_type='novnc',
+                protocol='vnc')['remote_console']
+        self.assertEqual('novnc', body['type'])
+        self.assertNotEqual('', body['url'])
+        self._validate_url(body['url'])
