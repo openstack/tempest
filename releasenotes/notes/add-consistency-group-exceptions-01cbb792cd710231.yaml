@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixed bug #1858417. Adding consistency group exceptions
+    ``ConsistencyGroupException`` and ``ConsistencyGroupSnapshotException``
+    that didn't exist before and caused failure in cinder-tempest-plugin.
