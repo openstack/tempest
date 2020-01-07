@@ -69,7 +69,7 @@ get_server['response_body']['properties']['server'][
 # need to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
 # ****** Schemas unchanged since microversion 2.70 ***
-list_servers_details = copy.deepcopy(servers270.list_servers_detail)
+list_servers_detail = copy.deepcopy(servers270.list_servers_detail)
 list_servers = copy.deepcopy(servers270.list_servers)
 show_server_diagnostics = copy.deepcopy(servers270.show_server_diagnostics)
 get_remote_consoles = copy.deepcopy(servers270.get_remote_consoles)
