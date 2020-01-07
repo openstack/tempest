@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import ast
 import importlib
 import tempfile
 from unittest import mock
@@ -52,6 +53,8 @@ class TestSourcePatcher(base.TestCase):
 
 
 class TestTestChecker(base.TestCase):
+    IMPORT_LINE = "from tempest.lib import decorators\n"
+
     def _test_add_uuid_to_test(self, source_file):
         class Fake_test_node():
             lineno = 1
@@ -84,55 +87,69 @@ class TestTestChecker(base.TestCase):
                        "        pass")
         self._test_add_uuid_to_test(source_file)
 
+    @staticmethod
+    def get_mocked_ast_object(lineno, col_offset, module, name, object_type):
+        ast_object = mock.Mock(spec=object_type)
+        name_obj = mock.Mock()
+        ast_object.lineno = lineno
+        ast_object.col_offset = col_offset
+        name_obj.name = name
+        ast_object.module = module
+        ast_object.names = [name_obj]
+
+        return ast_object
+
     def test_add_import_for_test_uuid_no_tempest(self):
         patcher = check_uuid.SourcePatcher()
         checker = check_uuid.TestChecker(importlib.import_module('tempest'))
-        fake_file = tempfile.NamedTemporaryFile("w+t")
+        fake_file = tempfile.NamedTemporaryFile("w+t", delete=False)
+        source_code = "from unittest import mock\n"
+        fake_file.write(source_code)
+        fake_file.close()
 
         class Fake_src_parsed():
-            body = ['test_node']
-        checker._import_name = mock.Mock(return_value='fake_module')
+            body = [TestTestChecker.get_mocked_ast_object(
+                1, 4, 'unittest', 'mock', ast.ImportFrom)]
 
-        checker._add_import_for_test_uuid(patcher, Fake_src_parsed(),
+        checker._add_import_for_test_uuid(patcher, Fake_src_parsed,
                                           fake_file.name)
-        (patch_id, patch), = patcher.patches.items()
-        self.assertEqual(patcher._quote('\n' + check_uuid.IMPORT_LINE + '\n'),
-                         patch)
-        self.assertEqual('{%s:s}' % patch_id,
-                         patcher.source_files[fake_file.name])
+        patcher.apply_patches()
+
+        with open(fake_file.name, "r") as f:
+            expected_result = source_code + '\n' + TestTestChecker.IMPORT_LINE
+            self.assertTrue(expected_result == f.read())
 
     def test_add_import_for_test_uuid_tempest(self):
         patcher = check_uuid.SourcePatcher()
         checker = check_uuid.TestChecker(importlib.import_module('tempest'))
         fake_file = tempfile.NamedTemporaryFile("w+t", delete=False)
-        test1 = ("    def test_test():\n"
-                 "        pass\n")
-        test2 = ("    def test_another_test():\n"
-                 "        pass\n")
-        source_code = test1 + test2
+        source_code = "from tempest import a_fake_module\n"
         fake_file.write(source_code)
         fake_file.close()
 
-        def fake_import_name(node):
-            return node.name
-        checker._import_name = fake_import_name
+        class Fake_src_parsed:
+            body = [TestTestChecker.get_mocked_ast_object(
+                1, 4, 'tempest', 'a_fake_module', ast.ImportFrom)]
 
-        class Fake_node():
-            def __init__(self, lineno, col_offset, name):
-                self.lineno = lineno
-                self.col_offset = col_offset
-                self.name = name
-
-        class Fake_src_parsed():
-            body = [Fake_node(1, 4, 'tempest.a_fake_module'),
-                    Fake_node(3, 4, 'another_fake_module')]
-
-        checker._add_import_for_test_uuid(patcher, Fake_src_parsed(),
+        checker._add_import_for_test_uuid(patcher, Fake_src_parsed,
                                           fake_file.name)
-        (patch_id, patch), = patcher.patches.items()
-        self.assertEqual(patcher._quote(check_uuid.IMPORT_LINE + '\n'),
-                         patch)
-        expected_source = patcher._quote(test1) + '{' + patch_id + ':s}' +\
-            patcher._quote(test2)
-        self.assertEqual(expected_source,
-                         patcher.source_files[fake_file.name])
+        patcher.apply_patches()
+
+        with open(fake_file.name, "r") as f:
+            expected_result = source_code + TestTestChecker.IMPORT_LINE
+            self.assertTrue(expected_result == f.read())
+
+    def test_add_import_no_import(self):
+        patcher = check_uuid.SourcePatcher()
+        patcher.add_patch = mock.Mock()
+        checker = check_uuid.TestChecker(importlib.import_module('tempest'))
+        fake_file = tempfile.NamedTemporaryFile("w+t", delete=False)
+        fake_file.close()
+
+        class Fake_src_parsed:
+            body = []
+
+        checker._add_import_for_test_uuid(patcher, Fake_src_parsed,
+                                          fake_file.name)
+
+        self.assertTrue(not patcher.add_patch.called)

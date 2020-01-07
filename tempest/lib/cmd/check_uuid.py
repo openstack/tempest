@@ -16,6 +16,7 @@
 
 import argparse
 import ast
+import contextlib
 import importlib
 import inspect
 import os
@@ -28,7 +29,7 @@ import six.moves.urllib.parse as urlparse
 
 DECORATOR_MODULE = 'decorators'
 DECORATOR_NAME = 'idempotent_id'
-DECORATOR_IMPORT = 'tempest.%s' % DECORATOR_MODULE
+DECORATOR_IMPORT = 'tempest.lib.%s' % DECORATOR_MODULE
 IMPORT_LINE = 'from tempest.lib import %s' % DECORATOR_MODULE
 DECORATOR_TEMPLATE = "@%s.%s('%%s')" % (DECORATOR_MODULE,
                                         DECORATOR_NAME)
@@ -180,34 +181,125 @@ class TestChecker(object):
         elif isinstance(node, ast.ImportFrom):
             return '%s.%s' % (node.module, node.names[0].name)
 
+    @contextlib.contextmanager
+    def ignore_site_packages_paths(self):
+        """Removes site-packages directories from the sys.path
+
+        Source:
+            - StackOverflow: https://stackoverflow.com/questions/22195382/
+            - Author: https://stackoverflow.com/users/485844/
+        """
+
+        paths = sys.path
+        # remove all third-party paths
+        # so that only stdlib imports will succeed
+        sys.path = list(filter(
+            None,
+            filter(lambda i: 'site-packages' not in i, sys.path)
+        ))
+        yield
+        sys.path = paths
+
+    def is_std_lib(self, module):
+        """Checks whether the module is part of the stdlib or not
+
+        Source:
+            - StackOverflow: https://stackoverflow.com/questions/22195382/
+            - Author: https://stackoverflow.com/users/485844/
+        """
+
+        if module in sys.builtin_module_names:
+            return True
+
+        with self.ignore_site_packages_paths():
+            imported_module = sys.modules.pop(module, None)
+            try:
+                importlib.import_module(module)
+            except ImportError:
+                return False
+            else:
+                return True
+            finally:
+                if imported_module:
+                    sys.modules[module] = imported_module
+
     def _add_import_for_test_uuid(self, patcher, src_parsed, source_path):
-        with open(source_path) as f:
-            src_lines = f.read().split('\n')
-        line_no = 0
-        tempest_imports = [node for node in src_parsed.body
+        import_list = [node for node in src_parsed.body
+                       if isinstance(node, ast.Import) or
+                       isinstance(node, ast.ImportFrom)]
+
+        if not import_list:
+            print("(WARNING) %s: The file is not valid as it does not contain "
+                  "any import line! Therefore the import needed by "
+                  "@decorators.idempotent_id is not added!" % source_path)
+            return
+
+        tempest_imports = [node for node in import_list
                            if self._import_name(node) and
                            'tempest.' in self._import_name(node)]
-        if not tempest_imports:
-            import_snippet = '\n'.join(('', IMPORT_LINE, ''))
-        else:
-            for node in tempest_imports:
-                if self._import_name(node) < DECORATOR_IMPORT:
-                    continue
-                else:
-                    line_no = node.lineno
-                    import_snippet = IMPORT_LINE
-                    break
+
+        for node in tempest_imports:
+            if self._import_name(node) < DECORATOR_IMPORT:
+                continue
             else:
-                line_no = tempest_imports[-1].lineno
-                while True:
-                    if (not src_lines[line_no - 1] or
-                            getattr(self._next_node(src_parsed.body,
-                                                    tempest_imports[-1]),
-                                    'lineno') == line_no or
-                            line_no == len(src_lines)):
-                        break
-                    line_no += 1
-                import_snippet = '\n'.join((IMPORT_LINE, ''))
+                line_no = node.lineno
+                break
+        else:
+            if tempest_imports:
+                line_no = tempest_imports[-1].lineno + 1
+
+        # Insert import line between existing tempest imports
+        if tempest_imports:
+            patcher.add_patch(source_path, IMPORT_LINE, line_no)
+            return
+
+        # Group space separated imports together
+        grouped_imports = {}
+        first_import_line = import_list[0].lineno
+        for idx, import_line in enumerate(import_list, first_import_line):
+            group_no = import_line.lineno - idx
+            group = grouped_imports.get(group_no, [])
+            group.append(import_line)
+            grouped_imports[group_no] = group
+
+        if len(grouped_imports) > 3:
+            print("(WARNING) %s: The file contains more than three import "
+                  "groups! This is not valid according to the PEP8 "
+                  "style guide. " % source_path)
+
+        # Divide grouped_imports into groupes based on PEP8 style guide
+        pep8_groups = {}
+        package_name = self.package.__name__.split(".")[0]
+        for key in grouped_imports:
+            module = self._import_name(grouped_imports[key][0]).split(".")[0]
+            if module.startswith(package_name):
+                group = pep8_groups.get('3rd_group', [])
+                pep8_groups['3rd_group'] = group + grouped_imports[key]
+            elif self.is_std_lib(module):
+                group = pep8_groups.get('1st_group', [])
+                pep8_groups['1st_group'] = group + grouped_imports[key]
+            else:
+                group = pep8_groups.get('2nd_group', [])
+                pep8_groups['2nd_group'] = group + grouped_imports[key]
+
+        for node in pep8_groups.get('2nd_group', []):
+            if self._import_name(node) < DECORATOR_IMPORT:
+                continue
+            else:
+                line_no = node.lineno
+                import_snippet = IMPORT_LINE
+                break
+        else:
+            if pep8_groups.get('2nd_group', []):
+                line_no = pep8_groups['2nd_group'][-1].lineno + 1
+                import_snippet = IMPORT_LINE
+            elif pep8_groups.get('1st_group', []):
+                line_no = pep8_groups['1st_group'][-1].lineno + 1
+                import_snippet = '\n' + IMPORT_LINE
+            else:
+                line_no = pep8_groups['3rd_group'][0].lineno
+                import_snippet = IMPORT_LINE + '\n\n'
+
         patcher.add_patch(source_path, import_snippet, line_no)
 
     def get_tests(self):
