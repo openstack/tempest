@@ -20,6 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):

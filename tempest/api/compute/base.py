@@ -39,6 +39,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     """Base test case class for all Compute API tests."""
 
     force_tenant_isolation = False
+    # Set this to True in subclasses to create a default network. See
+    # https://bugs.launchpad.net/tempest/+bug/1844568
+    create_default_network = False
 
     # TODO(andreaf) We should care also for the alt_manager here
     # but only once client lazy load in the manager is done
@@ -58,7 +61,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def setup_credentials(cls):
-        cls.set_network_resources()
+        # Setting network=True, subnet=True creates a default network
+        cls.set_network_resources(
+            network=cls.create_default_network,
+            subnet=cls.create_default_network)
         super(BaseV2ComputeTest, cls).setup_credentials()
 
     @classmethod

@@ -32,11 +32,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     depends_on_nova_network = True
 
-    @classmethod
-    def setup_credentials(cls):
-        # This test needs a network and a subnet
-        cls.set_network_resources(network=True, subnet=True)
-        super(VirtualInterfacesTestJSON, cls).setup_credentials()
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):

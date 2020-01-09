@@ -29,6 +29,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     policies = affinity/anti-affinity
     It also adds the tests for list and get details of server-groups
     """
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

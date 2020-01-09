@@ -31,6 +31,13 @@ LOG = logging.getLogger(__name__)
 
 class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 
+    # These tests don't attempt any SSH validation nor do they use
+    # floating IPs on the instance, so all we need is a network and
+    # a subnet so the instance being migrated has a single port, but
+    # we need that to make sure we are properly updating the port
+    # host bindings during the live migration.
+    create_default_network = True
+
     @classmethod
     def skip_checks(cls):
         super(LiveMigrationTestBase, cls).skip_checks()
@@ -42,16 +49,6 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
         if CONF.compute.min_compute_nodes < 2:
             raise cls.skipException(
                 "Less than 2 compute nodes, skipping migration test.")
-
-    @classmethod
-    def setup_credentials(cls):
-        # These tests don't attempt any SSH validation nor do they use
-        # floating IPs on the instance, so all we need is a network and
-        # a subnet so the instance being migrated has a single port, but
-        # we need that to make sure we are properly updating the port
-        # host bindings during the live migration.
-        cls.set_network_resources(network=True, subnet=True)
-        super(LiveMigrationTestBase, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):

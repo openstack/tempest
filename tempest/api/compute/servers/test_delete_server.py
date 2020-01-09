@@ -26,6 +26,7 @@ CONF = config.CONF
 
 
 class DeleteServersTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances"

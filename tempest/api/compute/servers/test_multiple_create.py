@@ -19,6 +19,7 @@ from tempest.lib import decorators
 
 
 class MultipleCreateTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @decorators.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
