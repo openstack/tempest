@@ -3,7 +3,9 @@
 
 # Skip Cinder, Glance, keystone and Swift API tests.
 tempest.api.volume
+tempest.api.compute.volumes
 tempest.api.image
+tempest.api.compute.images
 tempest.api.object_storage
 tempest.api.identity
 
