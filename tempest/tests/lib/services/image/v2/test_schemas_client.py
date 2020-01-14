@@ -81,6 +81,14 @@ class TestSchemasClient(base.BaseServiceTest):
         self.client = schemas_client.SchemasClient(fake_auth,
                                                    'image', 'regionOne')
 
+    def _test_show_schema_members(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_schema,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_SHOW_SCHEMA,
+            bytes_body,
+            schema="members")
+
     def _test_show_schema(self, bytes_body=False):
         self.check_service_client_function(
             self.client.show_schema,
@@ -88,6 +96,12 @@ class TestSchemasClient(base.BaseServiceTest):
             self.FAKE_SHOW_SCHEMA,
             bytes_body,
             schema="member")
+
+    def test_show_schema_members_with_str_body(self):
+        self._test_show_schema_members()
+
+    def test_show_schema_members_with_bytes_body(self):
+        self._test_show_schema_members(bytes_body=True)
 
     def test_show_schema_with_str_body(self):
         self._test_show_schema()
