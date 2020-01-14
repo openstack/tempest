@@ -31,42 +31,6 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     # breathing room to get through deletes in the time allotted.
     TIMEOUT_SCALING_FACTOR = 2
 
-    def _create_volume_from_image(self):
-        img_uuid = CONF.compute.image_ref
-        vol_name = data_utils.rand_name(
-            self.__class__.__name__ + '-volume-origin')
-        return self.create_volume(name=vol_name, imageRef=img_uuid)
-
-    def _get_bdm(self, source_id, source_type, delete_on_termination=False):
-        bd_map_v2 = [{
-            'uuid': source_id,
-            'source_type': source_type,
-            'destination_type': 'volume',
-            'boot_index': 0,
-            'delete_on_termination': delete_on_termination}]
-        return {'block_device_mapping_v2': bd_map_v2}
-
-    def _boot_instance_from_resource(self, source_id,
-                                     source_type,
-                                     keypair=None,
-                                     security_group=None,
-                                     delete_on_termination=False,
-                                     name=None):
-        create_kwargs = dict()
-        if keypair:
-            create_kwargs['key_name'] = keypair['name']
-        if security_group:
-            create_kwargs['security_groups'] = [
-                {'name': security_group['name']}]
-        create_kwargs.update(self._get_bdm(
-            source_id,
-            source_type,
-            delete_on_termination=delete_on_termination))
-        if name:
-            create_kwargs['name'] = name
-
-        return self.create_server(image_id='', **create_kwargs)
-
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
@@ -104,8 +68,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         # create an instance from volume
         LOG.info("Booting instance 1 from volume")
-        volume_origin = self._create_volume_from_image()
-        instance_1st = self._boot_instance_from_resource(
+        volume_origin = self.create_volume_from_image()
+        instance_1st = self.boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
             keypair=keypair,
@@ -124,7 +88,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self._delete_server(instance_1st)
 
         # create a 2nd instance from volume
-        instance_2nd = self._boot_instance_from_resource(
+        instance_2nd = self.boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
             keypair=keypair,
@@ -149,10 +113,10 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                                     size=snapshot['size'])
         LOG.info("Booting third instance from snapshot")
         server_from_snapshot = (
-            self._boot_instance_from_resource(source_id=volume['id'],
-                                              source_type='volume',
-                                              keypair=keypair,
-                                              security_group=security_group))
+            self.boot_instance_from_resource(source_id=volume['id'],
+                                             source_type='volume',
+                                             keypair=keypair,
+                                             security_group=security_group))
         LOG.info("Booted third instance %s", server_from_snapshot)
 
         # check the content of written file
@@ -171,13 +135,13 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @utils.services('compute', 'image', 'volume')
     def test_create_server_from_volume_snapshot(self):
         # Create a volume from an image
-        boot_volume = self._create_volume_from_image()
+        boot_volume = self.create_volume_from_image()
 
         # Create a snapshot
         boot_snapshot = self.create_volume_snapshot(boot_volume['id'])
 
         # Create a server from a volume snapshot
-        server = self._boot_instance_from_resource(
+        server = self.boot_instance_from_resource(
             source_id=boot_snapshot['id'],
             source_type='snapshot',
             delete_on_termination=True)
@@ -209,10 +173,10 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @utils.services('compute', 'volume', 'image')
     def test_image_defined_boot_from_volume(self):
         # create an instance from image-backed volume
-        volume_origin = self._create_volume_from_image()
+        volume_origin = self.create_volume_from_image()
         name = data_utils.rand_name(self.__class__.__name__ +
                                     '-volume-backed-server')
-        instance1 = self._boot_instance_from_resource(
+        instance1 = self.boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
             delete_on_termination=True,
@@ -288,7 +252,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self.volumes_client.set_bootable_volume(volume['id'], bootable=True)
 
         # Boot a server from the encrypted volume
-        server = self._boot_instance_from_resource(
+        server = self.boot_instance_from_resource(
             source_id=volume['id'],
             source_type='volume',
             delete_on_termination=False)

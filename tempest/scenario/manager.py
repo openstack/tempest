@@ -811,6 +811,42 @@ class ScenarioTest(tempest.test.BaseTestCase):
         server_details = cls.os_admin.servers_client.show_server(server_id)
         return server_details['server']['OS-EXT-SRV-ATTR:host']
 
+    def _get_bdm(self, source_id, source_type, delete_on_termination=False):
+        bd_map_v2 = [{
+            'uuid': source_id,
+            'source_type': source_type,
+            'destination_type': 'volume',
+            'boot_index': 0,
+            'delete_on_termination': delete_on_termination}]
+        return {'block_device_mapping_v2': bd_map_v2}
+
+    def boot_instance_from_resource(self, source_id,
+                                    source_type,
+                                    keypair=None,
+                                    security_group=None,
+                                    delete_on_termination=False,
+                                    name=None):
+        create_kwargs = dict()
+        if keypair:
+            create_kwargs['key_name'] = keypair['name']
+        if security_group:
+            create_kwargs['security_groups'] = [
+                {'name': security_group['name']}]
+        create_kwargs.update(self._get_bdm(
+            source_id,
+            source_type,
+            delete_on_termination=delete_on_termination))
+        if name:
+            create_kwargs['name'] = name
+
+        return self.create_server(image_id='', **create_kwargs)
+
+    def create_volume_from_image(self):
+        img_uuid = CONF.compute.image_ref
+        vol_name = data_utils.rand_name(
+            self.__class__.__name__ + '-volume-origin')
+        return self.create_volume(name=vol_name, imageRef=img_uuid)
+
 
 class NetworkScenarioTest(ScenarioTest):
     """Base class for network scenario tests.
