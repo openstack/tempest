@@ -26,6 +26,8 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     min_microversion = '2.26'
     max_microversion = 'latest'
 
+    create_default_network = True
+
     @classmethod
     def skip_checks(cls):
         super(ServerTagsTestJSON, cls).skip_checks()

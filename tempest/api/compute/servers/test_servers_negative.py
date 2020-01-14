@@ -30,6 +30,7 @@ CONF = config.CONF
 
 
 class ServersNegativeTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     def setUp(self):
         super(ServersNegativeTestJSON, self).setUp()
@@ -45,11 +46,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # which will prevent other cleanup steps from being executed, so
         # server_check_teardown should be called after super's tearDown.
         self.server_check_teardown()
-
-    @classmethod
-    def setup_credentials(cls):
-        cls.set_network_resources(network=True, subnet=True)
-        super(ServersNegativeTestJSON, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):

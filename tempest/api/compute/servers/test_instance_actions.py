@@ -19,6 +19,7 @@ from tempest.lib import decorators
 
 
 class InstanceActionsTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):

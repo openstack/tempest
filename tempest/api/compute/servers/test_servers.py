@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):

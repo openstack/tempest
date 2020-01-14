@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

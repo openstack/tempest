@@ -19,12 +19,7 @@ from tempest.lib import decorators
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
-
-    @classmethod
-    def setup_credentials(cls):
-        # This test module might use a network and a subnet
-        cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesTestJSON, cls).setup_credentials()
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):

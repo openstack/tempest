@@ -20,11 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
-
-    @classmethod
-    def setup_credentials(cls):
-        cls.set_network_resources(network=True, subnet=True)
-        super(ServerAddressesNegativeTestJSON, cls).setup_credentials()
+    create_default_network = True
 
     @classmethod
     def setup_clients(cls):
