@@ -32,6 +32,10 @@ class BaseMicroversionTest(object):
     # (min_microversion, max_microversion) on each test class if necessary.
     min_microversion = None
     max_microversion = LATEST_MICROVERSION
+    volume_min_microversion = None
+    volume_max_microversion = LATEST_MICROVERSION
+    placement_min_microversion = None
+    placement_max_microversion = LATEST_MICROVERSION
 
 
 def check_skip_with_microversion(test_min_version, test_max_version,

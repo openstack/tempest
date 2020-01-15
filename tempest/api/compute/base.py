@@ -52,12 +52,15 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         super(BaseV2ComputeTest, cls).skip_checks()
         if not CONF.service_available.nova:
             raise cls.skipException("Nova is not available")
-        cfg_min_version = CONF.compute.min_microversion
-        cfg_max_version = CONF.compute.max_microversion
-        api_version_utils.check_skip_with_microversion(cls.min_microversion,
-                                                       cls.max_microversion,
-                                                       cfg_min_version,
-                                                       cfg_max_version)
+        api_version_utils.check_skip_with_microversion(
+            cls.min_microversion, cls.max_microversion,
+            CONF.compute.min_microversion, CONF.compute.max_microversion)
+        api_version_utils.check_skip_with_microversion(
+            cls.volume_min_microversion, cls.volume_max_microversion,
+            CONF.volume.min_microversion, CONF.volume.max_microversion)
+        api_version_utils.check_skip_with_microversion(
+            cls.placement_min_microversion, cls.placement_max_microversion,
+            CONF.placement.min_microversion, CONF.placement.max_microversion)
 
     @classmethod
     def setup_credentials(cls):
@@ -151,6 +154,14 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             api_version_utils.select_request_microversion(
                 cls.min_microversion,
                 CONF.compute.min_microversion))
+        cls.volume_request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.volume_min_microversion,
+                CONF.volume.min_microversion))
+        cls.placement_request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.placement_min_microversion,
+                CONF.placement.min_microversion))
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.image_ref = CONF.compute.image_ref
@@ -476,7 +487,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def setUp(self):
         super(BaseV2ComputeTest, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            compute_microversion=self.request_microversion))
+            compute_microversion=self.request_microversion,
+            volume_microversion=self.volume_request_microversion,
+            placement_microversion=self.placement_request_microversion))
 
     @classmethod
     def create_volume(cls, image_ref=None, **kwargs):
