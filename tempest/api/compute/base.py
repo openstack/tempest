@@ -108,6 +108,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.versions_client = cls.os_primary.compute_versions_client
         if CONF.service_available.cinder:
             cls.volumes_client = cls.os_primary.volumes_client_latest
+            cls.attachments_client = cls.os_primary.attachments_client_latest
         if CONF.service_available.glance:
             if CONF.image_feature_enabled.api_v1:
                 cls.images_client = cls.os_primary.image_client
