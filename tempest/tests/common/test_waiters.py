@@ -54,44 +54,6 @@ class TestImageWaiters(base.TestCase):
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
 
-    @mock.patch.object(time, 'sleep')
-    def test_wait_for_volume_status_error_restoring(self, mock_sleep):
-        # Tests that the wait method raises VolumeRestoreErrorException if
-        # the volume status is 'error_restoring'.
-        client = mock.Mock(spec=volumes_client.VolumesClient,
-                           resource_type="volume",
-                           build_interval=1)
-        volume1 = {'volume': {'status': 'restoring-backup'}}
-        volume2 = {'volume': {'status': 'error_restoring'}}
-        mock_show = mock.Mock(side_effect=(volume1, volume2))
-        client.show_volume = mock_show
-        volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
-        self.assertRaises(exceptions.VolumeRestoreErrorException,
-                          waiters.wait_for_volume_resource_status,
-                          client, volume_id, 'available')
-        mock_show.assert_has_calls([mock.call(volume_id),
-                                    mock.call(volume_id)])
-        mock_sleep.assert_called_once_with(1)
-
-    @mock.patch.object(time, 'sleep')
-    def test_wait_for_volume_status_error_extending(self, mock_sleep):
-        # Tests that the wait method raises VolumeExtendErrorException if
-        # the volume status is 'error_extending'.
-        client = mock.Mock(spec=volumes_client.VolumesClient,
-                           resource_type="volume",
-                           build_interval=1)
-        volume1 = {'volume': {'status': 'extending'}}
-        volume2 = {'volume': {'status': 'error_extending'}}
-        mock_show = mock.Mock(side_effect=(volume1, volume2))
-        client.show_volume = mock_show
-        volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
-        self.assertRaises(exceptions.VolumeExtendErrorException,
-                          waiters.wait_for_volume_resource_status,
-                          client, volume_id, 'available')
-        mock_show.assert_has_calls([mock.call(volume_id),
-                                    mock.call(volume_id)])
-        mock_sleep.assert_called_once_with(1)
-
 
 class TestInterfaceWaiters(base.TestCase):
 
@@ -232,3 +194,41 @@ class TestVolumeWaiters(base.TestCase):
         show_volume.assert_has_calls([mock.call(mock.sentinel.volume_id),
                                       mock.call(mock.sentinel.volume_id),
                                       mock.call(mock.sentinel.volume_id)])
+
+    @mock.patch.object(time, 'sleep')
+    def test_wait_for_volume_status_error_restoring(self, mock_sleep):
+        # Tests that the wait method raises VolumeRestoreErrorException if
+        # the volume status is 'error_restoring'.
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1)
+        volume1 = {'volume': {'status': 'restoring-backup'}}
+        volume2 = {'volume': {'status': 'error_restoring'}}
+        mock_show = mock.Mock(side_effect=(volume1, volume2))
+        client.show_volume = mock_show
+        volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
+        self.assertRaises(exceptions.VolumeRestoreErrorException,
+                          waiters.wait_for_volume_resource_status,
+                          client, volume_id, 'available')
+        mock_show.assert_has_calls([mock.call(volume_id),
+                                    mock.call(volume_id)])
+        mock_sleep.assert_called_once_with(1)
+
+    @mock.patch.object(time, 'sleep')
+    def test_wait_for_volume_status_error_extending(self, mock_sleep):
+        # Tests that the wait method raises VolumeExtendErrorException if
+        # the volume status is 'error_extending'.
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1)
+        volume1 = {'volume': {'status': 'extending'}}
+        volume2 = {'volume': {'status': 'error_extending'}}
+        mock_show = mock.Mock(side_effect=(volume1, volume2))
+        client.show_volume = mock_show
+        volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
+        self.assertRaises(exceptions.VolumeExtendErrorException,
+                          waiters.wait_for_volume_resource_status,
+                          client, volume_id, 'available')
+        mock_show.assert_has_calls([mock.call(volume_id),
+                                    mock.call(volume_id)])
+        mock_sleep.assert_called_once_with(1)
