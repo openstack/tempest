@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new attachments client library has been introduced for the volume
+    service.
+
+    Initially only the show_attachment API is provided. This API requires a
+    minimum volume API microversion of ``3.27``.

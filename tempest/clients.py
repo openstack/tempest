@@ -263,6 +263,8 @@ class Manager(clients.ServiceClients):
                 self.volume_v3.MessagesClient())
             self.volume_versions_client_latest = (
                 self.volume_v3.VersionsClient())
+            self.attachments_client_latest = (
+                self.volume_v3.AttachmentsClient())
 
             # TODO(gmann): Below alias for service clients have been
             # deprecated and will be removed in future. Start using the alias

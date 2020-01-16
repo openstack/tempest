@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+from tempest.lib.services.volume.v3.attachments_client import AttachmentsClient
 from tempest.lib.services.volume.v3.availability_zone_client \
     import AvailabilityZoneClient
 from tempest.lib.services.volume.v3.backups_client import BackupsClient
@@ -43,12 +44,11 @@ from tempest.lib.services.volume.v3.versions_client import VersionsClient
 from tempest.lib.services.volume.v3.volume_manage_client import \
     VolumeManageClient
 from tempest.lib.services.volume.v3.volumes_client import VolumesClient
-
-__all__ = ['AvailabilityZoneClient', 'BackupsClient', 'BaseClient',
-           'CapabilitiesClient', 'EncryptionTypesClient', 'ExtensionsClient',
-           'GroupSnapshotsClient', 'GroupTypesClient', 'GroupsClient',
-           'HostsClient', 'LimitsClient', 'MessagesClient', 'QosSpecsClient',
-           'QuotaClassesClient', 'QuotasClient', 'SchedulerStatsClient',
-           'ServicesClient', 'SnapshotManageClient', 'SnapshotsClient',
-           'TransfersClient', 'TypesClient', 'VersionsClient',
-           'VolumeManageClient', 'VolumesClient']
+__all__ = ['AttachmentsClient', 'AvailabilityZoneClient', 'BackupsClient',
+           'BaseClient', 'CapabilitiesClient', 'EncryptionTypesClient',
+           'ExtensionsClient', 'GroupSnapshotsClient', 'GroupTypesClient',
+           'GroupsClient', 'HostsClient', 'LimitsClient', 'MessagesClient',
+           'QosSpecsClient', 'QuotaClassesClient', 'QuotasClient',
+           'SchedulerStatsClient', 'ServicesClient', 'SnapshotManageClient',
+           'SnapshotsClient', 'TransfersClient', 'TypesClient',
+           'VersionsClient', 'VolumeManageClient', 'VolumesClient']
