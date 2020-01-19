@@ -28,6 +28,7 @@ CONF = config.CONF
 
 class BaseAttachVolumeTest(base.BaseV2ComputeTest):
     """Base class for the attach volume tests in this module."""
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):
