@@ -555,6 +555,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
 
 class ServersNegativeTestMultiTenantJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     credentials = ['primary', 'alt']
 
