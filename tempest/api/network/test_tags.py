@@ -103,9 +103,10 @@ class TagsExtTest(base.BaseNetworkTest):
         List tags.
         Remove a tag.
 
-    v2.0 of the Neutron API is assumed. The tag-ext extension allows users to
-    set tags on the following resources: subnets, ports, routers and
-    subnetpools.
+    v2.0 of the Neutron API is assumed. The tag-ext or standard-attr-tag
+    extension allows users to set tags on the following resources: subnets,
+    ports, routers and subnetpools.
+    from stein release the tag-ext has been renamed to standard-attr-tag
     """
 
     # NOTE(felipemonteiro): The supported resource names are plural. Use
@@ -115,8 +116,12 @@ class TagsExtTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(TagsExtTest, cls).skip_checks()
-        if not utils.is_extension_enabled('tag-ext', 'network'):
-            msg = "tag-ext extension not enabled."
+        # Added condition to support backward compatiblity since
+        # tag-ext has been renamed to standard-attr-tag
+        if not (utils.is_extension_enabled('tag-ext', 'network') or
+                utils.is_extension_enabled('standard-attr-tag', 'network')):
+            msg = ("neither tag-ext nor standard-attr-tag extensions "
+                   "are enabled.")
             raise cls.skipException(msg)
 
     @classmethod
