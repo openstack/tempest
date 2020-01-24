@@ -1,0 +1,13 @@
+---
+upgrade:
+  - |
+     Default value of config option ``CONF.placement.region`` is updated
+     from ``RegionOne`` to empty string.
+
+     As per tempest design, if tempest conf is not having any region for
+     a service then identity region should be used. In case of placement
+     the default value is "RegionOne" which is considered as placement
+     region if region missing in tempest conf. In order to have identity
+     region to be used as default we need to change to empty string for
+     placement service. Empty string can be seen being used in other
+     services like volume, image etc.

@@ -390,7 +390,7 @@ PlacementGroup = [
                default='placement',
                help="Catalog type of the Placement service."),
     cfg.StrOpt('region',
-               default='RegionOne',
+               default='',
                help="The placement region name to use. If empty, the value "
                     "of [identity]/region is used instead. If no such region "
                     "is found in the service catalog, the first region found "
