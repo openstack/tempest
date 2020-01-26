@@ -48,6 +48,14 @@ Command Documentation
    workspace
    run
 
+Supported OpenStack Releases and Python Versions
+------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   supported_version
+
 Developers Guide
 ================
 
