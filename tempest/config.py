@@ -475,7 +475,14 @@ ComputeFeaturesGroup = [
                 default=False,
                 help="Does the test environment support block migration with "
                 "Cinder iSCSI volumes. Note: libvirt >= 1.2.17 is required "
-                "to support this if using the libvirt compute driver."),
+                "to support this if using the libvirt compute driver.",
+                deprecated_for_removal=True,
+                deprecated_reason='This option duplicates the more generic '
+                                  '[compute-feature-enabled]/block_migration '
+                                  '_for_live_migration now that '
+                                  'MIN_LIBVIRT_VERSION is >= 1.2.17 on all '
+                                  'branches from stable/rocky and will be '
+                                  'removed in a future release.'),
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '

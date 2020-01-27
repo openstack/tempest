@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    The ``[compute-feature-enabled]/block_migrate_cinder_iscsi`` is deprecated
+    ahead of removal in a future release. Once removed the
+    ``[compute-feature-enabled]/block_migration_for_live_migration``
+    configurable will then be used to determine when to run block migration
+    based tests during live migration.
