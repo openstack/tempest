@@ -458,18 +458,6 @@
     override-checkout: stable/rocky
 
 - job:
-    name: tempest-full-queens
-    parent: tempest-full
-    nodeset: openstack-single-node-xenial
-    override-checkout: stable/queens
-
-- job:
-    name: tempest-full-queens-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-xenial
-    override-checkout: stable/queens
-
-- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
@@ -665,10 +653,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-queens:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-queens-py3:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
@@ -769,8 +753,6 @@
         - tempest-full-stein-py3
         - tempest-full-rocky
         - tempest-full-rocky-py3
-        - tempest-full-queens
-        - tempest-full-queens-py3
     periodic:
       jobs:
         - tempest-all
