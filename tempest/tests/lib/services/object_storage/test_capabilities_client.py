@@ -43,7 +43,7 @@ class TestCapabilitiesClient(base.BaseServiceTest):
         }
         self.check_service_client_function(
             self.client.list_capabilities,
-            'tempest.lib.common.rest_client.RestClient.get',
+            'tempest.lib.common.rest_client.RestClient.raw_request',
             resp,
             bytes_body)
 
