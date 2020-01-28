@@ -634,8 +634,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def nova_volume_attach(self, server, volume_to_attach):
         volume = self.servers_client.attach_volume(
-            server['id'], volumeId=volume_to_attach['id'], device='/dev/%s'
-            % CONF.compute.volume_device_name)['volumeAttachment']
+            server['id'], volumeId=volume_to_attach['id'])['volumeAttachment']
         self.assertEqual(volume_to_attach['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
