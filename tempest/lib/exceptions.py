@@ -280,3 +280,12 @@ class InvalidTestResource(TempestException):
 
 class InvalidParam(TempestException):
     message = ("Invalid Parameter passed: %(invalid_param)s")
+
+
+class ConsistencyGroupException(TempestException):
+    message = "Consistency group %(cg_id)s failed and is in ERROR status"
+
+
+class ConsistencyGroupSnapshotException(TempestException):
+    message = ("Consistency group snapshot %(cgsnapshot_id)s failed and is "
+               "in ERROR status")
