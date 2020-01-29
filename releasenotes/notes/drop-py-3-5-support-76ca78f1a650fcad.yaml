@@ -1,0 +1,8 @@
+---
+prelude: >
+    Remove the support of python3.5.
+    Tempest, its plugins dependencies in ussuri cycle
+    are python-requires>=py3.6 which makes distro not
+    having python 3.6 to do hack to install py3.6 etc.
+    It time to drop the py3.5 from Tempest. Last supported
+    version of Tempest for py3.5 is 23.0.0.
