@@ -699,6 +699,11 @@ NetworkGroup = [
     cfg.StrOpt('floating_network_name',
                help="Default floating network name. Used to allocate floating "
                     "IPs when neutron is enabled."),
+    cfg.StrOpt('subnet_id',
+               default="",
+               help="Subnet id of subnet which is used for allocation of "
+                    "floating IPs. Specify when two or more subnets are "
+                    "present in network."),
     cfg.StrOpt('public_router_id',
                default="",
                help="Id of the public router that provides external "

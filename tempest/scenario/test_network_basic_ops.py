@@ -346,10 +346,19 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 network_id=CONF.network.public_network_id)['subnets']
             if s['ip_version'] == 4
         ]
-        self.assertEqual(1, len(v4_subnets),
-                         "Found %d IPv4 subnets" % len(v4_subnets))
 
-        external_ips = [v4_subnets[0]['gateway_ip']]
+        if len(v4_subnets) > 1:
+            self.assertTrue(
+                CONF.network.subnet_id,
+                "Found %d subnets. Specify subnet using configuration "
+                "option [network].subnet_id."
+                % len(v4_subnets))
+            subnet = self.os_admin.subnets_client.show_subnet(
+                CONF.network.subnet_id)['subnet']
+            external_ips = [subnet['gateway_ip']]
+        else:
+            external_ips = [v4_subnets[0]['gateway_ip']]
+
         self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
                                         external_ips)
 
