@@ -58,7 +58,7 @@ class VolumesExtendTest(base.BaseVolumeTest):
         self.assertEqual(extend_size, resized_volume['size'])
 
 
-class VolumesExtendAttachedTest(base.BaseVolumeTest):
+class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
     """Tests extending the size of an attached volume."""
     create_default_network = True
 
@@ -97,14 +97,9 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
                     event['finish_time']):
                 return event
 
-    @decorators.idempotent_id('301f5a30-1c6f-4ea0-be1a-91fd28d44354')
-    @testtools.skipUnless(CONF.volume_feature_enabled.extend_attached_volume,
-                          "Attached volume extend is disabled.")
-    @utils.services('compute')
-    def test_extend_attached_volume(self):
+    def _test_extend_attached_volume(self, volume):
         """This is a happy path test which does the following:
 
-        * Create a volume at the configured volume_size.
         * Create a server instance.
         * Attach the volume to the server.
         * Wait for the volume status to be "in-use".
@@ -116,8 +111,6 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
           if we timeout waiting for the instance action event to show up, or
           if the action on the server fails.
         """
-        # Create a test volume. Will be automatically cleaned up on teardown.
-        volume = self.create_volume()
         # Create a test server. Will be automatically cleaned up on teardown.
         server = self.create_server()
         # Attach the volume to the server and wait for the volume status to be
@@ -179,3 +172,14 @@ class VolumesExtendAttachedTest(base.BaseVolumeTest):
             "%(request_id)s." %
             {'result': event['result'],
              'request_id': action['request_id']})
+
+
+class VolumesExtendAttachedTest(BaseVolumesExtendAttachedTest):
+
+    @decorators.idempotent_id('301f5a30-1c6f-4ea0-be1a-91fd28d44354')
+    @testtools.skipUnless(CONF.volume_feature_enabled.extend_attached_volume,
+                          "Attached volume extend is disabled.")
+    @utils.services('compute')
+    def test_extend_attached_volume(self):
+        volume = self.create_volume()
+        self._test_extend_attached_volume(volume)
