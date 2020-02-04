@@ -100,6 +100,7 @@
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
         ENABLE_VOLUME_MULTIATTACH: true
+        USE_PYTHON3: False
       devstack_services:
         # NOTE(mriedem): Disable the cinder-backup service from tempest-full
         # since tempest-full is in the integrated-gate project template but
@@ -138,6 +139,9 @@
       - opendev.org/openstack/oslo.utils
       - opendev.org/openstack/oslo.versionedobjects
       - opendev.org/openstack/oslo.vmware
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: True
 
 - job:
     name: tempest-full-parallel
@@ -146,11 +150,13 @@
     branches:
       - master
     description: |
-      Base integration test with Neutron networking and py27.
+      Base integration test with Neutron networking.
       It includes all scenarios as it was in the past.
       This job runs all scenario tests in parallel!
     vars:
       tox_envlist: full-parallel
+      devstack_localrc:
+        USE_PYTHON3: True
 
 - job:
     name: tempest-full-py3
@@ -345,6 +351,13 @@
       - stable/pike
       - stable/queens
       - stable/rocky
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: False
 
 - job:
     name: tempest-multinode-full-py3
@@ -426,30 +439,14 @@
           USE_PYTHON3: true
 
 - job:
-    name: tempest-full-train
-    parent: tempest-full
-    override-checkout: stable/train
-
-- job:
     name: tempest-full-train-py3
     parent: tempest-full-py3
     override-checkout: stable/train
 
 - job:
-    name: tempest-full-stein
-    parent: tempest-full
-    override-checkout: stable/stein
-
-- job:
     name: tempest-full-stein-py3
     parent: tempest-full-py3
     override-checkout: stable/stein
-
-- job:
-    name: tempest-full-rocky
-    parent: tempest-full
-    nodeset: openstack-single-node-xenial
-    override-checkout: stable/rocky
 
 - job:
     name: tempest-full-rocky-py3
@@ -511,12 +508,13 @@
     name: tempest-pg-full
     parent: tempest-full
     description: |
-      Base integration test with Neutron networking and py27 and PostgreSQL.
+      Base integration test with Neutron networking and PostgreSQL.
       Former name for this job was legacy-tempest-dsvm-neutron-pg-full.
     vars:
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
         DATABASE_TYPE: postgresql
+        USE_PYTHON3: True
 
 - project-template:
     name: integrated-gate-networking
@@ -600,10 +598,9 @@
 - project:
     templates:
       - check-requirements
-      - integrated-gate
       - integrated-gate-py3
       - openstack-cover-jobs
-      - openstack-python3-train-jobs
+      - openstack-python3-ussuri-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
@@ -639,22 +636,13 @@
         - tempest-full-py3-ipv6:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-train:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-train-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-stein:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-stein-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-rocky:
-            irrelevant-files: *tempest-irrelevant-files
-            voting: false
         - tempest-full-rocky-py3:
             irrelevant-files: *tempest-irrelevant-files
             voting: false
-        - tempest-multinode-full:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
@@ -673,8 +661,6 @@
               # tools/ is not here since this relies on a script in tools/.
         - tempest-ipv6-only:
             irrelevant-files: *tempest-irrelevant-files-2
-        - tempest-slow:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
@@ -701,8 +687,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full:
-            irrelevant-files: *tempest-irrelevant-files
         - interop-tempest-consistency:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-test-account-py3:
@@ -719,7 +703,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full:
+        - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - grenade-py3:
             irrelevant-files: *tempest-irrelevant-files
@@ -747,11 +731,8 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
-        - tempest-full-train
         - tempest-full-train-py3
-        - tempest-full-stein
         - tempest-full-stein-py3
-        - tempest-full-rocky
         - tempest-full-rocky-py3
     periodic:
       jobs:

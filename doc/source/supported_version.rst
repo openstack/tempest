@@ -1,7 +1,7 @@
 Supported OpenStack Releases and Python Versions
 ================================================
 
-This Document list the officially supported OpenStack releases
+This document lists the officially supported OpenStack releases
 and python versions by Tempest.
 
 Compatible OpenStack Releases
@@ -24,13 +24,13 @@ For example: OpenStack Stein: Tempest 20.0.0
 * https://releases.openstack.org/stein/index.html#stein-tempest
 
 How to use Tempest tag on Extended Maintenance stable branch:
-* https://review.opendev.org/#/c/681950/
+
+* https://review.opendev.org/#/c/705098/
 
 Supported Python Versions
 -------------------------
 
 Tempest master supports the below python versions:
 
-* Python 2.7
 * Python 3.6
 * Python 3.7

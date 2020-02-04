@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    Python 2.7 support has been dropped. Last release of Tempest
+    to support python 2.7 is Temepst 23.0.0. The minimum version of Python now
+    supported by Tempest is Python 3.6.
