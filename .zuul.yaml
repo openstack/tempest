@@ -649,8 +649,10 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-rocky:
             irrelevant-files: *tempest-irrelevant-files
+            voting: false
         - tempest-full-rocky-py3:
             irrelevant-files: *tempest-irrelevant-files
+            voting: false
         - tempest-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
