@@ -72,3 +72,16 @@ Run Tempest
    :default: ''
 
    The timeout (in seconds) for each test.
+
+.. zuul:rolevar:: stable_constraints_file
+   :default: ''
+
+   Upper constraints file to be used for stable branch till stable/rocky.
+
+.. zuul:rolevar:: tempest_tox_environment
+   :default: ''
+
+   Environment variable to set for run-tempst task.
+
+   Env variables set in this variable will be combined with some more
+   defaults env variable set at runtime.

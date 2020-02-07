@@ -4,3 +4,6 @@ tox_envlist: smoke
 tempest_black_regex: ''
 tox_extra_args: ''
 tempest_test_timeout: ''
+stable_constraints_file: "{{ devstack_base_dir }}/requirements/upper-constraints.txt"
+target_branch: "{{ zuul.branch }}"
+tempest_tox_environment: {}
