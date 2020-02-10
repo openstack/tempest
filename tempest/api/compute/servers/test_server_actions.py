@@ -343,20 +343,27 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_resize_volume_backed_server_confirm(self):
         # We have to create a new server that is volume-backed since the one
         # from setUp is not volume-backed.
-        server = self.create_test_server(
-            volume_backed=True, wait_until='ACTIVE')
+        kwargs = {'volume_backed': True,
+                  'wait_until': 'ACTIVE'}
+        if CONF.validation.run_validation:
+            validation_resources = self.get_test_validation_resources(
+                self.os_primary)
+            kwargs.update({'validatable': True,
+                           'validation_resources': validation_resources})
+        server = self.create_test_server(**kwargs)
+
         # NOTE(mgoddard): Get detailed server to ensure addresses are present
         # in fixed IP case.
         server = self.servers_client.show_server(server['id'])['server']
+
         self._test_resize_server_confirm(server['id'])
+
         if CONF.compute_feature_enabled.console_output:
             # Now do something interactive with the guest like get its console
             # output; we don't actually care about the output,
             # just that it doesn't raise an error.
             self.client.get_console_output(server['id'])
         if CONF.validation.run_validation:
-            validation_resources = self.get_class_validation_resources(
-                self.os_primary)
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, validation_resources),
                 self.ssh_user,
