@@ -217,6 +217,22 @@ def wait_for_volume_resource_status(client, resource_id, status):
              resource_name, resource_id, status, time.time() - start)
 
 
+def wait_for_volume_attachment_remove(client, volume_id, attachment_id):
+    """Waits for a volume attachment to be removed from a given volume."""
+    start = int(time.time())
+    attachments = client.show_volume(volume_id)['volume']['attachments']
+    while any(attachment_id == a['attachment_id'] for a in attachments):
+        time.sleep(client.build_interval)
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Failed to remove attachment %s from volume %s'
+                       'within the required time (%s s).' %
+                       (attachment_id, volume_id, client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+        attachments = client.show_volume(volume_id)['volume']['attachments']
+    LOG.info('Attachment %s removed from volume %s after waiting for %f '
+             'seconds', attachment_id, volume_id, time.time() - start)
+
+
 def wait_for_volume_migration(client, volume_id, new_host):
     """Waits for a Volume to move to a new host."""
     body = client.show_volume(volume_id)['volume']

@@ -15,6 +15,7 @@
 import time
 
 import mock
+from oslo_utils.fixture import uuidsentinel as uuids
 
 from tempest.common import waiters
 from tempest import exceptions
@@ -232,3 +233,51 @@ class TestVolumeWaiters(base.TestCase):
         mock_show.assert_has_calls([mock.call(volume_id),
                                     mock.call(volume_id)])
         mock_sleep.assert_called_once_with(1)
+
+    def test_wait_for_volume_attachment(self):
+        vol_detached = {'volume': {'attachments': []}}
+        vol_attached = {'volume': {'attachments': [
+                       {'attachment_id': uuids.attachment_id}]}}
+        show_volume = mock.MagicMock(side_effect=[
+            vol_attached, vol_attached, vol_detached])
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           build_interval=1,
+                           build_timeout=5,
+                           show_volume=show_volume)
+        self.patch('time.time')
+        self.patch('time.sleep')
+        waiters.wait_for_volume_attachment_remove(client, uuids.volume_id,
+                                                  uuids.attachment_id)
+        # Assert that show volume is called until the attachment is removed.
+        show_volume.assert_has_calls = [mock.call(uuids.volume_id),
+                                        mock.call(uuids.volume_id),
+                                        mock.call(uuids.volume_id)]
+
+    def test_wait_for_volume_attachment_timeout(self):
+        show_volume = mock.MagicMock(return_value={
+            'volume': {'attachments': [
+                {'attachment_id': uuids.attachment_id}]}})
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        # Assert that a timeout is raised if the attachment remains.
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_attachment_remove,
+                          client, uuids.volume_id, uuids.attachment_id)
+
+    def test_wait_for_volume_attachment_not_present(self):
+        show_volume = mock.MagicMock(return_value={
+            'volume': {'attachments': []}})
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        waiters.wait_for_volume_attachment_remove(client, uuids.volume_id,
+                                                  uuids.attachment_id)
+        # Assert that show volume is only called once before we return
+        show_volume.assert_called_once_with(uuids.volume_id)
