@@ -67,7 +67,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         non_default_quotas = self.admin_quotas_client.list_quotas()
         found = False
         for qs in non_default_quotas['quotas']:
-            if qs['tenant_id'] == project_id:
+            if qs['project_id'] == project_id:
                 found = True
         self.assertTrue(found)
 
@@ -81,7 +81,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.admin_quotas_client.reset_quotas(project_id)
         non_default_quotas = self.admin_quotas_client.list_quotas()
         for q in non_default_quotas['quotas']:
-            self.assertNotEqual(project_id, q['tenant_id'])
+            self.assertNotEqual(project_id, q['project_id'])
         quota_set = self.admin_quotas_client.show_quotas(project_id)['quota']
         default_quotas = self.admin_quotas_client.show_default_quotas(
             project_id)['quota']

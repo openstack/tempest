@@ -192,9 +192,9 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         port_list = self.ports_client.list_ports(fixed_ips=fixed_ips)
         # Check that we got the desired port
         ports = port_list['ports']
-        tenant_ids = set([port['tenant_id'] for port in ports])
-        self.assertEqual(len(tenant_ids), 1,
-                         'Ports from multiple tenants are in the list resp')
+        project_ids = set([port['project_id'] for port in ports])
+        self.assertEqual(len(project_ids), 1,
+                         'Ports from multiple projects are in the list resp')
         port_ids = [port['id'] for port in ports]
         fixed_ips = [port['fixed_ips'] for port in ports]
         port_net_ids = [port['network_id'] for port in ports]

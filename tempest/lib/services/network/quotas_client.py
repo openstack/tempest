@@ -12,11 +12,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
+
 from tempest.lib.services.network import base
+
+
+def _warning_deprecate_tenant_id(func):
+    @functools.wraps(func)
+    def inner(*args, **kwargs):
+        _self = args[0]
+        # check length of arg to know whether 'tenant_id' is passed as
+        # positional arg or kwargs.
+        if len(args) < 2:
+            if 'tenant_id' in kwargs:
+                _self.LOG.warning(
+                    'positional arg name "tenant_id" is deprecated, for '
+                    'removal, please start using "project_id" instead')
+            elif 'project_id' in kwargs:
+                # fallback to deprecated name till deprecation phase.
+                kwargs['tenant_id'] = kwargs.pop('project_id')
+
+        return func(*args, **kwargs)
+    return inner
 
 
 class QuotasClient(base.BaseNetworkClient):
 
+    @_warning_deprecate_tenant_id
     def update_quotas(self, tenant_id, **kwargs):
         """Update quota for a project.
 
@@ -28,12 +50,14 @@ class QuotasClient(base.BaseNetworkClient):
         uri = '/quotas/%s' % tenant_id
         return self.update_resource(uri, put_body)
 
+    @_warning_deprecate_tenant_id
     def reset_quotas(self, tenant_id):  # noqa
         # NOTE: This noqa is for passing T111 check and we cannot rename
         #       to keep backwards compatibility.
         uri = '/quotas/%s' % tenant_id
         return self.delete_resource(uri)
 
+    @_warning_deprecate_tenant_id
     def show_quotas(self, tenant_id, **fields):
         """Show quota for a project.
 
@@ -54,11 +78,13 @@ class QuotasClient(base.BaseNetworkClient):
         uri = '/quotas'
         return self.list_resources(uri, **filters)
 
+    @_warning_deprecate_tenant_id
     def show_default_quotas(self, tenant_id):
         """List default quotas for a project."""
         uri = '/quotas/%s/default' % tenant_id
         return self.show_resource(uri)
 
+    @_warning_deprecate_tenant_id
     def show_quota_details(self, tenant_id):
         """Show quota details for a project."""
         uri = '/quotas/%s/details.json' % tenant_id

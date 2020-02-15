@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    [`blueprint blueprint adopt-oslo-versioned-objects-for-db <https://blueprints.launchpad.net/neutron/+spec/adopt-oslo-versioned-objects-for-db>`_]
+    Any reference to "tenant_id" in Network objects is replaced with
+    "project_id".
