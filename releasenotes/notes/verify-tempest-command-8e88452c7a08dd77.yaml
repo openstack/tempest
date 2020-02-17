@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Remove the deprecated CLI ``verify-tempest-config`` in favour of
+    ``tempest verify-config`` command.
+    You can use ``tempest verify-config`` CLI to verify the tempest
+    conf file.

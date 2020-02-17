@@ -433,11 +433,6 @@ def parse_args():
 
 
 def main(opts=None):
-    print('Running config verification...')
-    if opts is None:
-        print("Use of: 'verify-tempest-config' is deprecated, "
-              "please use: 'tempest verify-config'")
-        opts = parse_args()
     update = opts.update
     replace = opts.replace_ext
     global CONF_PARSER
@@ -497,7 +492,3 @@ class TempestVerifyConfig(command.Command):
             LOG.exception("Failure verifying configuration.")
             traceback.print_exc()
             raise
-
-
-if __name__ == "__main__":
-    main()
