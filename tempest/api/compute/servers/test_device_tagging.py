@@ -358,7 +358,8 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
             name=data_utils.rand_name('device-tagging-server'),
-            networks=[{'uuid': self.get_tenant_network()['id']}])
+            networks=[{'uuid': self.get_tenant_network()['id']}],
+            wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
 
         # NOTE(mgoddard): Get detailed server to ensure addresses are present
