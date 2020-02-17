@@ -555,11 +555,17 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
         attachment = self.servers_client.attach_volume(
             server['id'], **attach_kwargs)['volumeAttachment']
-        # On teardown detach the volume and wait for it to be available. This
-        # is so we don't error out when trying to delete the volume during
-        # teardown.
-        self.addCleanup(waiters.wait_for_volume_resource_status,
-                        self.volumes_client, volume['id'], 'available')
+        # On teardown detach the volume and for multiattach volumes wait for
+        # the attachment to be removed. For non-multiattach volumes wait for
+        # the state of the volume to change to available. This is so we don't
+        # error out when trying to delete the volume during teardown.
+        if volume['multiattach']:
+            self.addCleanup(waiters.wait_for_volume_attachment_remove,
+                            self.volumes_client, volume['id'],
+                            attachment['id'])
+        else:
+            self.addCleanup(waiters.wait_for_volume_resource_status,
+                            self.volumes_client, volume['id'], 'available')
         # Ignore 404s on detach in case the server is deleted or the volume
         # is already detached.
         self.addCleanup(self._detach_volume, server, volume)
