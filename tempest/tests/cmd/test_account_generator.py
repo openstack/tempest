@@ -28,7 +28,6 @@ class FakeOpts(object):
         self.os_username = 'fake_user'
         self.os_password = 'fake_password'
         self.os_project_name = 'fake_project_name'
-        self.os_tenant_name = None
         self.os_domain_name = 'fake_domain'
         self.tag = 'fake'
         self.concurrency = 2
@@ -99,15 +98,6 @@ class TestAccountGeneratorV2(base.TestCase, MockHelpersMixin):
         self.assertEqual(self.opts.os_project_name, admin_creds.tenant_name)
         self.assertEqual(self.opts.os_password, admin_creds.password)
         self.assertFalse(hasattr(admin_creds, 'domain_name'))
-
-    def test_get_credential_provider_with_tenant(self):
-        self.opts.os_project_name = None
-        self.opts.os_tenant_name = 'fake_tenant'
-        cp = account_generator.get_credential_provider(self.opts)
-        admin_creds = cp.default_admin_creds
-        self.assertEqual(self.opts.os_tenant_name, admin_creds.tenant_name)
-        self.assertEqual(self.opts.os_username, admin_creds.username)
-        self.assertEqual(self.opts.os_password, admin_creds.password)
 
 
 class TestAccountGeneratorV3(TestAccountGeneratorV2):

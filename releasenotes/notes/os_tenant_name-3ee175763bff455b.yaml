@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Remove the deprecated argument ``os-tenant-name`` or ``OS_TENANT_NAME`` in favour of
+    ``os-project-name`` argument.
