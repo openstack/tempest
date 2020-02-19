@@ -1,12 +1,12 @@
 ---
-prelude: >
+prelude: |
     This is an intermediate release during the Ussuri development cycle to
     mark the end of support for EM Queens in Tempest.
     After this release, Tempest will support below OpenStack Releases:
 
-      * Train
-      * Stein
-      * Rocky
+    * Train
+    * Stein
+    * Rocky
 
     Current development of Tempest is for OpenStack Ussuri development
     cycle.
