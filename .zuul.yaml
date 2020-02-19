@@ -80,6 +80,7 @@
       Integration test of IPv6-only deployments. This job runs
       smoke and IPv6 relates tests only. Basic idea is to test
       whether OpenStack Services listen on IPv6 addrress or not.
+    timeout: 10800
     vars:
       tox_envlist: ipv6-only
 
