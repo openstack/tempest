@@ -61,7 +61,11 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
     def cinder_show(self, volume):
         got_volume = self.volumes_client.show_volume(volume['id'])['volume']
-        self.assertEqual(volume, got_volume)
+        # Exclude updated_at because of bug 1838202.
+        excluded_keys = ['updated_at']
+        self.assertThat(
+            volume, custom_matchers.MatchesDictExceptForKeys(
+                got_volume, excluded_keys=excluded_keys))
 
     def nova_reboot(self, server):
         self.servers_client.reboot_server(server['id'], type='SOFT')
