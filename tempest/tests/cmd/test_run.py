@@ -153,6 +153,15 @@ class TestRunReturnCode(base.TestCase):
             result = ["b\'" + x + "\'" for x in result]
         self.assertEqual(result, tests)
 
+    def test_tempest_run_with_worker_file(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        worker_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(worker_file.close)
+        worker_file.write(
+            '- worker:\n  - passing\n  concurrency: 3'.encode('utf-8'))
+        self.assertRunExit(['tempest', 'run', '--worker-file=%s' % path], 0)
+
     def test_tempest_run_with_whitelist(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)

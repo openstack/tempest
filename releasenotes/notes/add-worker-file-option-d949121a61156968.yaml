@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Add the option --worker-file in ``tempest run`` command. This is to give
+    tempest more granularity to manually configure how the different sets of
+    tests can be grouped to run with the different worker. You can configure
+    tests regex to run under workers. You can also mix manual scheduling with
+    standard one by mentioning concurrency.
+    For example, the user can setup tempest to run with different concurrences,
+    to be used with different regexps.
