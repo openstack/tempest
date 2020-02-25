@@ -499,11 +499,19 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('spice_console',
                 default=False,
                 help='Enable Spice console. This configuration value should '
-                     'be same as nova.conf: spice.enabled'),
+                     'be same as nova.conf: spice.enabled',
+                deprecated_for_removal=True,
+                deprecated_reason="This config option is not being used "
+                                  "in Tempest, we can add it back when "
+                                  "adding the test cases."),
     cfg.BoolOpt('rdp_console',
                 default=False,
                 help='Enable RDP console. This configuration value should '
-                     'be same as nova.conf: rdp.enabled'),
+                     'be same as nova.conf: rdp.enabled',
+                deprecated_for_removal=True,
+                deprecated_reason="This config option is not being used "
+                                  "in Tempest, we can add it back when "
+                                  "adding the test cases."),
     cfg.BoolOpt('serial_console',
                 default=False,
                 help='Enable serial console. This configuration value '

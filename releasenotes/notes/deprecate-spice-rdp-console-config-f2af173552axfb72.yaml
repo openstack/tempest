@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    The config options ``CONF.compute.spice_console`` and ``CONF.compute.rdp_console``
+    are deprecated because test cases using them are removed.
+    We can add them back when adding the test cases again.
