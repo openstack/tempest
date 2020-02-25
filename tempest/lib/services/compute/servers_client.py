@@ -209,6 +209,9 @@ class ServersClient(base_compute_client.BaseComputeClient):
                                post_body)
         if body:
             body = json.loads(body)
+        else:
+            if isinstance(body, bytes):
+                body = body.decode('utf-8')
         self.validate_response(schema, resp, body)
         return rest_client.ResponseBody(resp, body)
 
