@@ -169,8 +169,13 @@ class LiveMigrationTest(LiveMigrationTestBase):
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
     @utils.services('volume')
-    def test_iscsi_volume(self):
-        """Test live migrating a server with volume attached"""
+    def test_live_block_migration_with_attached_volume(self):
+        """Test the live-migration of an instance with an attached volume.
+
+        This tests the live-migration of an instance with both a local disk and
+        attach volume. This differs from test_volume_backed_live_migration
+        above that tests live-migration with only an attached volume.
+        """
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
         if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
