@@ -20,37 +20,78 @@ from tempest.tests.lib.services import base
 class TestRoutersClient(base.BaseServiceTest):
     FAKE_CREATE_ROUTER = {
         "router": {
-            "name": u'\u2740(*\xb4\u25e1`*)\u2740',
+            "admin_state_up": True,
+            "availability_zone_hints": [],
+            "availability_zones": [
+                "nova"
+            ],
+            "created_at": "2018-03-19T19:17:04Z",
+            "description": "",
+            "distributed": False,
             "external_gateway_info": {
-                "network_id": "8ca37218-28ff-41cb-9b10-039601ea7e6b",
                 "enable_snat": True,
                 "external_fixed_ips": [
                     {
-                        "subnet_id": "255.255.255.0",
-                        "ip": "192.168.10.1"
+                        "ip_address": "172.24.4.6",
+                        "subnet_id": "b930d7f6-ceb7-40a0-8b81-a425dd994ccf"
                     }
-                ]
+                ],
+                "network_id": "ae34051f-aa6c-4c75-abf5-50dc9ac99ef3"
             },
-            "admin_state_up": True,
-            "id": "8604a0de-7f6b-409a-a47c-a1cc7bc77b2e"
+            "flavor_id": "f7b14d9a-b0dc-4fbe-bb14-a0f4970a69e0",
+            "ha": False,
+            "id": "f8a44de0-fc8e-45df-93c7-f79bf3b01c95",
+            "name": "router1",
+            "routes": [],
+            "revision_number": 1,
+            "status": "ACTIVE",
+            "updated_at": "2018-03-19T19:17:22Z",
+            "project_id": "0bd18306d801447bb457a46252d82d13",
+            "tenant_id": "0bd18306d801447bb457a46252d82d13",
+            "service_type_id": None,
+            "tags": ["tag1,tag2"],
+            "conntrack_helpers": []
         }
     }
 
     FAKE_UPDATE_ROUTER = {
         "router": {
-            "name": u'\u2740(*\xb4\u25e1`*)\u2740',
+            "admin_state_up": True,
+            "availability_zone_hints": [],
+            "availability_zones": [
+                "nova"
+            ],
+            "created_at": "2018-03-19T19:17:04Z",
+            "description": "",
+            "distributed": False,
             "external_gateway_info": {
-                "network_id": "8ca37218-28ff-41cb-9b10-039601ea7e6b",
                 "enable_snat": True,
                 "external_fixed_ips": [
                     {
-                        "subnet_id": "255.255.255.0",
-                        "ip": "192.168.10.1"
+                        "ip_address": "172.24.4.6",
+                        "subnet_id": "b930d7f6-ceb7-40a0-8b81-a425dd994ccf"
                     }
-                ]
+                ],
+                "network_id": "ae34051f-aa6c-4c75-abf5-50dc9ac99ef3"
             },
-            "admin_state_up": False,
-            "id": "8604a0de-7f6b-409a-a47c-a1cc7bc77b2e"
+            "flavor_id": "f7b14d9a-b0dc-4fbe-bb14-a0f4970a69e0",
+            "ha": False,
+            "id": "f8a44de0-fc8e-45df-93c7-f79bf3b01c95",
+            "name": "router1",
+            "revision_number": 3,
+            "routes": [
+                {
+                    "destination": "179.24.1.0/24",
+                    "nexthop": "172.24.3.99"
+                }
+            ],
+            "status": "ACTIVE",
+            "updated_at": "2018-03-19T19:17:22Z",
+            "project_id": "0bd18306d801447bb457a46252d82d13",
+            "tenant_id": "0bd18306d801447bb457a46252d82d13",
+            "service_type_id": None,
+            "tags": ["tag1,tag2"],
+            "conntrack_helpers": []
         }
     }
 
