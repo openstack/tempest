@@ -118,6 +118,14 @@ class TestNamespaceTagsClient(base.BaseServiceTest):
     def test_show_namespace_tag_with_bytes_body(self):
         self._test_show_namespace_tag_definition(bytes_body=True)
 
+    def test_delete_namespace_tag_definition(self):
+        self.check_service_client_function(
+            self.client.delete_namespace_tag,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {}, status=204,
+            namespace="OS::Compute::Hypervisor",
+            tag_name="added-sample-tag")
+
     def test_delete_all_namespace_tags(self):
         self.check_service_client_function(
             self.client.delete_namespace_tags,
