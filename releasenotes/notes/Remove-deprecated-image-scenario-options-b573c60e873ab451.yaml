@@ -1,0 +1,15 @@
+---
+upgrade:
+  - |
+    The following deprecated image scenario options are removed after a ~4
+    year deprecation period.
+
+    * ``ami_img_file``
+    * ``ari_img_file``
+    * ``aki_img_file``
+
+    Starting Tempest 25.0.0 release, CONF.scenario.img_file need a full path
+    for the image. CONF.scenario.img_dir was deprecated and will be removed
+    in the next release. Till Tempest 25.0.0, old behavior is maintained and
+    keep working but starting Tempest 26.0.0, you need to specify the full path
+    in CONF.scenario.img_file config option.
