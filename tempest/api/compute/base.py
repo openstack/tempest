@@ -631,8 +631,14 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
 
         svcs = self.os_admin.services_client.list_services(
             binary='nova-compute')['services']
-        hosts = [svc['host'] for svc in svcs
-                 if svc['state'] == 'up' and svc['status'] == 'enabled']
+        hosts = []
+        for svc in svcs:
+            if svc['state'] == 'up' and svc['status'] == 'enabled':
+                if CONF.compute.compute_volume_common_az:
+                    if svc['zone'] == CONF.compute.compute_volume_common_az:
+                        hosts.append(svc['host'])
+                else:
+                    hosts.append(svc['host'])
 
         for target_host in hosts:
             if source_host != target_host:
