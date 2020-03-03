@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class ImagesTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

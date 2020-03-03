@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeAdminTest):
+    create_default_network = True
 
     def _create_reset_and_force_delete_temp_volume(self, status=None):
         # Create volume, reset volume status, and force delete temp volume

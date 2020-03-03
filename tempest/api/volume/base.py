@@ -30,6 +30,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                      tempest.test.BaseTestCase):
     """Base test case class for all Cinder API tests."""
 
+    # Set this to True in subclasses to create a default network. See
+    # https://bugs.launchpad.net/tempest/+bug/1844568
+    create_default_network = False
     _api_version = 2
     # if api_v2 is not enabled while api_v3 is enabled, the volume v2 classes
     # should be transferred to volume v3 classes.
@@ -63,7 +66,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def setup_credentials(cls):
-        cls.set_network_resources()
+        cls.set_network_resources(
+            network=cls.create_default_network,
+            subnet=cls.create_default_network)
         super(BaseVolumeTest, cls).setup_credentials()
 
     @classmethod
