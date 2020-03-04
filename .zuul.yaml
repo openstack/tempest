@@ -666,12 +666,12 @@
         - nova-live-migration:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - devstack-plugin-ceph-tempest-py3:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - grenade-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - devstack-plugin-ceph-tempest:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario001-tempest-centos-7:
             voting: false
@@ -722,8 +722,6 @@
         - nova-tempest-v2-api:
             irrelevant-files: *tempest-irrelevant-files
         - legacy-tempest-dsvm-lvm-multibackend:
-            irrelevant-files: *tempest-irrelevant-files
-        - devstack-plugin-ceph-tempest-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-pg-full:
             irrelevant-files: *tempest-irrelevant-files
