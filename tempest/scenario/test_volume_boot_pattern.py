@@ -167,6 +167,13 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         self.assertEqual(created_volume[0]['id'],
                          created_volume_info['attachments'][0]['volume_id'])
 
+        # Delete the server and wait
+        self._delete_server(server)
+
+        # Assert that the underlying volume is gone before class tearDown
+        # to prevent snapshot deletion from failing
+        self.volumes_client.wait_for_resource_deletion(created_volume[0]['id'])
+
     @decorators.idempotent_id('36c34c67-7b54-4b59-b188-02a2f458a63b')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
                           'Cinder volume snapshots are disabled')
