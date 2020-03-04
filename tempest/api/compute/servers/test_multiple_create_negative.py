@@ -23,6 +23,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('daf29d8d-e928-4a01-9a8c-b129603f3fc0')
     def test_min_count_less_than_one(self):
+        # Creating server with min_count=0 should fail.
         invalid_min_count = 0
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,
                           min_count=invalid_min_count)
@@ -30,6 +31,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('999aa722-d624-4423-b813-0d1ac9884d7a')
     def test_min_count_non_integer(self):
+        # Creating server with non-integer min_count should fail.
         invalid_min_count = 2.5
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,
                           min_count=invalid_min_count)
@@ -37,6 +39,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a6f9c2ab-e060-4b82-b23c-4532cb9390ff')
     def test_max_count_less_than_one(self):
+        # Creating server with max_count < 1 shoudld fail.
         invalid_max_count = 0
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,
                           max_count=invalid_max_count)
@@ -44,6 +47,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9c5698d1-d7af-4c80-b971-9d403135eea2')
     def test_max_count_non_integer(self):
+        # Creating server with non-integer max_count should fail.
         invalid_max_count = 2.5
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,
                           max_count=invalid_max_count)
@@ -51,6 +55,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('476da616-f1ef-4271-a9b1-b9fc87727cdf')
     def test_max_count_less_than_min_count(self):
+        # Creating server with max_count less than min_count should fail.
         min_count = 3
         max_count = 2
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,

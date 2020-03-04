@@ -23,6 +23,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('61e03386-89c3-449c-9bb1-a06f423fd9d1')
     def test_multiple_create(self):
+        # Creating server with min_count=2, 2 servers will be created.
         tenant_network = self.get_tenant_network()
         body, servers = compute.create_test_server(
             self.os_primary,
@@ -39,6 +40,8 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('864777fb-2f1e-44e3-b5b9-3eb6fa84f2f7')
     def test_multiple_create_with_reservation_return(self):
+        # Creating multiple servers with return_reservation_id=True,
+        # reservation_id will be returned.
         body = self.create_test_server(wait_until='ACTIVE',
                                        min_count=1,
                                        max_count=2,

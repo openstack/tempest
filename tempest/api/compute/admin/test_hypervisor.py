@@ -134,6 +134,7 @@ class HypervisorAdminUnderV252Test(HypervisorAdminTestBase):
 
     @decorators.idempotent_id('d7e1805b-3b14-4a3b-b6fd-50ec6d9f361f')
     def test_search_hypervisor(self):
+        # Searching for hypervisors by its name.
         hypers = self._list_hypervisors()
         self.assertNotEmpty(hypers, "No hypervisors found.")
         hypers = self.client.search_hypervisor(
