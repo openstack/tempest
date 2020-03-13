@@ -251,6 +251,11 @@ class SSHExecCommandFailed(TempestException):
                "stdout:\n%(stdout)s")
 
 
+class SSHClientProxyClientLoop(TempestException):
+    message = ("SSH client proxy client has same host: %(host)s, port: "
+               "%(port)s and username: %(username)s as parent")
+
+
 class UnknownServiceClient(TempestException):
     message = "Service clients named %(services)s are not known"
 

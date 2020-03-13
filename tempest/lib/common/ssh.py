@@ -75,6 +75,11 @@ class Client(object):
         self.channel_timeout = float(channel_timeout)
         self.buf_size = 1024
         self.proxy_client = proxy_client
+        if (self.proxy_client and self.proxy_client.host == self.host and
+                self.proxy_client.port == self.port and
+                self.proxy_client.username == self.username):
+            raise exceptions.SSHClientProxyClientLoop(
+                host=self.host, port=self.port, username=self.username)
         self._proxy_conn = None
 
     def _get_ssh_connection(self, sleep=1.5, backoff=1):
@@ -114,8 +119,10 @@ class Client(object):
                 ssh.close()
                 if self._is_timed_out(_start_time):
                     LOG.exception("Failed to establish authenticated ssh"
-                                  " connection to %s@%s after %d attempts",
-                                  self.username, self.host, attempts)
+                                  " connection to %s@%s after %d attempts. "
+                                  "Proxy client: %s",
+                                  self.username, self.host, attempts,
+                                  self._get_proxy_client_info())
                     raise exceptions.SSHTimeout(host=self.host,
                                                 user=self.username,
                                                 password=self.password)
@@ -219,3 +226,13 @@ class Client(object):
         cmd = 'nc %s %s' % (self.host, self.port)
         chan.exec_command(cmd)
         return chan
+
+    def _get_proxy_client_info(self):
+        if not self.proxy_client:
+            return 'no proxy client'
+        nested_pclient = self.proxy_client._get_proxy_client_info()
+        return ('%(username)s@%(host)s:%(port)s, nested proxy client: '
+                '%(nested_pclient)s' % {'username': self.proxy_client.username,
+                                        'host': self.proxy_client.host,
+                                        'port': self.proxy_client.port,
+                                        'nested_pclient': nested_pclient})
