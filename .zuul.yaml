@@ -339,6 +339,13 @@
     nodeset: openstack-two-node-bionic
     # This job runs on Bionic from stable/stein on.
     branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: False
 
 - job:
     name: tempest-multinode-full
