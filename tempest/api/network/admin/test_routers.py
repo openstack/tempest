@@ -212,6 +212,42 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
 
+    @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
+    @utils.requires_ext(extension='ext-gw-mode', service='network')
+    def test_create_router_set_gateway_with_fixed_ip(self):
+        # At first create an external network and then use that
+        # to create address and delete
+        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_1 = self.admin_networks_client.create_network(
+            name=network_name, **{'router:external': True})['network']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_networks_client.delete_network,
+                        network_1['id'])
+        subnet = self.create_subnet(
+            network_1, client=self.admin_subnets_client, enable_dhcp=False)
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.admin_subnets_client.delete_subnet, subnet['id'])
+        port = self.admin_ports_client.create_port(
+            name=data_utils.rand_name(self.__class__.__name__),
+            network_id=network_1['id'])['port']
+        self.admin_ports_client.delete_port(port_id=port['id'])
+        fixed_ip = {
+            'subnet_id': port['fixed_ips'][0]['subnet_id'],
+            'ip_address': port['fixed_ips'][0]['ip_address']
+        }
+        external_gateway_info = {
+            'network_id': network_1['id'],
+            'external_fixed_ips': [fixed_ip]
+        }
+        # Create a router and set gateway to fixed_ip
+        router = self.admin_routers_client.create_router(
+            external_gateway_info=external_gateway_info)['router']
+        self.admin_routers_client.delete_router(router['id'])
+        # Examine router's gateway is equal to fixed_ip
+        self.assertEqual(router['external_gateway_info'][
+                         'external_fixed_ips'][0]['ip_address'],
+                         fixed_ip['ip_address'])
+
 
 class RoutersIpV6AdminTest(RoutersAdminTest):
     _ip_version = 6
