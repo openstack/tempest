@@ -196,6 +196,7 @@ class BaseCmdServiceTests(MockFunctionsBase):
             is_save_state=is_save_state,
             is_preserve=is_preserve,
             is_dry_run=is_dry_run,
+            project_id='b8e3ece07bb049138d224436756e3b57',
             data={},
             saved_state_json=self.saved_state
             )
@@ -531,6 +532,135 @@ class TestVolumeService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+
+class TestVolumeQuotaService(BaseCmdServiceTests):
+
+    service_class = 'VolumeQuotaService'
+    service_name = 'volume_quota_service'
+    response = {
+        "quota_set": {
+            "groups":
+                {"reserved": 0, "limit": 10, "in_use": 0},
+            "per_volume_gigabytes":
+                {"reserved": 0, "limit": -1, "in_use": 0},
+            "volumes":
+                {"reserved": 0, "limit": 10, "in_use": 0},
+            "gigabytes":
+                {"reserved": 0, "limit": 1000, "in_use": 0},
+            "backup_gigabytes":
+                {"reserved": 0, "limit": 1000, "in_use": 0},
+            "snapshots":
+                {"reserved": 0, "limit": 10, "in_use": 0},
+            "volumes_iscsi":
+                {"reserved": 0, "limit": -1, "in_use": 0},
+            "snapshots_iscsi":
+                {"reserved": 0, "limit": -1, "in_use": 0},
+            "backups":
+                {"reserved": 0, "limit": 10, "in_use": 0},
+            "gigabytes_iscsi":
+                {"reserved": 0, "limit": -1, "in_use": 0},
+            "id": "b8e3ece07bb049138d224436756e3b57"
+                }
+        }
+
+    def test_delete_fail(self):
+        delete_mock = [(self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock, fail=True)
+
+    def test_delete_pass(self):
+        delete_mock = [(self.delete_method, None, 200),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock)
+
+    def test_dry_run(self):
+        dry_mock = [(self.get_method, self.response, 200),
+                    (self.delete_method, "delete", None)]
+        self._test_dry_run_true(dry_mock)
+
+
+class TestNovaQuotaService(BaseCmdServiceTests):
+
+    service_class = 'NovaQuotaService'
+    service_name = 'nova_quota_service'
+    response = {
+        "limits": {
+            "rate": [],
+            "absolute": {
+                "maxServerMeta": 128,
+                "maxPersonality": 5,
+                "totalServerGroupsUsed": 0,
+                "maxImageMeta": 128,
+                "maxPersonalitySize": 10240,
+                "maxTotalKeypairs": 100,
+                "maxSecurityGroupRules": 20,
+                "maxServerGroups": 10,
+                "totalCoresUsed": 0,
+                "totalRAMUsed": 0,
+                "totalInstancesUsed": 0,
+                "maxSecurityGroups": 10,
+                "totalFloatingIpsUsed": 0,
+                "maxTotalCores": 20,
+                "maxServerGroupMembers": 10,
+                "maxTotalFloatingIps": 10,
+                "totalSecurityGroupsUsed": 0,
+                "maxTotalInstances": 10,
+                "maxTotalRAMSize": 51200
+                }
+            }
+        }
+
+    def test_delete_fail(self):
+        delete_mock = [(self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock, fail=True)
+
+    def test_delete_pass(self):
+        delete_mock = [(self.delete_method, None, 202),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock)
+
+    def test_dry_run(self):
+        dry_mock = [(self.get_method, self.response, 200),
+                    (self.delete_method, "delete", None)]
+        self._test_dry_run_true(dry_mock)
+
+
+class TestNetworkQuotaService(BaseCmdServiceTests):
+
+    service_class = 'NetworkQuotaService'
+    service_name = 'network_quota_service'
+    response = {
+        "quotas": [{
+            "subnet": 110,
+            "network": 100,
+            "floatingip": 50,
+            "tenant_id": "81e8490db559474dacb2212fca9cca2d",
+            "subnetpool": -1,
+            "security_group_rule": 100,
+            "trunk": -1,
+            "security_group": 10,
+            "router": 10,
+            "rbac_policy": 10, "project_id":
+            "81e8490db559474dacb2212fca9cca2d", "port": 500
+            }]
+    }
+
+    def test_delete_fail(self):
+        delete_mock = [(self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock, fail=True)
+
+    def test_delete_pass(self):
+        delete_mock = [(self.delete_method, None, 204),
+                       (self.log_method, 'exception', None)]
+        self._test_delete(delete_mock)
+
+    def test_dry_run(self):
+        dry_mock = [(self.get_method, self.response, 200),
+                    (self.delete_method, "delete", None)]
+        self._test_dry_run_true(dry_mock)
 
 
 # Begin network service classes

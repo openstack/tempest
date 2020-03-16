@@ -362,6 +362,25 @@ class NovaQuotaService(BaseService):
         self.data['compute_quotas'] = quotas['absolute']
 
 
+class NetworkQuotaService(BaseService):
+    def __init__(self, manager, **kwargs):
+        super(NetworkQuotaService, self).__init__(kwargs)
+        self.client = manager.network_quotas_client
+
+    def delete(self):
+        client = self.client
+        try:
+            client.reset_quotas(self.project_id)
+        except Exception:
+            LOG.exception("Delete Network Quotas exception for 'project %s'.",
+                          self.project_id)
+
+    def dry_run(self):
+        resp = [quota for quota in self.client.list_quotas()['quotas']
+                if quota['project_id'] == self.project_id]
+        self.data['network_quotas'] = resp
+
+
 # Begin network service classes
 class BaseNetworkService(BaseService):
     def __init__(self, manager, **kwargs):
@@ -1048,6 +1067,7 @@ def get_resource_cleanup_services():
         resource_cleanup_services.append(NetworkService)
         resource_cleanup_services.append(NetworkSecGroupService)
         resource_cleanup_services.append(NetworkSubnetPoolsService)
+        resource_cleanup_services.append(NetworkQuotaService)
     if IS_CINDER:
         resource_cleanup_services.append(SnapshotService)
         resource_cleanup_services.append(VolumeService)
