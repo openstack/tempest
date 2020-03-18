@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from json import decoder as json_decoder
+
 from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 
@@ -110,7 +112,11 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
     max_microversion = '2.32'
 
     def verify_device_metadata(self, md_json):
-        md_dict = json.loads(md_json)
+        try:
+            md_dict = json.loads(md_json)
+        except (json_decoder.JSONDecodeError, TypeError):
+            return False
+
         for d in md_dict['devices']:
             if d['type'] == 'nic':
                 if d['mac'] == self.port1['mac_address']:
@@ -310,7 +316,11 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
             raise cls.skipException('Metadata API must be enabled')
 
     def verify_device_metadata(self, md_json):
-        md_dict = json.loads(md_json)
+        try:
+            md_dict = json.loads(md_json)
+        except (json_decoder.JSONDecodeError, TypeError):
+            return False
+
         found_devices = [d['tags'][0] for d in md_dict['devices']
                          if d.get('tags')]
         try:
