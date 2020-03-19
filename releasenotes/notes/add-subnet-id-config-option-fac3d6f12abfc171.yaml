@@ -1,0 +1,8 @@
+---
+features:
+  - A new config option 'subnet_id' is added to section
+    'network' to specify subnet which should be used for
+    allocation of IPs for VMs created during testing.
+    It should be used when the tested network contains more
+    than one subnet otherwise test of external connectivity
+    will fail. (Fixes bug #1856671)

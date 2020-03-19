@@ -1008,13 +1008,18 @@ class NetworkScenarioTest(ScenarioTest):
             port_id, ip4 = self._get_server_port_id_and_ip4(thing)
         else:
             ip4 = None
-        result = client.create_floatingip(
-            floating_network_id=external_network_id,
-            port_id=port_id,
-            tenant_id=thing['tenant_id'],
-            fixed_ip_address=ip4
-        )
+
+        kwargs = {
+            'floating_network_id': external_network_id,
+            'port_id': port_id,
+            'tenant_id': thing['tenant_id'],
+            'fixed_ip_address': ip4,
+        }
+        if CONF.network.subnet_id:
+            kwargs['subnet_id'] = CONF.network.subnet_id
+        result = client.create_floatingip(**kwargs)
         floating_ip = result['floatingip']
+
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         client.delete_floatingip,
                         floating_ip['id'])
