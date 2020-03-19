@@ -20,14 +20,12 @@ Run Tempest
    It works only when used with some specific tox environments
    ('all', 'all-plugin'.)
 
-   Multi-line and commented regexs can be achieved by doing this:
+   In the following example only api scenario and third party tests
+   will be executed.
 
        ::
            vars:
-             tempest_test_regex: |
-               (?x)    # Ignore comments and whitespaces
-               # Line with only a comment.
-               (tempest\.(api|scenario|thirdparty)).*$    # Run only api scenario and third party
+             tempest_test_regex: (tempest\.(api|scenario|thirdparty)).*$
 
 .. zuul:rolevar:: tempest_test_blacklist
 
@@ -48,14 +46,9 @@ Run Tempest
    It works only when used with some specific tox environments
    ('all', 'all-plugin'.)
 
-   Multi-line and commented regexs can be achieved by doing this:
-
        ::
            vars:
-             tempest_black_regex: |
-               (?x)    # Ignore comments and whitespaces
-               # Line with only a comment.
-               (tempest.api.identity).*$
+             tempest_black_regex: (tempest.api.identity).*$
 
 .. zuul:rolevar:: tox_extra_args
    :default: ''
