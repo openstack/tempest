@@ -67,3 +67,12 @@ class TestResourceTypesClient(base.BaseServiceTest):
 
     def test_list_resource_types_with_bytes_body(self):
         self._test_list_resource_types(bytes_body=True)
+
+    def test_delete_resource_type_association(self):
+        self.check_service_client_function(
+            self.client.delete_resource_type_association,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {}, status=204,
+            namespace_id="OS::Compute::Hypervisor",
+            resource_name="OS::Glance::Image",
+            )
