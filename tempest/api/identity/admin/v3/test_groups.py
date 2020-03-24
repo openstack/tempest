@@ -114,6 +114,13 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.groups_client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
         user_groups = self.users_client.list_user_groups(user['id'])['groups']
+        # The `membership_expires_at` attribute is present when listing user
+        # group memberships, and is not an attribute of the groups themselves.
+        # Therefore we remove it from the comparison.
+        for g in user_groups:
+            if 'membership_expires_at' in g:
+                self.assertIsNone(g['membership_expires_at'])
+                del(g['membership_expires_at'])
         self.assertEqual(sorted(groups, key=lambda k: k['name']),
                          sorted(user_groups, key=lambda k: k['name']))
         self.assertEqual(2, len(user_groups))
