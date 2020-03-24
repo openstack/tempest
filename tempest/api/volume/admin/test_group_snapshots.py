@@ -113,7 +113,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
         self._delete_group_snapshot(group_snapshot)
         group_snapshots = self.group_snapshots_client.list_group_snapshots()[
             'group_snapshots']
-        self.assertEmpty(group_snapshots)
+        self.assertNotIn((group_snapshot['name'], group_snapshot['id']),
+                         [(m['name'], m['id']) for m in group_snapshots])
 
     @decorators.idempotent_id('eff52c70-efc7-45ed-b47a-4ad675d09b81')
     def test_create_group_from_group_snapshot(self):
