@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class VolumesSnapshotTestJSON(base.BaseVolumeTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

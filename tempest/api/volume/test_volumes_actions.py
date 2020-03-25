@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeTest):
+    create_default_network = True
 
     @classmethod
     def resource_setup(cls):

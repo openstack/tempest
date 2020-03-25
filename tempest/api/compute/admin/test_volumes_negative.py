@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

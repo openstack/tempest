@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):

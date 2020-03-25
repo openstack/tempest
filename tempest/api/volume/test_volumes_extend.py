@@ -60,6 +60,7 @@ class VolumesExtendTest(base.BaseVolumeTest):
 
 class VolumesExtendAttachedTest(base.BaseVolumeTest):
     """Tests extending the size of an attached volume."""
+    create_default_network = True
 
     # We need admin credentials for getting instance action event details. By
     # default a non-admin can list and show instance actions if they own the

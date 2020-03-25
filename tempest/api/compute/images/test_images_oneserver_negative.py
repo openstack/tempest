@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
+    create_default_network = True
 
     def tearDown(self):
         """Terminate test instances created after a test is executed."""
