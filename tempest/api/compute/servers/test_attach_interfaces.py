@@ -86,12 +86,16 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
         # apparently not enough? Add cleanup here.
         self.addCleanup(self.delete_server, server['id'])
         self._wait_for_validation(server, validation_resources)
+        try:
+            fip = set([validation_resources['floating_ip']['ip']])
+        except KeyError:
+            fip = ()
         ifs = (self.interfaces_client.list_interfaces(server['id'])
                ['interfaceAttachments'])
         body = waiters.wait_for_interface_status(
             self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
         ifs[0]['port_state'] = body['port_state']
-        return server, ifs
+        return server, ifs, fip
 
 
 class AttachInterfacesTestJSON(AttachInterfacesTestBase):
@@ -226,7 +230,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
     @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @utils.services('network')
     def test_create_list_show_delete_interfaces_by_network_port(self):
-        server, ifs = self._create_server_get_interfaces()
+        server, ifs, _ = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
 
@@ -268,7 +272,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
             raise self.skipException("Only owner network supports "
                                      "creating interface by fixed ip.")
 
-        server, ifs = self._create_server_get_interfaces()
+        server, ifs, _ = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
 
@@ -354,9 +358,8 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
                 not CONF.network.shared_physical_network):
             raise self.skipException("Only owner network supports "
                                      "creating interface by fixed ip.")
-
         # Add and Remove the fixed IP to server.
-        server, ifs = self._create_server_get_interfaces()
+        server, ifs, fip = self._create_server_get_interfaces()
         original_interface_count = len(ifs)  # This is the number of ports.
         self.assertGreater(original_interface_count, 0)
         # Get the starting list of IPs on the server.
@@ -369,6 +372,9 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
         self.assertEqual(1, len(addresses), addresses)  # number of networks
         # Keep track of the original addresses so we can know which IP is new.
         original_ips = [addr['addr'] for addr in list(addresses.values())[0]]
+        # Make sure the floating IP possibly assigned during
+        # server creation is always present in the set of original ips.
+        original_ips = set(original_ips).union(fip)
         original_ip_count = len(original_ips)
         self.assertGreater(original_ip_count, 0, addresses)  # at least 1
         network_id = ifs[0]['net_id']
@@ -376,40 +382,22 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
         # fixed IP on the same network (and same port since we only have one
         # port).
         self.servers_client.add_fixed_ip(server['id'], networkId=network_id)
-        # Wait for the ips count to increase by one.
 
-        def _get_server_floating_ips():
-            _floating_ips = []
-            _server = self.os_primary.servers_client.show_server(
-                server['id'])['server']
-            for _ip_set in _server['addresses']:
-                for _ip in _server['addresses'][_ip_set]:
-                    if _ip['OS-EXT-IPS:type'] == 'floating':
-                        _floating_ips.append(_ip['addr'])
-            return _floating_ips
-
-        def _wait_for_ip_increase():
+        def _wait_for_ip_change(expected_count):
             _addresses = self.os_primary.servers_client.list_addresses(
                 server['id'])['addresses']
-            _ips = [addr['addr'] for addr in list(_addresses.values())[0]]
-            LOG.debug("Wait for IP increase. All IPs still associated to "
+            _ips = set([addr['addr'] for addr in list(_addresses.values())[0]])
+            # Make sure possible floating ip is always present in the set.
+            _ips = _ips.union(fip)
+            LOG.debug("Wait for change of IPs. All IPs still associated to "
                       "the server %(id)s: %(ips)s",
                       {'id': server['id'], 'ips': _ips})
-            if len(_ips) == original_ip_count + 1:
-                return True
-            elif len(_ips) == original_ip_count:
-                return False
-            # If not, lets remove any floating IP from the list and check again
-            _fips = _get_server_floating_ips()
-            _ips = [_ip for _ip in _ips if _ip not in _fips]
-            LOG.debug("Wait for IP increase. Fixed IPs still associated to "
-                      "the server %(id)s: %(ips)s",
-                      {'id': server['id'], 'ips': _ips})
-            return len(_ips) == original_ip_count + 1
+            return len(_ips) == expected_count
 
+        # Wait for the ips count to increase by one.
         if not test_utils.call_until_true(
-                _wait_for_ip_increase, CONF.compute.build_timeout,
-                CONF.compute.build_interval):
+                _wait_for_ip_change, CONF.compute.build_timeout,
+                CONF.compute.build_interval, original_ip_count + 1):
             raise lib_exc.TimeoutException(
                 'Timed out while waiting for IP count to increase.')
 
@@ -428,26 +416,8 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
                 break
         self.servers_client.remove_fixed_ip(server['id'], address=fixed_ip)
         # Wait for the interface count to decrease by one.
-
-        def _wait_for_ip_decrease():
-            _addresses = self.os_primary.servers_client.list_addresses(
-                server['id'])['addresses']
-            _ips = [addr['addr'] for addr in list(_addresses.values())[0]]
-            LOG.debug("Wait for IP decrease. All IPs still associated to "
-                      "the server %(id)s: %(ips)s",
-                      {'id': server['id'], 'ips': _ips})
-            if len(_ips) == original_ip_count:
-                return True
-            # If not, lets remove any floating IP from the list and check again
-            _fips = _get_server_floating_ips()
-            _ips = [_ip for _ip in _ips if _ip not in _fips]
-            LOG.debug("Wait for IP decrease. Fixed IPs still associated to "
-                      "the server %(id)s: %(ips)s",
-                      {'id': server['id'], 'ips': _ips})
-            return len(_ips) == original_ip_count
-
         if not test_utils.call_until_true(
-                _wait_for_ip_decrease, CONF.compute.build_timeout,
-                CONF.compute.build_interval):
+                _wait_for_ip_change, CONF.compute.build_timeout,
+                CONF.compute.build_interval, original_ip_count):
             raise lib_exc.TimeoutException(
                 'Timed out while waiting for IP count to decrease.')
