@@ -15,6 +15,7 @@
 import os
 import re
 
+from hacking import core
 import pycodestyle
 
 
@@ -25,7 +26,6 @@ PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SETUP_TEARDOWN_CLASS_DEFINITION = re.compile(r'^\s+def (setUp|tearDown)Class')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
-VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 RAND_NAME_HYPHEN_RE = re.compile(r".*rand_name\(.+[\-\_][\"\']\)")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 TESTTOOLS_SKIP_DECORATOR = re.compile(r'\s*@testtools\.skip\((.*)\)')
@@ -39,6 +39,7 @@ NEGATIVE_TEST_DECORATOR = re.compile(
 _HAVE_NEGATIVE_DECORATOR = False
 
 
+@core.flake8ext
 def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
     """Check for client imports from tempest/api & tempest/scenario tests
 
@@ -53,6 +54,7 @@ def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
                      " in tempest/api/* or tempest/scenario/* tests"))
 
 
+@core.flake8ext
 def scenario_tests_need_service_tags(physical_line, filename,
                                      previous_logical):
     """Check that scenario tests have service tags
@@ -67,6 +69,7 @@ def scenario_tests_need_service_tags(physical_line, filename,
                         "T104: Scenario tests require a service decorator")
 
 
+@core.flake8ext
 def no_setup_teardown_class_for_tests(physical_line, filename):
 
     if pycodestyle.noqa(physical_line):
@@ -80,20 +83,7 @@ def no_setup_teardown_class_for_tests(physical_line, filename):
                 "T105: (setUp|tearDown)Class can not be used in tests")
 
 
-def no_vi_headers(physical_line, line_number, lines):
-    """Check for vi editor configuration in source files.
-
-    By default vi modelines can only appear in the first or
-    last 5 lines of a source file.
-
-    T106
-    """
-    # NOTE(gilliard): line_number is 1-indexed
-    if line_number <= 5 or line_number > len(lines) - 5:
-        if VI_HEADER_RE.match(physical_line):
-            return 0, "T106: Don't put vi configuration in source files"
-
-
+@core.flake8ext
 def service_tags_not_in_module_path(physical_line, filename):
     """Check that a service tag isn't in the module path
 
@@ -117,6 +107,7 @@ def service_tags_not_in_module_path(physical_line, filename):
                             "T107: service tag should not be in path")
 
 
+@core.flake8ext
 def no_hyphen_at_end_of_rand_name(logical_line, filename):
     """Check no hyphen at the end of rand_name() argument
 
@@ -127,6 +118,7 @@ def no_hyphen_at_end_of_rand_name(logical_line, filename):
         return 0, msg
 
 
+@core.flake8ext
 def no_mutable_default_args(logical_line):
     """Check that mutable object isn't used as default argument
 
@@ -137,6 +129,7 @@ def no_mutable_default_args(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def no_testtools_skip_decorator(logical_line):
     """Check that methods do not have the testtools.skip decorator
 
@@ -170,7 +163,8 @@ def _common_service_clients_check(logical_line, physical_line, filename,
     return True
 
 
-def get_resources_on_service_clients(logical_line, physical_line, filename,
+@core.flake8ext
+def get_resources_on_service_clients(physical_line, logical_line, filename,
                                      line_number, lines):
     """Check that service client names of GET should be consistent
 
@@ -197,7 +191,8 @@ def get_resources_on_service_clients(logical_line, physical_line, filename,
         yield (0, msg)
 
 
-def delete_resources_on_service_clients(logical_line, physical_line, filename,
+@core.flake8ext
+def delete_resources_on_service_clients(physical_line, logical_line, filename,
                                         line_number, lines):
     """Check that service client names of DELETE should be consistent
 
@@ -223,6 +218,7 @@ def delete_resources_on_service_clients(logical_line, physical_line, filename,
         yield (0, msg)
 
 
+@core.flake8ext
 def dont_import_local_tempest_into_lib(logical_line, filename):
     """Check that tempest.lib should not import local tempest code
 
@@ -244,6 +240,7 @@ def dont_import_local_tempest_into_lib(logical_line, filename):
     yield (0, msg)
 
 
+@core.flake8ext
 def use_rand_uuid_instead_of_uuid4(logical_line, filename):
     """Check that tests use data_utils.rand_uuid() instead of uuid.uuid4()
 
@@ -260,6 +257,7 @@ def use_rand_uuid_instead_of_uuid4(logical_line, filename):
     yield (0, msg)
 
 
+@core.flake8ext
 def dont_use_config_in_tempest_lib(logical_line, filename):
     """Check that tempest.lib doesn't use tempest config
 
@@ -277,7 +275,8 @@ def dont_use_config_in_tempest_lib(logical_line, filename):
         yield(0, msg)
 
 
-def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
+@core.flake8ext
+def dont_put_admin_tests_on_nonadmin_path(logical_line,
                                           filename):
     """Check admin tests should exist under admin path
 
@@ -285,9 +284,6 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
     """
 
     if 'tempest/api/' not in filename:
-        return
-
-    if pycodestyle.noqa(physical_line):
         return
 
     if not re.match(r'class .*Test.*\(.*Admin.*\):', logical_line):
@@ -298,6 +294,7 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line, physical_line,
         yield(0, msg)
 
 
+@core.flake8ext
 def unsupported_exception_attribute_PY3(logical_line):
     """Check Unsupported 'message' exception attribute in PY3
 
@@ -309,6 +306,7 @@ def unsupported_exception_attribute_PY3(logical_line):
         yield(0, msg)
 
 
+@core.flake8ext
 def negative_test_attribute_always_applied_to_negative_tests(physical_line,
                                                              filename):
     """Check ``@decorators.attr(type=['negative'])`` applied to negative tests.
@@ -330,22 +328,3 @@ def negative_test_attribute_always_applied_to_negative_tests(physical_line,
                        " to all negative API tests"
                 )
             _HAVE_NEGATIVE_DECORATOR = False
-
-
-def factory(register):
-    register(import_no_clients_in_api_and_scenario_tests)
-    register(scenario_tests_need_service_tags)
-    register(no_setup_teardown_class_for_tests)
-    register(no_vi_headers)
-    register(service_tags_not_in_module_path)
-    register(no_hyphen_at_end_of_rand_name)
-    register(no_mutable_default_args)
-    register(no_testtools_skip_decorator)
-    register(get_resources_on_service_clients)
-    register(delete_resources_on_service_clients)
-    register(dont_import_local_tempest_into_lib)
-    register(dont_use_config_in_tempest_lib)
-    register(use_rand_uuid_instead_of_uuid4)
-    register(dont_put_admin_tests_on_nonadmin_path)
-    register(unsupported_exception_attribute_PY3)
-    register(negative_test_attribute_always_applied_to_negative_tests)
