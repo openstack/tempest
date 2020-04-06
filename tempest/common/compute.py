@@ -400,9 +400,24 @@ class _WebSocket(object):
         """Upgrade the HTTP connection to a WebSocket and verify."""
         # It is possible to pass the path as a query parameter in the request,
         # so use it if present
+        # Given noVNC format
+        # https://x.com/vnc_auto.html?path=%3Ftoken%3Dxxx,
+        # url format is
+        # ParseResult(scheme='https', netloc='x.com',
+        # path='/vnc_auto.html', params='',
+        # query='path=%3Ftoken%3Dxxx', fragment='').
+        # qparams format is {'path': ['?token=xxx']}
         qparams = urlparse.parse_qs(url.query)
-        path = qparams['path'][0] if 'path' in qparams else '/websockify'
-        reqdata = 'GET %s HTTP/1.1\r\n' % path
+        # according to references
+        # https://docs.python.org/3/library/urllib.parse.html
+        # https://tools.ietf.org/html/rfc3986#section-3.4
+        # qparams['path'][0] format is '?token=xxx' without / prefix
+        # remove / in /websockify to comply to references.
+        path = qparams['path'][0] if 'path' in qparams else 'websockify'
+        # Fix websocket request format by adding / prefix.
+        # Updated request format: GET /?token=xxx HTTP/1.1
+        # or GET /websockify HTTP/1.1
+        reqdata = 'GET /%s HTTP/1.1\r\n' % path
         reqdata += 'Host: %s' % url.hostname
         # Add port only if we have one specified
         if url.port:
