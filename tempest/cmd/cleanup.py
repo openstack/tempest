@@ -123,6 +123,16 @@ class TempestCleanup(command.Command):
             raise Exception(self.GOT_EXCEPTIONS)
 
     def init(self, parsed_args):
+        # set new handler for logging to stdout, by default only INFO messages
+        # are logged to stdout
+        stdout_handler = logging.logging.StreamHandler()
+        # debug argument is defined in cliff already
+        if self.app_args.debug:
+            stdout_handler.level = logging.DEBUG
+        else:
+            stdout_handler.level = logging.INFO
+        LOG.handlers.append(stdout_handler)
+
         cleanup_service.init_conf()
         self.options = parsed_args
         self.admin_mgr = clients.Manager(
@@ -149,7 +159,7 @@ class TempestCleanup(command.Command):
         self._load_json()
 
     def _cleanup(self):
-        print("Begin cleanup")
+        LOG.info("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
@@ -167,7 +177,7 @@ class TempestCleanup(command.Command):
                   'is_save_state': is_save_state}
         project_service = cleanup_service.ProjectService(admin_mgr, **kwargs)
         projects = project_service.list()
-        print("Process %s projects" % len(projects))
+        LOG.info("Processing %s projects", len(projects))
 
         # Loop through list of projects and clean them up.
         for project in projects:
@@ -179,10 +189,12 @@ class TempestCleanup(command.Command):
                   'is_preserve': is_preserve,
                   'is_save_state': is_save_state,
                   'got_exceptions': self.GOT_EXCEPTIONS}
+        LOG.info("Processing global services")
         for service in self.global_services:
             svc = service(admin_mgr, **kwargs)
             svc.run()
 
+        LOG.info("Processing services")
         for service in self.resource_cleanup_services:
             svc = service(self.admin_mgr, **kwargs)
             svc.run()
@@ -193,7 +205,7 @@ class TempestCleanup(command.Command):
                                    indent=2, separators=(',', ': ')))
 
     def _clean_project(self, project):
-        print("Cleaning project:  %s " % project['name'])
+        LOG.debug("Cleaning project:  %s ", project['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
@@ -263,7 +275,7 @@ class TempestCleanup(command.Command):
         return 'Cleanup after tempest run'
 
     def _init_state(self):
-        print("Initializing saved state.")
+        LOG.info("Initializing saved state.")
         data = {}
         admin_mgr = self.admin_mgr
         kwargs = {'data': data,

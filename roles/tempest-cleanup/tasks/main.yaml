@@ -3,7 +3,7 @@
     - name: Run tempest cleanup init-saved-state
       become: yes
       become_user: tempest
-      command: tox -evenv-tempest -- tempest cleanup --init-saved-state
+      command: tox -evenv-tempest -- tempest cleanup --init-saved-state --debug
       args:
         chdir: "{{ devstack_base_dir }}/tempest"
 
@@ -15,7 +15,7 @@
     - name: Run tempest cleanup dry-run
       become: yes
       become_user: tempest
-      command: tox -evenv-tempest -- tempest cleanup --dry-run
+      command: tox -evenv-tempest -- tempest cleanup --dry-run --debug
       args:
         chdir: "{{ devstack_base_dir }}/tempest"
 
@@ -25,7 +25,7 @@
 - name: Run tempest cleanup
   become: yes
   become_user: tempest
-  command: tox -evenv-tempest -- tempest cleanup
+  command: tox -evenv-tempest -- tempest cleanup --debug
   args:
     chdir: "{{ devstack_base_dir }}/tempest"
   when: not dry_run and not init_saved_state
