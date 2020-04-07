@@ -18,16 +18,64 @@ from tempest.tests.lib.services import base
 
 
 class TestNamespacesClient(base.BaseServiceTest):
-    FAKE_CREATE_SHOW_NAMESPACE = {
-        "namespace": "OS::Compute::Hypervisor",
-        "visibility": "public",
-        "description": "Tempest",
-        "display_name": u"\u2740(*\xb4\u25e1`*)\u2740",
-        "protected": True
+    FAKE_CREATE_NAMESPACE = {
+        "created_at": "2016-05-19T16:05:48Z",
+        "description": "A metadata definitions namespace.",
+        "display_name": "An Example Namespace",
+        "namespace": "FredCo::SomeCategory::Example",
+        "owner": "c60b1d57c5034e0d86902aedf8c49be0",
+        "protected": True,
+        "schema": "/v2/schemas/metadefs/namespace",
+        "self": "/v2/metadefs/namespaces/"
+                "FredCo::SomeCategory::Example",
+        "updated_at": "2016-05-19T16:05:48Z",
+        "visibility": "public"
+    }
+
+    FAKE_SHOW_NAMESPACE = {
+        "created_at": "2016-06-28T14:57:10Z",
+        "description": "The libvirt compute driver options.",
+        "display_name": "libvirt Driver Options",
+        "namespace": "OS::Compute::Libvirt",
+        "owner": "admin",
+        "properties": {
+            "boot_menu": {
+                "description": "If true, enables the BIOS bootmenu.",
+                "enum": [
+                    "true",
+                    "false"
+                ],
+                "title": "Boot Menu",
+                "type": "string"
+            },
+            "serial_port_count": {
+                "description": "Specifies the count of serial ports.",
+                "minimum": 0,
+                "title": "Serial Port Count",
+                "type": "integer"
+            }
+        },
+        "protected": True,
+        "resource_type_associations": [
+            {
+                "created_at": "2016-06-28T14:57:10Z",
+                "name": "OS::Glance::Image",
+                "prefix": "hw_"
+            },
+            {
+                "created_at": "2016-06-28T14:57:10Z",
+                "name": "OS::Nova::Flavor",
+                "prefix": "hw:"
+            }
+        ],
+        "schema": "/v2/schemas/metadefs/namespace",
+        "self": "/v2/metadefs/namespaces/OS::Compute::Libvirt",
+        "visibility": "public"
     }
 
     FAKE_LIST_NAMESPACES = {
-        "first": "/v2/metadefs/namespaces?sort_key=created_at&sort_dir=asc",
+        "first": "/v2/metadefs/namespaces?sort_key=created_at&"
+                 "sort_dir=asc",
         "namespaces": [
             {
                 "created_at": "2014-08-28T17:13:06Z",
@@ -89,7 +137,7 @@ class TestNamespacesClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.show_namespace,
             'tempest.lib.common.rest_client.RestClient.get',
-            self.FAKE_CREATE_SHOW_NAMESPACE,
+            self.FAKE_SHOW_NAMESPACE,
             bytes_body,
             namespace="OS::Compute::Hypervisor")
 
@@ -104,7 +152,7 @@ class TestNamespacesClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.client.create_namespace,
             'tempest.lib.common.rest_client.RestClient.post',
-            self.FAKE_CREATE_SHOW_NAMESPACE,
+            self.FAKE_CREATE_NAMESPACE,
             bytes_body,
             namespace="OS::Compute::Hypervisor",
             visibility="public", description="Tempest",
