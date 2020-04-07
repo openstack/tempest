@@ -101,17 +101,6 @@ class HackingTestCase(base.TestCase):
             'def test_fake:', './tempest/scenario/orchestration/test_fake.py',
             "\n"))
 
-    def test_no_vi_headers(self):
-        # NOTE(mtreinish)  The lines parameter is used only for finding the
-        # line location in the file. So these tests just pass a list of an
-        # arbitrary length to use for verifying the check function.
-        self.assertTrue(checks.no_vi_headers(
-            '# vim: tabstop=4 shiftwidth=4 softtabstop=4', 1, range(250)))
-        self.assertTrue(checks.no_vi_headers(
-            '# vim: tabstop=4 shiftwidth=4 softtabstop=4', 249, range(250)))
-        self.assertFalse(checks.no_vi_headers(
-            '# vim: tabstop=4 shiftwidth=4 softtabstop=4', 149, range(250)))
-
     def test_service_tags_not_in_module_path(self):
         self.assertTrue(checks.service_tags_not_in_module_path(
             "@utils.services('compute')",

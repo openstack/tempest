@@ -23,7 +23,7 @@ CONF = config.CONF
 # NOTE(zhufl): This inherits from BaseVolumeAdminTest because
 # it requires force_tenant_isolation=True, which need admin
 # credentials to create non-admin users for the tests.
-class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa
+class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa: T115
 
     # avoid existing volumes of pre-defined tenant
     force_tenant_isolation = True

@@ -109,7 +109,7 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         snap_list = self.snapshots_client.list_snapshots(
             sort_key=sort_key, sort_dir=sort_dir)['snapshots']
         self.assertNotEmpty(snap_list)
-        if sort_key is 'display_name':
+        if sort_key == 'display_name':
             sort_key = 'name'
         # Note: On Cinder API, 'display_name' works as a sort key
         # on a request, a volume name appears as 'name' on the response.

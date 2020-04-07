@@ -69,7 +69,7 @@ class TestObjectClient(base.TestCase):
 
         # If the expected initial status is not 100, then an exception
         # should be thrown and the connection closed
-        if initial_status is 100:
+        if initial_status == 100:
             status, reason = \
                 self.object_client.create_object_continue(cnt, obj, req_data)
         else:
@@ -91,7 +91,7 @@ class TestObjectClient(base.TestCase):
         mock_poc.return_value.endheaders.assert_called_once_with()
 
         # The following steps are only taken if the initial status is 100
-        if initial_status is 100:
+        if initial_status == 100:
             # Verify that the method returned what it was supposed to
             self.assertEqual(status, 201)
 

@@ -684,7 +684,7 @@ class Credentials(object):
 
     def __str__(self):
         """Represent only attributes included in self.ATTRIBUTES"""
-        attrs = [attr for attr in self.ATTRIBUTES if attr is not 'password']
+        attrs = [attr for attr in self.ATTRIBUTES if attr != 'password']
         _repr = dict((k, getattr(self, k)) for k in attrs)
         return str(_repr)
 
@@ -741,7 +741,7 @@ class KeystoneV2Credentials(Credentials):
 
     def __str__(self):
         """Represent only attributes included in self.ATTRIBUTES"""
-        attrs = [attr for attr in self.ATTRIBUTES if attr is not 'password']
+        attrs = [attr for attr in self.ATTRIBUTES if attr != 'password']
         _repr = dict((k, getattr(self, k)) for k in attrs)
         return str(_repr)
 
