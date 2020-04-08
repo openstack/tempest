@@ -68,32 +68,36 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.set_flavor_extra_spec,
                           self.flavor['id'],
-                          key1="value1", key2="value2")
+                          **{'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'})
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1ebf4ef8-759e-48fe-a801-d451d80476fb')
     def test_flavor_non_admin_update_specific_key(self):
         # non admin user is not allowed to update flavor extra spec
         body = self.admin_flavors_client.set_flavor_extra_spec(
-            self.flavor['id'], key1="value1", key2="value2")['extra_specs']
-        self.assertEqual(body['key1'], 'value1')
+            self.flavor['id'],
+            **{'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
+        )['extra_specs']
+        self.assertEqual(body['hw:numa_nodes'], '1')
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.
                           update_flavor_extra_spec,
                           self.flavor['id'],
-                          'key1',
-                          key1='value1_new')
+                          'hw:numa_nodes',
+                          **{'hw:numa_nodes': '1'})
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('28f12249-27c7-44c1-8810-1f382f316b11')
     def test_flavor_non_admin_unset_keys(self):
         self.admin_flavors_client.set_flavor_extra_spec(
-            self.flavor['id'], key1="value1", key2="value2")
+            self.flavor['id'],
+            **{'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
+        )
 
         self.assertRaises(lib_exc.Forbidden,
                           self.flavors_client.unset_flavor_extra_spec,
                           self.flavor['id'],
-                          'key1')
+                          'hw:numa_nodes')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('440b9f3f-3c7f-4293-a106-0ceda350f8de')
@@ -101,7 +105,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.admin_flavors_client.unset_flavor_extra_spec,
                           self.flavor['id'],
-                          'nonexistent_key')
+                          'hw:cpu_thread_policy')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('329a7be3-54b2-48be-8052-bf2ce4afd898')
@@ -109,7 +113,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.NotFound,
                           self.flavors_client.show_flavor_extra_spec,
                           self.flavor['id'],
-                          "nonexistent_key")
+                          'hw:cpu_thread_policy')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('25b822b8-9f49-44f6-80de-d99f0482e5cb')
@@ -118,8 +122,8 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_flavors_client.update_flavor_extra_spec,
                           self.flavor['id'],
-                          "key2",
-                          key1="value")
+                          'hw:numa_nodes',
+                          **{'hw:cpu_policy': 'shared'})
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f5889590-bf66-41cc-b4b1-6e6370cfd93f')
@@ -128,6 +132,5 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_flavors_client.update_flavor_extra_spec,
                           self.flavor['id'],
-                          "key1",
-                          key1="value",
-                          key2="value")
+                          'hw:numa_nodes',
+                          **{'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'})
