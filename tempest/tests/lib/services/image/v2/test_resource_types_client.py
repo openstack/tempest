@@ -48,6 +48,28 @@ class TestResourceTypesClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_CREATE_RESOURCE_TYPE_ASSOCIATION = {
+        "created_at": "2020-03-07T18:20:44Z",
+        "name": "OS::Glance::Image",
+        "prefix": "hw:",
+        "updated_at": "2020-03-07T18:20:44Z"
+    }
+
+    FAKE_LIST_RESOURCE_TYPE_ASSOCIATION = {
+        "resource_type_associations": [
+            {
+                "created_at": "2020-03-07T18:20:44Z",
+                "name": "OS::Nova::Flavor",
+                "prefix": "hw:"
+            },
+            {
+                "created_at": "2020-03-07T18:20:44Z",
+                "name": "OS::Glance::Image",
+                "prefix": "hw_"
+            }
+        ]
+    }
+
     def setUp(self):
         super(TestResourceTypesClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -61,6 +83,25 @@ class TestResourceTypesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_RESOURCETYPES,
             bytes_body)
+
+    def _test_create_resource_type_association(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.create_resource_type_association,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_CREATE_RESOURCE_TYPE_ASSOCIATION,
+            bytes_body, status=201,
+            namespace_id="OS::Compute::Hypervisor",
+            name="OS::Glance::Image", prefix="hw_",
+            )
+
+    def _test_list_resource_type_association(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_resource_type_association,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_RESOURCE_TYPE_ASSOCIATION,
+            bytes_body,
+            namespace_id="OS::Compute::Hypervisor",
+            )
 
     def test_list_resource_types_with_str_body(self):
         self._test_list_resource_types()
@@ -76,3 +117,15 @@ class TestResourceTypesClient(base.BaseServiceTest):
             namespace_id="OS::Compute::Hypervisor",
             resource_name="OS::Glance::Image",
             )
+
+    def test_create_resource_type_association_with_str_body(self):
+        self._test_create_resource_type_association()
+
+    def test_create_resource_type_association_with_bytes_body(self):
+        self._test_create_resource_type_association(bytes_body=True)
+
+    def test_list_resource_type_association_with_str_body(self):
+        self._test_list_resource_type_association()
+
+    def test_list_resource_type_association_with_bytes_body(self):
+        self._test_list_resource_type_association(bytes_body=True)
