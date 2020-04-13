@@ -36,6 +36,7 @@ from urllib3.util import retry
 # when the patches are merged.
 BLACKLIST = [
     'x/gce-api',  # It looks gce-api doesn't support python3 yet.
+    'x/glare',  # To avoid sanity-job failure
     'x/group-based-policy',  # It looks this doesn't support python3 yet.
     'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
     'openstack/networking-generic-switch',
@@ -48,6 +49,7 @@ BLACKLIST = [
     'openstack/neutron-dynamic-routing',
     # https://review.opendev.org/#/c/637718/
     'openstack/neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
+    'x/tap-as-a-service',  # To avoid sanity-job failure
     'x/valet',  # https://review.opendev.org/#/c/638339/
     'x/kingbird',  # https://bugs.launchpad.net/kingbird/+bug/1869722
 ]
