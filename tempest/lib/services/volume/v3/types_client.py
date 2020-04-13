@@ -65,6 +65,19 @@ class TypesClient(rest_client.RestClient):
         self.validate_response(schema.show_volume_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
+    def show_default_volume_type(self):
+        """Returns the details of a single volume type.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/index.html#show-default-volume-type
+        """
+        url = "types/default"
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.validate_response(schema.show_volume_type, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
     def create_volume_type(self, **kwargs):
         """Create volume type.
 

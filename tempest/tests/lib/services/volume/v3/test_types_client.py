@@ -121,6 +121,13 @@ class TestTypesClient(base.BaseServiceTest):
             to_utf=bytes_body,
             volume_type_id="6685584b-1eac-4da6-b5c3-555430cf68ff")
 
+    def _test_show_default_volume_type(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_default_volume_type,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_DEFAULT_VOLUME_TYPE_INFO,
+            to_utf=bytes_body)
+
     def _test_create_volume_type(self, bytes_body=False):
         self.check_service_client_function(
             self.client.create_volume_type,
@@ -223,6 +230,12 @@ class TestTypesClient(base.BaseServiceTest):
 
     def test_show_volume_type_with_bytes_body(self):
         self._test_show_volume_type(bytes_body=True)
+
+    def test_show_default_volume_type_with_str_body(self):
+        self._test_show_default_volume_type()
+
+    def test_show_default_volume_type_with_bytes_body(self):
+        self._test_show_default_volume_type(bytes_body=True)
 
     def test_create_volume_type_str_body(self):
         self._test_create_volume_type()
