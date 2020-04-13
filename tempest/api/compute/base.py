@@ -227,7 +227,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def create_test_server(cls, validatable=False, volume_backed=False,
-                           validation_resources=None, **kwargs):
+                           validation_resources=None, clients=None, **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
@@ -239,6 +239,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param volume_backed: Whether the instance is volume backed or not.
         :param validation_resources: Dictionary of validation resources as
             returned by `get_class_validation_resources`.
+        :param clients: Client manager, defaults to os_primary.
         :param kwargs: Extra arguments are passed down to the
             `compute.create_test_server` call.
         """
@@ -255,8 +256,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             not tenant_network):
             kwargs['networks'] = 'none'
 
+        if clients is None:
+            clients = cls.os_primary
+
         body, servers = compute.create_test_server(
-            cls.os_primary,
+            clients,
             validatable,
             validation_resources=validation_resources,
             tenant_network=tenant_network,
@@ -267,11 +271,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # and then wait for all
         for server in servers:
             cls.addClassResourceCleanup(waiters.wait_for_server_termination,
-                                        cls.servers_client, server['id'])
+                                        clients.servers_client, server['id'])
         for server in servers:
             cls.addClassResourceCleanup(
                 test_utils.call_and_ignore_notfound_exc,
-                cls.servers_client.delete_server, server['id'])
+                clients.servers_client.delete_server, server['id'])
 
         return body
 
