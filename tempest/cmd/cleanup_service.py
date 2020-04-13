@@ -1048,6 +1048,8 @@ def get_project_associated_cleanup_services():
         project_associated_services.append(NovaQuotaService)
     if IS_CINDER:
         project_associated_services.append(VolumeQuotaService)
+    if IS_NEUTRON:
+        project_associated_services.append(NetworkQuotaService)
     return project_associated_services
 
 
@@ -1076,7 +1078,6 @@ def get_resource_cleanup_services():
         resource_cleanup_services.append(NetworkService)
         resource_cleanup_services.append(NetworkSecGroupService)
         resource_cleanup_services.append(NetworkSubnetPoolsService)
-        resource_cleanup_services.append(NetworkQuotaService)
     if IS_CINDER:
         resource_cleanup_services.append(SnapshotService)
         resource_cleanup_services.append(VolumeService)
