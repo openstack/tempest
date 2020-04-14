@@ -966,18 +966,21 @@ class NetworkScenarioTest(ScenarioTest):
         # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
-        p_status = ['ACTIVE']
-        # NOTE(vsaienko) With Ironic, instances live on separate hardware
-        # servers. Neutron does not bind ports for Ironic instances, as a
-        # result the port remains in the DOWN state.
-        # TODO(vsaienko) remove once bug: #1599836 is resolved.
-        if getattr(CONF.service_available, 'ironic', False):
-            p_status.append('DOWN')
+
+        def _is_active(port):
+            # NOTE(vsaienko) With Ironic, instances live on separate hardware
+            # servers. Neutron does not bind ports for Ironic instances, as a
+            # result the port remains in the DOWN state. This has been fixed
+            # with the introduction of the networking-baremetal plugin but
+            # it's not mandatory (and is not used on all stable branches).
+            return (port['status'] == 'ACTIVE' or
+                    port.get('binding:vnic_type') == 'baremetal')
+
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
                     if (netutils.is_valid_ipv4(fxip["ip_address"]) and
-                        p['status'] in p_status)]
+                        _is_active(p))]
         inactive = [p for p in ports if p['status'] != 'ACTIVE']
         if inactive:
             LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
