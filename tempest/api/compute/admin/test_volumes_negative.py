@@ -67,10 +67,10 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     volume_min_microversion = '3.27'
 
     @classmethod
-    def skip_checks(self):
-        super(UpdateMultiattachVolumeNegativeTest, self).skip_checks()
+    def skip_checks(cls):
+        super(UpdateMultiattachVolumeNegativeTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.volume_multiattach:
-            raise self.skipException('Volume multi-attach is not available.')
+            raise cls.skipException('Volume multi-attach is not available.')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7576d497-b7c6-44bd-9cc5-c5b4e50fec71')
