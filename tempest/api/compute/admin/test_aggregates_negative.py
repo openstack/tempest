@@ -144,6 +144,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('19dd44e1-c435-4ee1-a402-88c4f90b5950')
     def test_aggregate_add_existent_host(self):
+        # Adding already existing host to aggregate should fail.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate = self._create_test_aggregate()
 
@@ -172,6 +173,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('95d6a6fa-8da9-4426-84d0-eec0329f2e4d')
     def test_aggregate_remove_nonexistent_host(self):
+        # Removing not existing host from aggregate should fail.
         aggregate = self._create_test_aggregate()
 
         self.assertRaises(lib_exc.NotFound, self.client.remove_host,

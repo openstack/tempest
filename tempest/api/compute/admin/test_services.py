@@ -28,11 +28,13 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('5be41ef4-53d1-41cc-8839-5c2a48a1b283')
     def test_list_services(self):
+        # Listing nova services
         services = self.client.list_services()['services']
         self.assertNotEmpty(services)
 
     @decorators.idempotent_id('f345b1ec-bc6e-4c38-a527-3ca2bc00bef5')
     def test_get_service_by_service_binary_name(self):
+        # Listing nova services by binary name.
         binary_name = 'nova-compute'
         services = self.client.list_services(binary=binary_name)['services']
         self.assertNotEmpty(services)
@@ -41,6 +43,7 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('affb42d5-5b4b-43c8-8b0b-6dca054abcca')
     def test_get_service_by_host_name(self):
+        # Listing nova services by host name.
         services = self.client.list_services()['services']
         host_name = services[0]['host']
         services_on_host = [service for service in services if
