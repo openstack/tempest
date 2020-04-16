@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class VolumesCloneTest(base.BaseVolumeTest):
+    """Test volume clone"""
 
     @classmethod
     def skip_checks(cls):
@@ -44,6 +45,7 @@ class VolumesCloneTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('9adae371-a257-43a5-9555-dc7c88e66e0e')
     def test_create_from_volume(self):
+        """Test cloning a volume with increasing size"""
         # Creates a volume from another volume passing a size different from
         # the source volume.
         src_size = CONF.volume.volume_size
@@ -58,6 +60,7 @@ class VolumesCloneTest(base.BaseVolumeTest):
     @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
     @utils.services('image')
     def test_create_from_bootable_volume(self):
+        """Test cloning a bootable volume"""
         # Create volume from image
         img_uuid = CONF.compute.image_ref
         src_vol = self.create_volume(imageRef=img_uuid)

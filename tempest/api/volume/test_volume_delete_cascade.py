@@ -58,8 +58,11 @@ class VolumesDeleteCascade(base.BaseVolumeTest):
 
     @decorators.idempotent_id('994e2d40-de37-46e8-b328-a58fba7e4a95')
     def test_volume_delete_cascade(self):
-        # The case validates the ability to delete a volume
-        # with associated snapshots.
+        """Test deleting a volume with associated snapshots
+
+        The case validates the ability to delete a volume
+        with associated snapshots.
+        """
 
         # Create a volume
         volume = self.create_volume()
@@ -78,9 +81,12 @@ class VolumesDeleteCascade(base.BaseVolumeTest):
     @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
                       'Skip because of Bug#1677525')
     def test_volume_from_snapshot_cascade_delete(self):
-        # The case validates the ability to delete a volume with
-        # associated snapshot while there is another volume created
-        # from that snapshot.
+        """Test deleting a volume with associated volume-associated snapshot
+
+        The case validates the ability to delete a volume with
+        associated snapshot while there is another volume created
+        from that snapshot.
+        """
 
         # Create a volume
         volume = self.create_volume()

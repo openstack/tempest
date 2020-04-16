@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class VolumesGetTest(base.BaseVolumeTest):
+    """Test getting volume info"""
 
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
@@ -118,12 +119,14 @@ class VolumesGetTest(base.BaseVolumeTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('27fb0e9f-fb64-41dd-8bdb-1ffa762f0d51')
     def test_volume_create_get_update_delete(self):
+        """Test Create/Get/Update/Delete of a blank volume"""
         self._volume_create_get_update_delete(size=CONF.volume.volume_size)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('54a01030-c7fc-447c-86ee-c1182beae638')
     @utils.services('image')
     def test_volume_create_get_update_delete_from_image(self):
+        """Test Create/Get/Update/Delete of a volume created from image"""
         image = self.images_client.show_image(CONF.compute.image_ref)
         min_disk = image['min_disk']
         disk_size = max(min_disk, CONF.volume.volume_size)
@@ -134,12 +137,14 @@ class VolumesGetTest(base.BaseVolumeTest):
     @testtools.skipUnless(CONF.volume_feature_enabled.clone,
                           'Cinder volume clones are disabled')
     def test_volume_create_get_update_delete_as_clone(self):
+        """Test Create/Get/Update/Delete of a cloned volume"""
         origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'],
                                               size=CONF.volume.volume_size)
 
 
 class VolumesSummaryTest(base.BaseVolumeTest):
+    """Test volume summary"""
 
     _api_version = 3
     min_microversion = '3.12'
@@ -147,6 +152,7 @@ class VolumesSummaryTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('c4f2431e-4920-4736-9e00-4040386b6feb')
     def test_show_volume_summary(self):
+        """Test showing volume summary"""
         volume_summary = \
             self.volumes_client.show_volume_summary()['volume-summary']
         for key in ['total_size', 'total_count']:

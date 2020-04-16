@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class VolumesCloneNegativeTest(base.BaseVolumeTest):
+    """Negative tests of volume clone"""
 
     @classmethod
     def skip_checks(cls):
@@ -32,6 +33,7 @@ class VolumesCloneNegativeTest(base.BaseVolumeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9adae371-a257-43a5-459a-dc7c88e66e0e')
     def test_create_from_volume_decreasing_size(self):
+        """Test cloning a volume with decreasing size will fail"""
         # Creates a volume from another volume passing a size different from
         # the source volume.
         src_size = CONF.volume.volume_size + 1
