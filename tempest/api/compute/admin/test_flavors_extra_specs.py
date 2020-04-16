@@ -61,8 +61,11 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('0b2f9d4b-1ca2-4b99-bb40-165d4bb94208')
     def test_flavor_set_get_update_show_unset_keys(self):
-        # Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
-        # spec as a user with admin privileges.
+        """Test flavor extra spec operations by admin user
+
+        Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
+        spec as a user with admin privileges.
+        """
         # Assigning extra specs values that are to be set
         specs = {'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
         # SET extra specs to the flavor created in setUp
@@ -100,6 +103,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('a99dad88-ae1c-4fba-aeb4-32f898218bd0')
     def test_flavor_non_admin_get_all_keys(self):
+        """Test non admin user getting all flavor extra spec keys"""
         specs = {'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
         self.admin_flavors_client.set_flavor_extra_spec(self.flavor['id'],
                                                         **specs)
@@ -111,6 +115,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('12805a7f-39a3-4042-b989-701d5cad9c90')
     def test_flavor_non_admin_get_specific_key(self):
+        """Test non admin user getting specific flavor extra spec key"""
         specs = {'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
         body = self.admin_flavors_client.set_flavor_extra_spec(
             self.flavor['id'], **specs

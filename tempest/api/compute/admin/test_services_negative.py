@@ -31,14 +31,18 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1126d1f8-266e-485f-a687-adc547492646')
     def test_list_services_with_non_admin_user(self):
+        """Non admin user is not allowed to list nova services"""
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.list_services)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d0884a69-f693-4e79-a9af-232d15643bf7')
     def test_get_service_by_invalid_params(self):
-        # Expect all services to be returned when the request contains invalid
-        # parameters.
+        """Test listing services by invalid filter should return all services
+
+        Expect all services to be returned when the request contains invalid
+        parameters.
+        """
         services = self.client.list_services()['services']
         services_xxx = (self.client.list_services(xxx='nova-compute')
                         ['services'])
@@ -47,6 +51,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1e966d4a-226e-47c7-b601-0b18a27add54')
     def test_get_service_by_invalid_service_and_valid_host(self):
+        """Test listing services by invalid service and valid host value"""
         services = self.client.list_services()['services']
         host_name = services[0]['host']
         services = self.client.list_services(host=host_name,
@@ -56,6 +61,7 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('64e7e7fb-69e8-4cb6-a71d-8d5eb0c98655')
     def test_get_service_with_valid_service_and_invalid_host(self):
+        """Test listing services by valid service and invalid host value"""
         services = self.client.list_services()['services']
         binary_name = services[0]['binary']
         services = self.client.list_services(host='xxx',
@@ -79,6 +85,7 @@ class ServicesAdminNegativeV253TestJSON(ServicesAdminNegativeTestJSON):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('508671aa-c929-4479-bd10-8680d40dd0a6')
     def test_enable_service_with_invalid_service_id(self):
+        """Test updating non existing service to status enabled"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.update_service,
                           service_id=self.fake_service_id,
@@ -87,6 +94,7 @@ class ServicesAdminNegativeV253TestJSON(ServicesAdminNegativeTestJSON):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a9eeeade-42b3-419f-87aa-c9342aa068cf')
     def test_disable_service_with_invalid_service_id(self):
+        """Test updating non existing service to status disabled"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.update_service,
                           service_id=self.fake_service_id,
@@ -95,6 +103,8 @@ class ServicesAdminNegativeV253TestJSON(ServicesAdminNegativeTestJSON):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f46a9d91-1e85-4b96-8e7a-db7706fa2e9a')
     def test_disable_log_reason_with_invalid_service_id(self):
+        """Test updating non existing service to disabled with reason"""
+
         # disabled_reason requires that status='disabled' be provided.
         self.assertRaises(lib_exc.NotFound,
                           self.client.update_service,

@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 
 
 class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
+    """Test live migration operations supported by admin user"""
 
     # These tests don't attempt any SSH validation nor do they use
     # floating IPs on the instance, so all we need is a network and
@@ -123,12 +124,14 @@ class LiveMigrationTest(LiveMigrationTestBase):
 
     @decorators.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     def test_live_block_migration(self):
+        """Test live migrating an active server"""
         self._test_live_migration()
 
     @decorators.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_live_block_migration_paused(self):
+        """Test live migrating a paused server"""
         self._test_live_migration(state='PAUSED')
 
     @testtools.skipUnless(CONF.compute_feature_enabled.
@@ -137,6 +140,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
     @decorators.idempotent_id('5071cf17-3004-4257-ae61-73a84e28badd')
     @utils.services('volume')
     def test_volume_backed_live_migration(self):
+        """Test live migrating an active server booted from volume"""
         self._test_live_migration(volume_backed=True)
 
     @decorators.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
@@ -148,6 +152,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
                       'Block Live migration not configured for iSCSI')
     @utils.services('volume')
     def test_iscsi_volume(self):
+        """Test live migrating a server with volume attached"""
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
         target_host = self.get_host_other_than(server_id)
