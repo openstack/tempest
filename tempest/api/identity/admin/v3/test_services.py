@@ -20,6 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone services"""
 
     def _del_service(self, service_id):
         # Used for deleting the services created in this class
@@ -31,6 +32,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
+        """Test creating, updating and getting of keystone service"""
         # Creating a Service
         name = data_utils.rand_name('service')
         serv_type = data_utils.rand_name('type')
@@ -63,7 +65,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
-        # Create a service only with name and type
+        """Create a keystone service only with name and type"""
         name = data_utils.rand_name('service')
         serv_type = data_utils.rand_name('type')
         service = self.services_client.create_service(
@@ -74,7 +76,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
-        # Create, List, Verify and Delete Services
+        """Create, List, Verify and Delete Keystone Services"""
         service_ids = list()
         service_types = list()
         for _ in range(3):

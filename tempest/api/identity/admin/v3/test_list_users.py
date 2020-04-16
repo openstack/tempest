@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test listing keystone users"""
 
     def _list_users_with_params(self, params, key, expected, not_expected):
         # Helper method to list users filtered with params and
@@ -69,7 +70,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('08f9aabb-dcfe-41d0-8172-82b5fa0bd73d')
     def test_list_user_domains(self):
-        # List users with domain
+        """List users with domain"""
         params = {'domain_id': self.domain['id']}
         self._list_users_with_params(params, 'domain_id',
                                      self.domain_enabled_user,
@@ -77,7 +78,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('bff8bf2f-9408-4ef5-b63a-753c8c2124eb')
     def test_list_users_with_not_enabled(self):
-        # List the users with not enabled
+        """List the users with not enabled"""
         params = {'enabled': False}
         self._list_users_with_params(params, 'enabled',
                                      self.non_domain_enabled_user,
@@ -85,7 +86,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c285bb37-7325-4c02-bff3-3da5d946d683')
     def test_list_users_with_name(self):
-        # List users with name
+        """List users with name"""
         params = {'name': self.domain_enabled_user['name']}
         # When domain specific drivers are enabled the operations
         # of listing all users and listing all groups are not supported,
@@ -98,7 +99,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('b30d4651-a2ea-4666-8551-0c0e49692635')
     def test_list_users(self):
-        # List users
+        """List users"""
         # When domain specific drivers are enabled the operations
         # of listing all users and listing all groups are not supported,
         # they need a domain filter to be specified
@@ -120,7 +121,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
-        # Get a user detail
+        """Get a user detail"""
         user = self.users_client.show_user(self.users[0]['id'])['user']
         self.assertEqual(self.users[0]['id'], user['id'])
         self.assertEqual(self.users[0]['name'], user['name'])

@@ -19,6 +19,7 @@ from tempest.lib import decorators
 
 
 class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
+    """Test keystone v2 endpoints"""
 
     @classmethod
     def resource_setup(cls):
@@ -51,6 +52,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('11f590eb-59d8-4067-8b2b-980c7f387f51')
     def test_list_endpoints(self):
+        """Test listing keystone endpoints"""
         # Get a list of endpoints
         fetched_endpoints = self.endpoints_client.list_endpoints()['endpoints']
         # Asserting LIST endpoints
@@ -62,6 +64,7 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
     def test_create_list_delete_endpoint(self):
+        """Test creating, listing and deleting a keystone endpoint"""
         region = data_utils.rand_name('region')
         url = data_utils.rand_url()
         endpoint = self.endpoints_client.create_endpoint(

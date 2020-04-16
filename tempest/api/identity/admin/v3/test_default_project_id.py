@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class TestDefaultProjectId(base.BaseIdentityV3AdminTest):
+    """Test creating a token without project will default to user's project"""
 
     @classmethod
     def setup_credentials(cls):
@@ -35,11 +36,11 @@ class TestDefaultProjectId(base.BaseIdentityV3AdminTest):
         self.domains_client.delete_domain(domain_id)
 
     @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
-                      'Skipped because environment has an '
-                      'immutable user source and solely '
-                      'provides read-only access to users.')
+                      'Skipped because environment has an immutable user '
+                      'source and solely provides read-only access to users.')
     @decorators.idempotent_id('d6110661-6a71-49a7-a453-b5e26640ff6d')
     def test_default_project_id(self):
+        """Creating a token without project will default to user's project"""
         # create a domain
         dom_name = data_utils.rand_name('dom')
         domain_body = self.domains_client.create_domain(
