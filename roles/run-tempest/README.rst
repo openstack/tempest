@@ -1,5 +1,8 @@
 Run Tempest
 
+The result of the tempest run is stored in the `tempest_run_result`
+variable (through the `register` statement).
+
 **Role Variables**
 
 .. zuul:rolevar:: devstack_base_dir
