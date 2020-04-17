@@ -194,11 +194,14 @@ class TempestTestPluginManager(object):
     def get_plugin_load_tests_tuple(self):
         load_tests_dict = {}
         for plug in self.ext_plugins:
+            LOG.info('Loading tests from Tempest plugin: %s', plug.name)
             load_tests_dict[plug.name] = plug.obj.load_tests()
         return load_tests_dict
 
     def register_plugin_opts(self, conf):
         for plug in self.ext_plugins:
+            LOG.info('Register additional config options from Tempest '
+                     'plugin: %s', plug.name)
             try:
                 plug.obj.register_opts(conf)
             except Exception:
@@ -209,6 +212,9 @@ class TempestTestPluginManager(object):
         plugin_options = []
         for plug in self.ext_plugins:
             opt_list = plug.obj.get_opt_lists()
+            LOG.info('List additional config options registered by '
+                     'Tempest plugin: %s', plug.name)
+
             if opt_list:
                 plugin_options.extend(opt_list)
         return plugin_options
