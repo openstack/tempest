@@ -19,9 +19,11 @@ CONF = config.CONF
 
 
 class IdentityCatalogTest(base.BaseIdentityV3Test):
+    """Test service's catalog type values"""
 
     @decorators.idempotent_id('56b57ced-22b8-4127-9b8a-565dfb0207e2')
     def test_catalog_standardization(self):
+        """Test that every service has a standard catalog type value"""
         # https://opendev.org/openstack/service-types-authority
         # /src/branch/master/service-types.yaml
         standard_service_values = [{'name': 'keystone', 'type': 'identity'},
@@ -31,11 +33,9 @@ class IdentityCatalogTest(base.BaseIdentityV3Test):
         # next, we need to GET the catalog using the catalog client
         catalog = self.non_admin_catalog_client.show_catalog()['catalog']
         # get list of the service types present in the catalog
-        catalog_services = []
-        for service in catalog:
-            catalog_services.append(service['type'])
+        catalog_services = [service['type'] for service in catalog]
         for service in standard_service_values:
-            # if service enabled, check if it has a standard typevalue
+            # if service enabled, check if it has a standard type value
             if service['name'] == 'keystone' or\
                     getattr(CONF.service_available, service['name']):
                 self.assertIn(service['type'], catalog_services)

@@ -25,6 +25,8 @@ CONF = config.CONF
 
 
 class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
+    """Test keystone project tags"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -34,6 +36,7 @@ class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
     @testtools.skipUnless(CONF.identity_feature_enabled.project_tags,
                           'Project tags not available.')
     def test_list_update_delete_project_tags(self):
+        """Test listing, updating and deleting of project tags"""
         project = self.setup_test_project()
 
         # Create a tag for testing.

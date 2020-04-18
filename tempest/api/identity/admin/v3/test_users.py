@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone users"""
 
     @classmethod
     def skip_checks(cls):
@@ -38,7 +39,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
     def test_user_update(self):
-        # Test case to check if updating of user attributes is successful.
+        """Test case to check if updating of user attributes is successful"""
         # Creating first user
         u_name = data_utils.rand_name('user')
         u_desc = u_name + 'description'
@@ -72,6 +73,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('2d223a0e-e457-4a70-9fb1-febe027a0ff9')
     def test_update_user_password(self):
+        """Test updating user password"""
         # Creating User to check password updation
         u_name = data_utils.rand_name('user')
         original_password = data_utils.rand_password()
@@ -98,7 +100,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('a831e70c-e35b-430b-92ed-81ebbc5437b8')
     def test_list_user_projects(self):
-        # List the projects that a user has access upon
+        """Test listing the projects that a user has access upon"""
         assigned_project_ids = list()
         fetched_project_ids = list()
         u_project = self.setup_test_project()
@@ -141,7 +143,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c10dcd90-461d-4b16-8e23-4eb836c00644')
     def test_get_user(self):
-        # Get a user detail
+        """Test getting a user detail"""
         user = self.setup_test_user()
         fetched_user = self.users_client.show_user(user['id'])['user']
         self.assertEqual(user['id'], fetched_user['id'])
@@ -150,6 +152,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                           'Security compliance not available.')
     @decorators.idempotent_id('568cd46c-ee6c-4ab4-a33a-d3791931979e')
     def test_password_history_not_enforced_in_admin_reset(self):
+        """Test setting same password when password history is not enforced"""
         old_password = self.os_primary.credentials.password
         user_id = self.os_primary.credentials.user_id
 
