@@ -230,7 +230,7 @@ def wait_for_volume_attachment_remove(client, volume_id, attachment_id):
     while any(attachment_id == a['attachment_id'] for a in attachments):
         time.sleep(client.build_interval)
         if int(time.time()) - start >= client.build_timeout:
-            message = ('Failed to remove attachment %s from volume %s'
+            message = ('Failed to remove attachment %s from volume %s '
                        'within the required time (%s s).' %
                        (attachment_id, volume_id, client.build_timeout))
             raise lib_exc.TimeoutException(message)
