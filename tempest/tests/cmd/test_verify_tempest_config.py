@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_serialization import jsonutils as json
 
 from tempest import clients

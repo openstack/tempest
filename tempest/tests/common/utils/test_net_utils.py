@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
+from unittest import mock
 
 from tempest.common.utils import net_utils
 from tempest.lib import exceptions as lib_exc

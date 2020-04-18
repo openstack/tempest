@@ -13,8 +13,8 @@
 #    under the License.
 
 import socket
+from unittest import mock
 
-import mock
 import six
 from six import StringIO
 import testtools

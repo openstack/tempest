@@ -18,9 +18,9 @@ import os
 import shutil
 import subprocess
 import tempfile
+from unittest import mock
 
 import fixtures
-import mock
 import six
 
 from tempest.cmd import run

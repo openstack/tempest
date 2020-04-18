@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
+from unittest import mock
 
 from tempest.lib.services.network import base as base_network_client
 from tempest.tests.lib import fake_auth_provider

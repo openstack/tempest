@@ -14,8 +14,8 @@
 #    under the License.
 
 import time
+from unittest import mock
 
-import mock
 
 from tempest.lib.common import thread
 from tempest.lib.common.utils import test_utils

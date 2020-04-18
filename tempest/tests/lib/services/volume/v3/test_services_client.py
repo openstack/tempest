@@ -14,8 +14,8 @@
 #    under the License.
 
 import copy
+from unittest import mock
 
-import mock
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.services.volume.v3 import services_client

@@ -14,7 +14,7 @@
 #    under the License.
 
 
-import mock
+from unittest import mock
 
 from tempest.lib import exceptions
 from tempest.lib.services.object_storage import object_client
