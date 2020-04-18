@@ -35,6 +35,7 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):
+        """Test getting network from nova side"""
         networks = self.client.list_networks()['networks']
         if CONF.compute.fixed_network_name:
             configured_network = [x for x in networks if x['label'] ==
@@ -56,6 +57,7 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
     def test_list_all_networks(self):
+        """Test getting all networks from nova side"""
         networks = self.client.list_networks()['networks']
         # Check the configured network is in the list
         if CONF.compute.fixed_network_name:

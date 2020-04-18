@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
+    """Test migration operations supported by admin user"""
 
     @classmethod
     def setup_clients(cls):
@@ -33,14 +34,14 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
-        # Admin can get the migrations list
+        """Test admin user can get the migrations list"""
         self.client.list_migrations()
 
     @decorators.idempotent_id('1b512062-8093-438e-b47a-37d2f597cd64')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_list_migrations_in_flavor_resize_situation(self):
-        # Admin can get the migrations list which contains the resized server
+        """Admin can get the migrations list containing the resized server"""
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
 
@@ -62,8 +63,11 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_revert_deleted_flavor(self):
-        # Tests that we can revert the resize on an instance whose original
-        # flavor has been deleted.
+        """Test reverting resized server with original flavor deleted
+
+        Tests that we can revert the resize on an instance whose original
+        flavor has been deleted.
+        """
 
         # First we have to create a flavor that we can delete so make a copy
         # of the normal flavor from which we'd create a server.
@@ -137,10 +141,12 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration not available.')
     def test_cold_migration(self):
+        """Test cold migrating server and then confirm the migration"""
         self._test_cold_migrate_server(revert=False)
 
     @decorators.idempotent_id('caa1aa8b-f4ef-4374-be0d-95f001c2ac2d')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration not available.')
     def test_revert_cold_migration(self):
+        """Test cold migrating server and then revert the migration"""
         self._test_cold_migrate_server(revert=True)

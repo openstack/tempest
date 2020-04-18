@@ -23,7 +23,7 @@ CONF = config.CONF
 
 
 class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
-
+    """Test creating servers on mutiple nodes with scheduler_hints."""
     @classmethod
     def resource_setup(cls):
         super(ServersOnMultiNodesTest, cls).resource_setup()
@@ -65,6 +65,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         compute.is_scheduler_filter_enabled("SameHostFilter"),
         'SameHostFilter is not available.')
     def test_create_servers_on_same_host(self):
+        """Test creating servers with hints 'same_host'"""
         hints = {'same_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
@@ -76,6 +77,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         compute.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts(self):
+        """Test creating servers with hints of single 'different_host'"""
         hints = {'different_host': self.server01}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
@@ -87,7 +89,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         compute.is_scheduler_filter_enabled("DifferentHostFilter"),
         'DifferentHostFilter is not available.')
     def test_create_servers_on_different_hosts_with_list_of_servers(self):
-        # This scheduler-hint supports list of servers also.
+        """Test creating servers with hints of a list of 'different_host'"""
         hints = {'different_host': [self.server01]}
         server02 = self.create_test_server(scheduler_hints=hints,
                                            wait_until='ACTIVE')['id']
