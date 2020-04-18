@@ -80,6 +80,14 @@ Plugins
    plugin
    plugin-registry
 
+Tempest & Plugins Compatible Version Policy
+-------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   tempest_and_plugins_compatible_version_policy
+
 Library
 -------
 
