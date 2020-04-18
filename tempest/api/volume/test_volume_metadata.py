@@ -20,6 +20,7 @@ from tempest.lib import decorators
 
 
 class VolumesMetadataTest(base.BaseVolumeTest):
+    """Test volume metadata"""
 
     @classmethod
     def resource_setup(cls):
@@ -34,6 +35,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('6f5b125b-f664-44bf-910f-751591fe5769')
     def test_crud_volume_metadata(self):
+        """Test creating, getting, updating and deleting of volume metadata"""
         # Create metadata for the volume
         metadata = {"key1": "value1",
                     "key2": "value2",
@@ -71,6 +73,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('862261c5-8df4-475a-8c21-946e50e36a20')
     def test_update_show_volume_metadata_item(self):
+        """Test updating and getting single volume metadata item"""
         # Update metadata item for the volume
         metadata = {"key1": "value1",
                     "key2": "value2",

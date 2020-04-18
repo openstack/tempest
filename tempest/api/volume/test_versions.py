@@ -17,12 +17,14 @@ from tempest.lib import decorators
 
 
 class VersionsTest(base.BaseVolumeTest):
+    """Test cinder versions"""
 
     _api_version = 3
 
     @decorators.idempotent_id('77838fc4-b49b-4c64-9533-166762517369')
     @decorators.attr(type='smoke')
     def test_list_versions(self):
+        """Test listing cinder versions"""
         # NOTE: The version data is checked on service client side
         #       with JSON-Schema validation. It is enough to just call
         #       the API here.
@@ -30,6 +32,7 @@ class VersionsTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('7f755ae2-caa9-4049-988c-331d8f7a579f')
     def test_show_version(self):
+        "Test getting cinder version details"
         # NOTE: The version data is checked on service client side
         # with JSON-Schema validation. So we will loop through each
         # version and call show version.
