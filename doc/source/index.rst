@@ -56,6 +56,16 @@ Supported OpenStack Releases and Python Versions
 
    supported_version
 
+For Contributors
+================
+
+* If you are a new contributor to Tempest please refer: :doc:`contributor/contributing`
+
+.. toctree::
+   :hidden:
+
+   contributor/contributing
+
 Developers Guide
 ================
 
