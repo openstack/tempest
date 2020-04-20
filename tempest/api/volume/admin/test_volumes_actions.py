@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeAdminTest):
+    """Test volume actions"""
+
     create_default_network = True
 
     def _create_reset_and_force_delete_temp_volume(self, status=None):
@@ -38,7 +40,10 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('d063f96e-a2e0-4f34-8b8a-395c42de1845')
     def test_volume_reset_status(self):
-        # test volume reset status : available->error->available->maintenance
+        """Test resetting volume status
+
+        Reset volume status to available->error->available->maintenance
+        """
         volume = self.create_volume()
         self.addCleanup(waiters.wait_for_volume_resource_status,
                         self.volumes_client, volume['id'], 'available')
@@ -52,27 +57,28 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('21737d5a-92f2-46d7-b009-a0cc0ee7a570')
     def test_volume_force_delete_when_volume_is_creating(self):
-        # test force delete when status of volume is creating
+        """Test force deleting volume when its status is creating"""
         self._create_reset_and_force_delete_temp_volume('creating')
 
     @decorators.idempotent_id('db8d607a-aa2e-4beb-b51d-d4005c232011')
     def test_volume_force_delete_when_volume_is_attaching(self):
-        # test force delete when status of volume is attaching
+        """Test force deleting volume when its status is attaching"""
         self._create_reset_and_force_delete_temp_volume('attaching')
 
     @decorators.idempotent_id('3e33a8a8-afd4-4d64-a86b-c27a185c5a4a')
     def test_volume_force_delete_when_volume_is_error(self):
-        # test force delete when status of volume is error
+        """Test force deleting volume when its status is error"""
         self._create_reset_and_force_delete_temp_volume('error')
 
     @decorators.idempotent_id('b957cabd-1486-4e21-90cf-a9ed3c39dfb2')
     def test_volume_force_delete_when_volume_is_maintenance(self):
-        # test force delete when status of volume is maintenance
+        """Test force deleting volume when its status is maintenance"""
         self._create_reset_and_force_delete_temp_volume('maintenance')
 
     @decorators.idempotent_id('d38285d9-929d-478f-96a5-00e66a115b81')
     @utils.services('compute')
     def test_force_detach_volume(self):
+        """Test force detaching volume when its status is error"""
         # Create a server and a volume
         server_id = self.create_server()['id']
         volume_id = self.create_volume()['id']

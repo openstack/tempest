@@ -18,9 +18,11 @@ from tempest.lib import decorators
 
 
 class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
+    """Test fetching volume hosts info by admin users"""
 
     @decorators.idempotent_id('d5f3efa2-6684-4190-9ced-1c2f526352ad')
     def test_list_hosts(self):
+        """Test listing volume hosts"""
         hosts = self.admin_hosts_client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2,
                                 "The count of volume hosts is < 2, "
@@ -28,6 +30,7 @@ class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('21168d57-b373-4b71-a3ac-f2c88f0c5d31')
     def test_show_host(self):
+        """Test getting volume host details"""
         hosts = self.admin_hosts_client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2,
                                 "The count of volume hosts is < 2, "

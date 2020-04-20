@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class VolumeManageAdminTest(base.BaseVolumeAdminTest):
+    """Test volume manage by admin users"""
 
     @classmethod
     def skip_checks(cls):
@@ -39,6 +40,7 @@ class VolumeManageAdminTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('70076c71-0ce1-4208-a8ff-36a66e65cc1e')
     def test_unmanage_manage_volume(self):
+        """Test unmanaging and managing volume"""
         # Create original volume
         org_vol_id = self.create_volume()['id']
         org_vol_info = self.admin_volume_client.show_volume(

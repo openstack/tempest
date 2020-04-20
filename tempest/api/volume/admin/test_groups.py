@@ -23,12 +23,15 @@ CONF = config.CONF
 
 
 class GroupsTest(base.BaseVolumeAdminTest):
+    """Tests of volume groups with microversion greater than 3.12"""
+
     _api_version = 3
     min_microversion = '3.13'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
+        """Test creating, showing, listing and deleting of volume group"""
         # Create volume type
         volume_type = self.create_volume_type()
 
@@ -95,6 +98,7 @@ class GroupsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('4a8a6fd2-8b3b-4641-8f54-6a6f99320006')
     def test_group_update(self):
+        """Test updating volume group"""
         # Create volume type
         volume_type = self.create_volume_type()
 
@@ -150,12 +154,15 @@ class GroupsTest(base.BaseVolumeAdminTest):
 
 
 class GroupsV314Test(base.BaseVolumeAdminTest):
+    """Tests of volume groups with microversion greater than 3.13"""
+
     _api_version = 3
     min_microversion = '3.14'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('2424af8c-7851-4888-986a-794b10c3210e')
     def test_create_group_from_group(self):
+        """Test creating volume group from volume group"""
         # Create volume type
         volume_type = self.create_volume_type()
 
@@ -185,12 +192,15 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
 
 
 class GroupsV320Test(base.BaseVolumeAdminTest):
+    """Tests of volume groups with microversion greater than 3.19"""
+
     _api_version = 3
     min_microversion = '3.20'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('b20c696b-0cbc-49a5-8b3a-b1fb9338f45c')
     def test_reset_group_status(self):
+        """Test resetting volume group status to creating/available/error"""
         # Create volume type
         volume_type = self.create_volume_type()
 
