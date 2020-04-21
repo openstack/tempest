@@ -57,7 +57,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('3027f8e6-3492-4a11-8575-c3293017af4d')
     def test_register_then_upload(self):
-        # Register, then upload an image
+        """Register, then upload an image"""
         properties = {'prop1': 'val1'}
         container_format, disk_format = get_container_and_disk_format()
         image = self.create_image(name='New Name',
@@ -79,7 +79,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('69da74d9-68a9-404b-9664-ff7164ccb0f5')
     def test_register_remote_image(self):
-        # Register a new remote image
+        """Register a new remote image"""
         container_format, disk_format = get_container_and_disk_format()
         body = self.create_image(name='New Remote Image',
                                  container_format=container_format,
@@ -96,6 +96,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('6d0e13a7-515b-460c-b91f-9f4793f09816')
     def test_register_http_image(self):
+        """Register a new image from an http image path url"""
         container_format, disk_format = get_container_and_disk_format()
         image = self.create_image(name='New Http Image',
                                   container_format=container_format,
@@ -108,7 +109,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('05b19d55-140c-40d0-b36b-fafd774d421b')
     def test_register_image_with_min_ram(self):
-        # Register an image with min ram
+        """Register an image with min ram"""
         container_format, disk_format = get_container_and_disk_format()
         properties = {'prop1': 'val1'}
         body = self.create_image(name='New_image_with_min_ram',
@@ -213,7 +214,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('246178ab-3b33-4212-9a4b-a7fe8261794d')
     def test_index_no_params(self):
-        # Simple test to see all fixture images returned
+        """Simple test to see all fixture images returned"""
         images_list = self.client.list_images()['images']
         image_list = [image['id'] for image in images_list]
         for image_id in self.created_images:
@@ -221,6 +222,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('f1755589-63d6-4468-b098-589820eb4031')
     def test_index_disk_format(self):
+        """Test listing images by disk format"""
         images_list = self.client.list_images(
             disk_format=self.disk_format_alt)['images']
         for image in images_list:
@@ -232,6 +234,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('2143655d-96d9-4bec-9188-8674206b4b3b')
     def test_index_container_format(self):
+        """Test listing images by container format"""
         images_list = self.client.list_images(
             container_format=self.container_format)['images']
         for image in images_list:
@@ -243,6 +246,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('feb32ac6-22bb-4a16-afd8-9454bb714b14')
     def test_index_max_size(self):
+        """Test listing images by max size"""
         images_list = self.client.list_images(size_max=42)['images']
         for image in images_list:
             self.assertLessEqual(image['size'], 42)
@@ -252,6 +256,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('6ffc16d0-4cbf-4401-95c8-4ac63eac34d8')
     def test_index_min_size(self):
+        """Test listing images by min size"""
         images_list = self.client.list_images(size_min=142)['images']
         for image in images_list:
             self.assertGreaterEqual(image['size'], 142)
@@ -261,6 +266,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('e5dc26d9-9aa2-48dd-bda5-748e1445da98')
     def test_index_status_active_detail(self):
+        """Test listing active images sorting by size in descending order"""
         images_list = self.client.list_images(detail=True,
                                               status='active',
                                               sort_key='size',
@@ -274,6 +280,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('097af10a-bae8-4342-bff4-edf89969ed2a')
     def test_index_name(self):
+        """Test listing images by its name"""
         images_list = self.client.list_images(
             detail=True,
             name='New Remote Image dup')['images']
@@ -285,6 +292,8 @@ class ListImagesTest(base.BaseV1ImageTest):
 
 
 class UpdateImageMetaTest(base.BaseV1ImageTest):
+    """Test image metadata"""
+
     @classmethod
     def resource_setup(cls):
         super(UpdateImageMetaTest, cls).resource_setup()
@@ -308,6 +317,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('01752c1c-0275-4de3-9e5b-876e44541928')
     def test_list_image_metadata(self):
+        """Test listing image metadata"""
         # All metadata key/value pairs for an image should be returned
         resp = self.client.check_image(self.image_id)
         resp_metadata = common_image.get_image_meta_from_headers(resp)
@@ -316,6 +326,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
 
     @decorators.idempotent_id('d6d7649c-08ce-440d-9ea7-e3dda552f33c')
     def test_update_image_metadata(self):
+        """Test updating image metadata"""
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key2': 'value2'}
         resp = self.client.check_image(self.image_id)

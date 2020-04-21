@@ -20,6 +20,7 @@ class MetadataNamespacePropertiesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('b1a3765e-3a5d-4f6d-a3a7-3ca3476ae768')
     def test_basic_meta_def_namespace_property(self):
+        """Test operations of image metadata definition namespace property"""
         # Get the available resource types and use one resource_type
         body = self.resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']

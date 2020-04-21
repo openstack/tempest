@@ -30,6 +30,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('b1a3775e-3b5c-4f6a-a3b4-1ba3574ae718')
     def test_create_update_delete_meta_namespace_objects(self):
+        """Test creating/updating/deleting image metadata namespace objects"""
         # Create a namespace
         namespace = self.create_namespace()
         # Create a namespace object
@@ -52,6 +53,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('a2a3615e-3b5c-3f6a-a2b1-1ba3574ae738')
     def test_list_meta_namespace_objects(self):
+        """Test listing image metadata namespace objects"""
         # Create a namespace object
         namespace = self.create_namespace()
         meta_namespace_object = self._create_namespace_object(namespace)
@@ -64,6 +66,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('b1a3674e-3b4c-3f6a-a3b4-1ba3573ca768')
     def test_show_meta_namespace_objects(self):
+        """Test showing image metadata namespace object"""
         # Create a namespace object
         namespace = self.create_namespace()
         namespace_object = self._create_namespace_object(namespace)

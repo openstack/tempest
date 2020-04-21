@@ -19,9 +19,11 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ImageMembersTest(base.BaseV1ImageMembersTest):
+    """Test image members"""
 
     @decorators.idempotent_id('1d6ef640-3a20-4c84-8710-d95828fdb6ad')
     def test_add_image_member(self):
+        """Test adding member for image"""
         image = self._create_image()
         self.image_member_client.create_image_member(image, self.alt_tenant_id)
         body = self.image_member_client.list_image_members(image)
@@ -33,6 +35,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
 
     @decorators.idempotent_id('6a5328a5-80e8-4b82-bd32-6c061f128da9')
     def test_get_shared_images(self):
+        """Test getting shared images"""
         image = self._create_image()
         self.image_member_client.create_image_member(image, self.alt_tenant_id)
         share_image = self._create_image()
@@ -47,6 +50,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
 
     @decorators.idempotent_id('a76a3191-8948-4b44-a9d6-4053e5f2b138')
     def test_remove_member(self):
+        """Test removing member from image"""
         image_id = self._create_image()
         self.image_member_client.create_image_member(image_id,
                                                      self.alt_tenant_id)
