@@ -22,6 +22,7 @@ class MetadataResourceTypesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')
     def test_basic_meta_def_resource_type_association(self):
+        """Test image resource type associations"""
         # Get the available resource types and use one resource_type
         body = self.resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']

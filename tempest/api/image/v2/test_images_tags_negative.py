@@ -19,11 +19,12 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ImagesTagsNegativeTest(base.BaseV2ImageTest):
+    """Negative tests of image tags"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8cd30f82-6f9a-4c6e-8034-c1b51fba43d9')
     def test_update_tags_for_non_existing_image(self):
-        # Update tag with non existing image.
+        """Update image tag with non existing image"""
         tag = data_utils.rand_name('tag')
         non_exist_image = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
@@ -32,7 +33,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('39c023a2-325a-433a-9eea-649bf1414b19')
     def test_delete_non_existing_tag(self):
-        # Delete non existing tag.
+        """Delete non existing image tag"""
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   visibility='private'
