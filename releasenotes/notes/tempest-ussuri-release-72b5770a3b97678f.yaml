@@ -1,0 +1,16 @@
+---
+prelude: >
+    This release is to tag the Tempest for OpenStack Ussuri release.
+    This release marks the start of Ussuri release support in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Ussuri
+    * Train
+    * Stein
+
+    Current development of Tempest is for OpenStack Victoria development
+    cycle. Every Tempest commit is also tested against master during
+    the Victoria cycle. However, this does not necessarily mean that using
+    Tempest as of this tag will work against a Ussuri (or future release)
+    cloud.
+    To be on safe side, use this tag to test the OpenStack Ussuri release.
