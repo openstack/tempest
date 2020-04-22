@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class ServerRescueTestBase(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(cls):
@@ -106,6 +107,7 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
 
 
 class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
+    create_default_network = True
 
     @classmethod
     def skip_checks(self):
