@@ -252,8 +252,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     @utils.services('compute', 'volume')
     def test_boot_server_from_encrypted_volume_luks(self):
         # Create an encrypted volume
-        volume = self.create_encrypted_volume('nova.volume.encryptors.'
-                                              'luks.LuksEncryptor',
+        volume = self.create_encrypted_volume('luks',
                                               volume_type='luks')
 
         self.volumes_client.set_bootable_volume(volume['id'], bootable=True)
