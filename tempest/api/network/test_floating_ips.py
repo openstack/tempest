@@ -73,6 +73,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e8718')
     def test_create_list_show_update_delete_floating_ip(self):
+        """Test create/list/show/update/delete floating ip"""
         # Creates a floating IP
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
@@ -133,6 +134,14 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')
     def test_floating_ip_delete_port(self):
+        """Test deleting floating ip's port
+
+        1. Create a floating ip
+        2. Create a port
+        3. Update the floating ip's port_id to the created port
+        4. Delete the port
+        5. Verify that the port details are cleared from the floating ip
+        """
         # Create a floating IP
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
@@ -163,6 +172,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('1bb2f731-fe5a-4b8c-8409-799ade1bed4d')
     def test_floating_ip_update_different_router(self):
+        """Test associating a floating ip to a port on different router"""
         # Associate a floating IP to a port on a router
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
@@ -211,6 +221,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('36de4bd0-f09c-43e3-a8e1-1decc1ffd3a5')
     def test_create_floating_ip_specifying_a_fixed_ip_address(self):
+        """Test creating floating ip with specified fixed ip"""
         body = self.floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
             port_id=self.ports[1]['id'],
@@ -230,6 +241,12 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('45c4c683-ea97-41ef-9c51-5e9802f2f3d7')
     def test_create_update_floatingip_with_port_multiple_ip_address(self):
+        """Test updating floating ip's fixed_ips to another ip of same port
+
+        First we create a port with 2 fixed ips, then we create a floating ip
+        with one of the fixed ips, and then we update the floating ip to
+        another fixed ip of that port.
+        """
         # Find out ips that can be used for tests
         list_ips = net_utils.get_unused_ip_addresses(
             self.ports_client,

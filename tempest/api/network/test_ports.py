@@ -70,6 +70,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('c72c1c0c-2193-4aca-aaa4-b1442640f51c')
     def test_create_update_delete_port(self):
+        """Test creating, updating and deleting port"""
         # Verify port creation
         body = self.ports_client.create_port(
             network_id=self.network['id'],
@@ -89,6 +90,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('67f1b811-f8db-43e2-86bd-72c074d4a42c')
     def test_create_bulk_port(self):
+        """Test creating multiple ports in a single request"""
         network1 = self.network
         network2 = self._create_network()
         network_list = [network1['id'], network2['id']]
@@ -107,6 +109,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('0435f278-40ae-48cb-a404-b8a087bc09b1')
     def test_create_port_in_allowed_allocation_pools(self):
+        """Test creating port in allowed allocation pools"""
         network = self._create_network()
         net_id = network['id']
         address = self.cidr
@@ -136,7 +139,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
     def test_show_port(self):
-        # Verify the details of port
+        """Verify the details of port"""
         body = self.ports_client.show_port(self.port['id'])
         port = body['port']
         self.assertIn('id', port)
@@ -152,7 +155,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('45fcdaf2-dab0-4c13-ac6c-fcddfb579dbd')
     def test_show_port_fields(self):
-        # Verify specific fields of a port
+        """Verify specific fields of a port"""
         fields = ['id', 'mac_address']
         body = self.ports_client.show_port(self.port['id'],
                                            fields=fields)
@@ -164,7 +167,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
     def test_list_ports(self):
-        # Verify the port exists in the list of all ports
+        """Verify the port exists in the list of all ports"""
         body = self.ports_client.list_ports()
         ports = [port['id'] for port in body['ports']
                  if port['id'] == self.port['id']]
@@ -172,6 +175,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('e7fe260b-1e79-4dd3-86d9-bec6a7959fc5')
     def test_port_list_filter_by_ip(self):
+        """Test listing ports filtered by ip"""
         # Create network and subnet
         network = self._create_network()
         self._create_subnet(network)
@@ -211,6 +215,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         utils.is_extension_enabled('ip-substring-filtering', 'network'),
         'ip-substring-filtering extension not enabled.')
     def test_port_list_filter_by_ip_substr(self):
+        """Test listing ports filtered by part of ip address string"""
         # Create network and subnet
         network = self._create_network()
         subnet = self._create_subnet(network)
@@ -289,6 +294,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('5ad01ed0-0e6e-4c5d-8194-232801b15c72')
     def test_port_list_filter_by_router_id(self):
+        """Test listing ports filtered by router id"""
         # Create a router
         network = self._create_network()
         self._create_subnet(network)
@@ -313,7 +319,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('ff7f117f-f034-4e0e-abff-ccef05c454b4')
     def test_list_ports_fields(self):
-        # Verify specific fields of ports
+        """Verify specific fields of ports"""
         fields = ['id', 'mac_address']
         body = self.ports_client.list_ports(fields=fields)
         ports = body['ports']
@@ -324,6 +330,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     @decorators.idempotent_id('63aeadd4-3b49-427f-a3b1-19ca81f06270')
     def test_create_update_port_with_second_ip(self):
+        """Test updating port from 2 fixed ips to 1 fixed ip and vice versa"""
         # Create a network with two subnets
         network = self._create_network()
         subnet_1 = self._create_subnet(network)
@@ -410,6 +417,12 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_update_port_with_security_group_and_extra_attributes(self):
+        """Test updating port's security_group along with extra attributes
+
+        First we create a port with one security group, and then we update the
+        port's security_group, in the same update request we also change
+        the port's fixed ips.
+        """
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup')])
 
@@ -418,12 +431,19 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_update_port_with_two_security_groups_and_extra_attributes(self):
+        """Test updating port with two security_groups and extra attributes
+
+        First we create a port with one security group, and then we update the
+        port to two security_groups, in the same update request we also change
+        the port's fixed ips.
+        """
         self._update_port_with_security_groups(
             [data_utils.rand_name('secgroup'),
              data_utils.rand_name('secgroup')])
 
     @decorators.idempotent_id('13e95171-6cbd-489c-9d7c-3f9c58215c18')
     def test_create_show_delete_port_user_defined_mac(self):
+        """Test creating port with user defined mac address"""
         # Create a port for a legal mac
         body = self.ports_client.create_port(
             network_id=self.network['id'],
@@ -450,6 +470,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         utils.is_extension_enabled('security-group', 'network'),
         'security-group extension not enabled.')
     def test_create_port_with_no_securitygroups(self):
+        """Test creating port without security groups"""
         network = self._create_network()
         self._create_subnet(network)
         port = self.create_port(network, security_groups=[])

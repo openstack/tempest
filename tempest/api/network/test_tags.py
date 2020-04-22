@@ -51,7 +51,7 @@ class TagsTest(base.BaseNetworkTest):
 
     @decorators.idempotent_id('ee76bfaf-ac94-4d74-9ecc-4bbd4c583cb1')
     def test_create_list_show_update_delete_tags(self):
-        # Validate that creating a tag on a network resource works.
+        """Validate that creating a tag on a network resource works"""
         tag_name = data_utils.rand_name(self.__class__.__name__ + '-Tag')
         self.tags_client.create_tag('networks', self.network['id'], tag_name)
         self.addCleanup(self.tags_client.delete_all_tags, 'networks',
@@ -158,6 +158,7 @@ class TagsExtTest(base.BaseNetworkTest):
 
     @decorators.idempotent_id('c6231efa-9a89-4adf-b050-2a3156b8a1d9')
     def test_create_check_list_and_delete_tags(self):
+        """Test tag operations on subnets/ports/routers/subnetpools"""
         tag_names = self._create_tags_for_each_resource()
 
         for i, resource in enumerate(self.SUPPORTED_RESOURCES):
@@ -181,6 +182,7 @@ class TagsExtTest(base.BaseNetworkTest):
 
     @decorators.idempotent_id('663a90f5-f334-4b44-afe0-c5fc1d408791')
     def test_update_and_delete_all_tags(self):
+        """Test update/delete all tags on subnets/ports/routers/subnetpools"""
         self._create_tags_for_each_resource()
 
         for resource in self.SUPPORTED_RESOURCES:

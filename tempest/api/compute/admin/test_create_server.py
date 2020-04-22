@@ -27,6 +27,8 @@ CONF = config.CONF
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
+    """Test creating servers with specific flavor"""
+
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
@@ -41,7 +43,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_verify_created_server_ephemeral_disk(self):
-        # Verify that the ephemeral disk is created when creating server
+        """Verify that the ephemeral disk is created when creating server"""
         flavor_base = self.flavors_client.show_flavor(
             self.flavor_ref)['flavor']
 
