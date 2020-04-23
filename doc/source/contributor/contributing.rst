@@ -13,13 +13,13 @@ with Tempest.
 
 Communication
 ~~~~~~~~~~~~~
-* IRC channel #openstack-qa at FreeNode
+* IRC channel ``#openstack-qa`` at FreeNode
 * Mailing list (prefix subjects with ``[qa]`` for faster responses)
   http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
 
 Contacting the Core Team
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Please refer the `Tempest Core Team
+Please refer to the `Tempest Core Team
 <https://review.opendev.org/#/admin/groups/42,members>`_ contacts.
 
 New Feature Planning
@@ -43,8 +43,8 @@ More info about Launchpad usage can be found on `OpenStack docs page
 
 Getting Your Patch Merged
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-All changes proposed to the Tempest requires two ``Code-Review +2`` votes from
-Tempest core reviewers before one of the core reviewers can approve patch by
+All changes proposed to the Tempest require two ``Code-Review +2`` votes from
+Tempest core reviewers before one of the core reviewers can approve the patch by
 giving ``Workflow +1`` vote. More detailed guidelines for reviewers are available
 at :doc:`../REVIEWING`.
 
@@ -53,7 +53,7 @@ Project Team Lead Duties
 All common PTL duties are enumerated in the `PTL guide
 <https://docs.openstack.org/project-team-guide/ptl.html>`_.
 
-Release Process fir QA is documented in `QA Release Process
-<https://wiki.openstack.org/wiki/QA#Releases_Process>`_.
+The Release Process for QA is documented in `QA Release Process
+<https://wiki.openstack.org/wiki/QA/releases>`_.
 
 .. _Feature Proposal Process: https://wiki.openstack.org/wiki/QA#Feature_Proposal_.26_Design_discussions
