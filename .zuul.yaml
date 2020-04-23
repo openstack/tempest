@@ -532,11 +532,11 @@
       run on neutron gate only.
     check:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-networking
     gate:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-networking
 
 - project-template:
@@ -548,11 +548,11 @@
       run on Nova gate only.
     check:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-compute
     gate:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-compute
 
 - project-template:
@@ -564,11 +564,11 @@
       run on Placement gate only.
     check:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-placement
     gate:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-placement
 
 - project-template:
@@ -580,11 +580,11 @@
       run on Cinder and Glance gate only.
     check:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-storage
     gate:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-storage
 
 - project-template:
@@ -596,11 +596,11 @@
       run on swift gate only.
     check:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-object-storage
     gate:
       jobs:
-        - grenade-py3
+        - grenade
         - tempest-integrated-object-storage
 
 - project:
@@ -678,7 +678,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - neutron-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
-        - grenade-py3:
+        - grenade:
             irrelevant-files: *tempest-irrelevant-files
         - puppet-openstack-integration-4-scenario001-tempest-centos-7:
             voting: false
@@ -712,7 +712,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - grenade-py3:
+        - grenade:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-ipv6-only:
             irrelevant-files: *tempest-irrelevant-files-2
