@@ -60,8 +60,8 @@ function clone_project {
     fi
 }
 
-: ${UPPER_CONSTRAINTS_FILE:="https://releases.openstack.org/constraints/upper/master"}
-DEPS="-c${UPPER_CONSTRAINTS_FILE}"
+: ${TOX_CONSTRAINTS_FILE:="https://releases.openstack.org/constraints/upper/master"}
+DEPS="-c${TOX_CONSTRAINTS_FILE}"
 
 # function to create virtualenv to perform sanity operation
 function prepare_workspace {
