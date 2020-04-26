@@ -57,7 +57,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('86c3529b-1231-40de-803c-00e40882f043')
     def test_create_list_port_with_address_pair(self):
-        # Create port with allowed address pair attribute
+        """Create and list port with allowed address pair attribute"""
         allowed_address_pairs = [{'ip_address': self.ip_address,
                                   'mac_address': self.mac_address}]
         body = self.ports_client.create_port(
@@ -100,17 +100,17 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('9599b337-272c-47fd-b3cf-509414414ac4')
     def test_update_port_with_address_pair(self):
-        # Update port with allowed address pair
+        """Update port with allowed address pair"""
         self._update_port_with_address(self.ip_address)
 
     @decorators.idempotent_id('4d6d178f-34f6-4bff-a01c-0a2f8fe909e4')
     def test_update_port_with_cidr_address_pair(self):
-        # Update allowed address pair with cidr
+        """Update allowed address pair with cidr"""
         self._update_port_with_address(str(self.cidr))
 
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
     def test_update_port_with_multiple_ip_mac_address_pair(self):
-        # Create an ip _address and mac_address through port create
+        """Update allowed address pair port with multiple ip and mac"""
         resp = self.ports_client.create_port(
             network_id=self.network['id'],
             name=data_utils.rand_name(self.__class__.__name__))

@@ -104,9 +104,12 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('e5517e62-6f16-430d-a672-f80875493d4c')
     def test_dhcpv6_stateless_eui64(self):
-        # NOTE: When subnets configured with RAs SLAAC (AOM=100) and DHCP
-        # stateless (AOM=110) both for radvd and dnsmasq, port shall receive
-        # IP address calculated from its MAC.
+        """Test eui64 ip when setting slaac and statelss for subnet
+
+        NOTE: When subnets configured with RAs SLAAC (AOM=100) and DHCP
+        stateless (AOM=110) both for radvd and dnsmasq, port shall receive
+        IP address calculated from its MAC.
+        """
         for ra_mode, add_mode in (
                 ('slaac', 'slaac'),
                 ('dhcpv6-stateless', 'dhcpv6-stateless'),
@@ -122,9 +125,12 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('ae2f4a5d-03ff-4c42-a3b0-ce2fcb7ea832')
     def test_dhcpv6_stateless_no_ra(self):
-        # NOTE: When subnets configured with dnsmasq SLAAC and DHCP stateless
-        # and there is no radvd, port shall receive IP address calculated
-        # from its MAC and mask of subnet.
+        """Test eui64 ip when setting stateless and no radvd for subnets
+
+        NOTE: When subnets configured with dnsmasq SLAAC and DHCP stateless
+        and there is no radvd, port shall receive IP address calculated
+        from its MAC and mask of subnet.
+        """
         for ra_mode, add_mode in (
                 (None, 'slaac'),
                 (None, 'dhcpv6-stateless'),
@@ -161,8 +167,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('21635b6f-165a-4d42-bf49-7d195e47342f')
     def test_dhcpv6_stateless_no_ra_no_dhcp(self):
-        # NOTE: If no radvd option and no dnsmasq option is configured
-        # port shall receive IP from fixed IPs list of subnet.
+        """Test eui64 ip when setting no radvd and no dnsmasq for subnets
+
+        NOTE: If no radvd option and no dnsmasq option is configured
+        port shall receive IP from fixed IPs list of subnet.
+        """
         real_ip, eui_ip = self._get_ips_from_subnet()
         self._clean_network()
         self.assertNotEqual(eui_ip, real_ip,
@@ -173,10 +182,13 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('4544adf7-bb5f-4bdc-b769-b3e77026cef2')
     def test_dhcpv6_two_subnets(self):
-        # NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
-        # stateless and other IPv6 is with DHCP stateful, port shall receive
-        # EUI-64 IP addresses from first subnet and DHCP address from second
-        # one. Order of subnet creating should be unimportant.
+        """Test eui64 ip when creating port under network with two subnets
+
+        NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
+        stateless and other IPv6 is with DHCP stateful, port shall receive
+        EUI-64 IP addresses from first subnet and DHCP address from second
+        one. Order of subnet creating should be unimportant.
+        """
         for order in ("slaac_first", "dhcp_first"):
             for ra_mode, add_mode in (
                     ('slaac', 'slaac'),
@@ -225,10 +237,13 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('4256c61d-c538-41ea-9147-3c450c36669e')
     def test_dhcpv6_64_subnets(self):
-        # NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
-        # stateless and other IPv4 is with DHCP of IPv4, port shall receive
-        # EUI-64 IP addresses from first subnet and IPv4 DHCP address from
-        # second one. Order of subnet creating should be unimportant.
+        """Test eui64 ip when setting slaac and stateless for subnets
+
+        NOTE: When one IPv6 subnet configured with dnsmasq SLAAC or DHCP
+        stateless and other IPv4 is with DHCP of IPv4, port shall receive
+        EUI-64 IP addresses from first subnet and IPv4 DHCP address from
+        second one. Order of subnet creating should be unimportant.
+        """
         for order in ("slaac_first", "dhcp_first"):
             for ra_mode, add_mode in (
                     ('slaac', 'slaac'),
@@ -271,8 +286,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('4ab211a0-276f-4552-9070-51e27f58fecf')
     def test_dhcp_stateful(self):
-        # NOTE: With all options below, DHCPv6 shall allocate address from
-        # subnet pool to port.
+        """Test creating port when setting stateful for subnets
+
+        NOTE: With all options below, DHCPv6 shall allocate address from
+        subnet pool to port.
+        """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
@@ -294,9 +312,12 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('51a5e97f-f02e-4e4e-9a17-a69811d300e3')
     def test_dhcp_stateful_fixedips(self):
-        # NOTE: With all options below, port shall be able to get
-        # requested IP from fixed IP range not depending on
-        # DHCP stateful (not SLAAC!) settings configured.
+        """Test creating port with fixed ip when setting stateful for subnets
+
+        NOTE: With all options below, port shall be able to get
+        requested IP from fixed IP range not depending on
+        DHCP stateful (not SLAAC!) settings configured.
+        """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
@@ -324,8 +345,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('98244d88-d990-4570-91d4-6b25d70d08af')
     def test_dhcp_stateful_fixedips_outrange(self):
-        # NOTE: When port gets IP address from fixed IP range it
-        # shall be checked if it's from subnets range.
+        """Test creating port with fixed ip that is not in the range
+
+        NOTE: When port gets IP address from fixed IP range it
+        shall be checked if it's from subnets range.
+        """
         kwargs = {'ipv6_ra_mode': 'dhcpv6-stateful',
                   'ipv6_address_mode': 'dhcpv6-stateful'}
         subnet = self.create_subnet(self.network, **kwargs)
@@ -342,8 +366,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('57b8302b-cba9-4fbb-8835-9168df029051')
     def test_dhcp_stateful_fixedips_duplicate(self):
-        # NOTE: When port gets IP address from fixed IP range it
-        # shall be checked if it's not duplicate.
+        """Test creating port with duplicate fixed ip
+
+        NOTE: When port gets IP address from fixed IP range it
+        shall be checked if it's not duplicate.
+        """
         kwargs = {'ipv6_ra_mode': 'dhcpv6-stateful',
                   'ipv6_address_mode': 'dhcpv6-stateful'}
         subnet = self.create_subnet(self.network, **kwargs)
@@ -376,8 +403,11 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
 
     @decorators.idempotent_id('e98f65db-68f4-4330-9fea-abd8c5192d4d')
     def test_dhcp_stateful_router(self):
-        # NOTE: With all options below the router interface shall
-        # receive DHCPv6 IP address from allocation pool.
+        """Test creating router with dhcp stateful
+
+        NOTE: With all options below the router interface shall
+        receive DHCPv6 IP address from allocation pool.
+        """
         for ra_mode, add_mode in (
                 ('dhcpv6-stateful', 'dhcpv6-stateful'),
                 ('dhcpv6-stateful', None),
