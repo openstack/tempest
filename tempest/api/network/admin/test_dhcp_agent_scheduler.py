@@ -18,6 +18,7 @@ from tempest.lib import decorators
 
 
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
+    """Test network DHCP agent scheduler extension"""
 
     @classmethod
     def skip_checks(cls):
@@ -37,11 +38,13 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
     def test_list_dhcp_agent_hosting_network(self):
+        """Test Listing DHCP agents hosting a network"""
         self.admin_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
 
     @decorators.idempotent_id('30c48f98-e45d-4ffb-841c-b8aad57c7587')
     def test_list_networks_hosted_by_one_dhcp(self):
+        """Test Listing networks hosted by a DHCP agent"""
         body = self.admin_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
         agents = body['agents']
@@ -61,6 +64,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('a0856713-6549-470c-a656-e97c8df9a14d')
     def test_add_remove_network_from_dhcp_agent(self):
+        """Test adding and removing network from a DHCP agent"""
         # The agent is now bound to the network, we can free the port
         self.ports_client.delete_port(self.port['id'])
         agent = dict()

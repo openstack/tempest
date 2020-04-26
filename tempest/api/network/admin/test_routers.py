@@ -27,6 +27,8 @@ CONF = config.CONF
 
 
 class RoutersAdminTest(base.BaseAdminNetworkTest):
+    """Test routers operation supported by admin"""
+
     # NOTE(salv-orlando): This class inherits from BaseAdminNetworkTest
     # as some router operations, such as enabling or disabling SNAT
     # require admin credentials by default
@@ -52,7 +54,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
     def test_create_router_setting_project_id(self):
-        # Test creating router from admin user setting project_id.
+        """Test creating router from admin user setting project_id."""
         project = data_utils.rand_name('test_tenant_')
         description = data_utils.rand_name('desc_')
         project = identity.identity_utils(self.os_admin).create_project(
@@ -74,7 +76,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_create_router_with_default_snat_value(self):
-        # Create a router with default snat rule
+        """Create a router with default snat rule"""
         router = self._create_router(
             external_network_id=CONF.network.public_network_id)
         self._verify_router_gateway(
@@ -86,6 +88,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_create_router_with_snat_explicit(self):
+        """Test creating router with specified enable_snat value"""
         name = data_utils.rand_name('snat-router')
         # Create a router enabling snat attributes
         enable_snat_states = [False, True]
@@ -134,6 +137,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_set_gateway(self):
+        """Test updating router's gateway info"""
         router = self._create_router()
         self.routers_client.update_router(
             router['id'],
@@ -150,6 +154,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_set_gateway_with_snat_explicit(self):
+        """Test setting router's gateway with snat enabled"""
         router = self._create_router()
         self.admin_routers_client.update_router(
             router['id'],
@@ -167,6 +172,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_set_gateway_without_snat(self):
+        """Test setting router's gateway with snat not enabled"""
         router = self._create_router()
         self.admin_routers_client.update_router(
             router['id'],
@@ -183,6 +189,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_unset_gateway(self):
+        """Test unsetting router's gateway"""
         router = self._create_router(
             external_network_id=CONF.network.public_network_id)
         self.routers_client.update_router(router['id'],
@@ -199,6 +206,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_update_router_reset_gateway_without_snat(self):
+        """Test updating router's gateway to be with snat not enabled"""
         router = self._create_router(
             external_network_id=CONF.network.public_network_id)
         self.admin_routers_client.update_router(
@@ -215,6 +223,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
     @decorators.idempotent_id('cbe42f84-04c2-11e7-8adb-fa163e4fa634')
     @utils.requires_ext(extension='ext-gw-mode', service='network')
     def test_create_router_set_gateway_with_fixed_ip(self):
+        """Test creating router setting gateway with fixed ip"""
         # At first create an external network and then use that
         # to create address and delete
         network_name = data_utils.rand_name(self.__class__.__name__)

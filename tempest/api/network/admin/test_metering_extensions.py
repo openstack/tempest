@@ -92,13 +92,14 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('e2fb2f8c-45bf-429a-9f17-171c70444612')
     def test_list_metering_labels(self):
-        # Verify label filtering
+        """Verify listing metering labels"""
         body = self.admin_metering_labels_client.list_metering_labels(id=33)
         metering_labels = body['metering_labels']
         self.assertEmpty(metering_labels)
 
     @decorators.idempotent_id('ec8e15ff-95d0-433b-b8a6-b466bddb1e50')
     def test_create_delete_metering_label_with_filters(self):
+        """Verifies creating and deleting metering label with filters"""
         # Creates a label
         name = data_utils.rand_name('metering-label-')
         description = "label created by tempest"
@@ -115,7 +116,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('30abb445-0eea-472e-bd02-8649f54a5968')
     def test_show_metering_label(self):
-        # Verifies the details of a label
+        """Verifies the details of a metering label"""
         body = self.admin_metering_labels_client.show_metering_label(
             self.metering_label['id'])
         metering_label = body['metering_label']
@@ -128,6 +129,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('cc832399-6681-493b-9d79-0202831a1281')
     def test_list_metering_label_rules(self):
+        """Verifies listing metering label rules"""
         client = self.admin_metering_label_rules_client
         # Verify rule filtering
         body = client.list_metering_label_rules(id=33)
@@ -136,6 +138,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('f4d547cd-3aee-408f-bf36-454f8825e045')
     def test_create_delete_metering_label_rule_with_filters(self):
+        """Verifies creating and deleting metering label rule with filters"""
         # Creates a rule
         remote_ip_prefix = ("10.0.1.0/24" if self._ip_version == 4
                             else "fd03::/64")
@@ -154,7 +157,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('b7354489-96ea-41f3-9452-bace120fb4a7')
     def test_show_metering_label_rule(self):
-        # Verifies the details of a rule
+        """Verifies the metering details of a rule"""
         client = self.admin_metering_label_rules_client
         body = (client.show_metering_label_rule(
                 self.metering_label_rule['id']))
