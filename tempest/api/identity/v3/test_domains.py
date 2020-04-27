@@ -21,6 +21,7 @@ CONF = config.CONF
 
 
 class DefaultDomainTestJSON(base.BaseIdentityV3Test):
+    """Test identity default domains"""
 
     @classmethod
     def setup_clients(cls):
@@ -35,5 +36,6 @@ class DefaultDomainTestJSON(base.BaseIdentityV3Test):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('17a5de24-e6a0-4e4a-a9ee-d85b6e5612b5')
     def test_default_domain_exists(self):
+        """Test showing default domain"""
         domain = self.domains_client.show_domain(self.domain_id)['domain']
         self.assertTrue(domain['enabled'])

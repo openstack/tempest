@@ -19,11 +19,13 @@ from tempest.lib import exceptions as lib_exc
 
 
 class IdentityTenantsTest(base.BaseIdentityV2Test):
+    """Test listing tenants in identity v2 API"""
 
     credentials = ['primary', 'alt']
 
     @decorators.idempotent_id('ecae2459-243d-4ba1-ad02-65f15dc82b78')
     def test_list_tenants_returns_only_authorized_tenants(self):
+        """Test listing tenants only returns authorized tenants via v2 API"""
         alt_tenant_name = self.os_alt.credentials.tenant_name
         resp = self.non_admin_tenants_client.list_tenants()
 

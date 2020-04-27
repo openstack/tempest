@@ -28,6 +28,7 @@ CONF = config.CONF
 
 
 class IdentityV3UsersTest(base.BaseIdentityV3Test):
+    """Test identity user password"""
 
     @classmethod
     def resource_setup(cls):
@@ -82,6 +83,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_user_update_own_password(self):
+        """Test updating user's own password"""
         old_pass = self.creds.password
         old_token = self.non_admin_client.token
         new_pass = data_utils.rand_password()
@@ -111,6 +113,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_password_history_check_self_service_api(self):
+        """Test checking password changing history"""
         old_pass = self.creds.password
         new_pass1 = data_utils.rand_password()
         new_pass2 = data_utils.rand_password()
@@ -141,6 +144,7 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                           'Security compliance not available.')
     @decorators.idempotent_id('a7ad8bbf-2cff-4520-8c1d-96332e151658')
     def test_user_account_lockout(self):
+        """Test locking out user account after failure attempts"""
         if (CONF.identity.user_lockout_failure_attempts <= 0 or
                 CONF.identity.user_lockout_duration <= 0):
             raise self.skipException(

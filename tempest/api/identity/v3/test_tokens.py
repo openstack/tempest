@@ -22,9 +22,11 @@ from tempest.lib import exceptions as lib_exc
 
 
 class TokensV3Test(base.BaseIdentityV3Test):
+    """Test identity tokens"""
 
     @decorators.idempotent_id('a9512ac3-3909-48a4-b395-11f438e16260')
     def test_validate_token(self):
+        """Test validating token for user"""
         creds = self.os_primary.credentials
         user_id = creds.user_id
         username = creds.username
@@ -58,7 +60,7 @@ class TokensV3Test(base.BaseIdentityV3Test):
 
     @decorators.idempotent_id('6f8e4436-fc96-4282-8122-e41df57197a9')
     def test_create_token(self):
-
+        """Test creating token for user"""
         creds = self.os_primary.credentials
         user_id = creds.user_id
         username = creds.username
@@ -109,9 +111,12 @@ class TokensV3Test(base.BaseIdentityV3Test):
 
     @decorators.idempotent_id('0f9f5a5f-d5cd-4a86-8a5b-c5ded151f212')
     def test_token_auth_creation_existence_deletion(self):
-        # Tests basic token auth functionality in a way that is compatible with
-        # pre-provisioned credentials. The default user is used for token
-        # authentication.
+        """Test auth/check existence/delete token for user
+
+        Tests basic token auth functionality in a way that is compatible with
+        pre-provisioned credentials. The default user is used for token
+        authentication.
+        """
 
         # Valid user's token is authenticated
         user = self.os_primary.credentials

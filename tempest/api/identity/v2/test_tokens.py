@@ -20,10 +20,11 @@ from tempest.lib import decorators
 
 
 class TokensTest(base.BaseIdentityV2Test):
+    """Test tokens in identity v2 API"""
 
     @decorators.idempotent_id('65ae3b78-91ff-467b-a705-f6678863b8ec')
     def test_create_token(self):
-
+        """Test creating token for user via v2 API"""
         token_client = self.non_admin_token_client
 
         # get a token for the user
