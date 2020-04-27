@@ -20,6 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ServicesTestJSON(base.BaseIdentityV2AdminTest):
+    """Test identity services via v2 API"""
 
     def _del_service(self, service_id):
         # Deleting the service created in this method
@@ -30,6 +31,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('84521085-c6e6-491c-9a08-ec9f70f90110')
     def test_create_get_delete_service(self):
+        """Test verifies the identity service create/get/delete via v2 API"""
         # GET Service
         # Creating a Service
         name = data_utils.rand_name('service')
@@ -64,7 +66,10 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('5d3252c8-e555-494b-a6c8-e11d7335da42')
     def test_create_service_without_description(self):
-        # Create a service only with name and type
+        """Test creating identity service without description via v2 API
+
+        Create a service only with name and type.
+        """
         name = data_utils.rand_name('service')
         s_type = data_utils.rand_name('type')
         service = self.services_client.create_service(
@@ -79,7 +84,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('34ea6489-012d-4a86-9038-1287cadd5eca')
     def test_list_services(self):
-        # Create, List, Verify and Delete Services
+        """Test Create/List/Verify/Delete of identity service via v2 API"""
         services = []
         for _ in range(3):
             name = data_utils.rand_name('service')

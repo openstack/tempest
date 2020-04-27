@@ -20,6 +20,8 @@ from tempest.lib import exceptions as lib_exc
 
 
 class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
+    """Negative tests of identity domains"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -28,6 +30,7 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative', 'gate'])
     @decorators.idempotent_id('1f3fbff5-4e44-400d-9ca1-d953f05f609b')
     def test_delete_active_domain(self):
+        """Test deleting active domain should fail"""
         domain = self.create_domain()
         domain_id = domain['id']
 
@@ -40,14 +43,20 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9018461d-7d24-408d-b3fe-ae37e8cd5c9e')
     def test_create_domain_with_empty_name(self):
-        # Domain name should not be empty
+        """Test creating domain with empty name should fail
+
+        Domain name should not be empty
+        """
         self.assertRaises(lib_exc.BadRequest,
                           self.domains_client.create_domain, name='')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('37b1bbf2-d664-4785-9a11-333438586eae')
     def test_create_domain_with_name_length_over_64(self):
-        # Domain name length should not ne greater than 64 characters
+        """Test creating domain with name over length
+
+        Domain name length should not ne greater than 64 characters
+        """
         d_name = 'a' * 65
         self.assertRaises(lib_exc.BadRequest,
                           self.domains_client.create_domain,
@@ -56,13 +65,14 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('43781c07-764f-4cf2-a405-953c1916f605')
     def test_delete_non_existent_domain(self):
-        # Attempt to delete a non existent domain should fail
+        """Test attempting to delete a non existent domain should fail"""
         self.assertRaises(lib_exc.NotFound, self.domains_client.delete_domain,
                           data_utils.rand_uuid_hex())
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e6f9e4a2-4f36-4be8-bdbc-4e199ae29427')
     def test_domain_create_duplicate(self):
+        """Test creating domain with duplicate name should fail"""
         domain_name = data_utils.rand_name('domain-dup')
         domain = self.domains_client.create_domain(name=domain_name)['domain']
         domain_id = domain['id']
