@@ -17,13 +17,18 @@
   when: not subunit_input.stat.exists
 
 - name: Install stackviz
-  pip:
-    name: "file://{{ stackviz_archive.stat.path }}"
-    virtualenv: /tmp/stackviz
-    extra_args: -U
   when:
     - stackviz_archive.stat.exists
     - subunit_input.stat.exists
+  block:
+    - include_role:
+        name: ensure-pip
+
+    - pip:
+        name: "file://{{ stackviz_archive.stat.path }}"
+        virtualenv: /tmp/stackviz
+        virtualenv_command: '{{ ensure_pip_virtualenv_command }}'
+        extra_args: -U
 
 - name: Deploy stackviz static html+js
   command: cp -pR /tmp/stackviz/share/stackviz-html {{ stage_dir }}/stackviz
