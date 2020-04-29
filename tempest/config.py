@@ -833,7 +833,8 @@ ValidationGroup = [
                help="User name used to authenticate to an instance."),
     cfg.StrOpt('image_ssh_password',
                default="password",
-               help="Password used to authenticate to an instance."),
+               help="Password used to authenticate to an instance.",
+               secret=True),
     cfg.StrOpt('ssh_shell_prologue',
                default="set -eu -o pipefail; PATH=$$PATH:/sbin:/usr/sbin;",
                help="Shell fragments to use before executing a command "
