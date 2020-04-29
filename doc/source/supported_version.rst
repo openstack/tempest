@@ -11,7 +11,6 @@ Tempest master supports the below OpenStack Releases:
 
 * Train
 * Stein
-* Rocky
 
 For older OpenStack Release:
 
