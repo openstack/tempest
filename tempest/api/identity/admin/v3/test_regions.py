@@ -20,6 +20,8 @@ from tempest.lib import decorators
 
 
 class RegionsTestJSON(base.BaseIdentityV3AdminTest):
+    """Test regions"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -44,6 +46,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('56186092-82e4-43f2-b954-91013218ba42')
     def test_create_update_get_delete_region(self):
+        """Test creating, updating, getting and updating region"""
         # Create region
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
@@ -81,7 +84,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('2c12c5b5-efcf-4aa5-90c5-bff1ab0cdbe2')
     def test_create_region_with_specific_id(self):
-        # Create a region with a specific id
+        """Test creating region with specific id"""
         r_region_id = data_utils.rand_uuid()
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(
@@ -93,7 +96,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
     def test_list_regions(self):
-        # Get a list of regions
+        """Test getting a list of regions"""
         fetched_regions = self.client.list_regions()['regions']
         missing_regions =\
             [e for e in self.setup_regions if e not in fetched_regions]
@@ -104,6 +107,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('2d1057cb-bbde-413a-acdf-e2d265284542')
     def test_list_regions_filter_by_parent_region_id(self):
+        """Test listing regions filtered by parent region id"""
         # Add a sub-region to one of the existing test regions
         r_description = data_utils.rand_name('description')
         region = self.client.create_region(

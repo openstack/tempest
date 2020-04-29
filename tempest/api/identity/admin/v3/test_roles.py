@@ -25,6 +25,8 @@ CONF = config.CONF
 
 
 class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test roles"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -75,6 +77,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('18afc6c0-46cf-4911-824e-9989cc056c3a')
     def test_role_create_update_show_list(self):
+        """Test creating, updating, showing and listing a role"""
         r_name = data_utils.rand_name('Role')
         role = self.roles_client.create_role(name=r_name)['role']
         self.addCleanup(self.roles_client.delete_role, role['id'])
@@ -101,6 +104,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_grant_list_revoke_role_to_user_on_project(self):
+        """Test granting, listing, revoking role to user on project"""
         self.roles_client.create_user_role_on_project(self.project['id'],
                                                       self.user_body['id'],
                                                       self.role['id'])
@@ -122,6 +126,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_grant_list_revoke_role_to_user_on_domain(self):
+        """Test granting, listing, revoking role to user on domain"""
         self.roles_client.create_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
@@ -142,6 +147,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_grant_list_revoke_role_to_group_on_project(self):
+        """Test granting, listing, revoking role to group on project"""
         # Grant role to group on project
         self.roles_client.create_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
@@ -175,6 +181,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('4bf8a70b-e785-413a-ad53-9f91ce02faa7')
     def test_grant_list_revoke_role_to_group_on_domain(self):
+        """Test granting, listing, revoking role to group on domain"""
         self.roles_client.create_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
@@ -192,6 +199,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')
     def test_list_roles(self):
+        """Test listing roles"""
         # Return a list of all roles
         body = self.roles_client.list_roles()['roles']
         found = [role for role in body if role in self.roles]
@@ -215,6 +223,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c90c316c-d706-4728-bcba-eb1912081b69')
     def test_implied_roles_create_check_show_delete(self):
+        """Test creating, checking, showing and deleting implied roles"""
         prior_role_id = self.roles[0]['id']
         implies_role_id = self.roles[1]['id']
 
@@ -248,6 +257,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('dc6f5959-b74d-4e30-a9e5-a8255494ff00')
     def test_roles_hierarchy(self):
+        """Test creating implied role and listing role inferences rules"""
         # Create inference rule from "roles[0]" to "role[1]"
         self._create_implied_role(
             self.roles[0]['id'], self.roles[1]['id'])
@@ -280,6 +290,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_assignments_for_implied_roles_create_delete(self):
+        """Test assignments when implied roles are created and deleted"""
         # Create a grant using "roles[0]"
         self.roles_client.create_user_role_on_project(
             self.project['id'], self.user_body['id'], self.roles[0]['id'])
@@ -321,6 +332,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('d92a41d2-5501-497a-84bb-6e294330e8f8')
     def test_domain_roles_create_delete(self):
+        """Test creating, listing and deleting domain roles"""
         domain_role = self.roles_client.create_role(
             name=data_utils.rand_name('domain_role'),
             domain_id=self.domain['id'])['role']
@@ -341,6 +353,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('eb1e1c24-1bc4-4d47-9748-e127a1852c82')
     def test_implied_domain_roles(self):
+        """Test creating implied roles when roles are in domains"""
         # Create two roles in the same domain
         domain_role1 = self.setup_test_role(domain_id=self.domain['id'])
         domain_role2 = self.setup_test_role(domain_id=self.domain['id'])
@@ -373,6 +386,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_assignments_for_domain_roles(self):
+        """Test assignments for domain roles"""
         domain_role = self.setup_test_role(domain_id=self.domain['id'])
 
         # Create a grant using "domain_role"
@@ -395,6 +409,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('3748c316-c18f-4b08-997b-c60567bc6235')
     def test_list_all_implied_roles(self):
+        """Test listing all implied roles"""
         # Create inference rule from "roles[0]" to "roles[1]"
         self._create_implied_role(
             self.roles[0]['id'], self.roles[1]['id'])

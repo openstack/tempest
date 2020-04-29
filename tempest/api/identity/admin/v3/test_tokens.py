@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test tokens"""
 
     credentials = ['primary', 'admin', 'alt']
 
@@ -123,6 +124,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('08ed85ce-2ba8-4864-b442-bcc61f16ae89')
     def test_get_available_project_scopes(self):
+        """Test getting available project scopes"""
         manager_project_id = self.os_primary.credentials.project_id
         admin_user_id = self.os_admin.credentials.user_id
         admin_role_id = self.get_role_by_name(CONF.identity.admin_role)['id']
@@ -152,10 +154,13 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('ec5ecb05-af64-4c04-ac86-4d9f6f12f185')
     def test_get_available_domain_scopes(self):
-        # Test for verifying that listing domain scopes for a user works if
-        # the user has a domain role or belongs to a group that has a domain
-        # role. For this test, admin client is used to add roles to alt user,
-        # which performs API calls, to avoid 401 Unauthorized errors.
+        """Test getting available domain scopes
+
+        To verify that listing domain scopes for a user works if
+        the user has a domain role or belongs to a group that has a domain
+        role. For this test, admin client is used to add roles to alt user,
+        which performs API calls, to avoid 401 Unauthorized errors.
+        """
         alt_user_id = self.os_alt.credentials.user_id
 
         def _create_user_domain_role_for_alt_user():

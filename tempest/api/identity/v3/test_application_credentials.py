@@ -23,6 +23,7 @@ from tempest.lib import decorators
 
 
 class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
+    """Test application credentials"""
 
     def _list_app_creds(self, name=None):
         kwargs = dict(user_id=self.user_id)
@@ -33,6 +34,7 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
 
     @decorators.idempotent_id('8080c75c-eddc-4786-941a-c2da7039ae61')
     def test_create_application_credential(self):
+        """Test creating application credential"""
         app_cred = self.create_application_credential()
 
         # Check that the secret appears in the create response
@@ -55,6 +57,7 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
 
     @decorators.idempotent_id('852daf0c-42b5-4239-8466-d193d0543ed3')
     def test_create_application_credential_expires(self):
+        """Test creating application credential with expire time"""
         expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
 
         app_cred = self.create_application_credential(expires_at=expires_at)
@@ -64,6 +67,7 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
 
     @decorators.idempotent_id('ff0cd457-6224-46e7-b79e-0ada4964a8a6')
     def test_list_application_credentials(self):
+        """Test listing application credentials"""
         self.create_application_credential()
         self.create_application_credential()
 
@@ -72,6 +76,7 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
 
     @decorators.idempotent_id('9bb5e5cc-5250-493a-8869-8b665f6aa5f6')
     def test_query_application_credentials(self):
+        """Test listing application credentials filtered by name"""
         self.create_application_credential()
         app_cred_two = self.create_application_credential()
         app_cred_two_name = app_cred_two['name']
