@@ -8,6 +8,7 @@ tempest.api.network
 tempest.api.identity
 
 # Skip network only scenario tests.
-tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_network_advanced_server_ops
-tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_network_basic_ops
-tempest.scenario.test_network_v6.TestGettingAddress.test_security_groups_basic_ops
+tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps
+tempest.scenario.test_network_basic_ops.TestNetworkBasicOps
+tempest.scenario.test_network_v6.TestGettingAddress
+tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps
