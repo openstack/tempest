@@ -106,12 +106,12 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
                                                   name=sg['name'])
 
 
-class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
+class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
     create_default_network = True
 
     @classmethod
     def skip_checks(self):
-        super(ServerStableDeviceRescueTest, self).skip_checks()
+        super(BaseServerStableDeviceRescueTest, self).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
             raise self.skipException(msg)
@@ -120,8 +120,15 @@ class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
             raise self.skipException(msg)
 
     def _create_server_and_rescue_image(self, hw_rescue_device=None,
-                                        hw_rescue_bus=None):
-        server_id = self.create_test_server(wait_until='ACTIVE')['id']
+                                        hw_rescue_bus=None,
+                                        block_device_mapping_v2=None):
+        if block_device_mapping_v2:
+            server_id = self.create_test_server(
+                wait_until='ACTIVE',
+                block_device_mapping_v2=block_device_mapping_v2)['id']
+        else:
+            server_id = self.create_test_server(wait_until='ACTIVE')['id']
+
         image_id = self.create_image_from_server(server_id,
                                                  wait_until='ACTIVE')['id']
         if hw_rescue_bus:
@@ -142,6 +149,9 @@ class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
         self.servers_client.unrescue_server(server_id)
         waiters.wait_for_server_status(
             self.servers_client, server_id, 'ACTIVE')
+
+
+class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
 
     @decorators.idempotent_id('947004c3-e8ef-47d9-9f00-97b74f9eaf96')
     def test_stable_device_rescue_cdrom_ide(self):
@@ -176,4 +186,50 @@ class ServerStableDeviceRescueTest(base.BaseV2ComputeTest):
         self.attach_volume(server, volume)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+
+class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
+
+    min_microversion = '2.87'
+
+    @decorators.idempotent_id('48f123cb-922a-4065-8db6-b9a9074a556b')
+    def test_stable_device_rescue_bfv_blank_volume(self):
+        block_device_mapping_v2 = [{
+            "boot_index": "0",
+            "source_type": "blank",
+            "volume_size": "1",
+            "destination_type": "volume"}]
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio',
+            block_device_mapping_v2=block_device_mapping_v2)
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('e4636333-c928-40fc-98b7-70a23eef4224')
+    def test_stable_device_rescue_bfv_image_volume(self):
+        block_device_mapping_v2 = [{
+            "boot_index": "0",
+            "source_type": "image",
+            "volume_size": "1",
+            "uuid": CONF.compute.image_ref,
+            "destination_type": "volume"}]
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio',
+            block_device_mapping_v2=block_device_mapping_v2)
+        self._test_stable_device_rescue(server_id, rescue_image_id)
+
+    @decorators.idempotent_id('7fcc5d2c-130e-4750-95f5-7343f9d0a2f3')
+    def test_stable_device_rescue_bfv_snapshot_volume(self):
+        volume_id = self.create_volume()['id']
+        self.volumes_client.set_bootable_volume(volume_id, bootable=True)
+        snapshot_id = self.create_volume_snapshot(volume_id)['id']
+        block_device_mapping_v2 = [{
+            "boot_index": "0",
+            "source_type": "snapshot",
+            "volume_size": "1",
+            "uuid": snapshot_id,
+            "destination_type": "volume"}]
+        server_id, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio',
+            block_device_mapping_v2=block_device_mapping_v2)
         self._test_stable_device_rescue(server_id, rescue_image_id)

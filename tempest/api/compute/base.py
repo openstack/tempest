@@ -109,6 +109,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         if CONF.service_available.cinder:
             cls.volumes_client = cls.os_primary.volumes_client_latest
             cls.attachments_client = cls.os_primary.attachments_client_latest
+            cls.snapshots_client = cls.os_primary.snapshots_client_latest
         if CONF.service_available.glance:
             if CONF.image_feature_enabled.api_v1:
                 cls.images_client = cls.os_primary.image_client
@@ -577,6 +578,25 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
         return attachment
+
+    def create_volume_snapshot(self, volume_id, name=None, description=None,
+                               metadata=None, force=False):
+        name = name or data_utils.rand_name(
+            self.__class__.__name__ + '-snapshot')
+        snapshot = self.snapshots_client.create_snapshot(
+            volume_id=volume_id,
+            force=force,
+            display_name=name,
+            description=description,
+            metadata=metadata)['snapshot']
+        self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
+                        snapshot['id'])
+        self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot['id'], 'available')
+        snapshot = self.snapshots_client.show_snapshot(
+            snapshot['id'])['snapshot']
+        return snapshot
 
     def assert_flavor_equal(self, flavor_id, server_flavor):
         """Check whether server_flavor equals to flavor.
