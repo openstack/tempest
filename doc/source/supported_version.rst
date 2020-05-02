@@ -9,6 +9,7 @@ Compatible OpenStack Releases
 
 Tempest master supports the below OpenStack Releases:
 
+* Ussuri
 * Train
 * Stein
 
