@@ -98,8 +98,8 @@ printf "\n\n"
 if [[ -r doc/source/data/tempest-plugins-registry.footer ]]; then
     cat doc/source/data/tempest-plugins-registry.footer
 fi
-) > doc/source/plugin-registry.rst
+) > doc/source/plugins/plugin-registry.rst
 
 if [[ -n ${1} ]]; then
-    cp doc/source/plugin-registry.rst ${1}/doc/source/plugin-registry.rst
+    cp doc/source/plugins/plugin-registry.rst ${1}/doc/source/plugins/plugin-registry.rst
 fi

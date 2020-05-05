@@ -87,8 +87,7 @@ Plugins
 .. toctree::
    :maxdepth: 2
 
-   plugin
-   plugin-registry
+   plugins/index
 
 Tempest & Plugins Compatible Version Policy
 -------------------------------------------
@@ -97,6 +96,14 @@ Tempest & Plugins Compatible Version Policy
    :maxdepth: 2
 
    tempest_and_plugins_compatible_version_policy
+
+Stable Branch Support Policy
+----------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   stable_branch_support_policy
 
 Stable Branch Testing Policy
 ----------------------------
@@ -113,14 +120,6 @@ Library
    :maxdepth: 2
 
    library
-
-Support Policy
---------------
-
-.. toctree::
-   :maxdepth: 2
-
-   stable_branch_support_policy
 
 Search
 ======
