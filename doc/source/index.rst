@@ -98,6 +98,14 @@ Tempest & Plugins Compatible Version Policy
 
    tempest_and_plugins_compatible_version_policy
 
+Stable Branch Testing Policy
+----------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   stable_branch_testing_policy
+
 Library
 -------
 
