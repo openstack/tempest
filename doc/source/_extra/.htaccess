@@ -1,4 +1,4 @@
 redirectmatch 301 ^/developer/tempest/(.*) /tempest/latest/$1
 redirectmatch 301 ^/tempest/latest/plugin.html /tempest/latest/plugins/plugin.html
 redirectmatch 301 ^/tempest/latest/plugin-registry.html /tempest/latest/plugins/plugin-registry
-redirectmatch 301 ^/tempest/latest/support-policy /tempest/latest/stable-branch-support-policy
+redirectmatch 301 ^/tempest/latest/#support-policy /tempest/latest/#stable-branch-support-policy
