@@ -122,15 +122,17 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
     def _create_server_and_rescue_image(self, hw_rescue_device=None,
                                         hw_rescue_bus=None,
                                         block_device_mapping_v2=None):
+
+        server_id = self.create_test_server(
+            wait_until='ACTIVE')['id']
+        image_id = self.create_image_from_server(
+            server_id, wait_until='ACTIVE')['id']
+
         if block_device_mapping_v2:
             server_id = self.create_test_server(
                 wait_until='ACTIVE',
                 block_device_mapping_v2=block_device_mapping_v2)['id']
-        else:
-            server_id = self.create_test_server(wait_until='ACTIVE')['id']
 
-        image_id = self.create_image_from_server(server_id,
-                                                 wait_until='ACTIVE')['id']
         if hw_rescue_bus:
             self.images_client.update_image(
                 image_id, [dict(add='/hw_rescue_bus',
@@ -193,6 +195,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
 
     min_microversion = '2.87'
 
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('48f123cb-922a-4065-8db6-b9a9074a556b')
     def test_stable_device_rescue_bfv_blank_volume(self):
         block_device_mapping_v2 = [{
@@ -205,6 +208,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
             block_device_mapping_v2=block_device_mapping_v2)
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('e4636333-c928-40fc-98b7-70a23eef4224')
     def test_stable_device_rescue_bfv_image_volume(self):
         block_device_mapping_v2 = [{
@@ -212,22 +216,6 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
             "source_type": "image",
             "volume_size": CONF.volume.volume_size,
             "uuid": CONF.compute.image_ref,
-            "destination_type": "volume"}]
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
-            hw_rescue_device='disk', hw_rescue_bus='virtio',
-            block_device_mapping_v2=block_device_mapping_v2)
-        self._test_stable_device_rescue(server_id, rescue_image_id)
-
-    @decorators.idempotent_id('7fcc5d2c-130e-4750-95f5-7343f9d0a2f3')
-    def test_stable_device_rescue_bfv_snapshot_volume(self):
-        volume_id = self.create_volume()['id']
-        self.volumes_client.set_bootable_volume(volume_id, bootable=True)
-        snapshot_id = self.create_volume_snapshot(volume_id)['id']
-        block_device_mapping_v2 = [{
-            "boot_index": "0",
-            "source_type": "snapshot",
-            "volume_size": CONF.volume.volume_size,
-            "uuid": snapshot_id,
             "destination_type": "volume"}]
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio',
