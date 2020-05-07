@@ -12,8 +12,41 @@
     # job provided by the gabbi-tempest plugin. It can be safely ignored
     # if that plugin is not being used.
     GABBI_TEMPEST_PATH: "{{ gabbi_tempest_path | default('') }}"
-  roles:
-    - setup-tempest-run-dir
-    - setup-tempest-data-dir
-    - acl-devstack-files
-    - run-tempest
+  tasks:
+    - name: Setup Tempest Run Directory
+      include_role:
+        name: setup-tempest-run-dir
+
+    - name: Setup Tempest Data Directory
+      include_role:
+        name: setup-tempest-data-dir
+
+    - name: ACL devstack files
+      include_role:
+        name: acl-devstack-files
+
+    - name: Run tempest cleanup init-saved-state
+      include_role:
+        name: tempest-cleanup
+      vars:
+        init_saved_state: true
+      when:
+        - run_tempest_dry_cleanup is defined
+        - run_tempest_cleanup is defined
+
+    - name: Run Tempest
+      include_role:
+        name: run-tempest
+
+    - name: Run tempest cleanup dry-run
+      include_role:
+        name: tempest-cleanup
+      vars:
+        dry_run: true
+      when:
+        - run_tempest_dry_cleanup is defined
+
+    - name: Run tempest cleanup
+      include_role:
+        name: tempest-cleanup
+      when: run_tempest_cleanup is defined

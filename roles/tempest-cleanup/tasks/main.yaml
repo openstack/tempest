@@ -1,0 +1,31 @@
+- when: init_saved_state
+  block:
+    - name: Run tempest cleanup init-saved-state
+      become: yes
+      become_user: tempest
+      command: tox -evenv-tempest -- tempest cleanup --init-saved-state
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"
+
+    - name: Cat saved_state.json
+      command: cat "{{ devstack_base_dir }}/tempest/saved_state.json"
+
+- when: dry_run
+  block:
+    - name: Run tempest cleanup dry-run
+      become: yes
+      become_user: tempest
+      command: tox -evenv-tempest -- tempest cleanup --dry-run
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"
+
+    - name: Cat dry_run.json
+      command: cat "{{ devstack_base_dir }}/tempest/dry_run.json"
+
+- name: Run tempest cleanup
+  become: yes
+  become_user: tempest
+  command: tox -evenv-tempest -- tempest cleanup
+  args:
+    chdir: "{{ devstack_base_dir }}/tempest"
+  when: not dry_run and not init_saved_state
