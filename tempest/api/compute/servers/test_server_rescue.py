@@ -198,7 +198,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
         block_device_mapping_v2 = [{
             "boot_index": "0",
             "source_type": "blank",
-            "volume_size": "1",
+            "volume_size": CONF.volume.volume_size,
             "destination_type": "volume"}]
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio',
@@ -210,7 +210,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
         block_device_mapping_v2 = [{
             "boot_index": "0",
             "source_type": "image",
-            "volume_size": "1",
+            "volume_size": CONF.volume.volume_size,
             "uuid": CONF.compute.image_ref,
             "destination_type": "volume"}]
         server_id, rescue_image_id = self._create_server_and_rescue_image(
@@ -226,7 +226,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
         block_device_mapping_v2 = [{
             "boot_index": "0",
             "source_type": "snapshot",
-            "volume_size": "1",
+            "volume_size": CONF.volume.volume_size,
             "uuid": snapshot_id,
             "destination_type": "volume"}]
         server_id, rescue_image_id = self._create_server_and_rescue_image(
