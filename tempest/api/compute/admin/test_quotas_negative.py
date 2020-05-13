@@ -53,10 +53,12 @@ class QuotasAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
 
 
 class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
+    """Negative tests of nova quotas"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('733abfe8-166e-47bb-8363-23dbd7ff3476')
     def test_update_quota_normal_user(self):
+        """Test updating nova quota by normal user should fail"""
         self.assertRaises(lib_exc.Forbidden,
                           self.client.update_quota_set,
                           self.demo_tenant_id,
@@ -67,7 +69,7 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
     def test_create_server_when_cpu_quota_is_full(self):
-        # Disallow server creation when tenant's vcpu quota is full
+        """Disallow server creation when tenant's vcpu quota is full"""
         self._update_quota('cores', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
@@ -75,7 +77,7 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
     def test_create_server_when_memory_quota_is_full(self):
-        # Disallow server creation when tenant's memory quota is full
+        """Disallow server creation when tenant's memory quota is full"""
         self._update_quota('ram', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
@@ -83,13 +85,15 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
     def test_create_server_when_instances_quota_is_full(self):
-        # Once instances quota limit is reached, disallow server creation
+        """Once instances quota limit is reached, disallow server creation"""
         self._update_quota('instances', 0)
         self.assertRaises((lib_exc.Forbidden, lib_exc.OverLimit),
                           self.create_test_server)
 
 
 class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
+    """Negative tests of nova security group quota"""
+
     max_microversion = '2.35'
 
     @decorators.skip_because(bug="1186354",
@@ -98,7 +102,7 @@ class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
     @decorators.idempotent_id('7c6c8f3b-2bf6-4918-b240-57b136a66aa0')
     @utils.services('network')
     def test_security_groups_exceed_limit(self):
-        # Negative test: Creation Security Groups over limit should FAIL
+        """Negative test: Creation Security Groups over limit should FAIL"""
         # Set the quota to number of used security groups
         sg_quota = self.limits_client.show_limits()['limits']['absolute'][
             'totalSecurityGroupsUsed']
@@ -117,7 +121,7 @@ class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
     @decorators.idempotent_id('6e9f436d-f1ed-4f8e-a493-7275dfaa4b4d')
     @utils.services('network')
     def test_security_groups_rules_exceed_limit(self):
-        # Negative test: Creation of Security Group Rules should FAIL
+        """Negative test: Creation of Security Group Rules should FAIL"""
         # when we reach limit maxSecurityGroupRules
         self._update_quota('security_group_rules', 0)
 

@@ -63,7 +63,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('2c8f145f-8012-4cb8-ac7e-95a587f0e4ab')
     @utils.services('network')
     def test_create_list_delete_floating_ips_bulk(self):
-        # Create, List  and delete the Floating IPs Bulk
+        """Creating, listing and deleting the Floating IPs Bulk"""
         pool = 'test_pool'
         # NOTE(GMann): Reserving the IP range but those are not attached
         # anywhere. Using the below mentioned interface which is not ever
