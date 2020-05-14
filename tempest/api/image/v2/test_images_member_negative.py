@@ -16,10 +16,12 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
+    """Negative tests of image members"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('b79efb37-820d-4cf0-b54c-308b00cf842c')
     def test_image_share_invalid_status(self):
+        """Test updating image member status to invalid status should fail"""
         image_id = self._create_image()
         member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)
@@ -32,6 +34,7 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('27002f74-109e-4a37-acd0-f91cd4597967')
     def test_image_share_owner_cannot_accept(self):
+        """Test that image owner can't accept image shared to other member"""
         image_id = self._create_image()
         member = self.image_member_client.create_image_member(
             image_id, member=self.alt_tenant_id)

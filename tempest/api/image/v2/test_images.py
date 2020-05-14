@@ -88,8 +88,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f848bb94-1c6e-45a4-8726-39e3a5b23535')
     def test_delete_image(self):
-        # Deletes an image by image_id
-
+        """Test deleting an image by image_id"""
         # Create image
         image_name = data_utils.rand_name('image')
         container_format = CONF.image.container_formats[0]
@@ -110,8 +109,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f66891a7-a35c-41a8-b590-a065c2a1caa6')
     def test_update_image(self):
-        # Updates an image by image_id
-
+        """Test updating an image by image_id"""
         # Create image
         image_name = data_utils.rand_name('image')
         container_format = CONF.image.container_formats[0]
@@ -135,6 +133,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('951ebe01-969f-4ea9-9898-8a3f1f442ab0')
     def test_deactivate_reactivate_image(self):
+        """Test deactivating and reactivating an image"""
         # Create image
         image_name = data_utils.rand_name('image')
         image = self.create_image(name=image_name,
@@ -235,7 +234,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('1e341d7a-90a9-494c-b143-2cdf2aeb6aee')
     def test_list_no_params(self):
-        # Simple test to see all fixture images returned
+        """Simple test to see all fixture images returned"""
         images_list = self.client.list_images()['images']
         image_list = [image['id'] for image in images_list]
 
@@ -244,25 +243,25 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('9959ca1d-1aa7-4b7a-a1ea-0fff0499b37e')
     def test_list_images_param_container_format(self):
-        # Test to get all images with a specific container_format
+        """Test to get all images with a specific container_format"""
         params = {"container_format": self.test_data['container_format']}
         self._list_by_param_value_and_assert(params)
 
     @decorators.idempotent_id('4a4735a7-f22f-49b6-b0d9-66e1ef7453eb')
     def test_list_images_param_disk_format(self):
-        # Test to get all images with disk_format = raw
+        """Test to get all images with disk_format = raw"""
         params = {"disk_format": "raw"}
         self._list_by_param_value_and_assert(params)
 
     @decorators.idempotent_id('7a95bb92-d99e-4b12-9718-7bc6ab73e6d2')
     def test_list_images_param_visibility(self):
-        # Test to get all images with visibility = private
+        """Test to get all images with visibility = private"""
         params = {"visibility": "private"}
         self._list_by_param_value_and_assert(params)
 
     @decorators.idempotent_id('cf1b9a48-8340-480e-af7b-fe7e17690876')
     def test_list_images_param_size(self):
-        # Test to get all images by size
+        """Test to get all images by size"""
         image_id = self.created_images[0]
         # Get image metadata
         image = self.client.show_image(image_id)
@@ -272,7 +271,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('4ad8c157-971a-4ba8-aa84-ed61154b1e7f')
     def test_list_images_param_min_max_size(self):
-        # Test to get all images with size between 2000 to 3000
+        """Test to get all images with min size and max size"""
         image_id = self.created_images[0]
         # Get image metadata
         image = self.client.show_image(image_id)
@@ -290,13 +289,13 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('7fc9e369-0f58-4d05-9aa5-0969e2d59d15')
     def test_list_images_param_status(self):
-        # Test to get all active images
+        """Test to get all active images"""
         params = {"status": "active"}
         self._list_by_param_value_and_assert(params)
 
     @decorators.idempotent_id('e914a891-3cc8-4b40-ad32-e0a39ffbddbb')
     def test_list_images_param_limit(self):
-        # Test to get images by limit
+        """Test to get images by limit"""
         params = {"limit": 1}
         images_list = self.client.list_images(params=params)['images']
 
@@ -305,7 +304,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('e9a44b91-31c8-4b40-a332-e0a39ffb4dbb')
     def test_list_image_param_owner(self):
-        # Test to get images by owner
+        """Test to get images by owner"""
         image_id = self.created_images[0]
         # Get image metadata
         image = self.client.show_image(image_id)
@@ -315,13 +314,13 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('55c8f5f5-bfed-409d-a6d5-4caeda985d7b')
     def test_list_images_param_name(self):
-        # Test to get images by name
+        """Test to get images by name"""
         params = {'name': self.test_data['name']}
         self._list_by_param_value_and_assert(params)
 
     @decorators.idempotent_id('aa8ac4df-cff9-418b-8d0f-dd9c67b072c9')
     def test_list_images_param_tag(self):
-        # Test to get images matching a tag
+        """Test to get images matching a tag"""
         params = {'tag': self.test_data['tags'][0]}
         images_list = self.client.list_images(params=params)['images']
         # Validating properties of fetched images
@@ -336,24 +335,26 @@ class ListUserImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('eeadce49-04e0-43b7-aec7-52535d903e7a')
     def test_list_images_param_sort(self):
+        """Test listing images sorting in descending order"""
         params = {'sort': 'size:desc'}
         self._list_sorted_by_image_size_and_assert(params, desc=True)
 
     @decorators.idempotent_id('9faaa0c2-c3a5-43e1-8f61-61c54b409a49')
     def test_list_images_param_sort_key_dir(self):
+        """Test listing images sorting by size in descending order"""
         params = {'sort_key': 'size', 'sort_dir': 'desc'}
         self._list_sorted_by_image_size_and_assert(params, desc=True)
 
     @decorators.idempotent_id('622b925c-479f-4736-860d-adeaf13bc371')
     def test_get_image_schema(self):
-        # Test to get image schema
+        """Test to get image schema"""
         schema = "image"
         body = self.schemas_client.show_schema(schema)
         self.assertEqual("image", body['name'])
 
     @decorators.idempotent_id('25c8d7b2-df21-460f-87ac-93130bcdc684')
     def test_get_images_schema(self):
-        # Test to get images schema
+        """Test to get images schema"""
         schema = "images"
         body = self.schemas_client.show_schema(schema)
         self.assertEqual("images", body['name'])
@@ -372,6 +373,7 @@ class ListSharedImagesTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('3fa50be4-8e38-4c02-a8db-7811bb780122')
     def test_list_images_param_member_status(self):
+        """Test listing images by member_status and visibility"""
         # Create an image to be shared using default visibility
         image_file = six.BytesIO(data_utils.random_bytes(2048))
         container_format = CONF.image.container_formats[0]

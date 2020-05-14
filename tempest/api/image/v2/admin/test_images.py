@@ -19,10 +19,12 @@ from tempest.lib import decorators
 
 
 class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
+    """"Test image operations about image owner"""
 
     @decorators.related_bug('1420008')
     @decorators.idempotent_id('646a6eaa-135f-4493-a0af-12583021224e')
     def test_create_image_owner_param(self):
+        """Test creating image with specified owner"""
         # NOTE: Create image with owner different from tenant owner by
         # using "owner" parameter requires an admin privileges.
         random_id = data_utils.rand_uuid_hex()
@@ -35,6 +37,7 @@ class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
     @decorators.related_bug('1420008')
     @decorators.idempotent_id('525ba546-10ef-4aad-bba1-1858095ce553')
     def test_update_image_owner_param(self):
+        """Test updating image owner"""
         random_id_1 = data_utils.rand_uuid_hex()
         image = self.admin_client.create_image(
             container_format='bare', disk_format='raw', owner=random_id_1)

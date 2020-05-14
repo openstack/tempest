@@ -18,9 +18,11 @@ from tempest.lib import decorators
 
 
 class ImagesTagsTest(base.BaseV2ImageTest):
+    """Test image tags"""
 
     @decorators.idempotent_id('10407036-6059-4f95-a2cd-cbbbee7ed329')
     def test_update_delete_tags_for_image(self):
+        """Test adding and deleting image tags"""
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   visibility='private')
