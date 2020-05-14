@@ -35,14 +35,19 @@ class TestImagesClient(base.BaseServiceTest):
         "created_at": "2012-08-10T19:23:50Z",
         "updated_at": "2012-08-12T11:11:33Z",
         "self": "/v2/images/da3b75d9-3f4a-40e7-8a2c-bfab23927dea",
-        "file": "/v2/images/da3b75d9-3f4a-40e7-8a2c-bfab23927dea/file",
+        "file": "/v2/images/da3b75d9-3f4a-40e7-8a2c-bfab23927"
+                "dea/file",
         "schema": "/v2/schemas/image",
         "owner": None,
         "min_ram": None,
         "min_disk": None,
         "disk_format": None,
         "virtual_size": None,
-        "container_format": None
+        "container_format": None,
+        "os_hash_algo": "sha512",
+        "os_hash_value": "ef7d1ed957ffafefb324d50ebc6685ed03d0e645d",
+        "os_hidden": False,
+        "protected": False,
     }
 
     FAKE_LIST_IMAGES = {
@@ -66,7 +71,10 @@ class TestImagesClient(base.BaseServiceTest):
                 "size": 13167616,
                 "min_ram": 0,
                 "schema": "/v2/schemas/image",
-                "virtual_size": None
+                "virtual_size": None,
+                "os_hash_algo": "sha512",
+                "os_hash_value": "ef7d1ed957ffafefb324d50ebc6685ed03d0e645d",
+                "os_hidden": False
             },
             {
                 "status": "active",
@@ -87,7 +95,10 @@ class TestImagesClient(base.BaseServiceTest):
                 "size": 476704768,
                 "min_ram": 0,
                 "schema": "/v2/schemas/image",
-                "virtual_size": None
+                "virtual_size": None,
+                "os_hash_algo": "sha512",
+                "os_hash_value": "ef7d1ed957ffafefb324d50ebc6685ed03d0e645d",
+                "os_hidden": False
             }
         ],
         "schema": "/v2/schemas/images",
