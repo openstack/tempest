@@ -63,9 +63,10 @@ sample_config_basename = '_static/tempest'
 todo_include_todos = True
 
 # openstackdocstheme options
-repository_name = 'openstack/tempest'
-bug_project = 'tempest'
-bug_tag = 'doc'
+openstackdocs_repo_name = 'openstack/tempest'
+openstackdocs_bug_project = 'tempest'
+openstackdocs_bug_tag = 'doc'
+openstackdocs_pdf_link = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

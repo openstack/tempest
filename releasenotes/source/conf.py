@@ -42,9 +42,9 @@ extensions = [
 ]
 
 # openstackdocstheme options
-repository_name = 'openstack/tempest'
-bug_project = 'tempest'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/tempest'
+openstackdocs_bug_project = 'tempest'
+openstackdocs_bug_tag = ''
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
