@@ -26,7 +26,10 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('036ede36-6160-4463-8c01-c781eee6369d')
     def test_register_with_invalid_container_format(self):
-        # Negative tests for invalid data supplied to POST /images
+        """Create image with invalid container format
+
+        Negative tests for invalid data supplied to POST /images
+        """
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           headers={'x-image-meta-name': 'test',
                                    'x-image-meta-container_format': 'wrong',
@@ -35,6 +38,7 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('993face5-921d-4e84-aabf-c1bba4234a67')
     def test_register_with_invalid_disk_format(self):
+        """Create image with invalid disk format"""
         self.assertRaises(lib_exc.BadRequest, self.client.create_image,
                           headers={'x-image-meta-name': 'test',
                                    'x-image-meta-container_format': 'bare',
@@ -43,7 +47,7 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ec652588-7e3c-4b67-a2f2-0fa96f57c8fc')
     def test_delete_non_existent_image(self):
-        # Return an error while trying to delete a non-existent image
+        """Return an error while trying to delete a non-existent image"""
 
         non_existent_image_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
@@ -52,13 +56,13 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('04f72aa3-fcec-45a3-81a3-308ef7cc82bc')
     def test_delete_image_blank_id(self):
-        # Return an error while trying to delete an image with blank Id
+        """Return an error while trying to delete an image with blank Id"""
         self.assertRaises(lib_exc.NotFound, self.client.delete_image, '')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('950e5054-a3c7-4dee-ada5-e576f1087abd')
     def test_delete_image_non_hex_string_id(self):
-        # Return an error while trying to delete an image with non hex id
+        """Return an error while trying to delete an image with non hex id"""
         invalid_image_id = data_utils.rand_uuid()[:-1] + "j"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           invalid_image_id)
@@ -66,13 +70,13 @@ class CreateDeleteImagesNegativeTest(base.BaseV1ImageTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('4ed757cd-450c-44b1-9fd1-c819748c650d')
     def test_delete_image_negative_image_id(self):
-        # Return an error while trying to delete an image with negative id
+        """Return an error while trying to delete an image with negative id"""
         self.assertRaises(lib_exc.NotFound, self.client.delete_image, -1)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a4a448ab-3db2-4d2d-b9b2-6a1271241dfe')
     def test_delete_image_id_over_character_limit(self):
-        # Return an error while trying to delete image with id over limit
+        """Return an error while trying to delete image with id over limit"""
         overlimit_image_id = data_utils.rand_uuid() + "1"
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
                           overlimit_image_id)

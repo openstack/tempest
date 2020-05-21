@@ -43,6 +43,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('a2a3765e-3a6d-4f6d-a3a7-3cc3476aa876')
     def test_create_list_delete_namespace_tags(self):
+        """Test creating/listing/deleting image metadata namespace tags"""
         # Create a namespace
         namespace = self.create_namespace()
         self._create_namespace_tags(namespace)
@@ -62,6 +63,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
 
     @decorators.idempotent_id('a2a3765e-1a2c-3f6d-a3a7-3cc3466ab875')
     def test_create_update_delete_tag(self):
+        """Test creating/updating/deleting image metadata namespace tag"""
         # Create a namespace
         namespace = self.create_namespace()
         self._create_namespace_tags(namespace)
