@@ -127,7 +127,6 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
         encryption_type = \
             self.admin_encryption_types_client.create_encryption_type(
                 volume_type_id, **create_kwargs)['encryption']
-        self.assertIn('volume_type_id', encryption_type)
         for key in create_kwargs:
             self.assertEqual(create_kwargs[key], encryption_type[key],
                              'The created encryption_type %s is different '

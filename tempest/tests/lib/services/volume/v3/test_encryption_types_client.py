@@ -20,11 +20,11 @@ from tempest.tests.lib.services import base
 class TestEncryptionTypesClient(base.BaseServiceTest):
     FAKE_CREATE_ENCRYPTION_TYPE = {
         "encryption": {
-            "volume_type_id": "cbc36478b0bd8e67e89",
+            "volume_type_id": "2d29462d-76cb-417c-8a9f-fb23140f1577",
             "control_location": "front-end",
             "encryption_id": "81e069c6-7394-4856-8df7-3b237ca61f74",
             "key_size": 128,
-            "provider": "LuksEncryptor",
+            "provider": "luks",
             "cipher": "aes-xts-plain64"
         }
     }
