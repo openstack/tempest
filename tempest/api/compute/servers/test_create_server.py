@@ -27,6 +27,11 @@ CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
+    """Test creating server and verifying the server attributes
+
+    This is to create server booted from image and with disk_config 'AUTO'
+    """
+
     disk_config = 'AUTO'
     volume_backed = False
 
@@ -62,13 +67,12 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             disk_config=disk_config,
             adminPass=cls.password,
             volume_backed=cls.volume_backed)
-        cls.server = (cls.client.show_server(server_initial['id'])
-                      ['server'])
+        cls.server = cls.client.show_server(server_initial['id'])['server']
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('5de47127-9977-400a-936f-abcfbec1218f')
     def test_verify_server_details(self):
-        # Verify the specified server attributes are set correctly
+        """Verify the specified server attributes are set correctly"""
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
         # NOTE(maurosr): See http://tools.ietf.org/html/rfc5952 (section 4)
         # Here we compare directly with the canonicalized format.
@@ -86,7 +90,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('9a438d88-10c6-4bcd-8b5b-5b6e25e1346f')
     def test_list_servers(self):
-        # The created server should be in the list of all servers
+        """The created server should be in the list of all servers"""
         body = self.client.list_servers()
         servers = body['servers']
         found = [i for i in servers if i['id'] == self.server['id']]
@@ -94,7 +98,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
-        # The created server should be in the detailed list of all servers
+        """The created server should be in the detailed list of all servers"""
         body = self.client.list_servers(detail=True)
         servers = body['servers']
         found = [i for i in servers if i['id'] == self.server['id']]
@@ -104,8 +108,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_verify_created_server_vcpus(self):
-        # Verify that the number of vcpus reported by the instance matches
-        # the amount stated by the flavor
+        """The created server should have the same specification as the flavor
+
+        Verify that the number of vcpus reported by the instance matches
+        the amount stated by the flavor
+        """
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         validation_resources = self.get_class_validation_resources(
             self.os_primary)
@@ -123,7 +130,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
-        # Verify the instance host name is the same as the server name
+        """Verify the instance host name is the same as the server name"""
         validation_resources = self.get_class_validation_resources(
             self.os_primary)
         linux_client = remote_client.RemoteClient(
@@ -145,6 +152,10 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
 
 class ServersTestManualDisk(ServersTestJSON):
+    """Test creating server and verifying the server attributes
+
+    This is to create server booted from image and with disk_config 'MANUAL'
+    """
     disk_config = 'MANUAL'
 
     @classmethod
@@ -156,7 +167,11 @@ class ServersTestManualDisk(ServersTestJSON):
 
 
 class ServersTestBootFromVolume(ServersTestJSON):
-    """Run the `ServersTestJSON` tests with a volume backed VM"""
+    """Test creating server and verifying the server attributes
+
+    This is to create server booted from volume and with disk_config 'AUTO'
+    """
+    # Run the `ServersTestJSON` tests with a volume backed VM
     volume_backed = True
 
     @classmethod

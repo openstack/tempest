@@ -24,6 +24,8 @@ CONF = config.CONF
 
 
 class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
+    """Test disk config option of server"""
+
     create_default_network = True
 
     @classmethod
@@ -49,7 +51,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('bef56b09-2e8c-4883-a370-4950812f430e')
     def test_rebuild_server_with_manual_disk_config(self):
-        # A server should be rebuilt using the manual disk config option
+        """A server should be rebuilt using the manual disk config option"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
         self._update_server_with_disk_config(server['id'],
@@ -68,7 +70,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('9c9fae77-4feb-402f-8450-bf1c8b609713')
     def test_rebuild_server_with_auto_disk_config(self):
-        # A server should be rebuilt using the auto disk config option
+        """A server should be rebuilt using the auto disk config option"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
         self._update_server_with_disk_config(server['id'],
@@ -89,7 +91,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
-        # A server should be resized from manual to auto disk config
+        """A server should be resized from manual to auto disk config"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
         self._update_server_with_disk_config(server['id'],
@@ -105,7 +107,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
-        # A server should be resized from auto to manual disk config
+        """A server should be resized from auto to manual disk config"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
         self._update_server_with_disk_config(server['id'],
@@ -119,7 +121,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('5ef18867-358d-4de9-b3c9-94d4ba35742f')
     def test_update_server_from_auto_to_manual(self):
-        # A server should be updated from auto to manual disk config
+        """A server should be updated from auto to manual disk config"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
         self._update_server_with_disk_config(server['id'],
