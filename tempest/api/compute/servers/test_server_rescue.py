@@ -110,14 +110,14 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
     create_default_network = True
 
     @classmethod
-    def skip_checks(self):
-        super(BaseServerStableDeviceRescueTest, self).skip_checks()
+    def skip_checks(cls):
+        super(BaseServerStableDeviceRescueTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.rescue:
             msg = "Server rescue not available."
-            raise self.skipException(msg)
+            raise cls.skipException(msg)
         if not CONF.compute_feature_enabled.stable_rescue:
             msg = "Stable rescue not available."
-            raise self.skipException(msg)
+            raise cls.skipException(msg)
 
     def _create_server_and_rescue_image(self, hw_rescue_device=None,
                                         hw_rescue_bus=None,
