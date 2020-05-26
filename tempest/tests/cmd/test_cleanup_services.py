@@ -274,19 +274,22 @@ class TestSnapshotService(BaseCmdServiceTests):
                     "name": "test"
                 },
                 "name": "test-volume-snapshot",
-                "user_id": "40c2102f4a554b848d96b14f3eec39ed",
                 "volume_id": "173f7b48-c4c1-4e70-9acc-086b39073506",
                 "created_at": "2015-11-29T02:25:51.000000",
                 "size": 1,
                 "updated_at": "2015-11-20T05:36:40.000000",
-                "os-extended-snapshot-attributes:progress": "100%",
                 "id": "b1323cda-8e4b-41c1-afc5-2fc791809c8c",
                 "description": "volume snapshot"
             },
             {
                 "status": "available",
                 "name": "saved-snapshot",
+                "metadata": {},
                 "id": "1ad4c789-7e8w-4dwg-afc5",
+                "size": 1,
+                "volume_id": "af7c41be-1ff6-4233-a690-7ed61c34347f",
+                "created_at": "2015-11-20T05:39:40.000000",
+                "updated_at": "2015-11-20T05:39:40.000000",
                 "description": "snapshot in saved state"
             }
         ]
