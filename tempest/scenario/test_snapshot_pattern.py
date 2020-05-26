@@ -29,8 +29,10 @@ class TestSnapshotPattern(manager.ScenarioTest):
     The following is the scenario outline:
      * boot an instance and create a timestamp file in it
      * snapshot the instance
+     * add version metadata to the snapshot image
      * boot a second instance from the snapshot
      * check the existence of the timestamp file in the second instance
+     * snapshot the instance again
 
     """
 
@@ -63,6 +65,11 @@ class TestSnapshotPattern(manager.ScenarioTest):
         # snapshot the instance
         snapshot_image = self.create_server_snapshot(server=server)
 
+        # add version metadata to the snapshot image
+        self.image_client.update_image(
+            snapshot_image['id'], [dict(add='/version',
+                                        value='8.0')])
+
         # boot a second instance from the snapshot
         server_from_snapshot = self.create_server(
             image_id=snapshot_image['id'],
@@ -75,3 +82,6 @@ class TestSnapshotPattern(manager.ScenarioTest):
                                         private_key=keypair['private_key'],
                                         server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp2)
+
+        # snapshot the instance again
+        self.create_server_snapshot(server=server_from_snapshot)
