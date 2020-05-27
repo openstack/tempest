@@ -629,3 +629,23 @@ class TestDiscovery(base.TestCase):
     def test_contains_version_negative_data(self):
         self.assertFalse(
             verify_tempest_config.contains_version('v5.', ['v1.0', 'v2.0']))
+
+    def test_check_service_availability(self):
+        class FakeAuthProvider:
+            def get_auth(self):
+                return ('token',
+                        {'serviceCatalog': [{'type': 'compute'},
+                                            {'type': 'image'},
+                                            {'type': 'volumev3'},
+                                            {'type': 'network'},
+                                            {'type': 'object-store'}]})
+
+        class Fake_os:
+            auth_provider = FakeAuthProvider()
+            auth_version = 'v2'
+        verify_tempest_config.CONF._config = fake_config.FakePrivate()
+        services = verify_tempest_config.check_service_availability(
+            Fake_os(), True)
+        self.assertEqual(
+            sorted(['nova', 'glance', 'neutron', 'swift', 'cinder']),
+            sorted(services))
