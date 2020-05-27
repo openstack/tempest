@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    ``Member`` role has been deprecated and replaced by ``member``. Therefore
+    the default value of config option ``[object-storage].operator_role`` is
+    changed to ``member``. (Fixes bug #1330132)
