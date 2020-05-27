@@ -59,13 +59,17 @@ class BaseAttachVolumeTest(base.BaseV2ComputeTest):
 
 
 class AttachVolumeTestJSON(BaseAttachVolumeTest):
+    """Test attaching volume to server"""
 
     @decorators.idempotent_id('52e9045a-e90d-4c0d-9087-79d657faffff')
     # This test is conditionally marked slow if SSH validation is enabled.
     @decorators.attr(type='slow', condition=CONF.validation.run_validation)
     def test_attach_detach_volume(self):
-        # Stop and Start a server with an attached volume, ensuring that
-        # the volume remains attached.
+        """Test attaching and detaching volume from server
+
+        Stop and Start a server with an attached volume, ensuring that
+        the volume remains attached.
+        """
         server, validation_resources = self._create_server()
 
         # NOTE(andreaf) Create one remote client used throughout the test.
@@ -125,6 +129,13 @@ class AttachVolumeTestJSON(BaseAttachVolumeTest):
 
     @decorators.idempotent_id('7fa563fe-f0f7-43eb-9e22-a1ece036b513')
     def test_list_get_volume_attachments(self):
+        """Test listing and getting volume attachments
+
+        First we attach one volume to the server, check listing and getting
+        the volume attachment of the server. Then we attach another volume to
+        the server, check listing and getting the volume attachments of the
+        server. Finally we detach the volumes from the server one by one.
+        """
         # List volume attachment of the server
         server, validation_resources = self._create_server()
         volume_1st = self.create_volume()
@@ -244,8 +255,12 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('13a940b6-3474-4c3c-b03f-29b89112bfee')
     def test_attach_volume_shelved_or_offload_server(self):
-        # Create server, count number of volumes on it, shelve
-        # server and attach pre-created volume to shelved server
+        """Test attaching volume to shelved server
+
+        Create server, count number of volumes on it, shelve
+        server and attach pre-created volume to shelved server, then
+        unshelve the server and check that attached volume exists.
+        """
         server, validation_resources = self._create_server()
         volume = self.create_volume()
         num_vol = self._count_volumes(server, validation_resources)
@@ -271,8 +286,12 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('b54e86dd-a070-49c4-9c07-59ae6dae15aa')
     def test_detach_volume_shelved_or_offload_server(self):
-        # Count number of volumes on instance, shelve
-        # server and attach pre-created volume to shelved server
+        """Test detaching volume from shelved server
+
+        Count number of volumes on server, shelve server and attach
+        pre-created volume to shelved server, then detach the volume, unshelve
+        the instance and check that we have the expected number of volume(s).
+        """
         server, validation_resources = self._create_server()
         volume = self.create_volume()
         num_vol = self._count_volumes(server, validation_resources)
@@ -291,6 +310,12 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
 
 
 class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
+    """Test attaching one volume to multiple servers
+
+    Test attaching one volume to multiple servers with compute
+    microversion greater than 2.59.
+    """
+
     min_microversion = '2.60'
     max_microversion = 'latest'
 
@@ -367,6 +392,12 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
 
     @decorators.idempotent_id('8d5853f7-56e7-4988-9b0c-48cea3c7049a')
     def test_list_get_volume_attachments_multiattach(self):
+        """Test listing and getting multiattached volume attachments
+
+        Attach a single volume to two servers, list attachments from the
+        volume and make sure the server uuids are in the list, then detach
+        the volume from servers one by one.
+        """
         # Attach a single volume to two servers.
         servers, volume, attachments = self._create_and_multiattach()
 
@@ -448,7 +479,10 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_with_multiattached_volume(self):
-        # Attach a single volume to multiple servers, then resize the servers
+        """Test resizing servers with multiattached volume
+
+        Attach a single volume to multiple servers, then resize the servers
+        """
         servers, volume, _ = self._create_and_multiattach()
 
         for server in servers:

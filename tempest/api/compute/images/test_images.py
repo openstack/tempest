@@ -25,6 +25,8 @@ CONF = config.CONF
 
 
 class ImagesTestJSON(base.BaseV2ComputeTest):
+    """Test server images"""
+
     create_default_network = True
 
     @classmethod
@@ -48,6 +50,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('aa06b52b-2db5-4807-b218-9441f75d74e3')
     def test_delete_saving_image(self):
+        """Test deleting server image while it is in 'SAVING' state"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         # wait for server active to avoid conflict when deleting server
@@ -74,6 +77,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('aaacd1d0-55a2-4ce8-818a-b5439df8adc9')
     def test_create_image_from_stopped_server(self):
+        """Test creating server image from stopped server"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.stop_server(server['id'])
         waiters.wait_for_server_status(self.servers_client,
@@ -91,6 +95,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_create_image_from_paused_server(self):
+        """Test creating server image from paused server"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.pause_server(server['id'])
         waiters.wait_for_server_status(self.servers_client,
@@ -109,6 +114,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     def test_create_image_from_suspended_server(self):
+        """Test creating server image from suspended server"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.suspend_server(server['id'])
         waiters.wait_for_server_status(self.servers_client,
