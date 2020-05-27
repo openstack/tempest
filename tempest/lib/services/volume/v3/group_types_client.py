@@ -73,7 +73,7 @@ class GroupTypesClient(base_client.BaseClient):
         url = 'group_types/default'
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_default_group_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_group_type(self, group_type_id):
