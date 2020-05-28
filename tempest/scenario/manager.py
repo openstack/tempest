@@ -1038,9 +1038,12 @@ class NetworkScenarioTest(ScenarioTest):
         floatingip_id = floating_ip['id']
 
         def refresh():
-            result = (self.floating_ips_client.
-                      show_floatingip(floatingip_id)['floatingip'])
-            return status == result['status']
+            floating_ip = (self.floating_ips_client.
+                           show_floatingip(floatingip_id)['floatingip'])
+            if status == floating_ip['status']:
+                LOG.info("FloatingIP: {fp} is at status: {st}"
+                         .format(fp=floating_ip, st=status))
+            return status == floating_ip['status']
 
         if not test_utils.call_until_true(refresh,
                                           CONF.network.build_timeout,
@@ -1052,8 +1055,6 @@ class NetworkScenarioTest(ScenarioTest):
                                      "failed  to reach status: {st}"
                              .format(fp=floating_ip, cst=floating_ip['status'],
                                      st=status))
-        LOG.info("FloatingIP: {fp} is at status: {st}"
-                 .format(fp=floating_ip, st=status))
 
     def check_tenant_network_connectivity(self, server,
                                           username,
