@@ -28,7 +28,7 @@ common_snapshot_schema = {
         'status': {'type': 'string'},
         'description': {'type': ['string', 'null']},
         'created_at': parameter_types.date_time,
-        'name': {'type': 'string'},
+        'name': {'type': ['string', 'null']},
         'volume_id': {'type': 'string', 'format': 'uuid'},
         'metadata': metadata,
         'id': {'type': 'string', 'format': 'uuid'},
