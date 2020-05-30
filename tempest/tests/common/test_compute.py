@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from unittest import mock
+
 from six.moves.urllib import parse as urlparse
 
-import mock
 
 from tempest.common import compute
 from tempest.tests import base

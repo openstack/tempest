@@ -14,8 +14,8 @@
 #    under the License.
 
 import copy
+from unittest import mock
 
-import mock
 
 from tempest.lib.services.compute import base_compute_client
 from tempest.lib.services.compute import servers_client

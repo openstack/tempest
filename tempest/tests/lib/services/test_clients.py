@@ -13,9 +13,9 @@
 # the License.
 
 import types
+from unittest import mock
 
 import fixtures
-import mock
 import six
 import testtools
 

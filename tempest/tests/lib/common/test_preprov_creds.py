@@ -15,8 +15,8 @@
 import hashlib
 import os
 import shutil
+from unittest import mock
 
-import mock
 import six
 import testtools
 

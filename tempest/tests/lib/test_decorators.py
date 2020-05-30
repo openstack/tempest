@@ -14,8 +14,8 @@
 #    under the License.
 
 import abc
+from unittest import mock
 
-import mock
 import six
 import testtools
 

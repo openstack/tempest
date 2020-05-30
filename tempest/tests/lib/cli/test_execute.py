@@ -12,8 +12,8 @@
 #    under the License.
 
 import subprocess
+from unittest import mock
 
-import mock
 
 from tempest.lib.cli import base as cli_base
 from tempest.lib import exceptions

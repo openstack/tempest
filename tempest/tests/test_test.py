@@ -15,8 +15,8 @@
 
 import os
 import sys
+from unittest import mock
 
-import mock
 from oslo_config import cfg
 import testtools
 

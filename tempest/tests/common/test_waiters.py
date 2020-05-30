@@ -13,8 +13,8 @@
 #    under the License.
 
 import time
+from unittest import mock
 
-import mock
 from oslo_utils.fixture import uuidsentinel as uuids
 
 from tempest.common import waiters
