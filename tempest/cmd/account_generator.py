@@ -97,6 +97,7 @@ To see help on specific argument, please do: ``tempest account-generator
 [OPTIONS] <accounts_file.yaml> -h``.
 """
 
+import argparse
 import os
 import traceback
 
@@ -199,6 +200,14 @@ def dump_accounts(resources, identity_version, account_file):
     LOG.info('%s generated successfully!', account_file)
 
 
+def positive_int(number):
+    number = int(number)
+    if number <= 0:
+        raise argparse.ArgumentTypeError("Concurrency value should be a "
+                                         "positive number")
+    return number
+
+
 def _parser_add_args(parser):
     parser.add_argument('-c', '--config-file',
                         metavar='/etc/tempest.conf',
@@ -228,7 +237,7 @@ def _parser_add_args(parser):
                         help='Resources tag')
     parser.add_argument('-r', '--concurrency',
                         default=1,
-                        type=int,
+                        type=positive_int,
                         required=False,
                         dest='concurrency',
                         help='Concurrency count')

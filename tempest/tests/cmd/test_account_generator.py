@@ -337,3 +337,24 @@ class TestDumpAccountsV3(TestDumpAccountsV2):
     def setUp(self):
         self.mock_domains()
         super(TestDumpAccountsV3, self).setUp()
+
+
+class TestAccountGeneratorCliCheck(base.TestCase):
+
+    def setUp(self):
+        super(TestAccountGeneratorCliCheck, self).setUp()
+        self.account_generator = account_generator.TempestAccountGenerator(
+            app=mock.Mock(), app_args=mock.Mock())
+        self.parser = self.account_generator.get_parser("generator")
+
+    def test_account_generator_zero_concurrency(self):
+        error = self.assertRaises(
+            SystemExit, lambda: self.parser.parse_args(
+                ['-r', '0', 'accounts_file.yaml']))
+        self.assertTrue(error.code != 0)
+
+    def test_account_generator_negative_concurrency(self):
+        error = self.assertRaises(
+            SystemExit, lambda: self.parser.parse_args(
+                ['-r', '-1', 'accounts_file.yaml']))
+        self.assertTrue(error.code != 0)

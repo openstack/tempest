@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+   Concurrency parameter for account-generator command was accepting
+   negative values and zero. The concurrency parameter now accepts only
+   positive numbers. When a negative value or zero is passed to the
+   program then the program ends and help is displayed.
