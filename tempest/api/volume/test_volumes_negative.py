@@ -126,13 +126,13 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('0186422c-999a-480e-a026-6a665744c30c')
     def test_update_volume_with_nonexistent_volume_id(self):
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
-                          volume_id=data_utils.rand_uuid())
+                          volume_id=data_utils.rand_uuid(), name="n")
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
     def test_update_volume_with_invalid_volume_id(self):
         self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
-                          volume_id=data_utils.rand_name('invalid'))
+                          volume_id=data_utils.rand_name('invalid'), name="n")
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
