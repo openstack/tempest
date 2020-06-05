@@ -44,9 +44,21 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.server_groups_client
 
     @classmethod
+    def _set_policy(cls, policy):
+        if not cls.is_requested_microversion_compatible('2.63'):
+            return policy[0]
+        else:
+            return policy
+
+    @classmethod
     def resource_setup(cls):
         super(ServerGroupTestJSON, cls).resource_setup()
-        cls.policy = ['affinity']
+        if cls.is_requested_microversion_compatible('2.63'):
+            cls.policy_field = 'policies'
+            cls.policy = ['affinity']
+        else:
+            cls.policy_field = 'policy'
+            cls.policy = 'affinity'
 
     def setUp(self):
         super(ServerGroupTestJSON, self).setUp()
@@ -61,9 +73,9 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
 
     def _create_server_group(self, name, policy):
         # create the test server-group with given policy
-        server_group = {'name': name, 'policies': policy}
+        server_group = {'name': name, self.policy_field: policy}
         body = self.create_test_server_group(name, policy)
-        for key in ['name', 'policies']:
+        for key in ['name', self.policy_field]:
             self.assertEqual(server_group[key], body[key])
         return body
 
@@ -88,7 +100,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('3645a102-372f-4140-afad-13698d850d23')
     def test_create_delete_server_group_with_anti_affinity_policy(self):
         """Test Create/Delete the server-group with anti-affinity policy"""
-        policy = ['anti-affinity']
+        policy = self._set_policy(['anti-affinity'])
         self._create_delete_server_group(policy)
 
     @decorators.idempotent_id('154dc5a4-a2fe-44b5-b99e-f15806a4a113')
@@ -99,7 +111,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         for _ in range(0, 2):
             server_groups.append(self._create_server_group(server_group_name,
                                                            self.policy))
-        for key in ['name', 'policies']:
+        for key in ['name', self.policy_field]:
             self.assertEqual(server_groups[0][key], server_groups[1][key])
         self.assertNotEqual(server_groups[0]['id'], server_groups[1]['id'])
 
@@ -134,3 +146,24 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         server_group = (self.server_groups_client.show_server_group(
             self.created_server_group['id'])['server_group'])
         self.assertIn(server['id'], server_group['members'])
+
+
+class ServerGroup264TestJSON(base.BaseV2ComputeTest):
+    """These tests check for the server-group APIs 2.64 microversion.
+
+    This tests is only to verify the POST, GET server-groups APIs response
+    schema with 2.64 microversion
+    """
+    create_default_network = True
+    min_microversion = '2.64'
+
+    @decorators.idempotent_id('b52f09dd-2133-4037-9a5d-bdb260096a88')
+    def test_create_get_server_group(self):
+        # create, get the test server-group with given policy
+        server_group = self.create_test_server_group(
+            name='server-group', policy='affinity')
+        self.addCleanup(
+            self.server_groups_client.delete_server_group,
+            server_group['id'])
+        self.server_groups_client.list_server_groups()
+        self.server_groups_client.show_server_group(server_group['id'])
