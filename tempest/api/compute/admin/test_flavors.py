@@ -107,7 +107,10 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         """
         def verify_flavor_response_extension(flavor):
             # check some extensions for the flavor create/show/detail response
-            self.assertEqual(flavor['swap'], '')
+            if self.is_requested_microversion_compatible('2.74'):
+                self.assertEqual(flavor['swap'], '')
+            else:
+                self.assertEqual(flavor['swap'], 0)
             self.assertEqual(int(flavor['rxtx_factor']), 1)
             self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'], 0)
             self.assertEqual(flavor['os-flavor-access:is_public'], True)
