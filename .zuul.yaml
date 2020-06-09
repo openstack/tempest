@@ -13,6 +13,8 @@
     roles: &base_roles
       - zuul: opendev.org/openstack/devstack
     vars: &base_vars
+      # TODO(gmann): Remove these test skip once nova bug #1882521 is solved
+      tempest_black_regex: "(tempest.api.compute.volumes.test_attach_volume.AttachVolumeMultiAttachTest.test_resize_server_with_multiattached_volume|tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON|tempest.api.compute.servers.test_server_rescue.ServerStableDeviceRescueTest.test_stable_device_rescue_disk_virtio_with_volume_attached)"
       devstack_services:
         tempest: true
       devstack_local_conf:
@@ -146,7 +148,7 @@
 
 - job:
     name: tempest-full-parallel
-    parent: tempest-full
+    parent: tempest-full-py3
     voting: false
     branches:
       - master
@@ -159,8 +161,6 @@
       tox_envlist: full-parallel
       run_tempest_cleanup: true
       run_tempest_dry_cleanup: true
-      devstack_localrc:
-        USE_PYTHON3: True
 
 - job:
     name: tempest-full-py3
@@ -218,6 +218,7 @@
 - job:
     name: tempest-integrated-compute
     parent: devstack-tempest
+    nodeset: openstack-single-node-bionic
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for compute. This is
@@ -225,6 +226,7 @@
       and Glance related tests. This is meant to be run on Nova gate only.
     vars:
       tox_envlist: integrated-compute
+      tempest_black_regex: ""
       devstack_localrc:
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
@@ -341,9 +343,28 @@
 - job:
     name: tempest-multinode-full
     parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-focal
+    # This job runs on Focal from stable/victoria on.
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri)).*$
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: False
+
+- job:
+    name: tempest-multinode-full
+    parent: tempest-multinode-full-base
     nodeset: openstack-two-node-bionic
-    # This job runs on Bionic from stable/stein on.
-    branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
+    # This job runs on Bionic and on python2. This is for stable/stein and stable/train.
+    # This job is prepared to make sure all stable branches from stable/stein till stable/train
+    # will keep running on bionic. This can be removed once stable/train is EOL.
+    branches:
+      - stable/stein
+      - stable/train
+      - stable/ussuri
     vars:
       devstack_localrc:
         USE_PYTHON3: False
@@ -454,16 +475,19 @@
 - job:
     name: tempest-full-ussuri-py3
     parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
     override-checkout: stable/ussuri
 
 - job:
     name: tempest-full-train-py3
     parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
     override-checkout: stable/train
 
 - job:
     name: tempest-full-stein-py3
     parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
     override-checkout: stable/stein
 
 - job:
@@ -471,7 +495,7 @@
     parent: tox
     description: |
       Run tempest plugin sanity check script using tox.
-    nodeset: ubuntu-bionic
+    nodeset: ubuntu-focal
     vars:
       tox_envlist: plugin-sanity-check
     timeout: 5000
