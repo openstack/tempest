@@ -1021,7 +1021,7 @@ ObjectStoreGroup = [
                help="Number of seconds to wait while looping to check the "
                     "status of a container to container synchronization"),
     cfg.StrOpt('operator_role',
-               default='Member',
+               default='member',
                help="Role to add to users created for swift tests to "
                     "enable creating containers"),
     cfg.StrOpt('reseller_admin_role',
