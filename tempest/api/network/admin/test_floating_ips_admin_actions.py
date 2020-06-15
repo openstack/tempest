@@ -62,7 +62,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         This test performs below operations:
         1. Create couple floating ips for admin and non-admin users.
         2. Verify if admin can access all floating ips including other user
-           and non-admin user can only access its own floating ips.
+        and non-admin user can only access its own floating ips.
         """
         # Create floating ip from admin user
         floating_ip_admin = self.admin_floating_ips_client.create_floatingip(
