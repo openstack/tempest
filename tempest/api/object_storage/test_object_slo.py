@@ -17,7 +17,6 @@ import hashlib
 from oslo_serialization import jsonutils as json
 
 from tempest.api.object_storage import base
-from tempest.common import custom_matchers
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -160,17 +159,7 @@ class ObjectSloTest(base.BaseObjectTest):
             object_name,
             params=params_del)
 
-        # When deleting SLO using multipart manifest, the response contains
-        # not 'content-length' but 'transfer-encoding' header. This is the
-        # special case, therefore the existence of response headers is checked
-        # outside of custom matcher.
-        self.assertIn('transfer-encoding', resp)
-        self.assertIn('content-type', resp)
-        self.assertIn('x-trans-id', resp)
-        self.assertIn('date', resp)
-
-        # Check only the format of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+        self.assertHeaders(resp, 'Object', 'DELETE')
 
         resp, body = self.container_client.list_container_objects(
             self.container_name)
