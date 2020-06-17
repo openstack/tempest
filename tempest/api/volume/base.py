@@ -233,12 +233,15 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         return group
 
     def delete_group(self, group_id, delete_volumes=True):
-        self.groups_client.delete_group(group_id, delete_volumes)
+        group_vols = []
         if delete_volumes:
             vols = self.volumes_client.list_volumes(detail=True)['volumes']
             for vol in vols:
                 if vol['group_id'] == group_id:
-                    self.volumes_client.wait_for_resource_deletion(vol['id'])
+                    group_vols.append(vol['id'])
+        self.groups_client.delete_group(group_id, delete_volumes)
+        for vol in group_vols:
+            self.volumes_client.wait_for_resource_deletion(vol)
         self.groups_client.wait_for_resource_deletion(group_id)
 
 
