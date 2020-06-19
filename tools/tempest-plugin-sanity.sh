@@ -66,7 +66,7 @@ DEPS="-c${TOX_CONSTRAINTS_FILE}"
 # function to create virtualenv to perform sanity operation
 function prepare_workspace {
     SANITY_DIR=$(pwd)
-    virtualenv -p python3 --clear "$SANITY_DIR"/.venv
+    python3 -m venv "$SANITY_DIR"/.venv
     export TVENV="$SANITY_DIR/tools/with_venv.sh"
     cd "$SANITY_DIR"
 

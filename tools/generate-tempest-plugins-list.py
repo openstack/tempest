@@ -52,6 +52,8 @@ BLACKLIST = [
     'x/tap-as-a-service',  # To avoid sanity-job failure
     'x/valet',  # https://review.opendev.org/#/c/638339/
     'x/kingbird',  # https://bugs.launchpad.net/kingbird/+bug/1869722
+    # vmware-nsx is blacklisted since https://review.opendev.org/#/c/736952
+    'x/vmware-nsx-tempest-plugin',
 ]
 
 url = 'https://review.opendev.org/projects/'
