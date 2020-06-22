@@ -13,12 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from urllib import parse as urllib
+
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 \
     import hypervisors as schemav21
 from tempest.lib.api_schema.response.compute.v2_28 \
     import hypervisors as schemav228
+from tempest.lib.api_schema.response.compute.v2_33 \
+    import hypervisors as schemav233
+from tempest.lib.api_schema.response.compute.v2_53 \
+    import hypervisors as schemav253
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -27,9 +33,11 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [
         {'min': None, 'max': '2.27', 'schema': schemav21},
-        {'min': '2.28', 'max': None, 'schema': schemav228}]
+        {'min': '2.28', 'max': '2.32', 'schema': schemav228},
+        {'min': '2.33', 'max': '2.52', 'schema': schemav233},
+        {'min': '2.53', 'max': None, 'schema': schemav253}]
 
-    def list_hypervisors(self, detail=False):
+    def list_hypervisors(self, detail=False, **kwargs):
         """List hypervisors information."""
         url = 'os-hypervisors'
         schema = self.get_schema(self.schema_versions_info)
@@ -37,14 +45,19 @@ class HypervisorClient(base_compute_client.BaseComputeClient):
         if detail:
             url += '/detail'
             _schema = schema.list_hypervisors_detail
+        if kwargs:
+            url += '?%s' % urllib.urlencode(kwargs)
 
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(_schema, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def show_hypervisor(self, hypervisor_id):
+    def show_hypervisor(self, hypervisor_id, **kwargs):
         """Display the details of the specified hypervisor."""
+        url = 'os-hypervisors/%s' % hypervisor_id
+        if kwargs:
+            url += '?%s' % urllib.urlencode(kwargs)
         resp, body = self.get('os-hypervisors/%s' % hypervisor_id)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)

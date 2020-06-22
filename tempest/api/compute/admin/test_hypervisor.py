@@ -145,3 +145,26 @@ class HypervisorAdminUnderV252Test(HypervisorAdminTestBase):
         hypers = self.client.search_hypervisor(
             hypers[0]['hypervisor_hostname'])['hypervisors']
         self.assertNotEmpty(hypers, "No hypervisors found.")
+
+
+class HypervisorAdminV253TestBase(base.BaseV2ComputeAdminTest):
+    """Tests Hypervisors API above 2.53 that require admin privileges"""
+
+    min_microversion = '2.53'
+
+    @classmethod
+    def setup_clients(cls):
+        super(HypervisorAdminV253TestBase, cls).setup_clients()
+        cls.client = cls.os_admin.hypervisor_client
+
+    @decorators.idempotent_id('4ab54a14-77a2-4e39-b9d2-1306d157c705')
+    def test_list_show_detail_hypervisors(self):
+        """Verify the list, list details, and show hypevisors
+
+        This verify the Hypervisor API response schema with v2.53 microversion
+        """
+        self.client.list_hypervisors(
+            detail=True, with_servers=True)['hypervisors']
+        hypers = self.client.list_hypervisors(with_servers=True)['hypervisors']
+        self.client.show_hypervisor(
+            hypers[0]['id'], with_servers=True)['hypervisor']
