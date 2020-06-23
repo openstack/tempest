@@ -123,11 +123,17 @@ class LiveMigrationTest(LiveMigrationTestBase):
             self._live_migrate(server_id, source_host, state, volume_backed)
 
     @decorators.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          block_migration_for_live_migration,
+                          'Block Live migration not available')
     def test_live_block_migration(self):
         """Test live migrating an active server"""
         self._test_live_migration()
 
     @decorators.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
+    @testtools.skipUnless(CONF.compute_feature_enabled.
+                          block_migration_for_live_migration,
+                          'Block Live migration not available')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_live_block_migration_paused(self):
