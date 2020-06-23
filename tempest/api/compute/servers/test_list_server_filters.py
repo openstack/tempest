@@ -296,21 +296,32 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         for ip in ip_list:
             self.assertNotIn(ip_list[ip], map(lambda x: x['id'], servers))
 
-    @decorators.skip_because(bug="1540645")
     @decorators.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
     def test_list_servers_filtered_by_ip_regex(self):
         """Filter the list of servers by part of server ip address"""
-        # Here should be listed all servers
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
             raise self.skipException(msg)
-        self.s1 = self.client.show_server(self.s1['id'])['server']
-        addr_spec = self.s1['addresses'][self.fixed_network_name][0]
-        ip = addr_spec['addr'][0:-3]
+        # query addresses of the 3 servers
+        addrs = []
+        for s in [self.s1, self.s2, self.s3]:
+            s_show = self.client.show_server(s['id'])['server']
+            addr_spec = s_show['addresses'][self.fixed_network_name][0]
+            addrs.append(addr_spec['addr'])
+        # find common part of the 3 ip addresses
+        prefix = ''
+        addrs_len = [len(a) for a in addrs]
+        addrs_len.sort()
+        # iterate over the smallest length of an ip
+        for i in range(addrs_len[0]):
+            if not addrs[0][i] == addrs[1][i] == addrs[2][i]:
+                break
+            prefix += addrs[0][i]
+
         if addr_spec['version'] == 4:
-            params = {'ip': ip}
+            params = {'ip': prefix}
         else:
-            params = {'ip6': ip}
+            params = {'ip6': prefix}
         # capture all servers in case something goes wrong
         all_servers = self.client.list_servers(detail=True)
         body = self.client.list_servers(**params)
