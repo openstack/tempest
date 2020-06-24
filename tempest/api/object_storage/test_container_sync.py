@@ -123,7 +123,7 @@ class ContainerSyncTest(base.BaseObjectTest):
                 self.assertEqual(object_content, obj_name[::-1].encode())
 
     @decorators.attr(type='slow')
-    @decorators.skip_because(bug='1317133')
+    @decorators.unstable_test(bug='1317133')
     @decorators.idempotent_id('be008325-1bba-4925-b7dd-93b58f22ce9b')
     @testtools.skipIf(
         not CONF.object_storage_feature_enabled.container_sync,
