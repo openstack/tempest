@@ -43,6 +43,9 @@ class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         Expect all services to be returned when the request contains invalid
         parameters.
         """
+        if not self.is_requested_microversion_compatible('2.74'):
+            raise self.skipException(
+                "From microversion 2.75 invalid parameters are not allowed.")
         services = self.client.list_services()['services']
         services_xxx = (self.client.list_services(xxx='nova-compute')
                         ['services'])
