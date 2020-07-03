@@ -10,4 +10,6 @@ Tempest with the version of this documentation.
 
 The sample configuration can also be viewed in `file form <_static/tempest.conf.sample>`_.
 
-.. literalinclude:: _static/tempest.conf.sample
+.. only:: html
+
+   .. literalinclude:: _static/tempest.conf.sample
