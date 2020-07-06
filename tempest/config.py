@@ -1068,11 +1068,13 @@ ScenarioGroup = [
     cfg.StrOpt('img_dir',
                default='/opt/stack/new/devstack/files/images/'
                'cirros-0.3.1-x86_64-uec',
-               help='Directory containing image files',
+               help='Directory containing image files, this has been '
+                    'deprecated - img_file option contains a full path now.',
                deprecated_for_removal=True),
     cfg.StrOpt('img_file', deprecated_name='qcow2_img_file',
-               default='cirros-0.3.1-x86_64-disk.img',
-               help='Image file name'),
+               default='/opt/stack/new/devstack/files/images'
+               '/cirros-0.3.1-x86_64-disk.img',
+               help='Image full path.'),
     cfg.StrOpt('img_disk_format',
                default='qcow2',
                help='Image disk format'),
@@ -1081,18 +1083,6 @@ ScenarioGroup = [
                help='Image container format'),
     cfg.DictOpt('img_properties', help='Glance image properties. '
                 'Use for custom images which require them'),
-    cfg.StrOpt('ami_img_file',
-               default='cirros-0.3.1-x86_64-blank.img',
-               help='AMI image file name',
-               deprecated_for_removal=True),
-    cfg.StrOpt('ari_img_file',
-               default='cirros-0.3.1-x86_64-initrd',
-               help='ARI image file name',
-               deprecated_for_removal=True),
-    cfg.StrOpt('aki_img_file',
-               default='cirros-0.3.1-x86_64-vmlinuz',
-               help='AKI image file name',
-               deprecated_for_removal=True),
     # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',

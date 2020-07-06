@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import subprocess
 
 import netaddr
@@ -531,33 +532,32 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return image['id']
 
     def glance_image_create(self):
-        img_path = CONF.scenario.img_dir + "/" + CONF.scenario.img_file
-        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
-        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
-        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
+        img_path = CONF.scenario.img_file
+        if not os.path.exists(img_path):
+            # TODO(kopecmartin): replace LOG.warning for rasing
+            # InvalidConfiguration exception after tempest 25.0.0 is
+            # released - there will be one release which accepts both
+            # behaviors in order to avoid many failures across CIs and etc.
+            LOG.warning(
+                'Starting Tempest 25.0.0 release, CONF.scenario.img_file need '
+                'a full path for the image. CONF.scenario.img_dir was '
+                'deprecated and will be removed in the next release. Till '
+                'Tempest 25.0.0, old behavior is maintained and keep working '
+                'but starting Tempest 26.0.0, you need to specify the full '
+                'path in CONF.scenario.img_file config option.')
+            img_path = os.path.join(CONF.scenario.img_dir, img_path)
         img_container_format = CONF.scenario.img_container_format
         img_disk_format = CONF.scenario.img_disk_format
         img_properties = CONF.scenario.img_properties
         LOG.debug("paths: img: %s, container_format: %s, disk_format: %s, "
-                  "properties: %s, ami: %s, ari: %s, aki: %s",
+                  "properties: %s",
                   img_path, img_container_format, img_disk_format,
-                  img_properties, ami_img_path, ari_img_path, aki_img_path)
-        try:
-            image = self._image_create('scenario-img',
-                                       img_container_format,
-                                       img_path,
-                                       disk_format=img_disk_format,
-                                       properties=img_properties)
-        except IOError:
-            LOG.warning(
-                "A(n) %s image was not found. Retrying with uec image.",
-                img_disk_format)
-            kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
-            ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
-            properties = {'kernel_id': kernel, 'ramdisk_id': ramdisk}
-            image = self._image_create('scenario-ami', 'ami',
-                                       path=ami_img_path,
-                                       properties=properties)
+                  img_properties)
+        image = self._image_create('scenario-img',
+                                   img_container_format,
+                                   img_path,
+                                   disk_format=img_disk_format,
+                                   properties=img_properties)
         LOG.debug("image:%s", image)
 
         return image
