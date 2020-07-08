@@ -16,12 +16,12 @@ import os
 import shutil
 import subprocess
 import tempfile
-
-from mock import patch
+from unittest.mock import patch
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
 from tempest.cmd import workspace
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base

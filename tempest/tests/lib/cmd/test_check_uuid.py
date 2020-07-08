@@ -10,10 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import tempfile
-
 import importlib
-import mock
+import tempfile
+from unittest import mock
 
 from tempest.lib.cmd import check_uuid
 from tempest.tests import base
