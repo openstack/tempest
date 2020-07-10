@@ -83,7 +83,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             self.floating_ips_client.delete_floatingip,
             created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
-        self.assertIsNotNone(created_floating_ip['tenant_id'])
+        self.assertIsNotNone(created_floating_ip['project_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])
         self.assertEqual(created_floating_ip['port_id'], self.ports[0]['id'])
         self.assertEqual(created_floating_ip['floating_network_id'],
@@ -97,8 +97,8 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(shown_floating_ip['id'], created_floating_ip['id'])
         self.assertEqual(shown_floating_ip['floating_network_id'],
                          self.ext_net_id)
-        self.assertEqual(shown_floating_ip['tenant_id'],
-                         created_floating_ip['tenant_id'])
+        self.assertEqual(shown_floating_ip['project_id'],
+                         created_floating_ip['project_id'])
         self.assertEqual(shown_floating_ip['floating_ip_address'],
                          created_floating_ip['floating_ip_address'])
         self.assertEqual(shown_floating_ip['port_id'], self.ports[0]['id'])

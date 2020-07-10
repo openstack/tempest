@@ -52,7 +52,7 @@ class TestQuotasClient(base.BaseServiceTest):
         }
     }
 
-    FAKE_QUOTA_TENANT_ID = "bab7d5c60cd041a0a36f7c4b6e1dd978"
+    FAKE_QUOTA_PROJECT_ID = "bab7d5c60cd041a0a36f7c4b6e1dd978"
 
     FAKE_QUOTA_DETAILS = {
         "quota": {
@@ -115,7 +115,7 @@ class TestQuotasClient(base.BaseServiceTest):
             self.FAKE_PROJECT_QUOTAS,
             bytes_body,
             200,
-            tenant_id=self.FAKE_QUOTA_TENANT_ID)
+            project_id=self.FAKE_QUOTA_PROJECT_ID)
 
     def _test_show_default_quotas(self, bytes_body=False):
         self.check_service_client_function(
@@ -124,7 +124,7 @@ class TestQuotasClient(base.BaseServiceTest):
             self.FAKE_PROJECT_QUOTAS,
             bytes_body,
             200,
-            tenant_id=self.FAKE_QUOTA_TENANT_ID)
+            project_id=self.FAKE_QUOTA_PROJECT_ID)
 
     def _test_update_quotas(self, bytes_body=False):
         self.check_service_client_function(
@@ -133,7 +133,7 @@ class TestQuotasClient(base.BaseServiceTest):
             self.FAKE_PROJECT_QUOTAS,
             bytes_body,
             200,
-            tenant_id=self.FAKE_QUOTA_TENANT_ID)
+            project_id=self.FAKE_QUOTA_PROJECT_ID)
 
     def _test_show_quota_details(self, bytes_body=False):
         self.check_service_client_function(
@@ -142,7 +142,7 @@ class TestQuotasClient(base.BaseServiceTest):
             self.FAKE_QUOTA_DETAILS,
             bytes_body,
             200,
-            tenant_id=self.FAKE_QUOTA_TENANT_ID)
+            project_id=self.FAKE_QUOTA_PROJECT_ID)
 
     def test_reset_quotas(self):
         self.check_service_client_function(
@@ -150,7 +150,7 @@ class TestQuotasClient(base.BaseServiceTest):
             "tempest.lib.common.rest_client.RestClient.delete",
             {},
             status=204,
-            tenant_id=self.FAKE_QUOTA_TENANT_ID)
+            project_id=self.FAKE_QUOTA_PROJECT_ID)
 
     def test_list_quotas_with_str_body(self):
         self._test_list_quotas()

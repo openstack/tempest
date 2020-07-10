@@ -58,12 +58,12 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
 
         # Create two networks
         n1 = self.admin_networks_client.create_network(
-            tenant_id=self.project['id'])
+            project_id=self.project['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_networks_client.delete_network,
                         n1['network']['id'])
         n2 = self.admin_networks_client.create_network(
-            tenant_id=self.project['id'])
+            project_id=self.project['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_networks_client.delete_network,
                         n2['network']['id'])
@@ -73,7 +73,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
                 lib_exc.Conflict,
                 r"Quota exceeded for resources: \['network'\].*"):
             n3 = self.admin_networks_client.create_network(
-                tenant_id=self.project['id'])
+                project_id=self.project['id'])
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                             self.admin_networks_client.delete_network,
                             n3['network']['id'])

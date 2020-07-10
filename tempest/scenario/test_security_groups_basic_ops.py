@@ -176,7 +176,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         cls.primary_tenant = cls.TenantProperties(cls.os_primary)
         cls.alt_tenant = cls.TenantProperties(cls.os_alt)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
-            cls.tenants[tenant.creds.tenant_id] = tenant
+            cls.tenants[tenant.creds.project_id] = tenant
 
         cls.floating_ip_access = not CONF.network.public_router_id
 
@@ -199,14 +199,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _create_tenant_security_groups(self, tenant):
         access_sg = self._create_empty_security_group(
             namestart='secgroup_access-',
-            tenant_id=tenant.creds.tenant_id,
+            project_id=tenant.creds.project_id,
             client=tenant.manager.security_groups_client
         )
 
         # don't use default secgroup since it allows in-project traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
-            tenant_id=tenant.creds.tenant_id,
+            project_id=tenant.creds.project_id,
             client=tenant.manager.security_groups_client
         )
         tenant.security_groups.update(access=access_sg, default=def_sg)
@@ -536,7 +536,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # Create empty security group and add icmp rule in it
         new_sg = self._create_empty_security_group(
             namestart='secgroup_new-',
-            tenant_id=new_tenant.creds.tenant_id,
+            project_id=new_tenant.creds.project_id,
             client=new_tenant.manager.security_groups_client)
         icmp_rule = dict(
             protocol='icmp',

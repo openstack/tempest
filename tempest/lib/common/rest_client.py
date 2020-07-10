@@ -21,6 +21,7 @@ import time
 
 import jsonschema
 from oslo_log import log as logging
+from oslo_log import versionutils
 from oslo_serialization import jsonutils as json
 import six
 from six.moves import urllib
@@ -177,13 +178,27 @@ class RestClient(object):
         return self.auth_provider.credentials.tenant_name
 
     @property
+    def project_id(self):
+        """The project id being used for requests
+
+        :rtype: string
+        :return: The project id being used for requests
+        """
+        return self.auth_provider.credentials.tenant_id
+
+    @property
     def tenant_id(self):
         """The tenant/project id being used for requests
 
         :rtype: string
         :return: The tenant/project id being used for requests
         """
-        return self.auth_provider.credentials.tenant_id
+        # NOTE(ralonsoh): this property should be deprecated, reference
+        # blueprint adopt-oslo-versioned-objects-for-db.
+        versionutils.report_deprecated_feature(
+            self.LOG, '"tenant_id" property is deprecated for removal, use '
+                      '"project_id" instead')
+        return self.project_id
 
     @property
     def password(self):

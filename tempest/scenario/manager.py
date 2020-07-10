@@ -868,15 +868,15 @@ class NetworkScenarioTest(ScenarioTest):
             raise cls.skipException('Neutron not available')
 
     def _create_network(self, networks_client=None,
-                        tenant_id=None,
+                        project_id=None,
                         namestart='network-smoke-',
                         port_security_enabled=True, **net_dict):
         if not networks_client:
             networks_client = self.networks_client
-        if not tenant_id:
-            tenant_id = networks_client.tenant_id
+        if not project_id:
+            project_id = networks_client.project_id
         name = data_utils.rand_name(namestart)
-        network_kwargs = dict(name=name, tenant_id=tenant_id)
+        network_kwargs = dict(name=name, project_id=project_id)
         if net_dict:
             network_kwargs.update(net_dict)
         # Neutron disables port security by default so we have to check the
@@ -901,14 +901,14 @@ class NetworkScenarioTest(ScenarioTest):
         if not subnets_client:
             subnets_client = self.subnets_client
 
-        def cidr_in_use(cidr, tenant_id):
+        def cidr_in_use(cidr, project_id):
             """Check cidr existence
 
             :returns: True if subnet with cidr already exist in tenant
                   False else
             """
             cidr_in_use = self.os_admin.subnets_client.list_subnets(
-                tenant_id=tenant_id, cidr=cidr)['subnets']
+                project_id=project_id, cidr=cidr)['subnets']
             return len(cidr_in_use) != 0
 
         ip_version = kwargs.pop('ip_version', 4)
@@ -927,13 +927,13 @@ class NetworkScenarioTest(ScenarioTest):
         # blocks until an unallocated block is found.
         for subnet_cidr in tenant_cidr.subnet(num_bits):
             str_cidr = str(subnet_cidr)
-            if cidr_in_use(str_cidr, tenant_id=network['tenant_id']):
+            if cidr_in_use(str_cidr, project_id=network['project_id']):
                 continue
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
                 network_id=network['id'],
-                tenant_id=network['tenant_id'],
+                project_id=network['project_id'],
                 cidr=str_cidr,
                 ip_version=ip_version,
                 **kwargs
@@ -1015,7 +1015,7 @@ class NetworkScenarioTest(ScenarioTest):
         kwargs = {
             'floating_network_id': external_network_id,
             'port_id': port_id,
-            'tenant_id': thing['tenant_id'],
+            'tenant_id': thing.get('project_id') or thing['tenant_id'],
             'fixed_ip_address': ip4,
         }
         if CONF.network.subnet_id:
@@ -1122,18 +1122,18 @@ class NetworkScenarioTest(ScenarioTest):
         self.fail(msg)
 
     def _create_security_group(self, security_group_rules_client=None,
-                               tenant_id=None,
+                               project_id=None,
                                namestart='secgroup-smoke',
                                security_groups_client=None):
         if security_group_rules_client is None:
             security_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
-        if tenant_id is None:
-            tenant_id = security_groups_client.tenant_id
+        if project_id is None:
+            project_id = security_groups_client.project_id
         secgroup = self._create_empty_security_group(
             namestart=namestart, client=security_groups_client,
-            tenant_id=tenant_id)
+            project_id=project_id)
 
         # Add rules to the security group
         rules = self._create_loginable_secgroup_rule(
@@ -1141,11 +1141,11 @@ class NetworkScenarioTest(ScenarioTest):
             secgroup=secgroup,
             security_groups_client=security_groups_client)
         for rule in rules:
-            self.assertEqual(tenant_id, rule['tenant_id'])
+            self.assertEqual(project_id, rule['project_id'])
             self.assertEqual(secgroup['id'], rule['security_group_id'])
         return secgroup
 
-    def _create_empty_security_group(self, client=None, tenant_id=None,
+    def _create_empty_security_group(self, client=None, project_id=None,
                                      namestart='secgroup-smoke'):
         """Create a security group without rules.
 
@@ -1153,23 +1153,23 @@ class NetworkScenarioTest(ScenarioTest):
          - IPv4 egress to any
          - IPv6 egress to any
 
-        :param tenant_id: secgroup will be created in this tenant
+        :param project_id: secgroup will be created in this project
         :returns: the created security group
         """
         if client is None:
             client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
+        if not project_id:
+            project_id = client.project_id
         sg_name = data_utils.rand_name(namestart)
         sg_desc = sg_name + " description"
         sg_dict = dict(name=sg_name,
                        description=sg_desc)
-        sg_dict['tenant_id'] = tenant_id
+        sg_dict['project_id'] = project_id
         result = client.create_security_group(**sg_dict)
 
         secgroup = result['security_group']
         self.assertEqual(secgroup['name'], sg_name)
-        self.assertEqual(tenant_id, secgroup['tenant_id'])
+        self.assertEqual(project_id, secgroup['project_id'])
         self.assertEqual(secgroup['description'], sg_desc)
 
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -1178,15 +1178,15 @@ class NetworkScenarioTest(ScenarioTest):
 
     def _create_security_group_rule(self, secgroup=None,
                                     sec_group_rules_client=None,
-                                    tenant_id=None,
+                                    project_id=None,
                                     security_groups_client=None, **kwargs):
         """Create a rule from a dictionary of rule parameters.
 
         Create a rule in a secgroup. if secgroup not defined will search for
-        default secgroup in tenant_id.
+        default secgroup in project_id.
 
         :param secgroup: the security group.
-        :param tenant_id: if secgroup not passed -- the tenant in which to
+        :param project_id: if secgroup not passed -- the tenant in which to
             search for default secgroup
         :param kwargs: a dictionary containing rule parameters:
             for example, to allow incoming ssh:
@@ -1201,18 +1201,18 @@ class NetworkScenarioTest(ScenarioTest):
             sec_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
-        if not tenant_id:
-            tenant_id = security_groups_client.tenant_id
+        if not project_id:
+            project_id = security_groups_client.project_id
         if secgroup is None:
-            # Get default secgroup for tenant_id
+            # Get default secgroup for project_id
             default_secgroups = security_groups_client.list_security_groups(
-                name='default', tenant_id=tenant_id)['security_groups']
-            msg = "No default security group for tenant %s." % (tenant_id)
+                name='default', project_id=project_id)['security_groups']
+            msg = "No default security group for project %s." % (project_id)
             self.assertNotEmpty(default_secgroups, msg)
             secgroup = default_secgroups[0]
 
         ruleset = dict(security_group_id=secgroup['id'],
-                       tenant_id=secgroup['tenant_id'])
+                       project_id=secgroup['project_id'])
         ruleset.update(kwargs)
 
         sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
@@ -1278,7 +1278,7 @@ class NetworkScenarioTest(ScenarioTest):
 
         return rules
 
-    def _get_router(self, client=None, tenant_id=None):
+    def _get_router(self, client=None, project_id=None):
         """Retrieve a router for the given tenant id.
 
         If a public router has been configured, it will be returned.
@@ -1289,8 +1289,8 @@ class NetworkScenarioTest(ScenarioTest):
         """
         if not client:
             client = self.routers_client
-        if not tenant_id:
-            tenant_id = client.tenant_id
+        if not project_id:
+            project_id = client.project_id
         router_id = CONF.network.public_router_id
         network_id = CONF.network.public_network_id
         if router_id:
@@ -1300,7 +1300,7 @@ class NetworkScenarioTest(ScenarioTest):
             router = client.create_router(
                 name=data_utils.rand_name(self.__class__.__name__ + '-router'),
                 admin_state_up=True,
-                tenant_id=tenant_id,
+                project_id=project_id,
                 external_gateway_info=dict(network_id=network_id))['router']
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                             client.delete_router, router['id'])
@@ -1311,14 +1311,14 @@ class NetworkScenarioTest(ScenarioTest):
 
     def create_networks(self, networks_client=None,
                         routers_client=None, subnets_client=None,
-                        tenant_id=None, dns_nameservers=None,
+                        project_id=None, dns_nameservers=None,
                         port_security_enabled=True, **net_dict):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
         on the same shared network.
 
-        :param tenant_id: id of tenant to create resources in.
+        :param project_id: id of project to create resources in.
         :param dns_nameservers: list of dns servers to send to subnet.
         :param port_security_enabled: whether or not port_security is enabled
         :param net_dict: a dict containing experimental network information in
@@ -1343,11 +1343,11 @@ class NetworkScenarioTest(ScenarioTest):
         else:
             network = self._create_network(
                 networks_client=networks_client,
-                tenant_id=tenant_id,
+                project_id=project_id,
                 port_security_enabled=port_security_enabled,
                 **net_dict)
             router = self._get_router(client=routers_client,
-                                      tenant_id=tenant_id)
+                                      project_id=project_id)
             subnet_kwargs = dict(network=network,
                                  subnets_client=subnets_client)
             # use explicit check because empty list is a valid option

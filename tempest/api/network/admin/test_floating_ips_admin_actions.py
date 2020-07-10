@@ -93,7 +93,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         # Creates a floating IP
         body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,
-            tenant_id=self.network['tenant_id'],
+            project_id=self.network['project_id'],
             port_id=self.port['id'])
         created_floating_ip = body['floatingip']
         self.addCleanup(
@@ -101,7 +101,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
             self.floating_ips_client.delete_floatingip,
             created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
-        self.assertIsNotNone(created_floating_ip['tenant_id'])
+        self.assertIsNotNone(created_floating_ip['project_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])
         self.assertEqual(created_floating_ip['port_id'], self.port['id'])
         self.assertEqual(created_floating_ip['floating_network_id'],
@@ -116,8 +116,8 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual(shown_floating_ip['id'], created_floating_ip['id'])
         self.assertEqual(shown_floating_ip['floating_network_id'],
                          self.ext_net_id)
-        self.assertEqual(shown_floating_ip['tenant_id'],
-                         self.network['tenant_id'])
+        self.assertEqual(shown_floating_ip['project_id'],
+                         self.network['project_id'])
         self.assertEqual(shown_floating_ip['floating_ip_address'],
                          created_floating_ip['floating_ip_address'])
         self.assertEqual(shown_floating_ip['port_id'], self.port['id'])

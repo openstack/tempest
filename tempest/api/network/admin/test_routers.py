@@ -63,11 +63,11 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
 
         name = data_utils.rand_name('router-')
         create_body = self.admin_routers_client.create_router(
-            name=name, tenant_id=project_id)
+            name=name, project_id=project_id)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_routers_client.delete_router,
                         create_body['router']['id'])
-        self.assertEqual(project_id, create_body['router']['tenant_id'])
+        self.assertEqual(project_id, create_body['router']['project_id'])
 
     @decorators.idempotent_id('847257cc-6afd-4154-b8fb-af49f5670ce8')
     @utils.requires_ext(extension='ext-gw-mode', service='network')
