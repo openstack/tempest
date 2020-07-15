@@ -130,7 +130,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
             key_name=self.keypair['name'],
             security_groups=[{'name': self.sec_grp['name']}],
             networks=[{'uuid': n['id']} for n in networks])
-        fip = self.create_floating_ip(thing=srv)
+        fip = self.create_floating_ip(server=srv)
         ips = self.define_server_ips(srv=srv)
         ssh = self.get_remote_client(
             ip_address=fip['floating_ip_address'],
