@@ -20,6 +20,7 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 
 
@@ -54,6 +55,8 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
     # https://github.com/openstack/placement/blob/master/placement/
     # db/constants.py#L16
     PLACEMENT_MAX_INT = 0x7FFFFFFF
+    BANDWIDTH_1 = 1000
+    BANDWIDTH_2 = 2000
 
     @classmethod
     def setup_clients(cls):
@@ -61,6 +64,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         cls.placement_client = cls.os_admin.placement_client
         cls.networks_client = cls.os_admin.networks_client
         cls.subnets_client = cls.os_admin.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
         cls.routers_client = cls.os_adm.routers_client
         cls.qos_client = cls.os_admin.qos_client
         cls.qos_min_bw_client = cls.os_admin.qos_min_bw_client
@@ -78,7 +82,6 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
     def setUp(self):
         super(MinBwAllocationPlacementTest, self).setUp()
         self._check_if_allocation_is_possible()
-        self._create_network_and_qos_policies()
 
     def _create_policy_and_min_bw_rule(self, name_prefix, min_kbps):
         policy = self.qos_client.create_qos_policy(
@@ -99,7 +102,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
 
         return policy
 
-    def _create_qos_policies(self):
+    def _create_qos_basic_policies(self):
         self.qos_policy_valid = self._create_policy_and_min_bw_rule(
             name_prefix='test_policy_valid',
             min_kbps=self.SMALLEST_POSSIBLE_BW)
@@ -107,7 +110,20 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             name_prefix='test_policy_not_valid',
             min_kbps=self.PLACEMENT_MAX_INT)
 
-    def _create_network_and_qos_policies(self):
+    def _create_qos_policies_from_life(self):
+        # For tempest-slow the max bandwidth configured is 1000000,
+        # https://opendev.org/openstack/tempest/src/branch/master/
+        # .zuul.yaml#L416-L420
+        self.qos_policy_1 = self._create_policy_and_min_bw_rule(
+            name_prefix='test_policy_1',
+            min_kbps=self.BANDWIDTH_1
+        )
+        self.qos_policy_2 = self._create_policy_and_min_bw_rule(
+            name_prefix='test_policy_2',
+            min_kbps=self.BANDWIDTH_2
+        )
+
+    def _create_network_and_qos_policies(self, policy_method):
         physnet_name = CONF.network_feature_enabled.qos_placement_physnet
         base_segm = \
             CONF.network_feature_enabled.provider_net_base_segmentation_id
@@ -123,7 +139,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
                 'provider:segmentation_id': base_segm
             })
 
-        self._create_qos_policies()
+        policy_method()
 
     def _check_if_allocation_is_possible(self):
         alloc_candidates = self.placement_client.list_allocation_candidates(
@@ -157,20 +173,29 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             status=status, ready_wait=False, raise_on_error=False)
         return server, port
 
-    def _assert_allocation_is_as_expected(self, allocations, port_id):
-        self.assertGreater(len(allocations['allocations']), 0)
+    def _assert_allocation_is_as_expected(self, consumer, port_ids,
+                                          min_kbps=SMALLEST_POSSIBLE_BW):
+        allocations = self.placement_client.list_allocations(
+            consumer)['allocations']
+        self.assertGreater(len(allocations), 0)
         bw_resource_in_alloc = False
-        for rp, resources in allocations['allocations'].items():
+        for rp, resources in allocations.items():
             if self.INGRESS_RESOURCE_CLASS in resources['resources']:
+                self.assertEqual(
+                    min_kbps,
+                    resources['resources'][self.INGRESS_RESOURCE_CLASS])
                 bw_resource_in_alloc = True
                 allocation_rp = rp
-        self.assertTrue(bw_resource_in_alloc)
+        if min_kbps:
+            self.assertTrue(bw_resource_in_alloc)
 
-        # Check binding_profile of the port is not empty and equals with the
-        # rp uuid
-        port = self.os_admin.ports_client.show_port(port_id)
-        self.assertEqual(allocation_rp,
-                         port['port']['binding:profile']['allocation'])
+            # Check binding_profile of the port is not empty and equals with
+            # the rp uuid
+            for port_id in port_ids:
+                port = self.os_admin.ports_client.show_port(port_id)
+                self.assertEqual(
+                    allocation_rp,
+                    port['port']['binding:profile']['allocation'])
 
     @decorators.idempotent_id('78625d92-212c-400e-8695-dd51706858b8')
     @utils.services('compute', 'network')
@@ -193,11 +218,11 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         * Create port with invalid QoS policy, and try to boot VM with that,
         it should fail.
         """
-
+        self._create_network_and_qos_policies(self._create_qos_basic_policies)
         server1, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
-        allocations = self.placement_client.list_allocations(server1['id'])
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server1['id'],
+                                               [valid_port['id']])
 
         server2, not_valid_port = self._boot_vm_with_min_bw(
             self.qos_policy_not_valid['id'], status='ERROR')
@@ -228,27 +253,28 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         * If the VM goes to ACTIVE state check that allocations are as
         expected.
         """
+        self._create_network_and_qos_policies(self._create_qos_basic_policies)
         server, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
-        allocations = self.placement_client.list_allocations(server['id'])
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
 
         self.servers_client.migrate_server(server_id=server['id'])
         waiters.wait_for_server_status(
             client=self.os_primary.servers_client, server_id=server['id'],
             status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
-        allocations = self.placement_client.list_allocations(server['id'])
 
         # TODO(lajoskatona): Check that the allocations are ok for the
         #  migration?
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
 
         self.servers_client.confirm_resize_server(server_id=server['id'])
         waiters.wait_for_server_status(
             client=self.os_primary.servers_client, server_id=server['id'],
             status='ACTIVE', ready_wait=False, raise_on_error=True)
-        allocations = self.placement_client.list_allocations(server['id'])
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
 
     @decorators.idempotent_id('c29e7fd3-035d-4993-880f-70819847683f')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -264,10 +290,11 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         * If the VM goes to ACTIVE state check that allocations are as
         expected.
         """
+        self._create_network_and_qos_policies(self._create_qos_basic_policies)
         server, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
-        allocations = self.placement_client.list_allocations(server['id'])
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
 
         old_flavor = self.flavors_client.show_flavor(
             CONF.compute.flavor_ref)['flavor']
@@ -285,15 +312,176 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         waiters.wait_for_server_status(
             client=self.os_primary.servers_client, server_id=server['id'],
             status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
-        allocations = self.placement_client.list_allocations(server['id'])
 
         # TODO(lajoskatona): Check that the allocations are ok for the
         #  migration?
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
 
         self.servers_client.confirm_resize_server(server_id=server['id'])
         waiters.wait_for_server_status(
             client=self.os_primary.servers_client, server_id=server['id'],
             status='ACTIVE', ready_wait=False, raise_on_error=True)
-        allocations = self.placement_client.list_allocations(server['id'])
-        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+        self._assert_allocation_is_as_expected(server['id'],
+                                               [valid_port['id']])
+
+    @decorators.idempotent_id('79fdaa1c-df62-4738-a0f0-1cff9dc415f6')
+    @utils.services('compute', 'network')
+    def test_qos_min_bw_allocation_update_policy(self):
+        """Test the update of QoS policy on bound port
+
+        Related RFE in neutron: #1882804
+        The scenario is the following:
+        * Have a port with QoS policy and minimum bandwidth rule.
+        * Boot a VM with the port.
+        * Update the port with a new policy with different minimum bandwidth
+        values.
+        * The allocation on placement side should be according to the new
+        rules.
+        """
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        self._create_network_and_qos_policies(
+            self._create_qos_policies_from_life)
+
+        port = self.create_port(
+            self.prov_network['id'], qos_policy_id=self.qos_policy_1['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port['id']}])
+
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
+
+        self.ports_client.update_port(
+            port['id'],
+            **{'qos_policy_id': self.qos_policy_2['id']})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_2)
+
+        # I changed my mind
+        self.ports_client.update_port(
+            port['id'],
+            **{'qos_policy_id': self.qos_policy_1['id']})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
+
+        # bad request....
+        self.qos_policy_not_valid = self._create_policy_and_min_bw_rule(
+            name_prefix='test_policy_not_valid',
+            min_kbps=self.PLACEMENT_MAX_INT)
+        port_orig = self.ports_client.show_port(port['id'])['port']
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.ports_client.update_port,
+            port['id'], **{'qos_policy_id': self.qos_policy_not_valid['id']})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
+
+        port_upd = self.ports_client.show_port(port['id'])['port']
+        self.assertEqual(port_orig['qos_policy_id'],
+                         port_upd['qos_policy_id'])
+        self.assertEqual(self.qos_policy_1['id'], port_upd['qos_policy_id'])
+
+    @decorators.idempotent_id('9cfc3bb8-f433-4c91-87b6-747cadc8958a')
+    @utils.services('compute', 'network')
+    def test_qos_min_bw_allocation_update_policy_from_zero(self):
+        """Test port without QoS policy to have QoS policy
+
+        This scenario checks if updating a port without QoS policy to
+        have QoS policy with minimum_bandwidth rule succeeds only on
+        controlplane, but placement allocation remains 0.
+        """
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        self._create_network_and_qos_policies(
+            self._create_qos_policies_from_life)
+
+        port = self.create_port(self.prov_network['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port['id']}])
+
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']], 0)
+
+        self.ports_client.update_port(
+            port['id'], **{'qos_policy_id': self.qos_policy_2['id']})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']], 0)
+
+    @decorators.idempotent_id('a9725a70-1d28-4e3b-ae0e-450abc235962')
+    @utils.services('compute', 'network')
+    def test_qos_min_bw_allocation_update_policy_to_zero(self):
+        """Test port with QoS policy to remove QoS policy
+
+        In this scenario port with QoS minimum_bandwidth rule update to
+        remove QoS policy results in 0 placement allocation.
+        """
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        self._create_network_and_qos_policies(
+            self._create_qos_policies_from_life)
+
+        port = self.create_port(
+            self.prov_network['id'], qos_policy_id=self.qos_policy_1['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port['id']}])
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
+
+        self.ports_client.update_port(
+            port['id'],
+            **{'qos_policy_id': None})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']], 0)
+
+    @decorators.idempotent_id('756ced7f-6f1a-43e7-a851-2fcfc16f3dd7')
+    @utils.services('compute', 'network')
+    def test_qos_min_bw_allocation_update_with_multiple_ports(self):
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        self._create_network_and_qos_policies(
+            self._create_qos_policies_from_life)
+
+        port1 = self.create_port(
+            self.prov_network['id'], qos_policy_id=self.qos_policy_1['id'])
+        port2 = self.create_port(
+            self.prov_network['id'], qos_policy_id=self.qos_policy_2['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port1['id']}, {'port': port2['id']}])
+        self._assert_allocation_is_as_expected(
+            server1['id'], [port1['id'], port2['id']],
+            self.BANDWIDTH_1 + self.BANDWIDTH_2)
+
+        self.ports_client.update_port(
+            port1['id'],
+            **{'qos_policy_id': self.qos_policy_2['id']})
+        self._assert_allocation_is_as_expected(
+            server1['id'], [port1['id'], port2['id']],
+            2 * self.BANDWIDTH_2)
+
+    @decorators.idempotent_id('0805779e-e03c-44fb-900f-ce97a790653b')
+    @utils.services('compute', 'network')
+    def test_empty_update(self):
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        self._create_network_and_qos_policies(
+            self._create_qos_policies_from_life)
+
+        port = self.create_port(
+            self.prov_network['id'], qos_policy_id=self.qos_policy_1['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port['id']}])
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
+        self.ports_client.update_port(
+            port['id'],
+            **{'description': 'foo'})
+        self._assert_allocation_is_as_expected(server1['id'], [port['id']],
+                                               self.BANDWIDTH_1)
