@@ -76,8 +76,6 @@ class ExistsAllResponseHeaders(object):
         if self.method == 'GET' or self.method == 'HEAD':
             if 'x-timestamp' not in actual:
                 return NonExistentHeader('x-timestamp')
-            if 'accept-ranges' not in actual:
-                return NonExistentHeader('accept-ranges')
             if self.target == 'Account':
                 if 'x-account-bytes-used' not in actual:
                     return NonExistentHeader('x-account-bytes-used')
