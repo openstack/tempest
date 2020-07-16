@@ -180,6 +180,7 @@
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
+        GLANCE_USE_IMPORT_WORKFLOW: True
       devstack_services:
         s-account: false
         s-container: false
@@ -270,6 +271,7 @@
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
+        GLANCE_USE_IMPORT_WORKFLOW: True
 
 - job:
     name: tempest-integrated-object-storage

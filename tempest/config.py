@@ -658,6 +658,12 @@ ImageFeaturesGroup = [
                                   'are current one. In future, Tempest will '
                                   'test v2 APIs only so this config option '
                                   'will be removed.'),
+    # Image import feature is setup in devstack victoria onwards.
+    # Once all stable branches setup the same via glance standalone
+    # mode or with uwsgi, we can remove this config option.
+    cfg.BoolOpt('import_image',
+                default=False,
+                help="Is image import feature enabled"),
 ]
 
 network_group = cfg.OptGroup(name='network',

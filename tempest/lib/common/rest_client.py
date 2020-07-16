@@ -914,9 +914,41 @@ class RestClient(object):
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
 
+    def wait_for_resource_activation(self, id):
+        """Waits for a resource to become active
+
+        This method will loop over is_resource_active until either
+        is_resource_active returns True or the build timeout is reached. This
+        depends on is_resource_active being implemented
+
+        :param str id: The id of the resource to check
+        :raises TimeoutException: If the build_timeout has elapsed and the
+                                  resource still hasn't been active
+        """
+        start_time = int(time.time())
+        while True:
+            if self.is_resource_active(id):
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                message = ('Failed to reach active state %(resource_type)s '
+                           '%(id)s within the required time (%(timeout)s s).' %
+                           {'resource_type': self.resource_type, 'id': id,
+                            'timeout': self.build_timeout})
+                caller = test_utils.find_test_caller()
+                if caller:
+                    message = '(%s) %s' % (caller, message)
+                raise exceptions.TimeoutException(message)
+            time.sleep(self.build_interval)
+
     def is_resource_deleted(self, id):
         """Subclasses override with specific deletion detection."""
         message = ('"%s" does not implement is_resource_deleted'
+                   % self.__class__.__name__)
+        raise NotImplementedError(message)
+
+    def is_resource_active(self, id):
+        """Subclasses override with specific active detection."""
+        message = ('"%s" does not implement is_resource_active'
                    % self.__class__.__name__)
         raise NotImplementedError(message)
 

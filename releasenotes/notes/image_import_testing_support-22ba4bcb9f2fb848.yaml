@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Add glance image import APIs function to v2
+    images_client library.
+
+    * stage_image_file
+    * info_import
+    * info_stores
+    * image_import
+other:
+  - |
+    New configuration options
+    ``CONF.glance.image_feature_enabled.image_import`` has been introduced
+    to enable the image import tests. If your glance deployement support
+    image import functionality then you can enable the image import tests
+    via this flag. Default value of this new config option is false.
