@@ -22,53 +22,126 @@ from tempest.tests.lib.services import base
 
 class TestPortsClient(base.BaseServiceTest):
 
+    FAKE_CREATE_PORTS = {
+        "port": {
+            "binding:host_id": "4df8d9ff-6f6f-438f-90a1-ef660d4586ad",
+            "binding:profile": {
+                "local_link_information": [
+                    {
+                        "port_id": "Ethernet3/1",
+                        "switch_id": "0a:1b:2c:3d:4e:5f",
+                        "switch_info": "switch1"
+                    }
+                ]
+            },
+            "binding:vnic_type": "baremetal",
+            "device_id": "d90a13da-be41-461f-9f99-1dbcf438fdf2",
+            "device_owner": "baremetal:none",
+            "dns_domain": "my-domain.org.",
+            "dns_name": "myport",
+            "qos_policy_id": "29d5e02e-d5ab-4929-bee4-4a9fc12e22ae",
+            "uplink_status_propagation": False
+        }
+    }
+
     FAKE_PORTS = {
         "ports": [
             {
                 "admin_state_up": True,
                 "allowed_address_pairs": [],
+                "created_at": "2016-03-08T20:19:41",
                 "data_plane_status": None,
                 "description": "",
                 "device_id": "9ae135f4-b6e0-4dad-9e91-3c223e385824",
                 "device_owner": "network:router_gateway",
-                "extra_dhcp_opts": [],
+                "dns_assignment": [
+                    {
+                        "hostname": "myport",
+                        "ip_address": "172.24.4.2",
+                        "fqdn": "myport.my-domain.org"
+                    }
+                ],
+                "dns_domain": "my-domain.org.",
+                "dns_name": "myport",
+                "extra_dhcp_opts": [
+                    {
+                        "opt_value": "pxelinux.0",
+                        "ip_version": 4,
+                        "opt_name": "bootfile-name"
+                    }
+                ],
                 "fixed_ips": [
                     {
                         "ip_address": "172.24.4.2",
-                        "subnet_id": "008ba151-0b8c-4a67-98b5-0d2b87666062"
+                        "subnet_id":
+                            "008ba151-0b8c-4a67-98b5-0d2b87666062"
                     }
                 ],
                 "id": "d80b1a3b-4fc1-49f3-952e-1e2ab7081d8b",
+                "ip_allocation": "immediate",
                 "mac_address": "fa:16:3e:58:42:ed",
                 "name": "",
                 "network_id": "70c1db1f-b701-45bd-96e0-a313ee3430b3",
                 "project_id": "",
+                "revision_number": 1,
                 "security_groups": [],
                 "status": "ACTIVE",
-                "tenant_id": ""
+                "tags": ["tag1,tag2"],
+                "tenant_id": "d6700c0c9ffa4f1cb322cd4a1f3906fa",
+                "updated_at": "2016-03-08T20:19:41",
+                "qos_network_policy_id":
+                    "174dd0c1-a4eb-49d4-a807-ae80246d82f4",
+                "qos_policy_id": "29d5e02e-d5ab-4929-bee4-4a9fc12e22ae",
+                "port_security_enabled": False,
+                "uplink_status_propagation": False
             },
             {
                 "admin_state_up": True,
                 "allowed_address_pairs": [],
+                "created_at": "2016-03-08T20:19:41",
                 "data_plane_status": None,
                 "description": "",
                 "device_id": "9ae135f4-b6e0-4dad-9e91-3c223e385824",
                 "device_owner": "network:router_interface",
-                "extra_dhcp_opts": [],
+                "dns_assignment": [
+                    {
+                        "hostname": "myport2",
+                        "ip_address": "10.0.0.1",
+                        "fqdn": "myport2.my-domain.org"
+                    }
+                ],
+                "dns_domain": "my-domain.org.",
+                "dns_name": "myport2",
+                "extra_dhcp_opts": [
+                    {
+                        "opt_value": "pxelinux.0",
+                        "ip_version": 4,
+                        "opt_name": "bootfile-name"
+                    }
+                ],
                 "fixed_ips": [
                     {
                         "ip_address": "10.0.0.1",
-                        "subnet_id": "288bf4a1-51ba-43b6-9d0a-520e9005db17"
+                        "subnet_id":
+                            "288bf4a1-51ba-43b6-9d0a-520e9005db17"
                     }
                 ],
                 "id": "f71a6703-d6de-4be1-a91a-a570ede1d159",
+                "ip_allocation": "immediate",
                 "mac_address": "fa:16:3e:bb:3c:e4",
                 "name": "",
                 "network_id": "f27aa545-cbdd-4907-b0c6-c9e8b039dcc2",
                 "project_id": "d397de8a63f341818f198abb0966f6f3",
+                "revision_number": 1,
                 "security_groups": [],
                 "status": "ACTIVE",
-                "tenant_id": "d397de8a63f341818f198abb0966f6f3"
+                "tags": ["tag1,tag2"],
+                "tenant_id": "d397de8a63f341818f198abb0966f6f3",
+                "updated_at": "2016-03-08T20:19:41",
+                "qos_network_policy_id": None,
+                "qos_policy_id": None,
+                "port_security_enabled": False,
+                "uplink_status_propagation": False
             }
         ]
     }
@@ -112,7 +185,7 @@ class TestPortsClient(base.BaseServiceTest):
         self.check_service_client_function(
             self.ports_client.create_port,
             "tempest.lib.common.rest_client.RestClient.post",
-            {"port": self.FAKE_PORTS["ports"][0]},
+            self.FAKE_CREATE_PORTS,
             bytes_body,
             201,
             **self.FAKE_PORT1)
