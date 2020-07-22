@@ -80,6 +80,7 @@ Development
    microversion_testing
    test_removal
    write_tests
+   requirement_upper_constraint_for_tempest
 
 Plugins
 -------
