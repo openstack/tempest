@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    is_resource_deleted method of v3 volumes_client might have returned
+    a KeyError exception due to an incorrect accessing of a volume id
+    in the case the volume was in error_deleting state.
+    incorrect code - volume['id']
+    correct code - volume['volume']['id']
+    More details about the issue can be found at
+    https://bugs.launchpad.net/tempest/+bug/1887980

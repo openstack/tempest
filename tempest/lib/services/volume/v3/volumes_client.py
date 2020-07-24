@@ -219,7 +219,7 @@ class VolumesClient(base_client.BaseClient):
         if volume["volume"]["status"] == "error_deleting":
             raise lib_exc.DeleteErrorException(
                 "Volume %s failed to delete and is in error_deleting status" %
-                volume['id'])
+                volume['volume']['id'])
         return False
 
     @property
