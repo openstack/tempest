@@ -73,6 +73,18 @@ show_group_type = {
     }
 }
 
+show_default_group_type = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'group_type': common_show_group_type
+        },
+        'additionalProperties': False,
+        'required': ['group_type']
+    }
+}
+
 update_group_type = {
     'status_code': [200],
     'response_body': {
