@@ -20,11 +20,12 @@ from tempest.lib import exceptions as lib_exc
 
 
 class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
+    """Negative tests of volume type"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('878b4e57-faa2-4659-b0d1-ce740a06ae81')
     def test_create_with_empty_name(self):
-        # Should not be able to create volume type with an empty name.
+        """Test creating volume type with an empty name will fail"""
         self.assertRaises(
             lib_exc.BadRequest,
             self.admin_volume_types_client.create_volume_type, name='')
@@ -32,7 +33,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('994610d6-0476-4018-a644-a2602ef5d4aa')
     def test_get_nonexistent_type_id(self):
-        # Should not be able to get volume type with nonexistent type id.
+        """Test getting volume type with nonexistent type id will fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.admin_volume_types_client.show_volume_type,
                           data_utils.rand_uuid())
@@ -40,7 +41,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6b3926d2-7d73-4896-bc3d-e42dfd11a9f6')
     def test_delete_nonexistent_type_id(self):
-        # Should not be able to delete volume type with nonexistent type id.
+        """Test deleting volume type with nonexistent type id will fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.admin_volume_types_client.delete_volume_type,
                           data_utils.rand_uuid())
@@ -48,7 +49,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8c09f849-f225-4d78-ba87-bffd9a5e0c6f')
     def test_create_volume_with_private_volume_type(self):
-        # Should not be able to create volume with private volume type.
+        """Test creating volume with private volume type will fail"""
         params = {'os-volume-type-access:is_public': False}
         volume_type = self.create_volume_type(**params)
         self.assertRaises(lib_exc.NotFound,

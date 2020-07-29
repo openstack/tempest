@@ -24,6 +24,7 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
 
 
 class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
+    """Negative tests of volume quotas"""
 
     @classmethod
     def setup_credentials(cls):
@@ -52,6 +53,7 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('bf544854-d62a-47f2-a681-90f7a47d86b6')
     def test_quota_volumes(self):
+        """Creating more volume than allowed quota will fail"""
         self.admin_quotas_client.update_quota_set(self.demo_tenant_id,
                                                   volumes=1, gigabytes=-1)
         self.assertRaises(lib_exc.OverLimit,
@@ -61,6 +63,7 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('2dc27eee-8659-4298-b900-169d71a91374')
     def test_quota_volume_gigabytes(self):
+        """Creating volume with size larger than allowed quota will fail"""
         self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id, gigabytes=CONF.volume.volume_size, volumes=-1)
         self.assertRaises(lib_exc.OverLimit,
@@ -70,6 +73,7 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d321dc21-d8c6-401f-95fe-49f4845f1a6d')
     def test_volume_extend_gigabytes_quota_deviation(self):
+        """Extending volume with size larger than allowed quota will fail"""
         self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id, gigabytes=CONF.volume.volume_size)
         self.assertRaises(lib_exc.OverLimit,

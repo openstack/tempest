@@ -21,6 +21,8 @@ CONF = config.CONF
 
 
 class VolumePoolsAdminTestsJSON(base.BaseVolumeAdminTest):
+    """Test getting volume pools by admin users"""
+
     def _assert_pools(self, with_detail=False):
         cinder_pools = self.admin_scheduler_stats_client.list_pools(
             detail=with_detail)['pools']
@@ -33,8 +35,10 @@ class VolumePoolsAdminTestsJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('0248a46c-e226-4933-be10-ad6fca8227e7')
     def test_get_pools_without_details(self):
+        """Test getting volume pools without detail"""
         self._assert_pools()
 
     @decorators.idempotent_id('d4bb61f7-762d-4437-b8a4-5785759a0ced')
     def test_get_pools_with_details(self):
+        """Test getting volume pools with detail"""
         self._assert_pools(with_detail=True)

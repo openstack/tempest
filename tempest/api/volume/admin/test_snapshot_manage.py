@@ -48,6 +48,7 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
     def test_unmanage_manage_snapshot(self):
+        """Test unmanaging and managing volume snapshot"""
         # Create a volume
         volume = self.create_volume()
 

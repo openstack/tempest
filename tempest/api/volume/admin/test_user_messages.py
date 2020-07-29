@@ -22,6 +22,8 @@ CONF = config.CONF
 
 
 class UserMessagesTest(base.BaseVolumeAdminTest):
+    """Test volume messages with microversion greater than 3.2"""
+
     _api_version = 3
     min_microversion = '3.3'
     max_microversion = 'latest'
@@ -51,6 +53,7 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('50f29e6e-f363-42e1-8ad1-f67ae7fd4d5a')
     def test_list_show_messages(self):
+        """Test listing and showing volume messages"""
         message_id = self._create_user_message()
         self.addCleanup(self.messages_client.delete_message, message_id)
 
@@ -62,6 +65,7 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
     def test_delete_message(self):
+        """Test deleting volume messages"""
         message_id = self._create_user_message()
         self.messages_client.delete_message(message_id)
         self.messages_client.wait_for_resource_deletion(message_id)
