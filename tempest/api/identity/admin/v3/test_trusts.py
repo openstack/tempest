@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone trusts"""
 
     @classmethod
     def skip_checks(cls):
@@ -195,8 +196,11 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('5a0a91a4-baef-4a14-baba-59bf4d7fcace')
     def test_trust_impersonate(self):
-        # Test case to check we can create, get and delete a trust
-        # updates are not supported for trusts
+        """Test keystone trust with impersonation enabled
+
+        To check we can create, get and delete a trust.
+        Updates are not supported for trusts
+        """
         trust = self.create_trust()
         self.validate_trust(trust)
 
@@ -207,8 +211,11 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('ed2a8779-a7ac-49dc-afd7-30f32f936ed2')
     def test_trust_noimpersonate(self):
-        # Test case to check we can create, get and delete a trust
-        # with impersonation=False
+        """Test keystone trust with impersonation disabled
+
+        To check we can create, get and delete a trust
+        with impersonation=False
+        """
         trust = self.create_trust(impersonate=False)
         self.validate_trust(trust, impersonate=False)
 
@@ -219,8 +226,11 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('0ed14b66-cefd-4b5c-a964-65759453e292')
     def test_trust_expire(self):
-        # Test case to check we can create, get and delete a trust
-        # with an expiry specified
+        """Test expire attribute of keystone trust
+
+        To check we can create, get and delete a trust
+        with an expiry specified
+        """
         expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
         # NOTE(ylobankov) In some cases the expiry time may be rounded up
         # because of microseconds. In fact, it depends on database and its
@@ -246,8 +256,10 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('3e48f95d-e660-4fa9-85e0-5a3d85594384')
     def test_trust_expire_invalid(self):
-        # Test case to check we can check an invalid expiry time
-        # is rejected with the correct error
+        """Test invalid expire attribute of a keystone trust
+
+        To check an invalid expiry time is rejected with the correct error
+        """
         # with an expiry specified
         expires_str = 'bad.123Z'
         self.assertRaises(lib_exc.BadRequest,
@@ -256,6 +268,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('6268b345-87ca-47c0-9ce3-37792b43403a')
     def test_get_trusts_query(self):
+        """Test getting keystone trusts"""
         self.create_trust()
         trusts_get = self.trustor_client.list_trusts(
             trustor_user_id=self.trustor_user_id)['trusts']
@@ -265,7 +278,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('4773ebd5-ecbf-4255-b8d8-b63e6f72b65d')
     def test_get_trusts_all(self):
-
+        """Test getting all keystone trusts"""
         # Simple function that can be used for cleanup
         def set_scope(auth_provider, scope):
             auth_provider.scope = scope

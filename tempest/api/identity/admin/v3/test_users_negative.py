@@ -23,11 +23,12 @@ CONF = config.CONF
 
 
 class UsersNegativeTest(base.BaseIdentityV3AdminTest):
+    """Negative tests of keystone users"""
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e75f006c-89cc-477b-874d-588e4eab4b17')
     def test_create_user_for_non_existent_domain(self):
-        # Attempt to create a user in a non-existent domain should fail
+        """Attempt to create a user in a non-existent domain should fail"""
         u_name = data_utils.rand_name('user')
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
@@ -39,7 +40,7 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('b3c9fccc-4134-46f5-b600-1da6fb0a3b1f')
     def test_authentication_for_disabled_user(self):
-        # Attempt to authenticate for disabled user should fail
+        """Attempt to authenticate for disabled user should fail"""
         password = data_utils.rand_password()
         user = self.setup_test_user(password)
         self.disable_user(user['name'], user['domain_id'])

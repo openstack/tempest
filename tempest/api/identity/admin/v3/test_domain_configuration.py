@@ -21,6 +21,8 @@ from tempest.lib import exceptions as lib_exc
 
 
 class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
+    """Test domain configuration"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -51,10 +53,12 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('11a02bf0-6f94-4380-b3b0-c8dc18fc0d22')
     def test_show_default_group_config_and_options(self):
-        # The API supports only the identity and ldap groups. For the ldap
-        # group, a valid value is url or user_tree_dn. For the identity group,
-        # a valid value is driver.
+        """Test showing default keystone group config and options
 
+        The API supports only the identity and ldap groups. For the ldap
+        group, a valid value is url or user_tree_dn. For the identity group,
+        a valid value is driver.
+        """
         # Check that the default config has the identity and ldap groups.
         config = self.client.show_default_config_settings()['config']
         self.assertIsInstance(config, dict)
@@ -93,6 +97,7 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('9e3ff13c-f597-4f01-9377-d6c06c2a1477')
     def test_create_domain_config_and_show_config_groups_and_options(self):
+        """Test creating and showing keystone config groups and options"""
         domain, created_config = self._create_domain_and_config(
             self.custom_config)
 
@@ -117,6 +122,7 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('7161023e-5dd0-4612-9da0-1bac6ac30b63')
     def test_create_update_and_delete_domain_config(self):
+        """Test creating, updating and deleting keystone domain config"""
         domain, created_config = self._create_domain_and_config(
             self.custom_config)
 
@@ -140,6 +146,7 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c7510fa2-6661-4170-9c6b-4783a80651e9')
     def test_create_update_and_delete_domain_config_groups_and_opts(self):
+        """Test create/update/delete keystone domain config groups and opts"""
         domain, _ = self._create_domain_and_config(self.custom_config)
 
         # Check that updating configuration groups work.

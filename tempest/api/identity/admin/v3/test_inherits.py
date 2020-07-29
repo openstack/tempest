@@ -21,6 +21,8 @@ CONF = config.CONF
 
 
 class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone inherits"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -72,6 +74,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_inherit_assign_list_check_revoke_roles_on_domains_user(self):
+        """Test assign/list/check/revoke inherited role on domain user"""
         # Create role
         src_role = self.setup_test_role()
         # Assign role on domains user
@@ -96,6 +99,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c7a8dda2-be50-4fb4-9a9c-e830771078b1')
     def test_inherit_assign_list_check_revoke_roles_on_domains_group(self):
+        """Test assign/list/check/revoke inherited role on domain group"""
         # Create role
         src_role = self.setup_test_role()
         # Assign role on domains group
@@ -123,6 +127,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_inherit_assign_check_revoke_roles_on_projects_user(self):
+        """Test assign/list/check/revoke inherited role on project user"""
         # Create role
         src_role = self.setup_test_role()
         # Assign role on projects user
@@ -138,6 +143,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('26021436-d5a4-4256-943c-ded01e0d4b45')
     def test_inherit_assign_check_revoke_roles_on_projects_group(self):
+        """Test assign/list/check/revoke inherited role on project group"""
         # Create role
         src_role = self.setup_test_role()
         # Assign role on projects group
@@ -157,6 +163,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_inherit_assign_list_revoke_user_roles_on_domain(self):
+        """Test assign/list/check/revoke inherited role on domain"""
         # Create role
         src_role = self.setup_test_role()
 
@@ -204,6 +211,7 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'Skipped because environment has an immutable user '
                       'source and solely provides read-only access to users.')
     def test_inherit_assign_list_revoke_user_roles_on_project_tree(self):
+        """Test assign/list/check/revoke inherited role on project tree"""
         # Create role
         src_role = self.setup_test_role()
 

@@ -20,9 +20,11 @@ from tempest.lib import decorators
 
 class ApplicationCredentialsV3AdminTest(base.BaseApplicationCredentialsV3Test,
                                         base.BaseIdentityV3AdminTest):
+    """Test keystone application credentials"""
 
     @decorators.idempotent_id('3b3dd48f-3388-406a-a9e6-4d078a552d0e')
     def test_create_application_credential_with_roles(self):
+        """Test creating keystone application credential with roles"""
         role = self.setup_test_role()
         self.os_admin.roles_v3_client.create_user_role_on_project(
             self.project_id,

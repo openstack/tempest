@@ -20,6 +20,8 @@ from tempest.lib import exceptions as lib_exc
 
 
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
+    """Negative tests of endpoint"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -48,7 +50,10 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ac6c137e-4d3d-448f-8c83-4f13d0942651')
     def test_create_with_enabled_False(self):
-        # Enabled should be a boolean, not a string like 'False'
+        """Test creating endpoint with invalid enabled value 'False'
+
+        Enabled should be a boolean, not a string like 'False'
+        """
         interface = 'public'
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
@@ -59,7 +64,10 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9c43181e-0627-484a-8c79-923e8a59598b')
     def test_create_with_enabled_True(self):
-        # Enabled should be a boolean, not a string like 'True'
+        """Test creating endpoint with invalid enabled value 'True'
+
+        Enabled should be a boolean, not a string like 'True'
+        """
         interface = 'public'
         url = data_utils.rand_url()
         region = data_utils.rand_name('region')
@@ -88,11 +96,17 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('65e41f32-5eb7-498f-a92a-a6ccacf7439a')
     def test_update_with_enabled_False(self):
-        # Enabled should be a boolean, not a string like 'False'
+        """Test updating endpoint with invalid enabled value 'False'
+
+        Enabled should be a boolean, not a string like 'False'
+        """
         self._assert_update_raises_bad_request('False')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('faba3587-f066-4757-a48e-b4a3f01803bb')
     def test_update_with_enabled_True(self):
-        # Enabled should be a boolean, not a string like 'True'
+        """Test updating endpoint with invalid enabled value 'True'
+
+        Enabled should be a boolean, not a string like 'True'
+        """
         self._assert_update_raises_bad_request('True')

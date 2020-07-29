@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone groups"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -35,6 +37,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
+        """Test creating, updating and getting keystone group"""
         # Verify group creation works.
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
@@ -78,6 +81,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_group_users_add_list_delete(self):
+        """Test adding/listing/deleting group users"""
         group = self.setup_test_group(domain_id=self.domain['id'])
         # add user into group
         users = []
@@ -104,6 +108,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_list_user_groups(self):
+        """Test listing user groups when the user is in two groups"""
         # create a user
         user = self.create_test_user()
         # create two groups, and add user into them
@@ -127,7 +132,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('cc9a57a5-a9ed-4f2d-a29f-4f979a06ec71')
     def test_list_groups(self):
-        # Test to list groups
+        """Test listing groups"""
         group_ids = list()
         fetched_ids = list()
         for _ in range(3):

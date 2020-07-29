@@ -20,6 +20,8 @@ from tempest.lib import decorators
 
 
 class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
+    """Test endpoint groups"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -68,6 +70,7 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('7c69e7a1-f865-402d-a2ea-44493017315a')
     def test_create_list_show_check_delete_endpoint_group(self):
+        """Test create/list/show/check/delete of endpoint group"""
         service_id = self._create_service()
         self.addCleanup(self.services_client.delete_service, service_id)
         name = data_utils.rand_name('service_group')
@@ -127,6 +130,7 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('51c8fc38-fa84-4e76-b5b6-6fc37770fb26')
     def test_update_endpoint_group(self):
+        """Test updating endpoint group"""
         # Creating an endpoint group so as to check update endpoint group
         # with new values
         service1_id = self._create_service()

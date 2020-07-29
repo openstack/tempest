@@ -20,6 +20,8 @@ from tempest.lib import decorators
 
 
 class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone credentials"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -47,6 +49,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
+        """Test creating, getting, updating, deleting of credentials"""
         blob = '{"access": "%s", "secret": "%s"}' % (
             data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
         cred = self.creds_client.create_credential(
@@ -82,6 +85,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('13202c00-0021-42a1-88d4-81b44d448aab')
     def test_credentials_list_delete(self):
+        """Test listing credentials"""
         created_cred_ids = list()
         fetched_cred_ids = list()
 
