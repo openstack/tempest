@@ -447,6 +447,10 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('shelve',
                 default=True,
                 help="Does the test environment support shelving/unshelving?"),
+    cfg.BoolOpt('shelve_migrate',
+                default=False,
+                help="Does the test environment support "
+                     "cold migration of unshelved server?"),
     cfg.BoolOpt('suspend',
                 default=True,
                 help="Does the test environment support suspend/resume?"),

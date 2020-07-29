@@ -33,8 +33,17 @@ class TestShelveInstance(manager.ScenarioTest):
      * shelve the instance
      * unshelve the instance
      * check the existence of the timestamp file in the unshelved instance
+     * check the existence of the timestamp file in the unshelved instance,
+       after a cold migrate
 
     """
+
+    credentials = ['primary', 'admin']
+
+    @classmethod
+    def setup_clients(cls):
+        super(TestShelveInstance, cls).setup_clients()
+        cls.admin_servers_client = cls.os_admin.servers_client
 
     @classmethod
     def skip_checks(cls):
@@ -50,7 +59,21 @@ class TestShelveInstance(manager.ScenarioTest):
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
 
-    def _create_server_then_shelve_and_unshelve(self, boot_from_volume=False):
+    def _cold_migrate_server(self, server):
+        src_host = self.get_host_for_server(server['id'])
+
+        self.admin_servers_client.migrate_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'VERIFY_RESIZE')
+        self.servers_client.confirm_resize_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        dst_host = self.get_host_for_server(server['id'])
+        self.assertNotEqual(src_host, dst_host)
+
+    def _create_server_then_shelve_and_unshelve(self, boot_from_volume=False,
+                                                cold_migrate=False):
         keypair = self.create_keypair()
 
         security_group = self._create_security_group()
@@ -70,6 +93,10 @@ class TestShelveInstance(manager.ScenarioTest):
         # Unshelve used to boot the instance with the original image, not
         # with the instance snapshot
         self._shelve_then_unshelve_server(server)
+
+        if cold_migrate:
+            # Prevent bug #1732428 from coming back
+            self._cold_migrate_server(server)
 
         timestamp2 = self.get_timestamp(instance_ip,
                                         private_key=keypair['private_key'],
@@ -91,3 +118,18 @@ class TestShelveInstance(manager.ScenarioTest):
     @utils.services('compute', 'volume', 'network', 'image')
     def test_shelve_volume_backed_instance(self):
         self._create_server_then_shelve_and_unshelve(boot_from_volume=True)
+
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('1295fd9e-193a-4cf8-b211-55358e021bae')
+    @testtools.skipUnless(CONF.network.public_network_id,
+                          'The public_network_id option must be specified.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve_migrate,
+                          'Shelve migrate not available.')
+    @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
+                          'Less than 2 compute nodes, skipping multinode '
+                          'tests.')
+    @utils.services('compute', 'network', 'image')
+    def test_cold_migrate_unshelved_instance(self):
+        self._create_server_then_shelve_and_unshelve(cold_migrate=True)
