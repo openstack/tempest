@@ -49,6 +49,7 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
     def test_create_list_show_update_delete_subnetpools(self):
+        """Test create/list/show/update/delete of subnet pools"""
         subnetpool_name = data_utils.rand_name('subnetpools')
         # create subnet pool
         prefix = CONF.network.default_network

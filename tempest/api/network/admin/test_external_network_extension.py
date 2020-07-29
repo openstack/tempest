@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
+    """Test external networks"""
 
     @classmethod
     def resource_setup(cls):
@@ -42,8 +43,11 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('462be770-b310-4df9-9c42-773217e4c8b1')
     def test_create_external_network(self):
-        # Create a network as an admin user specifying the
-        # external network extension attribute
+        """Test creating external network
+
+        Create a network as an admin user specifying the
+        external network extension attribute
+        """
         ext_network = self._create_network()
         # Verifies router:external parameter
         self.assertIsNotNone(ext_network['id'])
@@ -51,8 +55,11 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('4db5417a-e11c-474d-a361-af00ebef57c5')
     def test_update_external_network(self):
-        # Update a network as an admin user specifying the
-        # external network extension attribute
+        """Test updating external network
+
+        Update a network as an admin user specifying the
+        external network extension attribute
+        """
         network = self._create_network(external=False)
         self.assertFalse(network.get('router:external', False))
         update_body = {'router:external': True}
@@ -64,6 +71,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('39be4c9b-a57e-4ff9-b7c7-b218e209dfcc')
     def test_list_external_networks(self):
+        """Test listing external networks"""
         # Create external_net
         external_network = self._create_network()
         # List networks as a normal user and confirm the external
@@ -81,6 +89,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('2ac50ab2-7ebd-4e27-b3ce-a9e399faaea2')
     def test_show_external_networks_attribute(self):
+        """Test showing external network attribute"""
         # Create external_net
         external_network = self._create_network()
         # Show an external network as a normal user and confirm the
@@ -101,9 +110,11 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
                           'Floating ips are not availabled')
     def test_delete_external_networks_with_floating_ip(self):
-        # Verifies external network can be deleted while still holding
-        # (unassociated) floating IPs
+        """Test deleting external network with unassociated floating ips
 
+        Verifies external network can be deleted while still holding
+        (unassociated) floating IPs
+        """
         body = self.admin_networks_client.create_network(
             **{'router:external': True})
         external_network = body['network']
