@@ -209,6 +209,37 @@ def wait_for_image_imported_to_stores(client, image_id, stores):
     raise lib_exc.TimeoutException(message)
 
 
+def wait_for_image_copied_to_stores(client, image_id):
+    """Waits for an image to be copied on all requested stores.
+
+    The client should also have build_interval and build_timeout attributes.
+    This return the list of stores where copy is failed.
+    """
+
+    start = int(time.time())
+    store_left = []
+    while int(time.time()) - start < client.build_timeout:
+        image = client.show_image(image_id)
+        store_left = image.get('os_glance_importing_to_stores')
+        # NOTE(danms): If os_glance_importing_to_stores is None, then
+        # we've raced with the startup of the task and should continue
+        # to wait.
+        if store_left is not None and not store_left:
+            return image['os_glance_failed_import']
+        if image['status'].lower() == 'killed':
+            raise exceptions.ImageKilledException(image_id=image_id,
+                                                  status=image['status'])
+
+        time.sleep(client.build_interval)
+
+    message = ('Image %(image_id)s failed to finish the copy operation '
+               'on stores: %s' % str(store_left))
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise lib_exc.TimeoutException(message)
+
+
 def wait_for_volume_resource_status(client, resource_id, status):
     """Waits for a volume resource to reach a given status.
 
