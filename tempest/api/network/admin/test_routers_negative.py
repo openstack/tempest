@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class RoutersAdminNegativeTest(base.BaseAdminNetworkTest):
+    """Admin negative tests of routers"""
 
     @classmethod
     def skip_checks(cls):
@@ -41,6 +42,7 @@ class RoutersAdminNegativeTest(base.BaseAdminNetworkTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_router_set_gateway_used_ip_returns_409(self):
+        """Test creating router with gateway set to used ip should fail"""
         # At first create a address from public_network_id
         port = self.admin_ports_client.create_port(
             name=data_utils.rand_name(self.__class__.__name__),

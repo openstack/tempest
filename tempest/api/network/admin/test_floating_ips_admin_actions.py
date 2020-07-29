@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
+    """Test floating ips"""
+
     credentials = ['primary', 'alt', 'admin']
 
     @classmethod
@@ -55,6 +57,13 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('64f2100b-5471-4ded-b46c-ddeeeb4f231b')
     def test_list_floating_ips_from_admin_and_nonadmin(self):
+        """Test listing floating ips from admin and non admin users
+
+        This test performs below operations:
+        1. Create couple floating ips for admin and non-admin users.
+        2. Verify if admin can access all floating ips including other user
+           and non-admin user can only access its own floating ips.
+        """
         # Create floating ip from admin user
         floating_ip_admin = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id)
@@ -90,6 +99,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
     def test_create_list_show_floating_ip_with_tenant_id_by_admin(self):
+        """Verify if admin can create/list/show floating ip with tenant id"""
         # Creates a floating IP
         body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,

@@ -19,6 +19,8 @@ from tempest.lib import decorators
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
+    """Test deletion of servers"""
+
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances".
 
@@ -30,7 +32,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('99774678-e072-49d1-9d2a-49a59bc56063')
     def test_delete_server_while_in_error_state(self):
-        # Delete a server while it's VM state is error
+        """Delete a server while it's VM state is error"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.admin_client.reset_state(server['id'], state='error')
         # Verify server's state
@@ -43,7 +45,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('73177903-6737-4f27-a60c-379e8ae8cf48')
     def test_admin_delete_servers_of_others(self):
-        # Administrator can delete servers of others
+        """Administrator can delete servers of others"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.admin_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])

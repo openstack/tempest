@@ -53,6 +53,7 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
     def test_network_quota_exceeding(self):
+        """Test creating network when exceeding network quota will fail"""
         # Set the network quota to two
         self.admin_quotas_client.update_quotas(self.project['id'], network=2)
 
