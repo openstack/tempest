@@ -21,6 +21,7 @@ from tempest.lib import decorators
 
 
 class SecGroupTest(base.BaseSecGroupTest):
+    """Test security groups"""
 
     @classmethod
     def skip_checks(cls):
@@ -67,7 +68,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
-        # Verify the security group belonging to project exist in list
+        """Verify that default security group exist"""
         body = self.security_groups_client.list_security_groups()
         security_groups = body['security_groups']
         found = None
@@ -80,6 +81,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('bfd128e5-3c92-44b6-9d66-7fe29d22c802')
     def test_create_list_update_show_delete_security_group(self):
+        """Verify create/list/update/show/delete of security group"""
         group_create_body, _ = self._create_security_group()
 
         # List security groups and verify if created group is there in response
@@ -111,6 +113,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('cfb99e0e-7410-4a3d-8a0c-959a63ee77e9')
     def test_create_show_delete_security_group_rule(self):
+        """Test create/show/delete of security group rule"""
         group_create_body, _ = self._create_security_group()
 
         # Create rules for each protocol
@@ -191,7 +194,7 @@ class SecGroupTest(base.BaseSecGroupTest):
 
     @decorators.idempotent_id('c2ed2deb-7a0c-44d8-8b4c-a5825b5c310b')
     def test_create_security_group_rule_with_remote_group_id(self):
-        # Verify creating security group rule with remote_group_id works
+        """Verify creating security group rule with remote_group_id works"""
         sg1_body, _ = self._create_security_group()
         sg2_body, _ = self._create_security_group()
 
@@ -209,7 +212,7 @@ class SecGroupTest(base.BaseSecGroupTest):
 
     @decorators.idempotent_id('16459776-5da2-4634-bce4-4b55ee3ec188')
     def test_create_security_group_rule_with_remote_ip_prefix(self):
-        # Verify creating security group rule with remote_ip_prefix works
+        """Verify creating security group rule with remote_ip_prefix works"""
         sg1_body, _ = self._create_security_group()
 
         sg_id = sg1_body['security_group']['id']
@@ -226,9 +229,10 @@ class SecGroupTest(base.BaseSecGroupTest):
 
     @decorators.idempotent_id('0a307599-6655-4220-bebc-fd70c64f2290')
     def test_create_security_group_rule_with_protocol_integer_value(self):
-        # Verify creating security group rule with the
-        # protocol as integer value
-        # arguments : "protocol": 17
+        """Verify creating security group rule with the integer protocol value
+
+        arguments : "protocol": 17
+        """
         group_create_body, _ = self._create_security_group()
         direction = 'ingress'
         protocol = 17

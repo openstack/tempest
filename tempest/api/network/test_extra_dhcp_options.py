@@ -58,7 +58,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('d2c17063-3767-4a24-be4f-a23dbfa133c9')
     def test_create_list_port_with_extra_dhcp_options(self):
-        # Create a port with Extra DHCP Options
+        """Test creating a port with Extra DHCP Options and list those"""
         body = self.ports_client.create_port(
             network_id=self.network['id'],
             name=data_utils.rand_name(self.__class__.__name__),
@@ -76,7 +76,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
 
     @decorators.idempotent_id('9a6aebf4-86ee-4f47-b07a-7f7232c55607')
     def test_update_show_port_with_extra_dhcp_options(self):
-        # Update port with extra dhcp options
+        """Test updating port with extra DHCP options and show that port"""
         name = data_utils.rand_name('new-port-name')
         self.ports_client.update_port(
             self.port['id'],
