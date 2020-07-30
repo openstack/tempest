@@ -20,6 +20,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
+    """Negative tests of nova absolute limits"""
 
     def setUp(self):
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
@@ -34,7 +35,10 @@ class AbsoluteLimitsNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('215cd465-d8ae-49c9-bf33-9c911913a5c8')
     def test_max_metadata_exceed_limit(self):
-        # We should not create vm with metadata over maxServerMeta limit
+        """Test creating server with metadata over limit should fail
+
+        We should not create server with metadata over maxServerMeta limit
+        """
         # Get max limit value
         limits = self.client.show_limits()['limits']
         max_meta = limits['absolute']['maxServerMeta']

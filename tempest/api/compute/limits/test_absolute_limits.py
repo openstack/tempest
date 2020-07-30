@@ -18,6 +18,11 @@ from tempest.lib import decorators
 
 
 class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
+    """Test compute absolute limits
+
+    Test compute absolute limits with compute microversion less than 2.57
+    """
+
     max_microversion = '2.56'
 
     @classmethod
@@ -27,12 +32,17 @@ class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('b54c66af-6ab6-4cf0-a9e5-a0cb58d75e0b')
     def test_absLimits_get(self):
+        """Test getting nova absolute limits"""
         # To check if all limits are present in the response (will be checked
         # by schema)
         self.client.show_limits()
 
 
 class AbsoluteLimitsV257TestJSON(base.BaseV2ComputeTest):
+    """Test compute absolute limits
+
+    Test compute absolute limits with compute microversion greater than 2.56
+    """
     min_microversion = '2.57'
     max_microversion = 'latest'
 
