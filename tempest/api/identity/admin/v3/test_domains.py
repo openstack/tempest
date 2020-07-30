@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class DomainsTestJSON(base.BaseIdentityV3AdminTest):
+    """Test identity domains"""
 
     @classmethod
     def resource_setup(cls):
@@ -37,7 +38,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('8cf516ef-2114-48f1-907b-d32726c734d4')
     def test_list_domains(self):
-        # Test to list domains
+        """Test listing domains"""
         fetched_ids = list()
         # List and Verify Domains
         body = self.domains_client.list_domains()['domains']
@@ -49,7 +50,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c6aee07b-4981-440c-bb0b-eb598f58ffe9')
     def test_list_domains_filter_by_name(self):
-        # List domains filtering by name
+        """Test listing domains filtering by name"""
         params = {'name': self.setup_domains[0]['name']}
         fetched_domains = self.domains_client.list_domains(
             **params)['domains']
@@ -61,7 +62,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('3fd19840-65c1-43f8-b48c-51bdd066dff9')
     def test_list_domains_filter_by_enabled(self):
-        # List domains filtering by enabled domains
+        """Test listing domains filtering by enabled domains"""
         params = {'enabled': True}
         fetched_domains = self.domains_client.list_domains(
             **params)['domains']
@@ -74,6 +75,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('f2f5b44a-82e8-4dad-8084-0661ea3b18cf')
     def test_create_update_delete_domain(self):
+        """Test creating, updating and deleting domain"""
         # Create domain
         d_name = data_utils.rand_name('domain')
         d_desc = data_utils.rand_name('domain-desc')
@@ -118,6 +120,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('d8d318b7-d1b3-4c37-94c5-3c5ba0b121ea')
     def test_domain_delete_cascades_content(self):
+        """Test deleting domain will delete its associated contents"""
         # Create a domain with a user and a group in it
         domain = self.setup_test_domain()
         user = self.create_test_user(domain_id=domain['id'])
@@ -134,6 +137,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):
+        """Test creating domain with disabled status"""
         # Create domain with enabled status as false
         d_name = data_utils.rand_name('domain')
         d_desc = data_utils.rand_name('domain-desc')
@@ -146,6 +150,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('2abf8764-309a-4fa9-bc58-201b799817ad')
     def test_create_domain_without_description(self):
+        """Test creating domain without description"""
         # Create domain only with name
         d_name = data_utils.rand_name('domain')
         domain = self.domains_client.create_domain(name=d_name)['domain']

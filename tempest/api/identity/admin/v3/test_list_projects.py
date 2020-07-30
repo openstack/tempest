@@ -40,6 +40,7 @@ class BaseListProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
 
 class ListProjectsTestJSON(BaseListProjectsTestJSON):
+    """Test listing projects"""
 
     @classmethod
     def resource_setup(cls):
@@ -65,13 +66,13 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
 
     @decorators.idempotent_id('0fe7a334-675a-4509-b00e-1c4b95d5dae8')
     def test_list_projects_with_enabled(self):
-        # List the projects with enabled
+        """Test listing the projects with enabled"""
         self._list_projects_with_params(
             [self.p1], [self.p2, self.p3], {'enabled': False}, 'enabled')
 
     @decorators.idempotent_id('6edc66f5-2941-4a17-9526-4073311c1fac')
     def test_list_projects_with_parent(self):
-        # List projects with parent
+        """Test listing projects with parent"""
         params = {'parent_id': self.p3['parent_id']}
         fetched_projects = self.projects_client.list_projects(
             params)['projects']
@@ -81,6 +82,11 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
 
 
 class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
+    """Test listing projects
+
+    These tests can be executed in clouds using the pre-provisioned users
+    """
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -102,7 +108,7 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
 
     @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_list_projects(self):
-        # List projects
+        """Test listing projects"""
         list_projects = self.projects_client.list_projects()['projects']
 
         for p in [self.p1, self.p2]:
@@ -112,13 +118,13 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
 
     @decorators.idempotent_id('fa178524-4e6d-4925-907c-7ab9f42c7e26')
     def test_list_projects_with_name(self):
-        # List projects with name
+        """Test listing projects filtered by name"""
         self._list_projects_with_params(
             [self.p1], [self.p2], {'name': self.p1['name']}, 'name')
 
     @decorators.idempotent_id('fab13f3c-f6a6-4b9f-829b-d32fd44fdf10')
     def test_list_projects_with_domains(self):
-        # Verify project list filtered by domain
+        """Test listing projects filtered by domain"""
         key = 'domain_id'
         for p in [self.p1, self.p2]:
             params = {key: p[key]}

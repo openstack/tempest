@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
+    """Test identity projects"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -30,7 +32,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
-        # Create project with a description
+        """Test creating project with a description"""
         project_desc = data_utils.rand_name('desc')
         project = self.setup_test_project(description=project_desc)
         project_id = project['id']
@@ -44,7 +46,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('5f50fe07-8166-430b-a882-3b2ee0abe26f')
     def test_project_create_with_domain(self):
-        # Create project with a domain
+        """Test creating project with a domain"""
         domain = self.setup_test_domain()
         project_name = data_utils.rand_name('project')
         project = self.setup_test_project(
@@ -58,7 +60,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('1854f9c0-70bc-4d11-a08a-1c789d339e3d')
     def test_project_create_with_parent(self):
-        # Create root project without providing a parent_id
+        """Test creating root project without providing a parent_id"""
         domain = self.setup_test_domain()
         domain_id = domain['id']
 
@@ -83,6 +85,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('a7eb9416-6f9b-4dbb-b71b-7f73aaef59d5')
     def test_create_is_domain_project(self):
+        """Test creating is_domain project"""
         project = self.setup_test_project(domain_id=None, is_domain=True)
         # To delete a domain, we need to disable it first
         self.addCleanup(self.projects_client.update_project, project['id'],
@@ -103,7 +106,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
     def test_project_create_enabled(self):
-        # Create a project that is enabled
+        """Test creating a project that is enabled"""
         project = self.setup_test_project(enabled=True)
         project_id = project['id']
         self.assertTrue(project['enabled'],
@@ -113,7 +116,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
     def test_project_create_not_enabled(self):
-        # Create a project that is not enabled
+        """Test creating a project that is not enabled"""
         project = self.setup_test_project(enabled=False)
         self.assertFalse(project['enabled'],
                          'Enable should be False in response')
@@ -123,7 +126,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
     def test_project_update_name(self):
-        # Update name attribute of a project
+        """Test updating name attribute of a project"""
         p_name1 = data_utils.rand_name('project')
         project = self.setup_test_project(name=p_name1)
 
@@ -144,7 +147,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('f138b715-255e-4a7d-871d-351e1ef2e153')
     def test_project_update_desc(self):
-        # Update description attribute of a project
+        """Test updating description attribute of a project"""
         p_desc = data_utils.rand_name('desc')
         project = self.setup_test_project(description=p_desc)
         resp1_desc = project['description']
@@ -164,7 +167,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('b6b25683-c97f-474d-a595-55d410b68100')
     def test_project_update_enable(self):
-        # Update the enabled attribute of a project
+        """Test updating the enabled attribute of a project"""
         p_en = False
         project = self.setup_test_project(enabled=p_en)
 
@@ -189,7 +192,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_associate_user_to_project(self):
-        # Associate a user to a project
+        """Test associating a user to a project"""
         # Create a Project
         project = self.setup_test_project()
 
@@ -215,6 +218,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('d1db68b6-aebe-4fa0-b79d-d724d2e21162')
     def test_project_get_equals_list(self):
+        """Test the result of getting project equals that of listing"""
         fields = ['parent_id', 'is_domain', 'description', 'links',
                   'name', 'enabled', 'domain_id', 'id', 'tags']
 

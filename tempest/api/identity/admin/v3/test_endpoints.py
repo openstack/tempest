@@ -20,6 +20,8 @@ from tempest.lib import decorators
 
 
 class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
+    """Test keystone endpoints"""
+
     # NOTE: force_tenant_isolation is true in the base class by default but
     # overridden to false here to allow test execution for clouds using the
     # pre-provisioned credentials provider.
@@ -71,6 +73,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('c19ecf90-240e-4e23-9966-21cee3f6a618')
     def test_list_endpoints(self):
+        """Test listing keystone endpoints by filters"""
         # Get the list of all the endpoints.
         fetched_endpoints = self.client.list_endpoints()['endpoints']
         fetched_endpoint_ids = [e['id'] for e in fetched_endpoints]
@@ -111,6 +114,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
 
     @decorators.idempotent_id('0e2446d2-c1fd-461b-a729-b9e73e3e3b37')
     def test_create_list_show_delete_endpoint(self):
+        """Test creating, listing, showing and deleting keystone endpoint"""
         region_name = data_utils.rand_name('region')
         url = data_utils.rand_url()
         interface = 'public'
@@ -152,6 +156,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('37e8f15e-ee7c-4657-a1e7-f6b61e375eff')
     def test_update_endpoint(self):
+        """Test updating keystone endpoint"""
         # NOTE(zhufl) Service2 should be created before endpoint_for_update
         # is created, because Service2 must be deleted after
         # endpoint_for_update is deleted, otherwise we will get a 404 error
