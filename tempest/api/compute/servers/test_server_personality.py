@@ -28,6 +28,7 @@ CONF = config.CONF
 
 
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
+    """Test servers with injected files"""
 
     @classmethod
     def setup_credentials(cls):
@@ -51,6 +52,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('3cfe87fd-115b-4a02-b942-7dc36a337fdf')
     def test_create_server_with_personality(self):
+        """Test creating server with file injection"""
         file_contents = 'This is a test file.'
         file_path = '/test.txt'
         personality = [{'path': file_path,
@@ -85,6 +87,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('128966d8-71fc-443c-8cab-08e24114ecc9')
     def test_rebuild_server_with_personality(self):
+        """Test injecting file when rebuilding server"""
         validation_resources = self.get_test_validation_resources(
             self.os_primary)
         server = self.create_test_server(
@@ -107,8 +110,11 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('176cd8c9-b9e8-48ee-a480-180beab292bf')
     def test_personality_files_exceed_limit(self):
-        # Server creation should fail if greater than the maximum allowed
-        # number of files are injected into the server.
+        """Test creating server with injected files over limitation
+
+        Server creation should fail if greater than the maximum allowed
+        number of files are injected into the server.
+        """
         file_contents = 'This is a test file.'
         personality = []
         limits = self.limits_client.show_limits()['limits']
@@ -131,8 +137,11 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('52f12ee8-5180-40cc-b417-31572ea3d555')
     def test_can_create_server_with_max_number_personality_files(self):
-        # Server should be created successfully if maximum allowed number of
-        # files is injected into the server during creation.
+        """Test creating server with maximum allowed number of injected files
+
+        Server should be created successfully if maximum allowed number of
+        files is injected into the server during creation.
+        """
         file_contents = 'This is a test file.'
         limits = self.limits_client.show_limits()['limits']
         max_file_limit = limits['absolute']['maxPersonality']

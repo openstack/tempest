@@ -22,6 +22,7 @@ from tempest.lib import decorators
 
 
 class ServerTagsTestJSON(base.BaseV2ComputeTest):
+    """Test server tags with compute microversion greater than 2.25"""
 
     min_microversion = '2.26'
     max_microversion = 'latest'
@@ -54,6 +55,7 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('8d95abe2-c658-4c42-9a44-c0258500306b')
     def test_create_delete_tag(self):
+        """Test creating and deleting server tag"""
         # Check that no tags exist.
         fetched_tags = self.client.list_tags(self.server['id'])['tags']
         self.assertEmpty(fetched_tags)
@@ -73,6 +75,7 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('a2c1af8c-127d-417d-974b-8115f7e3d831')
     def test_update_all_tags(self):
+        """Test updating all server tags"""
         # Add server tags to the server.
         tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
         self._update_server_tags(self.server['id'], tags)
@@ -89,6 +92,7 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('a63b2a74-e918-4b7c-bcab-10c855f3a57e')
     def test_delete_all_tags(self):
+        """Test deleting all server tags"""
         # Add server tags to the server.
         assigned_tags = [data_utils.rand_name('tag'),
                          data_utils.rand_name('tag')]
@@ -101,6 +105,7 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('81279a66-61c3-4759-b830-a2dbe64cbe08')
     def test_check_tag_existence(self):
+        """Test checking server tag existence"""
         # Add server tag to the server.
         assigned_tag = data_utils.rand_name('tag')
         self._update_server_tags(self.server['id'], assigned_tag)

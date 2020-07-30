@@ -33,6 +33,8 @@ else:
 
 
 class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
+    """Test novnc console"""
+
     create_default_network = True
 
     @classmethod
@@ -181,6 +183,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('c640fdff-8ab4-45a4-a5d8-7e6146cbd0dc')
     def test_novnc(self):
+        """Test accessing novnc console of server"""
         if self.use_get_remote_console:
             body = self.client.get_remote_console(
                 self.server['id'], console_type='novnc',
@@ -200,6 +203,11 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f9c79937-addc-4aaa-9e0e-841eef02aeb7')
     def test_novnc_bad_token(self):
+        """Test accessing novnc console with bad token
+
+        Do the WebSockify HTTP Request to novnc proxy with a bad token,
+        the novnc proxy should reject the connection and closed it.
+        """
         if self.use_get_remote_console:
             body = self.client.get_remote_console(
                 self.server['id'], console_type='novnc',

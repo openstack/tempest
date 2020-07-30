@@ -26,6 +26,7 @@ CONF = config.CONF
 
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
+    """Test listing servers filtered by specified attribute"""
 
     @classmethod
     def setup_credentials(cls):
@@ -71,7 +72,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute.image_ref != CONF.compute.image_ref_alt,
                           "Need distinct images to run this test")
     def test_list_servers_filter_by_image(self):
-        # Filter the list of servers by image
+        """Filter the list of servers by image"""
         params = {'image': self.image_ref}
         body = self.client.list_servers(**params)
         servers = body['servers']
@@ -82,7 +83,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('573637f5-7325-47bb-9144-3476d0416908')
     def test_list_servers_filter_by_flavor(self):
-        # Filter the list of servers by flavor
+        """Filter the list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
         body = self.client.list_servers(**params)
         servers = body['servers']
@@ -93,7 +94,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('9b067a7b-7fee-4f6a-b29c-be43fe18fc5a')
     def test_list_servers_filter_by_server_name(self):
-        # Filter the list of servers by server name
+        """Filter the list of servers by server name"""
         params = {'name': self.s1_name}
         body = self.client.list_servers(**params)
         servers = body['servers']
@@ -104,7 +105,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('ca78e20e-fddb-4ce6-b7f7-bcbf8605e66e')
     def test_list_servers_filter_by_active_status(self):
-        # Filter the list of servers by server active status
+        """Filter the list of servers by server active status"""
         params = {'status': 'active'}
         body = self.client.list_servers(**params)
         servers = body['servers']
@@ -115,7 +116,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('451dbbb2-f330-4a9f-b0e1-5f5d2cb0f34c')
     def test_list_servers_filter_by_shutoff_status(self):
-        # Filter the list of servers by server shutoff status
+        """Filter the list of servers by server shutoff status"""
         params = {'status': 'shutoff'}
         self.client.stop_server(self.s1['id'])
         waiters.wait_for_server_status(self.client, self.s1['id'],
@@ -132,21 +133,30 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('614cdfc1-d557-4bac-915b-3e67b48eee76')
     def test_list_servers_filter_by_limit(self):
-        # Verify only the expected number of servers are returned
+        """Filter the list of servers by limit 1
+
+        Verify only the expected number of servers are returned (one server)
+        """
         params = {'limit': 1}
         servers = self.client.list_servers(**params)
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @decorators.idempotent_id('b1495414-2d93-414c-8019-849afe8d319e')
     def test_list_servers_filter_by_zero_limit(self):
-        # Verify only the expected number of servers are returned
+        """Filter the list of servers by limit 0
+
+        Verify only the expected number of servers are returned (no server)
+        """
         params = {'limit': 0}
         servers = self.client.list_servers(**params)
         self.assertEmpty(servers['servers'])
 
     @decorators.idempotent_id('37791bbd-90c0-4de0-831e-5f38cba9c6b3')
     def test_list_servers_filter_by_exceed_limit(self):
-        # Verify only the expected number of servers are returned
+        """Filter the list of servers by exceeded limit
+
+        Verify only the expected number of servers are returned (all servers)
+        """
         params = {'limit': 100000}
         servers = self.client.list_servers(**params)
         all_servers = self.client.list_servers()
@@ -157,7 +167,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute.image_ref != CONF.compute.image_ref_alt,
                           "Need distinct images to run this test")
     def test_list_servers_detailed_filter_by_image(self):
-        # Filter the detailed list of servers by image
+        """"Filter the detailed list of servers by image"""
         params = {'image': self.image_ref}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
@@ -168,7 +178,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('80c574cc-0925-44ba-8602-299028357dd9')
     def test_list_servers_detailed_filter_by_flavor(self):
-        # Filter the detailed list of servers by flavor
+        """Filter the detailed list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
@@ -179,7 +189,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f9eb2b70-735f-416c-b260-9914ac6181e4')
     def test_list_servers_detailed_filter_by_server_name(self):
-        # Filter the detailed list of servers by server name
+        """Filter the detailed list of servers by server name"""
         params = {'name': self.s1_name}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
@@ -190,7 +200,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('de2612ab-b7dd-4044-b0b1-d2539601911f')
     def test_list_servers_detailed_filter_by_server_status(self):
-        # Filter the detailed list of servers by server status
+        """Filter the detailed list of servers by server status"""
         params = {'status': 'active'}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
@@ -204,6 +214,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('e9f624ee-92af-4562-8bec-437945a18dcb')
     def test_list_servers_filtered_by_name_wildcard(self):
+        """Filter the list of servers by part of server name"""
         # List all servers that contains '-instance' in name
         params = {'name': '-instance'}
         body = self.client.list_servers(**params)
@@ -226,6 +237,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('24a89b0c-0d55-4a28-847f-45075f19b27b')
     def test_list_servers_filtered_by_name_regex(self):
+        """Filter the list of servers by server name regular expression"""
         # list of regex that should match s1, s2 and s3
         regexes = [r'^.*\-instance\-[0-9]+$', r'^.*\-instance\-.*$']
         for regex in regexes:
@@ -250,7 +262,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('43a1242e-7b31-48d1-88f2-3f72aa9f2077')
     def test_list_servers_filtered_by_ip(self):
-        # Filter servers by ip
+        """Filter the list of servers by server ip address"""
         # Here should be listed 1 server
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
@@ -287,8 +299,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @decorators.skip_because(bug="1540645")
     @decorators.idempotent_id('a905e287-c35e-42f2-b132-d02b09f3654a')
     def test_list_servers_filtered_by_ip_regex(self):
-        # Filter servers by regex ip
-        # List all servers filtered by part of ip address.
+        """Filter the list of servers by part of server ip address"""
         # Here should be listed all servers
         if not self.fixed_network_name:
             msg = 'fixed_network_name needs to be configured to run this test'
@@ -317,7 +328,10 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('67aec2d0-35fe-4503-9f92-f13272b867ed')
     def test_list_servers_detailed_limit_results(self):
-        # Verify only the expected number of detailed results are returned
+        """Filter the detailed list of servers by limit 1
+
+        Verify only the expected number of servers are returned (one server)
+        """
         params = {'limit': 1}
         servers = self.client.list_servers(detail=True, **params)
         self.assertEqual(1, len(servers['servers']))

@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
+    """Negative tests of server rescue"""
 
     @classmethod
     def skip_checks(cls):
@@ -75,7 +76,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
                           'Pause is not available.')
     @decorators.attr(type=['negative'])
     def test_rescue_paused_instance(self):
-        # Rescue a paused server
+        """Test rescuing a paused server should fail"""
         self.servers_client.pause_server(self.server_id)
         self.addCleanup(self._unpause, self.server_id)
         waiters.wait_for_server_status(self.servers_client,
@@ -87,13 +88,14 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('db22b618-f157-4566-a317-1b6d467a8094')
     def test_rescued_vm_reboot(self):
+        """Test rebooing a rescued server should fail"""
         self.assertRaises(lib_exc.Conflict, self.servers_client.reboot_server,
                           self.rescue_id, type='HARD')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6dfc0a55-3a77-4564-a144-1587b7971dde')
     def test_rescue_non_existent_server(self):
-        # Rescue a non-existing server
+        """Test rescuing a non-existing server should fail"""
         non_existent_server = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.servers_client.rescue_server,
@@ -102,6 +104,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('70cdb8a1-89f8-437d-9448-8844fd82bf46')
     def test_rescued_vm_rebuild(self):
+        """Test rebuilding a rescued server should fail"""
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.rebuild_server,
                           self.rescue_id,
@@ -111,6 +114,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @utils.services('volume')
     @decorators.attr(type=['negative'])
     def test_rescued_vm_attach_volume(self):
+        """Test attaching volume to a rescued server should fail"""
         volume = self.create_volume()
 
         # Rescue the server
@@ -130,6 +134,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @utils.services('volume')
     @decorators.attr(type=['negative'])
     def test_rescued_vm_detach_volume(self):
+        """Test detaching volume from a rescued server should fail"""
         volume = self.create_volume()
 
         # Attach the volume to the server
