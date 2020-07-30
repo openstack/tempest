@@ -23,9 +23,11 @@ CONF = config.CONF
 
 
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
+    """Test keystone tokens via v2 API"""
 
     @decorators.idempotent_id('453ad4d5-e486-4b2f-be72-cffc8149e586')
     def test_create_check_get_delete_token(self):
+        """Test getting create/check/get/delete token for user via v2 API"""
         # get a token by username and password
         user_name = data_utils.rand_name(name='user')
         user_password = data_utils.rand_password()
@@ -59,7 +61,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('25ba82ee-8a32-4ceb-8f50-8b8c71e8765e')
     def test_rescope_token(self):
-        """An unscoped token can be requested
+        """Test an unscoped token can be requested via v2 API
 
         That token can be used to request a scoped token.
         """
@@ -112,6 +114,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
 
     @decorators.idempotent_id('ca3ea6f7-ed08-4a61-adbd-96906456ad31')
     def test_list_endpoints_for_token(self):
+        """Test listing endpoints for token via v2 API"""
         tempest_services = ['keystone', 'nova', 'neutron', 'swift', 'cinder',
                             'neutron']
         # get a token for the user

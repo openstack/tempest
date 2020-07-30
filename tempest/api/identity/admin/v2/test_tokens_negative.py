@@ -19,12 +19,17 @@ from tempest.lib import exceptions as lib_exc
 
 
 class TokensAdminTestNegative(base.BaseIdentityV2AdminTest):
+    """Negative tests of keystone tokens via v2 API"""
 
     credentials = ['primary', 'admin', 'alt']
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a0a0a600-4292-4364-99c5-922c834fdf05')
     def test_check_token_existence_negative(self):
+        """Test checking other tenant's token existence via v2 API
+
+        Checking other tenant's token existence via v2 API should fail.
+        """
         creds = self.os_primary.credentials
         creds_alt = self.os_alt.credentials
         username = creds.username
