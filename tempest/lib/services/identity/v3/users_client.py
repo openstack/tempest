@@ -118,3 +118,30 @@ class UsersClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def create_user_ec2_credential(self, user_id, **kwargs):
+        post_body = json.dumps(kwargs)
+        resp, body = self.post('/users/%s/credentials/OS-EC2' % user_id,
+                               post_body)
+        self.expected_success(201, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_user_ec2_credential(self, user_id, access):
+        resp, body = self.delete('/users/%s/credentials/OS-EC2/%s' %
+                                 (user_id, access))
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_user_ec2_credentials(self, user_id):
+        resp, body = self.get('/users/%s/credentials/OS-EC2' % user_id)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_user_ec2_credential(self, user_id, access):
+        resp, body = self.get('/users/%s/credentials/OS-EC2/%s' %
+                              (user_id, access))
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
