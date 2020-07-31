@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
+from tempest.lib.api_schema.response.volume import group_snapshots as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -34,7 +35,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         post_body = json.dumps({'group_snapshot': kwargs})
         resp, body = self.post('group_snapshots', post_body)
         body = json.loads(body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.create_group_snapshot, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def delete_group_snapshot(self, group_snapshot_id):
@@ -44,7 +45,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/#delete-group-snapshot
         """
         resp, body = self.delete('group_snapshots/%s' % group_snapshot_id)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.delete_group_snapshot, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_group_snapshot(self, group_snapshot_id):
@@ -56,7 +57,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         url = "group_snapshots/%s" % str(group_snapshot_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(schema.show_group_snapshot, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def list_group_snapshots(self, detail=False, **params):
@@ -67,13 +68,15 @@ class GroupSnapshotsClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/#list-group-snapshots-with-details
         """
         url = "group_snapshots"
+        list_group_snapshots = schema.list_group_snapshots_no_detail
         if detail:
             url += "/detail"
+            list_group_snapshots = schema.list_group_snapshots_with_detail
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.expected_success(200, resp.status)
+        self.validate_response(list_group_snapshots, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reset_group_snapshot_status(self, group_snapshot_id, status_to_set):
@@ -85,7 +88,7 @@ class GroupSnapshotsClient(base_client.BaseClient):
         post_body = json.dumps({'reset_status': {'status': status_to_set}})
         resp, body = self.post('group_snapshots/%s/action' % group_snapshot_id,
                                post_body)
-        self.expected_success(202, resp.status)
+        self.validate_response(schema.reset_group_snapshot_status, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def is_resource_deleted(self, id):
