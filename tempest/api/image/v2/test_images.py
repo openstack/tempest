@@ -40,19 +40,16 @@ class ImportImagesTest(base.BaseV2ImageTest):
                 "%s skipped as image import is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @decorators.idempotent_id('32ca0c20-e16f-44ac-8590-07869c9b4cc2')
-    def test_image_import(self):
-        """Here we test these functionalities
+    @classmethod
+    def resource_setup(cls):
+        super(ImportImagesTest, cls).resource_setup()
+        cls.available_import_methods = cls.client.info_import()[
+            'import-methods']['value']
+        if not cls.available_import_methods:
+            raise cls.skipException('Server does not support '
+                                    'any import method')
 
-        Create image, stage image data, import image and verify
-        that import succeeded.
-        """
-
-        body = self.client.info_import()
-        if 'glance-direct' not in body['import-methods']['value']:
-            raise self.skipException('Server does not support '
-                                     'glance-direct import method')
-
+    def _create_image(self):
         # Create image
         uuid = '00000000-1111-2222-3333-444455556666'
         image_name = data_utils.rand_name('image')
@@ -69,21 +66,50 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.assertEqual('private', image['visibility'])
         self.assertIn('status', image)
         self.assertEqual('queued', image['status'])
+        return image
 
+    @decorators.idempotent_id('32ca0c20-e16f-44ac-8590-07869c9b4cc2')
+    def test_image_glance_direct_import(self):
+        """Test 'glance-direct' import functionalities
+
+        Create image, stage image data, import image and verify
+        that import succeeded.
+        """
+        if 'glance-direct' not in self.available_import_methods:
+            raise self.skipException('Server does not support '
+                                     'glance-direct import method')
+        image = self._create_image()
         # Stage image data
         file_content = data_utils.random_bytes()
         image_file = six.BytesIO(file_content)
         self.client.stage_image_file(image['id'], image_file)
+        # Check image status is 'uploading'
+        body = self.client.show_image(image['id'])
+        self.assertEqual(image['id'], body['id'])
+        self.assertEqual('uploading', body['status'])
+        # import image from staging to backend
+        self.client.image_import(image['id'], method='glance-direct')
+        self.client.wait_for_resource_activation(image['id'])
 
+    @decorators.idempotent_id('f6feb7a4-b04f-4706-a011-206129f83e62')
+    def test_image_web_download_import(self):
+        """Test 'web-download' import functionalities
+
+        Create image, import image and verify that import
+        succeeded.
+        """
+        if 'web-download' not in self.available_import_methods:
+            raise self.skipException('Server does not support '
+                                     'web-download import method')
+        image = self._create_image()
         # Now try to get image details
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
-        self.assertEqual(image_name, body['name'])
-        self.assertEqual(uuid, body['ramdisk_id'])
-        self.assertEqual('uploading', body['status'])
-
-        # import image from staging to backend
-        self.client.image_import(image['id'])
+        self.assertEqual('queued', body['status'])
+        # import image from web to backend
+        image_uri = CONF.image.http_image
+        self.client.image_import(image['id'], method='web-download',
+                                 image_uri=image_uri)
         self.client.wait_for_resource_activation(image['id'])
 
 
