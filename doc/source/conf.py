@@ -204,6 +204,3 @@ latex_documents = [
     ('index', 'doc-tempest.tex', u'Tempest Testing Project',
      u'OpenStack Foundation', 'manual'),
 ]
-
-# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
-latex_use_xindy = False
