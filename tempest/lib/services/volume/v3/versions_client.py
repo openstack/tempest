@@ -54,8 +54,9 @@ class VersionsClient(base_client.BaseClient):
         """
 
         version_url = urljoin(self._get_base_version_url(), version + '/')
-        resp, body = self.raw_request(version_url, 'GET',
-                                      {'X-Auth-Token': self.token})
+        headers = self.get_headers()
+        headers['X-Auth-Token'] = self.token
+        resp, body = self.raw_request(version_url, 'GET', headers=headers)
         self._error_checker(resp, body)
         body = json.loads(body)
         self.validate_response(schema.volume_api_version_details, resp, body)
