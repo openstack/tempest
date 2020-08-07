@@ -40,8 +40,9 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c136086a-0f67-4b2b-bc61-8482bd68989f')
     def test_show_nonexistent_hypervisor(self):
-        # Showing not existing hypervisor should fail.
+        """Test showing non existent hypervisor should fail"""
         nonexistent_hypervisor_id = data_utils.rand_uuid()
+
         self.assertRaises(
             lib_exc.NotFound,
             self.client.show_hypervisor,
@@ -50,7 +51,7 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('51e663d0-6b89-4817-a465-20aca0667d03')
     def test_show_hypervisor_with_non_admin_user(self):
-        # Non admin user is not allowed to show hypervisor.
+        """Test showing hypervisor by non admin user should fail"""
         hypers = self._list_hypervisors()
         self.assertNotEmpty(hypers)
 
@@ -62,7 +63,7 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e2b061bb-13f9-40d8-9d6e-d5bf17595849')
     def test_get_hypervisor_stats_with_non_admin_user(self):
-        # Non admin user is not allowed to get hypervisor stats.
+        """Test getting hypervisor stats by non admin user should fail"""
         self.assertRaises(
             lib_exc.Forbidden,
             self.non_adm_client.show_hypervisor_statistics)
@@ -70,7 +71,7 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f60aa680-9a3a-4c7d-90e1-fae3a4891303')
     def test_get_nonexistent_hypervisor_uptime(self):
-        # Getting uptime of not existing hypervisor should fail.
+        """Test showing uptime of non existent hypervisor should fail"""
         nonexistent_hypervisor_id = data_utils.rand_uuid()
 
         self.assertRaises(
@@ -81,7 +82,7 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6c3461f9-c04c-4e2a-bebb-71dc9cb47df2')
     def test_get_hypervisor_uptime_with_non_admin_user(self):
-        # Non admin user is not allowed to get hypervisor uptime.
+        """Test showing uptime of hypervisor by non admin user should fail"""
         hypers = self._list_hypervisors()
         self.assertNotEmpty(hypers)
 
@@ -93,7 +94,7 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('51b3d536-9b14-409c-9bce-c6f7c794994e')
     def test_get_hypervisor_list_with_non_admin_user(self):
-        # List of hypervisor and available services with non admin user
+        """Test listing hypervisors by non admin user should fail"""
         self.assertRaises(
             lib_exc.Forbidden,
             self.non_adm_client.list_hypervisors)
@@ -101,19 +102,21 @@ class HypervisorAdminNegativeTestJSON(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('dc02db05-e801-4c5f-bc8e-d915290ab345')
     def test_get_hypervisor_list_details_with_non_admin_user(self):
-        # Non admin user is not allowed to list hypervisor details.
+        """Test listing hypervisor details by non admin user should fail"""
         self.assertRaises(
             lib_exc.Forbidden,
             self.non_adm_client.list_hypervisors, detail=True)
 
 
 class HypervisorAdminNegativeUnderV252Test(HypervisorAdminNegativeTestBase):
+    """Tests Hypervisors API below ver 2.53 that require admin privileges"""
+
     max_microversion = '2.52'
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('2a0a3938-832e-4859-95bf-1c57c236b924')
     def test_show_servers_with_non_admin_user(self):
-        # Non admin user is not allowed to show servers on hypervisor.
+        """Test showing hypervisor servers by non admin user should fail"""
         hypers = self._list_hypervisors()
         self.assertNotEmpty(hypers)
 
@@ -125,7 +128,7 @@ class HypervisorAdminNegativeUnderV252Test(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('02463d69-0ace-4d33-a4a8-93d7883a2bba')
     def test_show_servers_with_nonexistent_hypervisor(self):
-        # Showing servers on not existing hypervisor should fail.
+        """Test showing servers on non existent hypervisor should fail"""
         nonexistent_hypervisor_id = data_utils.rand_uuid()
 
         self.assertRaises(
@@ -136,7 +139,7 @@ class HypervisorAdminNegativeUnderV252Test(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5b6a6c79-5dc1-4fa5-9c58-9c8085948e74')
     def test_search_hypervisor_with_non_admin_user(self):
-        # Non admin user is not allowed to search hypervisor.
+        """Test searching hypervisor by non admin user should fail"""
         hypers = self._list_hypervisors()
         self.assertNotEmpty(hypers)
 
@@ -148,7 +151,7 @@ class HypervisorAdminNegativeUnderV252Test(HypervisorAdminNegativeTestBase):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('19a45cc1-1000-4055-b6d2-28e8b2ec4faa')
     def test_search_nonexistent_hypervisor(self):
-        # Searching not existing hypervisor should fail.
+        """Test searching non existent hypervisor should fail"""
         self.assertRaises(
             lib_exc.NotFound,
             self.client.search_hypervisor,

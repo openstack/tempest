@@ -18,7 +18,7 @@ from tempest.lib import decorators
 
 
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests hosts API using admin privileges."""
+    """Tests nova hosts API using admin privileges."""
 
     max_microversion = '2.42'
 
@@ -29,13 +29,13 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('9bfaf98d-e2cb-44b0-a07e-2558b2821e4f')
     def test_list_hosts(self):
-        # Listing hosts.
+        """Listing nova hosts"""
         hosts = self.client.list_hosts()['hosts']
         self.assertGreaterEqual(len(hosts), 2, str(hosts))
 
     @decorators.idempotent_id('5dc06f5b-d887-47a2-bb2a-67762ef3c6de')
     def test_list_hosts_with_zone(self):
-        # Listing hosts with specified availability zone
+        """Listing nova hosts with specified availability zone"""
         self.useFixture(fixtures.LockFixture('availability_zone'))
         hosts = self.client.list_hosts()['hosts']
         host = hosts[0]
@@ -45,23 +45,27 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('9af3c171-fbf4-4150-a624-22109733c2a6')
     def test_list_hosts_with_a_blank_zone(self):
-        # Listing hosts with blank availability zone.
-        # If send the request with a blank zone, the request will be successful
-        # and it will return all the hosts list
+        """Listing nova hosts with blank availability zone
+
+        If send the request with a blank zone, the request will be successful
+        and it will return all the hosts list
+        """
         hosts = self.client.list_hosts(zone='')['hosts']
         self.assertNotEmpty(hosts)
 
     @decorators.idempotent_id('c6ddbadb-c94e-4500-b12f-8ffc43843ff8')
     def test_list_hosts_with_nonexistent_zone(self):
-        # Listing hosts with not existing availability zone.
-        # If send the request with a nonexistent zone, the request will be
-        # successful and no hosts will be returned
+        """Listing nova hosts with not existing availability zone.
+
+        If send the request with a nonexistent zone, the request will be
+        successful and no hosts will be returned
+        """
         hosts = self.client.list_hosts(zone='xxx')['hosts']
         self.assertEmpty(hosts)
 
     @decorators.idempotent_id('38adbb12-aee2-4498-8aec-329c72423aa4')
     def test_show_host_detail(self):
-        # Showing host details.
+        """Showing nova host details"""
         hosts = self.client.list_hosts()['hosts']
 
         hosts = [host for host in hosts if host['service'] == 'compute']

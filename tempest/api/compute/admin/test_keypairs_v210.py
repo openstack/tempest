@@ -19,6 +19,8 @@ from tempest.lib import decorators
 
 
 class KeyPairsV210TestJSON(base.BaseKeypairTest):
+    """Tests KeyPairs API with microversion higher than 2.9"""
+
     credentials = ['primary', 'admin']
     min_microversion = '2.10'
 
@@ -48,6 +50,13 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
 
     @decorators.idempotent_id('3c8484af-cfb3-48f6-b8ba-d5d58bbf3eac')
     def test_admin_manage_keypairs_for_other_users(self):
+        """Test admin managing keypairs for other users
+
+        First admin creates a keypair for an other user, then admin lists
+        keypairs filtered by that user, and keypairs created for that user
+        should appear in the result and keypairs not created for that user
+        should not appear in the result.
+        """
         user_id = self.non_admin_client.user_id
         key_list = self._create_and_check_keypairs(user_id)
         first_keyname = key_list[0]['name']
