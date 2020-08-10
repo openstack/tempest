@@ -18,6 +18,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ServerDiagnosticsNegativeTest(base.BaseV2ComputeAdminTest):
+    """Negative tests of server diagnostics"""
 
     @classmethod
     def setup_clients(cls):
@@ -27,7 +28,10 @@ class ServerDiagnosticsNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e84e2234-60d2-42fa-8b30-e2d3049724ac')
     def test_get_server_diagnostics_by_non_admin(self):
-        # Non-admin user cannot view server diagnostics according to policy
+        """Test getting server diagnostics by non-admin user is forbidden
+
+        Non-admin user cannot view server diagnostics according to policy.
+        """
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
         self.assertRaises(lib_exc.Forbidden,
                           self.client.show_server_diagnostics, server_id)

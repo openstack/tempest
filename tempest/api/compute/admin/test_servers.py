@@ -45,7 +45,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
     def test_list_servers_filter_by_error_status(self):
-        # Filter the list of servers by server error status
+        """Test filtering the list of servers by server error status"""
         params = {'status': 'error'}
         self.client.reset_state(self.s1_id, state='error')
         body = self.non_admin_client.list_servers(**params)
@@ -61,6 +61,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('d56e9540-73ed-45e0-9b88-98fc419087eb')
     def test_list_servers_detailed_filter_by_invalid_status(self):
+        """Test filtering the list of servers by invalid server status"""
         params = {'status': 'invalid_status'}
         if self.is_requested_microversion_compatible('2.37'):
             body = self.client.list_servers(detail=True, **params)
@@ -72,8 +73,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
     def test_list_servers_by_admin(self):
-        # Listing servers by admin user returns a list which doesn't
-        # contain the other tenants' server by default
+        """Test listing servers by admin without other projects
+
+        Listing servers by admin user returns a list which doesn't
+        contain the other projects' server by default.
+        """
         body = self.client.list_servers(detail=True)
         servers = body['servers']
 
@@ -85,8 +89,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('9f5579ae-19b4-4985-a091-2a5d56106580')
     def test_list_servers_by_admin_with_all_tenants(self):
-        # Listing servers by admin user with all tenants parameter
-        # Here should be listed all servers
+        """Test listing servers by admin with all tenants
+
+        Listing servers by admin user with all tenants parameter,
+        all servers should be listed.
+        """
         params = {'all_tenants': ''}
         body = self.client.list_servers(detail=True, **params)
         servers = body['servers']
@@ -98,8 +105,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.related_bug('1659811')
     @decorators.idempotent_id('7e5d6b8f-454a-4ba1-8ae2-da857af8338b')
     def test_list_servers_by_admin_with_specified_tenant(self):
-        # In nova v2, tenant_id is ignored unless all_tenants is specified
+        """Test listing servers by admin with specified project
 
+        In nova v2, tenant_id is ignored unless all_tenants is specified.
+        """
         # List the primary tenant but get nothing due to odd specified behavior
         tenant_id = self.non_admin_client.tenant_id
         params = {'tenant_id': tenant_id}
@@ -128,7 +137,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('86c7a8f7-50cf-43a9-9bac-5b985317134f')
     def test_list_servers_filter_by_exist_host(self):
-        # Filter the list of servers by existent host
+        """Test filtering the list of servers by existent host"""
         server = self.client.show_server(self.s1_id)['server']
         hostname = server['OS-EXT-SRV-ATTR:host']
         params = {'host': hostname, 'all_tenants': '1'}
@@ -144,6 +153,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('ee8ae470-db70-474d-b752-690b7892cab1')
     def test_reset_state_server(self):
+        """Test resetting server state to error/active"""
         # Reset server's state to 'error'
         self.client.reset_state(self.s1_id, state='error')
 
@@ -160,9 +170,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('682cb127-e5bb-4f53-87ce-cb9003604442')
     def test_rebuild_server_in_error_state(self):
-        # The server in error state should be rebuilt using the provided
-        # image and changed to ACTIVE state
+        """Test rebuilding server in error state
 
+        The server in error state should be rebuilt using the provided
+        image and changed to ACTIVE state.
+        """
         # resetting vm state require admin privilege
         self.client.reset_state(self.s1_id, state='error')
         rebuilt_server = self.non_admin_client.rebuild_server(
@@ -188,6 +200,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('7a1323b4-a6a2-497a-96cb-76c07b945c71')
     def test_reset_network_inject_network_info(self):
+        """Test resetting and injecting network info of a server"""
         # Reset Network of a Server
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.reset_network(server['id'])
@@ -196,6 +209,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('fdcd9b33-0903-4e00-a1f7-b5f6543068d6')
     def test_create_server_with_scheduling_hint(self):
+        """Test creating server with scheduling hint"""
         # Create a server with scheduler hints.
         hints = {
             'same_host': self.s1_id

@@ -28,6 +28,8 @@ CONF = config.CONF
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
+    """Test image metadata with compute microversion less than 2.39"""
+
     max_microversion = '2.38'
 
     @classmethod
@@ -89,7 +91,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('37ec6edd-cf30-4c53-bd45-ae74db6b0531')
     def test_list_image_metadata(self):
-        # All metadata key/value pairs for an image should be returned
+        """Test listing image metadata
+
+        All metadata key/value pairs for an image should be returned.
+        """
         resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'metadata': {
             'os_version': 'value1', 'os_distro': 'value2'}}
@@ -97,7 +102,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('ece7befc-d3ce-42a4-b4be-c3067a418c29')
     def test_set_image_metadata(self):
-        # The metadata for the image should match the new values
+        """Test setting image metadata
+
+        The metadata for the image should match the new values.
+        """
         req_metadata = {'os_version': 'value2', 'architecture': 'value3'}
         self.client.set_image_metadata(self.image_id,
                                        req_metadata)
@@ -108,7 +116,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('7b491c11-a9d5-40fe-a696-7f7e03d3fea2')
     def test_update_image_metadata(self):
-        # The metadata for the image should match the updated values
+        """Test updating image medata
+
+        The metadata for the image should match the updated values.
+        """
         req_metadata = {'os_version': 'alt1', 'architecture': 'value3'}
         self.client.update_image_metadata(self.image_id,
                                           req_metadata)
@@ -122,15 +133,21 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('4f5db52f-6685-4c75-b848-f4bb363f9aa6')
     def test_get_image_metadata_item(self):
-        # The value for a specific metadata key should be returned
+        """Test getting image metadata item
+
+        The value for a specific metadata key should be returned.
+        """
         meta = self.client.show_image_metadata_item(self.image_id,
                                                     'os_distro')['meta']
         self.assertEqual('value2', meta['os_distro'])
 
     @decorators.idempotent_id('f2de776a-4778-4d90-a5da-aae63aee64ae')
     def test_set_image_metadata_item(self):
-        # The value provided for the given meta item should be set for
-        # the image
+        """Test setting image metadata item
+
+        The value provided for the given meta item should be set for
+        the image.
+        """
         meta = {'os_version': 'alt'}
         self.client.set_image_metadata_item(self.image_id,
                                             'os_version', meta)
@@ -140,7 +157,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('a013796c-ba37-4bb5-8602-d944511def14')
     def test_delete_image_metadata_item(self):
-        # The metadata value/key pair should be deleted from the image
+        """Test deleting image metadata item
+
+        The metadata value/key pair should be deleted from the image.
+        """
         self.client.delete_image_metadata_item(self.image_id,
                                                'os_version')
         resp_metadata = self.client.list_image_metadata(self.image_id)

@@ -18,7 +18,7 @@ from tempest.lib import decorators
 
 
 class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests Agents API"""
+    """Tests Compute Agents API"""
 
     @classmethod
     def setup_clients(cls):
@@ -46,7 +46,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('1fc6bdc8-0b6d-4cc7-9f30-9b04fabe5b90')
     def test_create_agent(self):
-        # Create an agent.
+        """Test creating a compute agent"""
         params = self._param_helper(
             hypervisor='kvm', os='win', architecture='x86',
             version='7.0', url='xxx://xxxx/xxx/xxx',
@@ -58,6 +58,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('dc9ffd51-1c50-4f0e-a820-ae6d2a568a9e')
     def test_update_agent(self):
+        """Test updating a compute agent"""
         # Create and update an agent.
         body = self.client.create_agent(**self.params_agent)['agent']
         self.addCleanup(self.client.delete_agent, body['agent_id'])
@@ -71,7 +72,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('470e0b89-386f-407b-91fd-819737d0b335')
     def test_delete_agent(self):
-        # Create an agent and delete it.
+        """Test deleting a compute agent"""
         body = self.client.create_agent(**self.params_agent)['agent']
         self.client.delete_agent(body['agent_id'])
 
@@ -82,7 +83,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('6a326c69-654b-438a-80a3-34bcc454e138')
     def test_list_agents(self):
-        # Create an agent and  list all agents.
+        """Test listing compute agents"""
         body = self.client.create_agent(**self.params_agent)['agent']
         self.addCleanup(self.client.delete_agent, body['agent_id'])
         agents = self.client.list_agents()['agents']
@@ -91,7 +92,7 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('eabadde4-3cd7-4ec4-a4b5-5a936d2d4408')
     def test_list_agents_with_filter(self):
-        # Create agents and list the agent builds by the filter.
+        """Test listing compute agents by the filter"""
         body = self.client.create_agent(**self.params_agent)['agent']
         self.addCleanup(self.client.delete_agent, body['agent_id'])
         params = self._param_helper(

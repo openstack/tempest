@@ -20,6 +20,7 @@ from tempest.lib import decorators
 
 
 class QuotasTestJSON(base.BaseV2ComputeTest):
+    """Test compute quotas"""
 
     @classmethod
     def skip_checks(cls):
@@ -59,7 +60,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f1ef0a97-dbbb-4cca-adc5-c9fbc4f76107')
     def test_get_quotas(self):
-        # User can get the quota set for it's tenant
+        """Test user can get the compute quota set for it's project"""
         expected_quota_set = self.default_quota_set | set(['id'])
         quota_set = self.client.show_quota_set(self.tenant_id)['quota_set']
         self.assertEqual(quota_set['id'], self.tenant_id)
@@ -75,7 +76,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('9bfecac7-b966-4f47-913f-1a9e2c12134a')
     def test_get_default_quotas(self):
-        # User can get the default quota set for it's tenant
+        """Test user can get the default compute quota set for it's project"""
         expected_quota_set = self.default_quota_set | set(['id'])
         quota_set = (self.client.show_default_quota_set(self.tenant_id)
                      ['quota_set'])
@@ -85,7 +86,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('cd65d997-f7e4-4966-a7e9-d5001b674fdc')
     def test_compare_tenant_quotas_with_default_quotas(self):
-        # Tenants are created with the default quota values
+        """Test tenants are created with the default compute quota values"""
         default_quota_set = \
             self.client.show_default_quota_set(self.tenant_id)['quota_set']
         tenant_quota_set = (self.client.show_quota_set(self.tenant_id)
