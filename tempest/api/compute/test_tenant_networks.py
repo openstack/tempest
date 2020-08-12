@@ -18,6 +18,8 @@ from tempest.lib import decorators
 
 
 class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
+    """Test compute tenant networks API with microversion less than 2.36"""
+
     max_microversion = '2.35'
 
     @classmethod
@@ -34,8 +36,11 @@ class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('edfea98e-bbe3-4c7a-9739-87b986baff26')
     @utils.services('network')
     def test_list_show_tenant_networks(self):
-        # Fetch all networks that are visible to the tenant: this may include
-        # shared and external networks
+        """Test list/show tenant networks
+
+        Fetch all networks that are visible to the tenant: this may include
+        shared and external networks.
+        """
         tenant_networks = [
             n['id'] for n in self.client.list_tenant_networks()['networks']
         ]

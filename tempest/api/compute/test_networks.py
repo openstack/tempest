@@ -20,6 +20,7 @@ CONF = config.CONF
 
 
 class ComputeNetworksTest(base.BaseV2ComputeTest):
+    """Test compute networks API with compute microversion less than 2.36"""
     max_microversion = '2.35'
 
     @classmethod
@@ -35,5 +36,6 @@ class ComputeNetworksTest(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3fe07175-312e-49a5-a623-5f52eeada4c2')
     def test_list_networks(self):
+        """Test listing networks using compute networks API"""
         networks = self.client.list_networks()['networks']
         self.assertNotEmpty(networks, "No networks found.")

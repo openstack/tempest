@@ -21,6 +21,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
+    """Test security groups API with compute microversion less than 2.36"""
 
     @classmethod
     def setup_clients(cls):
@@ -30,7 +31,10 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('eb2b087d-633d-4d0d-a7bd-9e6ba35b32de')
     def test_security_groups_create_list_delete(self):
-        # Positive test:Should return the list of Security Groups
+        """Test create/list/delete security groups
+
+        Positive test: Should return the list of security groups.
+        """
         # Create 3 Security Groups
         security_group_list = []
         for _ in range(3):
@@ -60,9 +64,11 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('ecc0da4a-2117-48af-91af-993cca39a615')
     def test_security_group_create_get_delete(self):
-        # Security Group should be created, fetched and deleted
-        # with char space between name along with
-        # leading and trailing spaces
+        """Test create/get/delete security group
+
+        Security group should be created, fetched and deleted
+        with char space between name along with leading and trailing spaces.
+        """
         s_name = ' %s ' % data_utils.rand_name('securitygroup ')
         securitygroup = self.create_security_group(name=s_name)
         securitygroup_name = securitygroup['name']
@@ -80,8 +86,11 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('fe4abc0d-83f5-4c50-ad11-57a1127297a2')
     def test_server_security_groups(self):
-        # Checks that security groups may be added and linked to a server
-        # and not deleted if the server is active.
+        """Test adding security groups to a server
+
+        Checks that security groups may be added and linked to a server
+        and not deleted if the server is active.
+        """
         # Create a couple security groups that we will use
         # for the server resource this test creates
         sg = self.create_security_group()
@@ -121,7 +130,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('7d4e1d3c-3209-4d6d-b020-986304ebad1f')
     def test_update_security_groups(self):
-        # Update security group name and description
+        """Test updating security group name and description"""
         # Create a security group
         securitygroup = self.create_security_group()
         securitygroup_id = securitygroup['id']
@@ -139,6 +148,11 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('79517d60-535a-438f-af3d-e6feab1cbea7')
     def test_list_security_groups_by_server(self):
+        """Test listing security groups by server
+
+        Create security groups and add them to a server, then list security
+        groups by server, the added security groups should be in the list.
+        """
         # Create a couple security groups that we will use
         # for the server resource this test creates
         sg = self.create_security_group()

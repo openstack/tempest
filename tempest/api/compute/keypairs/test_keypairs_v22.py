@@ -18,6 +18,8 @@ from tempest.lib import decorators
 
 
 class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
+    """Test keypairs API with compute microversion greater than 2.1"""
+
     min_microversion = '2.2'
     max_microversion = 'latest'
 
@@ -43,9 +45,11 @@ class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
 
     @decorators.idempotent_id('8726fa85-7f98-4b20-af9e-f710a4f3391c')
     def test_keypairsv22_create_list_show(self):
+        """Test create/list/show keypair"""
         self._test_keypairs_create_list_show()
 
     @decorators.idempotent_id('89d59d43-f735-441a-abcf-0601727f47b6')
     def test_keypairsv22_create_list_show_with_type(self):
+        """Test create/list/show keypair with keypair type"""
         keypair_type = 'x509'
         self._test_keypairs_create_list_show(keypair_type=keypair_type)
