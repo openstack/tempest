@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
+    """Test volume snapshots with compute microversion less than 2.36"""
 
     # These tests will fail with a 404 starting from microversion 2.36. For
     # more information, see:
@@ -48,6 +49,7 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('cd4ec87d-7825-450d-8040-6e2068f2da8f')
     def test_volume_snapshot_create_get_list_delete(self):
+        """Test create/get/list/delete volume snapshot"""
         volume = self.create_volume()
         self.addCleanup(self.delete_volume, volume['id'])
 

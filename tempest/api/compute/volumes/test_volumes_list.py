@@ -21,6 +21,8 @@ CONF = config.CONF
 
 
 class VolumesTestJSON(base.BaseV2ComputeTest):
+    """Test listing volumes with compute microversion less than 2.36"""
+
     # NOTE: This test creates a number of 1G volumes. To run successfully,
     # ensure that the backing file for the volume group that Nova uses
     # has space for at least 3 1G volumes!
@@ -57,7 +59,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('bc2dd1a0-15af-48e5-9990-f2e75a48325d')
     def test_volume_list(self):
-        # Should return the list of Volumes
+        """Test listing volumes should return all volumes"""
         # Fetch all Volumes
         fetched_list = self.client.list_volumes()['volumes']
         # Now check if all the Volumes created in setup are in fetched list
@@ -72,7 +74,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('bad0567a-5a4f-420b-851e-780b55bb867c')
     def test_volume_list_with_details(self):
-        # Should return the list of Volumes with details
+        """Test listing volumes with detail should return all volumes"""
         # Fetch all Volumes
         fetched_list = self.client.list_volumes(detail=True)['volumes']
         # Now check if all the Volumes created in setup are in fetched list
@@ -87,7 +89,11 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('1048ed81-2baf-487a-b284-c0622b86e7b8')
     def test_volume_list_param_limit(self):
-        # Return the list of volumes based on limit set
+        """Test listing volumes based on limit set
+
+        If we list volumes with limit=2, then only 2 volumes should be
+        returned.
+        """
         params = {'limit': 2}
         fetched_vol_list = self.client.list_volumes(**params)['volumes']
 
@@ -96,7 +102,11 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('33985568-4965-49d5-9bcc-0aa007ca5b7a')
     def test_volume_list_with_detail_param_limit(self):
-        # Return the list of volumes with details based on limit set.
+        """Test listing volumes with detail based on limit set
+
+        If we list volumes with detail with limit=2, then only 2 volumes with
+        detail should be returned.
+        """
         params = {'limit': 2}
         fetched_vol_list = self.client.list_volumes(detail=True,
                                                     **params)['volumes']
@@ -106,7 +116,12 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('51c22651-a074-4ea7-af0b-094f9331303e')
     def test_volume_list_param_offset_and_limit(self):
-        # Return the list of volumes based on offset and limit set.
+        """Test listing volumes based on offset and limit set
+
+        If we list volumes with offset=1 and limit=1, then 1 volume located
+        in the position 1 in the all volumes list should be returned.
+        (The items in the all volumes list start from position 0.)
+        """
         # get all volumes list
         all_vol_list = self.client.list_volumes()['volumes']
         params = {'offset': 1, 'limit': 1}
@@ -123,7 +138,13 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('06b6abc4-3f10-48e9-a7a1-3facc98f03e5')
     def test_volume_list_with_detail_param_offset_and_limit(self):
-        # Return the list of volumes details based on offset and limit set.
+        """Test listing volumes with detail based on offset and limit set
+
+        If we list volumes with detail with offset=1 and limit=1, then 1
+        volume with detail located in the position 1 in the all volumes list
+        should be returned.
+        (The items in the all volumes list start from position 0.)
+        """
         # get all volumes list
         all_vol_list = self.client.list_volumes(detail=True)['volumes']
         params = {'offset': 1, 'limit': 1}

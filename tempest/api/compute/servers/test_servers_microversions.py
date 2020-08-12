@@ -32,11 +32,13 @@ from tempest.lib import decorators
 
 
 class ServerShowV254Test(base.BaseV2ComputeTest):
+    """Test servers API schema for compute microversion greater than 2.53"""
     min_microversion = '2.54'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('09170a98-4940-4637-add7-1a35121f1a5a')
     def test_rebuild_server(self):
+        """Test rebuilding server with microversion greater than 2.53"""
         server = self.create_test_server(wait_until='ACTIVE')
         keypair_name = data_utils.rand_name(
             self.__class__.__name__ + '-keypair')
@@ -52,11 +54,13 @@ class ServerShowV254Test(base.BaseV2ComputeTest):
 
 
 class ServerShowV257Test(base.BaseV2ComputeTest):
+    """Test servers API schema for compute microversion greater than 2.56"""
     min_microversion = '2.57'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('803df848-080a-4261-8f11-b020cd9b6f60')
     def test_rebuild_server(self):
+        """Test rebuilding server with microversion greater than 2.56"""
         server = self.create_test_server(wait_until='ACTIVE')
         user_data = "ZWNobyAiaGVsbG8gd29ybGQi"
         # Checking rebuild API response schema

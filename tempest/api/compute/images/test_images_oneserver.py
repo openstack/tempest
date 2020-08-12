@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
+    """Test server images API"""
 
     @classmethod
     def resource_setup(cls):
@@ -54,6 +55,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3731d080-d4c5-4872-b41a-64d0d0021314')
     def test_create_delete_image(self):
+        """Test create/delete server image"""
         if self.is_requested_microversion_compatible('2.35'):
             MIN_DISK = 'minDisk'
             MIN_RAM = 'minRam'
@@ -93,6 +95,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3b7c6fe4-dfe7-477c-9243-b06359db51e6')
     def test_create_image_specify_multibyte_character_image_name(self):
+        """Test creating server image with multibyte character image name"""
         # prefix character is:
         # http://unicode.org/cldr/utility/character.jsp?a=20A1
 

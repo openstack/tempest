@@ -31,6 +31,8 @@ CONF = config.CONF
 
 
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
+    """Test listing server images with compute microversion less than 2.36"""
+
     max_microversion = '2.35'
 
     @classmethod
@@ -129,8 +131,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('a3f5b513-aeb3-42a9-b18e-f091ef73254d')
     def test_list_images_filter_by_status(self):
-        # The list of images should contain only images with the
-        # provided status
+        """Test listing server images filtered by image status
+
+        The list of images should contain only images with the
+        provided image status.
+        """
         params = {'status': 'ACTIVE'}
         images = self.client.list_images(**params)['images']
 
@@ -140,8 +145,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('33163b73-79f5-4d07-a7ea-9213bcc468ff')
     def test_list_images_filter_by_name(self):
-        # List of all images should contain the expected images filtered
-        # by name
+        """Test listing server images filtered by image name
+
+        The list of images should contain only images with the
+        provided image name.
+        """
         params = {'name': self.image1['name']}
         images = self.client.list_images(**params)['images']
 
@@ -153,7 +161,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     def test_list_images_filter_by_server_id(self):
-        # The images should contain images filtered by server id
+        """Test listing images filtered by server id
+
+        The list of images should contain only images with the
+        provided server id.
+        """
         params = {'server': self.server1['id']}
         images = self.client.list_images(**params)['images']
 
@@ -169,7 +181,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     def test_list_images_filter_by_server_ref(self):
-        # The list of servers should be filtered by server ref
+        """Test listing images filtered by server link href
+
+        The list of images should contain only images with the
+        provided server link href.
+        """
         server_links = self.server2['links']
 
         # Try all server link types
@@ -188,7 +204,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     def test_list_images_filter_by_type(self):
-        # The list of servers should be filtered by image type
+        """Test listing images filtered by image type
+
+        The list of images should contain only images with the
+        provided image type.
+        """
         params = {'type': 'snapshot'}
         images = self.client.list_images(**params)['images']
 
@@ -202,13 +222,22 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('3a484ca9-67ba-451e-b494-7fcf28d32d62')
     def test_list_images_limit_results(self):
-        # Verify only the expected number of results are returned
+        """Test listing images with limited count
+
+        If we use limit=1 when listing images, then only 1 image should be
+        returned.
+        """
         params = {'limit': '1'}
         images = self.client.list_images(**params)['images']
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @decorators.idempotent_id('18bac3ae-da27-436c-92a9-b22474d13aab')
     def test_list_images_filter_by_changes_since(self):
+        """Test listing images filtered by changes-since
+
+        The list of images should contain only images updated since the
+        provided changes-since value.
+        """
         # Verify only updated images are returned in the detailed list
 
         # Becoming ACTIVE will modify the updated time
@@ -220,8 +249,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('9b0ea018-6185-4f71-948a-a123a107988e')
     def test_list_images_with_detail_filter_by_status(self):
-        # Detailed list of all images should only contain images
-        # with the provided status
+        """Test listing server images details filtered by image status
+
+        The list of images should contain only images with the
+        provided image status.
+        """
         params = {'status': 'ACTIVE'}
         images = self.client.list_images(detail=True, **params)['images']
 
@@ -231,8 +263,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('644ea267-9bd9-4f3b-af9f-dffa02396a17')
     def test_list_images_with_detail_filter_by_name(self):
-        # Detailed list of all images should contain the expected
-        # images filtered by name
+        """Test listing server images details filtered by image name
+
+        The list of images should contain only images with the
+        provided image name.
+        """
         params = {'name': self.image1['name']}
         images = self.client.list_images(detail=True, **params)['images']
 
@@ -242,8 +277,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('ba2fa9a9-b672-47cc-b354-3b4c0600e2cb')
     def test_list_images_with_detail_limit_results(self):
-        # Verify only the expected number of results (with full details)
-        # are returned
+        """Test listing images details with limited count
+
+        If we use limit=1 when listing images with full details, then only 1
+        image should be returned.
+        """
         params = {'limit': '1'}
         images = self.client.list_images(detail=True, **params)['images']
         self.assertEqual(1, len(images))
@@ -252,7 +290,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     def test_list_images_with_detail_filter_by_server_ref(self):
-        # Detailed list of servers should be filtered by server ref
+        """Test listing images details filtered by server link href
+
+        The list of images should contain only images with the
+        provided server link href.
+        """
         server_links = self.server2['links']
 
         # Try all server link types
@@ -271,7 +313,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
     def test_list_images_with_detail_filter_by_type(self):
-        # The detailed list of servers should be filtered by image type
+        """Test listing images details filtered by image type
+
+        The list of images should contain only images with the
+        provided image type.
+        """
         params = {'type': 'snapshot'}
         images = self.client.list_images(detail=True, **params)['images']
         self.client.show_image(self.image_ref)
@@ -286,8 +332,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('7d439e18-ac2e-4827-b049-7e18004712c4')
     def test_list_images_with_detail_filter_by_changes_since(self):
-        # Verify an update image is returned
+        """Test listing images details filtered by changes-since
 
+        The list of images should contain only images updated since the
+        provided changes-since value.
+        """
         # Becoming ACTIVE will modify the updated time
         # Filter by the image's created time
         params = {'changes-since': self.image1['created']}
