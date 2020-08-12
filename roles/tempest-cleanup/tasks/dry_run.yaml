@@ -1,0 +1,7 @@
+---
+- name: Run tempest cleanup dry-run
+  become: yes
+  become_user: tempest
+  command: tox -evenv-tempest -- tempest cleanup --dry-run --debug
+  args:
+    chdir: "{{ devstack_base_dir }}/tempest"
