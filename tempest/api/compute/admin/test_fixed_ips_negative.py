@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
+    """Negative tests of fixed ips API"""
 
     @classmethod
     def skip_checks(cls):
@@ -58,12 +59,14 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9f17f47d-daad-4adc-986e-12370c93e407')
     def test_list_fixed_ip_details_with_non_admin_user(self):
+        """Test listing fixed ip with detail by non-admin user is forbidden"""
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.show_fixed_ip, self.ip)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ce60042c-fa60-4836-8d43-1c8e3359dc47')
     def test_set_reserve_with_non_admin_user(self):
+        """Test reserving fixed ip by non-admin user is forbidden"""
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, reserve="None")
@@ -71,6 +74,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f1f7a35b-0390-48c5-9803-5f27461439db')
     def test_set_unreserve_with_non_admin_user(self):
+        """Test unreserving fixed ip by non-admin user is forbidden"""
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, unreserve="None")
@@ -78,6 +82,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('f51cf464-7fc5-4352-bc3e-e75cfa2cb717')
     def test_set_reserve_with_invalid_ip(self):
+        """Test reserving invalid fixed ip should fail"""
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
         # NOTE(eliqiao): in Juno, the exception is NotFound, but in master, we
@@ -90,6 +95,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('fd26ef50-f135-4232-9d32-281aab3f9176')
     def test_fixed_ip_with_invalid_action(self):
+        """Test operating fixed ip with invalid action should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.client.reserve_fixed_ip,
                           self.ip, invalid_action="None")

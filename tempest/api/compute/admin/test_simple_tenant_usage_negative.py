@@ -21,6 +21,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
+    """Negative tests of compute tenant usages API"""
 
     @classmethod
     def setup_clients(cls):
@@ -43,7 +44,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8b21e135-d94b-4991-b6e9-87059609c8ed')
     def test_get_usage_tenant_with_empty_tenant_id(self):
-        # Get usage for a specific tenant empty
+        """Test getting tenant usage with empty tenant id should fail"""
         params = {'start': self.start,
                   'end': self.end}
         self.assertRaises(lib_exc.NotFound,
@@ -53,7 +54,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('4079dd2a-9e8d-479f-869d-6fa985ce45b6')
     def test_get_usage_tenant_with_invalid_date(self):
-        # Get usage for tenant with invalid date
+        """Test getting tenant usage with invalid time range should fail"""
         params = {'start': self.end,
                   'end': self.start}
         self.assertRaises(lib_exc.BadRequest,
@@ -63,7 +64,7 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('bbe6fe2c-15d8-404c-a0a2-44fad0ad5cc7')
     def test_list_usage_all_tenants_with_non_admin_user(self):
-        # Get usage for all tenants with non admin user
+        """Test listing usage of all tenants by non-admin user is forbidden"""
         params = {'start': self.start,
                   'end': self.end,
                   'detailed': "1"}

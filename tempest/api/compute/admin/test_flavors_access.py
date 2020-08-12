@@ -43,8 +43,12 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('ea2c2211-29fa-4db9-97c3-906d36fad3e0')
     def test_flavor_access_list_with_private_flavor(self):
-        # Test to make sure that list flavor access on a newly created
-        # private flavor will return an empty access list
+        """Test listing flavor access for a private flavor
+
+        Listing flavor access on a newly created private flavor will return
+        an empty access list.
+        """
+        # Test to make sure that
         flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
                                     disk=self.disk, is_public='False')
 
@@ -54,7 +58,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('59e622f6-bdf6-45e3-8ba8-fedad905a6b4')
     def test_flavor_access_add_remove(self):
-        # Test to add and remove flavor access to a given tenant.
+        """Test add/remove flavor access to a given project"""
         flavor = self.create_flavor(ram=self.ram, vcpus=self.vcpus,
                                     disk=self.disk, is_public='False')
 

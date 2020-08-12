@@ -26,6 +26,7 @@ VALID_WAIT = 30
 
 
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
+    """Test tenant usages"""
 
     @classmethod
     def setup_clients(cls):
@@ -67,7 +68,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('062c8ae9-9912-4249-8b51-e38d664e926e')
     def test_list_usage_all_tenants(self):
-        # Get usage for all tenants
+        """Test getting usage for all tenants"""
         tenant_usage = self.call_until_valid(
             self.adm_client.list_tenant_usages, VALID_WAIT,
             start=self.start, end=self.end, detailed="1")['tenant_usages'][0]
@@ -75,7 +76,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('94135049-a4c5-4934-ad39-08fa7da4f22e')
     def test_get_usage_tenant(self):
-        # Get usage for a specific tenant
+        """Test getting usage for a specific tenant"""
         tenant_usage = self.call_until_valid(
             self.adm_client.show_tenant_usage, VALID_WAIT,
             self.tenant_id, start=self.start, end=self.end)['tenant_usage']
@@ -84,7 +85,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('9d00a412-b40e-4fd9-8eba-97b496316116')
     def test_get_usage_tenant_with_non_admin_user(self):
-        # Get usage for a specific tenant with non admin user
+        """Test getting usage for a specific tenant with non admin user"""
         tenant_usage = self.call_until_valid(
             self.client.show_tenant_usage, VALID_WAIT,
             self.tenant_id, start=self.start, end=self.end)['tenant_usage']

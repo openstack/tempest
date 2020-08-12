@@ -18,6 +18,8 @@ from tempest.lib import decorators
 
 
 class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
+    """Test flavors API with compute microversion greater than 2.54"""
+
     min_microversion = '2.55'
     max_microversion = 'latest'
 
@@ -26,6 +28,11 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('61976b25-488d-41dc-9dcb-cb9693a7b075')
     def test_crud_flavor(self):
+        """Test create/show/update/list flavor
+
+        Check the response schema of flavors API with microversion greater
+        than 2.54.
+        """
         flavor_id = data_utils.rand_int_id(start=1000)
         # Checking create API response schema
         new_flavor_id = self.create_flavor(ram=512,
@@ -44,6 +51,7 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
 
 
 class FlavorsV261TestJSON(FlavorsV255TestJSON):
+    """Test flavors API with compute microversion greater than 2.60"""
     min_microversion = '2.61'
     max_microversion = 'latest'
 
