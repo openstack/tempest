@@ -19,6 +19,8 @@ from tempest.lib import decorators
 
 
 class InstanceActionsTestJSON(base.BaseV2ComputeTest):
+    """Test instance actions API"""
+
     create_default_network = True
 
     @classmethod
@@ -34,7 +36,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('77ca5cc5-9990-45e0-ab98-1de8fead201a')
     def test_list_instance_actions(self):
-        # List actions of the provided server
+        """Test listing actions of the provided server"""
         self.client.reboot_server(self.server['id'], type='HARD')
         waiters.wait_for_server_status(self.client,
                                        self.server['id'], 'ACTIVE')
@@ -47,7 +49,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
-        # Get the action details of the provided server
+        """Test getting the action details of the provided server"""
         body = self.client.show_instance_action(
             self.server['id'], self.request_id)['instanceAction']
         self.assertEqual(self.server['id'], body['instance_uuid'])
@@ -55,6 +57,8 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
 
 
 class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
+    """Test instance actions with compute microversion greater than 2.20"""
+
     create_default_network = True
 
     min_microversion = '2.21'
@@ -67,8 +71,11 @@ class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('0a0f85d4-10fa-41f6-bf80-a54fb4aa2ae1')
     def test_get_list_deleted_instance_actions(self):
+        """Test listing actions for deleted instance
 
-        # List actions of the deleted server
+        Listing actions for deleted instance should succeed and the returned
+        actions should contain 'create' and 'delete'.
+        """
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.client, server['id'])

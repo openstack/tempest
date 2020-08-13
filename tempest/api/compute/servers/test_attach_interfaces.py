@@ -99,6 +99,7 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
 
 
 class AttachInterfacesTestJSON(AttachInterfacesTestBase):
+    """Test attaching interfaces"""
 
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
@@ -230,6 +231,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
     @decorators.idempotent_id('73fe8f02-590d-4bf1-b184-e9ca81065051')
     @utils.services('network')
     def test_create_list_show_delete_interfaces_by_network_port(self):
+        """Test create/list/show/delete interfaces by network port"""
         server, ifs, _ = self._create_server_get_interfaces()
         interface_count = len(ifs)
         self.assertGreater(interface_count, 0)
@@ -262,6 +264,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
     @decorators.idempotent_id('d290c06c-f5b3-11e7-8ec8-002293781009')
     @utils.services('network')
     def test_create_list_show_delete_interfaces_by_fixed_ip(self):
+        """Test create/list/show/delete interfaces by fixed ip"""
         # NOTE(zhufl) By default only project that is admin or network owner
         # or project with role advsvc is authorised to create interfaces with
         # fixed-ip, so if we don't create network for each project, do not
@@ -290,7 +293,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
 
     @decorators.idempotent_id('2f3a0127-95c7-4977-92d2-bc5aec602fb4')
     def test_reassign_port_between_servers(self):
-        """Tests the following:
+        """Tests reassigning port between servers
 
         1. Create a port in Neutron.
         2. Create two servers in Nova.
@@ -343,12 +346,15 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
 
 
 class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
+    """Test attaching interfaces with compute microversion less than 2.44"""
+
     max_microversion = '2.43'
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('c7e0e60b-ee45-43d0-abeb-8596fd42a2f9')
     @utils.services('network')
     def test_add_remove_fixed_ip(self):
+        """Test adding and removing fixed ip from server"""
         # NOTE(zhufl) By default only project that is admin or network owner
         # or project with role advsvc is authorised to add interfaces with
         # fixed-ip, so if we don't create network for each project, do not

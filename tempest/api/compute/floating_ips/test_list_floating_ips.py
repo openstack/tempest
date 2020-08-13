@@ -21,6 +21,7 @@ CONF = config.CONF
 
 
 class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
+    """Test floating ip details with compute microversion less than 2.36"""
 
     max_microversion = '2.35'
 
@@ -37,7 +38,7 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
     def test_list_floating_ips(self):
-        # Positive test:Should return the list of floating IPs
+        """Test listing floating ips"""
         body = self.client.list_floating_ips()['floating_ips']
         floating_ips = body
         self.assertNotEmpty(floating_ips,
@@ -47,7 +48,7 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('eef497e0-8ff7-43c8-85ef-558440574f84')
     def test_get_floating_ip_details(self):
-        # Positive test:Should be able to GET the details of floatingIP
+        """Test getting floating ip details"""
         # Creating a floating IP for which details are to be checked
         body = self.client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
@@ -68,7 +69,7 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('df389fc8-56f5-43cc-b290-20eda39854d3')
     def test_list_floating_ip_pools(self):
-        # Positive test:Should return the list of floating IP Pools
+        """Test listing floating ip pools"""
         floating_ip_pools = self.pools_client.list_floating_ip_pools()
         self.assertNotEmpty(floating_ip_pools['floating_ip_pools'],
                             "Expected floating IP Pools. Got zero.")
