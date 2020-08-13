@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class ServersTestMultiNic(base.BaseV2ComputeTest):
+    """Test multiple networks in servers"""
 
     @classmethod
     def skip_checks(cls):
@@ -59,8 +60,11 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('0578d144-ed74-43f8-8e57-ab10dbf9b3c2')
     def test_verify_multiple_nics_order(self):
-        # Verify that the networks order given at the server creation is
-        # preserved within the server.
+        """Test verifying multiple networks order in server
+
+        The networks order given at the server creation is preserved within
+        the server.
+        """
         net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')
         net2 = self._create_net_subnet_ret_net_from_cidr('19.86.0.0/24')
 
@@ -95,6 +99,12 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('1678d144-ed74-43f8-8e57-ab10dbf9b3c2')
     def test_verify_duplicate_network_nics(self):
+        """Test multiple duplicate networks can be used to create server
+
+        Creating server with networks [net1, net2, net1], the server can
+        be created successfully and all three networks are in the server
+        addresses.
+        """
         # Verify that server creation does not fail when more than one nic
         # is created on the same network.
         net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')

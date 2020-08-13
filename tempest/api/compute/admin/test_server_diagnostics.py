@@ -19,6 +19,8 @@ from tempest.lib import decorators
 
 
 class ServerDiagnosticsTest(base.BaseV2ComputeAdminTest):
+    """Test server diagnostics with compute microversion less than 2.48"""
+
     min_microversion = None
     max_microversion = '2.47'
 
@@ -29,6 +31,7 @@ class ServerDiagnosticsTest(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('31ff3486-b8a0-4f56-a6c0-aab460531db3')
     def test_get_server_diagnostics(self):
+        """Test getting server diagnostics"""
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
         diagnostics = self.client.show_server_diagnostics(server_id)
 
@@ -41,6 +44,8 @@ class ServerDiagnosticsTest(base.BaseV2ComputeAdminTest):
 
 
 class ServerDiagnosticsV248Test(base.BaseV2ComputeAdminTest):
+    """Test server diagnostics with compute microversion greater than 2.47"""
+
     min_microversion = '2.48'
     max_microversion = 'latest'
 
@@ -51,6 +56,7 @@ class ServerDiagnosticsV248Test(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('64d0d48c-dff1-11e6-bf01-fe55135034f3')
     def test_get_server_diagnostics(self):
+        """Test getting server diagnostics"""
         server_id = self.create_test_server(wait_until='ACTIVE')['id']
         # Response status and filed types will be checked by json schema
         self.client.show_server_diagnostics(server_id)

@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
+    """Negative tests of volume swapping"""
+
     create_default_network = True
 
     @classmethod
@@ -40,6 +42,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
     def test_update_attached_volume_with_nonexistent_volume_in_uri(self):
+        """Test swapping non existent volume should fail"""
         volume = self.create_volume()
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
@@ -51,6 +54,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
     def test_update_attached_volume_with_nonexistent_volume_in_body(self):
+        """Test swapping volume to a non existence volume should fail"""
         volume = self.create_volume()
         self.attach_volume(self.server, volume)
 
@@ -62,6 +66,12 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
 
 
 class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
+    """Negative tests of swapping volume attached to multiple servers
+
+    Negative tests of swapping volume attached to multiple servers with
+    compute microversion greater than 2.59 and volume microversion greater
+    than 3.26
+    """
 
     min_microversion = '2.60'
     volume_min_microversion = '3.27'
@@ -76,7 +86,16 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('7576d497-b7c6-44bd-9cc5-c5b4e50fec71')
     @utils.services('volume')
     def test_multiattach_rw_volume_update_failure(self):
+        """Test swapping volume attached to multi-servers with read-write mode
 
+        1. Create two volumes "vol1" and "vol2"
+        2. Create two instances "server1" and "server2"
+        3. Attach "vol1" to both of these instances
+        4. By default both of these attachments should have an attach_mode of
+           read-write, so trying to swap "vol1" to "vol2" should fail
+        5. Check "vol1" is still attached to both servers
+        6. Check "vol2" is not attached to any server
+        """
         # Create two multiattach capable volumes.
         vol1 = self.create_volume(multiattach=True)
         vol2 = self.create_volume(multiattach=True)
