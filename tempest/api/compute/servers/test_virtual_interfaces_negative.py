@@ -23,6 +23,12 @@ from tempest.lib import exceptions as lib_exc
 # TODO(mriedem): Remove this test class once the nova queens branch goes into
 # extended maintenance mode.
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
+    """Negative tests of virtual interfaces API
+
+    Negative tests of virtual interfaces API for compute microversion less
+    than 2.44.
+    """
+
     max_microversion = '2.43'
 
     depends_on_nova_network = True
@@ -37,8 +43,7 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('64ebd03c-1089-4306-93fa-60f5eb5c803c')
     @utils.services('network')
     def test_list_virtual_interfaces_invalid_server_id(self):
-        # Negative test: Should not be able to GET virtual interfaces
-        # for an invalid server_id
+        """Test listing virtual interfaces of an invalid server should fail"""
         invalid_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.servers_client.list_virtual_interfaces,

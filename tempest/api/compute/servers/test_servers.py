@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
+    """Test servers API"""
     create_default_network = True
 
     @classmethod
@@ -37,8 +38,11 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                           enable_instance_password,
                           'Instance password not available.')
     def test_create_server_with_admin_password(self):
-        # If an admin password is provided on server creation, the server's
-        # root password should be set to that password.
+        """Test creating server with admin password
+
+        If an admin password is provided on server creation, the server's
+        root password should be set to that password.
+        """
         server = self.create_test_server(adminPass='testpassword')
         self.addCleanup(self.delete_server, server['id'])
 
@@ -47,8 +51,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('8fea6be7-065e-47cf-89b8-496e6f96c699')
     def test_create_with_existing_server_name(self):
-        # Creating a server with a name that already exists is allowed
-
+        """Test creating a server with already existing name is allowed"""
         # TODO(sdague): clear out try, we do cleanup one layer up
         server_name = data_utils.rand_name(
             self.__class__.__name__ + '-server')
@@ -69,8 +72,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f9e15296-d7f9-4e62-b53f-a04e89160833')
     def test_create_specify_keypair(self):
-        # Specify a keypair while creating a server
-
+        """Test creating server with keypair"""
         key_name = data_utils.rand_name('key')
         self.keypairs_client.create_keypair(name=key_name)
         self.addCleanup(self.keypairs_client.delete_keypair, key_name)
@@ -97,7 +99,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('5e6ccff8-349d-4852-a8b3-055df7988dd2')
     def test_update_server_name(self):
-        # The server name should be changed to the provided value
+        """Test updating server name to the provided value"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
         # Update instance name with non-ASCII characters
@@ -115,7 +117,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('89b90870-bc13-4b73-96af-f9d4f2b70077')
     def test_update_access_server_address(self):
-        # The server's access addresses should reflect the provided values
+        """Test updating server's access addresses to the provided value"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
 
@@ -132,7 +134,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('38fb1d02-c3c5-41de-91d3-9bc2025a75eb')
     def test_create_server_with_ipv6_addr_only(self):
-        # Create a server without an IPv4 address(only IPv6 address).
+        """Test creating server with ipv6 address only(no ipv4 address)"""
         server = self.create_test_server(accessIPv6='2001:2001::3',
                                          wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
@@ -142,17 +144,22 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @decorators.related_bug('1730756')
     @decorators.idempotent_id('defbaca5-d611-49f5-ae21-56ee25d2db49')
     def test_create_server_specify_multibyte_character_name(self):
-        # prefix character is:
-        # http://unicode.org/cldr/utility/character.jsp?a=20A1
+        """Test creating server with multi character name
 
-        # We use a string with 3 byte utf-8 character due to nova
-        # will return 400(Bad Request) if we attempt to send a name which has
-        # 4 byte utf-8 character.
+        prefix character is:
+        http://unicode.org/cldr/utility/character.jsp?a=20A1
+
+        We use a string with 3 byte utf-8 character due to nova
+        will return 400(Bad Request) if we attempt to send a name which has
+        4 byte utf-8 character.
+        """
         utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
         self.create_test_server(name=utf8_name, wait_until='ACTIVE')
 
 
 class ServerShowV247Test(base.BaseV2ComputeTest):
+    """Test servers API with compute microversion greater than 2.46"""
+
     min_microversion = '2.47'
     max_microversion = 'latest'
 
@@ -164,12 +171,14 @@ class ServerShowV247Test(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('88b0bdb2-494c-11e7-a919-92ebcb67fe33')
     def test_show_server(self):
+        """Test getting server detail"""
         server = self.create_test_server()
         # All fields will be checked by API schema
         self.servers_client.show_server(server['id'])
 
     @decorators.idempotent_id('8de397c2-57d0-4b90-aa30-e5d668f21a8b')
     def test_update_rebuild_list_server(self):
+        """Test update/rebuild/list server"""
         server = self.create_test_server()
         # Checking update API response schema
         self.servers_client.update_server(server['id'])
@@ -184,6 +193,8 @@ class ServerShowV247Test(base.BaseV2ComputeTest):
 
 
 class ServerShowV263Test(base.BaseV2ComputeTest):
+    """Test servers API with compute microversion greater than 2.62"""
+
     min_microversion = '2.63'
     max_microversion = 'latest'
 
@@ -195,6 +206,7 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
                           'required to test image certificate validation.')
     @decorators.idempotent_id('71b8e3d5-11d2-494f-b917-b094a4afed3c')
     def test_show_update_rebuild_list_server(self):
+        """Test show/update/rebuild/list server"""
         trusted_certs = CONF.compute.certified_image_trusted_certs
         server = self.create_test_server(
             image_id=CONF.compute.certified_image_ref,
