@@ -88,6 +88,7 @@ class VolumeRetypeTest(base.BaseVolumeAdminTest):
 
 
 class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
+    """Test volume retype with migration"""
 
     @classmethod
     def skip_checks(cls):
@@ -134,11 +135,25 @@ class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
 
     @decorators.idempotent_id('a1a41f3f-9dad-493e-9f09-3ff197d477cd')
     def test_available_volume_retype_with_migration(self):
+        """Test volume retype with migration
+
+        1. Create volume1 with volume_type1
+        2. Retype volume1 to volume_type2 with migration_policy='on-demand'
+        3. Check volume1's volume_type is changed to volume_type2, and
+           'os-vol-host-attr:host' in the volume info is changed.
+        """
         src_vol = self.create_volume(volume_type=self.src_vol_type['name'])
         self._retype_volume(src_vol, migration_policy='on-demand')
 
     @decorators.idempotent_id('d0d9554f-e7a5-4104-8973-f35b27ccb60d')
     def test_volume_from_snapshot_retype_with_migration(self):
+        """Test volume created from snapshot retype with migration
+
+        1. Create volume1 from snapshot with volume_type1
+        2. Retype volume1 to volume_type2 with migration_policy='on-demand'
+        3. Check volume1's volume_type is changed to volume_type2, and
+           'os-vol-host-attr:host' in the volume info is changed.
+        """
         src_vol = self._create_volume_from_snapshot()
 
         # Migrate the volume from snapshot to the second backend
@@ -146,6 +161,7 @@ class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
 
 
 class VolumeRetypeWithoutMigrationTest(VolumeRetypeTest):
+    """Test volume retype without migration"""
 
     @classmethod
     def resource_setup(cls):
@@ -174,6 +190,13 @@ class VolumeRetypeWithoutMigrationTest(VolumeRetypeTest):
 
     @decorators.idempotent_id('b90412ee-465d-46e9-b249-ec84a47d5f25')
     def test_available_volume_retype(self):
+        """Test volume retype without migration
+
+        1. Create volume1 with volume_type1
+        2. Retype volume1 to volume_type2 with migration_policy='never'
+        3. Check volume1's volume_type is changed to volume_type2, and
+           'os-vol-host-attr:host' in the volume info is not changed.
+        """
         src_vol = self.create_volume(volume_type=self.src_vol_type['name'])
 
         # Retype the volume from snapshot
