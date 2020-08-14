@@ -30,6 +30,7 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
 
 
 class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
+    """Test volume quota classes"""
 
     def setUp(self):
         # Note(jeremy.zhang): All test cases in this class need to externally
@@ -44,6 +45,7 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('abb9198e-67d0-4b09-859f-4f4a1418f176')
     def test_show_default_quota(self):
+        """Test showing default volume quota class set"""
         # response body is validated by schema
         default_quotas = self.admin_quota_classes_client.show_quota_class_set(
             'default')['quota_class_set']
@@ -51,6 +53,11 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('a7644c63-2669-467a-b00e-452dd5c5397b')
     def test_update_default_quota(self):
+        """Test updating default volume quota class set
+
+        Check current project and new project's default quota are updated
+        to the provided one.
+        """
         LOG.debug("Get the current default quota class values")
         body = self.admin_quota_classes_client.show_quota_class_set(
             'default')['quota_class_set']

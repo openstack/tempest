@@ -19,13 +19,15 @@ from tempest.lib import decorators
 
 
 class GroupTypesTest(base.BaseVolumeAdminTest):
+    """Test group types"""
+
     _api_version = 3
     min_microversion = '3.11'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('dd71e5f9-393e-4d4f-90e9-fa1b8d278864')
     def test_group_type_create_list_update_show(self):
-        # Create/list/show group type.
+        """Test create/list/update/show group type"""
         name = data_utils.rand_name(self.__class__.__name__ + '-group-type')
         description = data_utils.rand_name("group-type-description")
         group_specs = {"consistent_group_snapshot_enabled": "<is> False"}
