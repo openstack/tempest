@@ -18,10 +18,11 @@ from tempest.lib import decorators
 
 
 class ExtensionTestJSON(base.BaseIdentityV2Test):
+    """Test extensions in identity v2 API"""
 
     @decorators.idempotent_id('85f3f661-f54c-4d48-b563-72ae952b9383')
     def test_list_extensions(self):
-        # List all the extensions
+        """List all the identity extensions via v2 API"""
         body = self.non_admin_client.list_extensions()['extensions']['values']
         self.assertNotEmpty(body)
         keys = ['name', 'updated', 'alias', 'links',

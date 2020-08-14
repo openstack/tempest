@@ -28,6 +28,7 @@ CONF = config.CONF
 
 
 class IdentityUsersTest(base.BaseIdentityV2Test):
+    """Test user password in identity v2 API"""
 
     @classmethod
     def resource_setup(cls):
@@ -85,6 +86,7 @@ class IdentityUsersTest(base.BaseIdentityV2Test):
                       'immutable user source and solely '
                       'provides read-only access to users.')
     def test_user_update_own_password(self):
+        """test updating user's own password via v2 API"""
         old_pass = self.creds.password
         old_token = self.non_admin_users_client.token
         new_pass = data_utils.rand_password()
