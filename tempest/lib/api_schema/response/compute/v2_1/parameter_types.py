@@ -120,3 +120,10 @@ power_state = {
     # 7: SUSPENDED
     'enum': [0, 1, 3, 4, 6, 7]
 }
+
+uuid_or_null = {
+    'anyOf': [
+        {'type': 'string', 'format': 'uuid'},
+        {'type': 'null'}
+    ]
+}

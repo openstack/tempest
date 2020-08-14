@@ -511,7 +511,8 @@ class TestVolumeService(BaseCmdServiceTests):
             },
             {
                 "id": "aa77asdf-1234",
-                "name": "saved-volume"
+                "name": "saved-volume",
+                "links": [],
             }
         ]
     }

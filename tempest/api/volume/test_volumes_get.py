@@ -37,11 +37,9 @@ class VolumesGetTest(base.BaseVolumeTest):
         kwargs['name'] = v_name
         kwargs['metadata'] = metadata
         volume = self.volumes_client.create_volume(**kwargs)['volume']
-        self.assertIn('id', volume)
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
-        self.assertIn('name', volume)
         self.assertEqual(volume['name'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
@@ -101,7 +99,6 @@ class VolumesGetTest(base.BaseVolumeTest):
                   'availability_zone': volume['availability_zone'],
                   'size': CONF.volume.volume_size}
         new_volume = self.volumes_client.create_volume(**params)['volume']
-        self.assertIn('id', new_volume)
         self.addCleanup(self.delete_volume, self.volumes_client,
                         new_volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
@@ -153,7 +150,5 @@ class VolumesSummaryTest(base.BaseVolumeTest):
     @decorators.idempotent_id('c4f2431e-4920-4736-9e00-4040386b6feb')
     def test_show_volume_summary(self):
         """Test showing volume summary"""
-        volume_summary = \
-            self.volumes_client.show_volume_summary()['volume-summary']
-        for key in ['total_size', 'total_count']:
-            self.assertIn(key, volume_summary)
+        # check response schema
+        self.volumes_client.show_volume_summary()
