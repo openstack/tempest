@@ -19,6 +19,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
+    """Test volume type extra specs"""
 
     @classmethod
     def resource_setup(cls):
@@ -27,7 +28,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('b42923e9-0452-4945-be5b-d362ae533e60')
     def test_volume_type_extra_specs_list(self):
-        # List Volume types extra specs.
+        """Test listing volume type extra specs"""
         extra_specs = {"spec1": "val1"}
         body = self.admin_volume_types_client.create_volume_type_extra_specs(
             self.volume_type['id'], extra_specs)['extra_specs']
@@ -40,7 +41,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('0806db36-b4a0-47a1-b6f3-c2e7f194d017')
     def test_volume_type_extra_specs_update(self):
-        # Update volume type extra specs
+        """Test updating volume type extra specs"""
         extra_specs = {"spec2": "val1"}
         body = self.admin_volume_types_client.create_volume_type_extra_specs(
             self.volume_type['id'], extra_specs)['extra_specs']
@@ -74,7 +75,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('d4772798-601f-408a-b2a5-29e8a59d1220')
     def test_volume_type_extra_spec_create_get_delete(self):
-        # Create/Get/Delete volume type extra spec.
+        """Test Create/Get/Delete volume type extra specs"""
         spec_key = "spec3"
         extra_specs = {spec_key: "val1"}
         body = self.admin_volume_types_client.create_volume_type_extra_specs(

@@ -22,7 +22,7 @@ class AvailabilityZoneTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('01f1ae88-eba9-4c6b-a011-6f7ace06b725')
     def test_get_availability_zone_list(self):
-        # List of availability zone
+        """Test listing volume available zones"""
         availability_zone = (
             self.availability_zone_client.list_availability_zones()
             ['availabilityZoneInfo'])

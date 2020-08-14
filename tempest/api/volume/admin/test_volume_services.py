@@ -39,12 +39,14 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('e0218299-0a59-4f43-8b2b-f1c035b3d26d')
     def test_list_services(self):
+        """Test listing volume services"""
         services = (self.admin_volume_services_client.list_services()
                     ['services'])
         self.assertNotEmpty(services)
 
     @decorators.idempotent_id('63a3e1ca-37ee-4983-826d-83276a370d25')
     def test_get_service_by_service_binary_name(self):
+        """Test getting volume service by binary name"""
         services = (self.admin_volume_services_client.list_services(
             binary=self.binary_name)['services'])
         self.assertNotEmpty(services)
@@ -53,6 +55,7 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('178710e4-7596-4e08-9333-745cb8bc4f8d')
     def test_get_service_by_host_name(self):
+        """Test getting volume service by service host name"""
         services_on_host = [service for service in self.services if
                             _get_host(service['host']) == self.host_name]
 
@@ -69,6 +72,7 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('67ec6902-f91d-4dec-91fa-338523208bbc')
     def test_get_service_by_volume_host_name(self):
+        """Test getting volume service by volume host name"""
         volume_id = self.create_volume()['id']
         volume = self.admin_volume_client.show_volume(volume_id)['volume']
         hostname = _get_host(volume['os-vol-host-attr:host'])
@@ -83,7 +87,7 @@ class VolumesServicesTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('ffa6167c-4497-4944-a464-226bbdb53908')
     def test_get_service_by_service_and_host_name(self):
-
+        """Test getting volume service by binary name and host name"""
         services = (self.admin_volume_services_client.list_services(
             host=self.host_name, binary=self.binary_name))['services']
 

@@ -25,6 +25,8 @@ CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeTest):
+    """Test volume actions"""
+
     create_default_network = True
 
     @classmethod
@@ -38,6 +40,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @decorators.attr(type='smoke')
     @utils.services('compute')
     def test_attach_detach_volume_to_instance(self):
+        """Test attaching and detaching volume to instance"""
         # Create a server
         server = self.create_server()
         # Volume is attached and detached successfully from an instance
@@ -53,7 +56,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('63e21b4c-0a0c-41f6-bfc3-7c2816815599')
     def test_volume_bootable(self):
-        # Verify that a volume bootable flag is retrieved
+        """Test setting and retrieving bootable flag of a volume"""
         for bool_bootable in [True, False]:
             self.volumes_client.set_bootable_volume(self.volume['id'],
                                                     bootable=bool_bootable)
@@ -69,6 +72,11 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @decorators.idempotent_id('9516a2c8-9135-488c-8dd6-5677a7e5f371')
     @utils.services('compute')
     def test_get_volume_attachment(self):
+        """Test getting volume attachments
+
+        Attach a volume to a server, and then retrieve volume's attachments
+        info.
+        """
         # Create a server
         server = self.create_server()
         # Verify that a volume's attachment information is retrieved
@@ -97,6 +105,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
     @decorators.idempotent_id('d8f1ca95-3d5b-44a3-b8ca-909691c9532d')
     @utils.services('image')
     def test_volume_upload(self):
+        """Test uploading volume to create an image"""
         # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
@@ -119,6 +128,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
+        """Test reserving and unreserving volume"""
         # Mark volume as reserved.
         self.volumes_client.reserve_volume(self.volume['id'])
         # To get the volume info
@@ -132,6 +142,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
 
     @decorators.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
     def test_volume_readonly_update(self):
+        """Test updating and retrieve volume's readonly flag"""
         for readonly in [True, False]:
             # Update volume readonly
             self.volumes_client.update_volume_readonly(self.volume['id'],

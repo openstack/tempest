@@ -26,10 +26,11 @@ LOG = logging.getLogger(__name__)
 
 
 class ExtensionsTestJSON(base.BaseVolumeTest):
+    """Test volume extensions"""
 
     @decorators.idempotent_id('94607eb0-43a5-47ca-82aa-736b41bd2e2c')
     def test_list_extensions(self):
-        # List of all extensions
+        """Test listing volume extensions"""
         extensions = (self.volumes_extension_client.list_extensions()
                       ['extensions'])
         if not CONF.volume_feature_enabled.api_extensions:

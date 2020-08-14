@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
+    """Test listing volumes with admin privilege"""
 
     @classmethod
     def resource_setup(cls):
@@ -41,7 +42,7 @@ class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('5866286f-3290-4cfd-a414-088aa6cdc469')
     def test_volume_list_param_tenant(self):
-        # Test to list volumes from single tenant
+        """Test admin can list volumes belonging to specified project"""
         # Create a volume in admin tenant
         adm_vol = self.admin_volume_client.create_volume(
             size=CONF.volume.volume_size)['volume']
