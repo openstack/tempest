@@ -502,36 +502,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         linux_client.validate_authentication()
         return linux_client
 
-    def _image_create(self, name, fmt, path,
-                      disk_format=None, properties=None):
-        if properties is None:
-            properties = {}
-        name = data_utils.rand_name('%s-' % name)
-        params = {
-            'name': name,
-            'container_format': fmt,
-            'disk_format': disk_format or fmt,
-        }
-        if CONF.image_feature_enabled.api_v1:
-            params['is_public'] = 'False'
-            params['properties'] = properties
-            params = {'headers': common_image.image_meta_to_headers(**params)}
-        else:
-            params['visibility'] = 'private'
-            # Additional properties are flattened out in the v2 API.
-            params.update(properties)
-        body = self.image_client.create_image(**params)
-        image = body['image'] if 'image' in body else body
-        self.addCleanup(self.image_client.delete_image, image['id'])
-        self.assertEqual("queued", image['status'])
-        with open(path, 'rb') as image_file:
-            if CONF.image_feature_enabled.api_v1:
-                self.image_client.update_image(image['id'], data=image_file)
-            else:
-                self.image_client.store_image_file(image['id'], image_file)
-        return image['id']
-
-    def glance_image_create(self):
+    def image_create(self, name='scenario-img'):
         img_path = CONF.scenario.img_file
         if not os.path.exists(img_path):
             # TODO(kopecmartin): replace LOG.warning for rasing
@@ -553,14 +524,35 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   "properties: %s",
                   img_path, img_container_format, img_disk_format,
                   img_properties)
-        image = self._image_create('scenario-img',
-                                   img_container_format,
-                                   img_path,
-                                   disk_format=img_disk_format,
-                                   properties=img_properties)
-        LOG.debug("image:%s", image)
-
-        return image
+        if img_properties is None:
+            img_properties = {}
+        name = data_utils.rand_name('%s-' % name)
+        params = {
+            'name': name,
+            'container_format': img_container_format,
+            'disk_format': img_disk_format or img_container_format,
+        }
+        if CONF.image_feature_enabled.api_v1:
+            params['is_public'] = 'False'
+            if img_properties:
+                params['properties'] = img_properties
+            params = {'headers': common_image.image_meta_to_headers(**params)}
+        else:
+            params['visibility'] = 'private'
+            # Additional properties are flattened out in the v2 API.
+            if img_properties:
+                params.update(img_properties)
+        body = self.image_client.create_image(**params)
+        image = body['image'] if 'image' in body else body
+        self.addCleanup(self.image_client.delete_image, image['id'])
+        self.assertEqual("queued", image['status'])
+        with open(img_path, 'rb') as image_file:
+            if CONF.image_feature_enabled.api_v1:
+                self.image_client.update_image(image['id'], data=image_file)
+            else:
+                self.image_client.store_image_file(image['id'], image_file)
+        LOG.debug("image:%s", image['id'])
+        return image['id']
 
     def _log_console_output(self, servers=None, client=None):
         if not CONF.compute_feature_enabled.console_output:

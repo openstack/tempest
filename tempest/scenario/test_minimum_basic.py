@@ -106,7 +106,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
-        image = self.glance_image_create()
+        image = self.image_create()
         keypair = self.create_keypair()
 
         server = self.create_server(image_id=image, key_name=keypair['name'])
