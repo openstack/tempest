@@ -21,6 +21,8 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
+    """Test object expiry"""
+
     @classmethod
     def resource_setup(cls):
         super(ObjectExpiryTest, cls).resource_setup()
@@ -83,6 +85,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('fb024a42-37f3-4ba5-9684-4f40a7910b41')
     def test_get_object_after_expiry_time(self):
+        """Test object is expired after x-delete-after time"""
         # the 10s is important, because the get calls can take 3s each
         # some times
         metadata = {'X-Delete-After': '10'}
@@ -90,5 +93,6 @@ class ObjectExpiryTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('e592f18d-679c-48fe-9e36-4be5f47102c5')
     def test_get_object_at_expiry_time(self):
+        """Test object is expired at x-delete-at time"""
         metadata = {'X-Delete-At': str(int(time.time()) + 10)}
         self._test_object_expiry(metadata)

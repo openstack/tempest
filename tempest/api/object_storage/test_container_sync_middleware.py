@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class ContainerSyncMiddlewareTest(test_container_sync.ContainerSyncTest):
+    """Test containers synchronization specifying realm and cluster"""
 
     @classmethod
     def resource_setup(cls):
@@ -41,6 +42,7 @@ class ContainerSyncMiddlewareTest(test_container_sync.ContainerSyncTest):
     @decorators.idempotent_id('ea4645a1-d147-4976-82f7-e5a7a3065f80')
     @utils.requires_ext(extension='container_sync', service='object')
     def test_container_synchronization(self):
+        """Test container synchronization specifying realm and cluster"""
         def make_headers(cont, cont_client):
             # tell first container to synchronize to a second
             account_name = cont_client.base_url.split('/')[-1]
