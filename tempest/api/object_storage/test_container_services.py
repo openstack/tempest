@@ -19,6 +19,8 @@ from tempest.lib import decorators
 
 
 class ContainerTest(base.BaseObjectTest):
+    """Test containers"""
+
     def tearDown(self):
         self.delete_containers()
         super(ContainerTest, self).tearDown()
@@ -26,6 +28,7 @@ class ContainerTest(base.BaseObjectTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('92139d73-7819-4db1-85f8-3f2f22a8d91f')
     def test_create_container(self):
+        """Test creating container"""
         container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.update_container(container_name)
         self.containers.append(container_name)
@@ -33,7 +36,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('49f866ed-d6af-4395-93e7-4187eb56d322')
     def test_create_container_overwrite(self):
-        # overwrite container with the same name
+        """Test overwriting container with the same name"""
         container_name = data_utils.rand_name(name='TestContainer')
         self.container_client.update_container(container_name)
         self.containers.append(container_name)
@@ -43,7 +46,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('c2ac4d59-d0f5-40d5-ba19-0635056d48cd')
     def test_create_container_with_metadata_key(self):
-        # create container with the blank value of metadata
+        """Test creating container with the blank value of metadata"""
         container_name = data_utils.rand_name(name='TestContainer')
         headers = {'X-Container-Meta-test-container-meta': ''}
         resp, _ = self.container_client.update_container(
@@ -60,7 +63,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('e1e8df32-7b22-44e1-aa08-ccfd8d446b58')
     def test_create_container_with_metadata_value(self):
-        # create container with metadata value
+        """Test creating container with metadata value"""
         container_name = data_utils.rand_name(name='TestContainer')
 
         # metadata name using underscores should be converted to hyphens
@@ -79,7 +82,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('24d16451-1c0c-4e4f-b59c-9840a3aba40e')
     def test_create_container_with_remove_metadata_key(self):
-        # create container with the blank value of remove metadata
+        """Test creating container with the blank value of remove metadata"""
         container_name = data_utils.rand_name(name='TestContainer')
         headers = {'X-Container-Meta-test-container-meta': 'Meta1'}
         self.container_client.update_container(container_name, **headers)
@@ -97,7 +100,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('8a21ebad-a5c7-4e29-b428-384edc8cd156')
     def test_create_container_with_remove_metadata_value(self):
-        # create container with remove metadata
+        """Test creating container with remove metadata"""
         container_name = data_utils.rand_name(name='TestContainer')
         headers = {'X-Container-Meta-test-container-meta': 'Meta1'}
         self.container_client.update_container(container_name, **headers)
@@ -114,6 +117,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('95d3a249-b702-4082-a2c4-14bb860cf06a')
     def test_delete_container(self):
+        """Test deleting container"""
         # create a container
         container_name = self.create_container()
         # delete container, success asserted within
@@ -123,7 +127,7 @@ class ContainerTest(base.BaseObjectTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('312ff6bd-5290-497f-bda1-7c5fec6697ab')
     def test_list_container_contents(self):
-        # get container contents list
+        """Test getting container contents list"""
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
@@ -134,7 +138,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('4646ac2d-9bfb-4c7d-a3c5-0f527402b3df')
     def test_list_container_contents_with_no_object(self):
-        # get empty container contents list
+        """Test getting empty container contents list"""
         container_name = self.create_container()
 
         resp, object_list = self.container_client.list_container_objects(
@@ -144,7 +148,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('fe323a32-57b9-4704-a996-2e68f83b09bc')
     def test_list_container_contents_with_delimiter(self):
-        # get container contents list using delimiter param
+        """Test getting container contents list using delimiter param"""
         container_name = self.create_container()
         object_name = data_utils.rand_name(name='TestObject/')
         self.create_object(container_name, object_name)
@@ -158,7 +162,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('55b4fa5c-e12e-4ca9-8fcf-a79afe118522')
     def test_list_container_contents_with_end_marker(self):
-        # get container contents list using end_marker param
+        """Test getting container contents list using end_marker param"""
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
@@ -171,7 +175,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('196f5034-6ab0-4032-9da9-a937bbb9fba9')
     def test_list_container_contents_with_format_json(self):
-        # get container contents list using format_json param
+        """Test getting container contents list using format_json param"""
         container_name = self.create_container()
         self.create_object(container_name)
 
@@ -190,7 +194,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('655a53ca-4d15-408c-a377-f4c6dbd0a1fa')
     def test_list_container_contents_with_format_xml(self):
-        # get container contents list using format_xml param
+        """Test getting container contents list using format_xml param"""
         container_name = self.create_container()
         self.create_object(container_name)
 
@@ -214,7 +218,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('297ec38b-2b61-4ff4-bcd1-7fa055e97b61')
     def test_list_container_contents_with_limit(self):
-        # get container contents list using limit param
+        """Test getting container contents list using limit param"""
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
@@ -227,7 +231,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('c31ddc63-2a58-4f6b-b25c-94d2937e6867')
     def test_list_container_contents_with_marker(self):
-        # get container contents list using marker param
+        """Test getting container contents list using marker param"""
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
@@ -240,7 +244,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('58ca6cc9-6af0-408d-aaec-2a6a7b2f0df9')
     def test_list_container_contents_with_path(self):
-        # get container contents list using path param
+        """Test getting container contents list using path param"""
         container_name = self.create_container()
         object_name = data_utils.rand_name(name='TestObject')
         object_name = 'Swift/' + object_name
@@ -255,7 +259,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('77e742c7-caf2-4ec9-8aa4-f7d509a3344c')
     def test_list_container_contents_with_prefix(self):
-        # get container contents list using prefix param
+        """Test getting container contents list using prefix param"""
         container_name = self.create_container()
         object_name, _ = self.create_object(container_name)
 
@@ -270,7 +274,7 @@ class ContainerTest(base.BaseObjectTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('96e68f0e-19ec-4aa2-86f3-adc6a45e14dd')
     def test_list_container_metadata(self):
-        # List container metadata
+        """Test listing container metadata"""
         container_name = self.create_container()
 
         metadata = {'name': 'Pictures'}
@@ -286,7 +290,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('a2faf936-6b13-4f8d-92a2-c2278355821e')
     def test_list_no_container_metadata(self):
-        # HEAD container without metadata
+        """Test listing container without metadata"""
         container_name = self.create_container()
 
         resp, _ = self.container_client.list_container_metadata(
@@ -296,7 +300,10 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('cf19bc0b-7e16-4a5a-aaed-cb0c2fe8deef')
     def test_update_container_metadata_with_create_and_delete_metadata(self):
-        # Send one request of adding and deleting metadata
+        """Test updating container with adding and deleting metadata
+
+        Send one request of adding and deleting metadata.
+        """
         container_name = data_utils.rand_name(name='TestContainer')
         metadata_1 = {'X-Container-Meta-test-container-meta1': 'Meta1'}
         self.container_client.update_container(container_name, **metadata_1)
@@ -319,7 +326,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('2ae5f295-4bf1-4e04-bfad-21e54b62cec5')
     def test_update_container_metadata_with_create_metadata(self):
-        # update container metadata using add metadata
+        """Test updating container metadata using add metadata"""
         container_name = self.create_container()
 
         metadata = {'test-container-meta1': 'Meta1'}
@@ -337,7 +344,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('3a5ce7d4-6e4b-47d0-9d87-7cd42c325094')
     def test_update_container_metadata_with_delete_metadata(self):
-        # update container metadata using delete metadata
+        """Test updating container metadata using delete metadata"""
         container_name = data_utils.rand_name(name='TestContainer')
         metadata = {'X-Container-Meta-test-container-meta1': 'Meta1'}
         self.container_client.update_container(container_name, **metadata)
@@ -355,7 +362,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('31f40a5f-6a52-4314-8794-cd89baed3040')
     def test_update_container_metadata_with_create_metadata_key(self):
-        # update container metadata with a blank value of metadata
+        """Test updating container metadata with a blank value of metadata"""
         container_name = self.create_container()
 
         metadata = {'test-container-meta1': ''}
@@ -371,7 +378,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('a2e36378-6f1f-43f4-840a-ffd9cfd61914')
     def test_update_container_metadata_with_delete_metadata_key(self):
-        # update container metadata with a blank value of metadata
+        """Test updating container metadata with a blank value of metadata"""
         container_name = data_utils.rand_name(name='TestContainer')
         headers = {'X-Container-Meta-test-container-meta1': 'Meta1'}
         self.container_client.update_container(container_name, **headers)

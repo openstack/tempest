@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class AccountQuotasTest(base.BaseObjectTest):
+    """Test account quotas"""
 
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['reseller', CONF.object_storage.reseller_admin_role]]
@@ -79,6 +80,7 @@ class AccountQuotasTest(base.BaseObjectTest):
     @decorators.idempotent_id('a22ef352-a342-4587-8f47-3bbdb5b039c4')
     @utils.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
+        """Test uploading valid object"""
         object_name = data_utils.rand_name(name="TestObject")
         data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,

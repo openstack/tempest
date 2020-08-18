@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class ObjectTestACLs(base.BaseObjectTest):
+    """Test object ACLs"""
 
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
@@ -36,7 +37,7 @@ class ObjectTestACLs(base.BaseObjectTest):
 
     @decorators.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
-        # attempt to read object using authorized user
+        """Test reading object using authorized user"""
         # update X-Container-Read metadata ACL
         tenant_id = self.os_roles_operator_alt.credentials.tenant_id
         user_id = self.os_roles_operator_alt.credentials.user_id
@@ -64,7 +65,7 @@ class ObjectTestACLs(base.BaseObjectTest):
 
     @decorators.idempotent_id('aa58bfa5-40d9-4bc3-82b4-d07f4a9e392a')
     def test_write_object_with_rights(self):
-        # attempt to write object using authorized user
+        """Test writing object using authorized user"""
         # update X-Container-Write metadata ACL
         tenant_id = self.os_roles_operator_alt.credentials.tenant_id
         user_id = self.os_roles_operator_alt.credentials.user_id

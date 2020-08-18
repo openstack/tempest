@@ -19,12 +19,14 @@ from tempest.lib import decorators
 
 
 class HealthcheckTest(base.BaseObjectTest):
+    """Test healthcheck"""
 
     def setUp(self):
         super(HealthcheckTest, self).setUp()
 
     @decorators.idempotent_id('db5723b1-f25c-49a9-bfeb-7b5640caf337')
     def test_get_healthcheck(self):
+        """Test getting healthcheck"""
         url = self.account_client._get_base_version_url() + "healthcheck"
         resp, body = self.account_client.raw_request(url, "GET")
         self.account_client._error_checker(resp, body)
