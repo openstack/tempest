@@ -21,6 +21,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class StaticWebTest(base.BaseObjectTest):
+    """Test static web"""
 
     @classmethod
     def resource_setup(cls):
@@ -47,6 +48,7 @@ class StaticWebTest(base.BaseObjectTest):
     @decorators.idempotent_id('c1f055ab-621d-4a6a-831f-846fcb578b8b')
     @utils.requires_ext(extension='staticweb', service='object')
     def test_web_index(self):
+        """Test web index"""
         headers = {'web-index': self.object_name}
 
         self.container_client.create_update_or_delete_container_metadata(
@@ -79,6 +81,7 @@ class StaticWebTest(base.BaseObjectTest):
     @decorators.idempotent_id('941814cf-db9e-4b21-8112-2b6d0af10ee5')
     @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing(self):
+        """Test web listing"""
         headers = {'web-listings': 'true'}
 
         self.container_client.create_update_or_delete_container_metadata(
@@ -111,6 +114,7 @@ class StaticWebTest(base.BaseObjectTest):
     @decorators.idempotent_id('bc37ec94-43c8-4990-842e-0e5e02fc8926')
     @utils.requires_ext(extension='staticweb', service='object')
     def test_web_listing_css(self):
+        """Test web listing css"""
         headers = {'web-listings': 'true',
                    'web-listings-css': 'listings.css'}
 
@@ -134,6 +138,7 @@ class StaticWebTest(base.BaseObjectTest):
     @decorators.idempotent_id('f18b4bef-212e-45e7-b3ca-59af3a465f82')
     @utils.requires_ext(extension='staticweb', service='object')
     def test_web_error(self):
+        """Test web error"""
         headers = {'web-listings': 'true',
                    'web-error': self.object_name}
 

@@ -26,6 +26,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
+    """Negative tests of object post with form"""
 
     metadata = {}
     containers = []
@@ -112,6 +113,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     @utils.requires_ext(extension='formpost', service='object')
     @decorators.attr(type=['negative'])
     def test_post_object_using_form_expired(self):
+        """Test posting object using expired form"""
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)
 
@@ -129,6 +131,7 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     @utils.requires_ext(extension='formpost', service='object')
     @decorators.attr(type=['negative'])
     def test_post_object_using_form_invalid_signature(self):
+        """Test posting object using form with invalid signature"""
         self.key = "Wrong"
         body, content_type = self.get_multipart_form()
 

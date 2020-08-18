@@ -25,6 +25,7 @@ from tempest.lib import decorators
 
 
 class ObjectTempUrlTest(base.BaseObjectTest):
+    """Test object temp url"""
 
     @classmethod
     def resource_setup(cls):
@@ -90,6 +91,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @decorators.idempotent_id('f91c96d4-1230-4bba-8eb9-84476d18d991')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url(self):
+        """Test getting object using temp url"""
         expires = self._get_expiry_date()
 
         # get a temp URL for the created object
@@ -109,6 +111,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @decorators.idempotent_id('671f9583-86bd-4128-a034-be282a68c5d8')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_key_2(self):
+        """Test getting object using metadata 'Temp-URL-Key-2'"""
         key2 = 'Meta2-'
         metadata = {'Temp-URL-Key-2': key2}
         self.account_client.create_update_or_delete_account_metadata(
@@ -134,6 +137,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @decorators.idempotent_id('9b08dade-3571-4152-8a4f-a4f2a873a735')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_put_object_using_temp_url(self):
+        """Test putting object using temp url"""
         new_data = data_utils.random_bytes(size=len(self.object_name))
 
         expires = self._get_expiry_date()
@@ -160,6 +164,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @decorators.idempotent_id('249a0111-5ad3-4534-86a7-1993d55f9185')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_head_object_using_temp_url(self):
+        """Test HEAD operation of object using temp url"""
         expires = self._get_expiry_date()
 
         # get a temp URL for the created object
@@ -174,6 +179,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @decorators.idempotent_id('9d9cfd90-708b-465d-802c-e4a8090b823d')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_with_inline_query_parameter(self):
+        """Test getting object using temp url with inline query parameter"""
         expires = self._get_expiry_date()
 
         # get a temp URL for the created object
