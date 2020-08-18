@@ -18,6 +18,7 @@ from tempest.common import image as common_image
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -154,6 +155,15 @@ class BaseV2ImageTest(BaseImageTest):
         self.addCleanup(self.namespaces_client.delete_namespace,
                         namespace_name)
         return namespace
+
+    @classmethod
+    def get_available_stores(cls):
+        stores = []
+        try:
+            stores = cls.client.info_stores()['stores']
+        except exceptions.NotFound:
+            pass
+        return stores
 
 
 class BaseV2MemberImageTest(BaseV2ImageTest):

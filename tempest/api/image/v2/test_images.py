@@ -20,6 +20,7 @@ import six
 
 from oslo_log import log as logging
 from tempest.api.image import base
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -111,6 +112,95 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.client.image_import(image['id'], method='web-download',
                                  image_uri=image_uri)
         self.client.wait_for_resource_activation(image['id'])
+
+
+class MultiStoresImportImagesTest(base.BaseV2ImageTest):
+    """Test importing image in multiple stores"""
+    @classmethod
+    def skip_checks(cls):
+        super(MultiStoresImportImagesTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.import_image:
+            skip_msg = (
+                "%s skipped as image import is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(MultiStoresImportImagesTest, cls).resource_setup()
+        cls.available_import_methods = cls.client.info_import()[
+            'import-methods']['value']
+        if not cls.available_import_methods:
+            raise cls.skipException('Server does not support '
+                                    'any import method')
+
+        # NOTE(pdeore): Skip if glance-direct import method and mutlistore
+        # are not enabled/configured, or only one store is configured in
+        # multiple stores setup.
+        cls.available_stores = cls.get_available_stores()
+        if ('glance-direct' not in cls.available_import_methods or
+                not len(cls.available_stores) > 1):
+            raise cls.skipException(
+                'Either glance-direct import method not present in %s or '
+                'None or only one store is '
+                'configured %s' % (cls.available_import_methods,
+                                   cls.available_stores))
+
+    def _create_and_stage_image(self, all_stores=False):
+        """Create Image & stage image file for glance-direct import method."""
+        image_name = data_utils.rand_name('test-image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private')
+        self.assertEqual('queued', image['status'])
+
+        self.client.stage_image_file(
+            image['id'],
+            six.BytesIO(data_utils.random_bytes(10485760)))
+        # Check image status is 'uploading'
+        body = self.client.show_image(image['id'])
+        self.assertEqual(image['id'], body['id'])
+        self.assertEqual('uploading', body['status'])
+
+        if all_stores:
+            stores_list = ','.join([store['id']
+                                    for store in self.available_stores])
+        else:
+            stores = [store['id'] for store in self.available_stores]
+            stores_list = stores[::len(stores) - 1]
+
+        return body, stores_list
+
+    @decorators.idempotent_id('bf04ff00-3182-47cb-833a-f1c6767b47fd')
+    def test_glance_direct_import_image_to_all_stores(self):
+        """Test image is imported in all available stores
+
+        Create image, import image to all available stores using glance-direct
+        import method and verify that import succeeded.
+        """
+        image, stores = self._create_and_stage_image(all_stores=True)
+
+        self.client.image_import(
+            image['id'], method='glance-direct', all_stores=True)
+
+        waiters.wait_for_image_imported_to_stores(self.client,
+                                                  image['id'], stores)
+
+    @decorators.idempotent_id('82fb131a-dd2b-11ea-aec7-340286b6c574')
+    def test_glance_direct_import_image_to_specific_stores(self):
+        """Test image is imported in all available stores
+
+        Create image, import image to specified store(s) using glance-direct
+        import method and verify that import succeeded.
+        """
+        image, stores = self._create_and_stage_image()
+        self.client.image_import(image['id'], method='glance-direct',
+                                 stores=stores)
+
+        waiters.wait_for_image_imported_to_stores(self.client, image['id'],
+                                                  (','.join(stores)))
 
 
 class BasicOperationsImagesTest(base.BaseV2ImageTest):
