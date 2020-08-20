@@ -30,6 +30,8 @@ Runtime Arguments
 * ``--ports, -p``: (Optional) The path to a JSON file describing the ports
   being used by different services
 * ``--verbose, -v``: (Optional) Print Request and Response Headers and Body
+  data to stdout in the non cliff deprecated CLI
+* ``--all-stdout, -a``: (Optional) Print Request and Response Headers and Body
   data to stdout
 
 
@@ -278,7 +280,7 @@ def parse(stream, non_subunit_name, ports):
     return url_parser
 
 
-def output(url_parser, output_file, verbose):
+def output(url_parser, output_file, all_stdout):
     if output_file is not None:
         with open(output_file, "w") as outfile:
             outfile.write(json.dumps(url_parser.test_logs))
@@ -294,7 +296,7 @@ def output(url_parser, output_file, verbose):
             sys.stdout.write('\t- {0} {1} request for {2} to {3}\n'.format(
                 item.get('status_code'), item.get('verb'),
                 item.get('service'), item.get('url')))
-            if verbose:
+            if all_stdout:
                 sys.stdout.write('\t\t- request headers: {0}\n'.format(
                     item.get('request_headers')))
                 sys.stdout.write('\t\t- request body: {0}\n'.format(
@@ -313,7 +315,7 @@ def entry_point(cl_args=None):
               "please use: 'tempest subunit-describe-calls'")
         cl_args = ArgumentParser().parse_args()
     parser = parse(cl_args.subunit, cl_args.non_subunit_name, cl_args.ports)
-    output(parser, cl_args.output_file, cl_args.verbose)
+    output(parser, cl_args.output_file, cl_args.all_stdout)
 
 
 def _parser_add_args(parser):
@@ -339,9 +341,23 @@ def _parser_add_args(parser):
         help="A JSON file describing the ports for each service."
     )
 
-    parser.add_argument(
-        "-v", "--verbose", action='store_true', default=False,
-        help="Add Request and Response header and body data to stdout."
+    group = parser.add_mutually_exclusive_group()
+    # the -v and --verbose command are for the old subunit-describe-calls
+    # main() CLI interface.  It does not work with the new
+    # tempest subunit-describe-callss CLI. So when the main CLI approach is
+    # deleted this argument is not needed.
+    group.add_argument(
+        "-v", "--verbose", action='store_true', dest='all_stdout',
+        help='Add Request and Response header and body data to stdout print.'
+             ' NOTE: This argument deprecated and does not work with'
+             ' tempest subunit-describe-calls CLI.'
+             ' Use new option: "-a", "--all-stdout"'
+    )
+    group.add_argument(
+        "-a", "--all-stdout", action='store_true',
+        help="Add Request and Response header and body data to stdout print."
+             " Note: this argument work with the subunit-describe-calls and"
+             " tempest subunit-describe-calls CLI commands."
     )
 
 

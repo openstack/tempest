@@ -1,0 +1,10 @@
+---
+fixes:
+  - |
+    Fixed bug #1890060. tempest subunit_describe_calls --verbose not working with Cliff CLI.
+    The subunit_describe_calls --verbose argument was a boolean and worked in the non Cliff CLI
+    which is now deprecated, but does not work with cliff since --verbase is a standard cliff
+    argument which is an int.  Since the tool is in lib directory we cannot change the interface,
+    so we add a new argument -a --all-stdout that will allow cliff CLI to support the
+    feature in subunnit_describe_calls to print request and response headers and bodies
+    to stdout.
