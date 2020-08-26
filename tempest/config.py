@@ -582,10 +582,13 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enable special configuration drive with metadata.'),
     cfg.ListOpt('scheduler_enabled_filters',
-                default=["AvailabilityZoneFilter", "ComputeFilter",
-                         "ComputeCapabilitiesFilter", "ImagePropertiesFilter",
-                         "ServerGroupAntiAffinityFilter",
-                         "ServerGroupAffinityFilter"],
+                default=[
+                    "ComputeFilter",
+                    "ComputeCapabilitiesFilter",
+                    "ImagePropertiesFilter",
+                    "ServerGroupAntiAffinityFilter",
+                    "ServerGroupAffinityFilter",
+                ],
                 help="A list of enabled filters that Nova will accept as "
                      "hints to the scheduler when creating a server. If the "
                      "default value is overridden in nova.conf by the test "
