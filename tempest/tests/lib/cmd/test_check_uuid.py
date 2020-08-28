@@ -11,11 +11,54 @@
 # under the License.
 
 import importlib
+import os
+import sys
 import tempfile
 from unittest import mock
 
+import fixtures
+
 from tempest.lib.cmd import check_uuid
 from tempest.tests import base
+
+
+class TestCLInterface(base.TestCase):
+    CODE = "import unittest\n" \
+           "class TestClass(unittest.TestCase):\n" \
+           "    def test_tests(self):\n" \
+           "        pass"
+
+    def create_tests_file(self, directory):
+        with open(directory + "/__init__.py", "w"):
+            pass
+
+        tests_file = directory + "/tests.py"
+        with open(tests_file, "w") as fake_file:
+            fake_file.write(TestCLInterface.CODE)
+
+        return tests_file
+
+    def test_fix_argument_no(self):
+        temp_dir = self.useFixture(fixtures.TempDir(rootdir="."))
+        tests_file = self.create_tests_file(temp_dir.path)
+
+        sys.argv = [sys.argv[0]] + ["--package",
+                                    os.path.relpath(temp_dir.path)]
+
+        self.assertRaises(SystemExit, check_uuid.run)
+        with open(tests_file, "r") as f:
+            self.assertTrue(TestCLInterface.CODE == f.read())
+
+    def test_fix_argument_yes(self):
+        temp_dir = self.useFixture(fixtures.TempDir(rootdir="."))
+        tests_file = self.create_tests_file(temp_dir.path)
+
+        sys.argv = [sys.argv[0]] + ["--fix", "--package",
+                                    os.path.relpath(temp_dir.path)]
+
+        check_uuid.run()
+        with open(tests_file, "r") as f:
+            self.assertTrue(TestCLInterface.CODE != f.read())
 
 
 class TestSourcePatcher(base.TestCase):
