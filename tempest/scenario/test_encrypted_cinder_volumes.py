@@ -44,7 +44,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
             raise cls.skipException('Encrypted volume attach is not supported')
 
     def launch_instance(self):
-        image = self.glance_image_create()
+        image = self.image_create()
         keypair = self.create_keypair()
 
         return self.create_server(image_id=image, key_name=keypair['name'])
