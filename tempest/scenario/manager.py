@@ -698,21 +698,30 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return snapshot_image
 
     def nova_volume_attach(self, server, volume_to_attach):
-        """Attach nova volume"""
+        """Compute volume attach
+
+        This utility attaches volume from compute and waits for the
+        volume status to be 'in-use' state.
+        """
         volume = self.servers_client.attach_volume(
             server['id'], volumeId=volume_to_attach['id'])['volumeAttachment']
         self.assertEqual(volume_to_attach['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
-
         # Return the updated volume after the attachment
         return self.volumes_client.show_volume(volume['id'])['volume']
 
     def nova_volume_detach(self, server, volume):
-        """Detach nova volume"""
+        """Compute volume detach
+
+        This utility detaches volume from compute and check whether the
+        volume status is 'available' state, and if not, an exception
+        will be thrown.
+        """
         self.servers_client.detach_volume(server['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None, mtu=None, server=None):
