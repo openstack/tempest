@@ -77,6 +77,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             name=data_utils.rand_name(self.__class__.__name__))
         port = body['port']
         # Schedule port deletion with verification upon test completion
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(self._delete_port, port['id'])
         self.assertTrue(port['admin_state_up'])
         # Verify port update
@@ -99,6 +101,10 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         created_ports = body['ports']
         port1 = created_ports[0]
         port2 = created_ports[1]
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port1['id'])
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port2['id'])
         self.addCleanup(self._delete_port, port1['id'])
         self.addCleanup(self._delete_port, port2['id'])
         self.assertEqual(port1['network_id'], network1['id'])
@@ -126,6 +132,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         body = self.ports_client.create_port(
             network_id=net_id,
             name=data_utils.rand_name(self.__class__.__name__))
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        body['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, body['port']['id'])
         port = body['port']
@@ -183,11 +191,15 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         port_1 = self.ports_client.create_port(
             network_id=network['id'],
             name=data_utils.rand_name(self.__class__.__name__))
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_1['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_1['port']['id'])
         port_2 = self.ports_client.create_port(
             network_id=network['id'],
             name=data_utils.rand_name(self.__class__.__name__))
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_2['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_2['port']['id'])
         # List ports filtered by fixed_ips
@@ -241,6 +253,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             network_id=network['id'],
             name=data_utils.rand_name(self.__class__.__name__),
             fixed_ips=fixed_ips)
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_1['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_1['port']['id'])
         fixed_ips = [{'subnet_id': subnet['id'], 'ip_address': ip_address_2}]
@@ -248,6 +262,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             network_id=network['id'],
             name=data_utils.rand_name(self.__class__.__name__),
             fixed_ips=fixed_ips)
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_2['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_2['port']['id'])
 
@@ -307,6 +323,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Add router interface to port created above
         self.routers_client.add_router_interface(router['id'],
                                                  port_id=port['port']['id'])
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.routers_client.remove_router_interface,
                         router['id'], port_id=port['port']['id'])
@@ -343,6 +361,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create a port with multiple IP addresses
         port = self.create_port(network,
                                 fixed_ips=fixed_ips)
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port['id'])
         self.assertEqual(2, len(port['fixed_ips']))
@@ -386,6 +406,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             "admin_state_up": True,
             "fixed_ips": fixed_ip_1}
         body = self.ports_client.create_port(**post_body)
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        body['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, body['port']['id'])
         port = body['port']
@@ -456,6 +478,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             network_id=self.network['id'],
             mac_address=free_mac_address,
             name=data_utils.rand_name(self.__class__.__name__))
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        body['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, body['port']['id'])
         port = body['port']
@@ -474,6 +498,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         network = self._create_network()
         self._create_subnet(network)
         port = self.create_port(network, security_groups=[])
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port['id'])
         self.assertIsNotNone(port['security_groups'])

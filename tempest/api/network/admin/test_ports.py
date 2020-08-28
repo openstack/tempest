@@ -48,6 +48,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                      "name": data_utils.rand_name(self.__class__.__name__)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
+        self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
             self.admin_ports_client.delete_port, port['id'])
@@ -63,6 +65,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                      "name": data_utils.rand_name(self.__class__.__name__)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
+        self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
             self.admin_ports_client.delete_port, port['id'])
@@ -82,6 +86,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
                      "name": data_utils.rand_name(self.__class__.__name__)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
+        self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
             self.admin_ports_client.delete_port, port['id'])
@@ -110,6 +116,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
             name=data_utils.rand_name(self.__class__.__name__),
             network_id=self.network['id'])
         port = body['port']
+        self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
+                        port['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_ports_client.delete_port, port['id'])
         body = self.admin_ports_client.show_port(port['id'])
