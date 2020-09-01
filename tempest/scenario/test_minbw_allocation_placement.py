@@ -124,8 +124,11 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             resources1='%s:%s' % (self.INGRESS_RESOURCE_CLASS,
                                   self.SMALLEST_POSSIBLE_BW))
         if len(alloc_candidates['provider_summaries']) == 0:
-            self.fail('No allocation candidates are available for %s:%s' %
-                      (self.INGRESS_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
+            # Skip if the backend does not support QoS minimum bandwidth
+            # allocation in Placement API
+            raise self.skipException(
+                'No allocation candidates are available for %s:%s' %
+                (self.INGRESS_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
 
         # Just to be sure check with impossible high (placement max_int),
         # allocation
