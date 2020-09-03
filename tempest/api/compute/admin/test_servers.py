@@ -14,9 +14,12 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -201,6 +204,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('7a1323b4-a6a2-497a-96cb-76c07b945c71')
     def test_reset_network_inject_network_info(self):
         """Test resetting and injecting network info of a server"""
+        if not CONF.compute_feature_enabled.xenapi_apis:
+            raise self.skipException(
+                'The resetNetwork server action is not supported.')
+
         # Reset Network of a Server
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.reset_network(server['id'])

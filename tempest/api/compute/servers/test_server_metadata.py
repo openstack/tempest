@@ -14,13 +14,24 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib import decorators
 
+CONF = config.CONF
 
+
+# TODO(stephenfin): Remove these tests once the nova Ussuri branch goes EOL
 class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     """Test server metadata"""
 
     create_default_network = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(ServerMetadataTestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.xenapi_apis:
+            raise cls.skipException(
+                'Metadata is read-only on non-Xen-based deployments.')
 
     @classmethod
     def setup_clients(cls):

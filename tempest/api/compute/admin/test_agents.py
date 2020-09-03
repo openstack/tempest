@@ -13,12 +13,22 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+CONF = config.CONF
 
+
+# TODO(stephenfin): Remove these tests once the nova Ussuri branch goes EOL
 class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Compute Agents API"""
+
+    @classmethod
+    def skip_checks(cls):
+        super(AgentsAdminTestJSON, cls).skip_checks()
+        if not CONF.compute_feature_enabled.xenapi_apis:
+            raise cls.skipException('The os-agents API is not supported.')
 
     @classmethod
     def setup_clients(cls):

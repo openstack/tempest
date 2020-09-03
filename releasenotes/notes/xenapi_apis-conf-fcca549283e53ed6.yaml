@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    A number of Compute APIs that only worked with the XenAPI virt driver have
+    been removed in the Compute service. As a result, their corresponding tests
+    are now disabled by default. They can be re-enabled using the new
+    ``[compute_feature_enabled] xenapi_apis`` config option.
