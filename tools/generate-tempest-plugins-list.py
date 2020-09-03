@@ -41,7 +41,7 @@ BLACKLIST = [
     'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
     'openstack/networking-generic-switch',
     # https://review.opendev.org/#/c/634846/
-    'openstack/networking-l2gw-tempest-plugin',
+    'x/networking-l2gw-tempest-plugin',
     # https://review.opendev.org/#/c/635093/
     'openstack/networking-midonet',  # https://review.opendev.org/#/c/635096/
     'x/networking-plumgrid',  # https://review.opendev.org/#/c/635096/
