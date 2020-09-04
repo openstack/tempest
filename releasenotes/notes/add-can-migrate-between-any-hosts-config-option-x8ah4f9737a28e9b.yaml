@@ -1,0 +1,9 @@
+---
+features:
+  - Add a new config option can_migrate_between_any_hosts in the
+    compute-feature-enabled section, which can be set to False for environment
+    with non homogeneous compute nodes, so that it can select a destination
+    host for migrating automatically, otherwise the testcase may fail
+    unexpectedly. e.g., if source host is with CPU "E5-2699 v4" and the
+    selected target host is with CPU "E5-2670 v3", the live-migration will
+    fail because of the downgrade issue.

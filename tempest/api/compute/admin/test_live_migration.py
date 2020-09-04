@@ -71,6 +71,10 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 
     def _live_migrate(self, server_id, target_host, state,
                       volume_backed=False):
+        # If target_host is None, check whether source host is different with
+        # the new host after migration.
+        if target_host is None:
+            source_host = self.get_host_for_server(server_id)
         self._migrate_server_to(server_id, target_host, volume_backed)
         waiters.wait_for_server_status(self.servers_client, server_id, state)
         migration_list = (self.admin_migration_client.list_migrations()
@@ -82,8 +86,12 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
             if (live_migration['instance_uuid'] == server_id):
                 msg += "\n%s" % live_migration
         msg += "]"
-        self.assertEqual(target_host, self.get_host_for_server(server_id),
-                         msg)
+        if target_host is None:
+            self.assertNotEqual(source_host,
+                                self.get_host_for_server(server_id), msg)
+        else:
+            self.assertEqual(target_host, self.get_host_for_server(server_id),
+                             msg)
 
 
 class LiveMigrationTest(LiveMigrationTestBase):
@@ -105,7 +113,11 @@ class LiveMigrationTest(LiveMigrationTestBase):
         server_id = self.create_test_server(wait_until="ACTIVE",
                                             volume_backed=volume_backed)['id']
         source_host = self.get_host_for_server(server_id)
-        destination_host = self.get_host_other_than(server_id)
+        if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
+            # not to specify a host so that the scheduler will pick one
+            destination_host = None
+        else:
+            destination_host = self.get_host_other_than(server_id)
 
         if state == 'PAUSED':
             self.admin_servers_client.pause_server(server_id)
@@ -161,7 +173,11 @@ class LiveMigrationTest(LiveMigrationTestBase):
         """Test live migrating a server with volume attached"""
         server = self.create_test_server(wait_until="ACTIVE")
         server_id = server['id']
-        target_host = self.get_host_other_than(server_id)
+        if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
+            # not to specify a host so that the scheduler will pick one
+            target_host = None
+        else:
+            target_host = self.get_host_other_than(server_id)
 
         volume = self.create_volume()
 
