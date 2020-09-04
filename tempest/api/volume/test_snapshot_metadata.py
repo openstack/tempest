@@ -23,6 +23,8 @@ CONF = config.CONF
 
 
 class SnapshotMetadataTestJSON(base.BaseVolumeTest):
+    """Test snapshot metadata"""
+
     @classmethod
     def skip_checks(cls):
         super(SnapshotMetadataTestJSON, cls).skip_checks()
@@ -45,6 +47,7 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('a2f20f99-e363-4584-be97-bc33afb1a56c')
     def test_crud_snapshot_metadata(self):
+        """Test create/get/update/delete snapshot metadata"""
         # Create metadata for the snapshot
         metadata = {"key1": "value1",
                     "key2": "value2",
@@ -82,7 +85,7 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('e8ff85c5-8f97-477f-806a-3ac364a949ed')
     def test_update_show_snapshot_metadata_item(self):
-        # Update metadata item for the snapshot
+        """Test update/show snapshot metadata item"""
         metadata = {"key1": "value1",
                     "key2": "value2",
                     "key3": "value3"}

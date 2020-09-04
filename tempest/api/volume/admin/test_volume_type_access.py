@@ -24,11 +24,13 @@ CONF = config.CONF
 
 
 class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
+    """Test volume type access"""
 
     credentials = ['primary', 'alt', 'admin']
 
     @decorators.idempotent_id('d4dd0027-835f-4554-a6e5-50903fb79184')
     def test_volume_type_access_add(self):
+        """Test adding volume type access for non-admin project"""
         # Creating a NON public volume type
         params = {'os-volume-type-access:is_public': False}
         volume_type = self.create_volume_type(**params)
@@ -52,6 +54,7 @@ class VolumeTypesAccessTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('5220eb28-a435-43ce-baaf-ed46f0e95159')
     def test_volume_type_access_list(self):
+        """Test listing volume type access"""
         # Creating a NON public volume type
         params = {'os-volume-type-access:is_public': False}
         volume_type = self.create_volume_type(**params)

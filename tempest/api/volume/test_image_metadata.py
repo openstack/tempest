@@ -24,6 +24,7 @@ CONF = config.CONF
 
 
 class VolumesImageMetadata(base.BaseVolumeTest):
+    """Test volume image metadata"""
 
     @classmethod
     def skip_checks(cls):
@@ -41,6 +42,7 @@ class VolumesImageMetadata(base.BaseVolumeTest):
     @decorators.idempotent_id('03efff0b-5c75-4822-8f10-8789ac15b13e')
     @utils.services('image')
     def test_update_show_delete_image_metadata(self):
+        """Test update/show/delete volume's image metadata"""
         # Update image metadata
         image_metadata = {'image_id': '5137a025-3c5f-43c1-bc64-5f41270040a5',
                           'image_name': 'image',
