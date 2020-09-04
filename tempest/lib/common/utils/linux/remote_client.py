@@ -11,7 +11,6 @@
 #    under the License.
 
 import functools
-import re
 import sys
 
 import netaddr
@@ -134,9 +133,8 @@ class RemoteClient(object):
         This method will not unmount the config drive, so unmount_config_drive
         must be used for cleanup.
         """
-        cmd_blkid = 'blkid | grep -i config-2'
-        result = self.exec_command(cmd_blkid)
-        dev_name = re.match('([^:]+)', result).group()
+        cmd_blkid = 'blkid -L config-2 -o device'
+        dev_name = self.exec_command(cmd_blkid).strip()
 
         try:
             self.exec_command('sudo mount %s /mnt' % dev_name)
