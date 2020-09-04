@@ -33,7 +33,7 @@ class Manager(clients.ServiceClients):
 
     def __init__(self, credentials, scope='project'):
         msg = ("tempest.manager.Manager is not a stable interface and as such "
-               "it should not imported directly. It will be removed as "
+               "it should not be imported directly. It will be removed as "
                "soon as the client manager becomes available in tempest.lib.")
         LOG.warning(msg)
         dscv = CONF.identity.disable_ssl_certificate_validation
