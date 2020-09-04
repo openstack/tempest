@@ -67,11 +67,8 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         # Export Backup
         export_backup = (self.admin_backups_client.export_backup(backup['id'])
                          ['backup-record'])
-        self.assertIn('backup_service', export_backup)
-        self.assertIn('backup_url', export_backup)
         self.assertTrue(export_backup['backup_service'].startswith(
                         'cinder.backup.drivers'))
-        self.assertIsNotNone(export_backup['backup_url'])
 
         # NOTE(geguileo): Backups are imported with the same backup id
         # (important for incremental backups among other things), so we cannot
@@ -92,7 +89,6 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         # deletions will delete data from the backup back-end because they
         # were both pointing to the same backend data.
         self.addCleanup(self._delete_backup, new_id)
-        self.assertIn("id", import_backup)
         self.assertEqual(new_id, import_backup['id'])
         waiters.wait_for_volume_resource_status(self.admin_backups_client,
                                                 import_backup['id'],

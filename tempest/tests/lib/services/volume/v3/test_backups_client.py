@@ -45,6 +45,8 @@ class TestBackupsClient(base.BaseServiceTest):
                 "availability_zone": "az1",
                 "container": "volumebackups",
                 "created_at": "2013-04-02T10:35:27.000000",
+                "updated_at": "2013-04-02T10:39:27.000000",
+                "data_timestamp": "2013-04-02T10:35:27.000000",
                 "description": None,
                 "fail_reason": None,
                 "id": "2ef47aee-8844-490c-804d-2a8efe561c65",
@@ -64,7 +66,6 @@ class TestBackupsClient(base.BaseServiceTest):
                 "user_id": "515ba0dd59f84f25a6a084a45d8d93b2",
                 "size": 1,
                 "status": "available",
-                "updated_at": "2013-04-02T10:35:27.000000",
                 "volume_id": "e5185058-943a-4cb4-96d9-72c184c337d6",
                 "is_incremental": True,
                 "has_dependent_backups": False
