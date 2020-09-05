@@ -19,11 +19,16 @@ from tempest.lib import decorators
 
 
 class KeyPairsV2TestJSON(base.BaseKeypairTest):
+    """Test keypairs API with compute microversion less than 2.2"""
+
     max_microversion = '2.1'
 
     @decorators.idempotent_id('1d1dbedb-d7a0-432a-9d09-83f543c3c19b')
     def test_keypairs_create_list_delete(self):
-        # Keypairs created should be available in the response list
+        """Test create/list/delete keypairs
+
+        Keypairs created should be available in the response list
+        """
         # Create 3 keypairs
         key_list = list()
         for _ in range(3):
@@ -48,7 +53,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
 
     @decorators.idempotent_id('6c1d3123-4519-4742-9194-622cb1714b7d')
     def test_keypair_create_delete(self):
-        # Keypair should be created, verified and deleted
+        """Test create/delete keypair"""
         k_name = data_utils.rand_name('keypair')
         keypair = self.create_keypair(k_name)
         key_name = keypair['name']
@@ -58,7 +63,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
 
     @decorators.idempotent_id('a4233d5d-52d8-47cc-9a25-e1864527e3df')
     def test_get_keypair_detail(self):
-        # Keypair should be created, Got details by name and deleted
+        """Test getting keypair detail by keypair name"""
         k_name = data_utils.rand_name('keypair')
         self.create_keypair(k_name)
         keypair_detail = self.keypairs_client.show_keypair(k_name)['keypair']
@@ -68,7 +73,7 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
 
     @decorators.idempotent_id('39c90c6a-304a-49dd-95ec-2366129def05')
     def test_keypair_create_with_pub_key(self):
-        # Keypair should be created with a given public key
+        """Test creating keypair with a given public key"""
         k_name = data_utils.rand_name('keypair')
         pub_key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCs"
                    "Ne3/1ILNCqFyfYWDeTKLD6jEXC2OQHLmietMWW+/vd"

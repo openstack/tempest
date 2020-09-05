@@ -25,6 +25,11 @@ CONF = config.CONF
 
 
 class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
+    """Negative tests of security groups API
+
+    Negative tests of security groups API with compute microversion
+    less than 2.36.
+    """
 
     @classmethod
     def setup_clients(cls):
@@ -34,8 +39,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('673eaec1-9b3e-48ed-bdf1-2786c1b9661c')
     def test_security_group_get_nonexistent_group(self):
-        # Negative test:Should not be able to GET the details
-        # of non-existent Security Group
+        """Test getting non existent security group details should fail"""
         non_exist_id = self.generate_random_security_group_id()
         self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
                           non_exist_id)
@@ -45,8 +49,12 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1759c3cb-b0fc-44b7-86ce-c99236be911d')
     def test_security_group_create_with_invalid_group_name(self):
-        # Negative test: Security Group should not be created with group name
-        # as an empty string/with white spaces/chars more than 255
+        """Test creating security group with invalid group name should fail
+
+        Negative test: Security group should not be created with group name
+        as an empty string, or group name with white spaces, or group name
+        with chars more than 255.
+        """
         s_description = data_utils.rand_name('description')
         # Create Security Group with empty string as group name
         self.assertRaises(lib_exc.BadRequest,
@@ -67,9 +75,12 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('777b6f14-aca9-4758-9e84-38783cfa58bc')
     def test_security_group_create_with_invalid_group_description(self):
-        # Negative test: Security Group should not be created with description
-        # longer than 255 chars. Empty description is allowed by the API
-        # reference, however.
+        """Test creating security group with invalid group description
+
+        Negative test: Security group should not be created with description
+        longer than 255 chars. Empty description is allowed by the API
+        reference, however.
+        """
         s_name = data_utils.rand_name('securitygroup')
         # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
@@ -82,8 +93,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                       "Neutron allows duplicate names for security groups")
     @decorators.attr(type=['negative'])
     def test_security_group_create_with_duplicate_name(self):
-        # Negative test:Security Group with duplicate name should not
-        # be created
+        """Test creating security group with duplicate name should fail"""
         s_name = data_utils.rand_name('securitygroup')
         s_description = data_utils.rand_name('description')
         self.create_security_group(name=s_name, description=s_description)
@@ -95,7 +105,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('36a1629f-c6da-4a26-b8b8-55e7e5d5cd58')
     def test_delete_the_default_security_group(self):
-        # Negative test:Deletion of the "default" Security Group should Fail
+        """Test deleting "default" security group should fail"""
         default_security_group_id = None
         body = self.client.list_security_groups()['security_groups']
         for i in range(len(body)):
@@ -110,7 +120,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6727c00b-214c-4f9e-9a52-017ac3e98411')
     def test_delete_nonexistent_security_group(self):
-        # Negative test:Deletion of a non-existent Security Group should fail
+        """Test deleting non existent security group should fail"""
         non_exist_id = self.generate_random_security_group_id()
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, non_exist_id)
@@ -118,8 +128,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1438f330-8fa4-4aeb-8a94-37c250106d7f')
     def test_delete_security_group_without_passing_id(self):
-        # Negative test:Deletion of a Security Group with out passing ID
-        # should Fail
+        """Test deleting security group passing empty group id should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_security_group, '')
 
@@ -128,7 +137,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                       "Neutron does not check the security group ID")
     @decorators.attr(type=['negative'])
     def test_update_security_group_with_invalid_sg_id(self):
-        # Update security_group with invalid sg_id should fail
+        """Test updating security group with invalid group id should fail"""
         s_name = data_utils.rand_name('sg')
         s_description = data_utils.rand_name('description')
         # Create a non int sg_id
@@ -142,7 +151,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                       "Neutron does not check the security group name")
     @decorators.attr(type=['negative'])
     def test_update_security_group_with_invalid_sg_name(self):
-        # Update security_group with invalid sg_name should fail
+        """Test updating security group to invalid group name should fail"""
         securitygroup = self.create_security_group()
         securitygroup_id = securitygroup['id']
         # Update Security Group with group name longer than 255 chars
@@ -156,7 +165,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
                       "Neutron does not check the security group description")
     @decorators.attr(type=['negative'])
     def test_update_security_group_with_invalid_sg_des(self):
-        # Update security_group with invalid sg_des should fail
+        """Test updating security group to invalid description should fail"""
         securitygroup = self.create_security_group()
         securitygroup_id = securitygroup['id']
         # Update Security Group with group description longer than 255 chars
@@ -168,7 +177,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('27edee9c-873d-4da6-a68a-3c256efebe8f')
     def test_update_non_existent_security_group(self):
-        # Update a non-existent Security Group should Fail
+        """Test updating a non existent security group should fail"""
         non_exist_id = self.generate_random_security_group_id()
         s_name = data_utils.rand_name('sg')
         s_description = data_utils.rand_name('description')

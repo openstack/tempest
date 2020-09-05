@@ -18,6 +18,10 @@ from tempest.lib import decorators
 
 
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
+    """Test security group rules API
+
+    Test security group rules API with compute microversion less than 2.36.
+    """
 
     @classmethod
     def setup_clients(cls):
@@ -55,8 +59,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('850795d7-d4d3-4e55-b527-a774c0123d3a')
     def test_security_group_rules_create(self):
-        # Positive test: Creation of Security Group rule
-        # should be successful
+        """Test creating security group rules"""
         # Creating a Security Group to add rules to it
         security_group = self.create_security_group()
         securitygroup_id = security_group['id']
@@ -72,10 +75,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('7a01873e-3c38-4f30-80be-31a043cfe2fd')
     def test_security_group_rules_create_with_optional_cidr(self):
-        # Positive test: Creation of Security Group rule
-        # with optional argument cidr
-        # should be successful
-
+        """Test creating security group rules with optional field cidr"""
         # Creating a Security Group to add rules to it
         security_group = self.create_security_group()
         parent_group_id = security_group['id']
@@ -94,10 +94,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('7f5d2899-7705-4d4b-8458-4505188ffab6')
     def test_security_group_rules_create_with_optional_group_id(self):
-        # Positive test: Creation of Security Group rule
-        # with optional argument group_id
-        # should be successful
-
+        """Test creating security group rules with optional field group id"""
         # Creating a Security Group to add rules to it
         security_group = self.create_security_group()
         parent_group_id = security_group['id']
@@ -122,8 +119,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('a6154130-5a55-4850-8be4-5e9e796dbf17')
     def test_security_group_rules_list(self):
-        # Positive test: Created Security Group rules should be
-        # in the list of all rules
+        """Test listing security group rules"""
         # Creating a Security Group to add rules to it
         security_group = self.create_security_group()
         securitygroup_id = security_group['id']
@@ -159,7 +155,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
 
     @decorators.idempotent_id('fc5c5acf-2091-43a6-a6ae-e42760e9ffaf')
     def test_security_group_rules_delete_when_peer_group_deleted(self):
-        # Positive test:rule will delete when peer group deleting
+        """Test security group rule gets deleted when peer group is deleted"""
         # Creating a Security Group to add rules to it
         security_group = self.create_security_group()
         sg1_id = security_group['id']
