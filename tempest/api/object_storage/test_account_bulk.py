@@ -21,6 +21,7 @@ from tempest.lib import decorators
 
 
 class BulkTest(base.BaseObjectTest):
+    """Test bulk operation of archived file"""
 
     def setUp(self):
         super(BulkTest, self).setUp()
@@ -70,7 +71,7 @@ class BulkTest(base.BaseObjectTest):
     @decorators.idempotent_id('a407de51-1983-47cc-9f14-47c2b059413c')
     @utils.requires_ext(extension='bulk_upload', service='object')
     def test_extract_archive(self):
-        # Test bulk operation of file upload with an archived file
+        """Test bulk operation of file upload with an archived file"""
         filepath, container_name, object_name = self._create_archive()
         resp = self._upload_archive(filepath)
         self.containers.append(container_name)
@@ -95,7 +96,7 @@ class BulkTest(base.BaseObjectTest):
     @decorators.idempotent_id('c075e682-0d2a-43b2-808d-4116200d736d')
     @utils.requires_ext(extension='bulk_delete', service='object')
     def test_bulk_delete(self):
-        # Test bulk operation of deleting multiple files
+        """Test bulk operation of deleting multiple files"""
         filepath, container_name, object_name = self._create_archive()
         self._upload_archive(filepath)
 
@@ -110,7 +111,7 @@ class BulkTest(base.BaseObjectTest):
     @decorators.idempotent_id('dbea2bcb-efbb-4674-ac8a-a5a0e33d1d79')
     @utils.requires_ext(extension='bulk_delete', service='object')
     def test_bulk_delete_by_POST(self):
-        # Test bulk operation of deleting multiple files
+        """Test bulk operation of deleting multiple files by HTTP POST"""
         filepath, container_name, object_name = self._create_archive()
         self._upload_archive(filepath)
 

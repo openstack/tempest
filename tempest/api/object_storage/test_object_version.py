@@ -24,6 +24,8 @@ CONF = config.CONF
 
 
 class ContainerTest(base.BaseObjectTest):
+    """Test versioned container"""
+
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)
         self.assertHeaders(resp, 'Container', 'HEAD')
@@ -39,6 +41,15 @@ class ContainerTest(base.BaseObjectTest):
         not CONF.object_storage_feature_enabled.object_versioning,
         'Object-versioning is disabled')
     def test_versioned_container(self):
+        """Test versioned container
+
+        1. create container1
+        2. create container2, with container1 as 'X-versions-Location' header
+        3. create object1 in container1
+        4. create 2nd version of object1
+        5. delete object version 2
+        6. delete object version 1
+        """
         # create container
         vers_container_name = data_utils.rand_name(name='TestVersionContainer')
         resp, _ = self.container_client.update_container(vers_container_name)

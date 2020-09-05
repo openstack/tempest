@@ -21,6 +21,7 @@ CONF = config.CONF
 
 
 class AccountNegativeTest(base.BaseObjectTest):
+    """Negative tests of account"""
 
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
@@ -33,7 +34,7 @@ class AccountNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('070e6aca-6152-4867-868d-1118d68fb38c')
     def test_list_containers_with_non_authorized_user(self):
-        # list containers using non-authorized user
+        """Test listing containers using non-authorized user"""
 
         test_auth_provider = self.os_operator.auth_provider
         # Get auth for the test user
