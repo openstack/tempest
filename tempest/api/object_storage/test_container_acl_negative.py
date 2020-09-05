@@ -22,6 +22,7 @@ CONF = config.CONF
 
 
 class ObjectACLsNegativeTest(base.BaseObjectTest):
+    """Negative tests of object ACLs"""
 
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
@@ -48,6 +49,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('af587587-0c24-4e15-9822-8352ce711013')
     def test_write_object_without_using_creds(self):
+        """Test writing object without using credentials"""
         # trying to create object with empty headers
         # X-Auth-Token is not provided
         object_name = data_utils.rand_name(name='Object')
@@ -62,6 +64,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('af85af0b-a025-4e72-a90e-121babf55720')
     def test_delete_object_without_using_creds(self):
+        """Test deleting object without using credentials"""
         # create object
         object_name = data_utils.rand_name(name='Object')
         self.object_client.create_object(self.container_name, object_name,
@@ -79,7 +82,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('63d84e37-55a6-42e2-9e5f-276e60e26a00')
     def test_write_object_with_non_authorized_user(self):
-        # attempt to upload another file using non-authorized user
+        """Test writing object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
         object_name = data_utils.rand_name(name='Object')
         # trying to create object with non-authorized user
@@ -94,7 +97,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('abf63359-be52-4feb-87dd-447689fc77fd')
     def test_read_object_with_non_authorized_user(self):
-        # attempt to read object using non-authorized user
+        """Test reading object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(
@@ -112,7 +115,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7343ac3d-cfed-4198-9bb0-00149741a492')
     def test_delete_object_with_non_authorized_user(self):
-        # attempt to delete object using non-authorized user
+        """Test deleting object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(
@@ -130,7 +133,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9ed01334-01e9-41ea-87ea-e6f465582823')
     def test_read_object_without_rights(self):
-        # attempt to read object using non-authorized user
+        """Test reading object without rights"""
         # update X-Container-Read metadata ACL
         cont_headers = {'X-Container-Read': 'badtenant:baduser'}
         resp_meta, _ = (
@@ -155,7 +158,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a3a585a7-d8cf-4b65-a1a0-edc2b1204f85')
     def test_write_object_without_rights(self):
-        # attempt to write object using non-authorized user
+        """Test writing object without rights"""
         # update X-Container-Write metadata ACL
         cont_headers = {'X-Container-Write': 'badtenant:baduser'}
         resp_meta, _ = (
@@ -177,7 +180,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8ba512ad-aa6e-444e-b882-2906a0ea2052')
     def test_write_object_without_write_rights(self):
-        # attempt to write object using non-authorized user
+        """Test writing object without write rights"""
         # update X-Container-Read and X-Container-Write metadata ACL
         tenant_name = self.os_operator.credentials.tenant_name
         username = self.os_operator.credentials.username
@@ -203,7 +206,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('b4e366f8-f185-47ab-b789-df4416f9ecdb')
     def test_delete_object_without_write_rights(self):
-        # attempt to delete object using non-authorized user
+        """Test deleting object without write rights"""
         # update X-Container-Read and X-Container-Write metadata ACL
         tenant_name = self.os_operator.credentials.tenant_name
         username = self.os_operator.credentials.username

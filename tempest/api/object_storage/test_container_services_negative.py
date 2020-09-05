@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class ContainerNegativeTest(base.BaseObjectTest):
+    """Negative tests of containers"""
 
     @classmethod
     def resource_setup(cls):
@@ -41,7 +42,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_create_container_name_exceeds_max_length(self):
-        # Attempts to create a container name that is longer than max
+        """Test creating container with name longer than max"""
         max_length = self.constraints['max_container_name_length']
         # create a container with long name
         container_name = data_utils.arbitrary_string(size=max_length + 1)
@@ -58,8 +59,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_create_container_metadata_name_exceeds_max_length(self):
-        # Attempts to create container with metadata name
-        # that is longer than max.
+        """Test creating container with metadata name longer than max"""
         max_length = self.constraints['max_meta_name_length']
         container_name = data_utils.rand_name(name='TestContainer')
         metadata_name = 'X-Container-Meta-' + data_utils.arbitrary_string(
@@ -77,8 +77,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_create_container_metadata_value_exceeds_max_length(self):
-        # Attempts to create container with metadata value
-        # that is longer than max.
+        """Test creating container with metadata value longer than max"""
         max_length = self.constraints['max_meta_value_length']
         container_name = data_utils.rand_name(name='TestContainer')
         metadata_value = data_utils.arbitrary_string(size=max_length + 1)
@@ -95,8 +94,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_create_container_metadata_exceeds_overall_metadata_count(self):
-        # Attempts to create container with metadata that exceeds the
-        # default count
+        """Test creating container with metadata exceeding default count"""
         max_count = self.constraints['max_meta_count']
         container_name = data_utils.rand_name(name='TestContainer')
         metadata = {}
@@ -113,8 +111,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('1a95ab2e-b712-4a98-8a4d-8ce21b7557d6')
     def test_get_metadata_headers_with_invalid_container_name(self):
-        # Attempts to retrieve metadata headers with an invalid
-        # container name.
+        """Test getting metadata headers with invalid container name"""
         self.assertRaises(exceptions.NotFound,
                           self.container_client.list_container_metadata,
                           'invalid_container_name')
@@ -122,7 +119,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('125a24fa-90a7-4cfc-b604-44e49d788390')
     def test_update_metadata_with_nonexistent_container_name(self):
-        # Attempts to update metadata using a nonexistent container name.
+        """Test updating metadata using a nonexistent container name"""
         metadata = {'animal': 'penguin'}
 
         self.assertRaises(
@@ -133,7 +130,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('65387dbf-a0e2-4aac-9ddc-16eb3f1f69ba')
     def test_delete_with_nonexistent_container_name(self):
-        # Attempts to delete metadata using a nonexistent container name.
+        """Test deleting metadata using a non existent container name"""
         metadata = {'animal': 'penguin'}
 
         self.assertRaises(
@@ -144,8 +141,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('14331d21-1e81-420a-beea-19cb5e5207f5')
     def test_list_all_container_objects_with_nonexistent_container(self):
-        # Attempts to get a listing of all objects on a container
-        # that doesn't exist.
+        """Test getting a list of all objects on a non existent container"""
         params = {'limit': 9999, 'format': 'json'}
         self.assertRaises(exceptions.NotFound,
                           self.container_client.list_container_objects,
@@ -154,8 +150,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('86b2ab08-92d5-493d-acd2-85f0c848819e')
     def test_list_all_container_objects_on_deleted_container(self):
-        # Attempts to get a listing of all objects on a container
-        # that was deleted.
+        """Test getting a list of all objects on a deleted container"""
         container_name = self.create_container()
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
@@ -168,6 +163,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('42da116e-1e8c-4c96-9e06-2f13884ed2b1')
     def test_delete_non_empty_container(self):
+        """Test deleting a container with object in it"""
         # create a container and an object within it
         # attempt to delete a container that isn't empty.
         container_name = self.create_container()

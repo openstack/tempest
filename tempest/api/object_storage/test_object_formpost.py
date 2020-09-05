@@ -25,6 +25,7 @@ from tempest.lib import decorators
 
 
 class ObjectFormPostTest(base.BaseObjectTest):
+    """Test object post with form"""
 
     metadata = {}
     containers = []
@@ -110,6 +111,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
     @decorators.idempotent_id('80fac02b-6e54-4f7b-be0d-a965b5cbef76')
     @utils.requires_ext(extension='formpost', service='object')
     def test_post_object_using_form(self):
+        """Test posting object using form"""
         body, content_type = self.get_multipart_form()
 
         headers = {'Content-Type': content_type,

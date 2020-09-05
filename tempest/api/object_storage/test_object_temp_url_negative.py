@@ -26,6 +26,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class ObjectTempUrlNegativeTest(base.BaseObjectTest):
+    """Negative tests of object temp url"""
 
     metadata = {}
     containers = []
@@ -96,7 +97,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
     @decorators.idempotent_id('5a583aca-c804-41ba-9d9a-e7be132bdf0b')
     @utils.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
-
+        """Test getting object after expiration time"""
         expires = self._get_expiry_date(1)
         # get a temp URL for the created object
         url = self._get_temp_url(self.container_name,
