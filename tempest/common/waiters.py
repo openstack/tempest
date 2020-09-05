@@ -223,6 +223,25 @@ def wait_for_volume_resource_status(client, resource_id, status):
              resource_name, resource_id, status, time.time() - start)
 
 
+def wait_for_volume_attachment_create(client, volume_id, server_id):
+    """Waits for a volume attachment to be created at a given volume."""
+    start = int(time.time())
+    while True:
+        attachments = client.show_volume(volume_id)['volume']['attachments']
+        found = [a for a in attachments if a['server_id'] == server_id]
+        if found:
+            LOG.info('Attachment %s created for volume %s to server %s after '
+                     'waiting for %f seconds', found[0]['attachment_id'],
+                     volume_id, server_id, time.time() - start)
+            return found[0]
+        time.sleep(client.build_interval)
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Failed to attach volume %s to server %s '
+                       'within the required time (%s s).' %
+                       (volume_id, server_id, client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+
+
 def wait_for_volume_attachment_remove(client, volume_id, attachment_id):
     """Waits for a volume attachment to be removed from a given volume."""
     start = int(time.time())

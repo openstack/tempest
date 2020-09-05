@@ -234,6 +234,29 @@ class TestVolumeWaiters(base.TestCase):
                                     mock.call(volume_id)])
         mock_sleep.assert_called_once_with(1)
 
+    def test_wait_for_volume_attachment_create(self):
+        vol_detached = {'volume': {'attachments': []}}
+        vol_attached = {'volume': {'attachments': [
+                       {'id': uuids.volume_id,
+                        'attachment_id': uuids.attachment_id,
+                        'server_id': uuids.server_id,
+                        'volume_id': uuids.volume_id}]}}
+        show_volume = mock.MagicMock(side_effect=[
+            vol_detached, vol_detached, vol_attached])
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           build_interval=1,
+                           build_timeout=5,
+                           show_volume=show_volume)
+        self.patch('time.time')
+        self.patch('time.sleep')
+        att = waiters.wait_for_volume_attachment_create(
+            client, uuids.volume_id, uuids.server_id)
+        assert att == vol_attached['volume']['attachments'][0]
+        # Assert that show volume is called until the attachment is removed.
+        show_volume.assert_has_calls([mock.call(uuids.volume_id),
+                                      mock.call(uuids.volume_id),
+                                      mock.call(uuids.volume_id)])
+
     def test_wait_for_volume_attachment(self):
         vol_detached = {'volume': {'attachments': []}}
         vol_attached = {'volume': {'attachments': [
