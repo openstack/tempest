@@ -21,6 +21,8 @@ CONF = config.CONF
 
 
 class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
+    """Negative tests of volume attaching"""
+
     create_default_network = True
 
     @classmethod
@@ -34,6 +36,7 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
     @decorators.related_bug('1630783', status_code=500)
     @decorators.idempotent_id('a313b5cd-fbd0-49cc-94de-870e99f763c7')
     def test_delete_attached_volume(self):
+        """Test deleting attachemd volume should fail"""
         server = self.create_test_server(wait_until='ACTIVE')
         volume = self.create_volume()
         self.attach_volume(server, volume)
@@ -44,10 +47,13 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('aab919e2-d992-4cbb-a4ed-745c2475398c')
     def test_attach_attached_volume_to_same_server(self):
-        # Test attaching the same volume to the same instance once
-        # it's already attached. The nova/cinder validation for this differs
-        # depending on whether or not cinder v3.27 is being used to attach
-        # the volume to the instance.
+        """Test attaching attached volume to same server should fail
+
+        Test attaching the same volume to the same instance once
+        it's already attached. The nova/cinder validation for this differs
+        depending on whether or not cinder v3.27 is being used to attach
+        the volume to the instance.
+        """
         server = self.create_test_server(wait_until='ACTIVE')
         volume = self.create_volume()
 
@@ -59,6 +65,7 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ee37a796-2afb-11e7-bc0f-fa163e65f5ce')
     def test_attach_attached_volume_to_different_server(self):
+        """Test attaching attached volume to different server should fail"""
         server1 = self.create_test_server(wait_until='ACTIVE')
         volume = self.create_volume()
 

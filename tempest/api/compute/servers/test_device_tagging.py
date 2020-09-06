@@ -103,6 +103,7 @@ class DeviceTaggingBase(base.BaseV2ComputeTest):
 
 
 class TaggedBootDevicesTest(DeviceTaggingBase):
+    """Test tagged boot device with compute microversion equals 2.32"""
 
     min_microversion = '2.32'
     # NOTE(mriedem): max_version looks odd but it's actually correct. Due to a
@@ -149,6 +150,16 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
     @decorators.idempotent_id('a2e65a6c-66f1-4442-aaa8-498c31778d96')
     @utils.services('network', 'volume', 'image')
     def test_tagged_boot_devices(self):
+        """Test tagged boot devices
+
+        1. Create volumes
+        2. Create networks
+        3. Create subnets
+        4. Create ports
+        5. Create server, specifying tags for items in networks and
+           block_device_mapping_v2,
+        6. Verify tagged devices are in server via metadata service
+        """
         # Create volumes
         # The create_volume methods waits for the volumes to be available and
         # the base class will clean them up on tearDown.
@@ -300,11 +311,14 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
 
 
 class TaggedBootDevicesTest_v242(TaggedBootDevicesTest):
+    """Test tagged boot devices with compute microversion greater than 2.41"""
+
     min_microversion = '2.42'
     max_microversion = 'latest'
 
 
 class TaggedAttachmentsTest(DeviceTaggingBase):
+    """Test tagged attachments with compute microversion greater than 2.48"""
 
     min_microversion = '2.49'
     max_microversion = 'latest'
@@ -342,6 +356,16 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
     @decorators.idempotent_id('3e41c782-2a89-4922-a9d2-9a188c4e7c7c')
     @utils.services('network', 'volume', 'image')
     def test_tagged_attachment(self):
+        """Test tagged attachment
+
+        1. Create network
+        2. Create subnet
+        3. Create volume
+        4. Create server
+        5. Attach tagged networks and volume
+        6. Verify tagged devices are in server via metadata service
+        7. Detach tagged networks and volume
+        """
         # Create network
         net = self.networks_client.create_network(
             name=data_utils.rand_name(

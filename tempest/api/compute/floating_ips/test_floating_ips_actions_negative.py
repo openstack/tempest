@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
+    """Test floating ips API with compute microversion less than 2.36"""
 
     max_microversion = '2.35'
 
@@ -46,8 +47,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e0f059b-e4dd-48fb-8207-06e3bba5b074')
     def test_allocate_floating_ip_from_nonexistent_pool(self):
-        # Negative test:Allocation of a new floating IP from a nonexistent_pool
-        # to a project should fail
+        """Test allocating floating ip from non existent pool should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.create_floating_ip,
                           pool="non_exist_pool")
@@ -55,15 +55,14 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ae1c55a8-552b-44d4-bfb6-2a115a15d0ba')
     def test_delete_nonexistent_floating_ip(self):
-        # Negative test:Deletion of a nonexistent floating IP
-        # from project should fail
-
+        """Test deleting non existent floating ip should fail"""
         # Deleting the non existent floating IP
         self.assertRaises(lib_exc.NotFound, self.client.delete_floating_ip,
                           self.non_exist_id)
 
 
 class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
+    """Test floating ips API with compute microversion less than 2.44"""
 
     max_microversion = '2.43'
 
@@ -76,8 +75,7 @@ class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('595fa616-1a71-4670-9614-46564ac49a4c')
     def test_associate_nonexistent_floating_ip(self):
-        # Negative test:Association of a non existent floating IP
-        # to specific server should fail
+        """Test associating non existent floating ip to server should fail"""
         # Associating non existent floating IP
         self.assertRaises(lib_exc.NotFound,
                           self.client.associate_floating_ip_to_server,
@@ -86,7 +84,7 @@ class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0a081a66-e568-4e6b-aa62-9587a876dca8')
     def test_dissociate_nonexistent_floating_ip(self):
-        # Negative test:Dissociation of a non existent floating IP should fail
+        """Test dissociating non existent floating ip should fail"""
         # Dissociating non existent floating IP
         self.assertRaises(lib_exc.NotFound,
                           self.client.disassociate_floating_ip_from_server,
@@ -95,7 +93,7 @@ class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('804b4fcb-bbf5-412f-925d-896672b61eb3')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
-        # Negative test:Association of empty floating IP to specific server
+        """Test associating empty floating ip to server should fail"""
         # should raise NotFound or BadRequest(In case of Nova V2.1) exception.
         self.assertRaises((lib_exc.NotFound, lib_exc.BadRequest),
                           self.client.associate_floating_ip_to_server,
@@ -106,10 +104,13 @@ class FloatingIPsAssociationNegativeTestJSON(base.BaseFloatingIPsTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_ip_to_server_with_floating_ip(self):
-        # The VM have one port
-        # Associate floating IP A to the VM
-        # Associate floating IP B which is from same pool with floating IP A
-        # to the VM, should raise BadRequest exception
+        """Test associating floating ip to server already with floating ip
+
+        1. The VM have one port
+        2. Associate floating IP A to the VM
+        3. Associate floating IP B which is from same pool with floating IP A
+           to the VM, should raise BadRequest exception
+        """
         body = self.client.create_floating_ip(
             pool=CONF.network.public_network_id)['floating_ip']
         self.addCleanup(self.client.delete_floating_ip, body['id'])

@@ -23,14 +23,18 @@ CONF = config.CONF
 
 
 class FloatingIPDetailsNegativeTestJSON(base.BaseFloatingIPsTest):
+    """Negative tests of floating ip detail
+
+    Negative tests of floating ip detail with compute microversion less
+    than 2.36.
+    """
 
     max_microversion = '2.35'
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7ab18834-4a4b-4f28-a2c5-440579866695')
     def test_get_nonexistent_floating_ip_details(self):
-        # Negative test:Should not be able to GET the details
-        # of non-existent floating IP
+        """Test getting non existent floating ip should fail"""
         # Creating a non-existent floatingIP id
         if CONF.service_available.neutron:
             non_exist_id = data_utils.rand_uuid()

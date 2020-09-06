@@ -53,9 +53,11 @@ class ServerRescueTestBase(base.BaseV2ComputeTest):
 
 
 class ServerRescueTestJSON(ServerRescueTestBase):
+    """Test server rescue"""
 
     @decorators.idempotent_id('fd032140-714c-42e4-a8fd-adcd8df06be6')
     def test_rescue_unrescue_instance(self):
+        """Test rescue/unrescue server"""
         password = data_utils.rand_password()
         server = self.create_test_server(adminPass=password,
                                          wait_until='ACTIVE')
@@ -68,6 +70,7 @@ class ServerRescueTestJSON(ServerRescueTestBase):
 
 
 class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
+    """Test server rescue with compute microversion less than 2.36"""
 
     max_microversion = '2.35'
 
@@ -81,7 +84,7 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
     @testtools.skipUnless(CONF.network_feature_enabled.floating_ips,
                           "Floating ips are not available")
     def test_rescued_vm_associate_dissociate_floating_ip(self):
-        # Association of floating IP to a rescued vm
+        """Test associate/dissociate floating ip for rescued server"""
         floating_ip_body = self.floating_ips_client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
         self.addCleanup(self.floating_ips_client.delete_floating_ip,
@@ -96,6 +99,7 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
 
     @decorators.idempotent_id('affca41f-7195-492d-8065-e09eee245404')
     def test_rescued_vm_add_remove_security_group(self):
+        """Test add/remove security group to for rescued server"""
         # Add Security group
         sg = self.create_security_group()
         self.servers_client.add_security_group(self.rescued_server_id,
@@ -154,33 +158,43 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
 
 
 class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
+    """Test rescuing server specifying type of device for the rescue disk"""
 
     @decorators.idempotent_id('947004c3-e8ef-47d9-9f00-97b74f9eaf96')
     def test_stable_device_rescue_cdrom_ide(self):
+        """Test rescuing server with cdrom and ide as the rescue disk"""
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='cdrom', hw_rescue_bus='ide')
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
     @decorators.idempotent_id('16865750-1417-4854-bcf7-496e6753c01e')
     def test_stable_device_rescue_disk_virtio(self):
+        """Test rescuing server with disk and virtio as the rescue disk"""
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio')
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
     @decorators.idempotent_id('12340157-6306-4745-bdda-cfa019908b48')
     def test_stable_device_rescue_disk_scsi(self):
+        """Test rescuing server with disk and scsi as the rescue disk"""
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='scsi')
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
     @decorators.idempotent_id('647d04cf-ad35-4956-89ab-b05c5c16f30c')
     def test_stable_device_rescue_disk_usb(self):
+        """Test rescuing server with disk and usb as the rescue disk"""
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='usb')
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
     @decorators.idempotent_id('a3772b42-00bf-4310-a90b-1cc6fd3e7eab')
     def test_stable_device_rescue_disk_virtio_with_volume_attached(self):
+        """Test rescuing server with volume attached
+
+        Attach a volume to the server and then rescue the server with disk
+        and virtio as the rescue disk.
+        """
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio')
         server = self.servers_client.show_server(server_id)['server']
@@ -192,12 +206,22 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
 
 
 class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
+    """Test rescuing server specifying type of device for the rescue disk
+
+    Test rescuing server specifying type of device for the rescue disk with
+    compute microversion greater than 2.86.
+    """
 
     min_microversion = '2.87'
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('48f123cb-922a-4065-8db6-b9a9074a556b')
     def test_stable_device_rescue_bfv_blank_volume(self):
+        """Test rescuing server with blank volume as block_device_mapping_v2
+
+        Create a server with block_device_mapping_v2 with blank volume,
+        then rescue the server with disk and virtio as the rescue disk.
+        """
         block_device_mapping_v2 = [{
             "boot_index": "0",
             "source_type": "blank",
@@ -211,6 +235,11 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
     @decorators.attr(type='slow')
     @decorators.idempotent_id('e4636333-c928-40fc-98b7-70a23eef4224')
     def test_stable_device_rescue_bfv_image_volume(self):
+        """Test rescuing server with blank volume as block_device_mapping_v2
+
+        Create a server with block_device_mapping_v2 with image volume,
+        then rescue the server with disk and virtio as the rescue disk.
+        """
         block_device_mapping_v2 = [{
             "boot_index": "0",
             "source_type": "image",
