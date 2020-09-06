@@ -25,6 +25,8 @@ CONF = config.CONF
 
 
 class VolumesSnapshotTestJSON(base.BaseVolumeTest):
+    """Test volume snapshots"""
+
     create_default_network = True
 
     @classmethod
@@ -41,6 +43,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @utils.services('compute')
     def test_snapshot_create_delete_with_volume_in_use(self):
+        """Test create/delete snapshot from volume attached to server"""
         # Create a test instance
         server = self.create_server()
         # NOTE(zhufl) Here we create volume from self.image_ref for adding
@@ -66,7 +69,13 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     @decorators.idempotent_id('5210a1de-85a0-11e6-bb21-641c676a5d61')
     @utils.services('compute')
     def test_snapshot_create_offline_delete_online(self):
+        """Test creating snapshots when volume is detached and attached
 
+        1. Create snapshot1 from volume1(not attached to any server)
+        2. Attach volume1 to server1
+        3. Create snapshot2 and snapshot3 from volume1
+        4. Delete snapshot3, snapshot1, snapshot2
+        """
         # Create a snapshot while it is not attached
         snapshot1 = self.create_snapshot(self.volume_origin['id'])
 
@@ -74,7 +83,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         server = self.create_server()
         self.attach_volume(server['id'], self.volume_origin['id'])
 
-        # Now that the volume is attached, create another snapshots
+        # Now that the volume is attached, create other snapshots
         snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)
         snapshot3 = self.create_snapshot(self.volume_origin['id'], force=True)
 
@@ -86,6 +95,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('2a8abbe4-d871-46db-b049-c41f5af8216e')
     def test_snapshot_create_get_list_update_delete(self):
+        """Test create/get/list/update/delete snapshot"""
         # Create a snapshot with metadata
         metadata = {"snap-meta1": "value1",
                     "snap-meta2": "value2",
@@ -156,19 +166,25 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
-        # Creates a volume from a snapshot passing a size
-        # different from the source
+        """Test creating volume from snapshot with extending size"""
         self._create_volume_from_snapshot(extra_size=1)
 
     @decorators.idempotent_id('053d8870-8282-4fff-9dbb-99cb58bb5e0a')
     def test_volume_from_snapshot_no_size(self):
-        # Creates a volume from a snapshot defaulting to original size
+        """Test creating volume from snapshot with original size"""
         self._create_volume_from_snapshot()
 
     @decorators.idempotent_id('bbcfa285-af7f-479e-8c1a-8c34fc16543c')
     @testtools.skipUnless(CONF.volume_feature_enabled.backup,
                           "Cinder backup is disabled")
     def test_snapshot_backup(self):
+        """Test creating backup from snapshot and volume
+
+        1. Create snapshot1 from volume1
+        2. Create backup from volume1 and snapshot1
+        3. Check the created backup's volume is volume1 and snapshot
+           is snapshot1
+        """
         # Create a snapshot
         snapshot = self.create_snapshot(volume_id=self.volume_origin['id'])
 

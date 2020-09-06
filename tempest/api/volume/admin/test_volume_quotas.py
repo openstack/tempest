@@ -22,6 +22,8 @@ QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
 
 
 class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
+    """Test volume quotas with admin privilege"""
+
     credentials = ['primary', 'alt', 'admin']
 
     def setUp(self):
@@ -54,17 +56,19 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('59eada70-403c-4cef-a2a3-a8ce2f1b07a0')
     def test_list_quotas(self):
+        """Test showing volume quota set"""
         # Check response schema
         self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
 
     @decorators.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
+        """Test showing volume default quota set"""
         # Check response schema
         self.admin_quotas_client.show_default_quota_set(self.demo_tenant_id)
 
     @decorators.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
-        # Admin can update all the resource quota limits for a tenant
+        """Test admin can update all the volume quota limits for a project"""
         new_quota_set = {'gigabytes': 1009,
                          'volumes': 11,
                          'snapshots': 11,
@@ -87,14 +91,14 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):
+        """Test showing volume quota usage"""
         # Check response schema
         self.admin_quotas_client.show_quota_set(
             self.os_admin.credentials.tenant_id, params={'usage': True})
 
     @decorators.idempotent_id('874b35a9-51f1-4258-bec5-cd561b6690d3')
     def test_delete_quota(self):
-        # Admin can delete the resource quota set for a project
-
+        """Test admin can delete the volume quota set for a project"""
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id, **self.cleanup_quota_set)
 
@@ -112,6 +116,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
+        """Test volume quota usage is updated after creating volume"""
         quota_usage = self.admin_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
@@ -131,6 +136,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('8911036f-9d54-4720-80cc-a1c9796a8805')
     def test_quota_usage_after_volume_transfer(self):
+        """Test volume quota usage is updated after transferring volume"""
         # Create a volume for transfer
         volume = self.create_volume()
         self.addCleanup(self.delete_volume,

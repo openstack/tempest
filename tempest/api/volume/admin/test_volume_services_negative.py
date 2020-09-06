@@ -19,6 +19,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
+    """Negative tests of volume services"""
 
     @classmethod
     def resource_setup(cls):
@@ -30,6 +31,7 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('3246ce65-ba70-4159-aa3b-082c28e4b484')
     def test_enable_service_with_invalid_host(self):
+        """Test enabling volume service with invalid host should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.admin_volume_services_client.enable_service,
                           host='invalid_host', binary=self.binary)
@@ -37,6 +39,7 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('c571f179-c6e6-4c50-a0ab-368b628a8ac1')
     def test_disable_service_with_invalid_binary(self):
+        """Test disabling volume service with invalid binary should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.admin_volume_services_client.disable_service,
                           host=self.host, binary='invalid_binary')
@@ -44,6 +47,7 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('77767b36-5e8f-4c68-a0b5-2308cc21ec64')
     def test_disable_log_reason_with_no_reason(self):
+        """Test disabling volume service with none reason should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_volume_services_client.disable_log_reason,
                           host=self.host, binary=self.binary,
@@ -52,6 +56,7 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('712bfab8-1f44-4eb5-a632-fa70bf78f05e')
     def test_freeze_host_with_invalid_host(self):
+        """Test freezing volume service with invalid host should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_volume_services_client.freeze_host,
                           host='invalid_host')
@@ -59,6 +64,7 @@ class VolumeServicesNegativeTest(base.BaseVolumeAdminTest):
     @decorators.attr(type='negative')
     @decorators.idempotent_id('7c6287c9-d655-47e1-9a11-76f6657a6dce')
     def test_thaw_host_with_invalid_host(self):
+        """Test thawing volume service with invalid host should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.admin_volume_services_client.thaw_host,
                           host='invalid_host')

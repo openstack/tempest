@@ -27,6 +27,7 @@ CONF = config.CONF
 
 
 class VolumesBackupsTest(base.BaseVolumeTest):
+    """Test volumes backup"""
 
     @classmethod
     def skip_checks(cls):
@@ -54,6 +55,16 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                       'ceph does not support arbitrary container names')
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
+        """Test create/get/list/restore/delete volume backup
+
+        1. Create volume1 with metadata
+        2. Create backup1 from volume1
+        3. Show backup1
+        4. List backups with detail
+        5. Restore backup1
+        6. Verify backup1 has been restored successfully with the metadata
+           of volume1
+        """
         # Create a volume with metadata
         metadata = {"vol-meta1": "value1",
                     "vol-meta2": "value2",
@@ -89,7 +100,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         restored_volume_metadata = self.volumes_client.show_volume(
             restored_volume['volume_id'])['volume']['metadata']
 
-        # Verify the backups has been restored successfully
+        # Verify the backup has been restored successfully
         # with the metadata of the source volume.
         self.assertThat(restored_volume_metadata.items(),
                         matchers.ContainsAll(metadata.items()))
@@ -120,6 +131,13 @@ class VolumesBackupsTest(base.BaseVolumeTest):
     @decorators.idempotent_id('2a8ba340-dff2-4511-9db7-646f07156b15')
     @utils.services('image')
     def test_bootable_volume_backup_and_restore(self):
+        """Test backuping and restoring a bootable volume
+
+        1. Create volume1 from image
+        2. Create backup1 from volume1
+        3. Restore backup1
+        4. Verify the restored backup volume is bootable
+        """
         # Create volume from image
         img_uuid = CONF.compute.image_ref
         volume = self.create_volume(imageRef=img_uuid)
@@ -144,6 +162,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 
 
 class VolumesBackupsV39Test(base.BaseVolumeTest):
+    """Test volumes backup with volume microversion greater than 3.8"""
 
     _api_version = 3
     min_microversion = '3.9'
@@ -157,6 +176,7 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
 
     @decorators.idempotent_id('9b374cbc-be5f-4d37-8848-7efb8a873dcc')
     def test_update_backup(self):
+        """Test updating backup's name and description"""
         # Create volume and backup
         volume = self.create_volume()
         backup = self.create_backup(volume_id=volume['id'])

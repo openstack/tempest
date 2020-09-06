@@ -24,6 +24,7 @@ CONF = config.CONF
 # it requires force_tenant_isolation=True, which need admin
 # credentials to create non-admin users for the tests.
 class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa: T115
+    """Test volume absolute limits"""
 
     # avoid existing volumes of pre-defined tenant
     force_tenant_isolation = True
@@ -43,7 +44,7 @@ class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa: T115
 
     @decorators.idempotent_id('8e943f53-e9d6-4272-b2e9-adcf2f7c29ad')
     def test_get_volume_absolute_limits(self):
-        # get volume limit for a tenant
+        """Test getting volume absolute limits"""
         absolute_limits = \
             self.volume_limits_client.show_limits(
             )['limits']['absolute']
