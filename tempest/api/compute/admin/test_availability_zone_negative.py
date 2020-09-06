@@ -18,7 +18,7 @@ from tempest.lib import exceptions as lib_exc
 
 
 class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests Availability Zone API List"""
+    """Negative Tests of Availability Zone API List"""
 
     @classmethod
     def setup_clients(cls):
@@ -28,8 +28,12 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('bf34dca2-fdc3-4073-9c02-7648d9eae0d7')
     def test_get_availability_zone_list_detail_with_non_admin_user(self):
-        # List of availability zones and available services with
-        # non-administrator user
+        """Test listing availability zone with detail by non-admin user
+
+        List of availability zones and available services with
+        non-administrator user is not allowed.
+        """
+
         self.assertRaises(
             lib_exc.Forbidden,
             self.non_adm_client.list_availability_zones, detail=True)

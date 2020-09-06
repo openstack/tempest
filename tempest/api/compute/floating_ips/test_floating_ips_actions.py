@@ -25,13 +25,13 @@ CONF = config.CONF
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
+    """Test floating ips API with compute microversion less than 2.36"""
 
     max_microversion = '2.35'
 
     @decorators.idempotent_id('f7bfb946-297e-41b8-9e8c-aba8e9bb5194')
     def test_allocate_floating_ip(self):
-        # Positive test:Allocation of a new floating IP to a project
-        # should be successful
+        """Test allocating a floating ip to a project"""
         body = self.client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
         floating_ip_id_allocated = body['id']
@@ -45,8 +45,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
     @decorators.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
     def test_delete_floating_ip(self):
-        # Positive test:Deletion of valid floating IP from project
-        # should be successful
+        """Test deleting a valid floating ip from project"""
         # Creating the floating IP that is to be deleted in this method
         floating_ip_body = self.client.create_floating_ip(
             pool=CONF.network.floating_network_name)['floating_ip']
@@ -59,6 +58,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
 
 
 class FloatingIPsAssociationTestJSON(base.BaseFloatingIPsTest):
+    """Test floating ips association with microversion less than 2.44"""
 
     max_microversion = '2.43'
 
@@ -80,9 +80,7 @@ class FloatingIPsAssociationTestJSON(base.BaseFloatingIPsTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_disassociate_floating_ip(self):
-        # Positive test:Associate and disassociate the provided floating IP
-        # to a specific server should be successful
-
+        """Test associate/disassociate floating ip to a server"""
         # Association of floating IP to fixed IP address
         self.client.associate_floating_ip_to_server(
             self.floating_ip,
@@ -102,6 +100,12 @@ class FloatingIPsAssociationTestJSON(base.BaseFloatingIPsTest):
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')
     def test_associate_already_associated_floating_ip(self):
+        """Test associating an already associated floating ip
+
+        First associate a floating ip to server1, then associate the floating
+        ip to server2, the floating ip will be associated to server2 and no
+        longer associated to server1.
+        """
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association

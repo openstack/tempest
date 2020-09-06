@@ -71,10 +71,11 @@ class AggregatesAdminTestBase(base.BaseV2ComputeAdminTest):
 
 
 class AggregatesAdminTestJSON(AggregatesAdminTestBase):
+    """Tests Aggregates API that require admin privileges"""
 
     @decorators.idempotent_id('0d148aa3-d54c-4317-aa8d-42040a475e20')
     def test_aggregate_create_delete(self):
-        # Create and delete an aggregate.
+        """Test create/delete aggregate"""
         aggregate = self._create_test_aggregate()
         self.assertIsNone(aggregate['availability_zone'])
 
@@ -83,7 +84,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('5873a6f8-671a-43ff-8838-7ce430bb6d0b')
     def test_aggregate_create_delete_with_az(self):
-        # Create and delete an aggregate.
+        """Test create/delete aggregate with availability_zone"""
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
         self.assertEqual(az_name, aggregate['availability_zone'])
@@ -93,7 +94,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('68089c38-04b1-4758-bdf0-cf0daec4defd')
     def test_aggregate_create_verify_entry_in_list(self):
-        # Create an aggregate and ensure it is listed.
+        """Test listing aggregate should contain the created aggregate"""
         aggregate = self._create_test_aggregate()
         aggregates = self.client.list_aggregates()['aggregates']
         self.assertIn((aggregate['id'], aggregate['availability_zone']),
@@ -102,7 +103,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('36ec92ca-7a73-43bc-b920-7531809e8540')
     def test_aggregate_create_update_metadata_get_details(self):
-        # Create an aggregate and ensure its details are returned.
+        """Test set/get aggregate metadata"""
         aggregate = self._create_test_aggregate()
         body = self.client.show_aggregate(aggregate['id'])['aggregate']
         self.assertEqual(aggregate['name'], body['name'])
@@ -121,7 +122,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('4d2b2004-40fa-40a1-aab2-66f4dab81beb')
     def test_aggregate_create_update_with_az(self):
-        # Update an aggregate and ensure properties are updated correctly
+        """Test create/update aggregate with availability_zone"""
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self._create_test_aggregate(
@@ -148,7 +149,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('c8e85064-e79b-4906-9931-c11c24294d02')
     def test_aggregate_add_remove_host(self):
-        # Add a host to the given aggregate and remove.
+        """Test adding host to and removing host from aggregate"""
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
@@ -169,7 +170,10 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('7f6a1cc5-2446-4cdb-9baa-b6ae0a919b72')
     def test_aggregate_add_host_list(self):
-        # Add a host to the given aggregate and list.
+        """Test listing aggregate contains the host added to the aggregate
+
+        Add a host to the given aggregate and list.
+        """
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
@@ -188,7 +192,10 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('eeef473c-7c52-494d-9f09-2ed7fc8fc036')
     def test_aggregate_add_host_get_details(self):
-        # Add a host to the given aggregate and get details.
+        """Test showing aggregate contains the host added to the aggregate
+
+        Add a host to the given aggregate and get details.
+        """
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
@@ -204,7 +211,7 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('96be03c7-570d-409c-90f8-e4db3c646996')
     def test_aggregate_add_host_create_server_with_az(self):
-        # Add a host to the given aggregate and create a server.
+        """Test adding a host to the given aggregate and creating a server"""
         self.useFixture(fixtures.LockFixture('availability_zone'))
         az_name = data_utils.rand_name(self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
@@ -233,6 +240,11 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
 
 
 class AggregatesAdminTestV241(AggregatesAdminTestBase):
+    """Tests Aggregates API that require admin privileges
+
+    Tests Aggregates API that require admin privileges with compute
+    microversion greater than 2.40.
+    """
     min_microversion = '2.41'
 
     # NOTE(gmann): This test tests the Aggregate APIs response schema
@@ -241,6 +253,11 @@ class AggregatesAdminTestV241(AggregatesAdminTestBase):
 
     @decorators.idempotent_id('fdf24d9e-8afa-4700-b6aa-9c498351504f')
     def test_create_update_show_aggregate_add_remove_host(self):
+        """Test response schema of aggregates API
+
+        Test response schema of aggregates API(create/update/show/add host/
+        remove host) with compute microversion greater than 2.40.
+        """
         # Update and add a host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         # Checking create aggregate API response schema

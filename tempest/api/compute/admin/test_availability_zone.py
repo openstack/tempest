@@ -27,12 +27,12 @@ class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('d3431479-8a09-4f76-aa2d-26dc580cb27c')
     def test_get_availability_zone_list(self):
-        # List of availability zone
+        """Test listing availability zones"""
         availability_zone = self.client.list_availability_zones()
         self.assertNotEmpty(availability_zone['availabilityZoneInfo'])
 
     @decorators.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')
     def test_get_availability_zone_list_detail(self):
-        # List of availability zones and available services
+        """Test listing availability zones with detail"""
         availability_zone = self.client.list_availability_zones(detail=True)
         self.assertNotEmpty(availability_zone['availabilityZoneInfo'])
