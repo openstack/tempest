@@ -26,7 +26,7 @@ CONF = config.CONF
 
 
 class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-    """Tests Servers API using admin privileges"""
+    """Negative Tests of Servers API using admin privileges"""
 
     @classmethod
     def setup_clients(cls):
@@ -47,6 +47,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'Resize not available.')
     @decorators.attr(type=['negative'])
     def test_resize_server_using_overlimit_ram(self):
+        """Test resizing server using over limit ram should fail"""
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         quota_set = self.quotas_client.show_quota_set(
@@ -69,6 +70,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'Resize not available.')
     @decorators.attr(type=['negative'])
     def test_resize_server_using_overlimit_vcpus(self):
+        """Test resizing server using over limit vcpus should fail"""
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
         quota_set = self.quotas_client.show_quota_set(
@@ -89,6 +91,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('b0b4d8af-1256-41ef-9ee7-25f1c19dde80')
     def test_reset_state_server_invalid_state(self):
+        """Test resetting server state to invalid state value should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state='invalid')
@@ -96,6 +99,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('4cdcc984-fab0-4577-9a9d-6d558527ee9d')
     def test_reset_state_server_invalid_type(self):
+        """Test resetting server state to invalid state type should fail"""
         self.assertRaises(lib_exc.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state=1)
@@ -103,13 +107,14 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e741298b-8df2-46f0-81cb-8f814ff2504c')
     def test_reset_state_server_nonexistent_server(self):
+        """Test resetting a non existent server's state should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.reset_state, '999', state='error')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('46a4e1ca-87ae-4d28-987a-1b6b136a0221')
     def test_migrate_non_existent_server(self):
-        # migrate a non existent server
+        """Test migrating a non existent server should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.migrate_server,
                           data_utils.rand_uuid())
@@ -121,6 +126,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           'Suspend is not available.')
     @decorators.attr(type=['negative'])
     def test_migrate_server_invalid_state(self):
+        """Test migrating a server with invalid state should fail"""
         # create server.
         server = self.create_test_server(wait_until='ACTIVE')
         server_id = server['id']

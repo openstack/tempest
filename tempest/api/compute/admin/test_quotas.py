@@ -97,9 +97,11 @@ class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
 
 
 class QuotasAdminTestJSON(QuotasAdminTestBase):
+    """Test compute quotas by admin user"""
+
     @decorators.idempotent_id('3b0a7c8f-cf58-46b8-a60c-715a32a8ba7d')
     def test_get_default_quotas(self):
-        # Admin can get the default resource quota set for a tenant
+        """Test admin can get the default compute quota set for a project"""
         expected_quota_set = self.default_quota_set | set(['id'])
         quota_set = self.adm_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
@@ -109,7 +111,7 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
 
     @decorators.idempotent_id('55fbe2bf-21a9-435b-bbd2-4162b0ed799a')
     def test_update_all_quota_resources_for_tenant(self):
-        # Admin can update all the resource quota limits for a tenant
+        """Test admin can update all the compute quota limits for a project"""
         default_quota_set = self.adm_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         new_quota_set = {'metadata_items': 256, 'ram': 10240,
@@ -140,11 +142,12 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
     # TODO(afazekas): merge these test cases
     @decorators.idempotent_id('ce9e0815-8091-4abd-8345-7fe5b85faa1d')
     def test_get_updated_quotas(self):
+        """Test that GET shows the updated quota set of project"""
         self._get_updated_quotas()
 
     @decorators.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
     def test_delete_quota(self):
-        # Admin can delete the resource quota set for a project
+        """Test admin can delete the compute quota set for a project"""
         project_name = data_utils.rand_name('ram_quota_project')
         project_desc = project_name + '-desc'
         project = identity.identity_utils(self.os_admin).create_project(
@@ -165,26 +168,40 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
 
 
 class QuotasAdminTestV236(QuotasAdminTestBase):
-    min_microversion = '2.36'
+    """Test compute quotas with microversion greater than 2.35
+
     # NOTE(gmann): This test tests the Quota APIs response schema
     # for 2.36 microversion. No specific assert or behaviour verification
     # is needed.
+    """
+
+    min_microversion = '2.36'
 
     @decorators.idempotent_id('4268b5c9-92e5-4adc-acf1-3a2798f3d803')
     def test_get_updated_quotas(self):
-        # Checking Quota update, get, get details APIs response schema
+        """Test compute quotas API with microversion greater than 2.35
+
+        Checking compute quota update, get, get details APIs response schema.
+        """
         self._get_updated_quotas()
 
 
 class QuotasAdminTestV257(QuotasAdminTestBase):
-    min_microversion = '2.57'
+    """Test compute quotas with microversion greater than 2.56
+
     # NOTE(gmann): This test tests the Quota APIs response schema
     # for 2.57 microversion. No specific assert or behaviour verification
     # is needed.
+    """
+
+    min_microversion = '2.57'
 
     @decorators.idempotent_id('e641e6c6-e86c-41a4-9e5c-9493c0ae47ad')
     def test_get_updated_quotas(self):
-        # Checking Quota update, get, get details APIs response schema
+        """Test compute quotas API with microversion greater than 2.56
+
+        Checking compute quota update, get, get details APIs response schema.
+        """
         self._get_updated_quotas()
 
 
@@ -212,6 +229,7 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     # 'danger' flag.
     @decorators.idempotent_id('7932ab0f-5136-4075-b201-c0e2338df51a')
     def test_update_default_quotas(self):
+        """Test updating default compute quota class set"""
         # get the current 'default' quota class values
         body = (self.adm_client.show_quota_class_set('default')
                 ['quota_class_set'])

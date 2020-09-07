@@ -24,6 +24,8 @@ CONF = config.CONF
 
 
 class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
+    """Negative tests of live migration"""
+
     @classmethod
     def skip_checks(cls):
         super(LiveMigrationNegativeTest, cls).skip_checks()
@@ -40,7 +42,7 @@ class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7fb7856e-ae92-44c9-861a-af62d7830bcb')
     def test_invalid_host_for_migration(self):
-        # Migrating to an invalid host should not change the status
+        """Test migrating to an invalid host should not change the status"""
         target_host = data_utils.rand_name('host')
         server = self.create_test_server(wait_until="ACTIVE")
 
@@ -52,6 +54,7 @@ class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e2f94f5-2ee8-4830-bef5-5bc95bb0795b')
     def test_live_block_migration_suspended(self):
+        """Test migrating a suspended server should not change the status"""
         server = self.create_test_server(wait_until="ACTIVE")
 
         self.admin_servers_client.suspend_server(server['id'])
