@@ -124,7 +124,7 @@ def idempotent_id(id):
     def decorator(f):
         f = testtools.testcase.attr('id-%s' % id)(f)
         if f.__doc__:
-            f.__doc__ = 'Test idempotent id: %s\n%s' % (id, f.__doc__)
+            f.__doc__ = 'Test idempotent id: %s\n\n%s' % (id, f.__doc__)
         else:
             f.__doc__ = 'Test idempotent id: %s' % id
         return f

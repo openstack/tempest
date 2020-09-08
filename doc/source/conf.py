@@ -24,6 +24,7 @@
 
 import os
 import subprocess
+import sys
 
 # Build the plugin registry
 def build_plugin_registry(app):
@@ -31,16 +32,20 @@ def build_plugin_registry(app):
         os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     subprocess.call(['tools/generate-tempest-plugins-list.sh'], cwd=root_dir)
 
+def autodoc_skip_member_handler(app, what, name, obj, skip, options):
+    return skip or (what == "class" and not name.startswith("test"))
+
 def setup(app):
+    app.connect('autodoc-skip-member', autodoc_skip_member_handler)
     if os.getenv('GENERATE_TEMPEST_PLUGIN_LIST', 'true').lower() == 'true':
         app.connect('builder-inited', build_plugin_registry)
-
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+# sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../../tempest'))
+sys.path.insert(0, os.path.abspath('../../tempest/api'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -204,3 +209,10 @@ latex_documents = [
     ('index', 'doc-tempest.tex', u'Tempest Testing Project',
      u'OpenStack Foundation', 'manual'),
 ]
+
+latex_use_xindy = False
+
+latex_elements = {
+    'maxlistdepth': 20,
+    'printindex': '\\footnotesize\\raggedright\\printindex'
+}
