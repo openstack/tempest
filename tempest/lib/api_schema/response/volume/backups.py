@@ -66,7 +66,7 @@ create_backup = {
                 'properties': {
                     'id': {'type': 'string', 'format': 'uuid'},
                     'links': parameter_types.links,
-                    'name': {'type': 'string'},
+                    'name': {'type': ['string', 'null']},
                     # TODO(zhufl): metadata is added in 3.43, we should move it
                     # to the 3.43 schema file when microversion is supported
                     # in volume interfaces.
@@ -91,7 +91,7 @@ update_backup = {
                 'properties': {
                     'id': {'type': 'string', 'format': 'uuid'},
                     'links': parameter_types.links,
-                    'name': {'type': 'string'},
+                    'name': {'type': ['string', 'null']},
                     'metadata': {'^.+$': {'type': 'string'}}
                 },
                 'additionalProperties': False,
