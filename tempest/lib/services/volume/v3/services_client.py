@@ -17,11 +17,17 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.volume import services as schema
+from tempest.lib.api_schema.response.volume.v3_7 import services as schemav37
 from tempest.lib.common import rest_client
+from tempest.lib.services.volume import base_client
 
 
-class ServicesClient(rest_client.RestClient):
+class ServicesClient(base_client.BaseClient):
     """Client class to send CRUD Volume Services API requests"""
+
+    schema_versions_info = [
+        {'min': None, 'max': '3.6', 'schema': schema},
+        {'min': '3.7', 'max': None, 'schema': schemav37}]
 
     def list_services(self, **params):
         """List all Cinder services.
@@ -36,6 +42,7 @@ class ServicesClient(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_services, resp, body)
         return rest_client.ResponseBody(resp, body)
 

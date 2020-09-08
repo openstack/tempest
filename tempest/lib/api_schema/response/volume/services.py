@@ -33,10 +33,6 @@ list_services = {
                         'frozen': {'type': 'boolean'},
                         'updated_at': parameter_types.date_time,
                         'zone': {'type': 'string'},
-                        # TODO(zhufl): cluster is added in 3.7, we should move
-                        # it to the 3.7 schema file when microversion is
-                        # supported in volume interfaces
-                        'cluster': {'type': 'string'},
                         'replication_status': {'type': 'string'},
                         'active_backend_id': {'type': ['string', 'null']},
                         'backend_state': {'type': 'string'},

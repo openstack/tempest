@@ -13,8 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib.common import api_version_request
 from tempest.lib.common import api_version_utils
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 
 VOLUME_MICROVERSION = None
 
@@ -43,3 +45,39 @@ class BaseClient(rest_client.RestClient):
                 'volume %s' % VOLUME_MICROVERSION,
                 resp)
         return resp, resp_body
+
+    def get_schema(self, schema_versions_info):
+        """Get JSON schema
+
+        This method provides the matching schema for requested
+        microversion.
+
+        :param schema_versions_info: List of dict which provides schema
+                                     information with range of valid versions.
+
+        Example::
+
+         schema_versions_info = [
+             {'min': None, 'max': '2.1', 'schema': schemav21},
+             {'min': '2.2', 'max': '2.9', 'schema': schemav22},
+             {'min': '2.10', 'max': None, 'schema': schemav210}]
+        """
+        schema = None
+        version = api_version_request.APIVersionRequest(VOLUME_MICROVERSION)
+        for items in schema_versions_info:
+            min_version = api_version_request.APIVersionRequest(items['min'])
+            max_version = api_version_request.APIVersionRequest(items['max'])
+            # This is case where COMPUTE_MICROVERSION is None, which means
+            # request without microversion So select base v2.1 schema.
+            if version.is_null() and items['min'] is None:
+                schema = items['schema']
+                break
+            # else select appropriate schema as per COMPUTE_MICROVERSION
+            elif version.matches(min_version, max_version):
+                schema = items['schema']
+                break
+        if schema is None:
+            raise exceptions.JSONSchemaNotFound(
+                version=version.get_string(),
+                schema_versions_info=schema_versions_info)
+        return schema
