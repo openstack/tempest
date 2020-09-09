@@ -249,9 +249,9 @@ class TestVolumeWaiters(base.TestCase):
         waiters.wait_for_volume_attachment_remove(client, uuids.volume_id,
                                                   uuids.attachment_id)
         # Assert that show volume is called until the attachment is removed.
-        show_volume.assert_has_calls = [mock.call(uuids.volume_id),
-                                        mock.call(uuids.volume_id),
-                                        mock.call(uuids.volume_id)]
+        show_volume.assert_has_calls([mock.call(uuids.volume_id),
+                                      mock.call(uuids.volume_id),
+                                      mock.call(uuids.volume_id)])
 
     def test_wait_for_volume_attachment_timeout(self):
         show_volume = mock.MagicMock(return_value={
