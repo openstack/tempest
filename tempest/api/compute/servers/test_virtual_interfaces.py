@@ -28,6 +28,8 @@ CONF = config.CONF
 # TODO(mriedem): Remove this test class once the nova queens branch goes into
 # extended maintenance mode.
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
+    """Test virtual interfaces API with compute microversion less than 2.44"""
+
     max_microversion = '2.43'
 
     depends_on_nova_network = True
@@ -47,9 +49,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('96c4e2ef-5e4d-4d7f-87f5-fed6dca18016')
     @utils.services('network')
     def test_list_virtual_interfaces(self):
-        # Positive test:Should be able to GET the virtual interfaces list
-        # for a given server_id
-
+        """Test listing virtual interfaces of a server"""
         if CONF.service_available.neutron:
             with testtools.ExpectedException(exceptions.BadRequest):
                 self.client.list_virtual_interfaces(self.server['id'])
