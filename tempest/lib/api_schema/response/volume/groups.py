@@ -64,7 +64,10 @@ show_group = {
                         'type': 'array',
                         'items': {'type': 'string', 'format': 'uuid'}
                     },
-                    'replication_status': {'type': 'string'}
+                    # TODO(zhufl): replication_status is added in 3.38, we
+                    # should move it to the 3.38 schema file when microversion
+                    # is supported in volume interfaces
+                    'replication_status': {'type': ['string', 'null']}
                 },
                 'additionalProperties': False,
                 'required': ['status', 'description', 'created_at',
@@ -129,6 +132,10 @@ list_groups_with_detail = {
                             'type': 'array',
                             'items': {'type': 'string', 'format': 'uuid'}
                         },
+                        # TODO(zhufl): replication_status is added in 3.38, we
+                        # should move it to the 3.38 schema file when
+                        # microversion is supported in volume interfaces
+                        'replication_status': {'type': ['string', 'null']}
                     },
                     'additionalProperties': False,
                     'required': ['status', 'description', 'created_at',
