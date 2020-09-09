@@ -21,6 +21,7 @@ CONF = config.CONF
 
 
 class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
+    """Test volume multi backends"""
 
     @classmethod
     def skip_checks(cls):
@@ -78,24 +79,49 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('c1a41f3f-9dad-493e-9f09-3ff197d477cc')
     def test_backend_name_reporting(self):
-        # get volume id which created by type without prefix
+        """Test backend name reporting for volume when type is without prefix
+
+        1. Create volume type, with 'volume_backend_name' as extra spec key
+        2. Create volume using the created volume type
+        3. Check 'os-vol-host-attr:host' of the volume info, the value should
+           contain '@' character, like 'cinder@CloveStorage#tecs_backend'
+        """
         for volume_id in self.volume_id_list_without_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
     @decorators.idempotent_id('f38e647f-ab42-4a31-a2e7-ca86a6485215')
     def test_backend_name_reporting_with_prefix(self):
-        # get volume id which created by type with prefix
+        """Test backend name reporting for volume when type is with prefix
+
+        1. Create volume type, with 'capabilities:volume_backend_name' as
+           extra spec key
+        2. Create volume using the created volume type
+        3. Check 'os-vol-host-attr:host' of the volume info, the value should
+           contain '@' character, like 'cinder@CloveStorage#tecs_backend'
+        """
         for volume_id in self.volume_id_list_with_prefix:
             self._test_backend_name_reporting_by_volume_id(volume_id)
 
     @decorators.idempotent_id('46435ab1-a0af-4401-8373-f14e66b0dd58')
     def test_backend_name_distinction(self):
-        # get volume ids which created by type without prefix
+        """Test volume backend distinction when type is without prefix
+
+        1. For each backend, create volume type with 'volume_backend_name'
+           as extra spec key
+        2. Create volumes using the created volume types
+        3. Check 'os-vol-host-attr:host' of each created volume is different.
+        """
         self._test_backend_name_distinction(self.volume_id_list_without_prefix)
 
     @decorators.idempotent_id('4236305b-b65a-4bfc-a9d2-69cb5b2bf2ed')
     def test_backend_name_distinction_with_prefix(self):
-        # get volume ids which created by type without prefix
+        """Test volume backend distinction when type is with prefix
+
+        1. For each backend, create volume type with
+           'capabilities:volume_backend_name' as extra spec key
+        2. Create volumes using the created volume types
+        3. Check 'os-vol-host-attr:host' of each created volume is different.
+        """
         self._test_backend_name_distinction(self.volume_id_list_with_prefix)
 
     def _get_volume_host(self, volume_id):

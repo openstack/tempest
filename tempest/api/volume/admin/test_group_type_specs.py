@@ -19,12 +19,15 @@ from tempest.lib import exceptions as lib_exc
 
 
 class GroupTypeSpecsTest(base.BaseVolumeAdminTest):
+    """Test group type specs"""
+
     _api_version = 3
     min_microversion = '3.11'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('bb4e30d0-de6e-4f4d-866c-dcc48d023b4e')
     def test_group_type_specs_create_show_update_list_delete(self):
+        """Test create/show/update/list/delete group type specs"""
         # Create new group type
         group_type = self.create_group_type()
 

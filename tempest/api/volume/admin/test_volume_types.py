@@ -23,17 +23,18 @@ CONF = config.CONF
 
 
 class VolumeTypesTest(base.BaseVolumeAdminTest):
+    """Test volume types"""
 
     @decorators.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
-        # List volume types.
+        """Test listing volume types"""
         body = \
             self.admin_volume_types_client.list_volume_types()['volume_types']
         self.assertIsInstance(body, list)
 
     @decorators.idempotent_id('c03cc62c-f4e9-4623-91ec-64ce2f9c1260')
     def test_volume_crud_with_volume_type_and_extra_specs(self):
-        # Create/update/get/delete volume with volume_type and extra spec.
+        """Test create/update/get/delete volume with volume_type"""
         volume_types = list()
         vol_name = data_utils.rand_name(self.__class__.__name__ + '-volume')
         proto = CONF.volume.storage_protocol
@@ -80,7 +81,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('4e955c3b-49db-4515-9590-0c99f8e471ad')
     def test_volume_type_create_get_delete(self):
-        # Create/get volume type.
+        """Test create/get/delete volume type"""
         name = data_utils.rand_name(self.__class__.__name__ + '-volume-type')
         description = data_utils.rand_name("volume-type-description")
         proto = CONF.volume.storage_protocol
@@ -118,7 +119,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('7830abd0-ff99-4793-a265-405684a54d46')
     def test_volume_type_encryption_create_get_update_delete(self):
-        # Create/get/update/delete encryption type.
+        """Test create/get/update/delete volume encryption type"""
         create_kwargs = {'provider': 'LuksEncryptor',
                          'control_location': 'front-end'}
         volume_type_id = self.create_volume_type()['id']
@@ -175,6 +176,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('cf9f07c6-db9e-4462-a243-5933ad65e9c8')
     def test_volume_type_update(self):
+        """Test updating volume type details"""
         # Create volume type
         volume_type = self.create_volume_type()
 

@@ -62,12 +62,26 @@ class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
 
 
 class GroupSnapshotsTest(BaseGroupSnapshotsTest):
+    """Test group snapshot"""
+
     _api_version = 3
     min_microversion = '3.14'
     max_microversion = 'latest'
 
     @decorators.idempotent_id('1298e537-f1f0-47a3-a1dd-8adec8168897')
     def test_group_snapshot_create_show_list_delete(self):
+        """Test create/show/list/delete group snapshot
+
+        1. Create volume type "volume_type1"
+        2. Create group type "group_type1"
+        3. Create group "group1" with "group_type1" and "volume_type1"
+        4. Create volume "volume1" with "volume_type1" and "group1"
+        5. Create group snapshot "group_snapshot1" with "group1"
+        6. Check snapshot created from "volume1" reaches available status
+        7. Check the created group snapshot "group_snapshot1" is in the list
+           of all group snapshots
+        8. Delete group snapshot "group_snapshot1"
+        """
         # Create volume type
         volume_type = self.create_volume_type()
 
@@ -118,6 +132,18 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
     @decorators.idempotent_id('eff52c70-efc7-45ed-b47a-4ad675d09b81')
     def test_create_group_from_group_snapshot(self):
+        """Test creating group from group snapshot
+
+        1. Create volume type "volume_type1"
+        2. Create group type "group_type1"
+        3. Create group "group1" with "group_type1" and "volume_type1"
+        4. Create volume "volume1" with "volume_type1" and "group1"
+        5. Create group snapshot "group_snapshot1" with "group1"
+        6. Check snapshot created from "volume1" reaches available status
+        7. Create group "group2" from "group_snapshot1"
+        8. Check the volumes belonging to "group2" reach available status
+        9. Check "group2" reaches available status
+        """
         # Create volume type
         volume_type = self.create_volume_type()
 
@@ -161,6 +187,20 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
     @decorators.idempotent_id('7d7fc000-0b4c-4376-a372-544116d2e127')
     @decorators.related_bug('1739031')
     def test_delete_group_snapshots_following_updated_volumes(self):
+        """Test deleting group snapshot following updated volumes
+
+        1. Create volume type "volume_type1"
+        2. Create group type "group_type1"
+        3. Create group "group1" with "group_type1" and "volume_type1"
+        4. Create 2 volumes "volume1" and "volume2"
+           with "volume_type1" and "group1"
+        5. For each created volume, removing and then adding back to "group1"
+        6. Create group snapshot "group_snapshot1" with "group1"
+        7. Check snapshots created from "volume1" and "volume2" reach
+           available status
+        8. Delete "group_snapshot1"
+        9. Check snapshots created from "volume1" and "volume2" are deleted
+        """
         volume_type = self.create_volume_type()
 
         group_type = self.create_group_type()
@@ -211,6 +251,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
 
 class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
+    """Test group snapshot with volume microversion greater than 3.18"""
+
     _api_version = 3
     min_microversion = '3.19'
     max_microversion = 'latest'
@@ -218,6 +260,7 @@ class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
     @decorators.idempotent_id('3b42c9b9-c984-4444-816e-ca2e1ed30b40')
     @decorators.skip_because(bug='1770179')
     def test_reset_group_snapshot_status(self):
+        """Test resetting group snapshot status to creating/available/error"""
         # Create volume type
         volume_type = self.create_volume_type()
 

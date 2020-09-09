@@ -26,6 +26,7 @@ CONF = config.CONF
 
 
 class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
+    """Test volume backups"""
 
     @classmethod
     def skip_checks(cls):
@@ -118,6 +119,7 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
 
     @decorators.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')
     def test_volume_backup_reset_status(self):
+        """Test resetting volume backup status to error"""
         # Create a volume
         volume = self.create_volume()
         # Create a backup
