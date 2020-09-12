@@ -40,7 +40,7 @@ class TestTempestInit(base.TestCase):
 
     def test_generate_sample_config(self):
         local_dir = self.useFixture(fixtures.TempDir())
-        etc_dir_path = os.path.join(local_dir.path, 'etc/')
+        etc_dir_path = os.path.join(local_dir.path, 'etc')
         os.mkdir(etc_dir_path)
         init_cmd = init.TempestInit(None, None)
         local_sample_conf_file = os.path.join(etc_dir_path,
@@ -56,7 +56,7 @@ class TestTempestInit(base.TestCase):
 
     def test_update_local_conf(self):
         local_dir = self.useFixture(fixtures.TempDir())
-        etc_dir_path = os.path.join(local_dir.path, 'etc/')
+        etc_dir_path = os.path.join(local_dir.path, 'etc')
         os.mkdir(etc_dir_path)
         lock_dir = os.path.join(local_dir.path, 'tempest_lock')
         config_path = os.path.join(etc_dir_path, 'tempest.conf')

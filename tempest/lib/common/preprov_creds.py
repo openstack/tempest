@@ -172,7 +172,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return self.is_multi_user()
 
     def _create_hash_file(self, hash_string):
-        path = os.path.join(os.path.join(self.accounts_dir, hash_string))
+        path = os.path.join(self.accounts_dir, hash_string)
         if not os.path.isfile(path):
             with open(path, 'w') as fd:
                 fd.write(self.name)
@@ -194,8 +194,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             if res:
                 return _hash
             else:
-                path = os.path.join(os.path.join(self.accounts_dir,
-                                                 _hash))
+                path = os.path.join(self.accounts_dir, _hash)
                 with open(path, 'r') as fd:
                     names.append(fd.read())
         msg = ('Insufficient number of users provided. %s have allocated all '

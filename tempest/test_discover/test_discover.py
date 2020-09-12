@@ -30,8 +30,8 @@ def load_tests(loader, tests, pattern):
     base_path = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
     base_path = os.path.split(base_path)[0]
     # Load local tempest tests
-    for test_dir in ['tempest/api', 'tempest/scenario']:
-        full_test_dir = os.path.join(base_path, test_dir)
+    for test_dir in ['api', 'scenario']:
+        full_test_dir = os.path.join(base_path, 'tempest', test_dir)
         if not pattern:
             suite.addTests(loader.discover(full_test_dir,
                                            top_level_dir=base_path))
