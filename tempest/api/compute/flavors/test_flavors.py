@@ -28,6 +28,9 @@ class FlavorsV2TestJSON(base.BaseV2ComputeTest):
         flavor = self.flavors_client.show_flavor(self.flavor_ref)['flavor']
         flavor_min_detail = {'id': flavor['id'], 'links': flavor['links'],
                              'name': flavor['name']}
+        # description field is added to the response of list_flavors in 2.55
+        if not self.is_requested_microversion_compatible('2.54'):
+            flavor_min_detail.update({'description': flavor['description']})
         self.assertIn(flavor_min_detail, flavors)
 
     @decorators.idempotent_id('6e85fde4-b3cd-4137-ab72-ed5f418e8c24')
