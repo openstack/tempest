@@ -60,7 +60,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-        server = cls.create_test_server()
+        # Wait until the instance is active to avoid the delete racing
+        server = cls.create_test_server(wait_until='ACTIVE')
         cls.client.delete_server(server['id'])
         waiters.wait_for_server_termination(cls.client, server['id'])
         cls.deleted_server_id = server['id']
