@@ -566,17 +566,19 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # the state of the volume to change to available. This is so we don't
         # error out when trying to delete the volume during teardown.
         if volume['multiattach']:
+            att = waiters.wait_for_volume_attachment_create(
+                self.volumes_client, volume['id'], server['id'])
             self.addCleanup(waiters.wait_for_volume_attachment_remove,
                             self.volumes_client, volume['id'],
-                            attachment['id'])
+                            att['attachment_id'])
         else:
             self.addCleanup(waiters.wait_for_volume_resource_status,
                             self.volumes_client, volume['id'], 'available')
+            waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                    volume['id'], 'in-use')
         # Ignore 404s on detach in case the server is deleted or the volume
         # is already detached.
         self.addCleanup(self._detach_volume, server, volume)
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'in-use')
         return attachment
 
     def create_volume_snapshot(self, volume_id, name=None, description=None,
