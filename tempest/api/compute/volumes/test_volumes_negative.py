@@ -23,6 +23,7 @@ CONF = config.CONF
 
 
 class VolumesNegativeTest(base.BaseV2ComputeTest):
+    """Negative tests of volumes with compute microversion less than 2.36"""
 
     # These tests will fail with a 404 starting from microversion 2.36. For
     # more information, see:
@@ -44,7 +45,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c03ea686-905b-41a2-8748-9635154b7c57')
     def test_volume_get_nonexistent_volume_id(self):
-        # Negative: Should not be able to get details of nonexistent volume
+        """Test getting details of a non existent volume should fail"""
         # Creating a nonexistent volume id
         # Trying to GET a non existent volume
         self.assertRaises(lib_exc.NotFound, self.client.show_volume,
@@ -53,7 +54,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('54a34226-d910-4b00-9ef8-8683e6c55846')
     def test_volume_delete_nonexistent_volume_id(self):
-        # Negative: Should not be able to delete nonexistent Volume
+        """Test deleting a nonexistent volume should fail"""
         # Creating nonexistent volume id
         # Trying to DELETE a non existent volume
         self.assertRaises(lib_exc.NotFound, self.client.delete_volume,
@@ -62,8 +63,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('5125ae14-152b-40a7-b3c5-eae15e9022ef')
     def test_create_volume_with_invalid_size(self):
-        # Negative: Should not be able to create volume with invalid size
-        # in request
+        """Test creating volume with invalid size should fail"""
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
@@ -72,8 +72,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('131cb3a1-75cc-4d40-b4c3-1317f64719b0')
     def test_create_volume_without_passing_size(self):
-        # Negative: Should not be able to create volume without passing size
-        # in request
+        """Test creating volume without specifying size should fail"""
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
@@ -82,7 +81,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('8cce995e-0a83-479a-b94d-e1e40b8a09d1')
     def test_create_volume_with_size_zero(self):
-        # Negative: Should not be able to create volume with size zero
+        """Test creating volume with size=0 should fail"""
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
@@ -91,14 +90,13 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('62bab09a-4c03-4617-8cca-8572bc94af9b')
     def test_get_volume_without_passing_volume_id(self):
-        # Negative: Should not be able to get volume when empty ID is passed
+        """Test getting volume details without volume id should fail"""
         self.assertRaises(lib_exc.NotFound, self.client.show_volume, '')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('62972737-124b-4513-b6cf-2f019f178494')
     def test_delete_invalid_volume_id(self):
-        # Negative: Should not be able to delete volume when invalid ID is
-        # passed
+        """Test deleting volume with an invalid volume id should fail"""
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_volume,
                           data_utils.rand_name('invalid'))
@@ -106,5 +104,5 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0d1417c5-4ae8-4c2c-adc5-5f0b864253e5')
     def test_delete_volume_without_passing_volume_id(self):
-        # Negative: Should not be able to delete volume when empty ID is passed
+        """Test deleting volume without volume id should fail"""
         self.assertRaises(lib_exc.NotFound, self.client.delete_volume, '')

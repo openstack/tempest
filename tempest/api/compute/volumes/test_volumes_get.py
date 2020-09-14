@@ -25,6 +25,7 @@ CONF = config.CONF
 
 
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
+    """Test compute volumes API with microversion less than 2.36"""
 
     # These tests will fail with a 404 starting from microversion 2.36. For
     # more information, see:
@@ -45,7 +46,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
-        # CREATE, GET, DELETE Volume
+        """Test create/get/delete volume"""
         v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         # Create volume

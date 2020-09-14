@@ -19,6 +19,7 @@ from tempest.lib import decorators
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
+    """Test server addresses"""
     create_default_network = True
 
     @classmethod
@@ -36,8 +37,10 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('6eb718c0-02d9-4d5e-acd1-4e0c269cef39')
     @utils.services('network')
     def test_list_server_addresses(self):
-        # All public and private addresses for
-        # a server should be returned
+        """Test listing server address
+
+        All public and private addresses for a server should be returned.
+        """
 
         addresses = self.client.list_addresses(self.server['id'])['addresses']
 
@@ -51,8 +54,11 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('87bbc374-5538-4f64-b673-2b0e4443cc30')
     @utils.services('network')
     def test_list_server_addresses_by_network(self):
-        # Providing a network type should filter
-        # the addresses return by that type
+        """Test listing server addresses filtered by network addresses
+
+        Providing a network address should filter the addresses same with
+        the specified one.
+        """
 
         addresses = self.client.list_addresses(self.server['id'])['addresses']
 
