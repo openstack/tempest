@@ -65,6 +65,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
             name=data_utils.rand_name(self.__class__.__name__),
             allowed_address_pairs=allowed_address_pairs)
         port_id = body['port']['id']
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_id)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_id)
 
@@ -82,6 +84,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
             network_id=self.network['id'],
             name=data_utils.rand_name(self.__class__.__name__))
         port_id = body['port']['id']
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        port_id)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_id)
         if mac_address is None:
@@ -115,6 +119,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
             network_id=self.network['id'],
             name=data_utils.rand_name(self.__class__.__name__))
         newportid = resp['port']['id']
+        self.addCleanup(self.ports_client.wait_for_resource_deletion,
+                        newportid)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, newportid)
         ipaddress = resp['port']['fixed_ips'][0]['ip_address']
