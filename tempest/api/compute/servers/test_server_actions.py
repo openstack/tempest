@@ -34,6 +34,8 @@ LOG = logging.getLogger(__name__)
 
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
+    """Test server actions"""
+
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
@@ -84,6 +86,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
     def test_change_server_password(self):
+        """Test changing server's password
+
+        The server's password should be set to the provided password and
+        the user can authenticate with the new password.
+        """
         # Since this test messes with the password and makes the
         # server unreachable, it should create its own server
         validation_resources = self.get_test_validation_resources(
@@ -147,17 +154,24 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
     def test_reboot_server_hard(self):
-        # The server should be power cycled
+        """Test hard rebooting server
+
+        The server should be power cycled.
+        """
         self._test_reboot_server('HARD')
 
     @decorators.skip_because(bug="1014647")
     @decorators.idempotent_id('4640e3ef-a5df-482e-95a1-ceeeb0faa84d')
     def test_reboot_server_soft(self):
-        # The server should be signaled to reboot gracefully
+        """Test soft rebooting server
+
+        The server should be signaled to reboot gracefully.
+        """
         self._test_reboot_server('SOFT')
 
     @decorators.idempotent_id('1d1c9104-1b0a-11e7-a3d4-fa163e65f5ce')
     def test_remove_server_all_security_groups(self):
+        """Test removing all security groups from server"""
         server = self.create_test_server(wait_until='ACTIVE')
 
         # Remove all Security group
@@ -232,12 +246,19 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
+        """Test rebuilding server
+
+        The server should be rebuilt using the provided image and data.
+        """
         self._test_rebuild_server()
 
     @decorators.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
-        # The server in stop state  should be rebuilt using the provided
-        # image and remain in SHUTOFF state
+        """Test rebuilding server in stop state
+
+        The server in stop state should be rebuilt using the provided
+        image and remain in SHUTOFF state.
+        """
         server = self.client.show_server(self.server_id)['server']
         old_image = server['image']['id']
         new_image = (self.image_ref_alt
@@ -274,6 +295,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('b68bd8d6-855d-4212-b59b-2e704044dace')
     @utils.services('volume')
     def test_rebuild_server_with_volume_attached(self):
+        """Test rebuilding server with volume attached
+
+        The volume should be attached to the instance after rebuild.
+        """
         # create a new volume and attach it to the server
         volume = self.create_volume()
 
@@ -333,6 +358,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm(self):
+        """Test resizing server and then confirming"""
         self._test_resize_server_confirm(self.server_id, stop=False)
 
     @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
@@ -341,6 +367,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                           'Resize not available.')
     @utils.services('volume')
     def test_resize_volume_backed_server_confirm(self):
+        """Test resizing a volume backed server and then confirming"""
         # We have to create a new server that is volume-backed since the one
         # from setUp is not volume-backed.
         kwargs = {'volume_backed': True,
@@ -377,14 +404,18 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm_from_stopped(self):
+        """Test resizing a stopped server and then confirming"""
         self._test_resize_server_confirm(self.server_id, stop=True)
 
     @decorators.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_revert(self):
-        # The server's RAM and disk space should return to its original
-        # values after a resize is reverted
+        """Test resizing server and then reverting
+
+        The server's RAM and disk space should return to its original
+        values after a resize is reverted.
+        """
 
         self.client.resize_server(self.server_id, self.flavor_ref_alt)
         # NOTE(zhufl): Explicitly delete the server to get a new one for later
@@ -405,10 +436,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                           'Resize not available.')
     @utils.services('volume')
     def test_resize_server_revert_with_volume_attached(self):
-        # Tests attaching a volume to a server instance and then resizing
-        # the instance. Once the instance is resized, revert the resize which
-        # should move the instance and volume attachment back to the original
-        # compute host.
+        """Test resizing a volume attached server and then reverting
+
+        Tests attaching a volume to a server instance and then resizing
+        the instance. Once the instance is resized, revert the resize which
+        should move the instance and volume attachment back to the original
+        compute host.
+        """
 
         # Create a blank volume and attach it to the server created in setUp.
         volume = self.create_volume()
@@ -437,7 +471,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                           'Snapshotting not available, backup not possible.')
     @utils.services('image')
     def test_create_backup(self):
-        # Positive test:create backup successfully and rotate backups correctly
+        """Test creating server backup
+
+        1. create server backup1 with rotation=2, there are 1 backup.
+        2. create server backup2 with rotation=2, there are 2 backups.
+        3. create server backup3, due to the rotation is 2, the first one
+           (backup1) will be deleted, so now there are still 2 backups.
+        """
+
         # create the first and the second backup
 
         # Check if glance v1 is available to determine which client to use. We
@@ -563,8 +604,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output(self):
-        # Positive test:Should be able to GET the console output
-        # for a given server_id and number of lines
+        """Test getting console output for a server
+
+        Should be able to GET the console output for a given server_id and
+        number of lines.
+        """
 
         # This reboot is necessary for outputting some console log after
         # creating an instance backup. If an instance backup, the console
@@ -579,6 +623,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output_with_unlimited_size(self):
+        """Test getting server's console output with unlimited size
+
+        The console output lines length should be bigger than the one
+        of test_get_console_output.
+        """
         server = self.create_test_server(wait_until='ACTIVE')
 
         def _check_full_length_console_log():
@@ -597,8 +646,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
     def test_get_console_output_server_id_in_shutoff_status(self):
-        # Positive test:Should be able to GET the console output
-        # for a given server_id in SHUTOFF status
+        """Test getting console output for a server in SHUTOFF status
+
+        Should be able to GET the console output for a given server_id
+        in SHUTOFF status.
+        """
 
         # NOTE: SHUTOFF is irregular status. To avoid test instability,
         #       one server is created only for this test without using
@@ -614,6 +666,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_pause_unpause_server(self):
+        """Test pausing and unpausing server"""
         self.client.pause_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'PAUSED')
         self.client.unpause_server(self.server_id)
@@ -623,6 +676,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     def test_suspend_resume_server(self):
+        """Test suspending and resuming server"""
         self.client.suspend_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id,
                                        'SUSPENDED')
@@ -634,6 +688,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                           'Shelve is not available.')
     @utils.services('image')
     def test_shelve_unshelve_server(self):
+        """Test shelving and unshelving server"""
         if CONF.image_feature_enabled.api_v2:
             glance_client = self.os_primary.image_client_v2
         elif CONF.image_feature_enabled.api_v1:
@@ -673,6 +728,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
     def test_shelve_paused_server(self):
+        """Test shelving a paused server"""
         server = self.create_test_server(wait_until='ACTIVE')
         self.client.pause_server(server['id'])
         waiters.wait_for_server_status(self.client, server['id'], 'PAUSED')
@@ -682,6 +738,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
+        """Test stopping and starting server"""
         self.client.stop_server(self.server_id)
         waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
         self.client.start_server(self.server_id)
@@ -689,6 +746,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
     def test_lock_unlock_server(self):
+        """Test locking and unlocking server
+
+        Lock the server, and trying to stop it will fail because locked
+        server is not allowed to be stopped by non-admin user.
+        Then unlock the server, now the server can be stopped and started.
+        """
         # Lock the server,try server stop(exceptions throw),unlock it and retry
         self.client.lock_server(self.server_id)
         self.addCleanup(self.client.unlock_server, self.server_id)
@@ -714,6 +777,10 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled.')
     def test_get_vnc_console(self):
+        """Test getting vnc console from a server
+
+        The returned vnc console url should be in valid format.
+        """
         if self.is_requested_microversion_compatible('2.5'):
             body = self.client.get_vnc_console(
                 self.server_id, type='novnc')['console']

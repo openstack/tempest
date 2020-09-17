@@ -22,6 +22,7 @@ from tempest.lib import decorators
 
 
 class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
+    """Test instance usage audit logs API"""
 
     @classmethod
     def setup_clients(cls):
@@ -30,12 +31,12 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
 
     @decorators.idempotent_id('25319919-33d9-424f-9f99-2c203ee48b9d')
     def test_list_instance_usage_audit_logs(self):
-        # list instance usage audit logs
+        """Test listing instance usage audit logs"""
         self.adm_client.list_instance_usage_audit_logs()
 
     @decorators.idempotent_id('6e40459d-7c5f-400b-9e83-449fbc8e7feb')
     def test_get_instance_usage_audit_log(self):
-        # Get instance usage audit log before specified time
+        """Test getting instance usage audit log before specified time"""
         now = datetime.datetime.now()
         self.adm_client.show_instance_usage_audit_log(
             urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))

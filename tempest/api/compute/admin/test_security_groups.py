@@ -20,6 +20,12 @@ from tempest.lib import decorators
 
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
+    """Test security groups API that requires admin privilege
+
+    Test security groups API that requires admin privilege with compute
+    microversion less than 2.36
+    """
+
     max_microversion = '2.35'
 
     @classmethod
@@ -37,7 +43,17 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('49667619-5af9-4c63-ab5d-2cfdd1c8f7f1')
     @utils.services('network')
     def test_list_security_groups_list_all_tenants_filter(self):
-        # Admin can list security groups of all tenants
+        """Test listing security groups with all_tenants filter
+
+        1. Create two security groups for non-admin user
+        2. Create two security groups for admin user
+        3. Fetch all security groups based on 'all_tenants' search filter by
+           admin, check that all four created security groups are present in
+           fetched list
+        4. Fetch all security groups based on 'all_tenants' search filter by
+           non-admin, check only two security groups created by the provided
+           non-admin user are present in fetched list
+        """
         # List of all security groups created
         security_group_list = []
         # Create two security groups for a non-admin tenant

@@ -68,21 +68,7 @@ class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
 
 
 class TestVolumeSwap(TestVolumeSwapBase):
-    """The test suite for swapping of volume with admin user.
-
-    The following is the scenario outline:
-
-    1. Create a volume "volume1" with non-admin.
-    2. Create a volume "volume2" with non-admin.
-    3. Boot an instance "instance1" with non-admin.
-    4. Attach "volume1" to "instance1" with non-admin.
-    5. Swap volume from "volume1" to "volume2" as admin.
-    6. Check the swap volume is successful and "volume2"
-       is attached to "instance1" and "volume1" is in available state.
-    7. Swap volume from "volume2" to "volume1" as admin.
-    8. Check the swap volume is successful and "volume1"
-       is attached to "instance1" and "volume2" is in available state.
-    """
+    """The test suite for swapping of volume with admin user"""
 
     # NOTE(mriedem): This is an uncommon scenario to call the compute API
     # to swap volumes directly; swap volume is primarily only for volume
@@ -92,6 +78,21 @@ class TestVolumeSwap(TestVolumeSwapBase):
     @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
     @utils.services('volume')
     def test_volume_swap(self):
+        """Test swapping of volume attached to server with admin user
+
+        The following is the scenario outline:
+
+        1. Create a volume "volume1" with non-admin.
+        2. Create a volume "volume2" with non-admin.
+        3. Boot an instance "instance1" with non-admin.
+        4. Attach "volume1" to "instance1" with non-admin.
+        5. Swap volume from "volume1" to "volume2" as admin.
+        6. Check the swap volume is successful and "volume2"
+           is attached to "instance1" and "volume1" is in available state.
+        7. Swap volume from "volume2" to "volume1" as admin.
+        8. Check the swap volume is successful and "volume1"
+           is attached to "instance1" and "volume2" is in available state.
+        """
         # Create two volumes.
         # NOTE(gmann): Volumes are created before server creation so that
         # volumes cleanup can happen successfully irrespective of which volume
@@ -134,6 +135,12 @@ class TestVolumeSwap(TestVolumeSwapBase):
 
 
 class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
+    """Test swapping volume attached to multiple servers
+
+    Test swapping volume attached to multiple servers with microversion
+    greater than 2.59
+    """
+
     min_microversion = '2.60'
     max_microversion = 'latest'
 
@@ -164,6 +171,20 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
                              condition=CONF.compute.min_compute_nodes > 1)
     @utils.services('volume')
     def test_volume_swap_with_multiattach(self):
+        """Test swapping volume attached to multiple servers
+
+        The following is the scenario outline:
+
+        1. Create a volume "volume1" with non-admin.
+        2. Create a volume "volume2" with non-admin.
+        3. Boot 2 instances "server1" and "server2" with non-admin.
+        4. Attach "volume1" to "server1" with non-admin.
+        5. Attach "volume1" to "server2" with non-admin.
+        6. Swap "volume1" to "volume2" on "server1"
+        7. Check "volume1" is attached to "server2" and not attached to
+           "server1"
+        8. Check "volume2" is attached to "server1".
+        """
         # Create two volumes.
         # NOTE(gmann): Volumes are created before server creation so that
         # volumes cleanup can happen successfully irrespective of which volume
