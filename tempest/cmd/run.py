@@ -129,7 +129,6 @@ import sys
 
 from cliff import command
 from oslo_serialization import jsonutils as json
-import six
 from stestr import commands
 
 from tempest import clients
@@ -138,10 +137,6 @@ from tempest.cmd import init
 from tempest.cmd import workspace
 from tempest.common import credentials_factory as credentials
 from tempest import config
-
-if six.PY2:
-    # Python 2 has not FileNotFoundError exception
-    FileNotFoundError = IOError
 
 CONF = config.CONF
 SAVED_STATE_JSON = "saved_state.json"
@@ -167,7 +162,7 @@ class TempestRun(command.Command):
         # environment variable and fall back to "python", under python3
         # if it does not exist. we should set it to the python3 executable
         # to deal with this situation better for now.
-        if six.PY3 and 'PYTHON' not in os.environ:
+        if 'PYTHON' not in os.environ:
             os.environ['PYTHON'] = sys.executable
 
     def _create_stestr_conf(self):

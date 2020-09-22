@@ -29,10 +29,6 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.tests import base
 
-if six.PY2:
-    # Python 2 has not FileNotFoundError exception
-    FileNotFoundError = IOError
-
 DEVNULL = open(os.devnull, 'wb')
 atexit.register(DEVNULL.close)
 
@@ -149,8 +145,7 @@ class TestRunReturnCode(base.TestCase):
         ]
         # NOTE(mtreinish): on python 3 the subprocess prints b'' around
         # stdout.
-        if six.PY3:
-            result = ["b\'" + x + "\'" for x in result]
+        result = ["b\'" + x + "\'" for x in result]
         self.assertEqual(result, tests)
 
     def test_tempest_run_with_worker_file(self):

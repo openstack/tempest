@@ -26,11 +26,6 @@ from tempest.lib import decorators
 
 CONF = config.CONF
 
-if six.PY2:
-    ord_func = ord
-else:
-    ord_func = int
-
 
 class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
     """Test novnc console"""
@@ -116,14 +111,14 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
             # single word(4 bytes).
             self.assertEqual(
                 data_length, 4, 'Expected authentication type None.')
-            self.assertIn(1, [ord_func(data[i]) for i in (0, 3)],
+            self.assertIn(1, [int(data[i]) for i in (0, 3)],
                           'Expected authentication type None.')
         else:
             self.assertGreaterEqual(
                 len(data), 2, 'Expected authentication type None.')
             self.assertIn(
                 1,
-                [ord_func(data[i + 1]) for i in range(ord_func(data[0]))],
+                [int(data[i + 1]) for i in range(int(data[0]))],
                 'Expected authentication type None.')
             # Send to the server that we only support authentication
             # type None
@@ -136,7 +131,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                 len(data), 4,
                 'Server did not think security was successful.')
             self.assertEqual(
-                [ord_func(i) for i in data], [0, 0, 0, 0],
+                [int(i) for i in data], [0, 0, 0, 0],
                 'Server did not think security was successful.')
 
         # Say to leave the desktop as shared as part of client initialization
