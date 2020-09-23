@@ -302,6 +302,27 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.addClassResourceCleanup(cls.clear_volume_type, volume_type['id'])
         return volume_type
 
+    def create_encryption_type(self, type_id=None, provider=None,
+                               key_size=None, cipher=None,
+                               control_location=None):
+        if not type_id:
+            volume_type = self.create_volume_type()
+            type_id = volume_type['id']
+        self.admin_encryption_types_client.create_encryption_type(
+            type_id, provider=provider, key_size=key_size, cipher=cipher,
+            control_location=control_location)
+
+    def create_encrypted_volume(self, encryption_provider, key_size=256,
+                                cipher='aes-xts-plain64',
+                                control_location='front-end'):
+        volume_type = self.create_volume_type()
+        self.create_encryption_type(type_id=volume_type['id'],
+                                    provider=encryption_provider,
+                                    key_size=key_size,
+                                    cipher=cipher,
+                                    control_location=control_location)
+        return self.create_volume(volume_type=volume_type['name'])
+
     def create_group_type(self, name=None, **kwargs):
         """Create a test group-type"""
         name = name or data_utils.rand_name(
