@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added associate_floating_ip() and dissociate_floating_ip() methods
+    to the scenario manager.
