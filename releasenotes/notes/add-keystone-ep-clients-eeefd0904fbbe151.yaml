@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added missing client methods for keystone's OS-ENDPOINT-POLICY and
+    OS-EP-FILTER APIs.

@@ -185,3 +185,27 @@ class PoliciesClient(rest_client.RestClient):
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def list_endpoints_for_policy(self, policy_id):
+        """List policy and service endpoint associations.
+
+        API reference:
+        https://docs.openstack.org/api-ref/identity/v3-ext/#list-policy-and-service-endpoint-associations
+        """
+        url = "policies/{0}/OS-ENDPOINT-POLICY/endpoints".format(policy_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_policy_for_endpoint(self, endpoint_id):
+        """Show the effective policy associated with an endpoint
+
+        API reference:
+        https://docs.openstack.org/api-ref/identity/v3-ext/#show-the-effective-policy-associated-with-an-endpoint
+        """
+        url = "endpoints/{0}/OS-ENDPOINT-POLICY/policy".format(endpoint_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)

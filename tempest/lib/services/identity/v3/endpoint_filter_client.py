@@ -66,3 +66,57 @@ class EndPointsFilterClient(rest_client.RestClient):
             % (project_id, endpoint_id))
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def list_endpoint_groups_for_project(self, project_id):
+        """List Endpoint Groups Associated with Project."""
+        resp, body = self.get(
+            self.ep_filter + '/projects/%s/endpoint_groups'
+            % project_id)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_projects_for_endpoint_group(self, endpoint_group_id):
+        """List Projects Associated with Endpoint Group."""
+        resp, body = self.get(
+            self.ep_filter + '/endpoint_groups/%s/projects'
+            % endpoint_group_id)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_endpoints_for_endpoint_group(self, endpoint_group_id):
+        """List Endpoints Associated with Endpoint Group."""
+        resp, body = self.get(
+            self.ep_filter + '/endpoint_groups/%s/endpoints'
+            % endpoint_group_id)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def add_endpoint_group_to_project(self, endpoint_group_id, project_id):
+        """Create Endpoint Group to Project Association."""
+        body = None
+        resp, body = self.put(
+            self.ep_filter + '/endpoint_groups/%s/projects/%s'
+            % (endpoint_group_id, project_id), body)
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_endpoint_group_for_project(self, endpoint_group_id, project_id):
+        """Get Endpoint Group to Project Association."""
+        resp, body = self.get(
+            self.ep_filter + '/endpoint_groups/%s/projects/%s'
+            % (endpoint_group_id, project_id))
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_endpoint_group_from_project(
+        self, endpoint_group_id, project_id):
+        """Delete Endpoint Group to Project Association."""
+        resp, body = self.delete(
+            self.ep_filter + '/endpoint_groups/%s/projects/%s'
+            % (endpoint_group_id, project_id))
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp, body)

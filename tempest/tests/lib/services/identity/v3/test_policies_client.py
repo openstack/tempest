@@ -44,6 +44,34 @@ class TestPoliciesClient(base.BaseServiceTest):
             }
         }
 
+    FAKE_ENDPOINT_INFO = {
+        "endpoints": [
+            {
+                "id": "1",
+                "interface": "public",
+                "links": {
+                    "self": "http://example.com/identity/v3/endpoints/1"
+                },
+                "region": "north",
+                "service_id": "9242e05f0c23467bbd1cf1f7a6e5e596",
+                "url": "http://example.com/identity/"
+            },
+            {
+                "id": "1",
+                "interface": "internal",
+                "links": {
+                    "self": "http://example.com/identity/v3/endpoints/1"
+                },
+                "region": "south",
+                "service_id": "9242e05f0c23467bbd1cf1f7a6e5e596",
+                "url": "http://example.com/identity/"
+            }
+        ],
+        "links": {
+            "self": "http://exmp.com/identity/v3/OS-ENDPOINT-POLICY/policies/1"
+        }
+    }
+
     FAKE_LIST_POLICIES = {
         "links": {
             "next": None,
@@ -238,3 +266,33 @@ class TestPoliciesClient(base.BaseServiceTest):
             service_id=self.FAKE_SERVICE_ID,
             region_id=self.FAKE_REGION_ID,
             status=204)
+
+    def _test_list_endpoints_for_policy(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_endpoints_for_policy,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ENDPOINT_INFO,
+            bytes_body,
+            policy_id=self.FAKE_POLICY_ID,
+            status=200)
+
+    def test_list_endpoints_for_policy_with_str_body(self):
+        self._test_list_endpoints_for_policy()
+
+    def test_list_endpoints_for_policy_with_bytes_body(self):
+        self._test_list_endpoints_for_policy(bytes_body=True)
+
+    def _test_list_policy_for_endpoint(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_policy_for_endpoint,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_POLICY_INFO,
+            bytes_body,
+            endpoint_id=self.FAKE_ENDPOINT_ID,
+            status=200)
+
+    def test_list_policy_for_endpoint_with_str_body(self):
+        self._test_list_policy_for_endpoint()
+
+    def test_list_policy_for_endpoint_with_bytes_body(self):
+        self._test_list_policy_for_endpoint(bytes_body=True)
