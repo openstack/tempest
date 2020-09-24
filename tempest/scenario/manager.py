@@ -143,10 +143,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
     # resp part which is not used in scenario tests
 
     def create_port(self, network_id, client=None, **kwargs):
-        """Creates port"""
+        """Creates port for the respective network_id"""
         if not client:
             client = self.ports_client
-        name = data_utils.rand_name(self.__class__.__name__)
+        name = kwargs.pop('namestart', self.__class__.__name__)
         if CONF.network.port_vnic_type and 'binding:vnic_type' not in kwargs:
             kwargs['binding:vnic_type'] = CONF.network.port_vnic_type
         if CONF.network.port_profile and 'binding:profile' not in kwargs:
@@ -155,6 +155,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name=name,
             network_id=network_id,
             **kwargs)
+        self.assertIsNotNone(result, 'Unable to allocate port')
         port = result['port']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         client.delete_port, port['id'])
