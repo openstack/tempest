@@ -124,12 +124,18 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
             raise lib_exc.DeleteErrorException(
                 "Server %s failed to delete and is in ERROR status" %
                 server_id)
+
         if server_status == 'SOFT_DELETED':
             # Soft-deleted instances need to be forcibly deleted to
             # prevent some test cases from failing.
             LOG.debug("Automatically force-deleting soft-deleted server %s",
                       server_id)
-            client.force_delete_server(server_id)
+            try:
+                client.force_delete_server(server_id)
+            except lib_exc.NotFound:
+                # The instance may have been deleted so ignore
+                # NotFound exception
+                return
 
         if int(time.time()) - start_time >= client.build_timeout:
             raise lib_exc.TimeoutException
