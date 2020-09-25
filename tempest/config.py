@@ -250,6 +250,11 @@ IdentityFeatureGroup = [
                 default=False,
                 help='Does the environment have application credentials '
                      'enabled?'),
+    # Access rules for application credentials is a default feature in Train.
+    # This config option can removed once Stein is EOL.
+    cfg.BoolOpt('access_rules',
+                default=False,
+                help='Does the environment have access rules enabled?'),
     cfg.BoolOpt('immutable_user_source',
                 default=False,
                 help='Set to True if the environment has a read-only '

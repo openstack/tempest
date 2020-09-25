@@ -19,7 +19,10 @@ import datetime
 from oslo_utils import timeutils
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
@@ -64,6 +67,24 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
 
         expires_str = expires_at.isoformat()
         self.assertEqual(expires_str, app_cred['expires_at'])
+
+    @decorators.idempotent_id('529936eb-aa5d-463d-9f79-01c113d3b88f')
+    def test_create_application_credential_access_rules(self):
+        if not CONF.identity_feature_enabled.access_rules:
+            raise self.skipException("Application credential access rules are "
+                                     "not available in this environment")
+        access_rules = [
+            {
+                "path": "/v2.1/servers/*/ips",
+                "method": "GET",
+                "service": "compute"
+            }
+        ]
+        app_cred = self.create_application_credential(
+            access_rules=access_rules)
+        access_rule_resp = app_cred['access_rules'][0]
+        access_rule_resp.pop('id')
+        self.assertDictEqual(access_rules[0], access_rule_resp)
 
     @decorators.idempotent_id('ff0cd457-6224-46e7-b79e-0ada4964a8a6')
     def test_list_application_credentials(self):
