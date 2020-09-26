@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added missing clients and tests for keystone's v3 EC2 API which already
+    existed for keystone v2.

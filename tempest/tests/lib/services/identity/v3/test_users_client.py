@@ -141,6 +141,35 @@ class TestUsersClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_USER_EC2_CREDENTIAL_INFO = {
+        "credential": {
+            'user_id': '9beb0e12f3e5416db8d7cccfc785db3b',
+            'access': '79abf59acc77492a86170cbe2f1feafa',
+            'secret': 'c4e7d3a691fd4563873d381a40320f46',
+            'trust_id': None,
+            'tenant_id': '596557269d7b4dd78631a602eb9f151d'
+        }
+    }
+
+    FAKE_LIST_USER_EC2_CREDENTIALS = {
+        "credentials": [
+            {
+                'user_id': '9beb0e12f3e5416db8d7cccfc785db3b',
+                'access': '79abf59acc77492a86170cbe2f1feafa',
+                'secret': 'c4e7d3a691fd4563873d381a40320f46',
+                'trust_id': None,
+                'tenant_id': '596557269d7b4dd78631a602eb9f151d'
+            },
+            {
+                'user_id': '3beb0e12f3e5416db8d7cccfc785de4r',
+                'access': '45abf59acc77492a86170cbe2f1fesde',
+                'secret': 'g4e7d3a691fd4563873d381a40320e45',
+                'trust_id': None,
+                'tenant_id': '123557269d7b4dd78631a602eb9f112f'
+            }
+        ]
+    }
+
     def setUp(self):
         super(TestUsersClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -201,6 +230,33 @@ class TestUsersClient(base.BaseServiceTest):
             user_id='817fb3c23fd7465ba6d7fe1b1320121d',
         )
 
+    def _test_create_user_ec2_credential(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.create_user_ec2_credential,
+            'tempest.lib.common.rest_client.RestClient.post',
+            self.FAKE_USER_EC2_CREDENTIAL_INFO,
+            bytes_body,
+            status=201,
+            user_id="1",
+            tenant_id="123")
+
+    def _test_show_user_ec2_credential(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_user_ec2_credential,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_USER_EC2_CREDENTIAL_INFO,
+            bytes_body,
+            user_id="1",
+            access="123")
+
+    def _test_list_user_ec2_credentials(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_user_ec2_credentials,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_USER_EC2_CREDENTIALS,
+            bytes_body,
+            user_id="1")
+
     def test_create_user_with_string_body(self):
         self._test_create_user()
 
@@ -255,3 +311,30 @@ class TestUsersClient(base.BaseServiceTest):
             user_id='817fb3c23fd7465ba6d7fe1b1320121d',
             password='NewTempestPassword',
             original_password='OldTempestPassword')
+
+    def test_create_user_ec2_credential_with_str_body(self):
+        self._test_create_user_ec2_credential()
+
+    def test_create_user_ec2_credential_with_bytes_body(self):
+        self._test_create_user_ec2_credential(bytes_body=True)
+
+    def test_show_user_ec2_credential_with_str_body(self):
+        self._test_show_user_ec2_credential()
+
+    def test_show_user_ec2_credential_with_bytes_body(self):
+        self._test_show_user_ec2_credential(bytes_body=True)
+
+    def test_list_user_ec2_credentials_with_str_body(self):
+        self._test_list_user_ec2_credentials()
+
+    def test_list_user_ec2_credentials_with_bytes_body(self):
+        self._test_list_user_ec2_credentials(bytes_body=True)
+
+    def test_delete_user_ec2_credential(self):
+        self.check_service_client_function(
+            self.client.delete_user_ec2_credential,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            user_id="123",
+            access="1234",
+            status=204)
