@@ -187,6 +187,28 @@ def wait_for_image_status(client, image_id, status):
     raise lib_exc.TimeoutException(message)
 
 
+def wait_for_image_imported_to_stores(client, image_id, stores):
+    """Waits for an image to be imported to all requested stores.
+
+    The client should also have build_interval and build_timeout attributes.
+    """
+
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        image = client.show_image(image_id)
+        if image['status'] == 'active' and image['stores'] == stores:
+            return
+
+        time.sleep(client.build_interval)
+
+    message = ('Image %(image_id)s failed to import '
+               'on stores: %s' % str(image['os_glance_failed_import']))
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise lib_exc.TimeoutException(message)
+
+
 def wait_for_volume_resource_status(client, resource_id, status):
     """Waits for a volume resource to reach a given status.
 
