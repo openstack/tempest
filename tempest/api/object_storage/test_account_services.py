@@ -28,6 +28,7 @@ CONF = config.CONF
 
 
 class AccountTest(base.BaseObjectTest):
+    """Test account metadata and containers"""
 
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
@@ -54,7 +55,7 @@ class AccountTest(base.BaseObjectTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('3499406a-ae53-4f8c-b43a-133d4dc6fe3f')
     def test_list_containers(self):
-        # list of all containers should not be empty
+        """Test listing containers"""
         resp, container_list = self.account_client.list_account_containers()
         self.assertHeaders(resp, 'Account', 'GET')
 
@@ -66,11 +67,10 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('884ec421-fbad-4fcc-916b-0580f2699565')
     def test_list_no_containers(self):
-        # List request to empty account
+        """Test listing containers for an account without container"""
 
         # To test listing no containers, create new user other than
         # the base user of this instance.
-
         resp, container_list = \
             self.os_operator.account_client.list_account_containers()
 
@@ -103,7 +103,7 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('1c7efa35-e8a2-4b0b-b5ff-862c7fd83704')
     def test_list_containers_with_format_json(self):
-        # list containers setting format parameter to 'json'
+        """Test listing containers setting format parameter to 'json'"""
         params = {'format': 'json'}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
@@ -115,7 +115,7 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('4477b609-1ca6-4d4b-b25d-ad3f01086089')
     def test_list_containers_with_format_xml(self):
-        # list containers setting format parameter to 'xml'
+        """Test listing containers setting format parameter to 'xml'"""
         params = {'format': 'xml'}
         resp, container_list = self.account_client.list_account_containers(
             params=params)
@@ -133,13 +133,18 @@ class AccountTest(base.BaseObjectTest):
         not CONF.object_storage_feature_enabled.discoverability,
         'Discoverability function is disabled')
     def test_list_extensions(self):
+        """Test listing capabilities"""
         resp = self.capabilities_client.list_capabilities()
 
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
     @decorators.idempotent_id('5cfa4ab2-4373-48dd-a41f-a532b12b08b2')
     def test_list_containers_with_limit(self):
-        # list containers one of them, half of them then all of them
+        """Test listing containers with limit parameter
+
+        Listing containers limited to one of them, half of them, and then all
+        of them.
+        """
         for limit in (1, self.containers_count // 2,
                       self.containers_count):
             params = {'limit': limit}
@@ -151,10 +156,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('638f876d-6a43-482a-bbb3-0840bca101c6')
     def test_list_containers_with_marker(self):
-        # list containers using marker param
-        # first expect to get 0 container as we specified last
-        # the container as marker
-        # second expect to get the bottom half of the containers
+        """Test listing containers with marker parameter
+
+        First expect to get 0 container as we specified the last container
+        as marker, second expect to get the bottom half of the containers.
+        """
         params = {'marker': self.containers[-1]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
@@ -172,10 +178,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('5ca164e4-7bde-43fa-bafb-913b53b9e786')
     def test_list_containers_with_end_marker(self):
-        # list containers using end_marker param
-        # first expect to get 0 container as we specified first container as
-        # end_marker
-        # second expect to get the top half of the containers
+        """Test listing containers with end_marker parameter
+
+        First expect to get 0 container as we specified first container as
+        end_marker, second expect to get the top half of the containers
+        """
         params = {'end_marker': self.containers[0]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
@@ -190,7 +197,12 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('ac8502c2-d4e4-4f68-85a6-40befea2ef5e')
     def test_list_containers_with_marker_and_end_marker(self):
-        # list containers combining marker and end_marker param
+        """Test listing containers with marker and end_marker parameter
+
+        If we use the first container as marker, and the last container as
+        end_marker, then we should get all containers excluding the first one
+        and the last one.
+        """
         params = {'marker': self.containers[0],
                   'end_marker': self.containers[self.containers_count - 1]}
         resp, container_list = self.account_client.list_account_containers(
@@ -200,8 +212,10 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('f7064ae8-dbcc-48da-b594-82feef6ea5af')
     def test_list_containers_with_limit_and_marker(self):
-        # list containers combining marker and limit param
-        # result are always limitated by the limit whatever the marker
+        """Test listing containers combining marker and limit parameter
+
+        Result are always limited by the limit whatever the marker.
+        """
         for marker in random.choice(self.containers):
             limit = random.randint(0, self.containers_count - 1)
             params = {'marker': marker,
@@ -215,6 +229,10 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('888a3f0e-7214-4806-8e50-5e0c9a69bb5e')
     def test_list_containers_with_limit_and_end_marker(self):
+        """Test listing containers combining end_marker and limit parameter
+
+        Result are always limited by the limit whatever the end_marker.
+        """
         # list containers combining limit and end_marker param
         limit = random.randint(1, self.containers_count)
         params = {'limit': limit,
@@ -227,7 +245,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('8cf98d9c-e3a0-4e44-971b-c87656fdddbd')
     def test_list_containers_with_limit_and_marker_and_end_marker(self):
-        # list containers combining limit, marker and end_marker param
+        """Test listing containers combining marker and end_marker and limit
+
+        Result are always limited by the limit whatever the marker and the
+        end_marker.
+        """
         limit = random.randint(1, self.containers_count)
         params = {'limit': limit,
                   'marker': self.containers[0],
@@ -240,7 +262,7 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('365e6fc7-1cfe-463b-a37c-8bd08d47b6aa')
     def test_list_containers_with_prefix(self):
-        # list containers that have a name that starts with a prefix
+        """Test listing containers that have a name starting with a prefix"""
         prefix = 'tempest-a'
         params = {'prefix': prefix}
         resp, container_list = self.account_client.list_account_containers(
@@ -252,7 +274,7 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('b1811cff-d1ed-4c15-a52e-efd8de41cf34')
     def test_list_containers_reverse_order(self):
-        # list containers in reverse order
+        """Test listing containers in reverse order"""
         _, orig_container_list = self.account_client.list_account_containers()
 
         params = {'reverse': True}
@@ -265,8 +287,7 @@ class AccountTest(base.BaseObjectTest):
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('4894c312-6056-4587-8d6f-86ffbf861f80')
     def test_list_account_metadata(self):
-        # list all account metadata
-
+        """Test listing account metadata"""
         # set metadata to account
         metadata = {'test-account-meta1': 'Meta1',
                     'test-account-meta2': 'Meta2'}
@@ -282,14 +303,14 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('b904c2e3-24c2-4dba-ad7d-04e90a761be5')
     def test_list_no_account_metadata(self):
-        # list no account metadata
+        """Test listing account metadata for account without metadata"""
         resp, _ = self.account_client.list_account_metadata()
         self.assertHeaders(resp, 'Account', 'HEAD')
         self.assertNotIn('x-account-meta-', str(resp))
 
     @decorators.idempotent_id('e2a08b5f-3115-4768-a3ee-d4287acd6c08')
     def test_update_account_metadata_with_create_metadata(self):
-        # add metadata to account
+        """Test adding metadata to account"""
         metadata = {'test-account-meta1': 'Meta1'}
         resp, _ = self.account_client.create_update_or_delete_account_metadata(
             create_update_metadata=metadata)
@@ -305,7 +326,7 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('9f60348d-c46f-4465-ae06-d51dbd470953')
     def test_update_account_metadata_with_delete_metadata(self):
-        # delete metadata from account
+        """Test deleting metadata from account"""
         metadata = {'test-account-meta1': 'Meta1'}
         self.account_client.create_update_or_delete_account_metadata(
             create_update_metadata=metadata)
@@ -318,8 +339,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('64fd53f3-adbd-4639-af54-436e4982dbfb')
     def test_update_account_metadata_with_create_metadata_key(self):
-        # if the value of metadata is not set, the metadata is not
-        # registered at a server
+        """Test adding metadata to account with empty value
+
+        Adding metadata with empty value to account, the metadata is not
+        registered.
+        """
         metadata = {'test-account-meta1': ''}
         resp, _ = self.account_client.create_update_or_delete_account_metadata(
             create_update_metadata=metadata)
@@ -330,8 +354,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('d4d884d3-4696-4b85-bc98-4f57c4dd2bf1')
     def test_update_account_metadata_with_delete_metadata_key(self):
-        # Although the value of metadata is not set, the feature of
-        # deleting metadata is valid
+        """Test deleting metadata from account with empty value
+
+        Although the value of metadata is not set, the feature of deleting
+        metadata is valid, so the metadata is removed from account.
+        """
         metadata_1 = {'test-account-meta1': 'Meta1'}
         self.account_client.create_update_or_delete_account_metadata(
             create_update_metadata=metadata_1)
@@ -345,7 +372,11 @@ class AccountTest(base.BaseObjectTest):
 
     @decorators.idempotent_id('8e5fc073-59b9-42ee-984a-29ed11b2c749')
     def test_update_account_metadata_with_create_and_delete_metadata(self):
-        # Send a request adding and deleting metadata requests simultaneously
+        """Test adding and deleting metadata simultaneously
+
+        Send a request adding and deleting metadata requests simultaneously,
+        both adding and deleting of metadata will succeed.
+        """
         metadata_1 = {'test-account-meta1': 'Meta1'}
         self.account_client.create_update_or_delete_account_metadata(
             create_update_metadata=metadata_1)

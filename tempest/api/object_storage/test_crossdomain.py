@@ -19,6 +19,7 @@ from tempest.lib import decorators
 
 
 class CrossdomainTest(base.BaseObjectTest):
+    """Test crossdomain policy"""
 
     @classmethod
     def resource_setup(cls):
@@ -37,6 +38,7 @@ class CrossdomainTest(base.BaseObjectTest):
     @decorators.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @utils.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
+        """Test getting crossdomain policy"""
         url = self.account_client._get_base_version_url() + "crossdomain.xml"
         resp, body = self.account_client.raw_request(url, "GET")
         self.account_client._error_checker(resp, body)

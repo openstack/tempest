@@ -33,6 +33,8 @@ CONF = config.CONF
 
 
 class ContainerSyncTest(base.BaseObjectTest):
+    """Test container synchronization"""
+
     credentials = [['operator', CONF.object_storage.operator_role],
                    ['operator_alt', CONF.object_storage.operator_role]]
 
@@ -129,6 +131,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         not CONF.object_storage_feature_enabled.container_sync,
         'Old-style container sync function is disabled')
     def test_container_synchronization(self):
+        """Test container synchronization"""
         def make_headers(cont, cont_client):
             # tell first container to synchronize to a second
             client_proxy_ip = \

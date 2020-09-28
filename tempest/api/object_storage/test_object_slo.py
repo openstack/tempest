@@ -27,6 +27,7 @@ MIN_SEGMENT_SIZE = 1024 * 1024
 
 
 class ObjectSloTest(base.BaseObjectTest):
+    """Test static large object"""
 
     def setUp(self):
         super(ObjectSloTest, self).setUp()
@@ -108,7 +109,7 @@ class ObjectSloTest(base.BaseObjectTest):
     @decorators.idempotent_id('2c3f24a6-36e8-4711-9aa2-800ee1fc7b5b')
     @utils.requires_ext(extension='slo', service='object')
     def test_upload_manifest(self):
-        # create static large object from multipart manifest
+        """Test creating static large object from multipart manifest"""
         manifest = self._create_manifest()
 
         params = {'multipart-manifest': 'put'}
@@ -123,7 +124,10 @@ class ObjectSloTest(base.BaseObjectTest):
     @decorators.idempotent_id('e69ad766-e1aa-44a2-bdd2-bf62c09c1456')
     @utils.requires_ext(extension='slo', service='object')
     def test_list_large_object_metadata(self):
-        # list static large object metadata using multipart manifest
+        """Test listing static large object metadata
+
+        List static large object metadata using multipart manifest
+        """
         object_name = self._create_large_object()
 
         resp, _ = self.object_client.list_object_metadata(
@@ -135,7 +139,7 @@ class ObjectSloTest(base.BaseObjectTest):
     @decorators.idempotent_id('49bc49bc-dd1b-4c0f-904e-d9f10b830ee8')
     @utils.requires_ext(extension='slo', service='object')
     def test_retrieve_large_object(self):
-        # list static large object using multipart manifest
+        """Test listing static large object using multipart manifest"""
         object_name = self._create_large_object()
 
         resp, body = self.object_client.get_object(
@@ -150,7 +154,7 @@ class ObjectSloTest(base.BaseObjectTest):
     @decorators.idempotent_id('87b6dfa1-abe9-404d-8bf0-6c3751e6aa77')
     @utils.requires_ext(extension='slo', service='object')
     def test_delete_large_object(self):
-        # delete static large object using multipart manifest
+        """Test deleting static large object using multipart manifest"""
         object_name = self._create_large_object()
 
         params_del = {'multipart-manifest': 'delete'}
