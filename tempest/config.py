@@ -1199,7 +1199,7 @@ DefaultGroup = [
 
 The best use case is investigating used resources of one test.
 A test can be run as follows:
- $ ostestr --pdb TEST_ID
+ $ stestr run --pdb TEST_ID
 or
  $ python -m testtools.run TEST_ID"""),
 ]
