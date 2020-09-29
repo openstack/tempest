@@ -610,18 +610,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def image_create(self, name='scenario-img', **kwargs):
         img_path = CONF.scenario.img_file
         if not os.path.exists(img_path):
-            # TODO(kopecmartin): replace LOG.warning for rasing
-            # InvalidConfiguration exception after tempest 25.0.0 is
-            # released - there will be one release which accepts both
-            # behaviors in order to avoid many failures across CIs and etc.
-            LOG.warning(
+            lib_exc.InvalidConfiguration(
                 'Starting Tempest 25.0.0 release, CONF.scenario.img_file need '
                 'a full path for the image. CONF.scenario.img_dir was '
                 'deprecated and will be removed in the next release. Till '
-                'Tempest 25.0.0, old behavior is maintained and keep working '
+                'Tempest 25.0.0, old behavior was maintained and kept working '
                 'but starting Tempest 26.0.0, you need to specify the full '
                 'path in CONF.scenario.img_file config option.')
-            img_path = os.path.join(CONF.scenario.img_dir, img_path)
         img_container_format = CONF.scenario.img_container_format
         img_disk_format = CONF.scenario.img_disk_format
         img_properties = CONF.scenario.img_properties

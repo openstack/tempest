@@ -1150,12 +1150,6 @@ ObjectStoreFeaturesGroup = [
 scenario_group = cfg.OptGroup(name='scenario', title='Scenario Test Options')
 
 ScenarioGroup = [
-    cfg.StrOpt('img_dir',
-               default='/opt/stack/new/devstack/files/images/'
-               'cirros-0.3.1-x86_64-uec',
-               help='Directory containing image files, this has been '
-                    'deprecated - img_file option contains a full path now.',
-               deprecated_for_removal=True),
     cfg.StrOpt('img_file', deprecated_name='qcow2_img_file',
                default='/opt/stack/new/devstack/files/images'
                '/cirros-0.3.1-x86_64-disk.img',
