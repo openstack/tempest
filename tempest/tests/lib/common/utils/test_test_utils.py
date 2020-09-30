@@ -74,6 +74,17 @@ class TestTestUtils(base.TestCase):
         self.assertRaises(ValueError, test_utils.call_and_ignore_notfound_exc,
                           raise_value_error)
 
+    def test_call_and_ignore_notfound_exc_when_serverfault_raised(self):
+        calls = []
+
+        def raise_serverfault():
+            calls.append('call')
+            raise exceptions.ServerFault()
+        self.assertRaises(exceptions.ServerFault,
+                          test_utils.call_and_ignore_notfound_exc,
+                          raise_serverfault)
+        self.assertEqual(3, len(calls))
+
     def test_call_and_ignore_notfound_exc(self):
         m = mock.Mock(return_value=42)
         args, kwargs = (1,), {'1': None}

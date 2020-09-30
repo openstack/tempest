@@ -80,10 +80,19 @@ def find_test_caller():
 
 def call_and_ignore_notfound_exc(func, *args, **kwargs):
     """Call the given function and pass if a `NotFound` exception is raised."""
-    try:
-        return func(*args, **kwargs)
-    except exceptions.NotFound:
-        pass
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            return func(*args, **kwargs)
+        except exceptions.NotFound:
+            return
+        except exceptions.ServerFault:
+            # NOTE(danms): Tolerate three ServerFault exceptions while trying
+            # to do this thing, and after that, assume it's legit.
+            if attempt >= 3:
+                raise
+            LOG.warning('Got ServerFault while running %s, retrying...', func)
 
 
 def call_until_true(func, duration, sleep_for, *args, **kwargs):
