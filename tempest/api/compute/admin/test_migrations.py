@@ -94,6 +94,16 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         # Now boot a server with the copied flavor.
         server = self.create_test_server(
             wait_until='ACTIVE', flavor=flavor['id'])
+        server = self.servers_client.show_server(server['id'])['server']
+
+        # If 'id' not in server['flavor'], we can only compare the flavor
+        # details, so here we should save the to-be-deleted flavor's details,
+        # for the flavor comparison after the server resizing.
+        if not server['flavor'].get('id'):
+            pre_flavor = {}
+            body = self.flavors_client.show_flavor(flavor['id'])['flavor']
+            for key in ['name', 'ram', 'vcpus', 'disk']:
+                pre_flavor[key] = body[key]
 
         # Delete the flavor we used to boot the instance.
         self._flavor_clean_up(flavor['id'])
@@ -110,7 +120,18 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
                                        'ACTIVE')
 
         server = self.servers_client.show_server(server['id'])['server']
-        self.assert_flavor_equal(flavor['id'], server['flavor'])
+        if server['flavor'].get('id'):
+            msg = ('server flavor is not same as flavor!')
+            self.assertEqual(flavor['id'], server['flavor']['id'], msg)
+        else:
+            self.assertEqual(pre_flavor['name'],
+                             server['flavor']['original_name'],
+                             "original_name in server flavor is not same as "
+                             "flavor name!")
+            for key in ['ram', 'vcpus', 'disk']:
+                msg = ('attribute %s in server flavor is not same as '
+                       'flavor!' % key)
+                self.assertEqual(pre_flavor[key], server['flavor'][key], msg)
 
     def _test_cold_migrate_server(self, revert=False):
         if CONF.compute.min_compute_nodes < 2:
