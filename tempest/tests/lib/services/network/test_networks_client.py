@@ -31,12 +31,17 @@ class TestNetworksClient(base.BaseServiceTest):
                     "nova"
                 ],
                 "created_at": "2016-03-08T20:19:41",
+                "dns_domain": "my-domain.org.",
                 "id": "d32019d3-bc6e-4319-9c1d-6722fc136a22",
+                "ipv4_address_scope": None,
+                "ipv6_address_scope": None,
+                "l2_adjacency": False,
                 "mtu": 0,
                 "name": "net1",
                 "port_security_enabled": True,
                 "project_id": "4fd44f30292945e481c7b8a0c8908869",
                 "qos_policy_id": "6a8454ade84346f59e8d40665f878b2e",
+                "revision_number": 1,
                 "router:external": False,
                 "shared": False,
                 "status": "ACTIVE",
@@ -46,7 +51,8 @@ class TestNetworksClient(base.BaseServiceTest):
                 "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
                 "updated_at": "2016-03-08T20:19:41",
                 "vlan_transparent": True,
-                "description": ""
+                "description": "",
+                "is_default": False
             },
             {
                 "admin_state_up": True,
@@ -54,12 +60,18 @@ class TestNetworksClient(base.BaseServiceTest):
                 "availability_zones": [
                     "nova"
                 ],
+                "created_at": "2016-03-08T20:19:41",
+                "dns_domain": "my-domain.org.",
                 "id": "db193ab3-96e3-4cb3-8fc5-05f4296d0324",
+                "ipv4_address_scope": None,
+                "ipv6_address_scope": None,
+                "l2_adjacency": False,
                 "mtu": 0,
                 "name": "net2",
                 "port_security_enabled": True,
                 "project_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "qos_policy_id": "bfdb6c39f71e4d44b1dfbda245c50819",
+                "revision_number": 3,
                 "router:external": False,
                 "shared": False,
                 "status": "ACTIVE",
@@ -69,7 +81,8 @@ class TestNetworksClient(base.BaseServiceTest):
                 "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "updated_at": "2016-03-08T20:19:41",
                 "vlan_transparent": False,
-                "description": ""
+                "description": "",
+                "is_default": False
             }
         ]
     }
@@ -108,6 +121,7 @@ class TestNetworksClient(base.BaseServiceTest):
                 "alive": True,
                 "topic": "dhcp_agent",
                 "host": "osboxes",
+                "ha_state": None,
                 "agent_type": "DHCP agent",
                 "resource_versions": {},
                 "created_at": "2017-06-19 21:39:51",
