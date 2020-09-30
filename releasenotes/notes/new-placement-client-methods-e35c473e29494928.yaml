@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Add ``placement`` API methods for testing Routed Provider Networks feature.
+    The following API calls are available for tempest from now in the new
+    resource_providers_client:
+
+    * GET /resource_providers
+    * GET /resource_providers/{uuid}
+    * GET /resource_providers/{uuid}/inventories
+    * GET /resource_providers/{uuid}/aggregates

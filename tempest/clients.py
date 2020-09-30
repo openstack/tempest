@@ -44,7 +44,7 @@ class Manager(clients.ServiceClients):
         self._set_object_storage_clients()
         self._set_image_clients()
         self._set_network_clients()
-        self.placement_client = self.placement.PlacementClient()
+        self._set_placement_clients()
         # TODO(andreaf) This is maintained for backward compatibility
         # with plugins, but it should removed eventually, since it was
         # never a stable interface and it's not useful anyways
@@ -138,6 +138,11 @@ class Manager(clients.ServiceClients):
             **params_volume)
         self.snapshots_extensions_client = self.compute.SnapshotsClient(
             **params_volume)
+
+    def _set_placement_clients(self):
+        self.placement_client = self.placement.PlacementClient()
+        self.resource_providers_client = \
+            self.placement.ResourceProvidersClient()
 
     def _set_identity_clients(self):
         # Clients below use the admin endpoint type of Keystone API v2

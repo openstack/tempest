@@ -14,5 +14,7 @@
 
 from tempest.lib.services.placement.placement_client import \
     PlacementClient
+from tempest.lib.services.placement.resource_providers_client import \
+    ResourceProvidersClient
 
-__all__ = ['PlacementClient']
+__all__ = ['PlacementClient', 'ResourceProvidersClient']
