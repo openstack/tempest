@@ -45,7 +45,7 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         # Attempt to start a server with a meta-data key that is > 255
         # characters
 
-        # Tryset_server_metadata_item a few values
+        # Try create a server with the metadata for a few values
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
@@ -86,11 +86,15 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0025fbd6-a4ba-4cde-b8c2-96805dcfdabc')
-    def test_wrong_key_passed_in_body(self):
+    def test_set_metadata_invalid_key(self):
         """Test setting server metadata item with wrong key in body
 
         Raise BadRequest if key in uri does not match the key passed in body.
         """
+        if not CONF.compute_feature_enabled.xenapi_apis:
+            raise self.skipException(
+                'Metadata is read-only on non-Xen-based deployments.')
+
         meta = {'testkey': 'testvalue'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata_item,
