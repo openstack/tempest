@@ -218,7 +218,6 @@
 - job:
     name: tempest-integrated-compute
     parent: devstack-tempest
-    nodeset: openstack-single-node-bionic
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for compute. This is
