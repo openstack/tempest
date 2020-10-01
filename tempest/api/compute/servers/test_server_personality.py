@@ -29,6 +29,7 @@ CONF = config.CONF
 
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     """Test servers with injected files"""
+    max_microversion = '2.56'
 
     @classmethod
     def setup_credentials(cls):
