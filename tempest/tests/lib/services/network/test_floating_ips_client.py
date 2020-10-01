@@ -27,6 +27,8 @@ class TestFloatingIPsClient(base.BaseServiceTest):
             {
                 "router_id": "d23abc8d-2991-4a55-ba98-2aaea84cc72f",
                 "description": "for test",
+                "dns_domain": "my-domain.org.",
+                "dns_name": "myfip",
                 "created_at": "2016-12-21T10:55:50Z",
                 "updated_at": "2016-12-21T10:55:53Z",
                 "revision_number": 1,
@@ -37,11 +39,24 @@ class TestFloatingIPsClient(base.BaseServiceTest):
                 "floating_ip_address": "172.24.4.228",
                 "port_id": "ce705c24-c1ef-408a-bda3-7bbd946164ab",
                 "id": "2f245a7b-796b-4f26-9cf9-9e82d248fda7",
-                "status": "ACTIVE"
+                "status": "ACTIVE",
+                "port_details": {
+                    "status": "ACTIVE",
+                    "name": "",
+                    "admin_state_up": True,
+                    "network_id": "02dd8479-ef26-4398-a102-d19d0a7b3a1f",
+                    "device_owner": "compute:nova",
+                    "mac_address": "fa:16:3e:b1:3b:30",
+                    "device_id": "8e3941b4-a6e9-499f-a1ac-2a4662025cba"
+                },
+                "tags": ["tag1,tag2"],
+                "port_forwardings": []
             },
             {
                 "router_id": None,
                 "description": "for test",
+                "dns_domain": "my-domain.org.",
+                "dns_name": "myfip2",
                 "created_at": "2016-12-21T11:55:50Z",
                 "updated_at": "2016-12-21T11:55:53Z",
                 "revision_number": 2,
@@ -52,7 +67,10 @@ class TestFloatingIPsClient(base.BaseServiceTest):
                 "floating_ip_address": "172.24.4.227",
                 "port_id": None,
                 "id": "61cea855-49cb-4846-997d-801b70c71bdd",
-                "status": "DOWN"
+                "status": "DOWN",
+                "port_details": None,
+                "tags": ["tag1,tag2"],
+                "port_forwardings": []
             }
         ]
     }
