@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add show type API to v3 types_client library.
+
+    * default_volume_type
