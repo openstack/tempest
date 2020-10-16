@@ -306,7 +306,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return server
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
-                      imageRef=None, volume_type=None):
+                      imageRef=None, volume_type=None, **kwargs):
         """Creates volume
 
         This wrapper utility creates volume and waits for volume to be
@@ -326,11 +326,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
             size = max(size, min_disk)
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__ + "-volume")
-        kwargs = {'name': name,
-                  'snapshot_id': snapshot_id,
-                  'imageRef': imageRef,
-                  'volume_type': volume_type,
-                  'size': size}
+        kwargs.update({'name': name,
+                       'snapshot_id': snapshot_id,
+                       'imageRef': imageRef,
+                       'volume_type': volume_type,
+                       'size': size})
 
         if CONF.compute.compute_volume_common_az:
             kwargs.setdefault('availability_zone',
