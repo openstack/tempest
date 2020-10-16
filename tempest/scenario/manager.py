@@ -362,21 +362,35 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_backup(self, volume_id, name=None, description=None,
                       force=False, snapshot_id=None, incremental=False,
-                      container=None):
-        """Creates backup
+                      container=None, **kwargs):
+        """Creates a backup of the given volume_id or snapshot_id
 
-        This wrapper utility creates backup and waits for backup to be
-        in 'available' state.
+        This wrapper utility creates a backup and waits until it is in
+       'available' state.
+
+        :param volume_id: UUID of the volume to back up
+        :param name: backup name, '$classname-backup' by default
+        :param description: Description of the backup, None by default
+        :param force: boolean whether to backup even if the volume is attached
+            False by default
+        :param snapshot_id: UUID of the source snapshot to back up
+            None by default
+        :param incremental: boolean, False by default
+        :param container: a container name, None by default
+        :param **kwargs: additional parameters per the documentation:
+            https://docs.openstack.org/api-ref/block-storage/v3/
+            #create-a-backup
         """
 
         name = name or data_utils.rand_name(
             self.__class__.__name__ + "-backup")
-        kwargs = {'name': name,
-                  'description': description,
-                  'force': force,
-                  'snapshot_id': snapshot_id,
-                  'incremental': incremental,
-                  'container': container}
+        args = {'name': name,
+                'description': description,
+                'force': force,
+                'snapshot_id': snapshot_id,
+                'incremental': incremental,
+                'container': container}
+        args.update(kwargs)
         backup = self.backups_client.create_backup(volume_id=volume_id,
                                                    **kwargs)['backup']
         self.addCleanup(self.backups_client.delete_backup, backup['id'])
@@ -384,14 +398,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                                 backup['id'], 'available')
         return backup
 
-    def restore_backup(self, backup_id):
-        """Restore backup
+    def restore_backup(self, backup_id, **kwargs):
+        """Restores a backup given by the backup_id
 
-        This wrapper utility restores backup and waits for backup to be
-        in 'available' state.
+        This wrapper utility restores a backup and waits until it is in
+        'available' state.
+
+        :param backup_id: UUID of a backup to restore
+        :param **kwargs: additional parameters per the documentation:
+            https://docs.openstack.org/api-ref/block-storage/v3/
+            #restore-a-backup
         """
 
-        restore = self.backups_client.restore_backup(backup_id)['restore']
+        body = self.backups_client.restore_backup(backup_id, **kwargs)
+        restore = body['restore']
         self.addCleanup(self.volumes_client.delete_volume,
                         restore['volume_id'])
         waiters.wait_for_volume_resource_status(self.backups_client,
