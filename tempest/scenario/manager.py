@@ -160,7 +160,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         client.delete_port, port['id'])
         return port
 
-    def create_keypair(self, client=None):
+    def create_keypair(self, client=None, **kwargs):
         """Creates keypair
 
         Keypair is a public key of OpenSSH key pair used for accessing
@@ -170,10 +170,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """
         if not client:
             client = self.keypairs_client
-        name = data_utils.rand_name(self.__class__.__name__)
+        if not kwargs.get('name'):
+            kwargs['name'] = data_utils.rand_name(self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
-        body = client.create_keypair(name=name)
-        self.addCleanup(client.delete_keypair, name)
+        body = client.create_keypair(**kwargs)
+        self.addCleanup(client.delete_keypair, kwargs['name'])
         return body['keypair']
 
     def create_server(self, name=None, image_id=None, flavor=None,
