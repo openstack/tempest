@@ -410,11 +410,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                            server_id, 'ACTIVE')
 
     def create_volume_snapshot(self, volume_id, name=None, description=None,
-                               metadata=None, force=False):
-        """Creates volume
+                               metadata=None, force=False, **kwargs):
+        """Creates volume's snapshot
 
-        This wrapper utility creates volume snapshot and waits for backup
-        to be in 'available' state.
+        This wrapper utility creates volume snapshot and waits for it until
+        it is in 'available' state.
+
+        :param volume_id: UUID of a volume to create snapshot of
+        :param name: name of the snapshot, '$classname-snapshot' by default
+        :param description: description of the snapshot
+        :param metadata: metadata key and value pairs for the snapshot
+        :param force: whether snapshot even when the volume is attached
+        :param **kwargs: additional parameters per the doc
+            https://docs.openstack.org/api-ref/block-storage/v3/
+            #create-a-snapshot
         """
 
         name = name or data_utils.rand_name(
@@ -424,7 +433,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             force=force,
             name=name,
             description=description,
-            metadata=metadata)['snapshot']
+            metadata=metadata,
+            **kwargs)['snapshot']
 
         self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
                         snapshot['id'])
