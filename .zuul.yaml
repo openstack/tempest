@@ -720,6 +720,7 @@
             voting: false
             irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr:
+            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - interop-tempest-consistency:
             irrelevant-files: *tempest-irrelevant-files
