@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The test_reboot_server_soft has been skipped for more than 6 years.
+    Take into account that the minimum scenario test uses soft reboot
+    and the nova functional test also covers reboot.
