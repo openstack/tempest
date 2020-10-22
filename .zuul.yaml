@@ -473,6 +473,11 @@
           USE_PYTHON3: true
 
 - job:
+    name: tempest-full-victoria-py3
+    parent: tempest-full-py3
+    override-checkout: stable/victoria
+
+- job:
     name: tempest-full-ussuri-py3
     parent: tempest-full-py3
     nodeset: openstack-single-node-bionic
@@ -672,6 +677,8 @@
         - tempest-full-py3-ipv6:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-victoria-py3:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ussuri-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-train-py3:
@@ -764,6 +771,7 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
+        - tempest-full-victoria-py3
         - tempest-full-ussuri-py3
         - tempest-full-train-py3
         - tempest-full-stein-py3
