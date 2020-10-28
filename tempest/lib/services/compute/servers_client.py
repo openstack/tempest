@@ -646,7 +646,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
 
         For a full list of available parameters, please refer to the official
         API reference:
-        https://docs.openstack.org/api-ref/compute/#create-remote-console
+        https://docs.openstack.org/api-ref/compute/#create-console
         """
         param = {
             'remote_console': {
