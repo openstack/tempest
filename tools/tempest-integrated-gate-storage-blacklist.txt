@@ -12,8 +12,3 @@ tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps
 tempest.scenario.test_network_basic_ops.TestNetworkBasicOps
 tempest.scenario.test_network_v6.TestGettingAddress
 tempest.scenario.test_security_groups_basic_ops.TestSecurityGroupsBasicOps
-
-# TODO(gmann): Remove these test skip once nova bug #1882521 is solved
-tempest.api.compute.volumes.test_attach_volume.AttachVolumeMultiAttachTest.test_resize_server_with_multiattached_volume
-tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON
-tempest.api.compute.servers.test_server_rescue.ServerStableDeviceRescueTest.test_stable_device_rescue_disk_virtio_with_volume_attached
