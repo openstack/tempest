@@ -491,7 +491,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(self._cleanup_volume_type, volume_type)
         return volume_type
 
-    def _create_loginable_secgroup_rule(self, secgroup_id=None):
+    def _create_loginable_secgroup_rule(self, secgroup_id=None, rulesets=None):
+        """Create loginable security group rule by compute clients.
+
+        This function will create by default the following rules:
+        1. tcp port 22 allow rule in order to allow ssh access for ipv4
+        2. ipv4 icmp allow rule in order to allow icmpv4
+        """
+
         _client = self.compute_security_groups_client
         _client_rules = self.compute_security_group_rules_client
         if secgroup_id is None:
@@ -504,22 +511,23 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # traffic from all sources, so no group_id is provided.
         # Setting a group_id would only permit traffic from ports
         # belonging to the same security group.
-        rulesets = [
-            {
-                # ssh
-                'ip_protocol': 'tcp',
-                'from_port': 22,
-                'to_port': 22,
-                'cidr': '0.0.0.0/0',
-            },
-            {
-                # ping
-                'ip_protocol': 'icmp',
-                'from_port': -1,
-                'to_port': -1,
-                'cidr': '0.0.0.0/0',
-            }
-        ]
+        if not rulesets:
+            rulesets = [
+                {
+                    # ssh
+                    'ip_protocol': 'tcp',
+                    'from_port': 22,
+                    'to_port': 22,
+                    'cidr': '0.0.0.0/0',
+                },
+                {
+                    # ping
+                    'ip_protocol': 'icmp',
+                    'from_port': -1,
+                    'to_port': -1,
+                    'cidr': '0.0.0.0/0',
+                }
+            ]
         rules = list()
         for ruleset in rulesets:
             sg_rule = _client_rules.create_security_group_rule(
@@ -1340,7 +1348,7 @@ class NetworkScenarioTest(ScenarioTest):
     def _create_loginable_secgroup_rule(self, security_group_rules_client=None,
                                         secgroup=None,
                                         security_groups_client=None):
-        """Create loginable security group rule
+        """Create loginable security group rule by neutron clients by default.
 
         This function will create:
         1. egress and ingress tcp port 22 allow rule in order to allow ssh
