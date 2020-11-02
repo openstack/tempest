@@ -128,3 +128,18 @@ def is_extension_enabled(extension_name, service):
     if extension_name in config_dict[service]:
         return True
     return False
+
+
+def is_network_feature_enabled(feature_name):
+    """A function that will check the list of available network features
+
+    """
+    list_of_features = CONF.network_feature_enabled.available_features
+
+    if not list_of_features:
+        return False
+    if list_of_features[0] == 'all':
+        return True
+    if feature_name in list_of_features:
+        return True
+    return False

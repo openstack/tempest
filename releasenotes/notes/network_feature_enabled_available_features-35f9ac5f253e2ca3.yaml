@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    New config option to ``network-feature-enabled``: ``available_features``.
+    This is a list which can contain features that are not discoverable
+    through Neutron API, or it can be the special entry ``all``.

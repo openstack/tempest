@@ -790,6 +790,13 @@ NetworkFeaturesGroup = [
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
                      "To get the list of extensions run: 'neutron ext-list'"),
+    cfg.ListOpt('available_features',
+                default=['all'],
+                help="A list of available network features with a special "
+                     "entry all that indicates every feature is available. "
+                     "Empty list indicates all features are disabled."
+                     "This list can contain features that are not "
+                     "discoverable through API."),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
