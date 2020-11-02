@@ -338,7 +338,9 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
         found_devices = [d['tags'][0] for d in md_dict['devices']
                          if d.get('tags')]
         try:
-            self.assertItemsEqual(found_devices, ['nic-tag', 'volume-tag'])
+            self.assertEqual(
+                sorted(found_devices),
+                sorted(['nic-tag', 'volume-tag']))
             return True
         except Exception:
             return False
