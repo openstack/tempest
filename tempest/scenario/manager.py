@@ -1109,7 +1109,7 @@ class NetworkScenarioTest(ScenarioTest):
         return net[0]
 
     def create_floating_ip(self, server, external_network_id=None,
-                           port_id=None, client=None):
+                           port_id=None, client=None, **kwargs):
         """Create a floating IP and associates to a resource/port on Neutron"""
 
         if not external_network_id:
@@ -1121,15 +1121,17 @@ class NetworkScenarioTest(ScenarioTest):
         else:
             ip4 = None
 
-        kwargs = {
+        floatingip_kwargs = {
             'floating_network_id': external_network_id,
             'port_id': port_id,
             'tenant_id': server.get('project_id') or server['tenant_id'],
             'fixed_ip_address': ip4,
         }
         if CONF.network.subnet_id:
-            kwargs['subnet_id'] = CONF.network.subnet_id
-        result = client.create_floatingip(**kwargs)
+            floatingip_kwargs['subnet_id'] = CONF.network.subnet_id
+
+        floatingip_kwargs.update(kwargs)
+        result = client.create_floatingip(**floatingip_kwargs)
         floating_ip = result['floatingip']
 
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
