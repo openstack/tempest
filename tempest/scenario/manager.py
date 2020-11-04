@@ -948,12 +948,21 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return self.create_server(**create_kwargs)
 
-    def create_volume_from_image(self):
-        """Create volume from image"""
-        img_uuid = CONF.compute.image_ref
-        vol_name = data_utils.rand_name(
-            self.__class__.__name__ + '-volume-origin')
-        return self.create_volume(name=vol_name, imageRef=img_uuid)
+    def create_volume_from_image(self, **kwargs):
+        """Create volume from image.
+
+        :param image_id: ID of the image to create volume from,
+            CONF.compute.image_ref by default
+        :param name: name of the volume,
+            '$classname-volume-origin' by default
+        :param **kwargs: additional parameters
+        """
+        image_id = kwargs.pop('image_id', CONF.compute.image_ref)
+        name = kwargs.pop('name', None)
+        if not name:
+            namestart = self.__class__.__name__ + '-volume-origin'
+            name = data_utils.rand_name(namestart)
+        return self.create_volume(name=name, imageRef=image_id, **kwargs)
 
 
 class NetworkScenarioTest(ScenarioTest):
