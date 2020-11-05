@@ -13,8 +13,6 @@
     roles: &base_roles
       - zuul: opendev.org/openstack/devstack
     vars: &base_vars
-      # TODO(gmann): Remove these test skip once nova bug #1882521 is solved
-      tempest_black_regex: "(tempest.api.compute.volumes.test_attach_volume.AttachVolumeMultiAttachTest.test_resize_server_with_multiattached_volume|tempest.api.compute.servers.test_server_rescue_negative.ServerRescueNegativeTestJSON|tempest.api.compute.servers.test_server_rescue.ServerStableDeviceRescueTest.test_stable_device_rescue_disk_virtio_with_volume_attached)"
       devstack_services:
         tempest: true
       devstack_local_conf:
