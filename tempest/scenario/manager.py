@@ -573,7 +573,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         linux_client.validate_authentication()
         return linux_client
 
-    def image_create(self, name='scenario-img'):
+    def image_create(self, name='scenario-img', **kwargs):
         img_path = CONF.scenario.img_file
         if not os.path.exists(img_path):
             # TODO(kopecmartin): replace LOG.warning for rasing
@@ -613,6 +613,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # Additional properties are flattened out in the v2 API.
             if img_properties:
                 params.update(img_properties)
+        params.update(kwargs)
         body = self.image_client.create_image(**params)
         image = body['image'] if 'image' in body else body
         self.addCleanup(self.image_client.delete_image, image['id'])
