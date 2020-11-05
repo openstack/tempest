@@ -12,20 +12,35 @@
 
 - when: dry_run
   block:
-    - name: Run tempest cleanup dry-run
-      become: yes
-      become_user: tempest
-      command: tox -evenv-tempest -- tempest cleanup --dry-run --debug
-      args:
-        chdir: "{{ devstack_base_dir }}/tempest"
+    - import_tasks: dry_run.yaml
 
     - name: Cat dry_run.json
       command: cat "{{ devstack_base_dir }}/tempest/dry_run.json"
 
-- name: Run tempest cleanup
-  become: yes
-  become_user: tempest
-  command: tox -evenv-tempest -- tempest cleanup --debug
-  args:
-    chdir: "{{ devstack_base_dir }}/tempest"
-  when: not dry_run and not init_saved_state
+- when:
+    - not dry_run
+    - not init_saved_state
+  block:
+    - name: Run tempest cleanup
+      become: yes
+      become_user: tempest
+      command: tox -evenv-tempest -- tempest cleanup --debug
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"
+
+- when:
+    - run_tempest_fail_if_leaked_resources
+    - not init_saved_state
+  block:
+    # let's run dry run again, if haven't already, to check no leftover
+    # resources were left behind after the cleanup in the previous task
+    - import_tasks: dry_run.yaml
+      when: not dry_run
+
+    - name: Fail if any resources are leaked
+      become: yes
+      become_user: tempest
+      shell: |
+        python3 roles/tempest-cleanup/tasks/dry_run_checker.py --file {{ devstack_base_dir }}/tempest/dry_run.json --is-empty
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"

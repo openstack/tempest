@@ -1,3 +1,4 @@
 devstack_base_dir: /opt/stack
 init_saved_state: false
 dry_run: false
+run_tempest_fail_if_leaked_resources: false

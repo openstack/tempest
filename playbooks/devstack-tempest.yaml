@@ -30,9 +30,9 @@
         name: tempest-cleanup
       vars:
         init_saved_state: true
-      when:
-        - run_tempest_dry_cleanup is defined
-        - run_tempest_cleanup is defined
+      when: (run_tempest_dry_cleanup is defined and run_tempest_dry_cleanup | bool) or
+            (run_tempest_cleanup is defined and run_tempest_cleanup | bool) or
+            (run_tempest_fail_if_leaked_resources is defined and run_tempest_fail_if_leaked_resources | bool)
 
     - name: Run Tempest
       include_role:
@@ -43,10 +43,9 @@
         name: tempest-cleanup
       vars:
         dry_run: true
-      when:
-        - run_tempest_dry_cleanup is defined
+      when: run_tempest_dry_cleanup is defined and run_tempest_dry_cleanup | bool
 
     - name: Run tempest cleanup
       include_role:
         name: tempest-cleanup
-      when: run_tempest_cleanup is defined
+      when: run_tempest_cleanup is defined and run_tempest_cleanup | bool
