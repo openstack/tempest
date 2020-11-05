@@ -810,13 +810,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 LOG.exception(extra_msg)
                 raise
 
-    def create_floating_ip(self, server, pool_name=None):
+    def create_floating_ip(self, server, pool_name=None, **kwargs):
         """Create a floating IP and associates to a server on Nova"""
 
         if not pool_name:
             pool_name = CONF.network.floating_network_name
+
         floating_ip = (self.compute_floating_ips_client.
-                       create_floating_ip(pool=pool_name)['floating_ip'])
+                       create_floating_ip(pool=pool_name,
+                                          **kwargs)['floating_ip'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.compute_floating_ips_client.delete_floating_ip,
                         floating_ip['id'])
