@@ -119,3 +119,5 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(agent_id_xen, map(lambda x: x['agent_id'], agents))
         self.assertNotIn(body['agent_id'], map(lambda x: x['agent_id'],
                                                agents))
+        for agent in agents:
+            self.assertEqual(agent_xen['hypervisor'], agent['hypervisor'])
