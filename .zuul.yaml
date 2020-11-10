@@ -93,6 +93,10 @@
     branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking and py27.
+      This job is supposed to run until stable/train setup only.
+      If you are running it on stable/ussuri gate onwards for python2.7
+      coverage then you need to do override-checkout with any stable
+      branch less than or equal to stable/train.
       Former names for this job where:
         * legacy-tempest-dsvm-neutron-full
         * gate-tempest-dsvm-neutron-full-ubuntu-xenial
@@ -112,7 +116,7 @@
 
 - job:
     name: tempest-full-oslo-master
-    parent: tempest-full
+    parent: tempest-full-py3
     description: |
       Integration test using current git of oslo libs.
       This ensures that when oslo libs get released that they
@@ -140,9 +144,6 @@
       - opendev.org/openstack/oslo.utils
       - opendev.org/openstack/oslo.versionedobjects
       - opendev.org/openstack/oslo.vmware
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: True
 
 - job:
     name: tempest-full-parallel
@@ -199,7 +200,7 @@
     branches: ^(?!stable/ocata).*$
     description: |
       This  job runs integration tests for networking. This is subset of
-      'tempest-full' job and run only Neutron and Nova related tests.
+      'tempest-full-py3' job and run only Neutron and Nova related tests.
       This is meant to be run on neutron gate only.
     vars:
       tox_envlist: integrated-network
@@ -219,7 +220,7 @@
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for compute. This is
-      subset of 'tempest-full' job and run Nova, Neutron, Cinder (except backup tests)
+      subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
       and Glance related tests. This is meant to be run on Nova gate only.
     vars:
       tox_envlist: integrated-compute
@@ -241,7 +242,7 @@
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for placement. This is
-      subset of 'tempest-full' job and run Nova and Neutron
+      subset of 'tempest-full-py3' job and run Nova and Neutron
       related tests. This is meant to be run on Placement gate only.
     vars:
       tox_envlist: integrated-placement
@@ -262,7 +263,7 @@
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for image & block storage. This is
-      subset of 'tempest-full' job and run Cinder, Glance, Swift and Nova
+      subset of 'tempest-full-py3' job and run Cinder, Glance, Swift and Nova
       related tests. This is meant to be run on Cinder and Glance gate only.
     vars:
       tox_envlist: integrated-storage
@@ -278,7 +279,7 @@
     branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for object storage. This is
-      subset of 'tempest-full' job and run Swift, Cinder and Glance
+      subset of 'tempest-full-py3' job and run Swift, Cinder and Glance
       related tests. This is meant to be run on Swift gate only.
     vars:
       tox_envlist: integrated-object-storage
@@ -291,9 +292,6 @@
 - job:
     name: tempest-full-py3-ipv6
     parent: devstack-tempest-ipv6
-    # This currently works from stable/pike on.
-    # Before stable/pike, legacy version of tempest-full
-    # 'legacy-tempest-dsvm-neutron-full' run.
     branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking, IPv6 and py3.
@@ -544,7 +542,7 @@
 
 - job:
     name: tempest-pg-full
-    parent: tempest-full
+    parent: tempest-full-py3
     description: |
       Base integration test with Neutron networking and PostgreSQL.
       Former name for this job was legacy-tempest-dsvm-neutron-pg-full.
@@ -552,7 +550,6 @@
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
         DATABASE_TYPE: postgresql
-        USE_PYTHON3: True
 
 - project-template:
     name: integrated-gate-networking
