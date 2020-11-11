@@ -228,7 +228,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # 4.Plain username/password auth, if a password was given.
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(rebuilt_server, validation_resources),
-                self.ssh_user,
+                self.ssh_alt_user,
                 password,
                 validation_resources['keypair']['private_key'],
                 server=rebuilt_server,
@@ -310,7 +310,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.os_primary)
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, validation_resources),
-                self.ssh_user,
+                self.ssh_alt_user,
                 password=None,
                 pkey=validation_resources['keypair']['private_key'],
                 server=server,
