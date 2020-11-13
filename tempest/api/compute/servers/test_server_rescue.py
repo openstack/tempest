@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -189,6 +190,7 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         self._test_stable_device_rescue(server_id, rescue_image_id)
 
     @decorators.idempotent_id('a3772b42-00bf-4310-a90b-1cc6fd3e7eab')
+    @utils.services('volume')
     def test_stable_device_rescue_disk_virtio_with_volume_attached(self):
         """Test rescuing server with volume attached
 
@@ -213,6 +215,13 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
     """
 
     min_microversion = '2.87'
+
+    @classmethod
+    def skip_checks(cls):
+        super(ServerBootFromVolumeStableRescueTest, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('48f123cb-922a-4065-8db6-b9a9074a556b')
