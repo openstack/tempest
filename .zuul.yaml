@@ -671,6 +671,9 @@
         - tempest-full-py3-ipv6:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - glance-multistore-cinder-import:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-victoria-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ussuri-py3:
