@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Added methods to the identity v3 roles client to support:
+
+    - PUT /v3/system/users/{user}/roles/{role}
+    - GET /v3/system/users/{user}/roles
+    - GET /v3/system/users/{user}/roles/{role}
+    - DELETE /v3/system/users/{user}/roles/{role}
+    - PUT /v3/system/groups/{group}/roles/{role}
+    - GET /v3/system/groups/{group}/roles
+    - GET /v3/system/groups/{group}/roles/{role}
+    - DELETE /v3/system/groups/{group}/roles/{role}
