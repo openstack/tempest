@@ -437,3 +437,20 @@ def wait_for_interface_detach(client, server_id, port_id):
                        'the required time (%s s)' % (port_id, server_id,
                                                      client.build_timeout))
             raise lib_exc.TimeoutException(message)
+
+
+def wait_for_guest_os_boot(client, server_id):
+    start_time = int(time.time())
+    while True:
+        console_output = client.get_console_output(server_id)['output']
+        for line in console_output.split('\n'):
+            if 'login:' in line.lower():
+                return
+        if int(time.time()) - start_time >= client.build_timeout:
+            LOG.info("Guest OS on server %s probably isn't ready or its "
+                     "console log can't be parsed properly. If guest OS "
+                     "isn't ready, that may cause problems with SSH to "
+                     "the server.",
+                     server_id)
+            return
+        time.sleep(client.build_interval)
