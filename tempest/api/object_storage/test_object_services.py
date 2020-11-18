@@ -770,11 +770,11 @@ class ObjectTest(base.BaseObjectTest):
         headers = {}
         headers['X-Copy-From'] = "%s/%s" % (str(self.container_name),
                                             str(object_name))
-        resp, body = self.object_client.create_object(self.container_name,
-                                                      object_name,
-                                                      data=None,
-                                                      metadata=metadata,
-                                                      headers=headers)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name,
+                                                   data=None,
+                                                   metadata=metadata,
+                                                   headers=headers)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # check the content type

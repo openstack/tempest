@@ -165,6 +165,6 @@ class ObjectSloTest(base.BaseObjectTest):
 
         self.assertHeaders(resp, 'Object', 'DELETE')
 
-        resp, body = self.container_client.list_container_objects(
+        resp, _ = self.container_client.list_container_objects(
             self.container_name)
         self.assertEqual(int(resp['x-container-object-count']), 0)

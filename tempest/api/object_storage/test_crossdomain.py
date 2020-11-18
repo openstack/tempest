@@ -32,9 +32,6 @@ class CrossdomainTest(base.BaseObjectTest):
 
         cls.xml_end = "</cross-domain-policy>"
 
-    def setUp(self):
-        super(CrossdomainTest, self).setUp()
-
     @decorators.idempotent_id('d1b8b031-b622-4010-82f9-ff78a9e915c7')
     @utils.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):

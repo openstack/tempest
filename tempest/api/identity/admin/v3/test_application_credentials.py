@@ -37,7 +37,7 @@ class ApplicationCredentialsV3AdminTest(base.BaseApplicationCredentialsV3Test,
         secret = app_cred['secret']
 
         # Check that the application credential is functional
-        token_id, resp = self.non_admin_token.get_token(
+        _, resp = self.non_admin_token.get_token(
             app_cred_id=app_cred['id'],
             app_cred_secret=secret,
             auth_data=True

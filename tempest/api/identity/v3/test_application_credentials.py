@@ -51,7 +51,7 @@ class ApplicationCredentialsV3Test(base.BaseApplicationCredentialsV3Test):
         self.assertNotIn('secret', app_cred)
 
         # Check that the application credential is functional
-        token_id, resp = self.non_admin_token.get_token(
+        _, resp = self.non_admin_token.get_token(
             app_cred_id=app_cred['id'],
             app_cred_secret=secret,
             auth_data=True
