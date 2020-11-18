@@ -35,16 +35,16 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         cls.from_port = 22
         cls.to_port = 22
 
-    def setUp(cls):
-        super(SecurityGroupRulesTestJSON, cls).setUp()
+    def setUp(self):
+        super(SecurityGroupRulesTestJSON, self).setUp()
 
-        from_port = cls.from_port
-        to_port = cls.to_port
+        from_port = self.from_port
+        to_port = self.to_port
         group = {}
         ip_range = {}
-        cls.expected = {
+        self.expected = {
             'parent_group_id': None,
-            'ip_protocol': cls.ip_protocol,
+            'ip_protocol': self.ip_protocol,
             'from_port': from_port,
             'to_port': to_port,
             'ip_range': ip_range,
