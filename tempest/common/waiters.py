@@ -207,8 +207,8 @@ def wait_for_image_imported_to_stores(client, image_id, stores):
 
         time.sleep(client.build_interval)
 
-    message = ('Image %(image_id)s failed to import '
-               'on stores: %s' % str(image['os_glance_failed_import']))
+    message = ('Image %s failed to import on stores: %s' %
+               (image_id, str(image['os_glance_failed_import'])))
     caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)
@@ -238,8 +238,8 @@ def wait_for_image_copied_to_stores(client, image_id):
 
         time.sleep(client.build_interval)
 
-    message = ('Image %(image_id)s failed to finish the copy operation '
-               'on stores: %s' % str(store_left))
+    message = ('Image %s failed to finish the copy operation '
+               'on stores: %s' % (image_id, str(store_left)))
     caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)

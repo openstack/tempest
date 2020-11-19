@@ -55,6 +55,56 @@ class TestImageWaiters(base.TestCase):
                           waiters.wait_for_image_status,
                           self.client, 'fake_image_id', 'active')
 
+    def test_wait_for_image_imported_to_stores(self):
+        self.client.show_image.return_value = ({'status': 'active',
+                                                'stores': 'fake_store'})
+        start_time = int(time.time())
+        waiters.wait_for_image_imported_to_stores(
+            self.client, 'fake_image_id', 'fake_store')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_image_imported_to_stores_timeout(self):
+        time_mock = self.patch('time.time')
+        client = mock.MagicMock()
+        client.build_timeout = 2
+        self.patch('time.time', side_effect=[0., 1., 2.])
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        client.show_image.return_value = ({
+            'status': 'saving',
+            'stores': 'fake_store',
+            'os_glance_failed_import': 'fake_os_glance_failed_import'})
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_image_imported_to_stores,
+                          client, 'fake_image_id', 'fake_store')
+
+    def test_wait_for_image_copied_to_stores(self):
+        self.client.show_image.return_value = ({
+            'status': 'active',
+            'os_glance_importing_to_stores': '',
+            'os_glance_failed_import': 'fake_os_glance_failed_import'})
+        start_time = int(time.time())
+        waiters.wait_for_image_copied_to_stores(
+            self.client, 'fake_image_id')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_image_copied_to_stores_timeout(self):
+        time_mock = self.patch('time.time')
+        self.patch('time.time', side_effect=[0., 1.])
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        self.client.show_image.return_value = ({
+            'status': 'active',
+            'os_glance_importing_to_stores': 'processing',
+            'os_glance_failed_import': 'fake_os_glance_failed_import'})
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_image_copied_to_stores,
+                          self.client, 'fake_image_id')
+
 
 class TestInterfaceWaiters(base.TestCase):
 
