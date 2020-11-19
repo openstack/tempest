@@ -92,7 +92,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             # create object in container
             object_name = data_utils.rand_name(name='TestSyncObject')
             data = object_name[::-1].encode()  # Raw data, we need bytes
-            resp, _ = obj_client[0].create_object(cont[0], object_name, data)
+            obj_client[0].create_object(cont[0], object_name, data)
             self.objects.append(object_name)
 
         # wait until container contents list is not empty
