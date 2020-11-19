@@ -225,8 +225,7 @@ class TestChecker(object):
 
     def _add_import_for_test_uuid(self, patcher, src_parsed, source_path):
         import_list = [node for node in src_parsed.body
-                       if isinstance(node, ast.Import) or
-                       isinstance(node, ast.ImportFrom)]
+                       if isinstance(node, (ast.Import, ast.ImportFrom))]
 
         if not import_list:
             print("(WARNING) %s: The file is not valid as it does not contain "

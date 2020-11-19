@@ -302,5 +302,5 @@ class VolumesClient(rest_client.RestClient):
     def retype_volume(self, volume_id, **kwargs):
         """Updates volume with new volume type."""
         post_body = json.dumps({'os-retype': kwargs})
-        resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        resp, _ = self.post('volumes/%s/action' % volume_id, post_body)
         self.expected_success(202, resp.status)

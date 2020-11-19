@@ -129,7 +129,7 @@ def rand_infiniband_guid_address():
     :rtype: string
     """
     guid = []
-    for i in range(8):
+    for _ in range(8):
         guid.append("%02x" % random.randint(0x00, 0xff))
     return ':'.join(guid)
 
