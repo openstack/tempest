@@ -783,36 +783,37 @@ network_feature_group = cfg.OptGroup(name='network-feature-enabled',
 NetworkFeaturesGroup = [
     cfg.BoolOpt('ipv6',
                 default=True,
-                help="Allow the execution of IPv6 tests"),
+                help="Allow the execution of IPv6 tests."),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help="A list of enabled network extensions with a special "
                      "entry all which indicates every extension is enabled. "
                      "Empty list indicates all extensions are disabled. "
-                     "To get the list of extensions run: 'neutron ext-list'"),
+                     "To get the list of extensions run: "
+                     "'openstack extension list --network'"),
     cfg.ListOpt('available_features',
                 default=['all'],
                 help="A list of available network features with a special "
                      "entry all that indicates every feature is available. "
-                     "Empty list indicates all features are disabled."
+                     "Empty list indicates all features are disabled. "
                      "This list can contain features that are not "
-                     "discoverable through API."),
+                     "discoverable through the API."),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
                      "the extended IPv6 attributes ipv6_ra_mode "
-                     "and ipv6_address_mode"
+                     "and ipv6_address_mode."
                 ),
     cfg.BoolOpt('port_admin_state_change',
                 default=True,
-                help="Does the test environment support changing"
-                     " port admin state"),
+                help="Does the test environment support changing "
+                     "port admin state?"),
     cfg.BoolOpt('port_security',
                 default=False,
                 help="Does the test environment support port security?"),
     cfg.BoolOpt('floating_ips',
                 default=True,
-                help='Does the test environment support floating_ips'),
+                help='Does the test environment support floating_ips?'),
     cfg.StrOpt('qos_placement_physnet', default=None,
                help='Name of the physnet for placement based minimum '
                     'bandwidth allocation.'),
