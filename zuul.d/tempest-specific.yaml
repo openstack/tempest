@@ -1,0 +1,113 @@
+# NOTE(gmann): This file includes all tempest specific jobs definition which
+# are supposed to be run by Tempest gate only.
+- job:
+    name: tempest-full-oslo-master
+    parent: tempest-full-py3
+    description: |
+      Integration test using current git of oslo libs.
+      This ensures that when oslo libs get released that they
+      do not break OpenStack server projects.
+
+      Former name for this job was
+      periodic-tempest-dsvm-oslo-latest-full-master.
+    timeout: 10800
+    required-projects:
+      - opendev.org/openstack/oslo.cache
+      - opendev.org/openstack/oslo.concurrency
+      - opendev.org/openstack/oslo.config
+      - opendev.org/openstack/oslo.context
+      - opendev.org/openstack/oslo.db
+      - opendev.org/openstack/oslo.i18n
+      - opendev.org/openstack/oslo.log
+      - opendev.org/openstack/oslo.messaging
+      - opendev.org/openstack/oslo.middleware
+      - opendev.org/openstack/oslo.policy
+      - opendev.org/openstack/oslo.privsep
+      - opendev.org/openstack/oslo.reports
+      - opendev.org/openstack/oslo.rootwrap
+      - opendev.org/openstack/oslo.serialization
+      - opendev.org/openstack/oslo.service
+      - opendev.org/openstack/oslo.utils
+      - opendev.org/openstack/oslo.versionedobjects
+      - opendev.org/openstack/oslo.vmware
+
+- job:
+    name: tempest-full-parallel
+    parent: tempest-full-py3
+    voting: false
+    branches:
+      - master
+    description: |
+      Base integration test with Neutron networking.
+      It includes all scenarios as it was in the past.
+      This job runs all scenario tests in parallel!
+    timeout: 9000
+    vars:
+      tox_envlist: full-parallel
+      run_tempest_cleanup: true
+      run_tempest_dry_cleanup: true
+
+- job:
+    name: tempest-full-py3-ipv6
+    parent: devstack-tempest-ipv6
+    branches: ^(?!stable/ocata).*$
+    description: |
+      Base integration test with Neutron networking, IPv6 and py3.
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        # without Swift, c-bak cannot run (in the Gate at least)
+        c-bak: false
+
+- job:
+    name: tempest-full-py3-opensuse15
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-opensuse-15
+    description: |
+      Base integration test with Neutron networking and py36 running
+      on openSUSE Leap 15.x
+    voting: false
+
+- job:
+    name: tempest-tox-plugin-sanity-check
+    parent: tox
+    description: |
+      Run tempest plugin sanity check script using tox.
+    nodeset: ubuntu-focal
+    vars:
+      tox_envlist: plugin-sanity-check
+    timeout: 5000
+
+- job:
+    name: tempest-full-test-account-py3
+    parent: tempest-full-py3
+    description: |
+      This job runs the full set of tempest tests using pre-provisioned
+      credentials instead of dynamic credentials and py3.
+      Former names for this job were:
+        - legacy-tempest-dsvm-full-test-accounts
+        - legacy-tempest-dsvm-neutron-full-test-accounts
+        - legacy-tempest-dsvm-identity-v3-test-accounts
+    vars:
+      devstack_localrc:
+        TEMPEST_USE_TEST_ACCOUNTS: True
+
+- job:
+    name: tempest-full-test-account-no-admin-py3
+    parent: tempest-full-test-account-py3
+    description: |
+      This job runs the full set of tempest tests using pre-provisioned
+      credentials and py3 without having an admin account.
+      Former name for this job was:
+        - legacy-tempest-dsvm-neutron-full-non-admin
+
+    vars:
+      devstack_localrc:
+        TEMPEST_HAS_ADMIN: False

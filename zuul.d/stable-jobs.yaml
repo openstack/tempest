@@ -1,0 +1,23 @@
+# NOTE(gmann): This file includes all stable release jobs definition.
+- job:
+    name: tempest-full-victoria-py3
+    parent: tempest-full-py3
+    override-checkout: stable/victoria
+
+- job:
+    name: tempest-full-ussuri-py3
+    parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
+    override-checkout: stable/ussuri
+
+- job:
+    name: tempest-full-train-py3
+    parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
+    override-checkout: stable/train
+
+- job:
+    name: tempest-full-stein-py3
+    parent: tempest-full-py3
+    nodeset: openstack-single-node-bionic
+    override-checkout: stable/stein

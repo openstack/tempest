@@ -1,41 +1,6 @@
-- job:
-    name: devstack-tempest
-    parent: devstack
-    description: |
-      Base Tempest job.
-
-      This Tempest job provides the base for both the single and multi-node
-      test setup. To run a multi-node test inherit from devstack-tempest and
-      set the nodeset to a multi-node one.
-    required-projects: &base_required-projects
-      - opendev.org/openstack/tempest
-    timeout: 7200
-    roles: &base_roles
-      - zuul: opendev.org/openstack/devstack
-    vars: &base_vars
-      devstack_services:
-        tempest: true
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            compute:
-              min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
-      test_results_stage_name: test_results
-      zuul_copy_output:
-        '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
-        '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': logs
-        '{{ devstack_base_dir }}/tempest/tempest.log': logs
-        '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': logs
-        '{{ stage_dir }}/{{ test_results_stage_name }}.html': logs
-        '{{ stage_dir }}/stackviz': logs
-      extensions_to_txt:
-        conf: true
-        log: true
-        yaml: true
-        yml: true
-    run: playbooks/devstack-tempest.yaml
-    post-run: playbooks/post-tempest.yaml
-
+# NOTE(gmann): This file includes all integrated jobs definition which
+# are supposed to be run by Tempest and other projects as
+# integrated testing.
 - job:
     name: tempest-all
     parent: devstack-tempest
@@ -48,28 +13,6 @@
       tempest_test_regex: tempest
       devstack_localrc:
         ENABLE_FILE_INJECTION: true
-
-- job:
-    name: devstack-tempest-ipv6
-    parent: devstack-ipv6
-    description: |
-      Base Tempest IPv6 job. This job is derived from 'devstack-ipv6'
-      which set the IPv6-only setting for OpenStack services. As part of
-      run phase, this job will verify the IPv6 setting and check the services
-      endpoints and listen addresses are IPv6. Basically it will run the script
-      ./tool/verify-ipv6-only-deployments.sh
-
-      Child jobs of this job can run their own set of tests and can
-      add post-run playebooks to extend the IPv6 verification specific
-      to their deployed services.
-      Check the wiki page for more details about project jobs setup
-      - https://wiki.openstack.org/wiki/Goal-IPv6-only-deployments-and-testing
-    required-projects: *base_required-projects
-    timeout: 7200
-    roles: *base_roles
-    vars: *base_vars
-    run: playbooks/devstack-tempest-ipv6.yaml
-    post-run: playbooks/post-tempest.yaml
 
 - job:
     name: tempest-ipv6-only
@@ -113,53 +56,6 @@
         # be run in some more cinder-specific job, especially because the
         # tests fail at a high rate (see bugs 1483434, 1813217, 1745168)
         c-bak: false
-
-- job:
-    name: tempest-full-oslo-master
-    parent: tempest-full-py3
-    description: |
-      Integration test using current git of oslo libs.
-      This ensures that when oslo libs get released that they
-      do not break OpenStack server projects.
-
-      Former name for this job was
-      periodic-tempest-dsvm-oslo-latest-full-master.
-    timeout: 10800
-    required-projects:
-      - opendev.org/openstack/oslo.cache
-      - opendev.org/openstack/oslo.concurrency
-      - opendev.org/openstack/oslo.config
-      - opendev.org/openstack/oslo.context
-      - opendev.org/openstack/oslo.db
-      - opendev.org/openstack/oslo.i18n
-      - opendev.org/openstack/oslo.log
-      - opendev.org/openstack/oslo.messaging
-      - opendev.org/openstack/oslo.middleware
-      - opendev.org/openstack/oslo.policy
-      - opendev.org/openstack/oslo.privsep
-      - opendev.org/openstack/oslo.reports
-      - opendev.org/openstack/oslo.rootwrap
-      - opendev.org/openstack/oslo.serialization
-      - opendev.org/openstack/oslo.service
-      - opendev.org/openstack/oslo.utils
-      - opendev.org/openstack/oslo.versionedobjects
-      - opendev.org/openstack/oslo.vmware
-
-- job:
-    name: tempest-full-parallel
-    parent: tempest-full-py3
-    voting: false
-    branches:
-      - master
-    description: |
-      Base integration test with Neutron networking.
-      It includes all scenarios as it was in the past.
-      This job runs all scenario tests in parallel!
-    timeout: 9000
-    vars:
-      tox_envlist: full-parallel
-      run_tempest_cleanup: true
-      run_tempest_dry_cleanup: true
 
 - job:
     name: tempest-full-py3
@@ -290,52 +186,6 @@
         USE_PYTHON3: true
 
 - job:
-    name: tempest-full-py3-ipv6
-    parent: devstack-tempest-ipv6
-    branches: ^(?!stable/ocata).*$
-    description: |
-      Base integration test with Neutron networking, IPv6 and py3.
-    vars:
-      tox_envlist: full
-      devstack_localrc:
-        USE_PYTHON3: true
-        FORCE_CONFIG_DRIVE: true
-      devstack_services:
-        s-account: false
-        s-container: false
-        s-object: false
-        s-proxy: false
-        # without Swift, c-bak cannot run (in the Gate at least)
-        c-bak: false
-
-- job:
-    name: tempest-multinode-full-base
-    parent: devstack-tempest
-    description: |
-      Base multinode integration test with Neutron networking and py27.
-      Former names for this job were:
-        * neutron-tempest-multinode-full
-        * legacy-tempest-dsvm-neutron-multinode-full
-        * gate-tempest-dsvm-neutron-multinode-full-ubuntu-xenial-nv
-      This job includes two nodes, controller / tempest plus a subnode, but
-      it can be used with different topologies, as long as a controller node
-      and a tempest one exist.
-    timeout: 10800
-    vars:
-      tox_envlist: full
-      devstack_localrc:
-        FORCE_CONFIG_DRIVE: false
-        NOVA_ALLOW_MOVE_TO_SAME_HOST: false
-        LIVE_MIGRATION_AVAILABLE: true
-        USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
-    group-vars:
-      peers:
-        devstack_localrc:
-          NOVA_ALLOW_MOVE_TO_SAME_HOST: false
-          LIVE_MIGRATION_AVAILABLE: true
-          USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
-
-- job:
     name: tempest-multinode-full
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-focal
@@ -400,15 +250,6 @@
           USE_PYTHON3: true
 
 - job:
-    name: tempest-full-py3-opensuse15
-    parent: tempest-full-py3
-    nodeset: devstack-single-node-opensuse-15
-    description: |
-      Base integration test with Neutron networking and py36 running
-      on openSUSE Leap 15.x
-    voting: false
-
-- job:
     name: tempest-slow
     parent: tempest-multinode-full
     description: |
@@ -468,39 +309,6 @@
           USE_PYTHON3: true
 
 - job:
-    name: tempest-full-victoria-py3
-    parent: tempest-full-py3
-    override-checkout: stable/victoria
-
-- job:
-    name: tempest-full-ussuri-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/ussuri
-
-- job:
-    name: tempest-full-train-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/train
-
-- job:
-    name: tempest-full-stein-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/stein
-
-- job:
-    name: tempest-tox-plugin-sanity-check
-    parent: tox
-    description: |
-      Run tempest plugin sanity check script using tox.
-    nodeset: ubuntu-focal
-    vars:
-      tox_envlist: plugin-sanity-check
-    timeout: 5000
-
-- job:
     name: tempest-cinder-v2-api
     parent: devstack-tempest
     branches:
@@ -512,33 +320,6 @@
       tempest_test_regex: api.*volume
       devstack_localrc:
         TEMPEST_VOLUME_TYPE: volumev2
-
-- job:
-    name: tempest-full-test-account-py3
-    parent: tempest-full-py3
-    description: |
-      This job runs the full set of tempest tests using pre-provisioned
-      credentials instead of dynamic credentials and py3.
-      Former names for this job were:
-        - legacy-tempest-dsvm-full-test-accounts
-        - legacy-tempest-dsvm-neutron-full-test-accounts
-        - legacy-tempest-dsvm-identity-v3-test-accounts
-    vars:
-      devstack_localrc:
-        TEMPEST_USE_TEST_ACCOUNTS: True
-
-- job:
-    name: tempest-full-test-account-no-admin-py3
-    parent: tempest-full-test-account-py3
-    description: |
-      This job runs the full set of tempest tests using pre-provisioned
-      credentials and py3 without having an admin account.
-      Former name for this job was:
-        - legacy-tempest-dsvm-neutron-full-non-admin
-
-    vars:
-      devstack_localrc:
-        TEMPEST_HAS_ADMIN: False
 
 - job:
     name: tempest-pg-full
@@ -629,150 +410,3 @@
       jobs:
         - grenade
         - tempest-integrated-object-storage
-
-- project:
-    templates:
-      - check-requirements
-      - integrated-gate-py3
-      - openstack-cover-jobs
-      - openstack-python3-victoria-jobs
-      - publish-openstack-docs-pti
-      - release-notes-jobs-python3
-    check:
-      jobs:
-        - devstack-tempest:
-            files:
-              - ^playbooks/
-              - ^roles/
-              - ^.zuul.yaml$
-        - devstack-tempest-ipv6:
-            voting: false
-            files:
-              - ^playbooks/
-              - ^roles/
-              - ^.zuul.yaml$
-        - tempest-full-parallel:
-            # Define list of irrelevant files to use everywhere else
-            irrelevant-files: &tempest-irrelevant-files
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^tools/.*$
-              - ^.coveragerc$
-              - ^.gitignore$
-              - ^.gitreview$
-              - ^.mailmap$
-        - tempest-full-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3-ipv6:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - glance-multistore-cinder-import:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-victoria-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-ussuri-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-train-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-stein-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-multinode-full-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-tox-plugin-sanity-check:
-            irrelevant-files: &tempest-irrelevant-files-2
-              - ^.*\.rst$
-              - ^doc/.*$
-              - ^etc/.*$
-              - ^releasenotes/.*$
-              - ^setup.cfg$
-              - ^tempest/hacking/.*$
-              - ^tempest/tests/.*$
-              - ^.coveragerc$
-              - ^.gitignore$
-              - ^.gitreview$
-              - ^.mailmap$
-              # tools/ is not here since this relies on a script in tools/.
-        - tempest-ipv6-only:
-            irrelevant-files: *tempest-irrelevant-files-2
-        - tempest-slow-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - nova-live-migration:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - devstack-plugin-ceph-tempest-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade-multinode:
-            irrelevant-files: *tempest-irrelevant-files
-        - grenade:
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario001-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario002-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario003-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario004-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - neutron-tempest-dvr:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - interop-tempest-consistency:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-test-account-py3:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-test-account-no-admin-py3:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - openstack-tox-bashate:
-            irrelevant-files: *tempest-irrelevant-files-2
-    gate:
-      jobs:
-        - tempest-slow-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade-multinode:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - grenade:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-ipv6-only:
-            irrelevant-files: *tempest-irrelevant-files-2
-        - devstack-plugin-ceph-tempest-py3:
-            irrelevant-files: *tempest-irrelevant-files
-    experimental:
-      jobs:
-        - tempest-cinder-v2-api:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-all:
-            irrelevant-files: *tempest-irrelevant-files
-        - neutron-tempest-dvr-ha-multinode-full:
-            irrelevant-files: *tempest-irrelevant-files
-        - nova-tempest-v2-api:
-            irrelevant-files: *tempest-irrelevant-files
-        - cinder-tempest-lvm-multibackend:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-pg-full:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3-opensuse15:
-            irrelevant-files: *tempest-irrelevant-files
-    periodic-stable:
-      jobs:
-        - tempest-full-victoria-py3
-        - tempest-full-ussuri-py3
-        - tempest-full-train-py3
-        - tempest-full-stein-py3
-    periodic:
-      jobs:
-        - tempest-all
-        - tempest-full-oslo-master

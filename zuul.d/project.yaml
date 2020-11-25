@@ -1,0 +1,146 @@
+- project:
+    templates:
+      - check-requirements
+      - integrated-gate-py3
+      - openstack-cover-jobs
+      - openstack-python3-victoria-jobs
+      - publish-openstack-docs-pti
+      - release-notes-jobs-python3
+    check:
+      jobs:
+        - devstack-tempest:
+            files:
+              - ^playbooks/
+              - ^roles/
+              - ^.zuul.yaml$
+        - devstack-tempest-ipv6:
+            voting: false
+            files:
+              - ^playbooks/
+              - ^roles/
+              - ^.zuul.yaml$
+        - tempest-full-parallel:
+            # Define list of irrelevant files to use everywhere else
+            irrelevant-files: &tempest-irrelevant-files
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+              - ^tools/.*$
+              - ^.coveragerc$
+              - ^.gitignore$
+              - ^.gitreview$
+              - ^.mailmap$
+        - tempest-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-py3-ipv6:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - glance-multistore-cinder-import:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-victoria-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-ussuri-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-train-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-stein-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-multinode-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-tox-plugin-sanity-check:
+            irrelevant-files: &tempest-irrelevant-files-2
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+              - ^.coveragerc$
+              - ^.gitignore$
+              - ^.gitreview$
+              - ^.mailmap$
+              # tools/ is not here since this relies on a script in tools/.
+        - tempest-ipv6-only:
+            irrelevant-files: *tempest-irrelevant-files-2
+        - tempest-slow-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - nova-live-migration:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - devstack-plugin-ceph-tempest-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - neutron-grenade-multinode:
+            irrelevant-files: *tempest-irrelevant-files
+        - grenade:
+            irrelevant-files: *tempest-irrelevant-files
+        - puppet-openstack-integration-4-scenario001-tempest-centos-7:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - puppet-openstack-integration-4-scenario002-tempest-centos-7:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - puppet-openstack-integration-4-scenario003-tempest-centos-7:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - puppet-openstack-integration-4-scenario004-tempest-centos-7:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - neutron-tempest-dvr:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - interop-tempest-consistency:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-test-account-py3:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-test-account-no-admin-py3:
+            voting: false
+            irrelevant-files: *tempest-irrelevant-files
+        - openstack-tox-bashate:
+            irrelevant-files: *tempest-irrelevant-files-2
+    gate:
+      jobs:
+        - tempest-slow-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - neutron-grenade-multinode:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - grenade:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-ipv6-only:
+            irrelevant-files: *tempest-irrelevant-files-2
+        - devstack-plugin-ceph-tempest-py3:
+            irrelevant-files: *tempest-irrelevant-files
+    experimental:
+      jobs:
+        - tempest-cinder-v2-api:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-all:
+            irrelevant-files: *tempest-irrelevant-files
+        - neutron-tempest-dvr-ha-multinode-full:
+            irrelevant-files: *tempest-irrelevant-files
+        - nova-tempest-v2-api:
+            irrelevant-files: *tempest-irrelevant-files
+        - cinder-tempest-lvm-multibackend:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-pg-full:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-py3-opensuse15:
+            irrelevant-files: *tempest-irrelevant-files
+    periodic-stable:
+      jobs:
+        - tempest-full-victoria-py3
+        - tempest-full-ussuri-py3
+        - tempest-full-train-py3
+        - tempest-full-stein-py3
+    periodic:
+      jobs:
+        - tempest-all
+        - tempest-full-oslo-master

@@ -1,0 +1,86 @@
+- job:
+    name: devstack-tempest
+    parent: devstack
+    description: |
+      Base Tempest job.
+
+      This Tempest job provides the base for both the single and multi-node
+      test setup. To run a multi-node test inherit from devstack-tempest and
+      set the nodeset to a multi-node one.
+    required-projects: &base_required-projects
+      - opendev.org/openstack/tempest
+    timeout: 7200
+    roles: &base_roles
+      - zuul: opendev.org/openstack/devstack
+    vars: &base_vars
+      devstack_services:
+        tempest: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            compute:
+              min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
+      test_results_stage_name: test_results
+      zuul_copy_output:
+        '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
+        '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': logs
+        '{{ devstack_base_dir }}/tempest/tempest.log': logs
+        '{{ stage_dir }}/{{ test_results_stage_name }}.subunit': logs
+        '{{ stage_dir }}/{{ test_results_stage_name }}.html': logs
+        '{{ stage_dir }}/stackviz': logs
+      extensions_to_txt:
+        conf: true
+        log: true
+        yaml: true
+        yml: true
+    run: playbooks/devstack-tempest.yaml
+    post-run: playbooks/post-tempest.yaml
+
+- job:
+    name: devstack-tempest-ipv6
+    parent: devstack-ipv6
+    description: |
+      Base Tempest IPv6 job. This job is derived from 'devstack-ipv6'
+      which set the IPv6-only setting for OpenStack services. As part of
+      run phase, this job will verify the IPv6 setting and check the services
+      endpoints and listen addresses are IPv6. Basically it will run the script
+      ./tool/verify-ipv6-only-deployments.sh
+
+      Child jobs of this job can run their own set of tests and can
+      add post-run playebooks to extend the IPv6 verification specific
+      to their deployed services.
+      Check the wiki page for more details about project jobs setup
+      - https://wiki.openstack.org/wiki/Goal-IPv6-only-deployments-and-testing
+    required-projects: *base_required-projects
+    timeout: 7200
+    roles: *base_roles
+    vars: *base_vars
+    run: playbooks/devstack-tempest-ipv6.yaml
+    post-run: playbooks/post-tempest.yaml
+
+- job:
+    name: tempest-multinode-full-base
+    parent: devstack-tempest
+    description: |
+      Base multinode integration test with Neutron networking and py27.
+      Former names for this job were:
+        * neutron-tempest-multinode-full
+        * legacy-tempest-dsvm-neutron-multinode-full
+        * gate-tempest-dsvm-neutron-multinode-full-ubuntu-xenial-nv
+      This job includes two nodes, controller / tempest plus a subnode, but
+      it can be used with different topologies, as long as a controller node
+      and a tempest one exist.
+    timeout: 10800
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        FORCE_CONFIG_DRIVE: false
+        NOVA_ALLOW_MOVE_TO_SAME_HOST: false
+        LIVE_MIGRATION_AVAILABLE: true
+        USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
+    group-vars:
+      peers:
+        devstack_localrc:
+          NOVA_ALLOW_MOVE_TO_SAME_HOST: false
+          LIVE_MIGRATION_AVAILABLE: true
+          USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION: true
