@@ -51,10 +51,27 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         return aggregate
 
     def _get_host_name(self):
+        # Find a host that has not been added to other availability zone,
+        # for one host can't be added to different availability zones.
         svc_list = self.services_client.list_services(
             binary='nova-compute')['services']
         self.assertNotEmpty(svc_list)
-        return svc_list[0]['host']
+        hosts_available = []
+        for host in svc_list:
+            if (host['state'] == 'up' and host['status'] == 'enabled'):
+                hosts_available.append(host['host'])
+        aggregates = self.aggregates_client.list_aggregates()['aggregates']
+        hosts_in_zone = []
+        for agg in aggregates:
+            if agg['availability_zone']:
+                hosts_in_zone.extend(agg['hosts'])
+        hosts = [v for v in hosts_available if v not in hosts_in_zone]
+        if not hosts:
+            raise self.skipException("All hosts are already in other "
+                                     "availability zones, so can't add "
+                                     "host to aggregate. \nAggregates list: "
+                                     "%s" % aggregates)
+        return hosts[0]
 
     def _add_host(self, aggregate_id, host):
         aggregate = (self.aggregates_client.add_host(aggregate_id, host=host)
