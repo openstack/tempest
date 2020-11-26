@@ -61,7 +61,6 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
         }
         create_dict.update(kwargs)
         new_image = self.image_client.create_image(**create_dict)
-        self.addCleanup(self.image_client.delete_image, new_image['id'])
         self.image_client.store_image_file(new_image['id'], image_file)
 
         return new_image['id']
@@ -86,6 +85,12 @@ class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
         server = self.create_test_server(image_id=custom_img,
                                          config_drive=True,
                                          wait_until='ACTIVE')
+
+        # NOTE(lyarwood): Add image cleanup *after* creating the instance to
+        # ensure the instance is deleted first. This avoids failures when using
+        # the rbd backend is used for both Glance and Nova ephemeral storage.
+        self.addCleanup(self.image_client.delete_image, custom_img)
+
         volume = self.create_volume()
         attachment = self.attach_volume(server, volume)
         waiters.wait_for_volume_resource_status(
