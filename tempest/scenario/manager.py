@@ -326,7 +326,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             size = max(size, min_disk)
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__ + "-volume")
-        kwargs = {'display_name': name,
+        kwargs = {'name': name,
                   'snapshot_id': snapshot_id,
                   'imageRef': imageRef,
                   'volume_type': volume_type,
@@ -422,7 +422,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         snapshot = self.snapshots_client.create_snapshot(
             volume_id=volume_id,
             force=force,
-            display_name=name,
+            name=name,
             description=description,
             metadata=metadata)['snapshot']
 
