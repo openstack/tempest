@@ -697,17 +697,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   image_name, server['name'])
         return snapshot_image
 
-    def nova_volume_attach(self, server, volume_to_attach):
+    def nova_volume_attach(self, server, volume_to_attach, **kwargs):
         """Compute volume attach
 
         This utility attaches volume from compute and waits for the
         volume status to be 'in-use' state.
         """
         volume = self.servers_client.attach_volume(
-            server['id'], volumeId=volume_to_attach['id'])['volumeAttachment']
+            server['id'], volumeId=volume_to_attach['id'],
+            **kwargs)['volumeAttachment']
         self.assertEqual(volume_to_attach['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.nova_volume_detach, server, volume)
         # Return the updated volume after the attachment
         return self.volumes_client.show_volume(volume['id'])['volume']
 
