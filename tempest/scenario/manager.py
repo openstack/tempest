@@ -1073,14 +1073,13 @@ class NetworkScenarioTest(ScenarioTest):
 
         return subnet
 
-    def _get_server_port_id_and_ip4(self, server, ip_addr=None):
-        if ip_addr:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'],
-                fixed_ips='ip_address=%s' % ip_addr)['ports']
-        else:
-            ports = self.os_admin.ports_client.list_ports(
-                device_id=server['id'])['ports']
+    def _get_server_port_id_and_ip4(self, server, ip_addr=None, **kwargs):
+
+        if ip_addr and not kwargs.get('fixed_ips'):
+            kwargs['fixed_ips'] = 'ip_address=%s' % ip_addr
+        ports = self.os_admin.ports_client.list_ports(
+            device_id=server['id'], **kwargs)['ports']
+
         # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
         # with 2 subnets
