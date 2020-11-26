@@ -925,14 +925,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                     keypair=None,
                                     security_group=None,
                                     delete_on_termination=False,
-                                    name=None):
+                                    name=None, **kwargs):
         """Boot instance from resource
 
         This wrapper utility boots instance from resource with block device
         mapping with source info passed in arguments
         """
 
-        create_kwargs = dict()
+        create_kwargs = dict({'image_id': ''})
         if keypair:
             create_kwargs['key_name'] = keypair['name']
         if security_group:
@@ -944,8 +944,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             delete_on_termination=delete_on_termination))
         if name:
             create_kwargs['name'] = name
+        create_kwargs.update(kwargs)
 
-        return self.create_server(image_id='', **create_kwargs)
+        return self.create_server(**create_kwargs)
 
     def create_volume_from_image(self):
         """Create volume from image"""
