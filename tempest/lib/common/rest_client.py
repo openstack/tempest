@@ -507,7 +507,7 @@ class RestClient(object):
             if not hasattr(body, "keys") or len(body.keys()) != 1:
                 return body
             # Just return the "wrapped" element
-            first_key, first_item = six.next(six.iteritems(body))
+            _, first_item = six.next(six.iteritems(body))
             if isinstance(first_item, (dict, list)):
                 return first_item
         except (ValueError, IndexError):

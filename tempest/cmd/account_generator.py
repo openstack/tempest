@@ -270,7 +270,7 @@ class TempestAccountGenerator(command.Command):
                 config.CONF.set_config_path(parsed_args.config_file)
             setup_logging()
             resources = []
-            for count in range(parsed_args.concurrency):
+            for _ in range(parsed_args.concurrency):
                 # Use N different cred_providers to obtain different
                 # sets of creds
                 cred_provider = get_credential_provider(parsed_args)

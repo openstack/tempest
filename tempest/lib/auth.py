@@ -391,7 +391,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         """
         if auth_data is None:
             auth_data = self.get_auth()
-        token, _auth_data = auth_data
+        _, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
         name = filters.get('name')
@@ -524,7 +524,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         """
         if auth_data is None:
             auth_data = self.get_auth()
-        token, _auth_data = auth_data
+        _, _auth_data = auth_data
         service = filters.get('service')
         region = filters.get('region')
         name = filters.get('name')
