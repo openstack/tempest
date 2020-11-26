@@ -625,7 +625,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s", image['id'])
         return image['id']
 
-    def _log_console_output(self, servers=None, client=None):
+    def _log_console_output(self, servers=None, client=None, **kwargs):
         """Console log output"""
         if not CONF.compute_feature_enabled.console_output:
             LOG.debug('Console output not supported, cannot log')
@@ -637,7 +637,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         for server in servers:
             try:
                 console_output = client.get_console_output(
-                    server['id'])['output']
+                    server['id'], **kwargs)['output']
                 LOG.debug('Console output for %s\nbody=\n%s',
                           server['id'], console_output)
             except lib_exc.NotFound:
