@@ -870,18 +870,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
             ssh_client.exec_command('sudo umount %s' % mount_path)
         return timestamp
 
-    def get_server_ip(self, server):
+    def get_server_ip(self, server, **kwargs):
         """Get the server fixed or floating IP.
 
         Based on the configuration we're in, return a correct ip
         address for validating that a guest is up.
+
+        If CONF.validation.connect_method is floating, then
+        a floating ip will be created passing kwargs as additional
+        argument.
         """
 
         if CONF.validation.connect_method == 'floating':
             # The tests calling this method don't have a floating IP
             # and can't make use of the validation resources. So the
             # method is creating the floating IP there.
-            return self.create_floating_ip(server)['ip']
+            return self.create_floating_ip(server, **kwargs)['ip']
         elif CONF.validation.connect_method == 'fixed':
             # Determine the network name to look for based on config or creds
             # provider network resources.
