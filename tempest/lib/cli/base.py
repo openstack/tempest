@@ -18,7 +18,6 @@ import shlex
 import subprocess
 
 from oslo_log import log as logging
-import six
 
 from tempest.lib import base
 import tempest.lib.cli.output_parser
@@ -55,8 +54,6 @@ def execute(cmd, action, flags='', params='', fail_ok=False,
                     flags, action, params])
     cmd = cmd.strip()
     LOG.info("running: '%s'", cmd)
-    if six.PY2:
-        cmd = cmd.encode('utf-8')
     cmd = shlex.split(cmd)
     stdout = subprocess.PIPE
     stderr = subprocess.STDOUT if merge_stderr else subprocess.PIPE
@@ -67,10 +64,7 @@ def execute(cmd, action, flags='', params='', fail_ok=False,
                                        cmd,
                                        result,
                                        result_err)
-    if six.PY2:
-        return result
-    else:
-        return os.fsdecode(result)
+    return os.fsdecode(result)
 
 
 class CLIClient(object):

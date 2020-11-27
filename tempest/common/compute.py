@@ -19,7 +19,6 @@ import ssl
 import struct
 import textwrap
 
-import six
 from six.moves.urllib import parse as urlparse
 
 from oslo_log import log as logging
@@ -30,11 +29,6 @@ from tempest import config
 from tempest.lib.common import fixed_network
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
-
-if six.PY2:
-    ord_func = ord
-else:
-    ord_func = int
 
 CONF = config.CONF
 
@@ -371,8 +365,8 @@ class _WebSocket(object):
             # frames less than 125 bytes here (for the negotiation) and
             # that only the 2nd byte contains the length, and since the
             # server doesn't do masking, we can just read the data length
-            if ord_func(header[1]) & 127 > 0:
-                return self._recv(ord_func(header[1]) & 127)
+            if int(header[1]) & 127 > 0:
+                return self._recv(int(header[1]) & 127)
 
     def send_frame(self, data):
         """Wrapper for sending data to add in the WebSocket frame format."""
@@ -389,7 +383,7 @@ class _WebSocket(object):
             frame_bytes.append(mask[i])
         # Mask each of the actual data bytes that we are going to send
         for i in range(len(data)):
-            frame_bytes.append(ord_func(data[i]) ^ mask[i % 4])
+            frame_bytes.append(int(data[i]) ^ mask[i % 4])
         # Convert our integer list to a binary array of bytes
         frame_bytes = struct.pack('!%iB' % len(frame_bytes), * frame_bytes)
         self._socket.sendall(frame_bytes)

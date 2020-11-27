@@ -13,13 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
-if six.PY2:
-    # module thread is removed in Python 3
-    from thread import get_ident  # noqa: H237,F401
-
-else:
-    # On Python3 thread module has been deprecated and get_ident has been moved
-    # to threading module
-    from threading import get_ident  # noqa: F401
+# On Python3 thread module has been deprecated and get_ident has been moved
+# to threading module
+from threading import get_ident  # noqa: F401
