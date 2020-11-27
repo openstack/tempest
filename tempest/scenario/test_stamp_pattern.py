@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 import testtools
 
 from tempest.common import utils
@@ -24,7 +23,6 @@ from tempest.lib import exceptions as lib_exc
 from tempest.scenario import manager
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class TestStampPattern(manager.ScenarioTest):
