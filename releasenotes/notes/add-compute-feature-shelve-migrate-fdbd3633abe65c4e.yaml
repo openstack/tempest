@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add a new config option ``[compute-feature-enabled] shelve_migrate``
+    which enable test for environment that support cold migration of qcow2
+    unshelved instance.
