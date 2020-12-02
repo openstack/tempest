@@ -17,7 +17,6 @@ import os
 import shutil
 from unittest import mock
 
-import six
 import testtools
 
 import fixtures
@@ -109,7 +108,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             hash = hashlib.md5()
             account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in hash_fields)
-            hash.update(six.text_type(account_for_hash).encode('utf-8'))
+            hash.update(str(account_for_hash).encode('utf-8'))
             temp_hash = hash.hexdigest()
             hash_list.append(temp_hash)
         return hash_list

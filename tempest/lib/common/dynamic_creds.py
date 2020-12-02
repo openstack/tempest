@@ -341,7 +341,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                             tenant_id=tenant_id,
                             enable_dhcp=self.network_resources['dhcp'],
                             ip_version=(ipaddress.ip_network(
-                                six.text_type(subnet_cidr)).version))
+                                str(subnet_cidr)).version))
                 else:
                     resp_body = self.subnets_admin_client.\
                         create_subnet(network_id=network_id,
@@ -349,7 +349,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                                       name=subnet_name,
                                       tenant_id=tenant_id,
                                       ip_version=(ipaddress.ip_network(
-                                          six.text_type(subnet_cidr)).version))
+                                          str(subnet_cidr)).version))
                 break
             except lib_exc.BadRequest as e:
                 if 'overlaps with another subnet' not in str(e):

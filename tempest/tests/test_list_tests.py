@@ -16,8 +16,6 @@ import os
 import re
 import subprocess
 
-import six
-
 from tempest.tests import base
 
 
@@ -32,7 +30,7 @@ class TestTestList(base.TestCase):
         self.assertEqual(0, p.returncode,
                          "test discovery failed, one or more files cause an "
                          "error on import %s" % ids)
-        ids = six.text_type(ids).split('\n')
+        ids = str(ids).split('\n')
         for test_id in ids:
             if re.match(r'(\w+\.){3}\w+', test_id):
                 if not test_id.startswith('tempest.'):

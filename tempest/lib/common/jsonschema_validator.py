@@ -15,7 +15,6 @@
 import jsonschema
 from oslo_serialization import base64
 from oslo_utils import timeutils
-import six
 
 # JSON Schema validator and format checker used for JSON Schema validation
 JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
@@ -43,7 +42,7 @@ def _validate_datetime_format(instance):
 @jsonschema.FormatChecker.cls_checks('base64')
 def _validate_base64_format(instance):
     try:
-        if isinstance(instance, six.text_type):
+        if isinstance(instance, str):
             instance = instance.encode('utf-8')
         base64.decode_as_bytes(instance)
     except TypeError:

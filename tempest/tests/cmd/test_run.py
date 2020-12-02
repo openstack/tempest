@@ -21,7 +21,6 @@ import tempfile
 from unittest import mock
 
 import fixtures
-import six
 
 from tempest.cmd import run
 from tempest.cmd import workspace
@@ -153,12 +152,12 @@ class TestRunReturnCode(base.TestCase):
         subprocess.call(['stestr', 'init'])
         out, err = self.assertRunExit(['tempest', 'run', '-l'], 0)
         tests = out.split()
-        tests = sorted([six.text_type(x.rstrip()) for x in tests if x])
+        tests = sorted([str(x.rstrip()) for x in tests if x])
         result = [
-            six.text_type('tests.test_failing.FakeTestClass.test_pass'),
-            six.text_type('tests.test_failing.FakeTestClass.test_pass_list'),
-            six.text_type('tests.test_passing.FakeTestClass.test_pass'),
-            six.text_type('tests.test_passing.FakeTestClass.test_pass_list'),
+            str('tests.test_failing.FakeTestClass.test_pass'),
+            str('tests.test_failing.FakeTestClass.test_pass_list'),
+            str('tests.test_passing.FakeTestClass.test_pass'),
+            str('tests.test_passing.FakeTestClass.test_pass_list'),
         ]
         # NOTE(mtreinish): on python 3 the subprocess prints b'' around
         # stdout.

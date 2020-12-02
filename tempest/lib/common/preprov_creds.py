@@ -17,7 +17,6 @@ import os
 
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
-import six
 import yaml
 
 from tempest.lib import auth
@@ -138,7 +137,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             temp_hash = hashlib.md5()
             account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in cls.HASH_CRED_FIELDS)
-            temp_hash.update(six.text_type(account_for_hash).encode('utf-8'))
+            temp_hash.update(str(account_for_hash).encode('utf-8'))
             temp_hash_key = temp_hash.hexdigest()
             hash_dict['creds'][temp_hash_key] = account
             for role in roles:
@@ -391,7 +390,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))
-        exist_creds = self._creds.get(six.text_type(roles).encode(
+        exist_creds = self._creds.get(str(roles).encode(
             'utf-8'), None)
         # The force kwarg is used to allocate an additional set of creds with
         # the same role list. The index used for the previously allocation
@@ -401,11 +400,11 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         elif exist_creds and force_new:
             # NOTE(andreaf) In py3.x encode returns bytes, and b'' is bytes
             # In py2.7 encode returns strings, and b'' is still string
-            new_index = six.text_type(roles).encode('utf-8') + b'-' + \
-                six.text_type(len(self._creds)).encode('utf-8')
+            new_index = str(roles).encode('utf-8') + b'-' + \
+                str(len(self._creds)).encode('utf-8')
             self._creds[new_index] = exist_creds
         net_creds = self._get_creds(roles=roles)
-        self._creds[six.text_type(roles).encode('utf-8')] = net_creds
+        self._creds[str(roles).encode('utf-8')] = net_creds
         return net_creds
 
     def clear_creds(self):
