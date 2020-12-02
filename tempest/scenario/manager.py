@@ -455,7 +455,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             admin_volumes_client.wait_for_resource_deletion(volume['id'])
         admin_volume_type_client.delete_volume_type(volume_type['id'])
 
-    def create_volume_type(self, client=None, name=None, backend_name=None):
+    def create_volume_type(self, client=None, name=None, backend_name=None,
+                           **kwargs):
         """Creates volume type
 
         In a multiple-storage back-end configuration,
@@ -482,12 +483,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         LOG.debug("Creating a volume type: %s on backend %s",
                   randomized_name, backend_name)
-        extra_specs = {}
+        extra_specs = kwargs.pop("extra_specs", {})
         if backend_name:
-            extra_specs = {"volume_backend_name": backend_name}
+            extra_specs.update({"volume_backend_name": backend_name})
 
-        volume_type = client.create_volume_type(
-            name=randomized_name, extra_specs=extra_specs)['volume_type']
+        volume_type_resp = client.create_volume_type(
+            name=randomized_name, extra_specs=extra_specs, **kwargs)
+        volume_type = volume_type_resp['volume_type']
+
         self.assertIn('id', volume_type)
         self.addCleanup(self._cleanup_volume_type, volume_type)
         return volume_type
