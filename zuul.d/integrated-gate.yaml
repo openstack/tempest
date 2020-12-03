@@ -300,16 +300,6 @@
       devstack_services:
         neutron-placement: true
         neutron-qos: true
-      devstack_local_conf:
-        post-config:
-          "/$NEUTRON_CORE_PLUGIN_CONF":
-            ovs:
-              bridge_mappings: public:br-ex
-              resource_provider_bandwidths: br-ex:1000000:1000000
-        test-config:
-          $TEMPEST_CONFIG:
-            network-feature-enabled:
-              qos_placement_physnet: public
       tempest_concurrency: 2
     group-vars:
       # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
