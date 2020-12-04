@@ -16,15 +16,22 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import interfaces as schema
+from tempest.lib.api_schema.response.compute.v2_70 import interfaces as \
+    schemav270
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class InterfacesClient(base_compute_client.BaseComputeClient):
 
+    schema_versions_info = [
+        {'min': None, 'max': '2.69', 'schema': schema},
+        {'min': '2.70', 'max': None, 'schema': schemav270}]
+
     def list_interfaces(self, server_id):
         resp, body = self.get('servers/%s/os-interface' % server_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_interfaces, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -40,6 +47,7 @@ class InterfacesClient(base_compute_client.BaseComputeClient):
         resp, body = self.post('servers/%s/os-interface' % server_id,
                                body=post_body)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_create_interfaces, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -47,6 +55,7 @@ class InterfacesClient(base_compute_client.BaseComputeClient):
         resp, body = self.get('servers/%s/os-interface/%s' % (server_id,
                                                               port_id))
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_create_interfaces, resp, body)
         return rest_client.ResponseBody(resp, body)
 

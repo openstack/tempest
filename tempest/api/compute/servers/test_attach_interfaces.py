@@ -427,3 +427,33 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
                 CONF.compute.build_interval, original_ip_count):
             raise lib_exc.TimeoutException(
                 'Timed out while waiting for IP count to decrease.')
+
+
+class AttachInterfacesV270Test(AttachInterfacesTestBase):
+    """Test interface API with microversion greater than 2.69"""
+    min_microversion = '2.70'
+
+    @decorators.idempotent_id('2853f095-8277-4067-92bd-9f10bd4f8e0c')
+    @utils.services('network')
+    def test_create_get_list_interfaces(self):
+        """Test interface API with microversion greater than 2.69
+
+        Checking create, get, list interface APIs response schema.
+        """
+        server = self.create_test_server(wait_until='ACTIVE')
+        try:
+            iface = self.interfaces_client.create_interface(server['id'])[
+                'interfaceAttachment']
+            iface = waiters.wait_for_interface_status(
+                self.interfaces_client, server['id'], iface['port_id'],
+                'ACTIVE')
+        except lib_exc.BadRequest as e:
+            msg = ('Multiple possible networks found, use a Network ID to be '
+                   'more specific.')
+            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
+                raise
+        else:
+            # just to check the response schema
+            self.interfaces_client.show_interface(
+                server['id'], iface['port_id'])
+            self.interfaces_client.list_interfaces(server['id'])
