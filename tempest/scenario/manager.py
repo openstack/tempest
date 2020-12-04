@@ -655,7 +655,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not isinstance(exc, lib_exc.SSHTimeout):
             LOG.debug('Network information on a devstack host')
 
-    def create_server_snapshot(self, server, name=None):
+    def create_server_snapshot(self, server, name=None, **kwargs):
         """Creates server snapshot"""
         # Glance client
         _image_client = self.image_client
@@ -664,7 +664,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if name is None:
             name = data_utils.rand_name(self.__class__.__name__ + 'snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
-        image = _images_client.create_image(server['id'], name=name)
+        image = _images_client.create_image(server['id'], name=name, **kwargs)
         image_id = image.response['location'].split('images/')[1]
         waiters.wait_for_image_status(_image_client, image_id, 'active')
 
