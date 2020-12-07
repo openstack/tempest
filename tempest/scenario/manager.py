@@ -201,6 +201,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 direct: an SR-IOV port that is directly attached to a VM
                 macvtap: an SR-IOV port that is attached to a VM via a macvtap
                          device.
+                direct-physical: an SR-IOV port that is directly attached to a
+                                 VM using physical instead of virtual
+                                 functions.
+                baremetal: a baremetal port directly attached to a baremetal
+                           node.
+                virtio-forwarder:  an SR-IOV port that is indirectly attached
+                                   to a VM using a low-latency vhost-user
+                                   forwarding process.
               Defaults to ``CONF.network.port_vnic_type``.
             * *port_profile* (``dict``) --
               This attribute is a dictionary that can be used (with admin

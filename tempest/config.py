@@ -761,11 +761,13 @@ NetworkGroup = [
                 deprecated_reason="This config option is no longer "
                                   "used anywhere, so it can be removed."),
     cfg.StrOpt('port_vnic_type',
-               choices=[None, 'normal', 'direct', 'macvtap'],
+               choices=[None, 'normal', 'direct', 'macvtap', 'direct-physical',
+                        'baremetal', 'virtio-forwarder'],
                help="vnic_type to use when launching instances"
                     " with pre-configured ports."
                     " Supported ports are:"
-                    " ['normal','direct','macvtap']"),
+                    " ['normal', 'direct', 'macvtap', 'direct-physical', "
+                    "'baremetal', 'virtio-forwarder']"),
     cfg.Opt('port_profile',
             type=ProfileType,
             default={},
