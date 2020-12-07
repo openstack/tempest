@@ -317,6 +317,32 @@ def wait_for_volume_attachment_remove(client, volume_id, attachment_id):
              'seconds', attachment_id, volume_id, time.time() - start)
 
 
+def wait_for_volume_attachment_remove_from_server(
+        client, server_id, volume_id):
+    """Waits for a volume to be removed from a given server.
+
+    This waiter checks the compute API if the volume attachment is removed.
+    """
+    start = int(time.time())
+    volumes = client.list_volume_attachments(server_id)['volumeAttachments']
+
+    while any(volume for volume in volumes if volume['volumeId'] == volume_id):
+        time.sleep(client.build_interval)
+
+        timed_out = int(time.time()) - start >= client.build_timeout
+        if timed_out:
+            message = ('Volume %s failed to detach from server %s within '
+                       'the required time (%s s) from the compute API '
+                       'perspective' %
+                       (volume_id, server_id, client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+
+        volumes = client.list_volume_attachments(server_id)[
+            'volumeAttachments']
+
+    return volumes
+
+
 def wait_for_volume_migration(client, volume_id, new_host):
     """Waits for a Volume to move to a new host."""
     body = client.show_volume(volume_id)['volume']
