@@ -1173,6 +1173,32 @@ class NetworkScenarioTest(ScenarioTest):
                         floating_ip['id'])
         return floating_ip
 
+    def associate_floating_ip(self, floating_ip, server):
+        """Associate floating ip
+
+        This wrapper utility attaches the floating_ip for
+        the respective port_id of server
+        """
+        port_id, _ = self._get_server_port_id_and_ip4(server)
+        kwargs = dict(port_id=port_id)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertEqual(port_id, floating_ip['port_id'])
+        return floating_ip
+
+    def disassociate_floating_ip(self, floating_ip):
+        """Disassociates floating ip
+
+        This wrapper utility disassociates given floating ip.
+        :param floating_ip: a dict which is a return value of
+        floating_ips_client.create_floatingip method
+        """
+        kwargs = dict(port_id=None)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertIsNone(floating_ip['port_id'])
+        return floating_ip
+
     def check_floating_ip_status(self, floating_ip, status):
         """Verifies floatingip reaches the given status
 
