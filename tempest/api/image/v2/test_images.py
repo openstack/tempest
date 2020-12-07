@@ -402,7 +402,8 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         # Validate that the list was fetched sorted accordingly
         msg = 'No images were found that met the filter criteria.'
         self.assertNotEmpty(images_list, msg)
-        sorted_list = [image['size'] for image in images_list]
+        sorted_list = [image['size'] for image in images_list
+                       if image['size'] is not None]
         msg = 'The list of images was not sorted correctly.'
         self.assertEqual(sorted(sorted_list, reverse=desc), sorted_list, msg)
 
