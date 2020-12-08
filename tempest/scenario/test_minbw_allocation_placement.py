@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
+import testtools
 
 from tempest.common import utils
 from tempest.common import waiters
@@ -23,7 +23,6 @@ from tempest.lib import decorators
 from tempest.scenario import manager
 
 
-LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
@@ -65,6 +64,8 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         cls.routers_client = cls.os_adm.routers_client
         cls.qos_client = cls.os_admin.qos_client
         cls.qos_min_bw_client = cls.os_admin.qos_min_bw_client
+        cls.flavors_client = cls.os_adm.flavors_client
+        cls.servers_client = cls.os_adm.servers_client
 
     @classmethod
     def skip_checks(cls):
@@ -73,6 +74,11 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             msg = "Skipped as no physnet is available in config for " \
                   "placement based QoS allocation."
             raise cls.skipException(msg)
+
+    def setUp(self):
+        super(MinBwAllocationPlacementTest, self).setUp()
+        self._check_if_allocation_is_possible()
+        self._create_network_and_qos_policies()
 
     def _create_policy_and_min_bw_rule(self, name_prefix, min_kbps):
         policy = self.qos_client.create_qos_policy(
@@ -139,6 +145,33 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             self.fail('For %s:%s there should be no available candidate!' %
                       (self.INGRESS_RESOURCE_CLASS, self.PLACEMENT_MAX_INT))
 
+    def _boot_vm_with_min_bw(self, qos_policy_id, status='ACTIVE'):
+        wait_until = (None if status == 'ERROR' else status)
+        port = self.create_port(
+            self.prov_network['id'], qos_policy_id=qos_policy_id)
+
+        server = self.create_server(networks=[{'port': port['id']}],
+                                    wait_until=wait_until)
+        waiters.wait_for_server_status(
+            client=self.os_primary.servers_client, server_id=server['id'],
+            status=status, ready_wait=False, raise_on_error=False)
+        return server, port
+
+    def _assert_allocation_is_as_expected(self, allocations, port_id):
+        self.assertGreater(len(allocations['allocations']), 0)
+        bw_resource_in_alloc = False
+        for rp, resources in allocations['allocations'].items():
+            if self.INGRESS_RESOURCE_CLASS in resources['resources']:
+                bw_resource_in_alloc = True
+                allocation_rp = rp
+        self.assertTrue(bw_resource_in_alloc)
+
+        # Check binding_profile of the port is not empty and equals with the
+        # rp uuid
+        port = self.os_admin.ports_client.show_port(port_id)
+        self.assertEqual(allocation_rp,
+                         port['port']['binding:profile']['allocation'])
+
     @decorators.idempotent_id('78625d92-212c-400e-8695-dd51706858b8')
     @decorators.attr(type='slow')
     @utils.services('compute', 'network')
@@ -162,40 +195,13 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         it should fail.
         """
 
-        self._check_if_allocation_is_possible()
-
-        self._create_network_and_qos_policies()
-
-        valid_port = self.create_port(
-            self.prov_network['id'], qos_policy_id=self.qos_policy_valid['id'])
-
-        server1 = self.create_server(
-            networks=[{'port': valid_port['id']}])
+        server1, valid_port = self._boot_vm_with_min_bw(
+            qos_policy_id=self.qos_policy_valid['id'])
         allocations = self.placement_client.list_allocations(server1['id'])
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
 
-        self.assertGreater(len(allocations['allocations']), 0)
-        bw_resource_in_alloc = False
-        for rp, resources in allocations['allocations'].items():
-            if self.INGRESS_RESOURCE_CLASS in resources['resources']:
-                bw_resource_in_alloc = True
-                allocation_rp = rp
-        self.assertTrue(bw_resource_in_alloc)
-        # Check that binding_profile of the port is not empty and equals with
-        # the rp uuid
-        port = self.os_admin.ports_client.show_port(valid_port['id'])
-        self.assertEqual(allocation_rp,
-                         port['port']['binding:profile']['allocation'])
-
-        # boot another vm with max int bandwidth
-        not_valid_port = self.create_port(
-            self.prov_network['id'],
-            qos_policy_id=self.qos_policy_not_valid['id'])
-        server2 = self.create_server(
-            wait_until=None,
-            networks=[{'port': not_valid_port['id']}])
-        waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server2['id'],
-            status='ERROR', ready_wait=False, raise_on_error=False)
+        server2, not_valid_port = self._boot_vm_with_min_bw(
+            self.qos_policy_not_valid['id'], status='ERROR')
         allocations = self.placement_client.list_allocations(server2['id'])
 
         self.assertEqual(0, len(allocations['allocations']))
@@ -205,3 +211,90 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         # Check that binding_profile of the port is empty
         port = self.os_admin.ports_client.show_port(not_valid_port['id'])
         self.assertEqual(0, len(port['port']['binding:profile']))
+
+    @decorators.idempotent_id('8a98150c-a506-49a5-96c6-73a5e7b04ada')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration is not available.')
+    @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
+                          'Less than 2 compute nodes, skipping multinode '
+                          'tests.')
+    @utils.services('compute', 'network')
+    def test_migrate_with_qos_min_bw_allocation(self):
+        """Scenario to migrate VM with QoS min bw allocation in placement
+
+        Boot a VM like in test_qos_min_bw_allocation_basic, do the same
+        checks, and
+        * migrate the server
+        * confirm the resize, if the VM state is VERIFY_RESIZE
+        * If the VM goes to ACTIVE state check that allocations are as
+        expected.
+        """
+        server, valid_port = self._boot_vm_with_min_bw(
+            qos_policy_id=self.qos_policy_valid['id'])
+        allocations = self.placement_client.list_allocations(server['id'])
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+
+        self.servers_client.migrate_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.os_primary.servers_client, server_id=server['id'],
+            status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
+        allocations = self.placement_client.list_allocations(server['id'])
+
+        # TODO(lajoskatona): Check that the allocations are ok for the
+        #  migration?
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+
+        self.servers_client.confirm_resize_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.os_primary.servers_client, server_id=server['id'],
+            status='ACTIVE', ready_wait=False, raise_on_error=True)
+        allocations = self.placement_client.list_allocations(server['id'])
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+
+    @decorators.idempotent_id('c29e7fd3-035d-4993-880f-70819847683f')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @utils.services('compute', 'network')
+    def test_resize_with_qos_min_bw_allocation(self):
+        """Scenario to resize VM with QoS min bw allocation in placement.
+
+        Boot a VM like in test_qos_min_bw_allocation_basic, do the same
+        checks, and
+        * resize the server with new flavor
+        * confirm the resize, if the VM state is VERIFY_RESIZE
+        * If the VM goes to ACTIVE state check that allocations are as
+        expected.
+        """
+        server, valid_port = self._boot_vm_with_min_bw(
+            qos_policy_id=self.qos_policy_valid['id'])
+        allocations = self.placement_client.list_allocations(server['id'])
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+
+        old_flavor = self.flavors_client.show_flavor(
+            CONF.compute.flavor_ref)['flavor']
+        new_flavor = self.flavors_client.create_flavor(**{
+            'ram': old_flavor['ram'],
+            'vcpus': old_flavor['vcpus'],
+            'name': old_flavor['name'] + 'extra',
+            'disk': old_flavor['disk'] + 1
+        })['flavor']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.flavors_client.delete_flavor, new_flavor['id'])
+
+        self.servers_client.resize_server(
+            server_id=server['id'], flavor_ref=new_flavor['id'])
+        waiters.wait_for_server_status(
+            client=self.os_primary.servers_client, server_id=server['id'],
+            status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
+        allocations = self.placement_client.list_allocations(server['id'])
+
+        # TODO(lajoskatona): Check that the allocations are ok for the
+        #  migration?
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
+
+        self.servers_client.confirm_resize_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.os_primary.servers_client, server_id=server['id'],
+            status='ACTIVE', ready_wait=False, raise_on_error=True)
+        allocations = self.placement_client.list_allocations(server['id'])
+        self._assert_allocation_is_as_expected(allocations, valid_port['id'])
