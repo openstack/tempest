@@ -200,6 +200,10 @@ class AttachVolumeShelveTestJSON(BaseAttachVolumeTest):
         super(AttachVolumeShelveTestJSON, cls).skip_checks()
         if not CONF.compute_feature_enabled.shelve:
             raise cls.skipException('Shelve is not available.')
+        if CONF.compute.compute_volume_common_az:
+            # assuming cross_az_attach is set to false in nova.conf
+            # per the compute_volume_common_az option description
+            raise cls.skipException('Cross AZ attach not available.')
 
     def _count_volumes(self, server, validation_resources):
         # Count number of volumes on an instance
