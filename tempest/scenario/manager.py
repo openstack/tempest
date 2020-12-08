@@ -869,15 +869,25 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return timestamp
 
     def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                      private_key=None, server=None):
+                      private_key=None, server=None, username=None):
         """Returns timestamp
 
         This wrapper utility does ssh and returns the timestamp.
+
+        :param ip_address: The floating IP or fixed IP of the remote server
+        :param dev_name: Name of the device that stores the timestamp
+        :param mount_path: Path which should be used as mount point for
+                           dev_name
+        :param private_key: The SSH private key to use for authentication
+        :param server: Server dict, used for debugging purposes
+        :param username: Name of the Linux account on the remote server
         """
 
         ssh_client = self.get_remote_client(ip_address,
                                             private_key=private_key,
-                                            server=server)
+                                            server=server,
+                                            username=username)
+
         if dev_name is not None:
             ssh_client.mount(dev_name, mount_path)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
