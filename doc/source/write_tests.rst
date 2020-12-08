@@ -76,54 +76,54 @@ of these would be::
 
   class TestExampleCase(test.BaseTestCase):
 
-    @classmethod
-    def skip_checks(cls):
-        """This section is used to evaluate config early and skip all test
-           methods based on these checks
-        """
-        super(TestExampleCase, cls).skip_checks()
-        if not CONF.section.foo
-            cls.skip('A helpful message')
+      @classmethod
+      def skip_checks(cls):
+          """This section is used to evaluate config early and skip all test
+             methods based on these checks
+          """
+          super(TestExampleCase, cls).skip_checks()
+          if not CONF.section.foo
+              cls.skip('A helpful message')
 
-    @classmethod
-    def setup_credentials(cls):
-        """This section is used to do any manual credential allocation and also
-           in the case of dynamic credentials to override the default network
-           resource creation/auto allocation
-        """
-        # This call is used to tell the credential allocator to not create any
-        # network resources for this test case. It also enables selective
-        # creation of other neutron resources. NOTE: it must go before the
-        # super call
-        cls.set_network_resources()
-        super(TestExampleCase, cls).setup_credentials()
+      @classmethod
+      def setup_credentials(cls):
+          """This section is used to do any manual credential allocation and also
+             in the case of dynamic credentials to override the default network
+             resource creation/auto allocation
+          """
+          # This call is used to tell the credential allocator to not create any
+          # network resources for this test case. It also enables selective
+          # creation of other neutron resources. NOTE: it must go before the
+          # super call
+          cls.set_network_resources()
+          super(TestExampleCase, cls).setup_credentials()
 
-    @classmethod
-    def setup_clients(cls):
-        """This section is used to setup client aliases from the manager object
-           or to initialize any additional clients. Except in a few very
-           specific situations you should not need to use this.
-        """
-        super(TestExampleCase, cls).setup_clients()
-        cls.servers_client = cls.os_primary.servers_client
+      @classmethod
+      def setup_clients(cls):
+          """This section is used to setup client aliases from the manager object
+             or to initialize any additional clients. Except in a few very
+             specific situations you should not need to use this.
+          """
+          super(TestExampleCase, cls).setup_clients()
+          cls.servers_client = cls.os_primary.servers_client
 
-    @classmethod
-    def resource_setup(cls):
-        """This section is used to create any resources or objects which are
-           going to be used and shared by **all** test methods in the
-           TestCase. Note then anything created in this section must also be
-           destroyed in the corresponding resource_cleanup() method (which will
-           be run during tearDownClass())
-        """
-        super(TestExampleCase, cls).resource_setup()
-        cls.shared_server = cls.servers_client.create_server(...)
-        cls.addClassResourceCleanup(waiters.wait_for_server_termination,
-                                    cls.servers_client,
-                                    cls.shared_server['id'])
-        cls.addClassResourceCleanup(
-            test_utils.call_and_ignore_notfound_exc(
-                cls.servers_client.delete_server,
-                cls.shared_server['id']))
+      @classmethod
+      def resource_setup(cls):
+          """This section is used to create any resources or objects which are
+             going to be used and shared by **all** test methods in the
+             TestCase. Note then anything created in this section must also be
+             destroyed in the corresponding resource_cleanup() method (which will
+             be run during tearDownClass())
+          """
+          super(TestExampleCase, cls).resource_setup()
+          cls.shared_server = cls.servers_client.create_server(...)
+          cls.addClassResourceCleanup(waiters.wait_for_server_termination,
+                                      cls.servers_client,
+                                      cls.shared_server['id'])
+          cls.addClassResourceCleanup(
+              test_utils.call_and_ignore_notfound_exc(
+                  cls.servers_client.delete_server,
+                  cls.shared_server['id']))
 
 .. _credentials:
 
@@ -150,9 +150,9 @@ to set a class variable ``credentials`` on the TestCase directly. For example::
 
         credentials = ['primary', 'admin']
 
-    @classmethod
-    def skip_checks(cls):
-    ...
+        @classmethod
+        def skip_checks(cls):
+            ...
 
 In this example the ``TestExampleAdmin`` TestCase will allocate 2 sets of
 credentials, one regular user and one admin user. The corresponding manager
@@ -225,10 +225,10 @@ in the `setup_credentials()` method before the `super()`. For example::
 
   class TestExampleCase(test.BaseTestCase):
 
-  @classmethod
-  def setup_credentials(cls):
-      cls.set_network_resources(network=True, subnet=True, router=False)
-      super(TestExampleCase, cls).setup_credentials()
+      @classmethod
+      def setup_credentials(cls):
+          cls.set_network_resources(network=True, subnet=True, router=False)
+          super(TestExampleCase, cls).setup_credentials()
 
 There are 2 quirks with the usage here. First for the set_network_resources
 function to work properly it **must be called before super()**. This is so
@@ -242,10 +242,10 @@ any arguments. For example::
 
   class TestExampleCase(test.BaseTestCase):
 
-  @classmethod
-  def setup_credentials(cls):
-      cls.set_network_resources()
-      super(TestExampleCase, cls).setup_credentials()
+      @classmethod
+      def setup_credentials(cls):
+          cls.set_network_resources()
+          super(TestExampleCase, cls).setup_credentials()
 
 This will not allocate any networking resources. This is because by default all
 the arguments default to False.
@@ -282,8 +282,8 @@ call to create a server in Nova::
 
 
   class TestExampleCase(test.BaseTestCase):
-    def test_example_create_server(self):
-      self.os_primary.servers_client.create_server(...)
+      def test_example_create_server(self):
+          self.os_primary.servers_client.create_server(...)
 
 is all you need to do. As described previously, in the above example the
 ``self.os_primary`` is created automatically because the base test class sets the
@@ -305,8 +305,8 @@ object via the manager's ``credentials`` attribute. For example::
 
 
   class TestExampleCase(test.BaseTestCase):
-    def test_example_create_server(self):
-      credentials = self.os_primary.credentials
+      def test_example_create_server(self):
+          credentials = self.os_primary.credentials
 
 The credentials object provides access to all of the credential information you
 would need to make API requests. For example, building off the previous
@@ -316,9 +316,9 @@ example::
 
 
   class TestExampleCase(test.BaseTestCase):
-    def test_example_create_server(self):
-      credentials = self.os_primary.credentials
-      username = credentials.username
-      user_id = credentials.user_id
-      password = credentials.password
-      tenant_id = credentials.tenant_id
+      def test_example_create_server(self):
+          credentials = self.os_primary.credentials
+          username = credentials.username
+          user_id = credentials.user_id
+          password = credentials.password
+          tenant_id = credentials.tenant_id

@@ -268,12 +268,12 @@ instance:
 
    class MyAPIClient(rest_client.RestClient):
 
-    def __init__(self, auth_provider, service, region,
-                 my_arg, my_arg2=True, **kwargs):
-        super(MyAPIClient, self).__init__(
-            auth_provider, service, region, **kwargs)
-        self.my_arg = my_arg
-        self.my_args2 = my_arg
+       def __init__(self, auth_provider, service, region,
+                    my_arg, my_arg2=True, **kwargs):
+           super(MyAPIClient, self).__init__(
+               auth_provider, service, region, **kwargs)
+           self.my_arg = my_arg
+           self.my_args2 = my_arg
 
 Finally the service client should be structured in a python module, so that all
 service client classes are importable from it. Each major API version should

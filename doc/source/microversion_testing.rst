@@ -126,16 +126,16 @@ For example:
 
 .. code-block:: python
 
-    class BaseTestCase1(api_version_utils.BaseMicroversionTest):
+   class BaseTestCase1(api_version_utils.BaseMicroversionTest):
 
-        [..]
-    @classmethod
-    def skip_checks(cls):
-        super(BaseTestCase1, cls).skip_checks()
-        api_version_utils.check_skip_with_microversion(cls.min_microversion,
-                                                       cls.max_microversion,
-                                                       CONF.compute.min_microversion,
-                                                       CONF.compute.max_microversion)
+       [..]
+       @classmethod
+       def skip_checks(cls):
+           super(BaseTestCase1, cls).skip_checks()
+           api_version_utils.check_skip_with_microversion(cls.min_microversion,
+                                                          cls.max_microversion,
+                                                          CONF.compute.min_microversion,
+                                                          CONF.compute.max_microversion)
 
 Skip logic can be added in tests base class or any specific test class depends on
 tests class structure.
