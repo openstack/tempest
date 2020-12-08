@@ -20,6 +20,7 @@ from oslo_utils.fixture import uuidsentinel as uuids
 from tempest.common import waiters
 from tempest import exceptions
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.compute import servers_client
 from tempest.lib.services.volume.v2 import volumes_client
 from tempest.tests import base
 import tempest.tests.utils as utils
@@ -384,3 +385,54 @@ class TestVolumeWaiters(base.TestCase):
                                                   uuids.attachment_id)
         # Assert that show volume is only called once before we return
         show_volume.assert_called_once_with(uuids.volume_id)
+
+    def test_wait_for_volume_attachment_remove_from_server(self):
+        volume_attached = {
+            "volumeAttachments": [{"volumeId": uuids.volume_id}]}
+        volume_not_attached = {"volumeAttachments": []}
+        mock_list_volume_attachments = mock.Mock(
+            side_effect=[volume_attached, volume_not_attached])
+        mock_client = mock.Mock(
+            spec=servers_client.ServersClient,
+            build_interval=1,
+            build_timeout=1,
+            list_volume_attachments=mock_list_volume_attachments)
+        self.patch(
+            'time.time',
+            side_effect=[0., 0.5, mock_client.build_timeout + 1.])
+        self.patch('time.sleep')
+
+        waiters.wait_for_volume_attachment_remove_from_server(
+            mock_client, uuids.server_id, uuids.volume_id)
+
+        # Assert that list_volume_attachments is called until the attachment is
+        # removed.
+        mock_list_volume_attachments.assert_has_calls([
+            mock.call(uuids.server_id),
+            mock.call(uuids.server_id)])
+
+    def test_wait_for_volume_attachment_remove_from_server_timeout(self):
+        volume_attached = {
+            "volumeAttachments": [{"volumeId": uuids.volume_id}]}
+        mock_list_volume_attachments = mock.Mock(
+            side_effect=[volume_attached, volume_attached])
+        mock_client = mock.Mock(
+            spec=servers_client.ServersClient,
+            build_interval=1,
+            build_timeout=1,
+            list_volume_attachments=mock_list_volume_attachments)
+        self.patch(
+            'time.time',
+            side_effect=[0., 0.5, mock_client.build_timeout + 1.])
+        self.patch('time.sleep')
+
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_volume_attachment_remove_from_server,
+            mock_client, uuids.server_id, uuids.volume_id)
+
+        # Assert that list_volume_attachments is called until the attachment is
+        # removed.
+        mock_list_volume_attachments.assert_has_calls([
+            mock.call(uuids.server_id),
+            mock.call(uuids.server_id)])

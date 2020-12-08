@@ -112,7 +112,5 @@ class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
             server['id'], attachment['volumeId'])
         waiters.wait_for_volume_resource_status(
             self.volumes_client, attachment['volumeId'], 'available')
-        volume_after_detach = self.servers_client.list_volume_attachments(
-            server['id'])['volumeAttachments']
-        self.assertEqual(0, len(volume_after_detach),
-                         "Failed to detach volume")
+        waiters.wait_for_volume_attachment_remove_from_server(
+            self.servers_client, server['id'], attachment['volumeId'])
