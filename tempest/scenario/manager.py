@@ -540,14 +540,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
             rules.append(sg_rule)
         return rules
 
-    def _create_security_group(self):
+    def _create_security_group(self, **kwargs):
         """Create security group and add rules to security group"""
-        sg_name = data_utils.rand_name(self.__class__.__name__)
-        sg_desc = sg_name + " description"
+        if not kwargs.get('name'):
+            kwargs['name'] = data_utils.rand_name(self.__class__.__name__)
+        if not kwargs.get('description'):
+            kwargs['description'] = kwargs['name'] + " description"
         secgroup = self.compute_security_groups_client.create_security_group(
-            name=sg_name, description=sg_desc)['security_group']
-        self.assertEqual(secgroup['name'], sg_name)
-        self.assertEqual(secgroup['description'], sg_desc)
+            **kwargs)['security_group']
+        self.assertEqual(secgroup['name'], kwargs['name'])
+        self.assertEqual(secgroup['description'], kwargs['description'])
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
             self.compute_security_groups_client.delete_security_group,
