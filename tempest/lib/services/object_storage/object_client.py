@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import ssl
 
 from six.moves import http_client as httplib
 from six.moves.urllib import parse as urlparse
@@ -118,7 +119,7 @@ class ObjectClient(rest_client.RestClient):
         path = str(parsed.path) + "/"
         path += "%s/%s" % (str(container), str(object_name))
 
-        conn = _create_connection(parsed)
+        conn = self._create_connection(parsed)
         # Send the PUT request and the headers including the "Expect" header
         conn.putrequest('PUT', path)
 
@@ -151,15 +152,21 @@ class ObjectClient(rest_client.RestClient):
 
         return resp.status, resp.reason
 
+    def _create_connection(self, parsed_url):
+        """Helper function to create connection with httplib
 
-def _create_connection(parsed_url):
-    """Helper function to create connection with httplib
+        :param parsed_url: parsed url of the remote location
+        """
+        context = None
+        # If CONF.identity.disable_ssl_certificate_validation is true,
+        # do not check ssl certification.
+        if self.dscv:
+            context = ssl._create_unverified_context()
+        if parsed_url.scheme == 'https':
+            conn = httplib.HTTPSConnection(parsed_url.netloc,
+                                           context=context)
+        else:
+            conn = httplib.HTTPConnection(parsed_url.netloc,
+                                          context=context)
 
-    :param parsed_url: parsed url of the remote location
-    """
-    if parsed_url.scheme == 'https':
-        conn = httplib.HTTPSConnection(parsed_url.netloc)
-    else:
-        conn = httplib.HTTPConnection(parsed_url.netloc)
-
-    return conn
+        return conn

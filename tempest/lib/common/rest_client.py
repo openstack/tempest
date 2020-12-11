@@ -104,16 +104,18 @@ class RestClient(object):
                                        'location', 'proxy-authenticate',
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
-        dscv = disable_ssl_certificate_validation
+        self.dscv = disable_ssl_certificate_validation
 
         if proxy_url:
             self.http_obj = http.ClosingProxyHttp(
                 proxy_url,
-                disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+                disable_ssl_certificate_validation=self.dscv,
+                ca_certs=ca_certs,
                 timeout=http_timeout, follow_redirects=follow_redirects)
         else:
             self.http_obj = http.ClosingHttp(
-                disable_ssl_certificate_validation=dscv, ca_certs=ca_certs,
+                disable_ssl_certificate_validation=self.dscv,
+                ca_certs=ca_certs,
                 timeout=http_timeout, follow_redirects=follow_redirects)
 
     def get_headers(self, accept_type=None, send_type=None):
