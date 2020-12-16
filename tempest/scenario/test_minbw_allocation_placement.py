@@ -173,7 +173,6 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
                          port['port']['binding:profile']['allocation'])
 
     @decorators.idempotent_id('78625d92-212c-400e-8695-dd51706858b8')
-    @decorators.attr(type='slow')
     @utils.services('compute', 'network')
     def test_qos_min_bw_allocation_basic(self):
         """"Basic scenario with QoS min bw allocation in placement.
