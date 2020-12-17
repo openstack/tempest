@@ -143,10 +143,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
     # resp part which is not used in scenario tests
 
     def create_port(self, network_id, client=None, **kwargs):
-        """Creates port for the respective network_id"""
+        """Creates port for the respective network_id
+
+        :param network_id: the id of the network
+        :param client: the client to use, defaults to self.ports_client
+        :param kwargs: additional arguments such as:
+            - namestart - a string to generate a name for the port from
+                        - default is self.__class__.__name__
+            - 'binding:vnic_type' - defaults to CONF.network.port_vnic_type
+            - 'binding:profile' - defaults to CONF.network.port_profile
+        """
         if not client:
             client = self.ports_client
-        name = kwargs.pop('namestart', self.__class__.__name__)
+        name = data_utils.rand_name(
+            kwargs.pop('namestart', self.__class__.__name__))
         if CONF.network.port_vnic_type and 'binding:vnic_type' not in kwargs:
             kwargs['binding:vnic_type'] = CONF.network.port_vnic_type
         if CONF.network.port_profile and 'binding:profile' not in kwargs:
@@ -216,6 +226,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
               the port.
               example: port_profile = "capabilities:[switchdev]"
               Defaults to ``CONF.network.port_profile``.
+            * *create_port_body* (``dict``) --
+              This attribute is a dictionary of additional arguments to be
+              passed to create_port method.
         """
 
         # NOTE(jlanoux): As a first step, ssh checks in the scenario
@@ -241,7 +254,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # every network
         if vnic_type or profile:
             ports = []
-            create_port_body = {}
+            create_port_body = kwargs.pop('create_port_body', {})
 
             if vnic_type:
                 create_port_body['binding:vnic_type'] = vnic_type
