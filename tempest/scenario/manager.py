@@ -1067,12 +1067,19 @@ class NetworkScenarioTest(ScenarioTest):
         def cidr_in_use(cidr, project_id):
             """Check cidr existence
 
-            :returns: True if subnet with cidr already exist in tenant
-                  False else
+            :returns: True if subnet with cidr already exist in tenant or
+                  external False else
             """
-            cidr_in_use = self.os_admin.subnets_client.list_subnets(
+            tenant_subnets = self.os_admin.subnets_client.list_subnets(
                 project_id=project_id, cidr=cidr)['subnets']
-            return len(cidr_in_use) != 0
+            external_nets = self.os_admin.networks_client.list_networks(
+                **{"router:external": True})['networks']
+            external_subnets = []
+            for ext_net in external_nets:
+                external_subnets.extend(
+                    self.os_admin.subnets_client.list_subnets(
+                        network_id=ext_net['id'], cidr=cidr)['subnets'])
+            return len(tenant_subnets + external_subnets) != 0
 
         ip_version = kwargs.pop('ip_version', 4)
 
