@@ -48,8 +48,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-train-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-stein-py3:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
@@ -139,7 +137,6 @@
         - tempest-full-victoria-py3
         - tempest-full-ussuri-py3
         - tempest-full-train-py3
-        - tempest-full-stein-py3
     periodic:
       jobs:
         - tempest-all
