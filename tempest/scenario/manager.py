@@ -741,14 +741,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def nova_volume_detach(self, server, volume):
         """Compute volume detach
 
-        This utility detaches volume from compute and check whether the
-        volume status is 'available' state, and if not, an exception
-        will be thrown.
+        This utility detaches the volume from the server and checks whether the
+        volume attachment has been removed from Nova.
         """
         self.servers_client.detach_volume(server['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        waiters.wait_for_volume_attachment_remove_from_server(
+            self.servers_client, server['id'], volume['id'])
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None, mtu=None, server=None):
