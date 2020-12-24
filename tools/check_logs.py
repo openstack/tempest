@@ -56,39 +56,39 @@ allowed_dirty = set([
     's-proxy'])
 
 
-def process_files(file_specs, url_specs, whitelists):
+def process_files(file_specs, url_specs, allow_lists):
     regexp = re.compile(r"^.* (ERROR|CRITICAL|TRACE) .*\[.*\-.*\]")
     logs_with_errors = []
     for (name, filename) in file_specs:
-        whitelist = whitelists.get(name, [])
+        allow_list = allow_lists.get(name, [])
         with open(filename) as content:
-            if scan_content(content, regexp, whitelist):
+            if scan_content(content, regexp, allow_list):
                 logs_with_errors.append(name)
     for (name, url) in url_specs:
-        whitelist = whitelists.get(name, [])
+        allow_list = allow_lists.get(name, [])
         req = urlreq.Request(url)
         req.add_header('Accept-Encoding', 'gzip')
         page = urlreq.urlopen(req)
         buf = six.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
-        if scan_content(f.read().splitlines(), regexp, whitelist):
+        if scan_content(f.read().splitlines(), regexp, allow_list):
             logs_with_errors.append(name)
     return logs_with_errors
 
 
-def scan_content(content, regexp, whitelist):
+def scan_content(content, regexp, allow_list):
     had_errors = False
     for line in content:
         if not line.startswith("Stderr:") and regexp.match(line):
-            whitelisted = False
-            for w in whitelist:
+            allowed = False
+            for w in allow_list:
                 pat = ".*%s.*%s.*" % (w['module'].replace('.', '\\.'),
                                       w['message'])
                 if re.match(pat, line):
-                    whitelisted = True
+                    allowed = True
                     break
-            if not whitelisted or dump_all_errors:
-                if not whitelisted:
+            if not allowed or dump_all_errors:
+                if not allowed:
                     had_errors = True
     return had_errors
 
@@ -105,9 +105,9 @@ def main(opts):
         print("Must provide exactly one of -d or -u")
         return 1
     print("Checking logs...")
-    WHITELIST_FILE = os.path.join(
+    ALLOW_LIST_FILE = os.path.join(
         os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
-        "etc", "whitelist.yaml")
+        "etc", "allow-list.yaml")
 
     file_matcher = re.compile(r".*screen-([\w-]+)\.log")
     files = []
@@ -132,17 +132,17 @@ def main(opts):
         if m:
             urls_to_process.append((m.group(1), u))
 
-    whitelists = {}
-    with open(WHITELIST_FILE) as stream:
+    allow_lists = {}
+    with open(ALLOW_LIST_FILE) as stream:
         loaded = yaml.safe_load(stream)
         if loaded:
             for (name, l) in six.iteritems(loaded):
                 for w in l:
                     assert 'module' in w, 'no module in %s' % name
                     assert 'message' in w, 'no message in %s' % name
-            whitelists = loaded
+            allow_lists = loaded
     logs_with_errors = process_files(files_to_process, urls_to_process,
-                                     whitelists)
+                                     allow_lists)
 
     failed = False
     if logs_with_errors:
@@ -164,14 +164,14 @@ def main(opts):
 
 
 usage = """
-Find non-white-listed log errors in log files from a devstack-gate run.
+Find non-allow-listed log errors in log files from a devstack-gate run.
 Log files will be searched for ERROR or CRITICAL messages. If any
-error messages do not match any of the whitelist entries contained in
-etc/whitelist.yaml, those messages will be printed to the console and
+error messages do not match any of the allow-list entries contained in
+etc/allow-list.yaml, those messages will be printed to the console and
 failure will be returned. A file directory containing logs or a url to the
 log files of an OpenStack gate job can be provided.
 
-The whitelist yaml looks like:
+The allow-list yaml looks like:
 
 log-name:
     - module: "a.b.c"
@@ -179,7 +179,7 @@ log-name:
     - module: "a.b.c"
       message: "regexp"
 
-repeated for each log file with a whitelist.
+repeated for each log file with an allow-list.
 """
 
 parser = argparse.ArgumentParser(description=usage)

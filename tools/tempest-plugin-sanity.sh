@@ -44,7 +44,7 @@ set -ex
 # retrieve a list of projects having tempest plugins
 PROJECT_LIST="$(python tools/generate-tempest-plugins-list.py)"
 
-BLACKLIST="$(python tools/generate-tempest-plugins-list.py blacklist)"
+NON_ACTIVE_LIST="$(python tools/generate-tempest-plugins-list.py nonactivelist)"
 
 # Function to clone project using zuul-cloner or from git
 function clone_project {
@@ -117,8 +117,8 @@ passed_plugin=''
 failed_plugin=''
 # Perform sanity on all tempest plugin projects
 for project in $PROJECT_LIST; do
-    # Remove blacklisted tempest plugins
-    if ! [[ `echo $BLACKLIST | grep -c $project ` -gt 0 ]]; then
+    # Remove non-active tempest plugins
+    if ! [[ `echo $NON_ACTIVE_LIST | grep -c $project ` -gt 0 ]]; then
         plugin_sanity_check $project && passed_plugin+=", $project" || \
         failed_plugin+="$project, " > $SANITY_DIR/$project.txt
     fi

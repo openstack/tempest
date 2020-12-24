@@ -1,7 +1,10 @@
 devstack_base_dir: /opt/stack
 tempest_test_regex: ''
 tox_envlist: smoke
+# TODO(kopecmartin) remove tempest_black_regex once all consumers of this
+# role have switched to the tempest_exclude_regex option.
 tempest_black_regex: ''
+tempest_exclude_regex: ''
 tox_extra_args: ''
 tempest_test_timeout: ''
 stable_constraints_file: "{{ devstack_base_dir }}/requirements/upper-constraints.txt"

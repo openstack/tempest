@@ -22,10 +22,10 @@ Tempest run has several options:
 * ``--regex/-r``: This is a selection regex like what stestr uses. It will run
   any tests that match on re.match() with the regex
 * ``--smoke/-s``: Run all the tests tagged as smoke
-* ``--black-regex``: It allows to do simple test exclusion via passing a
-  rejection/black regexp
+* ``--exclude-regex``: It allows to do simple test exclusion via passing a
+  rejection/exclude regexp
 
-There are also the ``--blacklist-file`` and ``--whitelist-file`` options that
+There are also the ``--exclude-list`` and ``--include-list`` options that
 let you pass a filepath to tempest run with the file format being a line
 separated regex, with '#' used to signify the start of a comment on a line.
 For example::
@@ -128,6 +128,7 @@ import os
 import sys
 
 from cliff import command
+from oslo_log import log
 from oslo_serialization import jsonutils as json
 from stestr import commands
 
@@ -140,6 +141,8 @@ from tempest import config
 
 CONF = config.CONF
 SAVED_STATE_JSON = "saved_state.json"
+
+LOG = log.getLogger(__name__)
 
 
 class TempestRun(command.Command):
@@ -201,23 +204,71 @@ class TempestRun(command.Command):
             self._init_state()
 
         regex = self._build_regex(parsed_args)
+
+        # temporary method for parsing deprecated and new stestr options
+        # and showing warning messages in order to make the transition
+        # smoother for all tempest consumers
+        # TODO(kopecmartin) remove this after stestr>=3.1.0 is used
+        # in all supported OpenStack releases
+        def parse_dep(old_o, old_v, new_o, new_v):
+            ret = ''
+            if old_v:
+                LOG.warning("'%s' option is deprecated, use '%s' instead "
+                            "which is functionally equivalent. Right now "
+                            "Tempest still supports this option for "
+                            "backward compatibility, however, it will be "
+                            "removed soon.",
+                            old_o, new_o)
+                ret = old_v
+            if old_v and new_v:
+                # both options are specified
+                LOG.warning("'%s' and '%s' are specified at the same time, "
+                            "'%s' takes precedence over '%s'",
+                            new_o, old_o, new_o, old_o)
+            if new_v:
+                ret = new_v
+            return ret
+        ex_regex = parse_dep('--black-regex', parsed_args.black_regex,
+                             '--exclude-regex', parsed_args.exclude_regex)
+        ex_list = parse_dep('--blacklist-file', parsed_args.blacklist_file,
+                            '--exclude-list', parsed_args.exclude_list)
+        in_list = parse_dep('--whitelist-file', parsed_args.whitelist_file,
+                            '--include-list', parsed_args.include_list)
+
         return_code = 0
         if parsed_args.list_tests:
-            return_code = commands.list_command(
-                filters=regex, whitelist_file=parsed_args.whitelist_file,
-                blacklist_file=parsed_args.blacklist_file,
-                black_regex=parsed_args.black_regex)
+            try:
+                return_code = commands.list_command(
+                    filters=regex, include_list=in_list,
+                    exclude_list=ex_list, exclude_regex=ex_regex)
+            except TypeError:
+                # exclude_list, include_list and exclude_regex are defined only
+                # in stestr >= 3.1.0, this except block catches the case when
+                # tempest is executed with an older stestr
+                return_code = commands.list_command(
+                    filters=regex, whitelist_file=in_list,
+                    blacklist_file=ex_list, black_regex=ex_regex)
 
         else:
             serial = not parsed_args.parallel
-            return_code = commands.run_command(
-                filters=regex, subunit_out=parsed_args.subunit,
-                serial=serial, concurrency=parsed_args.concurrency,
-                blacklist_file=parsed_args.blacklist_file,
-                whitelist_file=parsed_args.whitelist_file,
-                black_regex=parsed_args.black_regex,
-                worker_path=parsed_args.worker_file,
-                load_list=parsed_args.load_list, combine=parsed_args.combine)
+            params = {
+                'filters': regex, 'subunit_out': parsed_args.subunit,
+                'serial': serial, 'concurrency': parsed_args.concurrency,
+                'worker_path': parsed_args.worker_file,
+                'load_list': parsed_args.load_list,
+                'combine': parsed_args.combine
+            }
+            try:
+                return_code = commands.run_command(
+                    **params, exclude_list=ex_list,
+                    include_list=in_list, exclude_regex=ex_regex)
+            except TypeError:
+                # exclude_list, include_list and exclude_regex are defined only
+                # in stestr >= 3.1.0, this except block catches the case when
+                # tempest is executed with an older stestr
+                return_code = commands.run_command(
+                    **params, blacklist_file=ex_list,
+                    whitelist_file=in_list, black_regex=ex_regex)
             if return_code > 0:
                 sys.exit(return_code)
         return return_code
@@ -271,15 +322,38 @@ class TempestRun(command.Command):
                            help='A normal stestr selection regex used to '
                                 'specify a subset of tests to run')
         parser.add_argument('--black-regex', dest='black_regex',
+                            help='DEPRECATED: This option is deprecated and '
+                                 'will be removed soon, use --exclude-regex '
+                                 'which is functionally equivalent. If this '
+                                 'is specified at the same time as '
+                                 '--exclude-regex, this flag will be ignored '
+                                 'and --exclude-regex will be used')
+        parser.add_argument('--exclude-regex', dest='exclude_regex',
                             help='A regex to exclude tests that match it')
         parser.add_argument('--whitelist-file', '--whitelist_file',
-                            help="Path to a whitelist file, this file "
-                            "contains a separate regex on each "
-                            "newline.")
+                            help='DEPRECATED: This option is deprecated and '
+                                 'will be removed soon, use --include-list '
+                                 'which is functionally equivalent. If this '
+                                 'is specified at the same time as '
+                                 '--include-list, this flag will be ignored '
+                                 'and --include-list will be used')
+        parser.add_argument('--include-list', '--include_list',
+                            help="Path to an include file which contains the "
+                                 "regex for tests to be included in tempest "
+                                 "run, this file contains a separate regex on "
+                                 "each newline.")
         parser.add_argument('--blacklist-file', '--blacklist_file',
-                            help='Path to a blacklist file, this file '
-                                 'contains a separate regex exclude on '
-                                 'each newline')
+                            help='DEPRECATED: This option is deprecated and '
+                                 'will be removed soon, use --exclude-list '
+                                 'which is functionally equivalent. If this '
+                                 'is specified at the same time as '
+                                 '--exclude-list, this flag will be ignored '
+                                 'and --exclude-list will be used')
+        parser.add_argument('--exclude-list', '--exclude_list',
+                            help='Path to an exclude file which contains the '
+                                 'regex for tests to be excluded in tempest '
+                                 'run, this file contains a separate regex on '
+                                 'each newline.')
         parser.add_argument('--load-list', '--load_list',
                             help='Path to a non-regex whitelist file, '
                                  'this file contains a separate test '

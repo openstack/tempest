@@ -81,17 +81,17 @@ print_plugin_table "${sorted_plugins}"
 
 printf "\n\n"
 
-# Print BLACKLIST
-if [[ -r doc/source/data/tempest-blacklisted-plugins-registry.header ]]; then
-    cat doc/source/data/tempest-blacklisted-plugins-registry.header
+# Print NON_ACTIVE_LIST
+if [[ -r doc/source/data/tempest-non-active-plugins-registry.header ]]; then
+    cat doc/source/data/tempest-non-active-plugins-registry.header
 fi
 
-blacklist=$(python tools/generate-tempest-plugins-list.py blacklist)
-name_col_len=$(echo "${blacklist}" | wc -L)
+nonactivelist=$(python tools/generate-tempest-plugins-list.py nonactivelist)
+name_col_len=$(echo "${nonactivelist}" | wc -L)
 name_col_len=$(( name_col_len + 20 ))
 
 printf "\n\n"
-print_plugin_table "${blacklist}"
+print_plugin_table "${nonactivelist}"
 
 printf "\n\n"
 

@@ -36,6 +36,9 @@
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'OS_TEST_TIMEOUT': tempest_test_timeout}) }}"
   when: tempest_test_timeout != ''
 
+# TODO(kopecmartin) remove the following 'when block' after all consumers of
+# the role have switched to tempest_test_exclude_list option, until then it's
+# kept here for backward compatibility
 - when:
     - tempest_test_blacklist is defined
   block:
@@ -50,10 +53,48 @@
         blacklist_option: "--blacklist-file={{ tempest_test_blacklist|quote }}"
       when: blacklist_stat.stat.exists
 
+- when:
+    - tempest_test_exclude_list is defined
+  block:
+    - name: Check for test exclude list file
+      stat:
+        path: "{{ tempest_test_exclude_list }}"
+      register:
+        exclude_list_stat
+
+    - name: Build exclude list option
+      set_fact:
+        exclude_list_option: "--exclude-list={{ tempest_test_exclude_list|quote }}"
+      when: exclude_list_stat.stat.exists
+
+# TODO(kopecmartin) remove this after all consumers of the role have switched
+# to tempest_exclude_regex option, until then it's kept here for the backward
+# compatibility
+- name: Set tempest_exclude_regex
+  set_fact:
+    tempest_exclude_regex: "{{ tempest_black_regex }}"
+  when:
+    - tempest_black_regex is defined
+    - tempest_exclude_regex is not defined
+
+- name: Build exclude regex (old param)
+  set_fact:
+    tempest_exclude_regex: "--black-regex={{tempest_black_regex|quote}}"
+  when:
+    - tempest_black_regex is defined
+
+- name: Build exclude regex (new param)
+  set_fact:
+    tempest_exclude_regex: "--exclude-regex={{tempest_exclude_regex|quote}}"
+  when:
+    - tempest_black_regex is not defined
+    - tempest_exclude_regex is defined
+
 - name: Run Tempest
-  command: tox -e {{tox_envlist}} {{tox_extra_args}} -- {{tempest_test_regex|quote}} {{blacklist_option|default('')}} \
+  command: tox -e {{tox_envlist}} {{tox_extra_args}} -- {{tempest_test_regex|quote}} \
+           {{blacklist_option|default('')}}  {{exclude_list_option|default('')}} \
             --concurrency={{tempest_concurrency|default(default_concurrency)}} \
-            --black-regex={{tempest_black_regex|quote}}
+           {{tempest_exclude_regex|default('')}}
   args:
     chdir: "{{devstack_base_dir}}/tempest"
   register: tempest_run_result

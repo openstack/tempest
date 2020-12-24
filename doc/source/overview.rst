@@ -113,7 +113,7 @@ as it is simpler, and quicker to work with.
    There is also the option to use `stestr`_ directly. For example, from
    the workspace dir run::
 
-    $ stestr run --black-regex '\[.*\bslow\b.*\]' '^tempest\.(api|scenario)'
+    $ stestr run --exclude-regex '\[.*\bslow\b.*\]' '^tempest\.(api|scenario)'
 
    will run the same set of tests as the default gate jobs. Or you can
    use `unittest`_ compatible test runners such as `stestr`_, `pytest`_ etc.

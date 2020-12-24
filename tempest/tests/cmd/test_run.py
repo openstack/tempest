@@ -68,6 +68,11 @@ class TestTempestRun(base.TestCase):
 
 
 class TestRunReturnCode(base.TestCase):
+
+    exclude_regex = '--exclude-regex'
+    exclude_list = '--exclude-list'
+    include_list = '--include-list'
+
     def setUp(self):
         super(TestRunReturnCode, self).setUp()
         # Setup test dirs
@@ -92,6 +97,14 @@ class TestRunReturnCode(base.TestCase):
         self.addCleanup(os.chdir, os.path.abspath(os.curdir))
         os.chdir(self.directory)
 
+    def _get_test_list_file(self, content):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        test_file = os.fdopen(fd, 'wb', 0)
+        self.addCleanup(test_file.close)
+        test_file.write(content.encode('utf-8'))
+        return path
+
     def assertRunExit(self, cmd, expected):
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
@@ -115,19 +128,23 @@ class TestRunReturnCode(base.TestCase):
         subprocess.call(['stestr', 'init'])
         self.assertRunExit(['tempest', 'run', '--regex', 'failing'], 1)
 
-    def test_tempest_run_blackregex_failing(self):
-        self.assertRunExit(['tempest', 'run', '--black-regex', 'failing'], 0)
+    def test_tempest_run_exclude_regex_failing(self):
+        self.assertRunExit(['tempest', 'run',
+                            self.exclude_regex, 'failing'], 0)
 
-    def test_tempest_run_blackregex_failing_with_stestr_repository(self):
+    def test_tempest_run_exclude_regex_failing_with_stestr_repository(self):
         subprocess.call(['stestr', 'init'])
-        self.assertRunExit(['tempest', 'run', '--black-regex', 'failing'], 0)
+        self.assertRunExit(['tempest', 'run',
+                            self.exclude_regex, 'failing'], 0)
 
-    def test_tempest_run_blackregex_passing(self):
-        self.assertRunExit(['tempest', 'run', '--black-regex', 'passing'], 1)
+    def test_tempest_run_exclude_regex_passing(self):
+        self.assertRunExit(['tempest', 'run',
+                            self.exclude_regex, 'passing'], 1)
 
-    def test_tempest_run_blackregex_passing_with_stestr_repository(self):
+    def test_tempest_run_exclude_regex_passing_with_stestr_repository(self):
         subprocess.call(['stestr', 'init'])
-        self.assertRunExit(['tempest', 'run', '--black-regex', 'passing'], 1)
+        self.assertRunExit(['tempest', 'run',
+                            self.exclude_regex, 'passing'], 1)
 
     def test_tempest_run_fails(self):
         self.assertRunExit(['tempest', 'run'], 1)
@@ -149,47 +166,31 @@ class TestRunReturnCode(base.TestCase):
         self.assertEqual(result, tests)
 
     def test_tempest_run_with_worker_file(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        worker_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(worker_file.close)
-        worker_file.write(
-            '- worker:\n  - passing\n  concurrency: 3'.encode('utf-8'))
+        path = self._get_test_list_file(
+            '- worker:\n  - passing\n  concurrency: 3')
         self.assertRunExit(['tempest', 'run', '--worker-file=%s' % path], 0)
 
-    def test_tempest_run_with_whitelist(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        whitelist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(whitelist_file.close)
-        whitelist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path], 0)
+    def test_tempest_run_with_include_list(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.include_list, path)], 0)
 
-    def test_tempest_run_with_whitelist_regex_include_pass_check_fail(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        whitelist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(whitelist_file.close)
-        whitelist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+    def test_tempest_run_with_include_regex_include_pass_check_fail(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.include_list, path),
                             '--regex', 'fail'], 1)
 
-    def test_tempest_run_with_whitelist_regex_include_pass_check_pass(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        whitelist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(whitelist_file.close)
-        whitelist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+    def test_tempest_run_with_include_regex_include_pass_check_pass(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.include_list, path),
                             '--regex', 'passing'], 0)
 
-    def test_tempest_run_with_whitelist_regex_include_fail_check_pass(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        whitelist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(whitelist_file.close)
-        whitelist_file.write('failing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--whitelist-file=%s' % path,
+    def test_tempest_run_with_include_regex_include_fail_check_pass(self):
+        path = self._get_test_list_file('failing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.include_list, path),
                             '--regex', 'pass'], 1)
 
     def test_tempest_run_passes_with_config_file(self):
@@ -197,48 +198,73 @@ class TestRunReturnCode(base.TestCase):
                             '--config-file', self.stestr_conf_file,
                             '--regex', 'passing'], 0)
 
-    def test_tempest_run_with_blacklist_failing(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        blacklist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(blacklist_file.close)
-        blacklist_file.write('failing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path], 0)
+    def test_tempest_run_with_exclude_list_failing(self):
+        path = self._get_test_list_file('failing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.exclude_list, path)], 0)
 
-    def test_tempest_run_with_blacklist_passing(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        blacklist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(blacklist_file.close)
-        blacklist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path], 1)
+    def test_tempest_run_with_exclude_list_passing(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.exclude_list, path)], 1)
 
-    def test_tempest_run_with_blacklist_regex_exclude_fail_check_pass(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        blacklist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(blacklist_file.close)
-        blacklist_file.write('failing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+    def test_tempest_run_with_exclude_list_regex_exclude_fail_check_pass(self):
+        path = self._get_test_list_file('failing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.exclude_list, path),
                             '--regex', 'pass'], 0)
 
-    def test_tempest_run_with_blacklist_regex_exclude_pass_check_pass(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        blacklist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(blacklist_file.close)
-        blacklist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+    def test_tempest_run_with_exclude_list_regex_exclude_pass_check_pass(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.exclude_list, path),
                             '--regex', 'pass'], 1)
 
-    def test_tempest_run_with_blacklist_regex_exclude_pass_check_fail(self):
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        blacklist_file = os.fdopen(fd, 'wb', 0)
-        self.addCleanup(blacklist_file.close)
-        blacklist_file.write('passing'.encode('utf-8'))
-        self.assertRunExit(['tempest', 'run', '--blacklist-file=%s' % path,
+    def test_tempest_run_with_exclude_list_regex_exclude_pass_check_fail(self):
+        path = self._get_test_list_file('passing')
+        self.assertRunExit(['tempest', 'run',
+                            '%s=%s' % (self.exclude_list, path),
                             '--regex', 'fail'], 1)
+
+
+class TestOldArgRunReturnCode(TestRunReturnCode):
+    """A class for testing deprecated but still supported args.
+
+    This class will be removed once we remove the following arguments:
+      * --black-regex
+      * --blacklist-file
+      * --whitelist-file
+    """
+    exclude_regex = '--black-regex'
+    exclude_list = '--blacklist-file'
+    include_list = '--whitelist-file'
+
+    def _test_args_passing(self, args):
+        self.assertRunExit(['tempest', 'run'] + args, 0)
+
+    def test_tempest_run_new_old_arg_comb(self):
+        path = self._get_test_list_file('failing')
+        self._test_args_passing(['--black-regex', 'failing',
+                                 '--exclude-regex', 'failing'])
+        self._test_args_passing(['--blacklist-file=' + path,
+                                 '--exclude-list=' + path])
+        path = self._get_test_list_file('passing')
+        self._test_args_passing(['--whitelist-file=' + path,
+                                 '--include-list=' + path])
+
+    def _test_args_passing_with_stestr_repository(self, args):
+        subprocess.call(['stestr', 'init'])
+        self.assertRunExit(['tempest', 'run'] + args, 0)
+
+    def test_tempest_run_new_old_arg_comb_with_stestr_repository(self):
+        path = self._get_test_list_file('failing')
+        self._test_args_passing_with_stestr_repository(
+            ['--black-regex', 'failing', '--exclude-regex', 'failing'])
+        self._test_args_passing_with_stestr_repository(
+            ['--blacklist-file=' + path, '--exclude-list=' + path])
+        path = self._get_test_list_file('passing')
+        self._test_args_passing_with_stestr_repository(
+            ['--whitelist-file=' + path, '--include-list=' + path])
 
 
 class TestConfigPathCheck(base.TestCase):

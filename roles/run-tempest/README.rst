@@ -32,7 +32,11 @@ variable (through the `register` statement).
 
 .. zuul:rolevar:: tempest_test_blacklist
 
-   Specifies a blacklist file to skip tests that are not needed.
+   DEPRECATED option, please use tempest_test_exclude_list instead.
+
+.. zuul:rolevar:: tempest_test_exclude_list
+
+   Specifies an excludelist file to skip tests that are not needed.
 
    Pass a full path to the file.
 
@@ -44,6 +48,11 @@ variable (through the `register` statement).
 .. zuul:rolevar:: tempest_black_regex
    :default: ''
 
+   DEPRECATED option, please use tempest_exclude_regex instead.
+
+.. zuul:rolevar:: tempest_exclude_regex
+   :default: ''
+
    A regular expression used to skip the tests.
 
    It works only when used with some specific tox environments
@@ -51,7 +60,7 @@ variable (through the `register` statement).
 
        ::
            vars:
-             tempest_black_regex: (tempest.api.identity).*$
+             tempest_exclude_regex: (tempest.api.identity).*$
 
 .. zuul:rolevar:: tox_extra_args
    :default: ''
