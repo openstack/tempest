@@ -9,9 +9,9 @@ Compatible OpenStack Releases
 
 Tempest master supports the below OpenStack Releases:
 
+* Victoria
 * Ussuri
 * Train
-* Stein
 
 For older OpenStack Release:
 
@@ -34,3 +34,4 @@ Tempest master supports the below python versions:
 
 * Python 3.6
 * Python 3.7
+* Python 3.8
