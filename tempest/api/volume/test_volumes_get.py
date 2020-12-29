@@ -143,7 +143,6 @@ class VolumesGetTest(base.BaseVolumeTest):
 class VolumesSummaryTest(base.BaseVolumeTest):
     """Test volume summary"""
 
-    _api_version = 3
     min_microversion = '3.12'
     max_microversion = 'latest'
 

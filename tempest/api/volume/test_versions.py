@@ -19,8 +19,6 @@ from tempest.lib import decorators
 class VersionsTest(base.BaseVolumeTest):
     """Test volume versions"""
 
-    _api_version = 3
-
     @decorators.idempotent_id('77838fc4-b49b-4c64-9533-166762517369')
     @decorators.attr(type='smoke')
     def test_list_versions(self):

@@ -24,7 +24,6 @@ CONF = config.CONF
 class UserMessagesTest(base.BaseVolumeAdminTest):
     """Test volume messages with microversion greater than 3.2"""
 
-    _api_version = 3
     min_microversion = '3.3'
     max_microversion = 'latest'
 

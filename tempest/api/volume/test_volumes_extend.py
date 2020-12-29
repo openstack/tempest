@@ -77,7 +77,6 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
     # details once that microversion is available in Nova.
     credentials = ['primary', 'admin']
 
-    _api_version = 3
     # NOTE(mriedem): The minimum required volume API version is 3.42 and the
     # minimum required compute API microversion is 2.51, but the compute call
     # is implicit - Cinder calls Nova at that microversion, Tempest does not.

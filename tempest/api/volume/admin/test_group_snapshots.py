@@ -64,7 +64,6 @@ class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
 class GroupSnapshotsTest(BaseGroupSnapshotsTest):
     """Test group snapshot"""
 
-    _api_version = 3
     min_microversion = '3.14'
     max_microversion = 'latest'
 
@@ -253,7 +252,6 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
     """Test group snapshot with volume microversion greater than 3.18"""
 
-    _api_version = 3
     min_microversion = '3.19'
     max_microversion = 'latest'
 

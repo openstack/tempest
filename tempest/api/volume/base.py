@@ -32,7 +32,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     # Set this to True in subclasses to create a default network. See
     # https://bugs.launchpad.net/tempest/+bug/1844568
     create_default_network = False
-    _api_version = 2
     credentials = ['primary']
 
     @classmethod

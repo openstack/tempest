@@ -21,7 +21,6 @@ from tempest.lib import decorators
 class GroupTypesTest(base.BaseVolumeAdminTest):
     """Test group types"""
 
-    _api_version = 3
     min_microversion = '3.11'
     max_microversion = 'latest'
 
