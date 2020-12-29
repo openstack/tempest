@@ -110,20 +110,30 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         Creating another server image when first image is being saved is
         not allowed.
         """
-        # Create first snapshot
-        image = self.create_image_from_server(self.server_id)
-        self.addCleanup(self._reset_server)
+        try:
+            # Create first snapshot
+            image = self.create_image_from_server(self.server_id)
+            self.addCleanup(self._reset_server)
 
-        # Create second snapshot
-        self.assertRaises(lib_exc.Conflict, self.create_image_from_server,
-                          self.server_id)
+            # Create second snapshot
+            self.assertRaises(lib_exc.Conflict, self.create_image_from_server,
+                              self.server_id)
 
-        if api_version_utils.compare_version_header_to_response(
-            "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
-            image_id = image['image_id']
-        else:
-            image_id = data_utils.parse_image_id(image.response['location'])
-        self.client.delete_image(image_id)
+            if api_version_utils.compare_version_header_to_response(
+                "OpenStack-API-Version", "compute 2.45", image.response, "lt"):
+                image_id = image['image_id']
+            else:
+                image_id = data_utils.parse_image_id(
+                    image.response['location'])
+            self.client.delete_image(image_id)
+
+        except lib_exc.TimeoutException as ex:
+            # Test cannot capture the image saving state.
+            # If timeout is reached, we don't need to check state,
+            # since, it wouldn't be a 'SAVING' state atleast and apart from
+            # it, this testcase doesn't have scope for other state transition
+            # Hence, skip the test.
+            raise self.skipException("This test is skipped because " + str(ex))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('084f0cbc-500a-4963-8a4e-312905862581')
