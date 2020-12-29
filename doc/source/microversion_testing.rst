@@ -302,6 +302,10 @@ Microversion tests implemented in Tempest
 
   .. _2.2: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id2
 
+  * `2.3`_
+
+  .. _2.3: http://docs.openstack.org/developer/nova/api_microversion_history.html#maximum-in-kilo
+
   * `2.6`_
 
   .. _2.6: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id5
