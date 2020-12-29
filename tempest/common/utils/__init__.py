@@ -13,35 +13,15 @@
 #    under the License.
 
 import functools
-from functools import partial
 
 import testtools
 
 from tempest import config
 from tempest.exceptions import InvalidServiceTag
-from tempest.lib.common.utils import data_utils as lib_data_utils
 from tempest.lib import decorators
 
 
 CONF = config.CONF
-
-
-class DataUtils(object):
-    def __getattr__(self, attr):
-
-        if attr == 'rand_name':
-            # NOTE(flwang): This is a proxy to generate a random name that
-            # includes a random number and a prefix 'tempest'
-            attr_obj = partial(lib_data_utils.rand_name,
-                               prefix='tempest')
-        else:
-            attr_obj = getattr(lib_data_utils, attr)
-
-        self.__dict__[attr] = attr_obj
-        return attr_obj
-
-
-data_utils = DataUtils()
 
 
 def get_service_list():
