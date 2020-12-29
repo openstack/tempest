@@ -19,7 +19,6 @@ import testtools
 from tempest.common import utils
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common.utils import data_utils
 from tempest import test
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -31,47 +30,6 @@ class BaseDecoratorsTest(base.TestCase):
         self.config_fixture = self.useFixture(fake_config.ConfigFixture())
         self.patchobject(config, 'TempestConfigPrivate',
                          fake_config.FakePrivate)
-
-
-# NOTE: The test module is for tempest.test.idempotent_id.
-# After all projects switch to use decorators.idempotent_id,
-# we can remove tempest.test.idempotent_id as well as this
-# test module
-class TestIdempotentIdDecorator(BaseDecoratorsTest):
-
-    def _test_helper(self, _id, **decorator_args):
-        @test.idempotent_id(_id)
-        def foo():
-            """Docstring"""
-            pass
-
-        return foo
-
-    def _test_helper_without_doc(self, _id, **decorator_args):
-        @test.idempotent_id(_id)
-        def foo():
-            pass
-
-        return foo
-
-    def test_positive(self):
-        _id = data_utils.rand_uuid()
-        foo = self._test_helper(_id)
-        self.assertIn('id-%s' % _id, getattr(foo, '__testtools_attrs'))
-        self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
-
-    def test_positive_without_doc(self):
-        _id = data_utils.rand_uuid()
-        foo = self._test_helper_without_doc(_id)
-        self.assertTrue(foo.__doc__.startswith('Test idempotent id: %s' % _id))
-
-    def test_idempotent_id_not_str(self):
-        _id = 42
-        self.assertRaises(TypeError, self._test_helper, _id)
-
-    def test_idempotent_id_not_valid_uuid(self):
-        _id = '42'
-        self.assertRaises(ValueError, self._test_helper, _id)
 
 
 class TestServicesDecorator(BaseDecoratorsTest):
