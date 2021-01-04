@@ -103,7 +103,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
         # Update instance name with non-ASCII characters
-        prefix_name = u'\u00CD\u00F1st\u00E1\u00F1c\u00E9'
+        prefix_name = '\u00CD\u00F1st\u00E1\u00F1c\u00E9'
         self._update_server_name(server['id'], 'ACTIVE', prefix_name)
 
         # stop server and check server name update again

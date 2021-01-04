@@ -143,40 +143,40 @@ class BaseCmdServiceTests(MockFunctionsBase):
 
     saved_state = {
         # Static list to ensure global service saved items are not deleted
-        "users": {u'32rwef64245tgr20121qw324bgg': u'Lightning'},
-        "flavors": {u'42': u'm1.tiny'},
-        "images": {u'34yhwr-4t3q': u'stratus-0.3.2-x86_64-disk'},
-        "roles": {u'3efrt74r45hn': u'president'},
-        "projects": {u'f38ohgp93jj032': u'manhattan'},
-        "domains": {u'default': u'Default'},
+        "users": {'32rwef64245tgr20121qw324bgg': 'Lightning'},
+        "flavors": {'42': 'm1.tiny'},
+        "images": {'34yhwr-4t3q': 'stratus-0.3.2-x86_64-disk'},
+        "roles": {'3efrt74r45hn': 'president'},
+        "projects": {'f38ohgp93jj032': 'manhattan'},
+        "domains": {'default': 'Default'},
         # Static list to ensure project service saved items are not deleted
-        "snapshots": {u'1ad4c789-7e8w-4dwg-afc5': u'saved-snapshot'},
-        "servers": {u'7a6d4v7w-36ds-4216': u'saved-server'},
-        "server_groups": {u'as6d5f7g-46ca-475e': u'saved-server-group'},
-        "keypairs": {u'saved-key-pair': {
-            u'fingerprint': u'7e:eb:ab:24',
-            u'name': u'saved-key-pair'
+        "snapshots": {'1ad4c789-7e8w-4dwg-afc5': 'saved-snapshot'},
+        "servers": {'7a6d4v7w-36ds-4216': 'saved-server'},
+        "server_groups": {'as6d5f7g-46ca-475e': 'saved-server-group'},
+        "keypairs": {'saved-key-pair': {
+            'fingerprint': '7e:eb:ab:24',
+            'name': 'saved-key-pair'
         }},
-        "volumes": {u'aa77asdf-1234': u'saved-volume'},
-        "networks": {u'6722fc13-4319': {
-            u'id': u'6722fc13-4319',
-            u'name': u'saved-network'
+        "volumes": {'aa77asdf-1234': 'saved-volume'},
+        "networks": {'6722fc13-4319': {
+            'id': '6722fc13-4319',
+            'name': 'saved-network'
         }},
-        "floatingips": {u'9e82d248-408a': {
-            u'id': u'9e82d248-408a',
-            u'status': u'ACTIVE'
+        "floatingips": {'9e82d248-408a': {
+            'id': '9e82d248-408a',
+            'status': 'ACTIVE'
         }},
-        "routers": {u'4s5w34hj-id44': u'saved-router'},
-        "metering_label_rules": {u'93a973ce-4dc5': {
-            u'direction': u'ingress',
-            u'id': u'93a973ce-4dc5'
+        "routers": {'4s5w34hj-id44': 'saved-router'},
+        "metering_label_rules": {'93a973ce-4dc5': {
+            'direction': 'ingress',
+            'id': '93a973ce-4dc5'
         }},
-        "metering_labels": {u'723b346ce866-4c7q': u'saved-label'},
-        "ports": {u'aa74aa4v-741a': u'saved-port'},
-        "security_groups": {u'7q844add-3697': u'saved-sec-group'},
-        "subnets": {u'55ttda4a-2584': u'saved-subnet'},
-        "subnetpools": {u'8acf64c1-43fc': u'saved-subnet-pool'},
-        "regions": {u'RegionOne': {}}
+        "metering_labels": {'723b346ce866-4c7q': 'saved-label'},
+        "ports": {'aa74aa4v-741a': 'saved-port'},
+        "security_groups": {'7q844add-3697': 'saved-sec-group'},
+        "subnets": {'55ttda4a-2584': 'saved-subnet'},
+        "subnetpools": {'8acf64c1-43fc': 'saved-subnet-pool'},
+        "regions": {'RegionOne': {}}
     }
     # Mocked methods
     get_method = 'tempest.lib.common.rest_client.RestClient.get'

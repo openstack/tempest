@@ -22,7 +22,7 @@ class TestTenantNetworksClient(base.BaseServiceTest):
     FAKE_NETWORK = {
         "cidr": "None",
         "id": "c2329eb4-cc8e-4439-ac4c-932369309e36",
-        "label": u'\u30d7'
+        "label": '\u30d7'
         }
 
     FAKE_NETWORKS = [FAKE_NETWORK]

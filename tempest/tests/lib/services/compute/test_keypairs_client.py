@@ -23,7 +23,7 @@ class TestKeyPairsClient(base.BaseServiceTest):
 
     FAKE_KEYPAIR = {"keypair": {
         "public_key": "ssh-rsa foo Generated-by-Nova",
-        "name": u'\u2740(*\xb4\u25e1`*)\u2740',
+        "name": '\u2740(*\xb4\u25e1`*)\u2740',
         "user_id": "525d55f98980415ba98e634972fa4a10",
         "fingerprint": "76:24:66:49:d7:ca:6e:5c:77:ea:8e:bb:9c:15:5f:98"
         }}

@@ -59,7 +59,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2016, tempest Developers'
+copyright = '2016, tempest Developers'
 
 # Release do not need a version number in the title, they
 # cover multiple versions.
@@ -194,8 +194,8 @@ htmlhelp_basename = 'tempestReleaseNotesdoc'
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'olso.configReleaseNotes.tex',
-     u'olso.config Release Notes Documentation',
-     u'tempest Developers', 'manual'),
+     'olso.config Release Notes Documentation',
+     'tempest Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -225,8 +225,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'olso.configreleasenotes',
-     u'tempest Release Notes Documentation',
-     [u'tempest Developers'], 1)
+     'tempest Release Notes Documentation',
+     ['tempest Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -240,8 +240,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'tempestReleaseNotes',
-     u'tempest Release Notes Documentation',
-     u'tempest Developers', 'olso.configReleaseNotes',
+     'tempest Release Notes Documentation',
+     'tempest Developers', 'olso.configReleaseNotes',
      'An OpenStack library for parsing configuration options from the command'
      ' line and configuration files.',
      'Miscellaneous'),
