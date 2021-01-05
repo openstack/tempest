@@ -14,6 +14,7 @@
 #    under the License.
 
 
+import io
 import select
 import socket
 import time
@@ -67,7 +68,7 @@ class Client(object):
         self.password = password
         if isinstance(pkey, six.string_types):
             pkey = paramiko.RSAKey.from_private_key(
-                six.StringIO(str(pkey)))
+                io.StringIO(str(pkey)))
         self.pkey = pkey
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename

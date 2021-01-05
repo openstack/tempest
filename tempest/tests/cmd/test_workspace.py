@@ -12,15 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from io import StringIO
 import os
 import shutil
 import subprocess
 import tempfile
 from unittest.mock import patch
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 from tempest.cmd import workspace
 from tempest.lib.common.utils import data_utils
