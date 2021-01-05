@@ -16,7 +16,6 @@
 import abc
 from unittest import mock
 
-import six
 import testtools
 
 from tempest.lib import base as test
@@ -69,8 +68,7 @@ class TestAttrDecorator(base.TestCase):
                                condition=True)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseSkipDecoratorTests(object):
+class BaseSkipDecoratorTests(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _test_skip_helper(self, raise_exception=True, expected_to_skip=True,

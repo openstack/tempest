@@ -15,7 +15,6 @@
 import abc
 
 from oslo_log import log as logging
-import six
 import stevedore
 
 from tempest.lib.common.utils import misc
@@ -24,8 +23,7 @@ from tempest.lib.services import clients
 LOG = logging.getLogger(__name__)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class TempestPlugin(object):
+class TempestPlugin(object, metaclass=abc.ABCMeta):
     """Provide basic hooks for an external plugin
 
     To provide tempest the necessary information to run the plugin.
