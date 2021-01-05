@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six.moves import http_client as httplib
-from six.moves.urllib import parse as urlparse
+from http import client as httplib
+from urllib import parse as urlparse
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions

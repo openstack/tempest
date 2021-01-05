@@ -18,9 +18,9 @@ import hashlib
 import hmac
 import random
 import time
+from urllib import parse as urlparse
 
 import six
-from six.moves.urllib import parse as urlparse
 
 from oslo_serialization import jsonutils as json
 

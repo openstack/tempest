@@ -22,10 +22,10 @@ import inspect
 import os
 import sys
 import unittest
+import urllib.parse as urlparse
 import uuid
 
 from oslo_utils import uuidutils
-import six.moves.urllib.parse as urlparse
 
 DECORATOR_MODULE = 'decorators'
 DECORATOR_NAME = 'idempotent_id'

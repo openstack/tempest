@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from urllib import parse as urlparse
+
 from oslo_log import log as logging
-from six.moves.urllib import parse as urlparse
 import testtools
 
 from tempest.api.compute import base

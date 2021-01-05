@@ -18,8 +18,7 @@ import socket
 import ssl
 import struct
 import textwrap
-
-from six.moves.urllib import parse as urlparse
+from urllib import parse as urlparse
 
 from oslo_log import log as logging
 from oslo_utils import excutils

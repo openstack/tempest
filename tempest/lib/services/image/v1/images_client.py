@@ -14,9 +14,9 @@
 #    under the License.
 
 import functools
+from urllib import parse as urllib
 
 from oslo_serialization import jsonutils as json
-from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc

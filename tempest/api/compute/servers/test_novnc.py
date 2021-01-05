@@ -14,9 +14,9 @@
 #    under the License.
 
 import struct
+import urllib.parse as urlparse
 
 import six
-import six.moves.urllib.parse as urlparse
 import urllib3
 
 from tempest.api.compute import base

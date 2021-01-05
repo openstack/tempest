@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six.moves.urllib.parse import urljoin
+from urllib.parse import urljoin
 
 from oslo_serialization import jsonutils as json
 

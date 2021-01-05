@@ -18,10 +18,10 @@ import abc
 import copy
 import datetime
 import re
+from urllib import parse as urlparse
 
 from oslo_log import log as logging
 import six
-from six.moves.urllib import parse as urlparse
 
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client as json_v2id
