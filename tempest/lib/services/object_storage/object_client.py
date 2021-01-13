@@ -166,7 +166,6 @@ class ObjectClient(rest_client.RestClient):
             conn = httplib.HTTPSConnection(parsed_url.netloc,
                                            context=context)
         else:
-            conn = httplib.HTTPConnection(parsed_url.netloc,
-                                          context=context)
+            conn = httplib.HTTPConnection(parsed_url.netloc)
 
         return conn
