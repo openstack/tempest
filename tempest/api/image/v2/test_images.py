@@ -68,16 +68,12 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.assertEqual('queued', image['status'])
         return image
 
-    @decorators.idempotent_id('32ca0c20-e16f-44ac-8590-07869c9b4cc2')
-    def test_image_glance_direct_import(self):
-        """Test 'glance-direct' import functionalities
-
-        Create image, stage image data, import image and verify
-        that import succeeded.
-        """
-        if 'glance-direct' not in self.available_import_methods:
+    def _require_import_method(self, method):
+        if method not in self.available_import_methods:
             raise self.skipException('Server does not support '
-                                     'glance-direct import method')
+                                     '%s import method' % method)
+
+    def _stage_and_check(self):
         image = self._create_image()
         # Stage image data
         file_content = data_utils.random_bytes()
@@ -87,9 +83,21 @@ class ImportImagesTest(base.BaseV2ImageTest):
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('uploading', body['status'])
+        return image['id']
+
+    @decorators.idempotent_id('32ca0c20-e16f-44ac-8590-07869c9b4cc2')
+    def test_image_glance_direct_import(self):
+        """Test 'glance-direct' import functionalities
+
+        Create image, stage image data, import image and verify
+        that import succeeded.
+        """
+        self._require_import_method('glance-direct')
+
+        image_id = self._stage_and_check()
         # import image from staging to backend
-        self.client.image_import(image['id'], method='glance-direct')
-        waiters.wait_for_image_imported_to_stores(self.client, image['id'])
+        self.client.image_import(image_id, method='glance-direct')
+        waiters.wait_for_image_imported_to_stores(self.client, image_id)
 
     @decorators.idempotent_id('f6feb7a4-b04f-4706-a011-206129f83e62')
     def test_image_web_download_import(self):
@@ -98,9 +106,8 @@ class ImportImagesTest(base.BaseV2ImageTest):
         Create image, import image and verify that import
         succeeded.
         """
-        if 'web-download' not in self.available_import_methods:
-            raise self.skipException('Server does not support '
-                                     'web-download import method')
+        self._require_import_method('web-download')
+
         image = self._create_image()
         # Now try to get image details
         body = self.client.show_image(image['id'])
@@ -111,6 +118,47 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.client.image_import(image['id'], method='web-download',
                                  image_uri=image_uri)
         waiters.wait_for_image_imported_to_stores(self.client, image['id'])
+
+    @decorators.idempotent_id('e04761a1-22af-42c2-b8bc-a34a3f12b585')
+    def test_remote_import(self):
+        """Test image import against a different worker than stage.
+
+        This creates and stages an image against the primary API worker,
+        but then calls import on a secondary worker (if available) to
+        test that distributed image import works (i.e. proxies the import
+        request to the proper worker).
+        """
+        self._require_import_method('glance-direct')
+
+        if not CONF.image.alternate_image_endpoint:
+            raise self.skipException('No image_remote service to test '
+                                     'against')
+
+        image_id = self._stage_and_check()
+        # import image from staging to backend, but on the alternate worker
+        self.os_primary.image_client_remote.image_import(
+            image_id, method='glance-direct')
+        waiters.wait_for_image_imported_to_stores(self.client, image_id)
+
+    @decorators.idempotent_id('44d60544-1524-42f7-8899-315301105dd8')
+    def test_remote_delete(self):
+        """Test image delete against a different worker than stage.
+
+        This creates and stages an image against the primary API worker,
+        but then calls delete on a secondary worker (if available) to
+        test that distributed image import works (i.e. proxies the delete
+        request to the proper worker).
+        """
+        self._require_import_method('glance-direct')
+
+        if not CONF.image.alternate_image_endpoint:
+            raise self.skipException('No image_remote service to test '
+                                     'against')
+
+        image_id = self._stage_and_check()
+        # delete image from staging to backend, but on the alternate worker
+        self.os_primary.image_client_remote.delete_image(image_id)
+        self.client.wait_for_resource_deletion(image_id)
 
 
 class MultiStoresImportImagesTest(base.BaseV2ImageTest):
