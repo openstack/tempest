@@ -402,19 +402,17 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.assertEqual(backup_id, restore['backup_id'])
         return restore
 
-    def rebuild_server(self, server_id, image=None,
-                       preserve_ephemeral=False, wait=True,
-                       rebuild_kwargs=None):
+    def rebuild_server(self, server_id, image=None, preserve_ephemeral=False,
+                       wait=True, **kwargs):
         if image is None:
             image = CONF.compute.image_ref
-        rebuild_kwargs = rebuild_kwargs or {}
         LOG.debug("Rebuilding server (id: %s, image: %s, preserve eph: %s)",
                   server_id, image, preserve_ephemeral)
         self.servers_client.rebuild_server(
             server_id=server_id,
             image_ref=image,
             preserve_ephemeral=preserve_ephemeral,
-            **rebuild_kwargs)
+            **kwargs)
         if wait:
             waiters.wait_for_server_status(self.servers_client,
                                            server_id, 'ACTIVE')
