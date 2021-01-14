@@ -169,6 +169,8 @@ def random_bytes(size=1024):
     :return: size randomly bytes
     :rtype: string
     """
+    if size > 1 << 20:
+        raise RuntimeError('Size should be less than 1MiB')
     return b''.join([six.int2byte(random.randint(0, 255))
                      for i in range(size)])
 
