@@ -67,7 +67,10 @@ class TestServerBasicOps(manager.ScenarioTest):
     def verify_metadata(self):
         if self.run_ssh and CONF.compute_feature_enabled.metadata_service:
             # Verify metadata service
-            md_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+            if CONF.network.public_network_id:
+                md_url = 'http://169.254.169.254/latest/meta-data/public-ipv4'
+            else:
+                md_url = 'http://169.254.169.254/latest/meta-data/local-ipv4'
 
             def exec_cmd_and_verify_output():
                 cmd = 'curl ' + md_url
