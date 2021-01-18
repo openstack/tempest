@@ -158,7 +158,7 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
 
         self.client.stage_image_file(
             image['id'],
-            six.BytesIO(data_utils.random_bytes(10485760)))
+            six.BytesIO(data_utils.random_bytes()))
         # Check image status is 'uploading'
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
