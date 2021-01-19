@@ -375,11 +375,9 @@
       run on Nova gate only.
     check:
       jobs:
-        - grenade
         - tempest-integrated-compute
     gate:
       jobs:
-        - grenade
         - tempest-integrated-compute
 
 - project-template:
