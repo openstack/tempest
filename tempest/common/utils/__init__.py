@@ -59,6 +59,7 @@ def get_service_list():
         # So we should set this True here.
         'identity': True,
         'object_storage': CONF.service_available.swift,
+        'dashboard': CONF.service_available.horizon,
     }
     return service_list
 

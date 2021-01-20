@@ -828,6 +828,18 @@ NetworkFeaturesGroup = [
                     'This value will be increased in case of conflict.')
 ]
 
+dashboard_group = cfg.OptGroup(name="dashboard",
+                               title="Dashboard options")
+
+DashboardGroup = [
+    cfg.StrOpt('dashboard_url',
+               default='http://localhost/',
+               help="Where the dashboard can be found"),
+    cfg.BoolOpt('disable_ssl_certificate_validation',
+                default=False,
+                help="Set to True if using self-signed SSL certificates."),
+]
+
 validation_group = cfg.OptGroup(name='validation',
                                 title='SSH Validation options')
 
@@ -1173,6 +1185,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('nova',
                 default=True,
                 help="Whether or not nova is expected to be available"),
+    cfg.BoolOpt('horizon',
+                default=True,
+                help="Whether or not horizon is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1236,6 +1251,7 @@ _opts = [
     (image_feature_group, ImageFeaturesGroup),
     (network_group, NetworkGroup),
     (network_feature_group, NetworkFeaturesGroup),
+    (dashboard_group, DashboardGroup),
     (validation_group, ValidationGroup),
     (volume_group, VolumeGroup),
     (volume_feature_group, VolumeFeaturesGroup),
@@ -1303,6 +1319,7 @@ class TempestConfigPrivate(object):
         self.image_feature_enabled = _CONF['image-feature-enabled']
         self.network = _CONF.network
         self.network_feature_enabled = _CONF['network-feature-enabled']
+        self.dashboard = _CONF.dashboard
         self.validation = _CONF.validation
         self.volume = _CONF.volume
         self.volume_feature_enabled = _CONF['volume-feature-enabled']
