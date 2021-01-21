@@ -144,9 +144,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # need a different token scope for them.
             if self.default_admin_creds.system:
                 scope = 'system'
-            elif (self.default_admin_creds.domain_id or
-                    self.default_admin_creds.domain_name or
-                    self.identity_admin_domain_scope):
+            elif (self.identity_admin_domain_scope and
+                  (self.default_admin_creds.domain_id or
+                   self.default_admin_creds.domain_name)):
                 scope = 'domain'
             else:
                 scope = 'project'
