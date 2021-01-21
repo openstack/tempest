@@ -92,7 +92,24 @@ AuthGroup = [
     cfg.StrOpt('admin_domain_name',
                default='Default',
                help="Admin domain name for authentication (Keystone V3). "
-                    "The same domain applies to user and project"),
+                    "The same domain applies to user and project if "
+                    "admin_user_domain_name and admin_project_domain_name "
+                    "are not specified"),
+    cfg.StrOpt('admin_user_domain_name',
+               help="Domain name that contains the admin user (Keystone V3). "
+                    "May be different from admin_project_domain_name and "
+                    "admin_domain_name"),
+    cfg.StrOpt('admin_project_domain_name',
+               help="Domain name that contains the project given by "
+                    "admin_project_name (Keystone V3). May be different from "
+                    "admin_user_domain_name and admin_domain_name"),
+    cfg.StrOpt('admin_system',
+               default=None,
+               help="The system scope on which an admin user has an admin "
+                    "role assignment, if any. Valid values are 'all' or None. "
+                    "This must be set to 'all' if using the "
+                    "[oslo_policy]/enforce_scope=true option for the "
+                    "identity service."),
 ]
 
 identity_group = cfg.OptGroup(name='identity',

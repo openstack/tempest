@@ -142,7 +142,14 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         else:
             # We use a dedicated client manager for identity client in case we
             # need a different token scope for them.
-            scope = 'domain' if self.identity_admin_domain_scope else 'project'
+            if self.default_admin_creds.system:
+                scope = 'system'
+            elif (self.default_admin_creds.domain_id or
+                    self.default_admin_creds.domain_name or
+                    self.identity_admin_domain_scope):
+                scope = 'domain'
+            else:
+                scope = 'project'
             identity_os = clients.ServiceClients(self.default_admin_creds,
                                                  self.identity_uri,
                                                  scope=scope)

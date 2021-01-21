@@ -43,6 +43,14 @@ class TestCredClientV2(base.TestCase):
         self.projects_client.delete_tenant.assert_called_once_with(
             'fake_id')
 
+    def test_get_credentials(self):
+        ret = self.creds_client.get_credentials(
+            {'name': 'some_user', 'id': 'fake_id'},
+            {'name': 'some_project', 'id': 'fake_id'},
+            'password123')
+        self.assertEqual(ret.username, 'some_user')
+        self.assertEqual(ret.project_name, 'some_project')
+
 
 class TestCredClientV3(base.TestCase):
     def setUp(self):
@@ -53,7 +61,7 @@ class TestCredClientV3(base.TestCase):
         self.roles_client = mock.MagicMock()
         self.domains_client = mock.MagicMock()
         self.domains_client.list_domains.return_value = {
-            'domains': [{'id': 'fake_domain_id'}]
+            'domains': [{'id': 'fake_domain_id', 'name': 'some_domain'}]
         }
         self.creds_client = cred_client.V3CredsClient(self.identity_client,
                                                       self.projects_client,
@@ -75,3 +83,31 @@ class TestCredClientV3(base.TestCase):
         self.creds_client.delete_project('fake_id')
         self.projects_client.delete_project.assert_called_once_with(
             'fake_id')
+
+    def test_get_credentials(self):
+        ret = self.creds_client.get_credentials(
+            {'name': 'some_user', 'id': 'fake_id'},
+            {'name': 'some_project', 'id': 'fake_id'},
+            'password123')
+        self.assertEqual(ret.username, 'some_user')
+        self.assertEqual(ret.project_name, 'some_project')
+        self.assertIsNone(ret.system)
+        self.assertEqual(ret.domain_name, 'some_domain')
+        ret = self.creds_client.get_credentials(
+            {'name': 'some_user', 'id': 'fake_id'},
+            None,
+            'password123',
+            domain={'name': 'another_domain', 'id': 'another_id'})
+        self.assertEqual(ret.username, 'some_user')
+        self.assertIsNone(ret.project_name)
+        self.assertIsNone(ret.system)
+        self.assertEqual(ret.domain_name, 'another_domain')
+        ret = self.creds_client.get_credentials(
+            {'name': 'some_user', 'id': 'fake_id'},
+            None,
+            'password123',
+            system={'system': 'all'})
+        self.assertEqual(ret.username, 'some_user')
+        self.assertIsNone(ret.project_name)
+        self.assertEqual(ret.system, {'system': 'all'})
+        self.assertEqual(ret.domain_name, 'some_domain')

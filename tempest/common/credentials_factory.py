@@ -245,6 +245,9 @@ def get_configured_admin_credentials(fill_in=True, identity_version=None):
 
     if identity_version == 'v3':
         conf_attributes.append('domain_name')
+        conf_attributes.append('user_domain_name')
+        conf_attributes.append('project_domain_name')
+        conf_attributes.append('system')
     # Read the parts of credentials from config
     params = config.service_client_config()
     for attr in conf_attributes:
@@ -284,7 +287,8 @@ def get_credentials(fill_in=True, identity_version=None, **kwargs):
     if identity_version == 'v3':
         domain_fields = set(x for x in auth.KeystoneV3Credentials.ATTRIBUTES
                             if 'domain' in x)
-        if not domain_fields.intersection(kwargs.keys()):
+        if (not params.get('system') and
+                not domain_fields.intersection(kwargs.keys())):
             domain_name = CONF.auth.default_credentials_domain_name
             # NOTE(andreaf) Setting domain_name implicitly sets user and
             # project domain names, if they are None

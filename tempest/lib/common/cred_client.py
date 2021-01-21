@@ -83,12 +83,15 @@ class CredsClient(object):
                       role['id'], project['id'], user['id'])
 
     @abc.abstractmethod
-    def get_credentials(self, user, project, password):
+    def get_credentials(
+            self, user, project, password, domain=None, system=None):
         """Produces a Credentials object from the details provided
 
         :param user: a user dict
-        :param project: a project dict
+        :param project: a project dict or None if using domain or system scope
         :param password: the password as a string
+        :param domain: a domain dict
+        :param system: a system dict
         :return: a Credentials object with all the available credential details
         """
         pass
@@ -116,7 +119,8 @@ class V2CredsClient(CredsClient):
     def delete_project(self, project_id):
         self.projects_client.delete_tenant(project_id)
 
-    def get_credentials(self, user, project, password):
+    def get_credentials(
+        self, user, project, password, domain=None, system=None):
         # User and project already include both ID and name here,
         # so there's no need to use the fill_in mode
         return auth.get_credentials(
@@ -156,23 +160,37 @@ class V3CredsClient(CredsClient):
     def delete_project(self, project_id):
         self.projects_client.delete_project(project_id)
 
-    def get_credentials(self, user, project, password):
+    def get_credentials(
+            self, user, project, password, domain=None, system=None):
         # User, project and domain already include both ID and name here,
         # so there's no need to use the fill_in mode.
         # NOTE(andreaf) We need to set all fields in the returned credentials.
         # Scope is then used to pick only those relevant for the type of
         # token needed by each service client.
+        if project:
+            project_name = project['name']
+            project_id = project['id']
+        else:
+            project_name = None
+            project_id = None
+        if domain:
+            domain_name = domain['name']
+            domain_id = domain['id']
+        else:
+            domain_name = self.creds_domain['name']
+            domain_id = self.creds_domain['id']
         return auth.get_credentials(
             auth_url=None,
             fill_in=False,
             identity_version='v3',
             username=user['name'], user_id=user['id'],
-            project_name=project['name'], project_id=project['id'],
+            project_name=project_name, project_id=project_id,
             password=password,
             project_domain_id=self.creds_domain['id'],
             project_domain_name=self.creds_domain['name'],
-            domain_id=self.creds_domain['id'],
-            domain_name=self.creds_domain['name'])
+            domain_id=domain_id,
+            domain_name=domain_name,
+            system=system)
 
     def assign_user_role_on_domain(self, user, role_name, domain=None):
         """Assign the specified role on a domain
