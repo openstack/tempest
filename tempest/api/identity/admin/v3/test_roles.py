@@ -142,6 +142,26 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.delete_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
+    @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
+                      'Skipped because environment has an immutable user '
+                      'source and solely provides read-only access to users.')
+    @decorators.idempotent_id('e5a81737-d294-424d-8189-8664858aae4c')
+    def test_grant_list_revoke_role_to_user_on_system(self):
+        self.roles_client.create_user_role_on_system(
+            self.user_body['id'], self.role['id'])
+
+        roles = self.roles_client.list_user_roles_on_system(
+            self.user_body['id'])['roles']
+
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
+
+        self.roles_client.check_user_role_existence_on_system(
+            self.user_body['id'], self.role['id'])
+
+        self.roles_client.delete_role_from_user_on_system(
+            self.user_body['id'], self.role['id'])
+
     @decorators.idempotent_id('cbf11737-1904-4690-9613-97bcbb3df1c4')
     @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
                       'Skipped because environment has an immutable user '
@@ -196,6 +216,23 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
 
         self.roles_client.delete_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
+
+    @decorators.idempotent_id('c888fe4f-8018-48db-b959-542225c1b4b6')
+    def test_grant_list_revoke_role_to_group_on_system(self):
+        self.roles_client.create_group_role_on_system(
+            self.group_body['id'], self.role['id'])
+
+        roles = self.roles_client.list_group_roles_on_system(
+            self.group_body['id'])['roles']
+
+        self.assertEqual(1, len(roles))
+        self.assertEqual(self.role['id'], roles[0]['id'])
+
+        self.roles_client.check_role_from_group_on_system_existence(
+            self.group_body['id'], self.role['id'])
+
+        self.roles_client.delete_role_from_group_on_system(
+            self.group_body['id'], self.role['id'])
 
     @decorators.idempotent_id('f5654bcc-08c4-4f71-88fe-05d64e06de94')
     def test_list_roles(self):

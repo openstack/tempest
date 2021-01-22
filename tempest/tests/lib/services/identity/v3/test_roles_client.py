@@ -225,6 +225,16 @@ class TestRolesClient(base.BaseServiceTest):
             role_id="1234",
             status=204)
 
+    def _test_create_user_role_on_system(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.create_user_role_on_system,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            bytes_body,
+            user_id="123",
+            role_id="1234",
+            status=204)
+
     def _test_list_user_roles_on_project(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_user_roles_on_project,
@@ -241,6 +251,14 @@ class TestRolesClient(base.BaseServiceTest):
             self.FAKE_LIST_ROLES,
             bytes_body,
             domain_id="b344506af7644f6794d9cb316600b020",
+            user_id="123")
+
+    def _test_list_user_roles_on_system(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_user_roles_on_system,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_ROLES,
+            bytes_body,
             user_id="123")
 
     def _test_create_group_role_on_project(self, bytes_body=False):
@@ -265,6 +283,16 @@ class TestRolesClient(base.BaseServiceTest):
             role_id="1234",
             status=204)
 
+    def _test_create_group_role_on_system(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.create_group_role_on_system,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            bytes_body,
+            group_id="123",
+            role_id="1234",
+            status=204)
+
     def _test_list_group_roles_on_project(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_group_roles_on_project,
@@ -277,6 +305,15 @@ class TestRolesClient(base.BaseServiceTest):
     def _test_list_group_roles_on_domain(self, bytes_body=False):
         self.check_service_client_function(
             self.client.list_group_roles_on_domain,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_ROLES,
+            bytes_body,
+            domain_id="b344506af7644f6794d9cb316600b020",
+            group_id="123")
+
+    def _test_list_group_roles_on_system(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_group_roles_on_system,
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_ROLES,
             bytes_body,
@@ -405,6 +442,15 @@ class TestRolesClient(base.BaseServiceTest):
             role_id="1234",
             status=204)
 
+    def test_delete_role_from_user_on_system(self):
+        self.check_service_client_function(
+            self.client.delete_role_from_user_on_system,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            user_id="123",
+            role_id="1234",
+            status=204)
+
     def test_delete_role_from_group_on_project(self):
         self.check_service_client_function(
             self.client.delete_role_from_group_on_project,
@@ -421,6 +467,15 @@ class TestRolesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.delete',
             {},
             domain_id="b344506af7644f6794d9cb316600b020",
+            group_id="123",
+            role_id="1234",
+            status=204)
+
+    def test_delete_role_from_group_on_system(self):
+        self.check_service_client_function(
+            self.client.delete_role_from_group_on_system,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
             group_id="123",
             role_id="1234",
             status=204)
@@ -445,6 +500,15 @@ class TestRolesClient(base.BaseServiceTest):
             role_id="1234",
             status=204)
 
+    def test_check_user_role_existence_on_system(self):
+        self.check_service_client_function(
+            self.client.check_user_role_existence_on_system,
+            'tempest.lib.common.rest_client.RestClient.head',
+            {},
+            user_id="123",
+            role_id="1234",
+            status=204)
+
     def test_check_role_from_group_on_project_existence(self):
         self.check_service_client_function(
             self.client.check_role_from_group_on_project_existence,
@@ -461,6 +525,15 @@ class TestRolesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.head',
             {},
             domain_id="b344506af7644f6794d9cb316600b020",
+            group_id="123",
+            role_id="1234",
+            status=204)
+
+    def test_check_role_from_group_on_system_existence(self):
+        self.check_service_client_function(
+            self.client.check_role_from_group_on_system_existence,
+            'tempest.lib.common.rest_client.RestClient.head',
+            {},
             group_id="123",
             role_id="1234",
             status=204)
