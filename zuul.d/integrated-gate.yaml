@@ -69,6 +69,8 @@
       Former names for this job where:
         * legacy-tempest-dsvm-py35
         * gate-tempest-dsvm-py35
+    required-projects:
+      - openstack/horizon
     vars:
       tox_envlist: full
       devstack_localrc:
@@ -89,6 +91,8 @@
             network-feature-enabled:
               qos_placement_physnet: public
       devstack_services:
+        # Enbale horizon so that we can run horizon test.
+        horizon: true
         s-account: false
         s-container: false
         s-object: false

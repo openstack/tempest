@@ -1,0 +1,6 @@
+---
+prelude: >
+    The integrated horizon dashboard test is now moved
+    from tempest-horizon plugin into Tempest. You do not need
+    to install tempest-horizon to run the horizon test which
+    can be run using Tempest itself.
