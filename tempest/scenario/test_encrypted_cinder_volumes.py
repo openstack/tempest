@@ -30,8 +30,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
     For both LUKS and cryptsetup encryption types, this test performs
     the following:
 
-    * Creates an image in Glance
-    * Boots an instance from the image
+    * Boots an instance from an image (CONF.compute.image_ref)
     * Creates an encryption type (as admin)
     * Creates a volume of that encryption type (as a regular user)
     * Attaches and detaches the encrypted volume to the instance
@@ -44,10 +43,9 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
             raise cls.skipException('Encrypted volume attach is not supported')
 
     def launch_instance(self):
-        image = self.image_create()
         keypair = self.create_keypair()
 
-        return self.create_server(image_id=image, key_name=keypair['name'])
+        return self.create_server(key_name=keypair['name'])
 
     def attach_detach_volume(self, server, volume):
         attached_volume = self.nova_volume_attach(server, volume)
