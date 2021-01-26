@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The ``tempest.lib.common.utils.data_utils.random_bytes()`` helper
+    function will no longer allow a ``size`` of more than 1MiB. Tests
+    generally do not need to generate and use large payloads for
+    feature verification and it is easy to lose track of and duplicate
+    large buffers. The sum total of such errors can become problematic
+    in paralllelized and constrained CI environments.
