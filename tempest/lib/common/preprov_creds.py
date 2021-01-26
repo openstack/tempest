@@ -104,15 +104,24 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return hash_dict
 
     @classmethod
+    def _append_scoped_role(cls, scope, role, account_hash, hash_dict):
+        key = "%s_%s" % (scope, role)
+        hash_dict['scoped_roles'].setdefault(key, [])
+        hash_dict['scoped_roles'][key].append(account_hash)
+        return hash_dict
+
+    @classmethod
     def get_hash_dict(cls, accounts, admin_role,
                       object_storage_operator_role=None,
                       object_storage_reseller_admin_role=None):
-        hash_dict = {'roles': {}, 'creds': {}, 'networks': {}}
+        hash_dict = {'roles': {}, 'creds': {}, 'networks': {},
+                     'scoped_roles': {}}
 
         # Loop over the accounts read from the yaml file
         for account in accounts:
             roles = []
             types = []
+            scope = None
             resources = []
             if 'roles' in account:
                 roles = account.pop('roles')
@@ -120,6 +129,12 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                 types = account.pop('types')
             if 'resources' in account:
                 resources = account.pop('resources')
+            if 'project_name' in account:
+                scope = 'project'
+            elif 'domain_name' in account:
+                scope = 'domain'
+            elif 'system' in account:
+                scope = 'system'
             temp_hash = hashlib.md5()
             account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in cls.HASH_CRED_FIELDS)
@@ -129,6 +144,9 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             for role in roles:
                 hash_dict = cls._append_role(role, temp_hash_key,
                                              hash_dict)
+                if scope:
+                    hash_dict = cls._append_scoped_role(
+                        scope, role, temp_hash_key, hash_dict)
             # If types are set for the account append the matching role
             # subdict with the hash
             for type in types:
@@ -201,17 +219,25 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                'the credentials for this allocation request' % ','.join(names))
         raise lib_exc.InvalidCredentials(msg)
 
-    def _get_match_hash_list(self, roles=None):
+    def _get_match_hash_list(self, roles=None, scope=None):
         hashes = []
         if roles:
             # Loop over all the creds for each role in the subdict and generate
             # a list of cred lists for each role
             for role in roles:
-                temp_hashes = self.hash_dict['roles'].get(role, None)
-                if not temp_hashes:
-                    raise lib_exc.InvalidCredentials(
-                        "No credentials with role: %s specified in the "
-                        "accounts ""file" % role)
+                if scope:
+                    key = "%s_%s" % (scope, role)
+                    temp_hashes = self.hash_dict['scoped_roles'].get(key)
+                    if not temp_hashes:
+                        raise lib_exc.InvalidCredentials(
+                            "No credentials matching role: %s, scope: %s "
+                            "specified in the accounts file" % (role, scope))
+                else:
+                    temp_hashes = self.hash_dict['roles'].get(role, None)
+                    if not temp_hashes:
+                        raise lib_exc.InvalidCredentials(
+                            "No credentials with role: %s specified in the "
+                            "accounts file" % role)
                 hashes.append(temp_hashes)
             # Take the list of lists and do a boolean and between each list to
             # find the creds which fall under all the specified roles
@@ -239,8 +265,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         temp_creds.pop('password')
         return temp_creds
 
-    def _get_creds(self, roles=None):
-        useable_hashes = self._get_match_hash_list(roles)
+    def _get_creds(self, roles=None, scope=None):
+        useable_hashes = self._get_match_hash_list(roles, scope)
         if not useable_hashes:
             msg = 'No users configured for type/roles %s' % roles
             raise lib_exc.InvalidCredentials(msg)
@@ -295,6 +321,69 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         net_creds = self._get_creds()
         self._creds['alt'] = net_creds
         return net_creds
+
+    def get_system_admin_creds(self):
+        if self._creds.get('system_admin'):
+            return self._creds.get('system_admin')
+        system_admin = self._get_creds(['admin'], scope='system')
+        self._creds['system_admin'] = system_admin
+        return system_admin
+
+    def get_system_member_creds(self):
+        if self._creds.get('system_member'):
+            return self._creds.get('system_member')
+        system_member = self._get_creds(['member'], scope='system')
+        self._creds['system_member'] = system_member
+        return system_member
+
+    def get_system_reader_creds(self):
+        if self._creds.get('system_reader'):
+            return self._creds.get('system_reader')
+        system_reader = self._get_creds(['reader'], scope='system')
+        self._creds['system_reader'] = system_reader
+        return system_reader
+
+    def get_domain_admin_creds(self):
+        if self._creds.get('domain_admin'):
+            return self._creds.get('domain_admin')
+        domain_admin = self._get_creds(['admin'], scope='domain')
+        self._creds['domain_admin'] = domain_admin
+        return domain_admin
+
+    def get_domain_member_creds(self):
+        if self._creds.get('domain_member'):
+            return self._creds.get('domain_member')
+        domain_member = self._get_creds(['member'], scope='domain')
+        self._creds['domain_member'] = domain_member
+        return domain_member
+
+    def get_domain_reader_creds(self):
+        if self._creds.get('domain_reader'):
+            return self._creds.get('domain_reader')
+        domain_reader = self._get_creds(['reader'], scope='domain')
+        self._creds['domain_reader'] = domain_reader
+        return domain_reader
+
+    def get_project_admin_creds(self):
+        if self._creds.get('project_admin'):
+            return self._creds.get('project_admin')
+        project_admin = self._get_creds(['admin'], scope='project')
+        self._creds['project_admin'] = project_admin
+        return project_admin
+
+    def get_project_member_creds(self):
+        if self._creds.get('project_member'):
+            return self._creds.get('project_member')
+        project_member = self._get_creds(['member'], scope='project')
+        self._creds['project_member'] = project_member
+        return project_member
+
+    def get_project_reader_creds(self):
+        if self._creds.get('project_reader'):
+            return self._creds.get('project_reader')
+        project_reader = self._get_creds(['reader'], scope='project')
+        self._creds['project_reader'] = project_reader
+        return project_reader
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))

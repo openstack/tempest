@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adds new personas that can be used to test service policies for all
+    default scopes (project, domain, and system) and roles (reader, member,
+    and admin). Both dynamic credentials and pre-provisioned credentials are
+    supported.

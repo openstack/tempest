@@ -1,0 +1,108 @@
+- user_domain_name: Default
+  password: password
+  roles:
+    - admin
+  username: tempest-system-admin-1
+  system: all
+- user_domain_name: Default
+  password: password
+  username: tempest-system-member-1
+  roles:
+    - member
+  system: all
+- user_domain_name: Default
+  password: password
+  username: tempest-system-reader-1
+  roles:
+    - reader
+  system: all
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-admin-1
+  roles:
+    - admin
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-member-1
+  roles:
+    - member
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-reader-1
+  roles:
+    - reader
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-admin-1
+  roles:
+    - admin
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-member-1
+  roles:
+    - member
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-reader-1
+  roles:
+    - reader
+- user_domain_name: Default
+  password: password
+  username: tempest-system-admin-2
+  roles:
+    - admin
+  system: all
+- user_domain_name: Default
+  password: password
+  username: tempest-system-member-2
+  roles:
+    - member
+  system: all
+- user_domain_name: Default
+  password: password
+  system: all
+  username: tempest-system-reader-2
+  roles:
+    - reader
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-admin-2
+  roles:
+    - admin
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-member-2
+  roles:
+    - member
+- user_domain_name: Default
+  password: password
+  domain_name: tempest-test-domain
+  username: tempest-domain-reader-2
+  roles:
+    - reader
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-admin-2
+  roles:
+    - admin
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-member-2
+  roles:
+    - member
+- user_domain_name: Default
+  password: password
+  project_name: tempest-test-project
+  username: tempest-project-reader-2
+  roles:
+    - reader
