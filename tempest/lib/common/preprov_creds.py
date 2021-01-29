@@ -308,6 +308,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self.remove_hash(_hash)
         LOG.info("%s returned allocated creds:\n%s", self.name, clean_creds)
 
+    # TODO(gmann): Remove this method in favor of get_project_member_creds()
+    # after the deprecation phase.
     def get_primary_creds(self):
         if self._creds.get('primary'):
             return self._creds.get('primary')
@@ -315,6 +317,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self._creds['primary'] = net_creds
         return net_creds
 
+    # TODO(gmann): Replace this method with more appropriate name.
+    # like get_project_alt_member_creds()
     def get_alt_creds(self):
         if self._creds.get('alt'):
             return self._creds.get('alt')
@@ -408,6 +412,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         for creds in self._creds.values():
             self.remove_credentials(creds)
 
+    # TODO(gmann): Remove this method in favor of get_project_admin_creds()
+    # after the deprecation phase.
     def get_admin_creds(self):
         return self.get_creds_by_roles([self.admin_role])
 

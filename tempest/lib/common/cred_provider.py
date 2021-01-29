@@ -60,6 +60,42 @@ class CredentialProvider(object):
         return
 
     @abc.abstractmethod
+    def get_system_admin_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_system_member_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_system_reader_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_domain_admin_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_domain_member_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_domain_reader_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_project_admin_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_project_member_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_project_reader_creds(self):
+        return
+
+    @abc.abstractmethod
     def clear_creds(self):
         return
 
