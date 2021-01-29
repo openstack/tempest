@@ -374,6 +374,10 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self._creds['project_admin'] = project_admin
         return project_admin
 
+    def get_project_alt_admin_creds(self):
+        # TODO(gmann): Implement alt admin hash.
+        return
+
     def get_project_member_creds(self):
         if self._creds.get('project_member'):
             return self._creds.get('project_member')
@@ -381,12 +385,20 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self._creds['project_member'] = project_member
         return project_member
 
+    def get_project_alt_member_creds(self):
+        # TODO(gmann): Implement alt member hash.
+        return
+
     def get_project_reader_creds(self):
         if self._creds.get('project_reader'):
             return self._creds.get('project_reader')
         project_reader = self._get_creds(['reader'], scope='project')
         self._creds['project_reader'] = project_reader
         return project_reader
+
+    def get_project_alt_reader_creds(self):
+        # TODO(gmann): Implement alt reader hash.
+        return
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))

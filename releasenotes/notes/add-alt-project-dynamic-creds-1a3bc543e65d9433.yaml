@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add project alternate admin, member and reader role for dynamic credentials.

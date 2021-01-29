@@ -296,6 +296,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         identity_version = cls.get_identity_version()
         # setting force_tenant_isolation to True also needs admin credentials.
         if ('admin' in cls.credentials or
+                'alt_admin' in cls.credentials or
                 getattr(cls, 'force_tenant_isolation', False)):
             if not credentials.is_admin_available(
                     identity_version=identity_version):

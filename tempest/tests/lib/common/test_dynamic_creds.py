@@ -214,6 +214,56 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(admin_creds.user_id, '1234')
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_project_alt_admin_creds(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_roles('1234', 'admin')
+        self._mock_user_create('1234', 'fake_alt_admin_user')
+        self._mock_tenant_create('1234', 'fake_alt_admin')
+
+        user_mock = mock.patch.object(self.roles_client.RolesClient,
+                                      'create_user_role_on_project')
+        user_mock.start()
+        self.addCleanup(user_mock.stop)
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock:
+            alt_admin_creds = creds.get_project_alt_admin_creds()
+        user_mock.assert_has_calls([
+            mock.call('1234', '1234', '1234')])
+        self.assertEqual(alt_admin_creds.username, 'fake_alt_admin_user')
+        self.assertEqual(alt_admin_creds.project_name, 'fake_alt_admin')
+        # Verify IDs
+        self.assertEqual(alt_admin_creds.project_id, '1234')
+        self.assertEqual(alt_admin_creds.user_id, '1234')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_project_alt_member_creds(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_tenant_create('1234', 'fake_alt_member')
+        self._mock_user_create('1234', 'fake_alt_user')
+        alt_member_creds = creds.get_project_alt_member_creds()
+        self.assertEqual(alt_member_creds.username, 'fake_alt_user')
+        self.assertEqual(alt_member_creds.project_name, 'fake_alt_member')
+        # Verify IDs
+        self.assertEqual(alt_member_creds.project_id, '1234')
+        self.assertEqual(alt_member_creds.user_id, '1234')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_project_alt_reader_creds(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_assign_user_role()
+        self._mock_list_roles('1234', 'reader')
+        self._mock_tenant_create('1234', 'fake_alt_reader')
+        self._mock_user_create('1234', 'fake_alt_user')
+        alt_reader_creds = creds.get_project_alt_reader_creds()
+        self.assertEqual(alt_reader_creds.username, 'fake_alt_user')
+        self.assertEqual(alt_reader_creds.project_name, 'fake_alt_reader')
+        # Verify IDs
+        self.assertEqual(alt_reader_creds.project_id, '1234')
+        self.assertEqual(alt_reader_creds.user_id, '1234')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_role_creds(self, MockRestClient):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_list_2_roles()
