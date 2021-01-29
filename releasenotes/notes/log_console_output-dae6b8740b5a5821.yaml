@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Added public interface log_console_output().
+    It used to be a private method with name _log_console_output().
+    Since this interface is meant to be used by tempest plugins,
+    It doesn't neccessarily require to be private api.
+

@@ -218,7 +218,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                     guest_has_address,
                     CONF.validation.ping_timeout, 1, ssh, ip)
                 if not result:
-                    self._log_console_output(servers=[srv])
+                    self.log_console_output(servers=[srv])
                     self.fail(
                         'Address %s not configured for instance %s, '
                         'ip address output is\n%s' %

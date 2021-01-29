@@ -464,9 +464,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _log_console_output_for_all_tenants(self):
         for tenant in self.tenants.values():
             client = tenant.manager.servers_client
-            self._log_console_output(servers=tenant.servers, client=client)
+            self.log_console_output(servers=tenant.servers, client=client)
             if tenant.access_point is not None:
-                self._log_console_output(
+                self.log_console_output(
                     servers=[tenant.access_point], client=client)
 
     def _create_protocol_ruleset(self, protocol, port=80):

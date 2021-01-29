@@ -660,7 +660,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s", image['id'])
         return image['id']
 
-    def _log_console_output(self, servers=None, client=None, **kwargs):
+    def log_console_output(self, servers=None, client=None, **kwargs):
         """Console log output"""
         if not CONF.compute_feature_enabled.console_output:
             LOG.debug('Console output not supported, cannot log')
@@ -796,7 +796,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                       'result': 'expected' if result else 'unexpected'
                   })
         if server:
-            self._log_console_output([server])
+            self.log_console_output([server])
         return result
 
     def check_vm_connectivity(self, ip_address,
@@ -1285,7 +1285,7 @@ class NetworkScenarioTest(ScenarioTest):
                                                should_connect=should_connect)
         except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
-            self._log_console_output(servers_for_debug)
+            self.log_console_output(servers_for_debug)
             self._log_net_info(e)
             raise
 
@@ -1328,7 +1328,7 @@ class NetworkScenarioTest(ScenarioTest):
                 % (dest, source_host)
         else:
             msg = "%s is reachable from %s" % (dest, source_host)
-        self._log_console_output()
+        self.log_console_output()
         self.fail(msg)
 
     def _create_security_group(self, security_group_rules_client=None,
