@@ -376,15 +376,18 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         elif scope and self._creds.get("%s_%s" % (scope, credential_type[0])):
             credentials = self._creds["%s_%s" % (scope, credential_type[0])]
         else:
-            if credential_type in ['primary', 'alt', 'admin']:
+            if scope:
+                if credential_type == 'admin':
+                    credentials = self._create_creds(
+                        admin=True, scope=scope)
+                else:
+                    credentials = self._create_creds(
+                        roles=credential_type, scope=scope)
+            elif credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
             else:
-                if scope:
-                    credentials = self._create_creds(
-                        roles=credential_type, scope=scope)
-                else:
-                    credentials = self._create_creds(roles=credential_type)
+                credentials = self._create_creds(roles=credential_type)
             if scope:
                 self._creds["%s_%s" %
                             (scope, credential_type[0])] = credentials
