@@ -217,7 +217,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             direction='ingress',
         )
         sec_group_rules_client = tenant.manager.security_group_rules_client
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=access_sg,
             sec_group_rules_client=sec_group_rules_client,
             **ssh_rule)
@@ -385,7 +385,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             remote_group_id=tenant.security_groups['default']['id'],
             direction='ingress'
         )
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=tenant.security_groups['default'],
             security_groups_client=tenant.manager.security_groups_client,
             **ruleset
@@ -413,7 +413,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         protocol = ruleset['protocol']
         sec_group_rules_client = (
             dest_tenant.manager.security_group_rules_client)
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=dest_tenant.security_groups['default'],
             sec_group_rules_client=sec_group_rules_client,
             **ruleset
@@ -429,7 +429,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         # allow reverse traffic and check
         sec_group_rules_client = (
             source_tenant.manager.security_group_rules_client)
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=source_tenant.security_groups['default'],
             sec_group_rules_client=sec_group_rules_client,
             **ruleset
@@ -543,7 +543,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             direction='ingress',
         )
         sec_group_rules_client = new_tenant.manager.security_group_rules_client
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=new_sg,
             sec_group_rules_client=sec_group_rules_client,
             **icmp_rule)
@@ -596,7 +596,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             protocol='icmp',
             direction='ingress'
         )
-        self._create_security_group_rule(
+        self.create_security_group_rule(
             secgroup=tenant.security_groups['default'],
             **ruleset
         )
