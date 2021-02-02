@@ -1207,6 +1207,39 @@ ServiceAvailableGroup = [
                 help="Whether or not horizon is expected to be available"),
 ]
 
+enforce_scope_group = cfg.OptGroup(name="enforce_scope",
+                                   title="OpenStack Services with "
+                                         "enforce scope")
+
+
+EnforceScopeGroup = [
+    cfg.BoolOpt('nova',
+                default=False,
+                help='Does the compute service API policies enforce scope? '
+                     'This configuration value should be same as '
+                     'nova.conf: [oslo_policy].enforce_scope option.'),
+    cfg.BoolOpt('neutron',
+                default=False,
+                help='Does the network service API policies enforce scope? '
+                     'This configuration value should be same as '
+                     'neutron.conf: [oslo_policy].enforce_scope option.'),
+    cfg.BoolOpt('glance',
+                default=False,
+                help='Does the Image service API policies enforce scope? '
+                     'This configuration value should be same as '
+                     'glance.conf: [oslo_policy].enforce_scope option.'),
+    cfg.BoolOpt('cinder',
+                default=False,
+                help='Does the Volume service API policies enforce scope? '
+                     'This configuration value should be same as '
+                     'cinder.conf: [oslo_policy].enforce_scope option.'),
+    cfg.BoolOpt('keystone',
+                default=False,
+                help='Does the Identity service API policies enforce scope? '
+                     'This configuration value should be same as '
+                     'keystone.conf: [oslo_policy].enforce_scope option.'),
+]
+
 debug_group = cfg.OptGroup(name="debug",
                            title="Debug System")
 
@@ -1276,6 +1309,7 @@ _opts = [
     (object_storage_feature_group, ObjectStoreFeaturesGroup),
     (scenario_group, ScenarioGroup),
     (service_available_group, ServiceAvailableGroup),
+    (enforce_scope_group, EnforceScopeGroup),
     (debug_group, DebugGroup),
     (placement_group, PlacementGroup),
     (profiler_group, ProfilerGroup),
@@ -1345,6 +1379,7 @@ class TempestConfigPrivate(object):
             'object-storage-feature-enabled']
         self.scenario = _CONF.scenario
         self.service_available = _CONF.service_available
+        self.enforce_scope = _CONF.enforce_scope
         self.debug = _CONF.debug
         logging.tempest_set_log_file('tempest.log')
         # Setting attributes for plugins
