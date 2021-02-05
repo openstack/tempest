@@ -193,26 +193,34 @@ def wait_for_image_status(client, image_id, status):
     raise lib_exc.TimeoutException(message)
 
 
-def wait_for_image_imported_to_stores(client, image_id, stores):
+def wait_for_image_imported_to_stores(client, image_id, stores=None):
     """Waits for an image to be imported to all requested stores.
+
+    Short circuits to fail if the serer reports failure of any store.
+    If stores is None, just wait for status==active.
 
     The client should also have build_interval and build_timeout attributes.
     """
 
+    exc_cls = lib_exc.TimeoutException
     start = int(time.time())
     while int(time.time()) - start < client.build_timeout:
         image = client.show_image(image_id)
-        if image['status'] == 'active' and image['stores'] == stores:
+        if image['status'] == 'active' and (stores is None or
+                                            image['stores'] == stores):
             return
+        if image.get('os_glance_failed_import'):
+            exc_cls = lib_exc.OtherRestClientException
+            break
 
         time.sleep(client.build_interval)
 
     message = ('Image %s failed to import on stores: %s' %
-               (image_id, str(image['os_glance_failed_import'])))
+               (image_id, str(image.get('os_glance_failed_import'))))
     caller = test_utils.find_test_caller()
     if caller:
         message = '(%s) %s' % (caller, message)
-    raise lib_exc.TimeoutException(message)
+    raise exc_cls(message)
 
 
 def wait_for_image_copied_to_stores(client, image_id):

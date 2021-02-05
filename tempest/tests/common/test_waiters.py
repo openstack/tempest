@@ -66,7 +66,7 @@ class TestImageWaiters(base.TestCase):
         # Ensure waiter returns before build_timeout
         self.assertLess((end_time - start_time), 10)
 
-    def test_wait_for_image_imported_to_stores_timeout(self):
+    def test_wait_for_image_imported_to_stores_failure(self):
         time_mock = self.patch('time.time')
         client = mock.MagicMock()
         client.build_timeout = 2
@@ -77,6 +77,20 @@ class TestImageWaiters(base.TestCase):
             'status': 'saving',
             'stores': 'fake_store',
             'os_glance_failed_import': 'fake_os_glance_failed_import'})
+        self.assertRaises(lib_exc.OtherRestClientException,
+                          waiters.wait_for_image_imported_to_stores,
+                          client, 'fake_image_id', 'fake_store')
+
+    def test_wait_for_image_imported_to_stores_timeout(self):
+        time_mock = self.patch('time.time')
+        client = mock.MagicMock()
+        client.build_timeout = 2
+        self.patch('time.time', side_effect=[0., 1., 2.])
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        client.show_image.return_value = ({
+            'status': 'saving',
+            'stores': 'fake_store'})
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_image_imported_to_stores,
                           client, 'fake_image_id', 'fake_store')

@@ -90,7 +90,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.assertEqual('uploading', body['status'])
         # import image from staging to backend
         self.client.image_import(image['id'], method='glance-direct')
-        self.client.wait_for_resource_activation(image['id'])
+        waiters.wait_for_image_imported_to_stores(self.client, image['id'])
 
     @decorators.idempotent_id('f6feb7a4-b04f-4706-a011-206129f83e62')
     def test_image_web_download_import(self):
@@ -111,7 +111,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         image_uri = CONF.image.http_image
         self.client.image_import(image['id'], method='web-download',
                                  image_uri=image_uri)
-        self.client.wait_for_resource_activation(image['id'])
+        waiters.wait_for_image_imported_to_stores(self.client, image['id'])
 
 
 class MultiStoresImportImagesTest(base.BaseV2ImageTest):
