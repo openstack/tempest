@@ -302,6 +302,7 @@
       devstack_services:
         neutron-placement: true
         neutron-qos: true
+        neutron-trunk: true
     group-vars:
       subnode:
         devstack_localrc:

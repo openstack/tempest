@@ -36,6 +36,7 @@ from tempest.lib.services.network.service_providers_client import \
 from tempest.lib.services.network.subnetpools_client import SubnetpoolsClient
 from tempest.lib.services.network.subnets_client import SubnetsClient
 from tempest.lib.services.network.tags_client import TagsClient
+from tempest.lib.services.network.trunks_client import TrunksClient
 from tempest.lib.services.network.versions_client import NetworkVersionsClient
 
 __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
@@ -44,4 +45,4 @@ __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'QosClient', 'QosMinimumBandwidthRulesClient', 'QuotasClient',
            'RoutersClient', 'SecurityGroupRulesClient', 'SecurityGroupsClient',
            'SegmentsClient', 'ServiceProvidersClient', 'SubnetpoolsClient',
-           'SubnetsClient', 'TagsClient']
+           'SubnetsClient', 'TagsClient', 'TrunksClient']
