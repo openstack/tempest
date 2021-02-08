@@ -37,7 +37,7 @@ class TestServerAdvancedOps(manager.ScenarioTest):
 
     @classmethod
     def setup_credentials(cls):
-        cls.set_network_resources()
+        cls.set_network_resources(network=True, subnet=True)
         super(TestServerAdvancedOps, cls).setup_credentials()
 
     @decorators.attr(type='slow')
