@@ -20,9 +20,17 @@ from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 
 
 class ContainerClient(rest_client.RestClient):
+
+    def is_resource_deleted(self, container):
+        try:
+            self.list_container_metadata(container)
+        except exceptions.NotFound:
+            return True
+        return False
 
     def update_container(self, container_name, **headers):
         """Creates or Updates a container

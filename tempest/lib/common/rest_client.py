@@ -890,7 +890,7 @@ class RestClient(object):
             return True
         return 'exceed' in resp_body.get('message', 'blabla')
 
-    def wait_for_resource_deletion(self, id):
+    def wait_for_resource_deletion(self, id, *args, **kwargs):
         """Waits for a resource to be deleted
 
         This method will loop over is_resource_deleted until either
@@ -903,7 +903,7 @@ class RestClient(object):
         """
         start_time = int(time.time())
         while True:
-            if self.is_resource_deleted(id):
+            if self.is_resource_deleted(id, *args, **kwargs):
                 return
             if int(time.time()) - start_time >= self.build_timeout:
                 message = ('Failed to delete %(resource_type)s %(id)s within '

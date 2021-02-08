@@ -13,12 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
 import tempest.test
 
@@ -50,12 +47,11 @@ def delete_containers(containers, container_client, object_client):
             _, objlist = container_client.list_container_objects(cont, params)
             # delete every object in the container
             for obj in objlist:
-                test_utils.call_and_ignore_notfound_exc(
-                    object_client.delete_object, cont, obj['name'])
-            # sleep 2 seconds to sync the deletion of the objects
-            # in HA deployment
-            time.sleep(2)
+                object_client.delete_object(cont, obj['name'])
+                object_client.wait_for_resource_deletion(obj['name'], cont)
+            # Verify resource deletion
             container_client.delete_container(cont)
+            container_client.wait_for_resource_deletion(cont)
         except lib_exc.NotFound:
             pass
 
