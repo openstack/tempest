@@ -1,0 +1,13 @@
+---
+deprecations:
+  - |
+    In this release the following tempest arguments are deprecated and
+    replaced by new ones which are functionally equivalent:
+
+     * --black-regex is replaced by --exclude-regex
+     * --blacklist-file is replaced by --exclude-list
+     * --whitelist-file is replaced by --include-list
+
+    For now Tempest supports both (new and old ones) in order to make the
+    transition for all consumers smoother. However, that's just a temporary
+    case and the old options will be removed soon.

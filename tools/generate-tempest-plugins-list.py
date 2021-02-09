@@ -32,9 +32,9 @@ from urllib3.util import retry
 
 # List of projects having tempest plugin stale or unmaintained for a long time
 # (6 months or more)
-# TODO(masayukig): Some of these can be removed from BLACKLIST in the future
-# when the patches are merged.
-BLACKLIST = [
+# TODO(masayukig): Some of these can be removed from NON_ACTIVE_LIST in the
+# future when the patches are merged.
+NON_ACTIVE_LIST = [
     'x/gce-api',  # It looks gce-api doesn't support python3 yet.
     'x/glare',  # To avoid sanity-job failure
     'x/group-based-policy',  # It looks this doesn't support python3 yet.
@@ -52,7 +52,7 @@ BLACKLIST = [
     'x/tap-as-a-service',  # To avoid sanity-job failure
     'x/valet',  # https://review.opendev.org/#/c/638339/
     'x/kingbird',  # https://bugs.launchpad.net/kingbird/+bug/1869722
-    # vmware-nsx is blacklisted since https://review.opendev.org/#/c/736952
+    # vmware-nsx is excluded since https://review.opendev.org/#/c/736952
     'x/vmware-nsx-tempest-plugin',
 ]
 
@@ -86,10 +86,10 @@ def has_tempest_plugin(proj):
         False
 
 
-if len(sys.argv) > 1 and sys.argv[1] == 'blacklist':
-    for black_plugin in BLACKLIST:
-        print(black_plugin)
-    # We just need BLACKLIST when we use this `blacklist` option.
+if len(sys.argv) > 1 and sys.argv[1] == 'nonactivelist':
+    for non_active_plugin in NON_ACTIVE_LIST:
+        print(non_active_plugin)
+    # We just need NON_ACTIVE_LIST when we use this `nonactivelist` option.
     # So, this exits here.
     sys.exit()
 

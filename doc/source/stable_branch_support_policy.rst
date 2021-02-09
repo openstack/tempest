@@ -20,7 +20,7 @@ Tempest from master as long as possible. But, because we won't be actively
 testing branches in these phases, it's possible that we'll introduce changes to
 Tempest on master which will break support on *Extended Maintenance* phase
 branches. When this happens the expectation for those branches is to either
-switch to running Tempest from a tag with support for the branch, or blacklist
+switch to running Tempest from a tag with support for the branch, or exclude
 a newly introduced test (if that is the cause of the issue). Tempest will not
 be creating stable branches to support *Extended Maintenance* phase branches, as
 the burden is on the *Extended Maintenance* phase branche maintainers, not the Tempest
