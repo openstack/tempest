@@ -43,10 +43,9 @@ More info about Launchpad usage can be found on `OpenStack docs page
 
 Getting Your Patch Merged
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-All changes proposed to the Tempest require two ``Code-Review +2`` votes from
-Tempest core reviewers before one of the core reviewers can approve the patch by
-giving ``Workflow +1`` vote. More detailed guidelines for reviewers are available
-at :doc:`../REVIEWING`.
+All changes proposed to the Tempest require single ``Code-Review +2`` votes from
+Tempest core reviewers by giving ``Workflow +1`` vote. More detailed guidelines
+for reviewers are available at :doc:`../REVIEWING`.
 
 Project Team Lead Duties
 ~~~~~~~~~~~~~~~~~~~~~~~~
