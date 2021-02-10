@@ -31,6 +31,17 @@
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
   when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
 
+- name: Use Configured upper-constraints for non-master Tempest
+  set_fact:
+    # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
+    tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS']}) | combine({'TOX_CONSTRAINTS_FILE': devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS']}) }}"
+  when:
+    - devstack_localrc is defined
+    - "'TEMPEST_BRANCH' in devstack_localrc"
+    - "'TEMPEST_VENV_UPPER_CONSTRAINTS' in devstack_localrc"
+    - devstack_localrc['TEMPEST_BRANCH'] != 'master'
+    - devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS'] != 'default'
+
 - name: Set OS_TEST_TIMEOUT if requested
   set_fact:
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'OS_TEST_TIMEOUT': tempest_test_timeout}) }}"
