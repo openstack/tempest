@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    In this release tempest/manager.py is removed after more than 4 years
+    of deprecation.

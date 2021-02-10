@@ -54,6 +54,9 @@ NON_ACTIVE_LIST = [
     'x/kingbird',  # https://bugs.launchpad.net/kingbird/+bug/1869722
     # vmware-nsx is excluded since https://review.opendev.org/#/c/736952
     'x/vmware-nsx-tempest-plugin',
+    # mogan is unmaintained now, remove from the list when this is merged:
+    # https://review.opendev.org/c/x/mogan/+/767718
+    'x/mogan',
 ]
 
 url = 'https://review.opendev.org/projects/'
