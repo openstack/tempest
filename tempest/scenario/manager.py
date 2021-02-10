@@ -1510,7 +1510,7 @@ class NetworkScenarioTest(ScenarioTest):
 
         return rules
 
-    def _get_router(self, client=None, project_id=None):
+    def _get_router(self, client=None, project_id=None, **kwargs):
         """Retrieve a router for the given tenant id.
 
         If a public router has been configured, it will be returned.
@@ -1530,11 +1530,20 @@ class NetworkScenarioTest(ScenarioTest):
             body = client.show_router(router_id)
             return body['router']
         elif network_id:
+            name = kwargs.pop('name', None)
+            if not name:
+                namestart = self.__class__.__name__ + '-router'
+                name = data_utils.rand_name(namestart)
+
+            ext_gw_info = kwargs.pop('external_gateway_info', None)
+            if not ext_gw_info:
+                ext_gw_info = dict(network_id=network_id)
             router = client.create_router(
-                name=data_utils.rand_name(self.__class__.__name__ + '-router'),
-                admin_state_up=True,
+                name=name,
+                admin_state_up=kwargs.get('admin_state_up', True),
                 project_id=project_id,
-                external_gateway_info=dict(network_id=network_id))['router']
+                external_gateway_info=ext_gw_info,
+                **kwargs)['router']
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                             client.delete_router, router['id'])
             return router
