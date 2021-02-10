@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added public interface create_loginable_secgroup_rule().
+    Since this interface is meant to be used by tempest plugins,
+    It doesn't neccessarily require to be private api.

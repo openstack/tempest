@@ -535,7 +535,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(self._cleanup_volume_type, volume_type)
         return volume_type
 
-    def _create_loginable_secgroup_rule(self, secgroup_id=None, rulesets=None):
+    def create_loginable_secgroup_rule(self, secgroup_id=None, rulesets=None):
         """Create loginable security group rule by compute clients.
 
         This function will create by default the following rules:
@@ -595,7 +595,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             secgroup['id'])
 
         # Add rules to the security group
-        self._create_loginable_secgroup_rule(secgroup['id'])
+        self.create_loginable_secgroup_rule(secgroup['id'])
         return secgroup
 
     def get_remote_client(self, ip_address, username=None, private_key=None,
@@ -1366,7 +1366,7 @@ class NetworkScenarioTest(ScenarioTest):
             project_id=project_id)
 
         # Add rules to the security group
-        rules = self._create_loginable_secgroup_rule(
+        rules = self.create_loginable_secgroup_rule(
             security_group_rules_client=security_group_rules_client,
             secgroup=secgroup,
             security_groups_client=security_groups_client)
@@ -1455,9 +1455,9 @@ class NetworkScenarioTest(ScenarioTest):
 
         return sg_rule
 
-    def _create_loginable_secgroup_rule(self, security_group_rules_client=None,
-                                        secgroup=None,
-                                        security_groups_client=None):
+    def create_loginable_secgroup_rule(self, security_group_rules_client=None,
+                                       secgroup=None,
+                                       security_groups_client=None):
         """Create loginable security group rule by neutron clients by default.
 
         This function will create:
