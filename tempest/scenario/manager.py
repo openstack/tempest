@@ -1387,10 +1387,10 @@ class NetworkScenarioTest(ScenarioTest):
                         client.delete_security_group, secgroup['id'])
         return secgroup
 
-    def _create_security_group_rule(self, secgroup=None,
-                                    sec_group_rules_client=None,
-                                    project_id=None,
-                                    security_groups_client=None, **kwargs):
+    def create_security_group_rule(self, secgroup=None,
+                                   sec_group_rules_client=None,
+                                   project_id=None,
+                                   security_groups_client=None, **kwargs):
         """Create a rule from a dictionary of rule parameters.
 
         Create a rule in a secgroup. if secgroup not defined will search for
@@ -1474,7 +1474,7 @@ class NetworkScenarioTest(ScenarioTest):
             for r_direction in ['ingress', 'egress']:
                 ruleset['direction'] = r_direction
                 try:
-                    sg_rule = self._create_security_group_rule(
+                    sg_rule = self.create_security_group_rule(
                         sec_group_rules_client=sec_group_rules_client,
                         secgroup=secgroup,
                         security_groups_client=security_groups_client,
