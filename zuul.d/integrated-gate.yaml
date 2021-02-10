@@ -294,11 +294,53 @@
         * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
         * tempest-scenario-multinode-lvm-multibackend
     timeout: 10800
+    # This job runs on stable/stein onwards.
+    branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
     vars:
       tox_envlist: slow-serial
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
         ENABLE_VOLUME_MULTIATTACH: true
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        neutron-placement: true
+        neutron-qos: true
+      tempest_concurrency: 2
+    group-vars:
+      # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
+      # the controller and subnode prior to Rocky so we have to make sure the
+      # variable is set in both locations.
+      subnode:
+        devstack_localrc:
+          ENABLE_VOLUME_MULTIATTACH: true
+
+- job:
+    name: tempest-slow
+    parent: tempest-multinode-full
+    description: |
+      This multinode integration job will run all the tests tagged as slow.
+      It enables the lvm multibackend setup to cover few scenario tests.
+      This job will run only slow tests (API or Scenario) serially.
+
+      Former names for this job were:
+        * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
+        * tempest-scenario-multinode-lvm-multibackend
+    timeout: 10800
+    branches:
+      - stable/pike
+      - stable/queens
+      - stable/rocky
+    vars:
+      tox_envlist: slow-serial
+      devstack_localrc:
+        CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
+        ENABLE_VOLUME_MULTIATTACH: true
+        # to avoid https://bugs.launchpad.net/neutron/+bug/1914037
+        # as we couldn't backport the fix to rocky and older releases
+        IPV6_PUBLIC_RANGE: 2001:db8:0:10::/64
+        IPV6_PUBLIC_NETWORK_GATEWAY: 2001:db8:0:10::2
+        IPV6_ROUTER_GW_IP: 2001:db8:0:10::1
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
