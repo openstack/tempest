@@ -138,7 +138,7 @@
       and Glance related tests. This is meant to be run on Nova gate only.
     vars:
       tox_envlist: integrated-compute
-      tempest_black_regex: ""
+      tempest_exclude_regex: ""
       devstack_localrc:
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
