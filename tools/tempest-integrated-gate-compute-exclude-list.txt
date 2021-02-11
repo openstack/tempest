@@ -11,9 +11,3 @@ tempest.api.object_storage
 tempest.scenario.test_object_storage_basic_ops.TestObjectStorageBasicOps.test_swift_basic_ops
 tempest.scenario.test_object_storage_basic_ops.TestObjectStorageBasicOps.test_swift_acl_anonymous_download
 tempest.scenario.test_volume_backup_restore.TestVolumeBackupRestore.test_volume_backup_restore
-
-# Skip test scenario when creating second image from instance
-# https://bugs.launchpad.net/tripleo/+bug/1881592
-# The test is most likely wrong and may fail if the fists image is create quickly.
-# FIXME: Either fix the test so it won't race or consider if we should cover the scenario at all.
-tempest.api.compute.images.test_images_oneserver_negative.ImagesOneServerNegativeTestJSON.test_create_second_image_when_first_image_is_being_saved
