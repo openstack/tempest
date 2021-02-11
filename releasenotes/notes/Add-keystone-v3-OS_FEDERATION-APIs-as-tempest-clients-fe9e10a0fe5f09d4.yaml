@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    The following tempest clients for keystone v3 OS_FEDERATION API were
+    implemented in this release
+
+    * identity_providers
+    * protocols
+    * mappings
+    * service_providers
