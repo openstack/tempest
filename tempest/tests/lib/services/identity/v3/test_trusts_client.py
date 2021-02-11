@@ -94,6 +94,35 @@ class TestTrustsClient(base.BaseServiceTest):
             }
         }
 
+    FAKE_LIST_TRUSTS_ROLES = {
+        "roles": [
+            {
+                "id": "c1648e",
+                "links": {
+                    "self": "http://example.com/identity/v3/roles/c1648e"
+                    },
+                "name": "manager"
+                },
+            {
+                "id": "ed7b78",
+                "links": {
+                    "self": "http://example.com/identity/v3/roles/ed7b78"
+                    },
+                "name": "member"
+                }
+            ]
+        }
+
+    FAKE_TRUST_ROLE = {
+        "role": {
+            "id": "c1648e",
+            "links": {
+                "self": "http://example.com/identity/v3/roles/c1648e"
+                },
+            "name": "manager"
+            }
+        }
+
     def setUp(self):
         super(TestTrustsClient, self).setUp()
         fake_auth = fake_auth_provider.FakeAuthProvider()
@@ -122,6 +151,43 @@ class TestTrustsClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.get',
             self.FAKE_LIST_TRUSTS,
             bytes_body)
+
+    def _test_list_trust_roles(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_trust_roles,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_LIST_TRUSTS_ROLES,
+            bytes_body,
+            trust_id="1ff900")
+
+    def test_check_trust_role(self):
+        self.check_service_client_function(
+            self.client.check_trust_role,
+            'tempest.lib.common.rest_client.RestClient.head',
+            {},
+            trust_id="1ff900",
+            role_id="ed7b78")
+
+    def _check_show_trust_role(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_trust_role,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_TRUST_ROLE,
+            bytes_body,
+            trust_id="1ff900",
+            role_id="ed7b78")
+
+    def test_list_trust_roles_with_str_body(self):
+        self._test_list_trust_roles()
+
+    def test_list_trust_roles_with_bytes_body(self):
+        self._test_list_trust_roles(bytes_body=True)
+
+    def test_check_show_trust_role_with_str_body(self):
+        self._check_show_trust_role()
+
+    def test_check_show_trust_role_with_bytes_body(self):
+        self._check_show_trust_role(bytes_body=True)
 
     def test_create_trust_with_str_body(self):
         self._test_create_trust()
