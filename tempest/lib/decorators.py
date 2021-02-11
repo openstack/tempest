@@ -72,19 +72,13 @@ def skip_because(*args, **kwargs):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(*func_args, **func_kwargs):
-            skip = False
-            msg = ''
-            if "condition" in kwargs:
-                if kwargs["condition"] is True:
-                    skip = True
-            else:
-                skip = True
-            if "bug" in kwargs and skip is True:
-                bug = kwargs['bug']
+            condition = kwargs.get('condition', True)
+            bug = kwargs.get('bug', None)
+            if bug and condition:
                 bug_type = kwargs.get('bug_type', 'launchpad')
                 bug_url = _get_bug_url(bug, bug_type)
-                msg = "Skipped until bug: %s is resolved." % bug_url
-                raise testtools.TestCase.skipException(msg)
+                raise testtools.TestCase.skipException(
+                    "Skipped until bug: %s is resolved." % bug_url)
             return f(*func_args, **func_kwargs)
         return wrapper
     return decorator
