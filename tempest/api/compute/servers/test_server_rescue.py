@@ -158,8 +158,14 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
             self.servers_client, server_id, 'ACTIVE')
 
 
-class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
-    """Test rescuing server specifying type of device for the rescue disk"""
+class ServerStableDeviceRescueTestIDE(BaseServerStableDeviceRescueTest):
+    """Test rescuing server using an IDE device for the rescue disk"""
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
+        if not CONF.compute_feature_enabled.ide_bus:
+            raise cls.skipException("IDE bus not available.")
 
     @decorators.idempotent_id('947004c3-e8ef-47d9-9f00-97b74f9eaf96')
     def test_stable_device_rescue_cdrom_ide(self):
@@ -167,6 +173,10 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         server_id, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='cdrom', hw_rescue_bus='ide')
         self._test_stable_device_rescue(server_id, rescue_image_id)
+
+
+class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
+    """Test rescuing server specifying type of device for the rescue disk"""
 
     @decorators.idempotent_id('16865750-1417-4854-bcf7-496e6753c01e')
     def test_stable_device_rescue_disk_virtio(self):

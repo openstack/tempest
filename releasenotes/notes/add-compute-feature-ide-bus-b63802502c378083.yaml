@@ -1,0 +1,10 @@
+---
+other:
+  - |
+    A new ``[compute-feature-enabled]ide_bus`` config option has been
+    introduced to indicate if the environment supports attaching disks to an
+    instance using an ``IDE`` bus.
+
+    This currently defaults to ``True`` but should be set to ``False`` when
+    using the libvirt OpenStack Nova virt driver *and* the ``q35`` machine type
+    as support for this bus is no longer provided.

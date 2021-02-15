@@ -636,6 +636,10 @@ ComputeFeaturesGroup = [
                                   "APIs that only worked with that driver "
                                   "have been removed and there's nothing to "
                                   "test after Ussuri."),
+    cfg.BoolOpt('ide_bus',
+                default=True,
+                help='Does the test environment support attaching devices '
+                     'using an IDE bus to the instance?'),
 ]
 
 
