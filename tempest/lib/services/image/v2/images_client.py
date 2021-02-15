@@ -121,6 +121,14 @@ class ImagesClient(rest_client.RestClient):
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
 
+    def show_image_tasks(self, image_id):
+        """Show image tasks."""
+        url = 'images/%s/tasks' % image_id
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
     def is_resource_deleted(self, id):
         try:
             self.show_image(id)

@@ -30,3 +30,13 @@ class VersionsClient(rest_client.RestClient):
         self.expected_success(300, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def has_version(self, version):
+        """Return True if a version is supported."""
+        version = 'v%s' % version
+        supported = ['SUPPORTED', 'CURRENT']
+        versions = self.list_versions()
+        for version_struct in versions['versions']:
+            if version_struct['id'] == version:
+                return version_struct['status'] in supported
+        return False

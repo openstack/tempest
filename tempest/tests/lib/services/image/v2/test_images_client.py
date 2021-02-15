@@ -105,6 +105,44 @@ class TestImagesClient(base.BaseServiceTest):
         "first": "/v2/images"
     }
 
+    FAKE_SHOW_IMAGE_TASKS = {
+        "tasks": [
+            {
+                "id": "ee22890e-8948-4ea6-9668-831f973c84f5",
+                "image_id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+                "request-id": "rrrrrrr-rrrr-rrrr-rrrr-rrrrrrrrrrrr",
+                "user": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+                "type": "api_image_import",
+                "status": "processing",
+                "owner": "64f0efc9955145aeb06f297a8a6fe402",
+                "expires_at": None,
+                "created_at": "2020-12-18T05:20:38.000000",
+                "updated_at": "2020-12-18T05:25:39.000000",
+                "deleted_at": None,
+                "deleted": False,
+                "input": {
+                    "image_id": "829c729b-ebc4-4cc7-a164-6f43f1149b17",
+                    "import_req": {
+                        "method": {
+                            "name": "copy-image",
+                        },
+                        "all_stores": True,
+                        "all_stores_must_succeed": False,
+                    },
+                    "backend": [
+                        "fast",
+                        "cheap",
+                        "slow",
+                        "reliable",
+                        "common",
+                    ]
+                },
+                "result": None,
+                "message": "Copied 15 MiB",
+            }
+        ]
+    }
+
     FAKE_TAG_NAME = "fake tag"
 
     def setUp(self):
@@ -230,3 +268,11 @@ class TestImagesClient(base.BaseServiceTest):
 
     def test_list_images_with_bytes_body(self):
         self._test_list_images(bytes_body=True)
+
+    def test_show_image_tasks(self):
+        self.check_service_client_function(
+            self.client.show_image_tasks,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_SHOW_IMAGE_TASKS,
+            True,
+            image_id="e485aab9-0907-4973-921c-bb6da8a8fcf8")
