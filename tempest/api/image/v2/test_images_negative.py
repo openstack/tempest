@@ -15,9 +15,12 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ImagesNegativeTest(base.BaseV2ImageTest):
@@ -114,3 +117,42 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.client.delete_image,
                           image['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('a0ae75d4-ce9c-4576-b823-aba04c8acabd')
+    def test_update_image_reserved_property(self):
+        """Attempt to add a reserved property to an image.
+
+        Glance bans some internal-use-only properties such that they will
+        cause a PATCH to fail. Since os_glance_* is banned, we can use a
+        key in that namespace here.
+        """
+        if not CONF.image_feature_enabled.os_glance_reserved:
+            raise self.skipException('os_glance_reserved is not enabled')
+
+        image = self.create_image(name='test',
+                                  container_format='bare',
+                                  disk_format='raw')
+        self.assertRaises(lib_exc.Forbidden,
+                          self.client.update_image,
+                          image['id'], [{'add': '/os_glance_foo',
+                                         'value': 'bar'}])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('e3fb7df8-2742-4143-8976-f1b26870f0a0')
+    def test_create_image_reserved_property(self):
+        """Attempt to create an image with a reserved property.
+
+        Glance bans some internal-use-only properties such that they will
+        cause an image create to fail. Since os_glance_* is banned, we can
+        use a key in that namespace here.
+        """
+        if not CONF.image_feature_enabled.os_glance_reserved:
+            raise self.skipException('os_glance_reserved is not enabled')
+
+        self.assertRaises(lib_exc.Forbidden,
+                          self.create_image,
+                          name='test',
+                          container_format='bare',
+                          disk_format='raw',
+                          os_glance_foo='bar')
