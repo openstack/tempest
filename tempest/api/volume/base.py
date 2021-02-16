@@ -129,6 +129,13 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             name = data_utils.rand_name(cls.__name__ + '-Volume')
             kwargs['name'] = name
 
+        if CONF.volume.volume_type and 'volume_type' not in kwargs:
+            # If volume_type is not provided in config then no need to
+            # add a volume type and
+            # if volume_type has already been added by child class then
+            # no need to override.
+            kwargs['volume_type'] = CONF.volume.volume_type
+
         if CONF.compute.compute_volume_common_az:
             kwargs.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
