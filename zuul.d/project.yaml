@@ -8,17 +8,6 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - devstack-tempest:
-            files:
-              - ^playbooks/
-              - ^roles/
-              - ^.zuul.yaml$
-        - devstack-tempest-ipv6:
-            voting: false
-            files:
-              - ^playbooks/
-              - ^roles/
-              - ^.zuul.yaml$
         - tempest-full-parallel:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
