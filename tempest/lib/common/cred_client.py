@@ -173,6 +173,22 @@ class V3CredsClient(CredsClient):
         self.domains_client.update_domain(domain_id, enabled=False)
         self.domains_client.delete_domain(domain_id)
 
+    def create_user(self, username, password, project=None, email=None,
+                    domain_id=None):
+        params = {'name': username,
+                  'password': password,
+                  'domain_id': domain_id or self.creds_domain['id']}
+        # with keystone v3, a default project is not required
+        if project:
+            params[self.project_id_param] = project['id']
+        # email is not a first-class attribute of a user
+        if email:
+            params['email'] = email
+        user = self.users_client.create_user(**params)
+        if 'user' in user:
+            user = user['user']
+        return user
+
     def get_credentials(
             self, user, project, password, domain=None, system=None):
         # User, project and domain already include both ID and name here,

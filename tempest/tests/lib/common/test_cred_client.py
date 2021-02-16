@@ -111,3 +111,21 @@ class TestCredClientV3(base.TestCase):
         self.assertIsNone(ret.project_name)
         self.assertEqual(ret.system, {'system': 'all'})
         self.assertEqual(ret.domain_name, 'some_domain')
+
+    def test_create_user(self):
+        self.users_client.create_user.return_value = {
+            'user': 'a_user'
+        }
+        fake_project = {
+            'id': 'fake_project_id',
+        }
+        res = self.creds_client.create_user('fake_username',
+                                            'fake_password',
+                                            fake_project,
+                                            'fake_email')
+        self.assertEqual('a_user', res)
+        self.users_client.create_user.assert_called_once_with(
+            name='fake_username', password='fake_password',
+            project_id=fake_project['id'],
+            email='fake_email',
+            domain_id='fake_domain_id')

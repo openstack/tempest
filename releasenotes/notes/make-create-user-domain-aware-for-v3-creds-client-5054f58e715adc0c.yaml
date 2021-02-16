@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    [`bug 1613819 <https://bugs.launchpad.net/tempest/+bug/1613819>`_]
+    admin_domain_name and default_credentials_domain_name parameters
+    under [auth] now affect a domain used for creating test users just
+    as they affect it for projects. Previously a domain with an id set
+    to "default" had to be present in order for test user creation to
+    succeed with Keystone v3.
