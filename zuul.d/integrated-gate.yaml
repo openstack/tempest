@@ -62,12 +62,16 @@
 - job:
     name: tempest-full-py3
     parent: devstack-tempest
-    # This currently works from stable/pike on.
-    # Before stable/pike, legacy version of tempest-full
-    # 'legacy-tempest-dsvm-neutron-full' run.
-    branches: ^(?!stable/ocata).*$
+    # This job version is with swift disabled on py3
+    # as swift was not ready on py3 until stable/train.
+    branches:
+      - stable/pike
+      - stable/queens
+      - stable/rocky
+      - stable/stein
+      - stable/train
     description: |
-      Base integration test with Neutron networking and py3.
+      Base integration test with Neutron networking, swift disabled, and py3.
       Former names for this job where:
         * legacy-tempest-dsvm-py35
         * gate-tempest-dsvm-py35
@@ -109,6 +113,25 @@
         c-bak: false
         neutron-placement: true
         neutron-qos: true
+
+- job:
+    name: tempest-full-py3
+    parent: devstack-tempest
+    # This job version is with swift enabled on py3
+    # as swift is ready on py3 from stable/ussuri onwards.
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
+    description: |
+      Base integration test with Neutron networking, swift enable, and py3.
+      Former names for this job where:
+        * legacy-tempest-dsvm-py35
+        * gate-tempest-dsvm-py35
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+        ENABLE_VOLUME_MULTIATTACH: true
+        GLANCE_USE_IMPORT_WORKFLOW: True
 
 - job:
     name: tempest-integrated-networking
