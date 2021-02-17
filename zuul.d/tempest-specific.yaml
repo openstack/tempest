@@ -46,6 +46,8 @@
       tox_envlist: full-parallel
       run_tempest_cleanup: true
       run_tempest_dry_cleanup: true
+      devstack_localrc:
+        DEVSTACK_PARALLEL: True
 
 - job:
     name: tempest-full-py3-ipv6
