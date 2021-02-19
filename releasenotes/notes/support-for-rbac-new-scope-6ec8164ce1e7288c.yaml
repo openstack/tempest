@@ -1,0 +1,13 @@
+---
+prelude: >
+    Support for RBAC new system scope is added in Tempest.
+features:
+  - |
+    Keystone provides the new scoped token called ``system`` which
+    can be used to query the system scoped API operation. Projects
+    are moving towards the policy with new scope types, Keystone, Nova
+    already provide the new policy for RBAC checks. Tempest has added
+    the support to query the system scoped token from keystone to test
+    the new policy.
+    As next step, we will be moving all the Tempest tests on the project's
+    new policy.

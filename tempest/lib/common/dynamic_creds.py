@@ -405,12 +405,18 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                          " credentials: %s", credentials)
         return credentials
 
+    # TODO(gmann): Remove this method in favor of get_project_member_creds()
+    # after the deprecation phase.
     def get_primary_creds(self):
         return self.get_credentials('primary')
 
+    # TODO(gmann): Remove this method in favor of get_project_admin_creds()
+    # after the deprecation phase.
     def get_admin_creds(self):
         return self.get_credentials('admin')
 
+    # TODO(gmann): Replace this method with more appropriate name.
+    # like get_project_alt_member_creds()
     def get_alt_creds(self):
         return self.get_credentials('alt')
 
