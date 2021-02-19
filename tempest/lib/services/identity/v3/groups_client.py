@@ -17,8 +17,9 @@
 https://docs.openstack.org/api-ref/identity/v3/index.html#groups
 """
 
+from urllib import parse as urllib
+
 from oslo_serialization import jsonutils as json
-from six.moves.urllib import parse as urllib
 
 from tempest.lib.common import rest_client
 

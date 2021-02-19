@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import configparser
 import os
 import shutil
 import sys
@@ -19,7 +20,6 @@ import sys
 from cliff import command
 from oslo_config import generator
 from oslo_log import log as logging
-from six import moves
 from stestr import commands
 
 from tempest.cmd import workspace
@@ -92,7 +92,7 @@ class TempestInit(command.Command):
             stestr_conf_file.write(stestr_conf)
 
     def get_configparser(self, conf_path):
-        config_parse = moves.configparser.ConfigParser()
+        config_parse = configparser.ConfigParser()
         config_parse.optionxform = str
         # get any existing values if a config file already exists
         if os.path.isfile(conf_path):

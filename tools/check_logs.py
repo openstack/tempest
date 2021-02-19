@@ -20,9 +20,9 @@ import gzip
 import os
 import re
 import sys
+import urllib.request as urlreq
 
 import six
-import six.moves.urllib.request as urlreq
 import yaml
 
 # DEVSTACK_GATE_GRENADE is either unset if grenade is not running

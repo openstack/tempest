@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from urllib import parse as urllib
+
 from oslo_serialization import jsonutils as json
-from six.moves.urllib import parse as urllib
 
 from tempest.lib.api_schema.response.compute.v2_1 import images as schema
 from tempest.lib.api_schema.response.compute.v2_45 import images as schemav245

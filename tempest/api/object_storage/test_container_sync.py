@@ -14,8 +14,8 @@
 #    under the License.
 
 import time
+from urllib import parse as urlparse
 
-from six.moves.urllib import parse as urlparse
 import testtools
 
 from tempest.api.object_storage import base

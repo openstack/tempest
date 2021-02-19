@@ -16,8 +16,8 @@
 
 import operator
 import random
+from urllib.parse import urlparse
 
-from six.moves.urllib.parse import urlparse
 from testtools import matchers
 
 from tempest.api.volume import base

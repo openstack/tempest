@@ -18,13 +18,13 @@ import collections
 import email.utils
 import re
 import time
+import urllib
 
 import jsonschema
 from oslo_log import log as logging
 from oslo_log import versionutils
 from oslo_serialization import jsonutils as json
 import six
-from six.moves import urllib
 
 from tempest.lib.common import http
 from tempest.lib.common import jsonschema_validator
