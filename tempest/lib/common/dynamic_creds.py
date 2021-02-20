@@ -254,6 +254,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     user, role, domain)
             elif scope == 'system':
                 self.creds_client.assign_user_role_on_system(user, role)
+        LOG.info("Roles assigned to the user %s are: %s",
+                 user['id'], roles_to_assign)
 
         creds = self.creds_client.get_credentials(**cred_params)
         return cred_provider.TestResources(creds)
