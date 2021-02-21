@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from io import StringIO
 import socket
 from unittest import mock
 
 import six
-from six import StringIO
 import testtools
 
 from tempest.lib.common import ssh
@@ -30,7 +30,7 @@ class TestSshClient(base.TestCase):
     SELECT_POLLIN = 1
 
     @mock.patch('paramiko.RSAKey.from_private_key')
-    @mock.patch('six.StringIO')
+    @mock.patch('io.StringIO')
     def test_pkey_calls_paramiko_RSAKey(self, cs_mock, rsa_mock):
         cs_mock.return_value = mock.sentinel.csio
         pkey = 'mykey'
