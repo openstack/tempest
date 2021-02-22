@@ -128,7 +128,7 @@ class TestServerBasicOps(manager.ScenarioTest):
     @utils.services('compute', 'network')
     def test_server_basic_ops(self):
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
             key_name=keypair['name'],

@@ -159,7 +159,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         keypair = self.create_keypair()
         self.keypairs[keypair['name']] = keypair
         security_groups = [
-            {'name': self._create_security_group()['name']}
+            {'name': self.create_security_group()['name']}
         ]
         network = {'uuid': network['id']}
         if port_id is not None:

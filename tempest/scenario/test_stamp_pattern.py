@@ -81,7 +81,7 @@ class TestStampPattern(manager.ScenarioTest):
     def test_stamp_pattern(self):
         # prepare for booting an instance
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
 
         # boot an instance and create a timestamp file in it
         volume = self.create_volume()

@@ -66,7 +66,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
     def setUp(self):
         super(TestGettingAddress, self).setUp()
         self.keypair = self.create_keypair()
-        self.sec_grp = self._create_security_group()
+        self.sec_grp = self.create_security_group()
 
     def prepare_network(self, address6_mode, n_subnets6=1, dualnet=False):
         """Prepare network

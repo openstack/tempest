@@ -70,7 +70,7 @@ class TestVolumeBackupRestore(manager.ScenarioTest):
 
         # Create keypair and security group
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
 
         # Boot a server from the restored backup
         bd_map_v2 = [{

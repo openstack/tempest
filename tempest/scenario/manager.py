@@ -589,7 +589,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             rules.append(sg_rule)
         return rules
 
-    def _create_security_group(self, **kwargs):
+    def create_security_group(self, **kwargs):
         """Create security group and add rules to security group"""
         if not kwargs.get('name'):
             kwargs['name'] = data_utils.rand_name(self.__class__.__name__)
@@ -1361,10 +1361,10 @@ class NetworkScenarioTest(ScenarioTest):
         self.log_console_output()
         self.fail(msg)
 
-    def _create_security_group(self, security_group_rules_client=None,
-                               project_id=None,
-                               namestart='secgroup-smoke',
-                               security_groups_client=None):
+    def create_security_group(self, security_group_rules_client=None,
+                              project_id=None,
+                              namestart='secgroup-smoke',
+                              security_groups_client=None):
         if security_group_rules_client is None:
             security_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
