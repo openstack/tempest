@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import io
 import random
-
-import six
 
 from tempest.api.compute import base
 from tempest.common import image as common_image
@@ -44,7 +43,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
             CONF.compute.flavor_ref)['flavor']
         min_img_ram = flavor['ram'] + 1
         size = random.randint(1024, 4096)
-        image_file = six.BytesIO(data_utils.random_bytes(size))
+        image_file = io.BytesIO(data_utils.random_bytes(size))
         params = {
             'name': data_utils.rand_name('image'),
             'container_format': CONF.image.container_formats[0],

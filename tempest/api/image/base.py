@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.common import image as common_image
 from tempest import config
@@ -113,7 +113,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         cls.alt_tenant_id = cls.alt_image_member_client.tenant_id
 
     def _create_image(self):
-        image_file = six.BytesIO(data_utils.random_bytes())
+        image_file = io.BytesIO(data_utils.random_bytes())
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   is_public=False,
