@@ -19,7 +19,6 @@ import string
 import uuid
 
 from oslo_utils import uuidutils
-import six.moves
 
 
 def rand_uuid():
@@ -171,7 +170,7 @@ def random_bytes(size=1024):
     """
     if size > 1 << 20:
         raise RuntimeError('Size should be less than 1MiB')
-    return b''.join([six.int2byte(random.randint(0, 255))
+    return b''.join([bytes((random.randint(0, 255),))
                      for i in range(size)])
 
 

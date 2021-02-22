@@ -20,8 +20,6 @@ import random
 import time
 from urllib import parse as urlparse
 
-import six
-
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
@@ -35,7 +33,7 @@ class OAUTHTokenClient(rest_client.RestClient):
         safe = b'~'
         s = s.encode('utf-8') if isinstance(s, str) else s
         s = urlparse.quote(s, safe)
-        if isinstance(s, six.binary_type):
+        if isinstance(s, bytes):
             s = s.decode('utf-8')
         return s
 

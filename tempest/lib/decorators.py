@@ -16,7 +16,6 @@ import functools
 import uuid
 
 from oslo_log import log as logging
-import six
 import testtools
 
 from tempest.lib import exceptions as lib_exc
@@ -110,7 +109,7 @@ def related_bug(bug, status_code=None, bug_type='launchpad'):
 
 def idempotent_id(id):
     """Stub for metadata decorator"""
-    if not isinstance(id, six.string_types):
+    if not isinstance(id, str):
         raise TypeError('Test idempotent_id must be string not %s'
                         '' % type(id).__name__)
     uuid.UUID(id)
@@ -140,7 +139,7 @@ def attr(**kwargs):
         # Check to see if the attr should be conditional applied.
         if 'condition' in kwargs and not kwargs.get('condition'):
             return f
-        if 'type' in kwargs and isinstance(kwargs['type'], six.string_types):
+        if 'type' in kwargs and isinstance(kwargs['type'], str):
             f = testtools.testcase.attr(kwargs['type'])(f)
         elif 'type' in kwargs and isinstance(kwargs['type'], list):
             for attr in kwargs['type']:

@@ -14,7 +14,6 @@
 #    under the License.
 
 from oslo_utils import timeutils
-import six
 from tempest.api.identity import base
 from tempest.lib import decorators
 
@@ -36,7 +35,7 @@ class TokensTest(base.BaseIdentityV2Test):
         body = token_client.auth(username, password, tenant_name)
 
         self.assertNotEmpty(body['token']['id'])
-        self.assertIsInstance(body['token']['id'], six.string_types)
+        self.assertIsInstance(body['token']['id'], str)
 
         now = timeutils.utcnow()
         expires_at = timeutils.normalize_time(

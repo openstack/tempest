@@ -16,7 +16,6 @@
 from urllib import parse as urllib
 
 from oslo_serialization import jsonutils as json
-import six
 
 from tempest.lib.api_schema.response.volume import volumes as schema
 from tempest.lib.common import rest_client
@@ -33,7 +32,7 @@ class VolumesClient(base_client.BaseClient):
         If params is a string it will be left as it is, but if it's not it will
         be urlencoded.
         """
-        if isinstance(params, six.string_types):
+        if isinstance(params, str):
             return params
         return urllib.urlencode(params)
 

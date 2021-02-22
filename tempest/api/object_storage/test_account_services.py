@@ -14,8 +14,6 @@
 #    under the License.
 
 import random
-
-import six
 import testtools
 
 from tempest.api.object_storage import base
@@ -43,7 +41,7 @@ class AccountTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(AccountTest, cls).resource_setup()
         for i in range(ord('a'), ord('f') + 1):
-            name = data_utils.rand_name(name='%s-' % six.int2byte(i))
+            name = data_utils.rand_name(name='%s-' % bytes((i,)))
             cls.container_client.update_container(name)
             cls.addClassResourceCleanup(base.delete_containers,
                                         [name],

@@ -21,7 +21,6 @@ import time
 import warnings
 
 from oslo_log import log as logging
-import six
 
 from tempest.lib import exceptions
 
@@ -66,7 +65,7 @@ class Client(object):
         self.username = username
         self.port = port
         self.password = password
-        if isinstance(pkey, six.string_types):
+        if isinstance(pkey, str):
             pkey = paramiko.RSAKey.from_private_key(
                 io.StringIO(str(pkey)))
         self.pkey = pkey

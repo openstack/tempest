@@ -384,7 +384,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
             # This may raise an exception in case credentials are not available
             # In that case we want to let the exception through and the test
             # fail accordingly
-            if isinstance(credentials_type, six.string_types):
+            if isinstance(credentials_type, str):
                 manager = cls.get_client_manager(
                     credential_type=credentials_type)
                 setattr(cls, 'os_%s' % credentials_type, manager)
@@ -859,7 +859,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         """
         # Get a manager for the given credentials_type, but at least
         # always fall back on getting the manager for primary credentials
-        if isinstance(credentials_type, six.string_types):
+        if isinstance(credentials_type, str):
             manager = cls.get_client_manager(credential_type=credentials_type)
         elif isinstance(credentials_type, list):
             scope = 'project'
