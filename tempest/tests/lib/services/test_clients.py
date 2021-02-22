@@ -16,7 +16,6 @@ import types
 from unittest import mock
 
 import fixtures
-import six
 import testtools
 
 from tempest.lib import auth
@@ -270,8 +269,7 @@ class TestServiceClients(base.TestCase):
                           'module_path': 'This neither',
                           'client_names': ['SomeClient1']}]}
         msg = "(?=.*{0})(?=.*{1})".format(
-            *[x[1][0]['module_path'] for x in six.iteritems(
-                fake_service_clients)])
+            *[x[1][0]['module_path'] for x in fake_service_clients.items()])
         self.useFixture(fixtures.MockPatchObject(
             clients.ClientsRegistry(), 'get_service_clients',
             return_value=fake_service_clients))
@@ -300,8 +298,8 @@ class TestServiceClients(base.TestCase):
                           'module_path': 'fake_path_2',
                           'client_names': ['SomeClient2']}]}
         msg = "(?=.*{0})(?=.*{1})".format(
-            *[x[1][0]['service_version'] for x in six.iteritems(
-                fake_service_clients)])
+            *[x[1][0]['service_version'] for x in
+                fake_service_clients.items()])
         self.useFixture(fixtures.MockPatchObject(
             clients.ClientsRegistry(), 'get_service_clients',
             return_value=fake_service_clients))

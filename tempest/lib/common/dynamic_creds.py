@@ -16,7 +16,6 @@ import ipaddress
 
 import netaddr
 from oslo_log import log as logging
-import six
 
 from tempest.lib.common import cred_client
 from tempest.lib.common import cred_provider
@@ -556,7 +555,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         if not self._creds:
             return
         self._clear_isolated_net_resources()
-        for creds in six.itervalues(self._creds):
+        for creds in self._creds.values():
             try:
                 self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:

@@ -10,7 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from tempest.api.volume import base
 from tempest.common import waiters
 from tempest import config
@@ -149,4 +148,4 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         # assert that volumes are each created on separate hosts:
         msg = ("volumes %s were created in the same backend" % ", "
                .join(volume_hosts))
-        six.assertCountEqual(self, volume_hosts, set(volume_hosts), msg)
+        self.assertCountEqual(volume_hosts, set(volume_hosts), msg)

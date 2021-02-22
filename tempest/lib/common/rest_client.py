@@ -24,7 +24,6 @@ import jsonschema
 from oslo_log import log as logging
 from oslo_log import versionutils
 from oslo_serialization import jsonutils as json
-import six
 
 from tempest.lib.common import http
 from tempest.lib.common import jsonschema_validator
@@ -509,7 +508,7 @@ class RestClient(object):
             if not hasattr(body, "keys") or len(body.keys()) != 1:
                 return body
             # Just return the "wrapped" element
-            _, first_item = six.next(six.iteritems(body))
+            _, first_item = tuple(body.items())[0]
             if isinstance(first_item, (dict, list)):
                 return first_item
         except (ValueError, IndexError):
