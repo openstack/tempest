@@ -77,9 +77,9 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         if dualnet - create IPv6 subnets on a different network
         :return: list of created networks
         """
-        network = self._create_network()
+        network = self.create_network()
         if dualnet:
-            network_v6 = self._create_network()
+            network_v6 = self.create_network()
 
         sub4 = self.create_subnet(network=network,
                                   namestart='sub4',

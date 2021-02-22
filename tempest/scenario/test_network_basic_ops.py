@@ -230,7 +230,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
 
     def _create_new_network(self, create_gateway=False):
-        self.new_net = self._create_network()
+        self.new_net = self.create_network()
         if create_gateway:
             self.new_subnet = self.create_subnet(
                 network=self.new_net)

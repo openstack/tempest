@@ -1060,10 +1060,10 @@ class NetworkScenarioTest(ScenarioTest):
         if not CONF.service_available.neutron:
             raise cls.skipException('Neutron not available')
 
-    def _create_network(self, networks_client=None,
-                        project_id=None,
-                        namestart='network-smoke-',
-                        port_security_enabled=True, **net_dict):
+    def create_network(self, networks_client=None,
+                       project_id=None,
+                       namestart='network-smoke-',
+                       port_security_enabled=True, **net_dict):
         if not networks_client:
             networks_client = self.networks_client
         if not project_id:
@@ -1594,7 +1594,7 @@ class NetworkScenarioTest(ScenarioTest):
             router = None
             subnet = None
         else:
-            network = self._create_network(
+            network = self.create_network(
                 networks_client=networks_client,
                 project_id=project_id,
                 port_security_enabled=port_security_enabled,
