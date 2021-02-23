@@ -972,6 +972,9 @@ VolumeGroup = [
                 default=['BACKEND_1', 'BACKEND_2'],
                 help='A list of backend names separated by comma. '
                      'The backend name must be declared in cinder.conf'),
+    cfg.StrOpt('volume_type',
+               default='',
+               help='Volume type to be used while creating volume.'),
     cfg.StrOpt('storage_protocol',
                default='iSCSI',
                help='Backend protocol to target when creating volume types'),
