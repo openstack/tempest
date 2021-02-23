@@ -202,22 +202,8 @@ def verify_keystone_api_versions(os, update):
                             not CONF.identity_feature_enabled.api_v3, update)
 
 
-def verify_cinder_api_versions(os, update):
-    # Check cinder api versions
-    versions = _get_api_versions(os, 'cinder')
-    if (CONF.volume_feature_enabled.api_v2 !=
-            contains_version('v2.', versions)):
-        print_and_or_update('api_v2', 'volume-feature-enabled',
-                            not CONF.volume_feature_enabled.api_v2, update)
-    if (CONF.volume_feature_enabled.api_v3 !=
-            contains_version('v3.', versions)):
-        print_and_or_update('api_v3', 'volume-feature-enabled',
-                            not CONF.volume_feature_enabled.api_v3, update)
-
-
 def verify_api_versions(os, service, update):
     verify = {
-        'cinder': verify_cinder_api_versions,
         'glance': verify_glance_api_versions,
         'keystone': verify_keystone_api_versions,
     }

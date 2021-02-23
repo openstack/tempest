@@ -1046,31 +1046,6 @@ VolumeFeaturesGroup = [
                 help='A list of enabled volume extensions with a special '
                      'entry all which indicates every extension is enabled. '
                      'Empty list indicates all extensions are disabled'),
-    cfg.BoolOpt('api_v2',
-                default=True,
-                help="Is the v2 volume API enabled",
-                deprecated_for_removal=True,
-                deprecated_reason="The v2 volume API has been deprecated "
-                                  "since Pike release. Now Tempest run all "
-                                  "the volume tests against v2 or v3 API "
-                                  "based on CONF.volume.catalog_type which "
-                                  "makes this config option unusable. If "
-                                  "catalog_type is volumev2, then all the "
-                                  "volume tests will run against v2 API. "
-                                  "Use ``CONF.volume.catalog_type`` to run "
-                                  "the Tempest against volume v2 or v3 API"),
-    cfg.BoolOpt('api_v3',
-                default=True,
-                help="Is the v3 volume API enabled",
-                deprecated_for_removal=True,
-                deprecated_reason="Tempest run all the volume tests against "
-                                  "v2 or v3 API based on "
-                                  "CONF.volume.catalog_type which makes this "
-                                  "config option unusable. If catalog_type is "
-                                  "volumev3 which is default, then all the "
-                                  "volume tests will run against v3 API. "
-                                  "Use ``CONF.volume.catalog_type`` to run "
-                                  "the Tempest against volume v2 or v3 API"),
     cfg.BoolOpt('extend_attached_volume',
                 default=False,
                 help='Does the cloud support extending the size of a volume '
