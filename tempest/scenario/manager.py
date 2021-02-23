@@ -486,7 +486,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             snapshot['id'])['snapshot']
         return snapshot
 
-    def _cleanup_volume_type(self, volume_type):
+    def cleanup_volume_type(self, volume_type):
         """Clean up a given volume type.
 
         Ensuring all volumes associated to a type are first removed before
@@ -542,7 +542,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         volume_type = volume_type_resp['volume_type']
 
         self.assertIn('id', volume_type)
-        self.addCleanup(self._cleanup_volume_type, volume_type)
+        self.addCleanup(self.cleanup_volume_type, volume_type)
         return volume_type
 
     def create_loginable_secgroup_rule(self, secgroup_id=None, rulesets=None):
