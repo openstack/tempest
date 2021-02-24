@@ -13,7 +13,6 @@
 import abc
 
 from oslo_log import log as logging
-import six
 
 from tempest.lib import auth
 from tempest.lib import exceptions as lib_exc
@@ -22,8 +21,7 @@ from tempest.lib.services.identity.v2 import identity_client as v2_identity
 LOG = logging.getLogger(__name__)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class CredsClient(object):
+class CredsClient(object, metaclass=abc.ABCMeta):
     """This class is a wrapper around the identity clients
 
      to provide a single interface for managing credentials in both v2 and v3

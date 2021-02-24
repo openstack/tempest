@@ -14,14 +14,12 @@
 
 import abc
 
-import six
 
 from tempest.lib import auth
 from tempest.lib import exceptions
 
 
-@six.add_metaclass(abc.ABCMeta)
-class CredentialProvider(object):
+class CredentialProvider(object, metaclass=abc.ABCMeta):
     def __init__(self, identity_version, name=None,
                  network_resources=None, credentials_domain=None,
                  admin_role=None, identity_uri=None):

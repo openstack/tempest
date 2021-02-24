@@ -21,7 +21,6 @@ import re
 from urllib import parse as urlparse
 
 from oslo_log import log as logging
-import six
 
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client as json_v2id
@@ -65,8 +64,7 @@ def apply_url_filters(url, filters):
     return url
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AuthProvider(object):
+class AuthProvider(object, metaclass=abc.ABCMeta):
     """Provide authentication"""
 
     SCOPES = set(['project'])
