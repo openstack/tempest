@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.api.compute import base
 from tempest.common import image as common_image
@@ -77,7 +77,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
                                     cls.glance_client.delete_image,
                                     cls.image_id)
-        image_file = six.BytesIO((b'*' * 1024))
+        image_file = io.BytesIO((b'*' * 1024))
         if CONF.image_feature_enabled.api_v1:
             cls.glance_client.update_image(cls.image_id, data=image_file)
         else:

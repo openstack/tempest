@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.api.image import base
 from tempest.common import waiters
@@ -99,7 +99,7 @@ class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
         self.assertEqual('queued', image['status'])
 
         file_content = data_utils.random_bytes()
-        image_file = six.BytesIO(file_content)
+        image_file = io.BytesIO(file_content)
         self.client.store_image_file(image['id'], image_file)
 
         body = self.client.show_image(image['id'])

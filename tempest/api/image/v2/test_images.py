@@ -14,9 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import io
 import random
-
-import six
 
 from oslo_log import log as logging
 from tempest.api.image import base
@@ -82,7 +81,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         image = self._create_image()
         # Stage image data
         file_content = data_utils.random_bytes()
-        image_file = six.BytesIO(file_content)
+        image_file = io.BytesIO(file_content)
         self.client.stage_image_file(image['id'], image_file)
         # Check image status is 'uploading'
         body = self.client.show_image(image['id'])
@@ -158,7 +157,7 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
 
         self.client.stage_image_file(
             image['id'],
-            six.BytesIO(data_utils.random_bytes()))
+            io.BytesIO(data_utils.random_bytes()))
         # Check image status is 'uploading'
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
@@ -240,7 +239,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Now try uploading an image file
         file_content = data_utils.random_bytes()
-        image_file = six.BytesIO(file_content)
+        image_file = io.BytesIO(file_content)
         self.client.store_image_file(image['id'], image_file)
 
         # Now try to get image details
@@ -317,7 +316,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Upload an image file
         content = data_utils.random_bytes()
-        image_file = six.BytesIO(content)
+        image_file = io.BytesIO(content)
         self.client.store_image_file(image['id'], image_file)
 
         # Deactivate image
@@ -367,7 +366,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         1024 and 4096
         """
         size = random.randint(1024, 4096)
-        image_file = six.BytesIO(data_utils.random_bytes(size))
+        image_file = io.BytesIO(data_utils.random_bytes(size))
         tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
         image = cls.create_image(container_format=container_format,
                                  disk_format=disk_format,
@@ -550,7 +549,7 @@ class ListSharedImagesTest(base.BaseV2ImageTest):
     def test_list_images_param_member_status(self):
         """Test listing images by member_status and visibility"""
         # Create an image to be shared using default visibility
-        image_file = six.BytesIO(data_utils.random_bytes(2048))
+        image_file = io.BytesIO(data_utils.random_bytes(2048))
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(container_format=container_format,

@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.lib.common.utils import data_utils
 from tempest.lib.services.image.v2 import images_client
@@ -178,7 +178,7 @@ class TestImagesClient(base.BaseServiceTest):
             {}, image_id="e485aab9-0907-4973-921c-bb6da8a8fcf8", status=204)
 
     def test_store_image_file(self):
-        data = six.BytesIO(data_utils.random_bytes())
+        data = io.BytesIO(data_utils.random_bytes())
 
         self.check_service_client_function(
             self.client.store_image_file,

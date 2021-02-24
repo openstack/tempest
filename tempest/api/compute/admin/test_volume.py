@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.api.compute import base
 from tempest.common import waiters
@@ -51,7 +51,7 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
         image = self.image_client.show_image(CONF.compute.image_ref)
         image_data = self.image_client.show_image_file(
             CONF.compute.image_ref).data
-        image_file = six.BytesIO(image_data)
+        image_file = io.BytesIO(image_data)
         create_dict = {
             'container_format': image['container_format'],
             'disk_format': image['disk_format'],

@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
+import io
 
 from tempest.api.volume import base
 from tempest.common import utils
@@ -50,7 +50,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
                         self.images_client.delete_image, image['id'])
 
         # Upload image with 1KB data
-        image_file = six.BytesIO(data_utils.random_bytes())
+        image_file = io.BytesIO(data_utils.random_bytes())
         self.images_client.store_image_file(image['id'], image_file)
         waiters.wait_for_image_status(self.images_client,
                                       image['id'], 'active')

@@ -15,7 +15,7 @@
 
 import time
 
-import six
+import io
 import testtools
 
 from tempest.api.compute import base
@@ -85,7 +85,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             # Wait 1 second between creation and upload to ensure a delta
             # between created_at and updated_at.
             time.sleep(1)
-            image_file = six.BytesIO((b'*' * 1024))
+            image_file = io.BytesIO((b'*' * 1024))
             if CONF.image_feature_enabled.api_v1:
                 cls.glance_client.update_image(image_id, data=image_file)
             else:
