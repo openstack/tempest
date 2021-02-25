@@ -15,7 +15,6 @@
 from unittest import mock
 
 from oslo_utils import uuidutils
-import six
 
 from tempest.api.compute import base as compute_base
 from tempest.common import waiters
@@ -128,9 +127,9 @@ class TestBaseV2ComputeTest(base.TestCase):
             mock.sentinel.server_id, wait_until='active')
         # make our assertions
         if fault:
-            self.assertIn(fault, six.text_type(ex))
+            self.assertIn(fault, str(ex))
         else:
-            self.assertNotIn(fault, six.text_type(ex))
+            self.assertNotIn(fault, str(ex))
         if compute_base.BaseV2ComputeTest.is_requested_microversion_compatible(
             '2.35'):
             status = 'ACTIVE'

@@ -16,7 +16,6 @@
 import ipaddress
 
 import netaddr
-import six
 import testtools
 
 from tempest.api.network import base_security_groups as sec_base
@@ -234,15 +233,15 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Get two IP addresses
         ip_address_1 = None
         ip_address_2 = None
-        ip_network = ipaddress.ip_network(six.text_type(subnet['cidr']))
+        ip_network = ipaddress.ip_network(str(subnet['cidr']))
         for ip in ip_network:
             if ip == ip_network.network_address:
                 continue
             if ip_address_1 is None:
-                ip_address_1 = six.text_type(ip)
+                ip_address_1 = str(ip)
             else:
                 ip_address_2 = ip_address_1
-                ip_address_1 = six.text_type(ip)
+                ip_address_1 = str(ip)
                 # Make sure these two IP addresses have different substring
                 if ip_address_1[:-1] != ip_address_2[:-1]:
                     break

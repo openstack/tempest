@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import testtools
 
 from tempest.lib.common import api_version_utils
@@ -31,7 +30,7 @@ class TestVersionSkipLogic(base.TestCase):
                                                            cfg_max_version)
         except testtools.TestCase.skipException as e:
             if not expected_skip:
-                raise testtools.TestCase.failureException(six.text_type(e))
+                raise testtools.TestCase.failureException(str(e))
 
     def test_version_min_in_range(self):
         self._test_version('2.2', '2.10', '2.1', '2.7')

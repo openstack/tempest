@@ -69,7 +69,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
         resp = urllib3.PoolManager().request('GET', vnc_url)
         # Make sure that the GET request was accepted by the novncproxy
         self.assertEqual(resp.status, 200, 'Got a Bad HTTP Response on the '
-                         'initial call: ' + six.text_type(resp.status))
+                         'initial call: ' + str(resp.status))
         # Do some basic validation to make sure it is an expected HTML document
         resp_data = resp.data.decode()
         # This is needed in the case of example: <html lang="en">
@@ -165,11 +165,11 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
             self._websocket.response.startswith(b'HTTP/1.1 101 Switching '
                                                 b'Protocols'),
             'Incorrect HTTP return status code: {}'.format(
-                six.text_type(self._websocket.response)
+                str(self._websocket.response)
             )
         )
         _required_header = 'upgrade: websocket'
-        _response = six.text_type(self._websocket.response).lower()
+        _response = str(self._websocket.response).lower()
         self.assertIn(
             _required_header,
             _response,

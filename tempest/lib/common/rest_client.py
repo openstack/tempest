@@ -418,7 +418,7 @@ class RestClient(object):
     def _safe_body(self, body, maxlen=4096):
         # convert a structure into a string safely
         try:
-            text = six.text_type(body)
+            text = str(body)
         except UnicodeDecodeError:
             # if this isn't actually text, return marker that
             return "<BinaryData: removed>"

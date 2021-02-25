@@ -274,7 +274,7 @@ class TestSshClient(base.TestCase):
         client = ssh.Client('localhost', 'root', timeout=2)
         exc = self.assertRaises(exceptions.SSHExecCommandFailed,
                                 client.exec_command, "test")
-        self.assertIn('R' + self._utf8_string, six.text_type(exc))
+        self.assertIn('R' + self._utf8_string, str(exc))
 
     def test_exec_command_no_select(self):
         gsc_mock = self.patch('tempest.lib.common.ssh.Client.'

@@ -62,7 +62,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertIsNotNone(container_list)
 
         for container_name in self.containers:
-            self.assertIn(six.text_type(container_name).encode('utf-8'),
+            self.assertIn(str(container_name).encode('utf-8'),
                           container_list)
 
     @decorators.idempotent_id('884ec421-fbad-4fcc-916b-0580f2699565')

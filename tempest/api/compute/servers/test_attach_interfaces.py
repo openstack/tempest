@@ -16,7 +16,6 @@
 import time
 
 from oslo_log import log
-import six
 
 from tempest.api.compute import base
 from tempest.common import compute
@@ -241,7 +240,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         except lib_exc.BadRequest as e:
             msg = ('Multiple possible networks found, use a Network ID to be '
                    'more specific.')
-            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
+            if not CONF.compute.fixed_network_name and str(e) == msg:
                 raise
         else:
             ifs.append(iface)
@@ -450,7 +449,7 @@ class AttachInterfacesV270Test(AttachInterfacesTestBase):
         except lib_exc.BadRequest as e:
             msg = ('Multiple possible networks found, use a Network ID to be '
                    'more specific.')
-            if not CONF.compute.fixed_network_name and six.text_type(e) == msg:
+            if not CONF.compute.fixed_network_name and str(e) == msg:
                 raise
         else:
             # just to check the response schema

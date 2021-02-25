@@ -33,7 +33,7 @@ class OAUTHTokenClient(rest_client.RestClient):
     def _escape(self, s):
         """Escape a unicode string in an OAuth-compatible fashion."""
         safe = b'~'
-        s = s.encode('utf-8') if isinstance(s, six.text_type) else s
+        s = s.encode('utf-8') if isinstance(s, str) else s
         s = urlparse.quote(s, safe)
         if isinstance(s, six.binary_type):
             s = s.decode('utf-8')
@@ -47,8 +47,8 @@ class OAUTHTokenClient(rest_client.RestClient):
                                         verifier=None,
                                         http_method='GET'):
         """Generate OAUTH params along with signature."""
-        timestamp = six.text_type(int(time.time()))
-        nonce = six.text_type(random.getrandbits(64)) + timestamp
+        timestamp = str(int(time.time()))
+        nonce = str(random.getrandbits(64)) + timestamp
         oauth_params = [
             ('oauth_nonce', nonce),
             ('oauth_timestamp', timestamp),
