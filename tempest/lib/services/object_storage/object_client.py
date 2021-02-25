@@ -23,6 +23,13 @@ from tempest.lib import exceptions
 
 class ObjectClient(rest_client.RestClient):
 
+    def is_resource_deleted(self, object_name, container):
+        try:
+            self.get_object(container, object_name)
+        except exceptions.NotFound:
+            return True
+        return False
+
     def create_object(self, container, object_name, data,
                       params=None, metadata=None, headers=None,
                       chunked=False):
