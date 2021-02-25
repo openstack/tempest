@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import hashlib
 import os
 import shutil
 from unittest import mock
@@ -22,6 +21,7 @@ import testtools
 import fixtures
 from oslo_concurrency.fixture import lockutils as lockutils_fixtures
 from oslo_config import cfg
+from oslo_utils.secretutils import md5
 
 from tempest import config
 from tempest.lib import auth
@@ -105,7 +105,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         hash_fields = (
             preprov_creds.PreProvisionedCredentialProvider.HASH_CRED_FIELDS)
         for account in accounts_list:
-            hash = hashlib.md5()
+            hash = md5(usedforsecurity=False)
             account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in hash_fields)
             hash.update(str(account_for_hash).encode('utf-8'))
