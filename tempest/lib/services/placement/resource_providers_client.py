@@ -81,3 +81,29 @@ class ResourceProvidersClient(base_placement_client.BasePlacementClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def update_resource_providers_inventories(self, rp_uuid, **kwargs):
+        """Update resource providers inventories.
+
+        For full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/placement/#update-resource-provider-inventories
+        """
+        url = '/resource_providers/{}/inventories'.format(rp_uuid)
+        data = json.dumps(kwargs)
+        resp, body = self.put(url, data)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_resource_providers_inventories(self, rp_uuid):
+        """Delete resource providers inventories.
+
+        For full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/placement/#delete-resource-provider-inventories
+        """
+        url = '/resource_providers/{}/inventories'.format(rp_uuid)
+        resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp, body)
