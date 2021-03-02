@@ -18,6 +18,7 @@ import os
 import subprocess
 
 import netaddr
+
 from oslo_log import log
 from oslo_serialization import jsonutils as json
 from oslo_utils import netutils
@@ -1098,6 +1099,8 @@ class NetworkScenarioTest(ScenarioTest):
         :Keyword Arguments:
 
             * *ip_version = ip version of the given network,
+            use_default_subnetpool = default subnetpool to
+                    manage IPv6 addresses range.
         """
 
         if not subnets_client:
@@ -1120,44 +1123,66 @@ class NetworkScenarioTest(ScenarioTest):
                         network_id=ext_net['id'], cidr=cidr)['subnets'])
             return len(tenant_subnets + external_subnets) != 0
 
-        ip_version = kwargs.pop('ip_version', 4)
-
-        if ip_version == 6:
-            tenant_cidr = netaddr.IPNetwork(
-                CONF.network.project_network_v6_cidr)
-            num_bits = CONF.network.project_network_v6_mask_bits
-        else:
-            tenant_cidr = netaddr.IPNetwork(CONF.network.project_network_cidr)
-            num_bits = CONF.network.project_network_mask_bits
-
-        result = None
-        str_cidr = None
-        # Repeatedly attempt subnet creation with sequential cidr
-        # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(num_bits):
-            str_cidr = str(subnet_cidr)
-            if cidr_in_use(str_cidr, project_id=network['project_id']):
-                continue
+        def _make_create_subnet_request(namestart, network,
+                                        ip_version, subnets_client, **kwargs):
 
             subnet = dict(
                 name=data_utils.rand_name(namestart),
                 network_id=network['id'],
                 project_id=network['project_id'],
-                cidr=str_cidr,
                 ip_version=ip_version,
                 **kwargs
             )
+
+            if ip_version == 6:
+                subnet['ipv6_address_mode'] = 'slaac'
+                subnet['ipv6_ra_mode'] = 'slaac'
+
             try:
-                result = subnets_client.create_subnet(**subnet)
-                break
+                return subnets_client.create_subnet(**subnet)
             except lib_exc.Conflict as e:
-                is_overlapping_cidr = 'overlaps with another subnet' in str(e)
-                if not is_overlapping_cidr:
+                if 'overlaps with another subnet' not in str(e):
                     raise
+
+        result = None
+        str_cidr = None
+
+        use_default_subnetpool = kwargs.get('use_default_subnetpool', False)
+        ip_version = kwargs.pop('ip_version', 4)
+
+        if not use_default_subnetpool:
+
+            if ip_version == 6:
+                tenant_cidr = netaddr.IPNetwork(
+                    CONF.network.project_network_v6_cidr)
+                num_bits = CONF.network.project_network_v6_mask_bits
+            else:
+                tenant_cidr = netaddr.IPNetwork(
+                    CONF.network.project_network_cidr)
+                num_bits = CONF.network.project_network_mask_bits
+
+        # Repeatedly attempt subnet creation with sequential cidr
+        # blocks until an unallocated block is found.
+            for subnet_cidr in tenant_cidr.subnet(num_bits):
+                str_cidr = str(subnet_cidr)
+                if cidr_in_use(str_cidr, project_id=network['project_id']):
+                    continue
+                result = _make_create_subnet_request(
+                    namestart, network, ip_version, subnets_client,
+                    cidr=str_cidr, **kwargs)
+
+                if result is not None:
+                    break
+
+        else:
+            result = _make_create_subnet_request(
+                namestart, network, ip_version, subnets_client,
+                **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
 
         subnet = result['subnet']
-        self.assertEqual(subnet['cidr'], str_cidr)
+        if str_cidr is not None:
+            self.assertEqual(subnet['cidr'], str_cidr)
 
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         subnets_client.delete_subnet, subnet['id'])
