@@ -1201,7 +1201,7 @@ class NetworkScenarioTest(ScenarioTest):
                          % port_map)
         return port_map[0]
 
-    def _get_network_by_name(self, network_name):
+    def get_network_by_name(self, network_name):
         net = self.os_admin.networks_client.list_networks(
             name=network_name)['networks']
         self.assertNotEmpty(net,
@@ -1589,7 +1589,7 @@ class NetworkScenarioTest(ScenarioTest):
             if not CONF.compute.fixed_network_name:
                 m = 'fixed_network_name must be specified in config'
                 raise lib_exc.InvalidConfiguration(m)
-            network = self._get_network_by_name(
+            network = self.get_network_by_name(
                 CONF.compute.fixed_network_name)
             router = None
             subnet = None
