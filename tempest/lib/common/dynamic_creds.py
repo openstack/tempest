@@ -379,12 +379,15 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             credentials = self._creds["%s_%s" % (scope, credential_type[0])]
         else:
             if scope:
-                if credential_type == 'admin':
+                if credential_type in [['admin'], ['alt_admin']]:
                     credentials = self._create_creds(
                         admin=True, scope=scope)
                 else:
+                    cred_type = credential_type
+                    if credential_type in [['alt_member'], ['alt_reader']]:
+                        cred_type = credential_type[0][4:]
                     credentials = self._create_creds(
-                        roles=credential_type, scope=scope)
+                        roles=[cred_type], scope=scope)
             elif credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
@@ -443,11 +446,20 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     def get_project_admin_creds(self):
         return self.get_credentials(['admin'], scope='project')
 
+    def get_project_alt_admin_creds(self):
+        return self.get_credentials(['alt_admin'], scope='project')
+
     def get_project_member_creds(self):
         return self.get_credentials(['member'], scope='project')
 
+    def get_project_alt_member_creds(self):
+        return self.get_credentials(['alt_member'], scope='project')
+
     def get_project_reader_creds(self):
         return self.get_credentials(['reader'], scope='project')
+
+    def get_project_alt_reader_creds(self):
+        return self.get_credentials(['alt_reader'], scope='project')
 
     def get_creds_by_roles(self, roles, force_new=False):
         roles = list(set(roles))

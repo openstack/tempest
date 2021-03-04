@@ -86,11 +86,23 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
         return
 
     @abc.abstractmethod
+    def get_project_alt_admin_creds(self):
+        return
+
+    @abc.abstractmethod
     def get_project_member_creds(self):
         return
 
     @abc.abstractmethod
+    def get_project_alt_member_creds(self):
+        return
+
+    @abc.abstractmethod
     def get_project_reader_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_project_alt_reader_creds(self):
         return
 
     @abc.abstractmethod
