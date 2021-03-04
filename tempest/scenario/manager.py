@@ -1396,7 +1396,7 @@ class NetworkScenarioTest(ScenarioTest):
             security_groups_client = self.security_groups_client
         if project_id is None:
             project_id = security_groups_client.project_id
-        secgroup = self._create_empty_security_group(
+        secgroup = self.create_empty_security_group(
             namestart=namestart, client=security_groups_client,
             project_id=project_id)
 
@@ -1410,8 +1410,8 @@ class NetworkScenarioTest(ScenarioTest):
             self.assertEqual(secgroup['id'], rule['security_group_id'])
         return secgroup
 
-    def _create_empty_security_group(self, client=None, project_id=None,
-                                     namestart='secgroup-smoke'):
+    def create_empty_security_group(self, client=None, project_id=None,
+                                    namestart='secgroup-smoke'):
         """Create a security group without rules.
 
         Default rules will be created:
