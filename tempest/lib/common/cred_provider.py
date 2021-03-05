@@ -118,7 +118,7 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
         return
 
     @abc.abstractmethod
-    def get_creds_by_roles(self, roles, force_new=False):
+    def get_creds_by_roles(self, roles, force_new=False, scope=None):
         return
 
     @abc.abstractmethod

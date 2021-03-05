@@ -292,6 +292,100 @@ class TestDynamicCredentialProvider(base.TestCase):
         self.assertEqual(role_creds.user_id, '1234')
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_role_creds_with_project_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        self._mock_tenant_create('1234', 'fake_role_project')
+
+        user_mock = mock.patch.object(self.roles_client.RolesClient,
+                                      'create_user_role_on_project')
+        user_mock.start()
+        self.addCleanup(user_mock.stop)
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='project')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        args = map(lambda x: x[1], calls)
+        args = list(args)
+        self.assertIn(('1234', '1234', '1234'), args)
+        self.assertIn(('1234', '1234', '12345'), args)
+        self.assertEqual(role_creds.username, 'fake_role_user')
+        self.assertEqual(role_creds.project_name, 'fake_role_project')
+        # Verify IDs
+        self.assertEqual(role_creds.project_id, '1234')
+        self.assertEqual(role_creds.user_id, '1234')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def _test_get_same_role_creds_with_project_scope(self, MockRestClient,
+                                                     scope=None):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        self._mock_tenant_create('1234', 'fake_role_project')
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope=scope)
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+
+        # Fetch the same creds again
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope=scope)
+        calls = user_mock1.mock_calls
+        # Assert that previously created creds are return and no call to
+        # role creation.
+        self.assertEqual(len(calls), 0)
+        # Check if previously created creds are returned.
+        self.assertEqual(role_creds, role_creds_new)
+
+    def test_get_same_role_creds_with_project_scope(self):
+        self._test_get_same_role_creds_with_project_scope(scope='project')
+
+    def test_get_same_role_creds_with_default_scope(self):
+        self._test_get_same_role_creds_with_project_scope()
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def _test_get_different_role_creds_with_project_scope(
+            self, MockRestClient, scope=None):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        self._mock_tenant_create('1234', 'fake_role_project')
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope=scope)
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        # Fetch the creds with one role different
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1'], scope=scope)
+        calls = user_mock1.mock_calls
+        # Because one role is different, assert that the role creation
+        # is called with the 1 specified roles
+        self.assertEqual(len(calls), 1)
+        # Check new creds is created for new roles.
+        self.assertNotEqual(role_creds, role_creds_new)
+
+    def test_get_different_role_creds_with_project_scope(self):
+        self._test_get_different_role_creds_with_project_scope(
+            scope='project')
+
+    def test_get_different_role_creds_with_default_scope(self):
+        self._test_get_different_role_creds_with_project_scope()
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_assign_user_role()
@@ -706,6 +800,232 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
             return_value=(rest_client.ResponseBody
                           (200, {'project': {'id': id, 'name': name}}))))
         return project_fix
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_role_creds_with_system_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='system')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        args = map(lambda x: x[1], calls)
+        args = list(args)
+        self.assertIn(('1234', '1234'), args)
+        self.assertIn(('1234', '12345'), args)
+        self.assertEqual(role_creds.username, 'fake_role_user')
+        self.assertEqual(role_creds.user_id, '1234')
+        # Verify system scope
+        self.assertEqual(role_creds.system, 'all')
+        # Verify domain is default
+        self.assertEqual(role_creds.domain_id, 'default')
+        self.assertEqual(role_creds.domain_name, 'Default')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_get_same_role_creds_with_system_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='system')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+
+        # Fetch the same creds again
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='system')
+        calls = user_mock1.mock_calls
+        # Assert that previously created creds are return and no call to
+        # role creation.
+        self.assertEqual(len(calls), 0)
+        # Verify system scope
+        self.assertEqual(role_creds_new.system, 'all')
+        # Check if previously created creds are returned.
+        self.assertEqual(role_creds, role_creds_new)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_get_different_role_creds_with_system_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='system')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        # Verify system scope
+        self.assertEqual(role_creds.system, 'all')
+        # Fetch the creds with one role different
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1'], scope='system')
+        calls = user_mock1.mock_calls
+        # Because one role is different, assert that the role creation
+        # is called with the 1 specified roles
+        self.assertEqual(len(calls), 1)
+        # Verify Scope
+        self.assertEqual(role_creds_new.system, 'all')
+        # Check new creds is created for new roles.
+        self.assertNotEqual(role_creds, role_creds_new)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_role_creds_with_domain_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+
+        domain = {
+            "id": '12',
+            "enabled": True,
+            "name": "TestDomain"
+        }
+
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.cred_client.V3CredsClient.create_domain',
+            return_value=domain))
+
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='domain')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        args = map(lambda x: x[1], calls)
+        args = list(args)
+        self.assertIn((domain['id'], '1234', '1234'), args)
+        self.assertIn((domain['id'], '1234', '12345'), args)
+        self.assertEqual(role_creds.username, 'fake_role_user')
+        self.assertEqual(role_creds.user_id, '1234')
+        # Verify creds are under new created domain
+        self.assertEqual(role_creds.domain_id, domain['id'])
+        self.assertEqual(role_creds.domain_name, domain['name'])
+        # Verify that Scope is None
+        self.assertIsNone(role_creds.system)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_get_same_role_creds_with_domain_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+
+        domain = {
+            "id": '12',
+            "enabled": True,
+            "name": "TestDomain"
+        }
+
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.cred_client.V3CredsClient.create_domain',
+            return_value=domain))
+
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='domain')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(role_creds.user_id, '1234')
+        # Verify Scope
+        self.assertIsNone(role_creds.system)
+        # Fetch the same creds again
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='domain')
+        calls = user_mock1.mock_calls
+        # Assert that previously created creds are return and no call to
+        # role creation.
+        self.assertEqual(len(calls), 0)
+        # Verify Scope
+        self.assertIsNone(role_creds_new.system)
+        # Check if previously created creds are returned.
+        self.assertEqual(role_creds, role_creds_new)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_get_different_role_creds_with_domain_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+
+        domain = {
+            "id": '12',
+            "enabled": True,
+            "name": "TestDomain"
+        }
+
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.cred_client.V3CredsClient.create_domain',
+            return_value=domain))
+
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='domain')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(role_creds.user_id, '1234')
+        # Verify Scope
+        self.assertIsNone(role_creds.system)
+        # Fetch the same creds again
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1'], scope='domain')
+        calls = user_mock1.mock_calls
+        # Because one role is different, assert that the role creation
+        # is called with the 1 specified roles
+        self.assertEqual(len(calls), 1)
+        # Verify Scope
+        self.assertIsNone(role_creds_new.system)
+        # Check new creds is created for new roles.
+        self.assertNotEqual(role_creds, role_creds_new)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_get_role_creds_with_different_scope(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_2_roles()
+        self._mock_user_create('1234', 'fake_role_user')
+        self._mock_tenant_create('1234', 'fake_role_project')
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_system') as user_mock:
+            role_creds = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='system')
+        calls = user_mock.mock_calls
+        # Assert that the role creation is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        # Verify Scope
+        self.assertEqual(role_creds.system, 'all')
+
+        # Fetch the same role creds but with different scope
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock1:
+            role_creds_new = creds.get_creds_by_roles(
+                roles=['role1', 'role2'], scope='project')
+        calls = user_mock1.mock_calls
+        # Because scope is different, assert that the role creation
+        # is called with the 2 specified roles
+        self.assertEqual(len(calls), 2)
+        # Verify Scope
+        self.assertIsNone(role_creds_new.system)
+        # Check that created creds are different
+        self.assertNotEqual(role_creds, role_creds_new)
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_member_role_creation_with_duplicate(self, rest_client_mock):

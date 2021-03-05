@@ -415,8 +415,18 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                             'alt_manager', 'os_alt', version='Pike',
                             removal_version='Queens')
             elif isinstance(credentials_type, list):
+                scope = 'project'
+                if credentials_type[0].startswith('system'):
+                    scope = 'system'
+                elif credentials_type[0].startswith('domain'):
+                    scope = 'domain'
                 manager = cls.get_client_manager(roles=credentials_type[1:],
-                                                 force_new=True)
+                                                 force_new=True,
+                                                 scope=scope)
+                setattr(cls, 'os_%s' % credentials_type[0], manager)
+                # TODO(gmann): Setting the old style attribute too for
+                # backward compatibility but at some point we should
+                # remove this.
                 setattr(cls, 'os_roles_%s' % credentials_type[0], manager)
 
     @classmethod
@@ -658,7 +668,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def get_client_manager(cls, credential_type=None, roles=None,
-                           force_new=None):
+                           force_new=None, scope=None):
         """Returns an OpenStack client manager
 
         Returns an OpenStack client manager based on either credential_type
@@ -666,6 +676,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         credential_type 'primary'
         :param credential_type: string - primary, alt or admin
         :param roles: list of roles
+        :param scope: scope for the test user
 
         :returns: the created client manager
         :raises skipException: if the requested credentials are not available
@@ -684,7 +695,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                         " is not able to provide credentials with the %s role "
                         "assigned." % (cls.__name__, role))
                     raise cls.skipException(skip_msg)
-            params = dict(roles=roles)
+            params = dict(roles=roles, scope=scope)
             if force_new is not None:
                 params.update(force_new=force_new)
             creds = cred_provider.get_creds_by_roles(**params)
@@ -851,7 +862,13 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if isinstance(credentials_type, six.string_types):
             manager = cls.get_client_manager(credential_type=credentials_type)
         elif isinstance(credentials_type, list):
-            manager = cls.get_client_manager(roles=credentials_type[1:])
+            scope = 'project'
+            if credentials_type[0].startswith('system'):
+                scope = 'system'
+            elif credentials_type[0].startswith('domain'):
+                scope = 'domain'
+            manager = cls.get_client_manager(roles=credentials_type[1:],
+                                             scope=scope)
         else:
             manager = cls.get_client_manager()
 

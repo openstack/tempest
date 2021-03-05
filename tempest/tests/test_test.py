@@ -453,6 +453,130 @@ class TestTempestBaseTestClass(base.TestCase):
             expected_creds[1][1:],
             mock_get_client_manager.mock_calls[1][2]['roles'])
 
+    def test_setup_credentials_with_role_and_system_scope(self):
+        expected_creds = [['system_my_role', 'role1', 'role2']]
+
+        class SystemRoleCredentials(self.parent_test):
+            credentials = expected_creds
+
+        expected_clients = 'clients'
+        with mock.patch.object(
+                SystemRoleCredentials,
+                'get_client_manager') as mock_get_client_manager:
+            mock_get_client_manager.return_value = expected_clients
+            sys_creds = SystemRoleCredentials()
+            sys_creds.setup_credentials()
+        self.assertTrue(hasattr(sys_creds, 'os_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_system_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_system_my_role)
+        self.assertEqual(1, mock_get_client_manager.call_count)
+        self.assertEqual(
+            expected_creds[0][1:],
+            mock_get_client_manager.mock_calls[0][2]['roles'])
+        self.assertEqual(
+            'system',
+            mock_get_client_manager.mock_calls[0][2]['scope'])
+
+    def test_setup_credentials_with_multiple_role_and_system_scope(self):
+        expected_creds = [['system_my_role', 'role1', 'role2'],
+                          ['system_my_role2', 'role1', 'role2'],
+                          ['system_my_role3', 'role3']]
+
+        class SystemRoleCredentials(self.parent_test):
+            credentials = expected_creds
+
+        expected_clients = 'clients'
+        with mock.patch.object(
+                SystemRoleCredentials,
+                'get_client_manager') as mock_get_client_manager:
+            mock_get_client_manager.return_value = expected_clients
+            sys_creds = SystemRoleCredentials()
+            sys_creds.setup_credentials()
+        self.assertTrue(hasattr(sys_creds, 'os_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_system_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_system_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_system_my_role2'))
+        self.assertEqual(expected_clients, sys_creds.os_system_my_role2)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_system_my_role2'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_system_my_role2)
+        self.assertTrue(hasattr(sys_creds, 'os_system_my_role3'))
+        self.assertEqual(expected_clients, sys_creds.os_system_my_role3)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_system_my_role3'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_system_my_role3)
+        self.assertEqual(3, mock_get_client_manager.call_count)
+        self.assertEqual(
+            expected_creds[0][1:],
+            mock_get_client_manager.mock_calls[0][2]['roles'])
+        self.assertEqual(
+            'system', mock_get_client_manager.mock_calls[0][2]['scope'])
+        self.assertEqual(
+            expected_creds[1][1:],
+            mock_get_client_manager.mock_calls[1][2]['roles'])
+        self.assertEqual(
+            'system', mock_get_client_manager.mock_calls[1][2]['scope'])
+        self.assertEqual(
+            expected_creds[2][1:],
+            mock_get_client_manager.mock_calls[2][2]['roles'])
+        self.assertEqual(
+            'system', mock_get_client_manager.mock_calls[2][2]['scope'])
+
+    def test_setup_credentials_with_role_and_multiple_scope(self):
+        expected_creds = [['my_role', 'role1', 'role2'],
+                          ['project_my_role', 'role1', 'role2'],
+                          ['domain_my_role', 'role1', 'role2'],
+                          ['system_my_role', 'role1', 'role2']]
+
+        class SystemRoleCredentials(self.parent_test):
+            credentials = expected_creds
+
+        expected_clients = 'clients'
+        with mock.patch.object(
+                SystemRoleCredentials,
+                'get_client_manager') as mock_get_client_manager:
+            mock_get_client_manager.return_value = expected_clients
+            sys_creds = SystemRoleCredentials()
+            sys_creds.setup_credentials()
+        self.assertTrue(hasattr(sys_creds, 'os_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_project_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_project_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_project_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_project_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_domain_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_domain_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_domain_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_domain_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_system_my_role)
+        self.assertTrue(hasattr(sys_creds, 'os_roles_system_my_role'))
+        self.assertEqual(expected_clients, sys_creds.os_roles_system_my_role)
+
+        self.assertEqual(4, mock_get_client_manager.call_count)
+        self.assertEqual(
+            expected_creds[0][1:],
+            mock_get_client_manager.mock_calls[0][2]['roles'])
+        self.assertEqual(
+            'project', mock_get_client_manager.mock_calls[0][2]['scope'])
+        self.assertEqual(
+            expected_creds[1][1:],
+            mock_get_client_manager.mock_calls[1][2]['roles'])
+        self.assertEqual(
+            'project', mock_get_client_manager.mock_calls[1][2]['scope'])
+        self.assertEqual(
+            expected_creds[2][1:],
+            mock_get_client_manager.mock_calls[2][2]['roles'])
+        self.assertEqual(
+            'domain', mock_get_client_manager.mock_calls[2][2]['scope'])
+        self.assertEqual(
+            expected_creds[3][1:],
+            mock_get_client_manager.mock_calls[3][2]['roles'])
+        self.assertEqual(
+            'system', mock_get_client_manager.mock_calls[3][2]['scope'])
+
     def test_setup_class_overwritten(self):
 
         class OverridesSetup(self.parent_test):
