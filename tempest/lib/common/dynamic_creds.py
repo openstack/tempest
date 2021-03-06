@@ -228,8 +228,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         roles_to_assign = [r for r in roles]
         if admin:
             roles_to_assign.append(self.admin_role)
-            self.creds_client.assign_user_role(
-                user, project, self.identity_admin_role)
+            if scope == 'project':
+                self.creds_client.assign_user_role(
+                    user, project, self.identity_admin_role)
             if (self.identity_version == 'v3' and
                     self.identity_admin_domain_scope):
                 self.creds_client.assign_user_role_on_domain(
@@ -386,8 +387,10 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     cred_type = credential_type
                     if credential_type in [['alt_member'], ['alt_reader']]:
                         cred_type = credential_type[0][4:]
+                    if isinstance(cred_type, str):
+                        cred_type = [cred_type]
                     credentials = self._create_creds(
-                        roles=[cred_type], scope=scope)
+                        roles=cred_type, scope=scope)
             elif credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
