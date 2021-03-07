@@ -1,0 +1,36 @@
+---
+features:
+  - |
+    Dynamic credentials now support the scope type for specific roles
+    too along with ``admin``, ``member``, ``reader`` role.
+    Test can specify the scope in the prefix of ``cls.credentials`` name.
+    If ``system`` is prefix in ``cls.credentials`` name then creds will
+    be created with scope as ``system``. If ``domain`` is prefix in
+    ``cls.credentials`` name then creds will be created with scope as
+    ``domain`` otherwise default ``project`` scope will be used.
+    For Example::
+
+        credentials = [['my_role', 'role1'], # this will be old style and project scoped
+                       ['project_my_role', 'role1'], # this will be project scoped
+                       ['domain_my_role', 'role1'], # this will be domain scoped
+                       ['system_my_role', 'role1']] # this will be system scoped
+
+    And below is how test can access the credential manager of respective
+    credentials type::
+
+        cls.os_my_role.any_client
+        cls.os_project_my_role.any_client
+        cls.os_domain_my_role.any_client
+        cls.os_system_my_role.any_client
+
+
+    For backward compatibility, we set the credentials manager class attribute
+    in old style form too which is prefix with ``os_roles_*``, example
+    ``cls.os_roles_my_role`` but we recommend to use the new style attribute
+    as shown above.
+issues:
+  - |
+    Scope support for specific role is not yet added for pre-provisioned credentials.
+fixes:
+  - |
+    Fixes the `bug# 1917168 <https://bugs.launchpad.net/tempest/+bug/1917168>`_

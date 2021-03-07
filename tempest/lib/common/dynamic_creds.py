@@ -376,21 +376,25 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     def get_credentials(self, credential_type, scope=None):
         if not scope and self._creds.get(str(credential_type)):
             credentials = self._creds[str(credential_type)]
-        elif scope and self._creds.get("%s_%s" % (scope, credential_type[0])):
-            credentials = self._creds["%s_%s" % (scope, credential_type[0])]
+        elif scope and (
+                self._creds.get("%s_%s" % (scope, str(credential_type)))):
+            credentials = self._creds["%s_%s" % (scope, str(credential_type))]
         else:
+            LOG.debug("Creating new dynamic creds for scope: %s and "
+                      "credential_type: %s", scope, credential_type)
             if scope:
                 if credential_type in [['admin'], ['alt_admin']]:
                     credentials = self._create_creds(
                         admin=True, scope=scope)
-                else:
-                    cred_type = credential_type
-                    if credential_type in [['alt_member'], ['alt_reader']]:
-                        cred_type = credential_type[0][4:]
+                elif credential_type in [['alt_member'], ['alt_reader']]:
+                    cred_type = credential_type[0][4:]
                     if isinstance(cred_type, str):
                         cred_type = [cred_type]
                     credentials = self._create_creds(
                         roles=cred_type, scope=scope)
+                else:
+                    credentials = self._create_creds(
+                        roles=credential_type, scope=scope)
             elif credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
@@ -398,7 +402,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 credentials = self._create_creds(roles=credential_type)
             if scope:
                 self._creds["%s_%s" %
-                            (scope, credential_type[0])] = credentials
+                            (scope, str(credential_type))] = credentials
             else:
                 self._creds[str(credential_type)] = credentials
             # Maintained until tests are ported
@@ -464,19 +468,22 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     def get_project_alt_reader_creds(self):
         return self.get_credentials(['alt_reader'], scope='project')
 
-    def get_creds_by_roles(self, roles, force_new=False):
+    def get_creds_by_roles(self, roles, force_new=False, scope=None):
         roles = list(set(roles))
         # The roles list as a str will become the index as the dict key for
         # the created credentials set in the dynamic_creds dict.
-        exist_creds = self._creds.get(str(roles))
+        creds_name = str(roles)
+        if scope:
+            creds_name = "%s_%s" % (scope, str(roles))
+        exist_creds = self._creds.get(creds_name)
         # If force_new flag is True 2 cred sets with the same roles are needed
         # handle this by creating a separate index for old one to store it
         # separately for cleanup
         if exist_creds and force_new:
-            new_index = str(roles) + '-' + str(len(self._creds))
+            new_index = creds_name + '-' + str(len(self._creds))
             self._creds[new_index] = exist_creds
-            del self._creds[str(roles)]
-        return self.get_credentials(roles)
+            del self._creds[creds_name]
+        return self.get_credentials(roles, scope=scope)
 
     def _clear_isolated_router(self, router_id, router_name):
         client = self.routers_admin_client

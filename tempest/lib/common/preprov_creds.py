@@ -400,7 +400,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         # TODO(gmann): Implement alt reader hash.
         return
 
-    def get_creds_by_roles(self, roles, force_new=False):
+    def get_creds_by_roles(self, roles, force_new=False, scope=None):
         roles = list(set(roles))
         exist_creds = self._creds.get(str(roles).encode(
             'utf-8'), None)

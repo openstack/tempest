@@ -109,7 +109,7 @@ class TestBaseTestCase(base.TestCase):
 
         test.BaseTestCase.get_tenant_network(credentials_type=creds)
 
-        mock_gcm.assert_called_once_with(roles=['role1'])
+        mock_gcm.assert_called_once_with(roles=['role1'], scope='project')
         mock_gprov.assert_called_once_with()
         mock_gtn.assert_called_once_with(mock_prov, net_client,
                                          self.fixed_network_name)
