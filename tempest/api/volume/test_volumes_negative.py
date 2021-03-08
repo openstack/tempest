@@ -336,6 +336,9 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
         # Deactivate the image
         self.images_client.deactivate_image(image['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.images_client.reactivate_image, image['id'])
+
         body = self.images_client.show_image(image['id'])
         self.assertEqual("deactivated", body['status'])
         # Try creating a volume from deactivated image
