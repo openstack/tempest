@@ -60,7 +60,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     def _setup_server(self, keypair):
         security_groups = []
         if utils.is_extension_enabled('security-group', 'network'):
-            security_group = self._create_security_group()
+            security_group = self.create_security_group()
             security_groups = [{'name': security_group['name']}]
         network, _, _ = self.create_networks()
         server = self.create_server(

@@ -64,7 +64,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
 
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
 
         # create an instance from volume
         LOG.info("Booting instance 1 from volume")

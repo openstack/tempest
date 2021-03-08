@@ -78,7 +78,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual(1, disks.count(CONF.compute.volume_device_name))
 
     def create_and_add_security_group_to_server(self, server):
-        secgroup = self._create_security_group()
+        secgroup = self.create_security_group()
         self.servers_client.add_security_group(server['id'],
                                                name=secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,

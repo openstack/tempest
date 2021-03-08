@@ -76,7 +76,7 @@ class TestShelveInstance(manager.ScenarioTest):
                                                 cold_migrate=False):
         keypair = self.create_keypair()
 
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
         security_groups = [{'name': security_group['name']}]
 
         server = self.create_server(

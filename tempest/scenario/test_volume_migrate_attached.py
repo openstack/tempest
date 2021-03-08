@@ -100,7 +100,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     def test_volume_retype_attached(self):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
 
         # create volume types
         LOG.info("Creating Volume types")
@@ -156,7 +156,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
     def test_volume_migrate_attached(self):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
 
         LOG.info("Creating volume")
         # Create a unique volume type to avoid using the backend default
