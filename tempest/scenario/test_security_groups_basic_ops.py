@@ -197,14 +197,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         tenant.keypair = keypair
 
     def _create_tenant_security_groups(self, tenant):
-        access_sg = self._create_empty_security_group(
+        access_sg = self.create_empty_security_group(
             namestart='secgroup_access-',
             project_id=tenant.creds.project_id,
             client=tenant.manager.security_groups_client
         )
 
         # don't use default secgroup since it allows in-project traffic
-        def_sg = self._create_empty_security_group(
+        def_sg = self.create_empty_security_group(
             namestart='secgroup_general-',
             project_id=tenant.creds.project_id,
             client=tenant.manager.security_groups_client
@@ -534,7 +534,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         new_tenant = self.primary_tenant
 
         # Create empty security group and add icmp rule in it
-        new_sg = self._create_empty_security_group(
+        new_sg = self.create_empty_security_group(
             namestart='secgroup_new-',
             project_id=new_tenant.creds.project_id,
             client=new_tenant.manager.security_groups_client)
