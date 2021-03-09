@@ -657,6 +657,15 @@ ImageGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the image service."),
+    cfg.StrOpt('alternate_image_endpoint',
+               default=None,
+               help="Alternate endpoint name for cross-worker testing"),
+    cfg.StrOpt('alternate_image_endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help=("The endpoint type to use for the alternate image "
+                     "service.")),
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
