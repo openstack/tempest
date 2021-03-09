@@ -13,11 +13,10 @@
 import ast
 import importlib
 import os
+import shutil
 import sys
 import tempfile
 from unittest import mock
-
-import fixtures
 
 from tempest.lib.cmd import check_uuid
 from tempest.tests import base
@@ -40,23 +39,23 @@ class TestCLInterface(base.TestCase):
         return tests_file
 
     def test_fix_argument_no(self):
-        temp_dir = self.useFixture(fixtures.TempDir(rootdir="."))
-        tests_file = self.create_tests_file(temp_dir.path)
-
+        temp_dir = tempfile.mkdtemp(prefix='check-uuid-no', dir=".")
+        self.addCleanup(shutil.rmtree, temp_dir, ignore_errors=True)
+        tests_file = self.create_tests_file(temp_dir)
         sys.argv = [sys.argv[0]] + ["--package",
-                                    os.path.relpath(temp_dir.path)]
+                                    os.path.relpath(temp_dir)]
 
         self.assertRaises(SystemExit, check_uuid.run)
         with open(tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE == f.read())
 
     def test_fix_argument_yes(self):
-        temp_dir = self.useFixture(fixtures.TempDir(rootdir="."))
-        tests_file = self.create_tests_file(temp_dir.path)
+        temp_dir = tempfile.mkdtemp(prefix='check-uuid-yes', dir=".")
+        self.addCleanup(shutil.rmtree, temp_dir, ignore_errors=True)
+        tests_file = self.create_tests_file(temp_dir)
 
         sys.argv = [sys.argv[0]] + ["--fix", "--package",
-                                    os.path.relpath(temp_dir.path)]
-
+                                    os.path.relpath(temp_dir)]
         check_uuid.run()
         with open(tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE != f.read())
