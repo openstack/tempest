@@ -25,7 +25,6 @@ CONF = config.CONF
 class GroupsTest(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.12"""
 
-    _api_version = 3
     min_microversion = '3.13'
     max_microversion = 'latest'
 
@@ -156,7 +155,6 @@ class GroupsTest(base.BaseVolumeAdminTest):
 class GroupsV314Test(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.13"""
 
-    _api_version = 3
     min_microversion = '3.14'
     max_microversion = 'latest'
 
@@ -194,7 +192,6 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
 class GroupsV320Test(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.19"""
 
-    _api_version = 3
     min_microversion = '3.20'
     max_microversion = 'latest'
 

@@ -164,7 +164,6 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 class VolumesBackupsV39Test(base.BaseVolumeTest):
     """Test volumes backup with volume microversion greater than 3.8"""
 
-    _api_version = 3
     min_microversion = '3.9'
     max_microversion = 'latest'
 

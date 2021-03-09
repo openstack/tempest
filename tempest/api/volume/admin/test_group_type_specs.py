@@ -21,7 +21,6 @@ from tempest.lib import exceptions as lib_exc
 class GroupTypeSpecsTest(base.BaseVolumeAdminTest):
     """Test group type specs"""
 
-    _api_version = 3
     min_microversion = '3.11'
     max_microversion = 'latest'
 
