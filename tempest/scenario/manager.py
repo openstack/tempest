@@ -1545,7 +1545,7 @@ class NetworkScenarioTest(ScenarioTest):
 
         return rules
 
-    def _get_router(self, client=None, project_id=None, **kwargs):
+    def get_router(self, client=None, project_id=None, **kwargs):
         """Retrieve a router for the given tenant id.
 
         If a public router has been configured, it will be returned.
@@ -1624,8 +1624,8 @@ class NetworkScenarioTest(ScenarioTest):
                 project_id=project_id,
                 port_security_enabled=port_security_enabled,
                 **net_dict)
-            router = self._get_router(client=routers_client,
-                                      project_id=project_id)
+            router = self.get_router(client=routers_client,
+                                     project_id=project_id)
             subnet_kwargs = dict(network=network,
                                  subnets_client=subnets_client)
             # use explicit check because empty list is a valid option

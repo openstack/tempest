@@ -85,7 +85,7 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                                   namestart='sub4',
                                   ip_version=4)
 
-        router = self._get_router()
+        router = self.get_router()
         self.routers_client.add_router_interface(router['id'],
                                                  subnet_id=sub4['id'])
 
