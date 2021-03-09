@@ -1189,7 +1189,7 @@ class NetworkScenarioTest(ScenarioTest):
 
         return subnet
 
-    def _get_server_port_id_and_ip4(self, server, ip_addr=None, **kwargs):
+    def get_server_port_id_and_ip4(self, server, ip_addr=None, **kwargs):
 
         if ip_addr and not kwargs.get('fixed_ips'):
             kwargs['fixed_ips'] = 'ip_address=%s' % ip_addr
@@ -1242,7 +1242,7 @@ class NetworkScenarioTest(ScenarioTest):
         if not client:
             client = self.floating_ips_client
         if not port_id:
-            port_id, ip4 = self._get_server_port_id_and_ip4(server)
+            port_id, ip4 = self.get_server_port_id_and_ip4(server)
         else:
             ip4 = None
 
@@ -1270,7 +1270,7 @@ class NetworkScenarioTest(ScenarioTest):
         This wrapper utility attaches the floating_ip for
         the respective port_id of server
         """
-        port_id, _ = self._get_server_port_id_and_ip4(server)
+        port_id, _ = self.get_server_port_id_and_ip4(server)
         kwargs = dict(port_id=port_id)
         floating_ip = self.floating_ips_client.update_floatingip(
             floating_ip['id'], **kwargs)['floatingip']

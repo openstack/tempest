@@ -223,7 +223,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         floating_ip, server = self.floating_ip_tuple
         # create a new server for the floating ip
         server = self._create_server(self.network)
-        port_id, _ = self._get_server_port_id_and_ip4(server)
+        port_id, _ = self.get_server_port_id_and_ip4(server)
         floating_ip = self.floating_ips_client.update_floatingip(
             floating_ip['id'], port_id=port_id)['floatingip']
         self.assertEqual(port_id, floating_ip['port_id'])
