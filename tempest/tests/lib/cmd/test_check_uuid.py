@@ -20,6 +20,7 @@ from unittest import mock
 import fixtures
 
 from tempest.lib.cmd import check_uuid
+from tempest.lib import decorators
 from tempest.tests import base
 
 
@@ -50,6 +51,7 @@ class TestCLInterface(base.TestCase):
         with open(tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE == f.read())
 
+    @decorators.skip_because(bug='1918316')
     def test_fix_argument_yes(self):
         temp_dir = self.useFixture(fixtures.TempDir(rootdir="."))
         tests_file = self.create_tests_file(temp_dir.path)
