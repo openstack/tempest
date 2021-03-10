@@ -18,12 +18,9 @@ from unittest import mock
 import fixtures
 from oslo_serialization import jsonutils as json
 
-from tempest import clients
 from tempest.cmd import init
 from tempest.cmd import verify_tempest_config
-from tempest.common import credentials_factory
 from tempest import config
-from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
@@ -514,23 +511,24 @@ class TestDiscovery(base.TestCase):
         self.assertEqual([], results['swift']['extensions'])
 
     def test_get_extension_client(self):
-        creds = credentials_factory.get_credentials(
-            fill_in=False, username='fake_user', project_name='fake_project',
-            password='fake_password')
-        os = clients.Manager(creds)
-        for service in ['nova', 'neutron', 'swift', 'cinder']:
+        fake_os = mock.MagicMock()
+        services = {
+            'nova': fake_os.compute.ExtensionsClient(),
+            'neutron': fake_os.network.ExtensionsClient(),
+            'swift': fake_os.object_storage.CapabilitiesClient(),
+            'cinder': fake_os.volume_v2.ExtensionsClient(),
+        }
+        for service in services.keys():
             extensions_client = verify_tempest_config.get_extension_client(
-                os, service)
-            self.assertIsInstance(extensions_client, rest_client.RestClient)
+                fake_os, service)
+            self.assertIsInstance(extensions_client, mock.MagicMock)
+            self.assertEqual(extensions_client, services[service])
 
     def test_get_extension_client_sysexit(self):
-        creds = credentials_factory.get_credentials(
-            fill_in=False, username='fake_user', project_name='fake_project',
-            password='fake_password')
-        os = clients.Manager(creds)
+        fake_os = mock.MagicMock()
         self.assertRaises(SystemExit,
                           verify_tempest_config.get_extension_client,
-                          os, 'fakeservice')
+                          fake_os, 'fakeservice')
 
     def test_get_config_file(self):
         conf_dir = os.path.join(os.getcwd(), 'etc')
