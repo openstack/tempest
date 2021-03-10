@@ -17,7 +17,7 @@ from tempest.api.image import base
 from tempest.lib import decorators
 
 
-class MetadataResourceTypesTest(base.BaseV2ImageTest):
+class MetadataResourceTypesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition resource types basic functionality"""
 
     @decorators.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')

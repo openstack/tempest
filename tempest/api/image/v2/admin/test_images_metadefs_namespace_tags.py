@@ -16,7 +16,7 @@ from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
-class MetadataNamespaceTagsTest(base.BaseV2ImageTest):
+class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace tags basic functionality"""
 
     tags = [

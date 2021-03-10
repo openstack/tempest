@@ -134,12 +134,6 @@ class BaseV2ImageTest(BaseImageTest):
     def setup_clients(cls):
         super(BaseV2ImageTest, cls).setup_clients()
         cls.client = cls.os_primary.image_client_v2
-        cls.namespaces_client = cls.os_primary.namespaces_client
-        cls.resource_types_client = cls.os_primary.resource_types_client
-        cls.namespace_properties_client =\
-            cls.os_primary.namespace_properties_client
-        cls.namespace_objects_client = cls.os_primary.namespace_objects_client
-        cls.namespace_tags_client = cls.os_primary.namespace_tags_client
         cls.schemas_client = cls.os_primary.schemas_client
         cls.versions_client = cls.os_primary.image_versions_client
 
@@ -204,3 +198,9 @@ class BaseV2ImageAdminTest(BaseV2ImageTest):
     def setup_clients(cls):
         super(BaseV2ImageAdminTest, cls).setup_clients()
         cls.admin_client = cls.os_admin.image_client_v2
+        cls.namespaces_client = cls.os_admin.namespaces_client
+        cls.resource_types_client = cls.os_admin.resource_types_client
+        cls.namespace_properties_client =\
+            cls.os_admin.namespace_properties_client
+        cls.namespace_objects_client = cls.os_admin.namespace_objects_client
+        cls.namespace_tags_client = cls.os_admin.namespace_tags_client
