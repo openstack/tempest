@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import fixtures
+
 from tempest.lib.services.image.v2 import versions_client
 from tempest.tests.lib import fake_auth_provider
 from tempest.tests.lib.services import base
@@ -92,3 +94,13 @@ class TestVersionsClient(base.BaseServiceTest):
 
     def test_list_versions_with_bytes_body(self):
         self._test_list_versions(bytes_body=True)
+
+    def test_has_version(self):
+        mocked_r = self.create_response(self.FAKE_VERSIONS_INFO, False,
+                                        300, None)
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.rest_client.RestClient.raw_request',
+            return_value=mocked_r))
+
+        self.assertTrue(self.client.has_version('2.1'))
+        self.assertFalse(self.client.has_version('9.9'))

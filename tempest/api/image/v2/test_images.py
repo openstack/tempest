@@ -96,8 +96,25 @@ class ImportImagesTest(base.BaseV2ImageTest):
 
         image_id = self._stage_and_check()
         # import image from staging to backend
-        self.client.image_import(image_id, method='glance-direct')
+        resp = self.client.image_import(image_id, method='glance-direct')
         waiters.wait_for_image_imported_to_stores(self.client, image_id)
+
+        if not self.versions_client.has_version('2.12'):
+            # API is not new enough to support image/tasks API
+            LOG.info('Glance does not support v2.12, so I am unable to '
+                     'validate the image/tasks API.')
+            return
+
+        # Make sure we can access the task and that some of the key
+        # fields look legit.
+        tasks = self.client.show_image_tasks(image_id)
+        self.assertEqual(1, len(tasks['tasks']))
+        task = tasks['tasks'][0]
+        self.assertEqual('success', task['status'])
+        self.assertEqual(resp.response['x-openstack-request-id'],
+                         task['request_id'])
+        self.assertEqual('glance-direct',
+                         task['input']['import_req']['method']['name'])
 
     @decorators.idempotent_id('f6feb7a4-b04f-4706-a011-206129f83e62')
     def test_image_web_download_import(self):

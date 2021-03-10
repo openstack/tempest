@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds a method to images_client to get tasks relevant to a given image. Also adds
+    has_version() method to image versions_client to probe for availability of a given
+    API version.
