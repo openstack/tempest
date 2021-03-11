@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The old deprecated ``data-ultis`` from ``tempest.common.utils`` has been
+    removed. If you are still using this, use the stable version
+    of ``data-utils`` from new location ``tempest.lib.common.utils``.
