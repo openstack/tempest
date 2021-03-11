@@ -94,7 +94,8 @@ class Manager(clients.ServiceClients):
             # config option to see if the alternate_image_endpoint is set.
             self.image_client_remote = self.image_v2.ImagesClient(
                 service=CONF.image.alternate_image_endpoint,
-                endpoint_type=CONF.image.alternate_image_endpoint_type)
+                endpoint_type=CONF.image.alternate_image_endpoint_type,
+                region=CONF.image.region)
 
     def _set_compute_clients(self):
         self.agents_client = self.compute.AgentsClient()
