@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import hashlib
-
 from oslo_serialization import jsonutils as json
 
+from oslo_utils.secretutils import md5
 from tempest.api.object_storage import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
@@ -70,10 +69,12 @@ class ObjectSloTest(base.BaseObjectTest):
         path_object_2 = '/%s/%s' % (self.container_name,
                                     object_name_base_2)
         data_manifest = [{'path': path_object_1,
-                          'etag': hashlib.md5(self.content).hexdigest(),
+                          'etag': md5(self.content,
+                                      usedforsecurity=False).hexdigest(),
                           'size_bytes': data_size},
                          {'path': path_object_2,
-                          'etag': hashlib.md5(self.content).hexdigest(),
+                          'etag': md5(self.content,
+                                      usedforsecurity=False).hexdigest(),
                           'size_bytes': data_size}]
 
         return json.dumps(data_manifest)
