@@ -105,6 +105,14 @@ Tempest & Plugins Compatible Version Policy
 
    tempest_and_plugins_compatible_version_policy
 
+Keystone Scopes & Roles Support in Tempest
+------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   keystone_scopes_and_roles_support
+
 Stable Branch Support Policy
 ----------------------------
 
