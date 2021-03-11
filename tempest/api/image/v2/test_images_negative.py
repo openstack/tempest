@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.api.image import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -156,3 +158,63 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
                           container_format='bare',
                           disk_format='raw',
                           os_glance_foo='bar')
+
+
+class ImportImagesNegativeTest(base.BaseV2ImageTest):
+    """Here we test the import operations for image"""
+
+    @classmethod
+    def skip_checks(cls):
+        super(ImportImagesNegativeTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.import_image:
+            skip_msg = (
+                "%s skipped as image import is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImportImagesNegativeTest, cls).resource_setup()
+        cls.available_import_methods = cls.client.info_import()[
+            'import-methods']['value']
+        if not cls.available_import_methods:
+            raise cls.skipException('Server does not support '
+                                    'any import method')
+
+        cls.available_stores = cls.get_available_stores()
+        if not len(cls.available_stores) > 0:
+            raise cls.skipException(
+                'No stores configured %s' % cls.available_stores)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('c52f6a77-f522-4411-8dbe-9d14f2b1ba6b')
+    def test_image_web_download_import_with_bad_url(self):
+        """Test 'web-download' import functionalities
+
+        Make sure that web-download with invalid URL fails properly.
+        """
+        if 'web-download' not in self.available_import_methods:
+            raise self.skipException('Server does not support '
+                                     'web-download import method')
+        image = self.client.create_image(name='test',
+                                         container_format='bare',
+                                         disk_format='raw')
+        # Now try to get image details
+        body = self.client.show_image(image['id'])
+        self.assertEqual(image['id'], body['id'])
+        self.assertEqual('queued', body['status'])
+        stores = self.get_available_stores()
+        # import image from web to backend
+        image_uri = 'http://does-not.exist/no/possible/way'
+        self.client.image_import(image['id'], method='web-download',
+                                 image_uri=image_uri,
+                                 stores=[stores[0]['id']])
+
+        start_time = int(time.time())
+        while int(time.time()) - start_time < self.client.build_timeout:
+            body = self.client.show_image(image['id'])
+            if body.get('os_glance_failed_import'):
+                # Store ended up in failed list, which is good
+                return
+            time.sleep(self.client.build_interval)
+
+        self.fail('Image never reported failed store')
