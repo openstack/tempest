@@ -19,6 +19,7 @@ import tempfile
 from unittest import mock
 
 from tempest.lib.cmd import check_uuid
+from tempest.lib import decorators
 from tempest.tests import base
 
 
@@ -49,6 +50,7 @@ class TestCLInterface(base.TestCase):
         with open(tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE == f.read())
 
+    @decorators.skip_because(bug='1918316')
     def test_fix_argument_yes(self):
         temp_dir = tempfile.mkdtemp(prefix='check-uuid-yes', dir=".")
         self.addCleanup(shutil.rmtree, temp_dir, ignore_errors=True)
