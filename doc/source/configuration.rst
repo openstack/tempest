@@ -153,6 +153,11 @@ properly in tempest.conf.
 
 Pre-Provisioned Credentials are also known as accounts.yaml or accounts file.
 
+Keystone Scopes & Roles Support in Tempest
+""""""""""""""""""""""""""""""""""""""""""
+For details on scope and roles support in Tempest,
+please refer to :doc:`this document <keystone_scopes_and_roles_support>`
+
 Compute
 -------
 
