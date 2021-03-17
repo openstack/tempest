@@ -20,7 +20,7 @@ from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 
-class MetadataNamespacesTest(base.BaseV2ImageTest):
+class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition Namespaces basic functionality"""
 
     @decorators.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')

@@ -15,7 +15,7 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
 
-class MetadataNamespacePropertiesTest(base.BaseV2ImageTest):
+class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace property basic functionality"""
 
     @decorators.idempotent_id('b1a3765e-3a5d-4f6d-a3a7-3ca3476ae768')

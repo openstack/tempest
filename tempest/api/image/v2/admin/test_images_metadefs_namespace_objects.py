@@ -16,7 +16,7 @@ from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 
-class MetadataNamespaceObjectsTest(base.BaseV2ImageTest):
+class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace objects basic functionality"""
 
     def _create_namespace_object(self, namespace):
