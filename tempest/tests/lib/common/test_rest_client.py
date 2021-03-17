@@ -526,9 +526,11 @@ class TestRestClientUtils(BaseRestClientTestClass):
                           self.rest_client.wait_for_resource_deletion,
                           '1234')
 
-        # time.time() should be called twice, first to start the timer
-        # and then to compute the timedelta
-        self.assertEqual(2, time_mock.call_count)
+        # time.time() should be called 4 times,
+        # 1. Start timer
+        # 2. End timer
+        # 3 & 4. To generate timeout exception message
+        self.assertEqual(4, time_mock.call_count)
 
     def test_wait_for_deletion_with_unimplemented_deleted_method(self):
         self.rest_client.is_resource_deleted = self.original_deleted_method

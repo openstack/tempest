@@ -155,6 +155,10 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 
         backup = backup_client.create_backup(
             volume_id=volume_id, **kwargs)['backup']
+        # addCleanup uses list pop to cleanup. Wait should be added before
+        # the backup is deleted
+        self.addCleanup(backup_client.wait_for_resource_deletion,
+                        backup['id'])
         self.addCleanup(backup_client.delete_backup, backup['id'])
         waiters.wait_for_volume_resource_status(backup_client, backup['id'],
                                                 'available')
