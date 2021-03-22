@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    img_dir scenario option has been deprecated and it's being removed.
+    Starting Tempest 25.0.0 release, CONF.scenario.img_file needs a full path
+    for the image. Until this release, old behavior was maintained and kept
+    working however a user needs to specify the full path in
+    CONF.scenario.img_file config option from now on.
