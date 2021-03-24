@@ -638,6 +638,8 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         cls.admin_flavors_client = cls.os_admin.flavors_client
         cls.admin_servers_client = cls.os_admin.servers_client
         cls.image_client = cls.os_admin.image_client_v2
+        cls.admin_assisted_volume_snapshots_client = \
+            cls.os_admin.assisted_volume_snapshots_client
 
     def create_flavor(self, ram, vcpus, disk, name=None,
                       is_public='True', **kwargs):

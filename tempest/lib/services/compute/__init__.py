@@ -14,6 +14,8 @@
 
 from tempest.lib.services.compute.agents_client import AgentsClient
 from tempest.lib.services.compute.aggregates_client import AggregatesClient
+from tempest.lib.services.compute.assisted_volume_snapshots_client import \
+    AssistedVolumeSnapshotsClient
 from tempest.lib.services.compute.availability_zone_client import \
     AvailabilityZoneClient
 from tempest.lib.services.compute.baremetal_nodes_client import \
@@ -63,9 +65,10 @@ from tempest.lib.services.compute.versions_client import VersionsClient
 from tempest.lib.services.compute.volumes_client import \
     VolumesClient
 
-__all__ = ['AgentsClient', 'AggregatesClient', 'AvailabilityZoneClient',
-           'BaremetalNodesClient', 'CertificatesClient', 'ExtensionsClient',
-           'FixedIPsClient', 'FlavorsClient', 'FloatingIPPoolsClient',
+__all__ = ['AgentsClient', 'AggregatesClient', 'AssistedVolumeSnapshotsClient',
+           'AvailabilityZoneClient', 'BaremetalNodesClient',
+           'CertificatesClient', 'ExtensionsClient', 'FixedIPsClient',
+           'FlavorsClient', 'FloatingIPPoolsClient',
            'FloatingIPsBulkClient', 'FloatingIPsClient', 'HostsClient',
            'HypervisorClient', 'ImagesClient', 'InstanceUsagesAuditLogClient',
            'InterfacesClient', 'KeyPairsClient', 'LimitsClient',

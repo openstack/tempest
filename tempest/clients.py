@@ -133,6 +133,8 @@ class Manager(clients.ServiceClients):
         self.instance_usages_audit_log_client = (
             self.compute.InstanceUsagesAuditLogClient())
         self.tenant_networks_client = self.compute.TenantNetworksClient()
+        self.assisted_volume_snapshots_client = (
+            self.compute.AssistedVolumeSnapshotsClient())
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
