@@ -47,7 +47,7 @@ LATEST_MICROVERSION = 'latest'
 class ScenarioTest(tempest.test.BaseTestCase):
     """Base class for scenario tests. Uses tempest own clients. """
 
-    credentials = ['primary']
+    credentials = ['primary', 'admin']
 
     compute_min_microversion = None
     compute_max_microversion = LATEST_MICROVERSION
@@ -115,8 +115,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """This setup the service clients for the tests"""
         super(ScenarioTest, cls).setup_clients()
         cls.flavors_client = cls.os_primary.flavors_client
-        cls.compute_floating_ips_client = (
-            cls.os_primary.compute_floating_ips_client)
         if CONF.service_available.glance:
             # Check if glance v1 is available to determine which client to use.
             if CONF.image_feature_enabled.api_v1:
@@ -962,20 +960,98 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 LOG.exception(extra_msg)
                 raise
 
-    def create_floating_ip(self, server, pool_name=None, **kwargs):
-        """Create a floating IP and associates to a server on Nova"""
+    def get_server_port_id_and_ip4(self, server, ip_addr=None, **kwargs):
 
-        if not pool_name:
-            pool_name = CONF.network.floating_network_name
+        if ip_addr and not kwargs.get('fixed_ips'):
+            kwargs['fixed_ips'] = 'ip_address=%s' % ip_addr
+        ports = self.os_admin.ports_client.list_ports(
+            device_id=server['id'], **kwargs)['ports']
 
-        floating_ip = (self.compute_floating_ips_client.
-                       create_floating_ip(pool=pool_name,
-                                          **kwargs)['floating_ip'])
+        # A port can have more than one IP address in some cases.
+        # If the network is dual-stack (IPv4 + IPv6), this port is associated
+        # with 2 subnets
+
+        def _is_active(port):
+            # NOTE(vsaienko) With Ironic, instances live on separate hardware
+            # servers. Neutron does not bind ports for Ironic instances, as a
+            # result the port remains in the DOWN state. This has been fixed
+            # with the introduction of the networking-baremetal plugin but
+            # it's not mandatory (and is not used on all stable branches).
+            return (port['status'] == 'ACTIVE' or
+                    port.get('binding:vnic_type') == 'baremetal')
+
+        port_map = [(p["id"], fxip["ip_address"])
+                    for p in ports
+                    for fxip in p["fixed_ips"]
+                    if (netutils.is_valid_ipv4(fxip["ip_address"]) and
+                        _is_active(p))]
+        inactive = [p for p in ports if p['status'] != 'ACTIVE']
+        if inactive:
+            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
+
+        self.assertNotEmpty(port_map,
+                            "No IPv4 addresses found in: %s" % ports)
+        self.assertEqual(len(port_map), 1,
+                         "Found multiple IPv4 addresses: %s. "
+                         "Unable to determine which port to target."
+                         % port_map)
+        return port_map[0]
+
+    def create_floating_ip(self, server, external_network_id=None,
+                           port_id=None, client=None, **kwargs):
+        """Create a floating IP and associates to a resource/port on Neutron"""
+
+        if not external_network_id:
+            external_network_id = CONF.network.public_network_id
+        if not client:
+            client = self.floating_ips_client
+        if not port_id:
+            port_id, ip4 = self.get_server_port_id_and_ip4(server)
+        else:
+            ip4 = None
+
+        floatingip_kwargs = {
+            'floating_network_id': external_network_id,
+            'port_id': port_id,
+            'tenant_id': server.get('project_id') or server['tenant_id'],
+            'fixed_ip_address': ip4,
+        }
+        if CONF.network.subnet_id:
+            floatingip_kwargs['subnet_id'] = CONF.network.subnet_id
+
+        floatingip_kwargs.update(kwargs)
+        result = client.create_floatingip(**floatingip_kwargs)
+        floating_ip = result['floatingip']
+
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.compute_floating_ips_client.delete_floating_ip,
+                        client.delete_floatingip,
                         floating_ip['id'])
-        self.compute_floating_ips_client.associate_floating_ip_to_server(
-            floating_ip['ip'], server['id'])
+        return floating_ip
+
+    def associate_floating_ip(self, floating_ip, server):
+        """Associate floating ip to server
+
+        This wrapper utility attaches the floating_ip for
+        the respective port_id of server
+        """
+        port_id, _ = self.get_server_port_id_and_ip4(server)
+        kwargs = dict(port_id=port_id)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertEqual(port_id, floating_ip['port_id'])
+        return floating_ip
+
+    def disassociate_floating_ip(self, floating_ip):
+        """Disassociates floating ip
+
+        This wrapper utility disassociates given floating ip.
+        :param floating_ip: a dict which is a return value of
+        floating_ips_client.create_floatingip method
+        """
+        kwargs = dict(port_id=None)
+        floating_ip = self.floating_ips_client.update_floatingip(
+            floating_ip['id'], **kwargs)['floatingip']
+        self.assertIsNone(floating_ip['port_id'])
         return floating_ip
 
     def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
@@ -1046,7 +1122,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # The tests calling this method don't have a floating IP
             # and can't make use of the validation resources. So the
             # method is creating the floating IP there.
-            return self.create_floating_ip(server, **kwargs)['ip']
+            return self.create_floating_ip(
+                server, **kwargs)['floating_ip_address']
         elif CONF.validation.connect_method == 'fixed':
             # Determine the network name to look for based on config or creds
             # provider network resources.
@@ -1137,8 +1214,6 @@ class NetworkScenarioTest(ScenarioTest):
     Subclassed tests will be skipped if Neutron is not enabled
 
     """
-
-    credentials = ['primary', 'admin']
 
     @classmethod
     def skip_checks(cls):
@@ -1274,106 +1349,12 @@ class NetworkScenarioTest(ScenarioTest):
 
         return subnet
 
-    def get_server_port_id_and_ip4(self, server, ip_addr=None, **kwargs):
-
-        if ip_addr and not kwargs.get('fixed_ips'):
-            kwargs['fixed_ips'] = 'ip_address=%s' % ip_addr
-        ports = self.os_admin.ports_client.list_ports(
-            device_id=server['id'], **kwargs)['ports']
-
-        # A port can have more than one IP address in some cases.
-        # If the network is dual-stack (IPv4 + IPv6), this port is associated
-        # with 2 subnets
-
-        def _is_active(port):
-            # NOTE(vsaienko) With Ironic, instances live on separate hardware
-            # servers. Neutron does not bind ports for Ironic instances, as a
-            # result the port remains in the DOWN state. This has been fixed
-            # with the introduction of the networking-baremetal plugin but
-            # it's not mandatory (and is not used on all stable branches).
-            return (port['status'] == 'ACTIVE' or
-                    port.get('binding:vnic_type') == 'baremetal')
-
-        port_map = [(p["id"], fxip["ip_address"])
-                    for p in ports
-                    for fxip in p["fixed_ips"]
-                    if (netutils.is_valid_ipv4(fxip["ip_address"]) and
-                        _is_active(p))]
-        inactive = [p for p in ports if p['status'] != 'ACTIVE']
-        if inactive:
-            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
-
-        self.assertNotEmpty(port_map,
-                            "No IPv4 addresses found in: %s" % ports)
-        self.assertEqual(len(port_map), 1,
-                         "Found multiple IPv4 addresses: %s. "
-                         "Unable to determine which port to target."
-                         % port_map)
-        return port_map[0]
-
     def get_network_by_name(self, network_name):
         net = self.os_admin.networks_client.list_networks(
             name=network_name)['networks']
         self.assertNotEmpty(net,
                             "Unable to get network by name: %s" % network_name)
         return net[0]
-
-    def create_floating_ip(self, server, external_network_id=None,
-                           port_id=None, client=None, **kwargs):
-        """Create a floating IP and associates to a resource/port on Neutron"""
-
-        if not external_network_id:
-            external_network_id = CONF.network.public_network_id
-        if not client:
-            client = self.floating_ips_client
-        if not port_id:
-            port_id, ip4 = self.get_server_port_id_and_ip4(server)
-        else:
-            ip4 = None
-
-        floatingip_kwargs = {
-            'floating_network_id': external_network_id,
-            'port_id': port_id,
-            'tenant_id': server.get('project_id') or server['tenant_id'],
-            'fixed_ip_address': ip4,
-        }
-        if CONF.network.subnet_id:
-            floatingip_kwargs['subnet_id'] = CONF.network.subnet_id
-
-        floatingip_kwargs.update(kwargs)
-        result = client.create_floatingip(**floatingip_kwargs)
-        floating_ip = result['floatingip']
-
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_floatingip,
-                        floating_ip['id'])
-        return floating_ip
-
-    def associate_floating_ip(self, floating_ip, server):
-        """Associate floating ip
-
-        This wrapper utility attaches the floating_ip for
-        the respective port_id of server
-        """
-        port_id, _ = self.get_server_port_id_and_ip4(server)
-        kwargs = dict(port_id=port_id)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertEqual(port_id, floating_ip['port_id'])
-        return floating_ip
-
-    def disassociate_floating_ip(self, floating_ip):
-        """Disassociates floating ip
-
-        This wrapper utility disassociates given floating ip.
-        :param floating_ip: a dict which is a return value of
-        floating_ips_client.create_floatingip method
-        """
-        kwargs = dict(port_id=None)
-        floating_ip = self.floating_ips_client.update_floatingip(
-            floating_ip['id'], **kwargs)['floatingip']
-        self.assertIsNone(floating_ip['port_id'])
-        return floating_ip
 
     def check_floating_ip_status(self, floating_ip, status):
         """Verifies floatingip reaches the given status
@@ -1575,8 +1556,6 @@ class NetworkScenarioTest(ScenarioTest):
 class EncryptionScenarioTest(ScenarioTest):
     """Base class for encryption scenario tests"""
 
-    credentials = ['primary', 'admin']
-
     @classmethod
     def setup_clients(cls):
         super(EncryptionScenarioTest, cls).setup_clients()
@@ -1617,6 +1596,8 @@ class ObjectStorageScenarioTest(ScenarioTest):
     Subclasses implement the tests that use the methods provided by this
     class.
     """
+
+    credentials = ['primary']
 
     @classmethod
     def skip_checks(cls):
