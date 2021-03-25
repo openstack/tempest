@@ -128,7 +128,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         base_segm = \
             CONF.network_feature_enabled.provider_net_base_segmentation_id
 
-        self.prov_network, _, _ = self.create_networks(
+        self.prov_network, _, _ = self.setup_network_subnet_with_router(
             networks_client=self.networks_client,
             routers_client=self.routers_client,
             subnets_client=self.subnets_client,

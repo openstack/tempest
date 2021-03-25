@@ -106,7 +106,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _setup_network_and_servers(self, **kwargs):
         boot_with_port = kwargs.pop('boot_with_port', False)
-        self.network, self.subnet, self.router = self.create_networks(**kwargs)
+        self.network, self.subnet, self.router = (
+            self.setup_network_subnet_with_router(**kwargs))
         self.check_networks()
 
         self.ports = []

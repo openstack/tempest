@@ -1493,10 +1493,11 @@ class NetworkScenarioTest(ScenarioTest):
             raise Exception("Neither of 'public_router_id' or "
                             "'public_network_id' has been defined.")
 
-    def create_networks(self, networks_client=None,
-                        routers_client=None, subnets_client=None,
-                        project_id=None, dns_nameservers=None,
-                        port_security_enabled=True, **net_dict):
+    def setup_network_subnet_with_router(
+            self, networks_client=None,
+            routers_client=None, subnets_client=None,
+            project_id=None, dns_nameservers=None,
+            port_security_enabled=True, **net_dict):
         """Create a network with a subnet connected to a router.
 
         The baremetal driver is a special case since all nodes are
