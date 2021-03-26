@@ -93,11 +93,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
             placement_microversion=self.placement_request_microversion))
 
     def setup_compute_client(cls):
-        """Compute and Compute security groups client"""
+        """Compute client"""
         cls.compute_images_client = cls.os_primary.compute_images_client
         cls.keypairs_client = cls.os_primary.keypairs_client
         cls.servers_client = cls.os_primary.servers_client
         cls.interface_client = cls.os_primary.interfaces_client
+        cls.flavors_client = cls.os_primary.flavors_client
 
     def setup_network_client(cls):
         """Neutron network client"""
@@ -114,7 +115,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def setup_clients(cls):
         """This setup the service clients for the tests"""
         super(ScenarioTest, cls).setup_clients()
-        cls.flavors_client = cls.os_primary.flavors_client
         if CONF.service_available.glance:
             # Check if glance v1 is available to determine which client to use.
             if CONF.image_feature_enabled.api_v1:
