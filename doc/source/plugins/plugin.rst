@@ -31,6 +31,7 @@ others are not. A list of stable APIs available to plugins is provided below:
 * tempest.common.credentials_factory
 * tempest.clients
 * tempest.test
+* tempest.scenario.manager
 
 If there is an interface from Tempest that you need to rely on in your plugin
 which is not listed above, it likely needs to be migrated to tempest.lib. In
