@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add ``placement`` API usage method for evaluating resource class
+    utilization of the resource provider. The following API call is available
+    for tempest from now in the resource_providers_client:
+
+    * GET /resource_providers/{uuid}/usages

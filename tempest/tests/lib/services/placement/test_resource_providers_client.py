@@ -85,6 +85,14 @@ class TestResourceProvidersClient(base.BaseServiceTest):
         },
         "resource_provider_generation": 1
     }
+    FAKE_RESOURCE_PROVIDER_USAGES = {
+        "usages": {
+            "VCPU": 2,
+            "MEMORY_MB": 1024,
+            "DISK_GB": 10
+        },
+        "resource_provider_generation": 3
+    }
 
     def setUp(self):
         super(TestResourceProvidersClient, self).setUp()
@@ -180,3 +188,19 @@ class TestResourceProvidersClient(base.BaseServiceTest):
 
     def test_list_resource_provider_aggregates_with_bytes_body(self):
         self._test_list_resource_provider_aggregates(bytes_body=True)
+
+    def _test_list_resource_provider_usages(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_resource_provider_usages,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_RESOURCE_PROVIDER_USAGES,
+            to_utf=bytes_body,
+            status=200,
+            rp_uuid=self.FAKE_RESOURCE_PROVIDER_UUID
+        )
+
+    def test_show_resource_provider_usages_with_str_body(self):
+        self._test_list_resource_provider_inventories()
+
+    def test_show_resource_provider_usages_with_with_bytes_body(self):
+        self._test_list_resource_provider_inventories(bytes_body=True)

@@ -26,6 +26,7 @@ class ResourceProvidersClient(base_placement_client.BasePlacementClient):
     * resource providers
     * resource provider inventories
     * resource provider aggregates
+    * resource provider usages
     """
 
     def list_resource_providers(self, **params):
@@ -64,6 +65,19 @@ class ResourceProvidersClient(base_placement_client.BasePlacementClient):
         https://docs.openstack.org/api-ref/placement/#list-resource-provider-inventories
         """
         url = '/resource_providers/%s/inventories' % rp_uuid
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_resource_provider_usages(self, rp_uuid):
+        """List resource provider usages.
+
+        For full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/placement/#list-resource-provider-usages
+        """
+        url = '/resource_providers/%s/usages' % rp_uuid
         resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
