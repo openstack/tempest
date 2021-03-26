@@ -84,11 +84,11 @@ class TestVolumeBackupRestore(manager.ScenarioTest):
                                     security_groups=[
                                         {'name': security_group['name']}])
 
-        # Create a floating ip
-        floating_ip = self.create_floating_ip(server)
-
+        # Create a floating ip and associate it to server.
+        fip = self.create_floating_ip(server)
+        floating_ip = self.associate_floating_ip(fip, server)
         # Check server connectivity
-        self.check_vm_connectivity(floating_ip['ip'],
+        self.check_vm_connectivity(floating_ip['floating_ip_address'],
                                    username=CONF.validation.image_ssh_user,
                                    private_key=keypair['private_key'],
                                    should_connect=True)

@@ -52,7 +52,9 @@ class TestServerBasicOps(manager.ScenarioTest):
             # Obtain a floating IP if floating_ips is enabled
             if (CONF.network_feature_enabled.floating_ips and
                 CONF.network.floating_network_name):
-                self.ip = self.create_floating_ip(self.instance)['ip']
+                fip = self.create_floating_ip(self.instance)
+                self.ip = self.associate_floating_ip(
+                    fip, self.instance)['floating_ip_address']
             else:
                 server = self.servers_client.show_server(
                     self.instance['id'])['server']

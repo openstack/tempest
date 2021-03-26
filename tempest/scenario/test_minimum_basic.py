@@ -100,7 +100,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         for addresses in server['addresses'].values():
             for address in addresses:
                 if (address['OS-EXT-IPS:type'] == 'floating' and
-                        address['addr'] == floating_ip['ip']):
+                        address['addr'] == floating_ip['floating_ip_address']):
                     return address
 
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
@@ -129,7 +129,9 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         server = self.servers_client.show_server(server['id'])['server']
         if (CONF.network_feature_enabled.floating_ips and
             CONF.network.floating_network_name):
-            floating_ip = self.create_floating_ip(server)
+            fip = self.create_floating_ip(server)
+            floating_ip = self.associate_floating_ip(
+                fip, server)
             # fetch the server again to make sure the addresses were refreshed
             # after associating the floating IP
             server = self.servers_client.show_server(server['id'])['server']
@@ -138,8 +140,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             self.assertIsNotNone(
                 address,
                 "Failed to find floating IP '%s' in server addresses: %s" %
-                (floating_ip['ip'], server['addresses']))
-            ssh_ip = floating_ip['ip']
+                (floating_ip['floating_ip_address'], server['addresses']))
+            ssh_ip = floating_ip['floating_ip_address']
         else:
             ssh_ip = self.get_server_ip(server)
 
@@ -162,8 +164,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
 
         if floating_ip:
             # delete the floating IP, this should refresh the server addresses
-            self.compute_floating_ips_client.delete_floating_ip(
-                floating_ip['id'])
+            self.disassociate_floating_ip(floating_ip)
 
             def is_floating_ip_detached_from_server():
                 server_info = self.servers_client.show_server(
@@ -177,5 +178,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                 CONF.compute.build_timeout,
                 CONF.compute.build_interval):
                 msg = ("Floating IP '%s' should not be in server addresses: %s"
-                       % (floating_ip['ip'], server['addresses']))
+                       % (floating_ip['floating_ip_address'],
+                          server['addresses']))
                 raise exceptions.TimeoutException(msg)
