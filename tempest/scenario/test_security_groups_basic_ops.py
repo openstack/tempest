@@ -326,7 +326,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self.floating_ips.setdefault(server['id'], floating_ip)
 
     def _create_tenant_network(self, tenant, port_security_enabled=True):
-        network, subnet, router = self.create_networks(
+        network, subnet, router = self.setup_network_subnet_with_router(
             networks_client=tenant.manager.networks_client,
             routers_client=tenant.manager.routers_client,
             subnets_client=tenant.manager.subnets_client,
