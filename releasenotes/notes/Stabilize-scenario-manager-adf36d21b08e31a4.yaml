@@ -1,0 +1,31 @@
+---
+prelude: >
+    Tempest.scenario.manager is now a stable interface for Tempest plugins.
+features:
+  - |
+    In this release, we made tempest/scenario/manager.py a stable interface
+    ready to be consumed by all tempest plugins. The effort was tracked in
+    the following etherpad [1], and the related review can be listed via [2]:
+
+    * [1] https://etherpad.opendev.org/p/tempest-scenario-manager
+    * [2] https://review.opendev.org/#/q/topic:bp/tempest-scenario-manager-stable(status:open+OR+status:merged)
+
+    Some time ago, tempest/scenario/manager.py got copied to most of the plugins
+    and therefore, it diverged - every plugin's copy had slight differences.
+    In this release, we pushed changes to unify the manager's methods and
+    improved their APIs in order to have them easier consumable:
+
+    * we added implementations of methods that were often used in plugins'
+      manager.py however were not implemented in our manager
+    * we improved APIs by f.e. adding a kwargs argument so that the consumers
+      are more in control of the data that are passed to tempest clients
+    * we modified logic of a few methods so that it complies with the plugins'
+      manager versions in order to prepare for a situation when the plugins
+      can reuse Tempest manager as much as possible rather than keeping their
+      own copy
+    * we made methods consistent w.r.t. names and parameters
+    * we split the lengthy methods to have more readable code
+    * previously private methods which had a potential to be reused were
+      made public so that it's clear they are expected to be used in tempest
+      plugins
+    * missing docstrings have been added
