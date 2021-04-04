@@ -162,6 +162,8 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
     """Test rescuing server specifying type of device for the rescue disk"""
 
     @decorators.idempotent_id('947004c3-e8ef-47d9-9f00-97b74f9eaf96')
+    @testtools.skipIf("aarch64" in CONF.scenario.img_file,
+                      "Aarch64 does not support ide bus for cdrom")
     def test_stable_device_rescue_cdrom_ide(self):
         """Test rescuing server with cdrom and ide as the rescue disk"""
         server_id, rescue_image_id = self._create_server_and_rescue_image(

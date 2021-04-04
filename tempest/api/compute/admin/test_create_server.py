@@ -42,6 +42,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
     @testtools.skipUnless(CONF.validation.run_validation,
                           'Instance validation tests are disabled.')
+    @testtools.skipIf("aarch64" in CONF.scenario.img_file,
+                      "Aarch64 does not support ephemeral disk test")
     def test_verify_created_server_ephemeral_disk(self):
         """Verify that the ephemeral disk is created when creating server"""
         flavor_base = self.flavors_client.show_flavor(
