@@ -23,6 +23,8 @@ from tempest.common import compute
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -55,6 +57,10 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(LiveMigrationTestBase, cls).setup_clients()
         cls.admin_migration_client = cls.os_admin.migrations_client
+        cls.networks_client = cls.os_primary.networks_client
+        cls.subnets_client = cls.os_primary.subnets_client
+        cls.ports_client = cls.os_primary.ports_client
+        cls.trunks_client = cls.os_primary.trunks_client
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
         kwargs = dict()
@@ -196,6 +202,86 @@ class LiveMigrationTest(LiveMigrationTestBase):
         volume_id2 = server["os-extended-volumes:volumes_attached"][0]["id"]
 
         self.assertEqual(volume_id1, volume_id2)
+
+    def _create_net_subnet(self, name, cidr):
+        net_name = data_utils.rand_name(name=name)
+        net = self.networks_client.create_network(name=net_name)['network']
+        self.addClassResourceCleanup(
+            self.networks_client.delete_network, net['id'])
+
+        subnet = self.subnets_client.create_subnet(
+            network_id=net['id'],
+            cidr=cidr,
+            ip_version=4)
+        self.addClassResourceCleanup(self.subnets_client.delete_subnet,
+                                     subnet['subnet']['id'])
+        return net
+
+    def _create_port(self, network_id, name):
+        name = data_utils.rand_name(name=name)
+        port = self.ports_client.create_port(name=name,
+                                             network_id=network_id)['port']
+        self.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                     self.ports_client.delete_port,
+                                     port_id=port['id'])
+        return port
+
+    def _create_trunk_with_subport(self):
+        tenant_network = self.get_tenant_network()
+        parent = self._create_port(network_id=tenant_network['id'],
+                                   name='parent')
+        net = self._create_net_subnet(name='subport_net', cidr='19.80.0.0/24')
+        subport = self._create_port(network_id=net['id'], name='subport')
+
+        trunk = self.trunks_client.create_trunk(
+            name=data_utils.rand_name('trunk'),
+            port_id=parent['id'],
+            sub_ports=[{"segmentation_id": 42, "port_id": subport['id'],
+                        "segmentation_type": "vlan"}]
+        )['trunk']
+        self.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
+                                     self.trunks_client.delete_trunk,
+                                     trunk['id'])
+        return trunk, parent, subport
+
+    def _is_port_status_active(self, port_id):
+        port = self.ports_client.show_port(port_id)['port']
+        return port['status'] == 'ACTIVE'
+
+    @decorators.idempotent_id('0022c12e-a482-42b0-be2d-396b5f0cffe3')
+    @utils.requires_ext(service='network', extension='trunk')
+    @utils.services('network')
+    def test_live_migration_with_trunk(self):
+        """Test live migration with trunk and subport"""
+        trunk, parent, subport = self._create_trunk_with_subport()
+
+        server = self.create_test_server(
+            wait_until="ACTIVE", networks=[{'port': parent['id']}])
+
+        # Wait till subport status is ACTIVE
+        self.assertTrue(
+            test_utils.call_until_true(
+                self._is_port_status_active, CONF.validation.connect_timeout,
+                5, subport['id']))
+        parent = self.ports_client.show_port(parent['id'])['port']
+        self.assertEqual('ACTIVE', parent['status'])
+        subport = self.ports_client.show_port(subport['id'])['port']
+
+        if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
+            # not to specify a host so that the scheduler will pick one
+            target_host = None
+        else:
+            target_host = self.get_host_other_than(server['id'])
+
+        self._live_migrate(server['id'], target_host, 'ACTIVE')
+
+        # Wait till subport status is ACTIVE
+        self.assertTrue(
+            test_utils.call_until_true(
+                self._is_port_status_active, CONF.validation.connect_timeout,
+                5, subport['id']))
+        parent = self.ports_client.show_port(parent['id'])['port']
+        self.assertEqual('ACTIVE', parent['status'])
 
 
 class LiveMigrationRemoteConsolesV26Test(LiveMigrationTestBase):

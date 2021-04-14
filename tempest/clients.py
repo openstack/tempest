@@ -72,6 +72,7 @@ class Manager(clients.ServiceClients):
         self.qos_client = self.network.QosClient()
         self.qos_min_bw_client = self.network.QosMinimumBandwidthRulesClient()
         self.segments_client = self.network.SegmentsClient()
+        self.trunks_client = self.network.TrunksClient()
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
