@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import testtools
 
 from tempest.lib.common import api_version_request
@@ -117,7 +116,7 @@ def assert_version_header_matches_request(api_microversion_header_name,
     :param response_header: Response header where microversion is
             expected to be present.
     """
-    if not isinstance(api_microversion, six.string_types):
+    if not isinstance(api_microversion, str):
         raise TypeError('api_microversion must be a string')
     api_microversion_header_name = api_microversion_header_name.lower()
     if (api_microversion_header_name not in response_header or

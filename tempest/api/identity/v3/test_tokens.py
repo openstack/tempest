@@ -16,7 +16,6 @@
 import operator
 
 from oslo_utils import timeutils
-import six
 
 from tempest.api.identity import base
 from tempest.lib import decorators
@@ -88,7 +87,7 @@ class TokensV3Test(base.BaseIdentityV3Test):
             auth_data=True)
 
         self.assertNotEmpty(token_id)
-        self.assertIsInstance(token_id, six.string_types)
+        self.assertIsInstance(token_id, str)
 
         now = timeutils.utcnow()
         expires_at = timeutils.normalize_time(

@@ -15,8 +15,6 @@
 
 import struct
 import urllib.parse as urlparse
-
-import six
 import urllib3
 
 from tempest.api.compute import base
@@ -122,7 +120,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                 'Expected authentication type None.')
             # Send to the server that we only support authentication
             # type None
-            self._websocket.send_frame(six.int2byte(1))
+            self._websocket.send_frame(bytes((1,)))
 
             # The server should send 4 bytes of 0's if security
             # handshake succeeded
@@ -135,7 +133,7 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest):
                 'Server did not think security was successful.')
 
         # Say to leave the desktop as shared as part of client initialization
-        self._websocket.send_frame(six.int2byte(1))
+        self._websocket.send_frame(bytes((1,)))
         # Get the server initialization packet back and make sure it is the
         # right structure where bytes 20-24 is the name length and
         # 24-N is the name

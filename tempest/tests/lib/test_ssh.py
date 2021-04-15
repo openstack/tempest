@@ -16,7 +16,6 @@ from io import StringIO
 import socket
 from unittest import mock
 
-import six
 import testtools
 
 from tempest.lib.common import ssh
@@ -240,7 +239,7 @@ class TestSshClient(base.TestCase):
 
         return chan_mock, poll_mock, select_mock, client_mock
 
-    _utf8_string = six.unichr(1071)
+    _utf8_string = chr(1071)
     _utf8_bytes = _utf8_string.encode("utf-8")
 
     @mock.patch('select.POLLIN', SELECT_POLLIN, create=True)
