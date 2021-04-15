@@ -144,8 +144,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         # Emulate the lock existing on the filesystem
         self.useFixture(fixtures.MockPatch(
             'os.path.isfile', return_value=True))
-        with mock.patch('six.moves.builtins.open', mock.mock_open(),
-                        create=True):
+        with mock.patch('builtins.open', mock.mock_open(), create=True):
             test_account_class = (
                 preprov_creds.PreProvisionedCredentialProvider(
                     **self.fixed_params))
@@ -157,8 +156,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         # Emulate the lock not existing on the filesystem
         self.useFixture(fixtures.MockPatch(
             'os.path.isfile', return_value=False))
-        with mock.patch('six.moves.builtins.open', mock.mock_open(),
-                        create=True):
+        with mock.patch('builtins.open', mock.mock_open(), create=True):
             test_account_class = (
                 preprov_creds.PreProvisionedCredentialProvider(
                     **self.fixed_params))
@@ -177,7 +175,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             'os.path.isfile', return_value=False))
         test_account_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
-        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+        with mock.patch('builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
             lock_path = os.path.join(self.fixed_params['accounts_lock_dir'],
@@ -196,8 +194,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             'os.path.isfile', return_value=True))
         test_account_class = preprov_creds.PreProvisionedCredentialProvider(
             **self.fixed_params)
-        with mock.patch('six.moves.builtins.open', mock.mock_open(),
-                        create=True):
+        with mock.patch('builtins.open', mock.mock_open(), create=True):
             self.assertRaises(lib_exc.InvalidCredentials,
                               test_account_class._get_free_hash, hash_list)
 
@@ -217,7 +214,7 @@ class TestPreProvisionedCredentials(base.TestCase):
             return True
 
         self.patchobject(os.path, 'isfile', _fake_is_file)
-        with mock.patch('six.moves.builtins.open', mock.mock_open(),
+        with mock.patch('builtins.open', mock.mock_open(),
                         create=True) as open_mock:
             test_account_class._get_free_hash(hash_list)
             lock_path = os.path.join(self.fixed_params['accounts_lock_dir'],

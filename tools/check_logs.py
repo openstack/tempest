@@ -23,7 +23,6 @@ import re
 import sys
 import urllib.request as urlreq
 
-import six
 import yaml
 
 # DEVSTACK_GATE_GRENADE is either unset if grenade is not running
@@ -137,7 +136,7 @@ def main(opts):
     with open(ALLOW_LIST_FILE) as stream:
         loaded = yaml.safe_load(stream)
         if loaded:
-            for (name, l) in six.iteritems(loaded):
+            for (name, l) in loaded.values():
                 for w in l:
                     assert 'module' in w, 'no module in %s' % name
                     assert 'message' in w, 'no message in %s' % name
