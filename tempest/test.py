@@ -20,7 +20,6 @@ import sys
 import debtcollector.moves
 import fixtures
 from oslo_log import log as logging
-import six
 import testtools
 
 from tempest import clients
@@ -179,7 +178,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
                      etype, cls.__name__)
             cls.tearDownClass()
             try:
-                six.reraise(etype, value, trace)
+                raise value.with_traceback(trace)
             finally:
                 del trace  # to avoid circular refs
         finally:
@@ -233,7 +232,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # the first one
         if re_raise and etype is not None:
             try:
-                six.reraise(etype, value, trace)
+                raise value.with_traceback(trace)
             finally:
                 del trace  # to avoid circular refs
 

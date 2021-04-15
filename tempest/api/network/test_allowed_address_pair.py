@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
@@ -99,8 +97,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         body = self.ports_client.update_port(
             port_id, allowed_address_pairs=allowed_address_pairs)
         allowed_address_pair = body['port']['allowed_address_pairs']
-        six.assertCountEqual(self, allowed_address_pair,
-                             allowed_address_pairs)
+        self.assertCountEqual(allowed_address_pair, allowed_address_pairs)
 
     @decorators.idempotent_id('9599b337-272c-47fd-b3cf-509414414ac4')
     def test_update_port_with_address_pair(self):

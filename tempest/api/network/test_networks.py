@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import netaddr
-import six
 import testtools
 
 from tempest.api.network import base
@@ -595,9 +594,9 @@ class NetworksIpV6Test(NetworksTest):
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
-        six.assertCountEqual(self, subnets,
-                             test_subnet_ids,
-                             'Subnet are not in the same network')
+        self.assertCountEqual(subnets,
+                              test_subnet_ids,
+                              'Subnet are not in the same network')
 
 
 class NetworksIpV6TestAttrs(BaseNetworkTestResources):

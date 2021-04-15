@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from tempest.api.compute import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
@@ -84,11 +82,11 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
         new_tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
         replaced_tags = self.client.update_all_tags(
             self.server['id'], new_tags)['tags']
-        six.assertCountEqual(self, new_tags, replaced_tags)
+        self.assertCountEqual(new_tags, replaced_tags)
 
         # List the tags and check that the tags were replaced.
         fetched_tags = self.client.list_tags(self.server['id'])['tags']
-        six.assertCountEqual(self, new_tags, fetched_tags)
+        self.assertCountEqual(new_tags, fetched_tags)
 
     @decorators.idempotent_id('a63b2a74-e918-4b7c-bcab-10c855f3a57e')
     def test_delete_all_tags(self):

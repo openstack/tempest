@@ -17,7 +17,6 @@ import copy
 import fixtures
 import jsonschema
 from oslo_serialization import jsonutils as json
-import six
 
 from tempest.lib.common import http
 from tempest.lib.common import rest_client
@@ -93,7 +92,7 @@ class TestRestClientNotFoundHandling(BaseRestClientTestClass):
 class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
 
     def _verify_headers(self, resp):
-        resp = dict((k.lower(), v) for k, v in six.iteritems(resp))
+        resp = dict((k.lower(), v) for k, v in resp.items())
         self.assertEqual(self.header_value, resp['accept'])
         self.assertEqual(self.header_value, resp['content-type'])
 
