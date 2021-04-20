@@ -263,8 +263,10 @@ class LiveMigrationTest(LiveMigrationTestBase):
             test_utils.call_until_true(
                 self._is_port_status_active, CONF.validation.connect_timeout,
                 5, subport['id']))
-        parent = self.ports_client.show_port(parent['id'])['port']
-        self.assertEqual('ACTIVE', parent['status'])
+        self.assertTrue(
+            test_utils.call_until_true(
+                self._is_port_status_active, CONF.validation.connect_timeout,
+                5, parent['id']))
         subport = self.ports_client.show_port(subport['id'])['port']
 
         if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
@@ -280,8 +282,10 @@ class LiveMigrationTest(LiveMigrationTestBase):
             test_utils.call_until_true(
                 self._is_port_status_active, CONF.validation.connect_timeout,
                 5, subport['id']))
-        parent = self.ports_client.show_port(parent['id'])['port']
-        self.assertEqual('ACTIVE', parent['status'])
+        self.assertTrue(
+            test_utils.call_until_true(
+                self._is_port_status_active, CONF.validation.connect_timeout,
+                5, parent['id']))
 
 
 class LiveMigrationRemoteConsolesV26Test(LiveMigrationTestBase):
