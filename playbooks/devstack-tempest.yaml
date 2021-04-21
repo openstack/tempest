@@ -29,9 +29,17 @@
             (run_tempest_cleanup is defined and run_tempest_cleanup | bool) or
             (run_tempest_fail_if_leaked_resources is defined and run_tempest_fail_if_leaked_resources | bool)
 
+    - name: Run Tempest version <= 26.0.0
+      include_role:
+        name: run-tempest-26
+      when: (zuul.branch is defined and zuul.branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]) or
+            (zuul.override_checkout is defined and zuul.override_checkout in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"])
+
     - name: Run Tempest
       include_role:
         name: run-tempest
+      when: (zuul.branch is defined and zuul.branch not in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"] and zuul.override_checkout is not defined) or
+            (zuul.override_checkout is defined and zuul.override_checkout not in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"])
 
     - name: Run tempest cleanup dry-run
       include_role:

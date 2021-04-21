@@ -1,0 +1,73 @@
+# NOTE(andreaf) The number of vcpus is not available on all systems.
+# See https://github.com/ansible/ansible/issues/30688
+# When not available, we fall back to ansible_processor_cores
+- name: Get hw.logicalcpu from sysctl
+  shell: sysctl hw.logicalcpu | cut -d' ' -f2
+  register: sysctl_hw_logicalcpu
+  when: ansible_processor_vcpus is not defined
+
+- name: Number of cores
+  set_fact:
+    num_cores: "{{ansible_processor_vcpus|default(sysctl_hw_logicalcpu.stdout)}}"
+
+- name: Set concurrency for cores == 3 or less
+  set_fact:
+    default_concurrency: "{{ num_cores }}"
+  when: num_cores|int <= 3
+
+- name: Limit max concurrency when more than 3 vcpus are available
+  set_fact:
+    default_concurrency: "{{ num_cores|int // 2 }}"
+  when: num_cores|int > 3
+
+- name: Override target branch
+  set_fact:
+    target_branch: "{{ zuul.override_checkout }}"
+  when: zuul.override_checkout is defined
+
+- name: Use stable branch upper-constraints till stable/stein
+  set_fact:
+    # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
+    tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
+  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky"]
+
+- name: Use Configured upper-constraints for non-master Tempest
+  set_fact:
+    # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
+    tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS']}) | combine({'TOX_CONSTRAINTS_FILE': devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS']}) }}"
+  when:
+    - devstack_localrc is defined
+    - "'TEMPEST_BRANCH' in devstack_localrc"
+    - "'TEMPEST_VENV_UPPER_CONSTRAINTS' in devstack_localrc"
+    - devstack_localrc['TEMPEST_BRANCH'] != 'master'
+    - devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS'] != 'default'
+
+- name: Set OS_TEST_TIMEOUT if requested
+  set_fact:
+    tempest_tox_environment: "{{ tempest_tox_environment | combine({'OS_TEST_TIMEOUT': tempest_test_timeout}) }}"
+  when: tempest_test_timeout != ''
+
+- when:
+    - tempest_test_blacklist is defined
+  block:
+    - name: Check for test blacklist file
+      stat:
+        path: "{{ tempest_test_blacklist }}"
+      register:
+        blacklist_stat
+
+    - name: Build blacklist option
+      set_fact:
+        blacklist_option: "--blacklist-file={{ tempest_test_blacklist|quote }}"
+      when: blacklist_stat.stat.exists
+
+- name: Run Tempest
+  command: tox -e {{tox_envlist}} {{tox_extra_args}} -- {{tempest_test_regex|quote}} {{blacklist_option|default('')}} \
+            --concurrency={{tempest_concurrency|default(default_concurrency)}} \
+            --black-regex={{tempest_black_regex|quote}}
+  args:
+    chdir: "{{devstack_base_dir}}/tempest"
+  register: tempest_run_result
+  become: true
+  become_user: tempest
+  environment: "{{ tempest_tox_environment }}"

@@ -16,4 +16,17 @@
     # address is IPv6 etc. This is invoked before tests are run so that we can
     # fail early if anything missing the IPv6 settings or deployments.
     - devstack-ipv6-only-deployments-verification
-    - run-tempest
+  tasks:
+    - name: Run Tempest version <= 26.0.0
+      include_role:
+        name: run-tempest-26
+      when:
+        - zuul.branch is defined
+        - zuul.branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
+
+    - name: Run Tempest
+      include_role:
+        name: run-tempest
+      when:
+        - zuul.branch is defined
+        - zuul.branch not in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
