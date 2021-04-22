@@ -40,7 +40,7 @@
     - "'TEMPEST_BRANCH' in devstack_localrc"
     - "'TEMPEST_VENV_UPPER_CONSTRAINTS' in devstack_localrc"
     - devstack_localrc['TEMPEST_BRANCH'] != 'master'
-    - devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS'] != 'default'
+    - devstack_localrc['TEMPEST_VENV_UPPER_CONSTRAINTS'] != 'master'
 
 - name: Set OS_TEST_TIMEOUT if requested
   set_fact:
