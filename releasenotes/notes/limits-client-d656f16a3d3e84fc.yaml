@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add a new client for keystone's unified limits API to create and update limits.
