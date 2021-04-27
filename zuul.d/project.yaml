@@ -109,6 +109,7 @@
             irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
+        - tempest-stestr-master
         - tempest-cinder-v2-api:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
@@ -133,3 +134,4 @@
       jobs:
         - tempest-all
         - tempest-full-oslo-master
+        - tempest-stestr-master

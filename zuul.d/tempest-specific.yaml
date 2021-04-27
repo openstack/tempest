@@ -113,3 +113,19 @@
     vars:
       devstack_localrc:
         TEMPEST_HAS_ADMIN: False
+
+- job:
+    name: tempest-stestr-master
+    parent: devstack-tempest
+    description: |
+      Smoke integration test with stestr master.
+      This ensures that new stestr release does
+      not break Temepst.
+    vars:
+      tox_envlist: stestr-master
+      devstack_services:
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        c-bak: false
