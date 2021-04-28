@@ -3,7 +3,7 @@
       - check-requirements
       - integrated-gate-py3
       - openstack-cover-jobs
-      - openstack-python3-victoria-jobs
+      - openstack-python3-xena-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
