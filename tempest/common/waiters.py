@@ -193,6 +193,30 @@ def wait_for_image_status(client, image_id, status):
     raise lib_exc.TimeoutException(message)
 
 
+def wait_for_image_tasks_status(client, image_id, status):
+    """Waits for an image tasks to reach a given status."""
+    pending_tasks = []
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        tasks = client.show_image_tasks(image_id)['tasks']
+
+        pending_tasks = [task for task in tasks if task['status'] != status]
+        if not pending_tasks:
+            return tasks
+        time.sleep(client.build_interval)
+
+    message = ('Image %(image_id)s tasks: %(pending_tasks)s '
+               'failed to reach %(status)s state within the required '
+               'time (%(timeout)s s).' % {'image_id': image_id,
+                                          'pending_tasks': pending_tasks,
+                                          'status': status,
+                                          'timeout': client.build_timeout})
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise lib_exc.TimeoutException(message)
+
+
 def wait_for_image_imported_to_stores(client, image_id, stores=None):
     """Waits for an image to be imported to all requested stores.
 

@@ -105,12 +105,10 @@ class ImportImagesTest(base.BaseV2ImageTest):
                      'validate the image/tasks API.')
             return
 
-        # Make sure we can access the task and that some of the key
-        # fields look legit.
-        tasks = self.client.show_image_tasks(image_id)
-        self.assertEqual(1, len(tasks['tasks']))
-        task = tasks['tasks'][0]
-        self.assertEqual('success', task['status'])
+        tasks = waiters.wait_for_image_tasks_status(
+            self.client, image_id, 'success')
+        self.assertEqual(1, len(tasks))
+        task = tasks[0]
         self.assertEqual(resp.response['x-openstack-request-id'],
                          task['request_id'])
         self.assertEqual('glance-direct',

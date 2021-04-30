@@ -120,6 +120,29 @@ class TestImageWaiters(base.TestCase):
                           waiters.wait_for_image_copied_to_stores,
                           self.client, 'fake_image_id')
 
+    def test_wait_for_image_tasks_status(self):
+        self.client.show_image_tasks.return_value = ({
+            'tasks': [{'status': 'success'}]})
+        start_time = int(time.time())
+        waiters.wait_for_image_tasks_status(
+            self.client, 'fake_image_id', 'success')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_image_tasks_status_timeout(self):
+        time_mock = self.patch('time.time')
+        self.patch('time.time', side_effect=[0., 1.])
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        self.client.show_image_tasks.return_value = ({
+            'tasks': [
+                {'status': 'success'},
+                {'status': 'processing'}]})
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_image_tasks_status,
+                          self.client, 'fake_image_id', 'success')
+
 
 class TestInterfaceWaiters(base.TestCase):
 
