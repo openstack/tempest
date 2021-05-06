@@ -14,14 +14,17 @@
 #    under the License.
 
 from oslo_log import log as logging
+import testtools
 from testtools import matchers
 
 from tempest.api.compute import base
 from tempest.common import identity
 from tempest.common import tempest_fixtures as fixtures
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -110,6 +113,8 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
             self.assertIn(quota, quota_set.keys())
 
     @decorators.idempotent_id('55fbe2bf-21a9-435b-bbd2-4162b0ed799a')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_update_all_quota_resources_for_tenant(self):
         """Test admin can update all the compute quota limits for a project"""
         default_quota_set = self.adm_client.show_default_quota_set(
@@ -141,11 +146,15 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
 
     # TODO(afazekas): merge these test cases
     @decorators.idempotent_id('ce9e0815-8091-4abd-8345-7fe5b85faa1d')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_get_updated_quotas(self):
         """Test that GET shows the updated quota set of project"""
         self._get_updated_quotas()
 
     @decorators.idempotent_id('389d04f0-3a41-405f-9317-e5f86e3c44f0')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_delete_quota(self):
         """Test admin can delete the compute quota set for a project"""
         project_name = data_utils.rand_name('ram_quota_project')
@@ -178,6 +187,8 @@ class QuotasAdminTestV236(QuotasAdminTestBase):
     min_microversion = '2.36'
 
     @decorators.idempotent_id('4268b5c9-92e5-4adc-acf1-3a2798f3d803')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_get_updated_quotas(self):
         """Test compute quotas API with microversion greater than 2.35
 
@@ -197,6 +208,8 @@ class QuotasAdminTestV257(QuotasAdminTestBase):
     min_microversion = '2.57'
 
     @decorators.idempotent_id('e641e6c6-e86c-41a4-9e5c-9493c0ae47ad')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_get_updated_quotas(self):
         """Test compute quotas API with microversion greater than 2.56
 
@@ -228,6 +241,8 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     # tests that get run all by themselves at the end under a
     # 'danger' flag.
     @decorators.idempotent_id('7932ab0f-5136-4075-b201-c0e2338df51a')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_update_default_quotas(self):
         """Test updating default compute quota class set"""
         # get the current 'default' quota class values

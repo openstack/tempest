@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common import utils
 from tempest import config
@@ -68,6 +70,8 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
     # It can be moved into the setUpClass as well.
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('91058876-9947-4807-9f22-f6eb17140d9b')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_create_server_when_cpu_quota_is_full(self):
         """Disallow server creation when tenant's vcpu quota is full"""
         self._update_quota('cores', 0)
@@ -76,6 +80,8 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6fdd7012-584d-4327-a61c-49122e0d5864')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_create_server_when_memory_quota_is_full(self):
         """Disallow server creation when tenant's memory quota is full"""
         self._update_quota('ram', 0)
@@ -84,6 +90,8 @@ class QuotasAdminNegativeTest(QuotasAdminNegativeTestBase):
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7c6be468-0274-449a-81c3-ac1c32ee0161')
+    @testtools.skipIf(CONF.compute_feature_enabled.unified_limits,
+                      'Legacy quota update not available with unified limits')
     def test_create_server_when_instances_quota_is_full(self):
         """Once instances quota limit is reached, disallow server creation"""
         self._update_quota('instances', 0)

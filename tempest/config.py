@@ -650,6 +650,9 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Does the test environment support attaching devices '
                      'using an IDE bus to the instance?'),
+    cfg.BoolOpt('unified_limits',
+                default=False,
+                help='Does the test environment support unified limits?'),
 ]
 
 
