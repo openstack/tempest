@@ -24,6 +24,8 @@ from tempest.lib.common import rest_client
 class TransfersClient(rest_client.RestClient):
     """Client class to send CRUD Volume Transfer API requests"""
 
+    resource_path = 'os-volume-transfer'
+
     def create_volume_transfer(self, **kwargs):
         """Create a volume transfer.
 
@@ -32,14 +34,14 @@ class TransfersClient(rest_client.RestClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#create-a-volume-transfer
         """
         post_body = json.dumps({'transfer': kwargs})
-        resp, body = self.post('os-volume-transfer', post_body)
+        resp, body = self.post(self.resource_path, post_body)
         body = json.loads(body)
         self.validate_response(schema.create_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def show_volume_transfer(self, transfer_id):
         """Returns the details of a volume transfer."""
-        url = "os-volume-transfer/%s" % transfer_id
+        url = "%s/%s" % (self.resource_path, transfer_id)
         resp, body = self.get(url)
         body = json.loads(body)
         self.validate_response(schema.show_volume_transfer, resp, body)
@@ -53,7 +55,7 @@ class TransfersClient(rest_client.RestClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-for-a-project
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-and-details
         """
-        url = 'os-volume-transfer'
+        url = self.resource_path
         schema_list_transfers = schema.list_volume_transfers_no_detail
         if detail:
             url += '/detail'
@@ -67,7 +69,7 @@ class TransfersClient(rest_client.RestClient):
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
-        resp, body = self.delete("os-volume-transfer/%s" % transfer_id)
+        resp, body = self.delete("%s/%s" % (self.resource_path, transfer_id))
         self.validate_response(schema.delete_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -78,9 +80,14 @@ class TransfersClient(rest_client.RestClient):
         API reference:
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#accept-a-volume-transfer
         """
-        url = 'os-volume-transfer/%s/accept' % transfer_id
+        url = '%s/%s/accept' % (self.resource_path, transfer_id)
         post_body = json.dumps({'accept': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         self.validate_response(schema.accept_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
+
+
+class TransfersV355Client(TransfersClient):
+    """Client class to send CRUD for the "new" Transfers API (mv 3.55)"""
+    resource_path = 'volume-transfers'

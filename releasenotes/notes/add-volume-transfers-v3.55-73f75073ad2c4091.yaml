@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add a ``TransfersV355Client`` to the volume v3 ``transfer_client`` library
+    supporting create, list, show, delete, and accept operations for the `new
+    Volume Transfers API
+    <https://docs.openstack.org/api-ref/block-storage/v3/#volume-transfers-volume-transfers-3-55-or-later>`_
+    of the Block Storage API v3.  The min_microversion of this API is 3.55.

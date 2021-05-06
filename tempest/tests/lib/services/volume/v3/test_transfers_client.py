@@ -52,6 +52,7 @@ class TestTransfersClient(base.BaseServiceTest):
         self.client = transfers_client.TransfersClient(fake_auth,
                                                        'volume',
                                                        'regionOne')
+        self.resource_path = 'os-volume-transfer'
 
     def _test_create_volume_transfer(self, bytes_body=False):
         resp_body = copy.deepcopy(self.FAKE_VOLUME_TRANSFER_INFO)
@@ -72,7 +73,7 @@ class TestTransfersClient(base.BaseServiceTest):
                 resp_body,
                 to_utf=bytes_body,
                 status=202,
-                mock_args=['os-volume-transfer', payload],
+                mock_args=[self.resource_path, payload],
                 **kwargs)
 
     def _test_accept_volume_transfer(self, bytes_body=False):
@@ -93,8 +94,9 @@ class TestTransfersClient(base.BaseServiceTest):
                 resp_body,
                 to_utf=bytes_body,
                 status=202,
-                mock_args=['os-volume-transfer/%s/accept' %
-                           self.FAKE_VOLUME_TRANSFER_ID, payload],
+                mock_args=['%s/%s/accept' % (self.resource_path,
+                                             self.FAKE_VOLUME_TRANSFER_ID),
+                           payload],
                 transfer_id=self.FAKE_VOLUME_TRANSFER_ID,
                 **kwargs)
 
@@ -156,3 +158,14 @@ class TestTransfersClient(base.BaseServiceTest):
             {},
             status=202,
             transfer_id="0e89cdd1-6249-421b-96d8-25fac0623d42")
+
+
+class TestTransfersV355Client(TestTransfersClient):
+
+    def setUp(self):
+        super(TestTransfersV355Client, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = transfers_client.TransfersV355Client(fake_auth,
+                                                           'volume',
+                                                           'regionOne')
+        self.resource_path = 'volume-transfers'
