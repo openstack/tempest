@@ -27,7 +27,7 @@ class TestAvailabilityZoneClient(base.BaseServiceTest):
                     "available": True
                 },
                 "hosts": None,
-                "zoneName": u'\xf4'
+                "zoneName": '\xf4'
             }
         ]
     }

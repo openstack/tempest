@@ -31,7 +31,7 @@ class TestNetworksClient(base.BaseServiceTest):
         "deleted_at": None,
         "gateway": None,
         "rxtx_base": None,
-        "label": u'30d7',
+        "label": '30d7',
         "priority": None,
         "project_id": None,
         "vpn_private_address": None,

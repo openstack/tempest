@@ -27,7 +27,7 @@ class TestExtensionsClient(base.BaseServiceTest):
             "namespace":
             "http://docs.openstack.org/compute/ext/multinic/api/v1.1",
             "alias": "NMN",
-            "description": u'\u2740(*\xb4\u25e1`*)\u2740'
+            "description": '\u2740(*\xb4\u25e1`*)\u2740'
         }
     }
 

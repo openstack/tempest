@@ -29,7 +29,7 @@ class TestQuotaClassesClient(base.BaseServiceTest):
         "ram": 51200,
         "floating_ips": 10,
         "key_pairs": 100,
-        "id": u'\u2740(*\xb4\u25e1`*)\u2740',
+        "id": '\u2740(*\xb4\u25e1`*)\u2740',
         "instances": 10,
         "security_group_rules": 20,
         "security_groups": 10,

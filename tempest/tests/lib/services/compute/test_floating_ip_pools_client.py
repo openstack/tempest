@@ -22,8 +22,8 @@ class TestFloatingIPPoolsClient(base.BaseServiceTest):
     FAKE_FLOATING_IP_POOLS = {
         "floating_ip_pools":
         [
-            {"name": u'\u3042'},
-            {"name": u'\u3044'}
+            {"name": '\u3042'},
+            {"name": '\u3044'}
         ]
     }
 

@@ -37,7 +37,7 @@ class TestAggregatesClient(base.BaseServiceTest):
     FAKE_CREATE_AGGREGATE = {
         "aggregate":
         {
-            "name": u'\xf4',
+            "name": '\xf4',
             "availability_zone": None,
             "deleted": False,
             "created_at": "2015-07-21T04:11:18.000000",
@@ -50,7 +50,7 @@ class TestAggregatesClient(base.BaseServiceTest):
     FAKE_UPDATE_AGGREGATE = {
         "aggregate":
         {
-            "name": u'\xe9',
+            "name": '\xe9',
             "availability_zone": None,
             "deleted": False,
             "created_at": "2015-07-16T03:07:32.000000",
@@ -74,7 +74,7 @@ class TestAggregatesClient(base.BaseServiceTest):
         "metadata": {
             "availability_zone": "nova"
         },
-        "name": u'\xe9',
+        "name": '\xe9',
         "updated_at": None
     }
 
