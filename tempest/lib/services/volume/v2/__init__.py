@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+import warnings
+
 from tempest.lib.services.volume.v2.availability_zone_client \
     import AvailabilityZoneClient
 from tempest.lib.services.volume.v2.backups_client import BackupsClient
@@ -44,3 +46,9 @@ __all__ = ['AvailabilityZoneClient', 'BackupsClient', 'EncryptionTypesClient',
            'LimitsClient', 'CapabilitiesClient', 'SchedulerStatsClient',
            'SnapshotManageClient', 'VolumeManageClient', 'TransfersClient',
            'QuotaClassesClient']
+
+warnings.warn(
+    "The tempest.lib.services.volume.v2 module (volume v2 APIs service "
+    "clients) is deprecated in favor of tempest.lib.services.volume.v3 "
+    "(volume v3 APIs service clients) and will be removed once Tempest stop "
+    "supporting stable wallaby.", DeprecationWarning)

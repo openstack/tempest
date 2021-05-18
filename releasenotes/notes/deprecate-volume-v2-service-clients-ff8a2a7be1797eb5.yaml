@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Tempest service clients for volume v2 APIs (tempest.lib.services.volume.v2 module)
+    is deprecated and will be removed once Tempest stop supporting stable wallaby release
+    which is last release volume v2 APIs are present in cinder.
