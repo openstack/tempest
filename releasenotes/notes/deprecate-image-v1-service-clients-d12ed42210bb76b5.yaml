@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    Tempest service clients for image v1 APIs (tempest.lib.services.image.v1 module)
+    is deprecated and will be removed once Tempest stop supporting stable Ussuri release
+    which is last release Image v1 APIs are present in glance.
