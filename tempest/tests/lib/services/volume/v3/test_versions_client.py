@@ -22,21 +22,6 @@ class TestVersionsClient(base.BaseServiceTest):
     FAKE_VERSIONS_INFO = {
         "versions": [
             {
-                "status": "DEPRECATED", "updated": "2016-05-02T20:25:19Z",
-                "links": [
-                    {"href": "http://docs.openstack.org/", "type": "text/html",
-                     "rel": "describedby"},
-                    {"href": "https://10.30.197.39:8776/v1/", "rel": "self"}
-                ],
-                "min_version": "",
-                "version": "",
-                "media-types": [
-                    {"base": "application/json",
-                     "type": "application/vnd.openstack.volume+json;version=1"}
-                ],
-                "id": "v1.0"
-            },
-            {
                 "status": "DEPRECATED", "updated": "2017-02-25T12:00:00Z",
                 "links": [
                     {"href": "http://docs.openstack.org/", "type": "text/html",
@@ -134,8 +119,6 @@ class TestVersionsClient(base.BaseServiceTest):
         self._test_show_version('v3', bytes_body=True)
 
     def test_get_base_version_url_app_name(self):
-        self._test_get_base_version_url('https://bar.org/volume/v1/123',
-                                        'https://bar.org/volume/')
         self._test_get_base_version_url('https://bar.org/volume/v2/123',
                                         'https://bar.org/volume/')
         self._test_get_base_version_url('https://bar.org/volume/v3/123',

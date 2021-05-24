@@ -1,0 +1,8 @@
+---
+prelude: >
+    Tempest Service clients for volume v1 APIs are removed.
+upgrade:
+  - |
+    Cinder removed the volume v1 APIs in queens release and Tempest
+    now support only stable train onwards release so all the Tempest
+    service clients for volume v1 APIs are now removed.

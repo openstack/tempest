@@ -52,7 +52,6 @@ def tempest_modules():
         'image.v2': image.v2,
         'network': network,
         'object-storage': object_storage,
-        'volume.v1': volume.v1,
         'volume.v2': volume.v2,
         'volume.v3': volume.v3
     }
