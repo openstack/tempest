@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
@@ -195,15 +194,3 @@ class V3TokenClient(rest_client.RestClient):
             return token, body['token']
         else:
             return token
-
-
-class V3TokenClientJSON(V3TokenClient):
-    LOG = logging.getLogger(__name__)
-
-    def _warn(self):
-        self.LOG.warning("%s class was deprecated and renamed to %s",
-                         self.__class__.__name__, 'V3TokenClient')
-
-    def __init__(self, *args, **kwargs):
-        self._warn()
-        super(V3TokenClientJSON, self).__init__(*args, **kwargs)

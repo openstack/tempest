@@ -1,0 +1,9 @@
+---
+prelude: >
+    Tempest's identity service client TokenClientJSON and V3TokenClientJSON
+    has been removed.
+upgrade:
+  - |
+    Tempest's identity service client TokenClientJSON and V3TokenClientJSON
+    were deprecated since long which are not removed. Please use new service
+    clients TokenClient and V3TokenClient instead.
