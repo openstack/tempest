@@ -408,8 +408,9 @@
 - job:
     name: tempest-cinder-v2-api
     parent: devstack-tempest
-    branches:
-      - master
+    # NOTE(gmann): Cinder v2 APIs are available until
+    # stable/wallaby only.
+    override-checkout: stable/wallaby
     description: |
       This job runs the cinder API test against v2 endpoint.
     vars:
