@@ -62,61 +62,6 @@
 - job:
     name: tempest-full-py3
     parent: devstack-tempest
-    # This job version is with swift disabled on py3
-    # as swift was not ready on py3 until stable/train.
-    branches:
-      - stable/pike
-      - stable/queens
-      - stable/rocky
-      - stable/stein
-      - stable/train
-    description: |
-      Base integration test with Neutron networking, swift disabled, and py3.
-      Former names for this job where:
-        * legacy-tempest-dsvm-py35
-        * gate-tempest-dsvm-py35
-    required-projects:
-      - openstack/horizon
-    vars:
-      tox_envlist: full
-      devstack_localrc:
-        USE_PYTHON3: true
-        FORCE_CONFIG_DRIVE: true
-        ENABLE_VOLUME_MULTIATTACH: true
-        GLANCE_USE_IMPORT_WORKFLOW: True
-      devstack_plugins:
-        neutron: https://opendev.org/openstack/neutron
-      devstack_local_conf:
-        post-config:
-          "/$NEUTRON_CORE_PLUGIN_CONF":
-            ovs:
-              bridge_mappings: public:br-ex
-              resource_provider_bandwidths: br-ex:1000000:1000000
-        test-config:
-          $TEMPEST_CONFIG:
-            network-feature-enabled:
-              qos_placement_physnet: public
-      devstack_services:
-        # Enbale horizon so that we can run horizon test.
-        horizon: true
-        s-account: false
-        s-container: false
-        s-object: false
-        s-proxy: false
-        # without Swift, c-bak cannot run (in the Gate at least)
-        # NOTE(mriedem): Disable the cinder-backup service from
-        # tempest-full-py3 since tempest-full-py3 is in the integrated-gate-py3
-        # project template but the backup tests do not really involve other
-        # services so they should be run in some more cinder-specific job,
-        # especially because the tests fail at a high rate (see bugs 1483434,
-        # 1813217, 1745168)
-        c-bak: false
-        neutron-placement: true
-        neutron-qos: true
-
-- job:
-    name: tempest-full-py3
-    parent: devstack-tempest
     # This job version is with swift enabled on py3
     # as swift is ready on py3 from stable/ussuri onwards.
     branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
@@ -263,45 +208,6 @@
           USE_PYTHON3: False
 
 - job:
-    name: tempest-multinode-full
-    parent: tempest-multinode-full-base
-    nodeset: openstack-two-node-bionic
-    # This job runs on Bionic and on python2. This is for stable/stein and stable/train.
-    # This job is prepared to make sure all stable branches from stable/stein till stable/train
-    # will keep running on bionic. This can be removed once stable/train is EOL.
-    branches:
-      - stable/stein
-      - stable/train
-      - stable/ussuri
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
-
-- job:
-    name: tempest-multinode-full
-    parent: tempest-multinode-full-base
-    nodeset: openstack-two-node-xenial
-    # This job runs on Xenial and this is for stable/pike, stable/queens
-    # and stable/rocky. This job is prepared to make sure all stable branches
-    # before stable/stein will keep running on xenial. This job can be
-    # removed once stable/rocky is EOL.
-    branches:
-      - stable/pike
-      - stable/queens
-      - stable/rocky
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
-
-- job:
     name: tempest-multinode-full-py3
     parent: tempest-multinode-full
     vars:
@@ -353,46 +259,6 @@
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
         ENABLE_VOLUME_MULTIATTACH: true
-      devstack_plugins:
-        neutron: https://opendev.org/openstack/neutron
-      devstack_services:
-        neutron-placement: true
-        neutron-qos: true
-      tempest_concurrency: 2
-    group-vars:
-      # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
-      # the controller and subnode prior to Rocky so we have to make sure the
-      # variable is set in both locations.
-      subnode:
-        devstack_localrc:
-          ENABLE_VOLUME_MULTIATTACH: true
-
-- job:
-    name: tempest-slow
-    parent: tempest-multinode-full
-    description: |
-      This multinode integration job will run all the tests tagged as slow.
-      It enables the lvm multibackend setup to cover few scenario tests.
-      This job will run only slow tests (API or Scenario) serially.
-
-      Former names for this job were:
-        * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
-        * tempest-scenario-multinode-lvm-multibackend
-    timeout: 10800
-    branches:
-      - stable/pike
-      - stable/queens
-      - stable/rocky
-    vars:
-      tox_envlist: slow-serial
-      devstack_localrc:
-        CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
-        ENABLE_VOLUME_MULTIATTACH: true
-        # to avoid https://bugs.launchpad.net/neutron/+bug/1914037
-        # as we couldn't backport the fix to rocky and older releases
-        IPV6_PUBLIC_RANGE: 2001:db8:0:10::/64
-        IPV6_PUBLIC_NETWORK_GATEWAY: 2001:db8:0:10::2
-        IPV6_ROUTER_GW_IP: 2001:db8:0:10::1
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
