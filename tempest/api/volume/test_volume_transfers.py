@@ -104,3 +104,30 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         self.client.delete_volume_transfer(transfer_id)
         waiters.wait_for_volume_resource_status(
             self.volumes_client, volume['id'], 'available')
+
+
+class VolumesTransfersV355Test(VolumesTransfersTest):
+    """Test volume transfer for the "new" Transfers API mv 3.55"""
+
+    min_microversion = '3.55'
+    max_microversion = 'latest'
+
+    credentials = ['primary', 'alt', 'admin']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesTransfersV355Test, cls).setup_clients()
+        cls.client = cls.os_primary.volume_transfers_mv355_client_latest
+        cls.alt_client = cls.os_alt.volume_transfers_mv355_client_latest
+
+    @decorators.idempotent_id('9f36bb2b-619f-4507-b246-76aeb9a28851')
+    def test_create_get_list_accept_volume_transfer(self):
+        """Test create, get, list, accept with volume-transfers API mv 3.55"""
+        super(VolumesTransfersV355Test, self). \
+            test_create_get_list_accept_volume_transfer()
+
+    @decorators.idempotent_id('af4a5b97-0859-4f31-aa3c-85b05bb63322')
+    def test_create_list_delete_volume_transfer(self):
+        """Test create, list, delete with volume-transfers API mv 3.55"""
+        super(VolumesTransfersV355Test, self). \
+            test_create_list_delete_volume_transfer()

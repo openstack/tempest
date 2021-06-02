@@ -264,6 +264,8 @@ class Manager(clients.ServiceClients):
             self.volume_v3.SchedulerStatsClient()
         self.volume_transfers_client_latest = \
             self.volume_v3.TransfersClient()
+        self.volume_transfers_mv355_client_latest = \
+            self.volume_v3.TransfersV355Client()
         self.volume_availability_zone_client_latest = \
             self.volume_v3.AvailabilityZoneClient()
         self.volume_limits_client_latest = self.volume_v3.LimitsClient()

@@ -39,6 +39,7 @@ from tempest.lib.services.volume.v3.snapshot_manage_client import \
     SnapshotManageClient
 from tempest.lib.services.volume.v3.snapshots_client import SnapshotsClient
 from tempest.lib.services.volume.v3.transfers_client import TransfersClient
+from tempest.lib.services.volume.v3.transfers_client import TransfersV355Client
 from tempest.lib.services.volume.v3.types_client import TypesClient
 from tempest.lib.services.volume.v3.versions_client import VersionsClient
 from tempest.lib.services.volume.v3.volume_manage_client import \
@@ -50,5 +51,6 @@ __all__ = ['AttachmentsClient', 'AvailabilityZoneClient', 'BackupsClient',
            'GroupsClient', 'HostsClient', 'LimitsClient', 'MessagesClient',
            'QosSpecsClient', 'QuotaClassesClient', 'QuotasClient',
            'SchedulerStatsClient', 'ServicesClient', 'SnapshotManageClient',
-           'SnapshotsClient', 'TransfersClient', 'TypesClient',
-           'VersionsClient', 'VolumeManageClient', 'VolumesClient']
+           'SnapshotsClient', 'TransfersClient', 'TransfersV355Client',
+           'TypesClient', 'VersionsClient', 'VolumeManageClient',
+           'VolumesClient']
