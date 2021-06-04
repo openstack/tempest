@@ -570,24 +570,33 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
         attachment = self.servers_client.attach_volume(
             server['id'], **attach_kwargs)['volumeAttachment']
-        # On teardown detach the volume and for multiattach volumes wait for
-        # the attachment to be removed. For non-multiattach volumes wait for
-        # the state of the volume to change to available. This is so we don't
-        # error out when trying to delete the volume during teardown.
-        if volume['multiattach']:
-            att = waiters.wait_for_volume_attachment_create(
-                self.volumes_client, volume['id'], server['id'])
-            self.addCleanup(waiters.wait_for_volume_attachment_remove,
-                            self.volumes_client, volume['id'],
-                            att['attachment_id'])
-        else:
-            self.addCleanup(waiters.wait_for_volume_resource_status,
-                            self.volumes_client, volume['id'], 'available')
-            waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                    volume['id'], 'in-use')
-        # Ignore 404s on detach in case the server is deleted or the volume
-        # is already detached.
+
+        # NOTE(lyarwood): During attach we initially wait for the volume
+        # attachment and then check the volume state.
+        waiters.wait_for_volume_attachment_create(
+            self.volumes_client, volume['id'], server['id'])
+        # TODO(lyarwood): Remove the following volume status checks and move to
+        # attachment status checks across all volumes now with the 3.27
+        # microversion somehow.
+        if not volume['multiattach']:
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, volume['id'], 'in-use')
+
+        # NOTE(lyarwood): On teardown (LIFO) initially wait for the volume
+        # attachment in Nova to be removed. While this technically happens last
+        # we want this to be the first waiter as if it fails we can then dump
+        # the contents of the console log. The final check of the volume state
+        # should be a no-op by this point and is just added for completeness
+        # when detaching non-multiattach volumes.
+        if not volume['multiattach']:
+            self.addCleanup(
+                waiters.wait_for_volume_resource_status, self.volumes_client,
+                volume['id'], 'available')
+        self.addCleanup(
+            waiters.wait_for_volume_attachment_remove_from_server,
+            self.servers_client, server['id'], volume['id'])
         self.addCleanup(self._detach_volume, server, volume)
+
         return attachment
 
     def create_volume_snapshot(self, volume_id, name=None, description=None,

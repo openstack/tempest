@@ -453,11 +453,14 @@ class TestVolumeWaiters(base.TestCase):
             "volumeAttachments": [{"volumeId": uuids.volume_id}]}
         mock_list_volume_attachments = mock.Mock(
             side_effect=[volume_attached, volume_attached])
+        mock_get_console_output = mock.Mock(
+            return_value={'output': 'output'})
         mock_client = mock.Mock(
             spec=servers_client.ServersClient,
             build_interval=1,
             build_timeout=1,
-            list_volume_attachments=mock_list_volume_attachments)
+            list_volume_attachments=mock_list_volume_attachments,
+            get_console_output=mock_get_console_output)
         self.patch(
             'time.time',
             side_effect=[0., 0.5, mock_client.build_timeout + 1.])
@@ -473,3 +476,22 @@ class TestVolumeWaiters(base.TestCase):
         mock_list_volume_attachments.assert_has_calls([
             mock.call(uuids.server_id),
             mock.call(uuids.server_id)])
+
+        # Assert that we fetch console output
+        mock_get_console_output.assert_called_once_with(uuids.server_id)
+
+    def test_wait_for_volume_attachment_remove_from_server_not_found(self):
+        mock_list_volume_attachments = mock.Mock(
+            side_effect=lib_exc.NotFound)
+        mock_client = mock.Mock(
+            spec=servers_client.ServersClient,
+            list_volume_attachments=mock_list_volume_attachments)
+
+        # Assert that nothing is raised when lib_exc_NotFound is raised
+        # by the client call to list_volume_attachments
+        waiters.wait_for_volume_attachment_remove_from_server(
+            mock_client, mock.sentinel.server_id, mock.sentinel.volume_id)
+
+        # Assert that list_volume_attachments was actually called
+        mock_list_volume_attachments.assert_called_once_with(
+            mock.sentinel.server_id)

@@ -356,23 +356,36 @@ def wait_for_volume_attachment_remove_from_server(
     This waiter checks the compute API if the volume attachment is removed.
     """
     start = int(time.time())
-    volumes = client.list_volume_attachments(server_id)['volumeAttachments']
+
+    try:
+        volumes = client.list_volume_attachments(
+            server_id)['volumeAttachments']
+    except lib_exc.NotFound:
+        # Ignore 404s on detach in case the server is deleted or the volume
+        # is already detached.
+        return
 
     while any(volume for volume in volumes if volume['volumeId'] == volume_id):
         time.sleep(client.build_interval)
 
         timed_out = int(time.time()) - start >= client.build_timeout
         if timed_out:
+            console_output = client.get_console_output(server_id)['output']
+            LOG.debug('Console output for %s\nbody=\n%s',
+                      server_id, console_output)
             message = ('Volume %s failed to detach from server %s within '
                        'the required time (%s s) from the compute API '
                        'perspective' %
                        (volume_id, server_id, client.build_timeout))
             raise lib_exc.TimeoutException(message)
-
-        volumes = client.list_volume_attachments(server_id)[
-            'volumeAttachments']
-
-    return volumes
+        try:
+            volumes = client.list_volume_attachments(
+                server_id)['volumeAttachments']
+        except lib_exc.NotFound:
+            # Ignore 404s on detach in case the server is deleted or the volume
+            # is already detached.
+            return
+    return
 
 
 def wait_for_volume_migration(client, volume_id, new_host):
