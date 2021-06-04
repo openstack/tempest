@@ -121,6 +121,8 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
     def test_volume_type_encryption_create_get_update_delete(self):
         """Test create/get/update/delete volume encryption type"""
         create_kwargs = {'provider': 'LuksEncryptor',
+                         'key_size': 256,
+                         'cipher': 'aes-xts-plain64',
                          'control_location': 'front-end'}
         volume_type_id = self.create_volume_type()['id']
 
