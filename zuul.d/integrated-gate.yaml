@@ -121,10 +121,13 @@
     # as swift is ready on py3 from stable/ussuri onwards.
     branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
     description: |
-      Base integration test with Neutron networking, swift enable, and py3.
+      Base integration test with Neutron networking, horizon, swift enable,
+      and py3.
       Former names for this job where:
         * legacy-tempest-dsvm-py35
         * gate-tempest-dsvm-py35
+    required-projects:
+      - openstack/horizon
     vars:
       tox_envlist: full
       devstack_localrc:
@@ -132,6 +135,23 @@
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
         GLANCE_USE_IMPORT_WORKFLOW: True
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_local_conf:
+        post-config:
+          "/$NEUTRON_CORE_PLUGIN_CONF":
+            ovs:
+              bridge_mappings: public:br-ex
+              resource_provider_bandwidths: br-ex:1000000:1000000
+        test-config:
+          $TEMPEST_CONFIG:
+            network-feature-enabled:
+              qos_placement_physnet: public
+      devstack_services:
+        # Enbale horizon so that we can run horizon test.
+        horizon: true
+        neutron-placement: true
+        neutron-qos: true
 
 - job:
     name: tempest-integrated-networking
