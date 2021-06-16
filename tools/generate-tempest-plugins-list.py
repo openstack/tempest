@@ -35,28 +35,33 @@ from urllib3.util import retry
 # TODO(masayukig): Some of these can be removed from NON_ACTIVE_LIST in the
 # future when the patches are merged.
 NON_ACTIVE_LIST = [
-    'x/gce-api',  # It looks gce-api doesn't support python3 yet.
+    'x/gce-api',  # It looks gce-api doesn't support python3 yet
+    # https://bugs.launchpad.net/gce-api/+bug/1931094
     'x/glare',  # To avoid sanity-job failure
-    'x/group-based-policy',  # It looks this doesn't support python3 yet.
-    'x/intel-nfv-ci-tests',  # https://review.opendev.org/#/c/634640/
+    'x/group-based-policy',
+    # https://bugs.launchpad.net/group-based-policy/+bug/1931091
+    'x/intel-nfv-ci-tests',  # To avoid sanity-job failure
     'openstack/networking-generic-switch',
+    # This is not a real tempest plugin,
     # https://review.opendev.org/#/c/634846/
-    'x/networking-l2gw-tempest-plugin',
-    # https://review.opendev.org/#/c/635093/
-    'openstack/networking-midonet',  # https://review.opendev.org/#/c/635096/
-    'x/networking-plumgrid',  # https://review.opendev.org/#/c/635096/
+    'x/networking-plumgrid',  # No longer contains tempest tests
     'x/networking-spp',  # https://review.opendev.org/#/c/635098/
+    # networking-spp is missing neutron-tempest-plugin as a dep plus
+    # test-requirements.txt is nested in a openstack dir and sanity script
+    # doesn't count with such scenario yet
     'openstack/neutron-dynamic-routing',
+    # As tests have been migrated to neutron-tempest-plugin:
     # https://review.opendev.org/#/c/637718/
-    'openstack/neutron-vpnaas',  # https://review.opendev.org/#/c/637719/
-    'x/tap-as-a-service',  # To avoid sanity-job failure
-    'x/valet',  # https://review.opendev.org/#/c/638339/
-    'x/kingbird',  # https://bugs.launchpad.net/kingbird/+bug/1869722
-    # vmware-nsx is excluded since https://review.opendev.org/#/c/736952
-    'x/vmware-nsx-tempest-plugin',
+    'openstack/neutron-vpnaas',
+    # As tests have been migrated to neutron-tempest-plugin:
+    # https://review.opendev.org/c/openstack/neutron-vpnaas/+/695834
+    'x/valet',  # valet is unmaintained now
+    # https://review.opendev.org/c/x/valet/+/638339
+    'x/kingbird',  # kingbird is unmaintained now
+    # https://bugs.launchpad.net/kingbird/+bug/1869722
+    'x/mogan',
     # mogan is unmaintained now, remove from the list when this is merged:
     # https://review.opendev.org/c/x/mogan/+/767718
-    'x/mogan',
 ]
 
 url = 'https://review.opendev.org/projects/'
