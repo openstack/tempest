@@ -276,20 +276,9 @@
 - job:
     name: tempest-slow-py3
     parent: tempest-slow
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: true
-      devstack_services:
-        s-account: false
-        s-container: false
-        s-object: false
-        s-proxy: false
-        # without Swift, c-bak cannot run (in the Gate at least)
-        c-bak: false
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: true
+    # This job version is with swift enabled on py3
+    # as swift is ready on py3 from stable/ussuri onwards.
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
 
 - job:
     name: tempest-cinder-v2-api
