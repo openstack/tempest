@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add a new client to lists, creates, shows information for,
+    and updates neutron log resource.
