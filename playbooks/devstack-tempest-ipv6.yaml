@@ -15,5 +15,5 @@
     # IPv6 only env for example Devstack IPv6 settings and services listen
     # address is IPv6 etc. This is invoked before tests are run so that we can
     # fail early if anything missing the IPv6 settings or deployments.
-    - ipv6-only-deployments-verification
+    - devstack-ipv6-only-deployments-verification
     - run-tempest
