@@ -97,6 +97,18 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         body = self.ports_client.update_port(
             port_id, allowed_address_pairs=allowed_address_pairs)
         allowed_address_pair = body['port']['allowed_address_pairs']
+        # NOTE(slaweq): Attribute "active" is added to the
+        # allowed_address_pairs in the Xena release.
+        # To make our existing allowed_address_pairs API tests to be passing in
+        # both cases, with and without that "active" attribute, we need to
+        # removes that field from the allowed_address_pairs which are returned
+        # by the Neutron server.
+        # We could make expected results of those tests to be dependend on the
+        # available Neutron's API extensions but in that case existing tests
+        # may fail randomly as all tests are always using same IP addresses
+        # thus allowed_address_pair may be active=True or active=False.
+        for pair in allowed_address_pair:
+            pair.pop('active', None)
         self.assertCountEqual(allowed_address_pair, allowed_address_pairs)
 
     @decorators.idempotent_id('9599b337-272c-47fd-b3cf-509414414ac4')
