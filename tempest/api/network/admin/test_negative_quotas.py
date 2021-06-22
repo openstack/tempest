@@ -45,10 +45,15 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
         super(QuotasNegativeTest, self).setUp()
         name = data_utils.rand_name('test_project_')
         description = data_utils.rand_name('desc_')
-        self.project = identity.identity_utils(self.os_admin).create_project(
+        self.creds_client = identity.identity_utils(self.os_admin)
+        self.project = self.creds_client.create_project(
             name=name, description=description)
         self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
                         self.project['id'])
+
+    def tearDown(self):
+        super(QuotasNegativeTest, self).tearDown()
+        self.credentials_provider.cleanup_default_secgroup(self.project['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
