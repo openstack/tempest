@@ -1000,6 +1000,11 @@ VolumeGroup = [
     cfg.IntOpt('volume_size',
                default=1,
                help='Default size in GB for volumes created by volumes tests'),
+    cfg.IntOpt('volume_size_extend',
+               default=1,
+               help="Size in GB a volume is extended by - if a test "
+                    "extends a volume, the size of the new volume will be "
+                    "volume_size + volume_size_extend."),
     cfg.ListOpt('manage_volume_ref',
                 default=['source-name', 'volume-%s'],
                 help="A reference to existing volume for volume manage. "
