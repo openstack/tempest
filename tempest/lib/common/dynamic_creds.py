@@ -407,13 +407,23 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # Maintained until tests are ported
             LOG.info("Acquired dynamic creds:\n"
                      " credentials: %s", credentials)
-            if (self.neutron_available and self.create_networks):
-                network, subnet, router = self._create_network_resources(
-                    credentials.tenant_id)
-                credentials.set_resources(network=network, subnet=subnet,
-                                          router=router)
-                LOG.info("Created isolated network resources for:\n"
-                         " credentials: %s", credentials)
+            # NOTE(gmann): For 'domain' and 'system' scoped token, there is no
+            # project_id so we are skipping the network creation for both
+            # scope. How these scoped token can create the network, Nova
+            # server or other project mapped resources is one of the open
+            # question and discussed a lot in Xena cycle PTG. Once we sort
+            # out that then if needed we can update the network creation here.
+            if (not scope or scope == 'project'):
+                if (self.neutron_available and self.create_networks):
+                    network, subnet, router = self._create_network_resources(
+                        credentials.tenant_id)
+                    credentials.set_resources(network=network, subnet=subnet,
+                                              router=router)
+                    LOG.info("Created isolated network resources for:\n"
+                             " credentials: %s", credentials)
+            else:
+                LOG.info("Network resources are not created for scope: %s",
+                         scope)
         return credentials
 
     # TODO(gmann): Remove this method in favor of get_project_member_creds()
