@@ -45,7 +45,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
             container_format=CONF.image.container_formats[0],
             disk_format=CONF.image.disk_formats[0],
             visibility='private',
-            min_disk=CONF.volume.volume_size + 1)
+            min_disk=CONF.volume.volume_size + CONF.volume.volume_size_extend)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.images_client.delete_image, image['id'])
 
@@ -223,7 +223,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('8f05a943-013c-4063-ac71-7baf561e82eb')
     def test_volume_extend_with_nonexistent_volume_id(self):
         """Test extending non existent volume should fail"""
-        extend_size = self.volume['size'] + 1
+        extend_size = self.volume['size'] + CONF.volume.volume_size_extend
         self.assertRaises(lib_exc.NotFound, self.volumes_client.extend_volume,
                           data_utils.rand_uuid(), new_size=extend_size)
 
@@ -231,7 +231,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('aff8ba64-6d6f-4f2e-bc33-41a08ee9f115')
     def test_volume_extend_without_passing_volume_id(self):
         """Test extending volume without passing volume id should fail"""
-        extend_size = self.volume['size'] + 1
+        extend_size = self.volume['size'] + CONF.volume.volume_size_extend
         self.assertRaises(lib_exc.NotFound, self.volumes_client.extend_volume,
                           None, new_size=extend_size)
 

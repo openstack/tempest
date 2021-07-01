@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adding new config option for volume tests which allows to specify the size
+    a volume will be extended by (if a test does extend a volume or needs
+    a new bigger volume). The option is beneficial in case such tests are
+    executed on systems where the chunk size (the minimum size a volume can be
+    extended by) is other than 1 (originally hardcoded in the tests).:
+
+    CONF.volume.volume_size_extend

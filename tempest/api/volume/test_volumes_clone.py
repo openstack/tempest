@@ -49,13 +49,14 @@ class VolumesCloneTest(base.BaseVolumeTest):
         # Creates a volume from another volume passing a size different from
         # the source volume.
         src_size = CONF.volume.volume_size
+        extend_size = CONF.volume.volume_size_extend
 
         src_vol = self.create_volume(size=src_size)
         # Destination volume bigger than source
         dst_vol = self.create_volume(source_volid=src_vol['id'],
-                                     size=src_size + 1)
+                                     size=src_size + extend_size)
 
-        self._verify_volume_clone(src_vol, dst_vol, extra_size=1)
+        self._verify_volume_clone(src_vol, dst_vol, extra_size=extend_size)
 
     @decorators.idempotent_id('cbbcd7c6-5a6c-481a-97ac-ca55ab715d16')
     @utils.services('image')

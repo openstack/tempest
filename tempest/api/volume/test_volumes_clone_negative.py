@@ -36,11 +36,11 @@ class VolumesCloneNegativeTest(base.BaseVolumeTest):
         """Test cloning a volume with decreasing size will fail"""
         # Creates a volume from another volume passing a size different from
         # the source volume.
-        src_size = CONF.volume.volume_size + 1
+        src_size = CONF.volume.volume_size + CONF.volume.volume_size_extend
         src_vol = self.create_volume(size=src_size)
 
         # Destination volume smaller than source
         self.assertRaises(exceptions.BadRequest,
                           self.volumes_client.create_volume,
-                          size=src_size - 1,
+                          size=src_size - CONF.volume.volume_size_extend,
                           source_volid=src_vol['id'])
