@@ -68,18 +68,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario001-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario002-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario003-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
-        - puppet-openstack-integration-4-scenario004-tempest-centos-7:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
         - neutron-tempest-dvr:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
