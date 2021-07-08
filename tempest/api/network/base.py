@@ -84,6 +84,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.network_versions_client = cls.os_primary.network_versions_client
         cls.service_providers_client = cls.os_primary.service_providers_client
         cls.tags_client = cls.os_primary.tags_client
+        cls.log_resource_client = cls.os_primary.log_resource_client
 
     @classmethod
     def resource_setup(cls):

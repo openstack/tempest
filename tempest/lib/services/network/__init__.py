@@ -15,6 +15,7 @@
 from tempest.lib.services.network.agents_client import AgentsClient
 from tempest.lib.services.network.extensions_client import ExtensionsClient
 from tempest.lib.services.network.floating_ips_client import FloatingIPsClient
+from tempest.lib.services.network.log_resource_client import LogResourceClient
 from tempest.lib.services.network.metering_label_rules_client import \
     MeteringLabelRulesClient
 from tempest.lib.services.network.metering_labels_client import \
@@ -45,4 +46,4 @@ __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'QosClient', 'QosMinimumBandwidthRulesClient', 'QuotasClient',
            'RoutersClient', 'SecurityGroupRulesClient', 'SecurityGroupsClient',
            'SegmentsClient', 'ServiceProvidersClient', 'SubnetpoolsClient',
-           'SubnetsClient', 'TagsClient', 'TrunksClient']
+           'SubnetsClient', 'TagsClient', 'TrunksClient', 'LogResourceClient']
