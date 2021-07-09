@@ -64,11 +64,11 @@
             irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade-multinode:
+        - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
-        - neutron-tempest-dvr:
+        - neutron-ovs-tempest-dvr:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
         - interop-tempest-consistency:
@@ -85,7 +85,7 @@
       jobs:
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - neutron-grenade-multinode:
+        - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
@@ -102,7 +102,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
             irrelevant-files: *tempest-irrelevant-files
-        - neutron-tempest-dvr-ha-multinode-full:
+        - neutron-ovs-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - nova-tempest-v2-api:
             irrelevant-files: *tempest-irrelevant-files
