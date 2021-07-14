@@ -518,7 +518,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             LOG.warning('network with name: %s not found for delete',
                         network_name)
 
-    def _cleanup_default_secgroup(self, tenant):
+    def cleanup_default_secgroup(self, tenant):
         nsg_client = self.security_groups_admin_client
         resp_body = nsg_client.list_security_groups(tenant_id=tenant,
                                                     name="default")
@@ -572,13 +572,13 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 LOG.warning("user with name: %s not found for delete",
                             creds.username)
             # NOTE(zhufl): Only when neutron's security_group ext is
-            # enabled, _cleanup_default_secgroup will not raise error. But
+            # enabled, cleanup_default_secgroup will not raise error. But
             # here cannot use test_utils.is_extension_enabled for it will cause
             # "circular dependency". So here just use try...except to
             # ensure tenant deletion without big changes.
             try:
                 if self.neutron_available:
-                    self._cleanup_default_secgroup(creds.tenant_id)
+                    self.cleanup_default_secgroup(creds.tenant_id)
             except lib_exc.NotFound:
                 LOG.warning("failed to cleanup tenant %s's secgroup",
                             creds.tenant_name)
