@@ -14,7 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
+from collections import abc
 import email.utils
 import re
 import time
@@ -884,7 +884,7 @@ class RestClient(object):
                                                     resp=resp)
 
     def is_absolute_limit(self, resp, resp_body):
-        if (not isinstance(resp_body, collections.Mapping) or
+        if (not isinstance(resp_body, abc.Mapping) or
                 'retry-after' not in resp):
             return True
         return 'exceed' in resp_body.get('message', 'blabla')
