@@ -1,0 +1,12 @@
+---
+prelude: |
+    This is an intermediate release during the Xena development cycle to
+    mark the end of support for EM Train release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Wallaby
+    * Victoria
+    * Ussuri
+
+    Current development of Tempest is for OpenStack Xena development
+    cycle.
