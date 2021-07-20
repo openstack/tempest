@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Add "QoS bandwidth limit rules" APIs to:
+    "tempest/tests/lib/services/network/test_qos_limit_bandwidth_rules_client.py"  module.
+
+    * List bandwidth limit rules for QoS policy
+    * Create bandwidth limit rule
+    * Show bandwidth limit rule details
+    * Update bandwidth limit rule
+    * Delete bandwidth limit rule
