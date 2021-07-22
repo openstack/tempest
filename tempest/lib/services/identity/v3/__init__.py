@@ -32,6 +32,7 @@ from tempest.lib.services.identity.v3.groups_client import GroupsClient
 from tempest.lib.services.identity.v3.identity_client import IdentityClient
 from tempest.lib.services.identity.v3.inherited_roles_client import \
     InheritedRolesClient
+from tempest.lib.services.identity.v3.limits_client import LimitsClient
 from tempest.lib.services.identity.v3.oauth_consumers_client import \
     OAUTHConsumerClient
 from tempest.lib.services.identity.v3.oauth_token_client import \
@@ -55,7 +56,8 @@ __all__ = ['AccessRulesClient', 'ApplicationCredentialsClient',
            'DomainConfigurationClient', 'EndPointGroupsClient',
            'EndPointsClient', 'EndPointsFilterClient',
            'GroupsClient', 'IdentityClient', 'InheritedRolesClient',
-           'OAUTHConsumerClient', 'OAUTHTokenClient', 'PoliciesClient',
-           'ProjectsClient', 'ProjectTagsClient', 'RegionsClient',
-           'RoleAssignmentsClient', 'RolesClient', 'ServicesClient',
-           'V3TokenClient', 'TrustsClient', 'UsersClient', 'VersionsClient']
+           'LimitsClient', 'OAUTHConsumerClient', 'OAUTHTokenClient',
+           'PoliciesClient', 'ProjectsClient', 'ProjectTagsClient',
+           'RegionsClient', 'RoleAssignmentsClient', 'RolesClient',
+           'ServicesClient', 'V3TokenClient', 'TrustsClient', 'UsersClient',
+           'VersionsClient']

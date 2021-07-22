@@ -222,6 +222,8 @@ class Manager(clients.ServiceClients):
             self.identity_v3.ApplicationCredentialsClient(**params_v3)
         self.access_rules_client = \
             self.identity_v3.AccessRulesClient(**params_v3)
+        self.identity_limits_client = \
+            self.identity_v3.LimitsClient(**params_v3)
 
         # Token clients do not use the catalog. They only need default_params.
         # They read auth_url, so they should only be set if the corresponding
