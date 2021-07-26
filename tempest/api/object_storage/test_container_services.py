@@ -21,9 +21,10 @@ from tempest.lib import decorators
 class ContainerTest(base.BaseObjectTest):
     """Test containers"""
 
-    def tearDown(self):
-        self.delete_containers()
-        super(ContainerTest, self).tearDown()
+    @classmethod
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ContainerTest, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('92139d73-7819-4db1-85f8-3f2f22a8d91f')

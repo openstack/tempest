@@ -44,10 +44,10 @@ class ContainerQuotasTest(base.BaseObjectTest):
         self.container_client.create_update_or_delete_container_metadata(
             self.container_name, create_update_metadata=metadata)
 
-    def tearDown(self):
-        """Cleans the container of any object after each test."""
-        self.delete_containers()
-        super(ContainerQuotasTest, self).tearDown()
+    @classmethod
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ContainerQuotasTest, cls).resource_cleanup()
 
     @decorators.idempotent_id('9a0fb034-86af-4df0-86fa-f8bd7db21ae0')
     @utils.requires_ext(extension='container_quotas', service='object')

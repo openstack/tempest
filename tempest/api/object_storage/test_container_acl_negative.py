@@ -42,9 +42,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.container_name = data_utils.rand_name(name='TestContainer')
         self.container_client.update_container(self.container_name)
 
-    def tearDown(self):
-        self.delete_containers([self.container_name])
-        super(ObjectACLsNegativeTest, self).tearDown()
+    @classmethod
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ObjectACLsNegativeTest, cls).resource_cleanup()
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('af587587-0c24-4e15-9822-8352ce711013')

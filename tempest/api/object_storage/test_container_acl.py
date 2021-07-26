@@ -31,9 +31,10 @@ class ObjectTestACLs(base.BaseObjectTest):
         super(ObjectTestACLs, self).setUp()
         self.container_name = self.create_container()
 
-    def tearDown(self):
-        self.delete_containers()
-        super(ObjectTestACLs, self).tearDown()
+    @classmethod
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ObjectTestACLs, cls).resource_cleanup()
 
     @decorators.idempotent_id('a3270f3f-7640-4944-8448-c7ea783ea5b6')
     def test_read_object_with_rights(self):
