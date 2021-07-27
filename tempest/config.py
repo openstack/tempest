@@ -437,6 +437,15 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
+    # TODO(pkesav): Make it True by default once wallaby
+    # is oldest supported stable for Tempest.
+    cfg.BoolOpt('hostname_fqdn_sanitization',
+                default=False,
+                help="If false, skip fqdn instance sanitization tests. "
+                     "Nova started sanitizing the instance name by replacing "
+                     "the '.' with '-' to comply with fqdn hostname. Nova "
+                     "changed that in Wallaby cycle, if your cloud is older "
+                     "than wallaby then you can keep/make it False."),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled compute extensions with a special '

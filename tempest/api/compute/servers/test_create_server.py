@@ -180,3 +180,56 @@ class ServersTestBootFromVolume(ServersTestJSON):
         if not utils.get_service_list()['volume']:
             msg = "Volume service not enabled."
             raise cls.skipException(msg)
+
+
+class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
+    """Test creating server with FQDN hostname and verifying atrributes
+
+    Starting Wallaby release, Nova sanitizes freeform characters in
+    server hostname with dashes. This test verifies the same.
+    """
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServersTestFqdnHostnames, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersTestFqdnHostnames, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @decorators.idempotent_id('622066d2-39fc-4c09-9eeb-35903c114a0a')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.hostname_fqdn_sanitization,
+        'FQDN hostname sanitization is not supported.')
+    @testtools.skipUnless(CONF.validation.run_validation,
+                          'Instance validation tests are disabled.')
+    def test_create_server_with_fqdn_name(self):
+        """Test to create an instance with FQDN type name scheme"""
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        self.server_name = 'guest-instance-1.domain.com'
+        self.password = data_utils.rand_password()
+        self.accessIPv4 = '2.2.2.2'
+        test_server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='ACTIVE',
+            adminPass=self.password,
+            name=self.server_name,
+            accessIPv4=self.accessIPv4)
+
+        """Verify the hostname within the instance is sanitized
+
+        Freeform characters in the hostname are replaced with dashes
+        """
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(test_server, validation_resources),
+            self.ssh_user,
+            self.password,
+            validation_resources['keypair']['private_key'],
+            server=test_server,
+            servers_client=self.client)
+        hostname = linux_client.exec_command("hostname").rstrip()
+        self.assertEqual('guest-instance-1-domain-com', hostname)
