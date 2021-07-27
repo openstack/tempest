@@ -29,7 +29,7 @@
   set_fact:
     # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
-  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky"]
+  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
 
 - name: Use Configured upper-constraints for non-master Tempest
   set_fact:
