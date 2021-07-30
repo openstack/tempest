@@ -108,12 +108,25 @@ class RemoteClient(remote_client.RemoteClient):
         LOG.debug('(get_nic_name_by_ip) Command result: %s', nic)
         return nic.strip().strip(":").split('@')[0].lower()
 
-    def get_dns_servers(self):
+    def _get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
         resolve_file = self.exec_command(cmd).strip().split('\n')
         entries = (l.split() for l in resolve_file)
         dns_servers = [l[1] for l in entries
                        if len(l) and l[0] == 'nameserver']
+        return dns_servers
+
+    def get_dns_servers(self, timeout=5):
+        start_time = int(time.time())
+        dns_servers = []
+        while True:
+            dns_servers = self._get_dns_servers()
+            if dns_servers:
+                break
+            LOG.debug("DNS Servers list empty.")
+            if int(time.time()) - start_time >= timeout:
+                LOG.debug("DNS Servers list empty after %s.", timeout)
+                break
         return dns_servers
 
     def _renew_lease_udhcpc(self, fixed_ip=None):
