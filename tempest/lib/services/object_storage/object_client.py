@@ -28,6 +28,8 @@ class ObjectClient(rest_client.RestClient):
             self.get_object(container, object_name)
         except exceptions.NotFound:
             return True
+        except exceptions.Conflict:
+            return False
         return False
 
     def create_object(self, container, object_name, data,
