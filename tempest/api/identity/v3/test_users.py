@@ -77,6 +77,8 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         time.sleep(1)
         self.non_admin_users_client.auth_provider.set_auth()
 
+    @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
+                          'Security compliance not available.')
     @decorators.idempotent_id('ad71bd23-12ad-426b-bb8b-195d2b635f27')
     @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
                       'Skipped because environment has an '
