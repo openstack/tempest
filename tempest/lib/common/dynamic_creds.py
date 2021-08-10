@@ -518,18 +518,6 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             LOG.warning('network with name: %s not found for delete',
                         network_name)
 
-    def cleanup_default_secgroup(self, tenant):
-        nsg_client = self.security_groups_admin_client
-        resp_body = nsg_client.list_security_groups(tenant_id=tenant,
-                                                    name="default")
-        secgroups_to_delete = resp_body['security_groups']
-        for secgroup in secgroups_to_delete:
-            try:
-                nsg_client.delete_security_group(secgroup['id'])
-            except lib_exc.NotFound:
-                LOG.warning('Security group %s, id %s not found for clean-up',
-                            secgroup['name'], secgroup['id'])
-
     def _clear_isolated_net_resources(self):
         client = self.routers_admin_client
         for cred in self._creds:
@@ -578,7 +566,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # ensure tenant deletion without big changes.
             try:
                 if self.neutron_available:
-                    self.cleanup_default_secgroup(creds.tenant_id)
+                    self.cleanup_default_secgroup(
+                        self.security_groups_admin_client, creds.tenant_id)
             except lib_exc.NotFound:
                 LOG.warning("failed to cleanup tenant %s's secgroup",
                             creds.tenant_name)

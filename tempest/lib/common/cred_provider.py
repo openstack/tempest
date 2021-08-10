@@ -13,10 +13,12 @@
 #    limitations under the License.
 
 import abc
-
+from oslo_log import log as logging
 
 from tempest.lib import auth
 from tempest.lib import exceptions
+
+LOG = logging.getLogger(__name__)
 
 
 class CredentialProvider(object, metaclass=abc.ABCMeta):
@@ -124,6 +126,18 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def is_role_available(self, role):
         return
+
+    def cleanup_default_secgroup(self, security_group_client, tenant):
+        resp_body = security_group_client.list_security_groups(
+            tenant_id=tenant,
+            name="default")
+        secgroups_to_delete = resp_body['security_groups']
+        for secgroup in secgroups_to_delete:
+            try:
+                security_group_client.delete_security_group(secgroup['id'])
+            except exceptions.NotFound:
+                LOG.warning('Security group %s, id %s not found for clean-up',
+                            secgroup['name'], secgroup['id'])
 
 
 class TestResources(object):
