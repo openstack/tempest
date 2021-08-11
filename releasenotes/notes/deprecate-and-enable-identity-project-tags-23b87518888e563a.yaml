@@ -1,0 +1,17 @@
+---
+upgrade:
+  - |
+    Project tags are supported by Keystone since Queens.
+    As Tempest currently supports only much newer OpenStack versions
+    (Ussuri or later), the configuration option which enables
+    project tags testing
+    (``CONF.identity-feature-enabled.project_tags``)
+    is now enabled by default.
+deprecations:
+  - |
+    Project tags are supported by Keystone since Queens.
+    As Tempest currently supports only much newer OpenStack versions
+    (Ussuri or later), the configuration option which enables
+    project tags testing
+    (``CONF.identity-feature-enabled.project_tags``)
+    is now deprecated.
