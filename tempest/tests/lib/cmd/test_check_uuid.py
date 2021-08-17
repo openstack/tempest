@@ -29,12 +29,13 @@ class TestCLInterface(base.TestCase):
            "        pass"
 
     def create_tests_file(self, directory):
-        with open(directory + "/__init__.py", "w"):
-            pass
+        init_file = open(directory + "/__init__.py", "w")
+        init_file.close()
 
         tests_file = directory + "/tests.py"
         with open(tests_file, "w") as fake_file:
             fake_file.write(TestCLInterface.CODE)
+            fake_file.close()
 
         return tests_file
 
