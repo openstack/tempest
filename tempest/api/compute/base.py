@@ -454,6 +454,12 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         server = self.servers_client.show_server(server_id)['server']
         self.assert_flavor_equal(new_flavor_id, server['flavor'])
 
+    def reboot_server(self, server_id, type):
+        """Reboot a server and wait for it to be ACTIVE."""
+        self.servers_client.reboot_server(server_id, type=type)
+        waiters.wait_for_server_status(
+            self.servers_client, server_id, 'ACTIVE')
+
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""

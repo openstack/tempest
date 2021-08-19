@@ -136,8 +136,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # in a server
             linux_client.exec_command("sync")
 
-        self.client.reboot_server(self.server_id, type=reboot_type)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.reboot_server(self.server_id, type=reboot_type)
 
         if CONF.validation.run_validation:
             # Log in and verify the boot time has changed
@@ -607,8 +606,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # log file is truncated and we cannot get any console log through
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
-        self.client.reboot_server(self.server_id, type='HARD')
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.reboot_server(self.server_id, type='HARD')
         self.wait_for(self._get_output)
 
     @decorators.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')

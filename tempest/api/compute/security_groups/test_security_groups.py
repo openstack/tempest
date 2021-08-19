@@ -109,9 +109,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                           sg['id'])
 
         # Reboot and add the other security group
-        self.servers_client.reboot_server(server_id, type='HARD')
-        waiters.wait_for_server_status(self.servers_client, server_id,
-                                       'ACTIVE')
+        self.reboot_server(server_id, type='HARD')
         self.servers_client.add_security_group(server_id, name=sg2['name'])
 
         # Check that we are not able to delete the other security
