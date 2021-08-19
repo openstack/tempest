@@ -54,3 +54,18 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
         volume_type = self.create_volume_type(**params)
         self.assertRaises(lib_exc.NotFound,
                           self.create_volume, volume_type=volume_type['id'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('a5924b5f-b6c1-49ba-994c-b4af55d26e52')
+    def test_create_volume_type_encryption_nonexistent_type_id(self):
+        """Test create encryption with nonexistent type id will fail"""
+        create_kwargs = {
+            'type_id': data_utils.rand_uuid(),
+            'provider': 'LuksEncryptor',
+            'key_size': 256,
+            'cipher': 'aes-xts-plain64',
+            'control_location': 'front-end'
+            }
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.create_encryption_type, **create_kwargs)
