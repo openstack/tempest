@@ -53,7 +53,8 @@ class QuotasNegativeTest(base.BaseAdminNetworkTest):
 
     def tearDown(self):
         super(QuotasNegativeTest, self).tearDown()
-        self.credentials_provider.cleanup_default_secgroup(self.project['id'])
+        self.credentials_provider.cleanup_default_secgroup(
+            self.os_admin.security_groups_client, self.project['id'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('644f4e1b-1bf9-4af0-9fd8-eb56ac0f51cf')
