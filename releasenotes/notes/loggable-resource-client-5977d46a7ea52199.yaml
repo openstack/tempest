@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Lists neutron's Loggable resources API service clients are available in
+    ``tempest/lib/services/network/loggable_resource_client.py`` module.

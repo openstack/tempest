@@ -74,6 +74,7 @@ class Manager(clients.ServiceClients):
         self.segments_client = self.network.SegmentsClient()
         self.trunks_client = self.network.TrunksClient()
         self.log_resource_client = self.network.LogResourceClient()
+        self.loggable_resource_client = self.network.LoggableResourceClient()
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
