@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Added QoS minimum packet rate rule client:
+
+    * create_minimum_packet_rate_rule
+    * update_minimum_packet_rate_rule
+    * show_minimum_packet_rate_rule
+    * list_minimum_packet_rate_rules
+    * delete_minimum_packet_rate_rule also
