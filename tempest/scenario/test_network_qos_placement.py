@@ -27,11 +27,13 @@ from tempest.scenario import manager
 CONF = config.CONF
 
 
-class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
+class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
+    """Base class for Network QoS testing
+
+    Base class for testing Network QoS scenarios involving placement
+    resource allocations.
+    """
     credentials = ['primary', 'admin']
-    required_extensions = ['port-resource-request',
-                           'qos',
-                           'qos-bw-minimum-ingress']
     # The feature QoS minimum bandwidth allocation in Placement API depends on
     # Granular resource requests to GET /allocation_candidates and Support
     # allocation candidates with nested resource providers features in
@@ -46,21 +48,18 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
     compute_min_microversion = '2.72'
     compute_max_microversion = 'latest'
 
-    INGRESS_RESOURCE_CLASS = "NET_BW_IGR_KILOBIT_PER_SEC"
     INGRESS_DIRECTION = 'ingress'
+    BW_RESOURCE_CLASS = "NET_BW_IGR_KILOBIT_PER_SEC"
 
-    SMALLEST_POSSIBLE_BW = 1
     # For any realistic inventory value (that is inventory != MAX_INT) an
     # allocation candidate request of MAX_INT is expected to be rejected, see:
     # https://github.com/openstack/placement/blob/master/placement/
     # db/constants.py#L16
     PLACEMENT_MAX_INT = 0x7FFFFFFF
-    BANDWIDTH_1 = 1000
-    BANDWIDTH_2 = 2000
 
     @classmethod
     def setup_clients(cls):
-        super(MinBwAllocationPlacementTest, cls).setup_clients()
+        super().setup_clients()
         cls.placement_client = cls.os_admin.placement_client
         cls.networks_client = cls.os_admin.networks_client
         cls.subnets_client = cls.os_admin.subnets_client
@@ -70,6 +69,30 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         cls.qos_min_bw_client = cls.os_admin.qos_min_bw_client
         cls.flavors_client = cls.os_adm.flavors_client
         cls.servers_client = cls.os_adm.servers_client
+
+    def _create_flavor_to_resize_to(self):
+        old_flavor = self.flavors_client.show_flavor(
+            CONF.compute.flavor_ref)['flavor']
+        new_flavor = self.flavors_client.create_flavor(**{
+            'ram': old_flavor['ram'],
+            'vcpus': old_flavor['vcpus'],
+            'name': old_flavor['name'] + 'extra',
+            'disk': old_flavor['disk'] + 1
+        })['flavor']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.flavors_client.delete_flavor, new_flavor['id'])
+        return new_flavor
+
+
+class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
+
+    required_extensions = ['port-resource-request',
+                           'qos',
+                           'qos-bw-minimum-ingress']
+
+    SMALLEST_POSSIBLE_BW = 1
+    BANDWIDTH_1 = 1000
+    BANDWIDTH_2 = 2000
 
     @classmethod
     def skip_checks(cls):
@@ -143,20 +166,20 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
 
     def _check_if_allocation_is_possible(self):
         alloc_candidates = self.placement_client.list_allocation_candidates(
-            resources1='%s:%s' % (self.INGRESS_RESOURCE_CLASS,
+            resources1='%s:%s' % (self.BW_RESOURCE_CLASS,
                                   self.SMALLEST_POSSIBLE_BW))
         if len(alloc_candidates['provider_summaries']) == 0:
             self.fail('No allocation candidates are available for %s:%s' %
-                      (self.INGRESS_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
+                      (self.BW_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
 
         # Just to be sure check with impossible high (placement max_int),
         # allocation
         alloc_candidates = self.placement_client.list_allocation_candidates(
-            resources1='%s:%s' % (self.INGRESS_RESOURCE_CLASS,
+            resources1='%s:%s' % (self.BW_RESOURCE_CLASS,
                                   self.PLACEMENT_MAX_INT))
         if len(alloc_candidates['provider_summaries']) != 0:
             self.fail('For %s:%s there should be no available candidate!' %
-                      (self.INGRESS_RESOURCE_CLASS, self.PLACEMENT_MAX_INT))
+                      (self.BW_RESOURCE_CLASS, self.PLACEMENT_MAX_INT))
 
     def _boot_vm_with_min_bw(self, qos_policy_id, status='ACTIVE'):
         wait_until = (None if status == 'ERROR' else status)
@@ -178,10 +201,10 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         bw_resource_in_alloc = False
         allocation_rp = None
         for rp, resources in allocations.items():
-            if self.INGRESS_RESOURCE_CLASS in resources['resources']:
+            if self.BW_RESOURCE_CLASS in resources['resources']:
                 self.assertEqual(
                     min_kbps,
-                    resources['resources'][self.INGRESS_RESOURCE_CLASS])
+                    resources['resources'][self.BW_RESOURCE_CLASS])
                 bw_resource_in_alloc = True
                 allocation_rp = rp
         if min_kbps:
@@ -304,16 +327,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
         self._assert_allocation_is_as_expected(server['id'],
                                                [valid_port['id']])
 
-        old_flavor = self.flavors_client.show_flavor(
-            CONF.compute.flavor_ref)['flavor']
-        new_flavor = self.flavors_client.create_flavor(**{
-            'ram': old_flavor['ram'],
-            'vcpus': old_flavor['vcpus'],
-            'name': old_flavor['name'] + 'extra',
-            'disk': old_flavor['disk'] + 1
-        })['flavor']
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.flavors_client.delete_flavor, new_flavor['id'])
+        new_flavor = self._create_flavor_to_resize_to()
 
         self.servers_client.resize_server(
             server_id=server['id'], flavor_ref=new_flavor['id'])
