@@ -54,9 +54,44 @@
               - ^.gitignore$
               - ^.gitreview$
               - ^.mailmap$
+              - ^tools/check_logs.py
+              - ^tools/format.sh
+              - ^tools/skip_tracker.py
+              - ^tools/tempest-integrated-gate-compute-exclude-list.txt
+              - ^tools/tempest-integrated-gate-networking-exclude-list.txt
+              - ^tools/tempest-integrated-gate-object-storage-exclude-list.txt
+              - ^tools/tempest-integrated-gate-placement-exclude-list.txt
+              - ^tools/tempest-integrated-gate-storage-blacklist.txt
+              - ^tools/tempest-integrated-gate-storage-exclude-list.txt
+              - ^tools/verify-ipv6-only-deployments.sh
+              - ^tools/with_venv.sh
               # tools/ is not here since this relies on a script in tools/.
         - tempest-ipv6-only:
-            irrelevant-files: *tempest-irrelevant-files-2
+            irrelevant-files: &tempest-irrelevant-files-3
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^etc/.*$
+              - ^releasenotes/.*$
+              - ^setup.cfg$
+              - ^tempest/hacking/.*$
+              - ^tempest/tests/.*$
+              - ^tools/check_logs.py
+              - ^tools/format.sh
+              - ^tools/generate-tempest-plugins-list.py
+              - ^tools/generate-tempest-plugins-list.sh
+              - ^tools/skip_tracker.py
+              - ^tools/tempest-integrated-gate-compute-exclude-list.txt
+              - ^tools/tempest-integrated-gate-networking-exclude-list.txt
+              - ^tools/tempest-integrated-gate-object-storage-exclude-list.txt
+              - ^tools/tempest-integrated-gate-placement-exclude-list.txt
+              - ^tools/tempest-integrated-gate-storage-blacklist.txt
+              - ^tools/tempest-integrated-gate-storage-exclude-list.txt
+              - ^tools/tempest-plugin-sanity.sh
+              - ^tools/with_venv.sh
+              - ^.coveragerc$
+              - ^.gitignore$
+              - ^.gitreview$
+              - ^.mailmap$
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
@@ -92,7 +127,7 @@
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-ipv6-only:
-            irrelevant-files: *tempest-irrelevant-files-2
+            irrelevant-files: *tempest-irrelevant-files-3
         - devstack-plugin-ceph-tempest-py3:
             irrelevant-files: *tempest-irrelevant-files
     experimental:
