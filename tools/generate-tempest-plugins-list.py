@@ -62,6 +62,9 @@ NON_ACTIVE_LIST = [
     'x/mogan',
     # mogan is unmaintained now, remove from the list when this is merged:
     # https://review.opendev.org/c/x/mogan/+/767718
+    'x/vmware-nsx-tempest-plugin'
+    # Failing since 2021-08-27
+    # https://zuul.opendev.org/t/openstack/build/45f6c8d3c62d4387a70b7b471ec687c8
 ]
 
 url = 'https://review.opendev.org/projects/'
