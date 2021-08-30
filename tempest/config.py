@@ -259,8 +259,11 @@ IdentityFeatureGroup = [
                 help='Does the environment have the security compliance '
                      'settings enabled?'),
     cfg.BoolOpt('project_tags',
-                default=False,
-                help='Is the project tags identity v3 API available?'),
+                default=True,
+                help='Is the project tags identity v3 API available?',
+                deprecated_for_removal=True,
+                deprecated_reason='Project tags API is a default feature '
+                                  'since Queens'),
     cfg.BoolOpt('application_credentials',
                 default=True,
                 help='Does the environment have application credentials '
