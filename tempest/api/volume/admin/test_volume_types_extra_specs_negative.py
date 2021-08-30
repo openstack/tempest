@@ -77,6 +77,21 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
             extra_spec)
 
     @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('474090d2-0824-eb3b-9335-f506b4aa49d8')
+    def test_update_nonexistent_type_id(self):
+        """Test update volume type extra specs for non existent volume type
+
+        Update volume type extra specs for non existent volume type should
+        fail.
+        """
+        spec_key = "spec1"
+        extra_spec = {spec_key: "val5"}
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.admin_volume_types_client.update_volume_type_extra_specs,
+            data_utils.rand_uuid(), spec_key, extra_spec)
+
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('49d5472c-a53d-4eab-a4d3-450c4db1c545')
     def test_create_nonexistent_type_id(self):
         """Test creating volume type extra specs for non existent volume type
