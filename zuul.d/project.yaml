@@ -132,6 +132,7 @@
             irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
+        - tempest-with-latest-microversion
         - tempest-stestr-master
         - tempest-cinder-v2-api:
             irrelevant-files: *tempest-irrelevant-files
