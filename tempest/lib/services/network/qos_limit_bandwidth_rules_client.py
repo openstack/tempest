@@ -36,7 +36,7 @@ class QosLimitBandwidthRulesClient(base.BaseNetworkClient):
         API reference:
         https://docs.openstack.org/api-ref/network/v2/index.html#update-bandwidth-limit-rule
         """
-        uri = '/qos/policies/{}/bandwidth_limit_rules{}/'.format(
+        uri = '/qos/policies/{}/bandwidth_limit_rules/{}'.format(
             qos_policy_id, rule_id)
         post_data = {'bandwidth_limit_rule': kwargs}
         return self.update_resource(uri, post_data, expect_response_code=202)
@@ -70,5 +70,5 @@ class QosLimitBandwidthRulesClient(base.BaseNetworkClient):
         API reference:
         https://docs.openstack.org/api-ref/network/v2/index.html#list-bandwidth-limit-rules-for-qos-policy
         """
-        uri = '/qos/policies/%s/bandwidth_limit_rules'.format(qos_policy_id)
+        uri = '/qos/policies/{}/bandwidth_limit_rules'.format(qos_policy_id)
         return self.list_resources(uri, **filters)
