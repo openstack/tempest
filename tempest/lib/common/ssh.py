@@ -37,7 +37,7 @@ class Client(object):
 
     def __init__(self, host, username, password=None, timeout=300, pkey=None,
                  channel_timeout=10, look_for_keys=False, key_filename=None,
-                 port=22, proxy_client=None):
+                 port=22, proxy_client=None, ssh_key_type='rsa'):
         """SSH client.
 
         Many of parameters are just passed to the underlying implementation
@@ -59,6 +59,7 @@ class Client(object):
         :param proxy_client: Another SSH client to provide a transport
             for ssh-over-ssh.  The default is None, which means
             not to use ssh-over-ssh.
+        :param ssh_key_type: ssh key type (rsa, ecdsa)
         :type proxy_client: ``tempest.lib.common.ssh.Client`` object
         """
         self.host = host
@@ -66,8 +67,15 @@ class Client(object):
         self.port = port
         self.password = password
         if isinstance(pkey, str):
-            pkey = paramiko.RSAKey.from_private_key(
-                io.StringIO(str(pkey)))
+            if ssh_key_type == 'rsa':
+                pkey = paramiko.RSAKey.from_private_key(
+                    io.StringIO(str(pkey)))
+            elif ssh_key_type == 'ecdsa':
+                pkey = paramiko.ECDSAKey.from_private_key(
+                    io.StringIO(str(pkey)))
+            else:
+                raise exceptions.SSHClientUnsupportedKeyType(
+                    key_type=ssh_key_type)
         self.pkey = pkey
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename

@@ -69,7 +69,7 @@ class RemoteClient(object):
                  server=None, servers_client=None, ssh_timeout=300,
                  connect_timeout=60, console_output_enabled=True,
                  ssh_shell_prologue="set -eu -o pipefail; PATH=$PATH:/sbin;",
-                 ping_count=1, ping_size=56):
+                 ping_count=1, ping_size=56, ssh_key_type='rsa'):
         """Executes commands in a VM over ssh
 
         :param ip_address: IP address to ssh to
@@ -84,6 +84,7 @@ class RemoteClient(object):
         :param ssh_shell_prologue: Shell fragments to use before command
         :param ping_count: Number of ping packets
         :param ping_size: Packet size for ping packets
+        :param ssh_key_type: ssh key type (rsa, ecdsa)
         """
         self.server = server
         self.servers_client = servers_client
@@ -92,10 +93,12 @@ class RemoteClient(object):
         self.ssh_shell_prologue = ssh_shell_prologue
         self.ping_count = ping_count
         self.ping_size = ping_size
+        self.ssh_key_type = ssh_key_type
 
         self.ssh_client = ssh.Client(ip_address, username, password,
                                      ssh_timeout, pkey=pkey,
-                                     channel_timeout=connect_timeout)
+                                     channel_timeout=connect_timeout,
+                                     ssh_key_type=ssh_key_type)
 
     @debug_ssh
     def exec_command(self, cmd):

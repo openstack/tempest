@@ -118,7 +118,8 @@ class Manager(clients.ServiceClients):
         self.server_groups_client = self.compute.ServerGroupsClient()
         self.limits_client = self.compute.LimitsClient()
         self.compute_images_client = self.compute.ImagesClient()
-        self.keypairs_client = self.compute.KeyPairsClient()
+        self.keypairs_client = self.compute.KeyPairsClient(
+            ssh_key_type=CONF.validation.ssh_key_type)
         self.quotas_client = self.compute.QuotasClient()
         self.quota_classes_client = self.compute.QuotaClassesClient()
         self.flavors_client = self.compute.FlavorsClient()

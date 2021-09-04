@@ -15,6 +15,10 @@
 
 from urllib import parse as urllib
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
+
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import keypairs as schemav21
@@ -27,6 +31,12 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [{'min': None, 'max': '2.1', 'schema': schemav21},
                             {'min': '2.2', 'max': None, 'schema': schemav22}]
+
+    def __init__(self, auth_provider, service, region,
+                 ssh_key_type='rsa', **kwargs):
+        super(KeyPairsClient, self).__init__(
+            auth_provider, service, region, **kwargs)
+        self.ssh_key_type = ssh_key_type
 
     def list_keypairs(self, **params):
         """Lists keypairs that are associated with the account.
@@ -67,12 +77,30 @@ class KeyPairsClient(base_compute_client.BaseComputeClient):
         API reference:
         https://docs.openstack.org/api-ref/compute/#create-or-import-keypair
         """
+        pkey = None
+        if (self.ssh_key_type == 'ecdsa' and 'public_key' not in kwargs and
+            ('type' not in kwargs or kwargs['type'] == 'ssh')):
+            # create a ecdsa key and pass the public key into the request
+            pkey = ec.generate_private_key(ec.SECP384R1(), default_backend())
+            pubkey = pkey.public_key().public_bytes(
+                encoding=serialization.Encoding.OpenSSH,
+                format=serialization.PublicFormat.OpenSSH)
+            kwargs['public_key'] = pubkey
+
         post_body = json.dumps({'keypair': kwargs})
         resp, body = self.post("os-keypairs", body=post_body)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_keypair, resp, body)
-        return rest_client.ResponseBody(resp, body)
+        resp_body = rest_client.ResponseBody(resp, body)
+        if pkey:
+            # add the privkey to the response as it was generated here
+            privkey = pkey.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption())
+            resp_body['keypair']['private_key'] = privkey.decode('utf-8')
+        return resp_body
 
     def delete_keypair(self, keypair_name, **params):
         """Deletes a keypair.

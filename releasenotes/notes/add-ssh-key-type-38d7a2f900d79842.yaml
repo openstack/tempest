@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add parameter to specify the SSH key type.  Current options are 'rsa'
+    (which is the default) and 'ecdsa'.  Tempest now supports the importing
+    and generation of both 'rsa' and 'ecdsa' SSH key types.
