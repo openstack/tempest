@@ -38,7 +38,7 @@ class QosMinimumBandwidthRulesClient(base.BaseNetworkClient):
         uri = '/qos/policies/%s/minimum_bandwidth_rules/%s' % (
             qos_policy_id, rule_id)
         post_data = {'minimum_bandwidth_rule': kwargs}
-        return self.update_resource(uri, post_data, expect_response_code=202)
+        return self.update_resource(uri, post_data)
 
     def show_minimum_bandwidth_rule(self, qos_policy_id, rule_id, **fields):
         """Show details of a minimum bandwidth rule.

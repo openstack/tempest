@@ -39,7 +39,7 @@ class QosLimitBandwidthRulesClient(base.BaseNetworkClient):
         uri = '/qos/policies/{}/bandwidth_limit_rules/{}'.format(
             qos_policy_id, rule_id)
         post_data = {'bandwidth_limit_rule': kwargs}
-        return self.update_resource(uri, post_data, expect_response_code=202)
+        return self.update_resource(uri, post_data)
 
     def show_limit_bandwidth_rule(self, qos_policy_id, rule_id, **fields):
         """Show details of a limit bandwidth rule.

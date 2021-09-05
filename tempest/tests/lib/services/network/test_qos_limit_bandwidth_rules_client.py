@@ -85,7 +85,7 @@ class TestQosLimitBandwidthRulesClient(base.BaseServiceTest):
             "tempest.lib.common.rest_client.RestClient.put",
             resp_body,
             bytes_body,
-            202,
+            200,
             qos_policy_id=self.FAKE_QOS_POLICY_ID,
             rule_id=self.FAKE_MAX_BW_RULE_ID,
             **update_kwargs)
