@@ -194,6 +194,20 @@
         USE_PYTHON3: true
 
 - job:
+    name: tempest-with-latest-microversion
+    parent: tempest-full-py3
+    description: |
+      This job runs compute, placement and volume API tests with 'latest'
+      API microversion (This can be extended to other services having API
+      microversion concept).
+    vars:
+      tox_envlist: api-microversion-tests
+      devstack_localrc:
+        TEMPEST_COMPUTE_MIN_MICROVERSION: 'latest'
+        TEMPEST_VOLUME_MIN_MICROVERSION: 'latest'
+        TEMPEST_PLACEMENT_MIN_MICROVERSION: 'latest'
+
+- job:
     name: tempest-multinode-full
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-focal
