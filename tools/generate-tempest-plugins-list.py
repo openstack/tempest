@@ -64,7 +64,19 @@ NON_ACTIVE_LIST = [
     # https://review.opendev.org/c/x/mogan/+/767718
     'x/vmware-nsx-tempest-plugin'
     # Failing since 2021-08-27
-    # https://zuul.opendev.org/t/openstack/build/45f6c8d3c62d4387a70b7b471ec687c8
+    # https://zuul.opendev.org/t/openstack/build
+    # /45f6c8d3c62d4387a70b7b471ec687c8
+    # Below plugins failing for error in psycopg2 __init__
+    # ImportError: libpq.so.5: cannot open shared object
+    # file: No such file or directory
+    # https://zuul.opendev.org/t/openstack/build
+    # /b61a48196dfa476d83645aea4853e544/log/job-output.txt#271722
+    # Failing since 2021-09-08
+    'x/networking-l2gw-tempest-plugin'
+    'x/novajoin-tempest-plugin'
+    'x/ranger-tempest-plugin'
+    'x/tap-as-a-service-tempest-plugin'
+    'x/trio2o'
 ]
 
 url = 'https://review.opendev.org/projects/'
