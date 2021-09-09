@@ -1,0 +1,18 @@
+---
+prelude: |
+    This release is to tag Tempest for OpenStack Xena release.
+    This release marks the start of Xena release support in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Xena
+    * Wallaby
+    * Victoria
+    * Ussuri
+
+    Current development of Tempest is for OpenStack Yoga development
+    cycle. Every Tempest commit is also tested against master during
+    the Yoga cycle. However, this does not necessarily mean that using
+    Tempest as of this tag will work against a Yoga (or future release)
+    cloud.
+    To be on safe side, use this tag to test the OpenStack Xena release.
+
