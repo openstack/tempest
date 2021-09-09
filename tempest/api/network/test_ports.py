@@ -51,7 +51,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _create_subnet(self, network, gateway='',
                        cidr=None, mask_bits=None, **kwargs):
-        subnet = self.create_subnet(network, gateway, cidr, mask_bits)
+        subnet = self.create_subnet(
+            network, gateway, cidr, mask_bits, **kwargs)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.subnets_client.delete_subnet, subnet['id'])
         return subnet
