@@ -69,3 +69,13 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
         self.assertRaises(
             lib_exc.NotFound,
             self.create_encryption_type, **create_kwargs)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('969b10c7-3d77-4e1b-a4f2-2d265980f7e5')
+    def test_create_with_repeated_name(self):
+        """Test creating volume type with a repeated name will fail"""
+        volume_type_name = self.create_volume_type()['name']
+        self.assertRaises(
+            lib_exc.Conflict,
+            self.admin_volume_types_client.create_volume_type,
+            name=volume_type_name)
