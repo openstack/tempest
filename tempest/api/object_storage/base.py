@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.common import custom_matchers
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -119,12 +121,20 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             object_name = data_utils.rand_name(name='TestObject')
         if data is None:
             data = data_utils.random_bytes()
-        cls.object_client.create_object(container_name,
-                                        object_name,
-                                        data,
-                                        metadata=metadata)
 
-        return object_name, data
+        err = Exception()
+        for _ in range(5):
+            try:
+                cls.object_client.create_object(container_name,
+                                                object_name,
+                                                data,
+                                                metadata=metadata)
+                return object_name, data
+            # after bucket creation we might see Conflict
+            except lib_exc.Conflict as e:
+                err = e
+                time.sleep(2)
+        raise err
 
     @classmethod
     def delete_containers(cls, container_client=None, object_client=None):
