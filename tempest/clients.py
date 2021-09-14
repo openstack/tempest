@@ -59,6 +59,8 @@ class Manager(clients.ServiceClients):
         self.ports_client = self.network.PortsClient()
         self.network_quotas_client = self.network.QuotasClient()
         self.floating_ips_client = self.network.FloatingIPsClient()
+        self.floating_ips_port_forwarding_client =\
+            self.network.FloatingIpsPortForwardingClient()
         self.metering_labels_client = self.network.MeteringLabelsClient()
         self.metering_label_rules_client = (
             self.network.MeteringLabelRulesClient())

@@ -15,6 +15,8 @@
 from tempest.lib.services.network.agents_client import AgentsClient
 from tempest.lib.services.network.extensions_client import ExtensionsClient
 from tempest.lib.services.network.floating_ips_client import FloatingIPsClient
+from tempest.lib.services.network.floating_ips_port_forwarding_client import \
+    FloatingIpsPortForwardingClient
 from tempest.lib.services.network.log_resource_client import LogResourceClient
 from tempest.lib.services.network.loggable_resource_client import \
     LoggableResourceClient
@@ -45,9 +47,9 @@ from tempest.lib.services.network.trunks_client import TrunksClient
 from tempest.lib.services.network.versions_client import NetworkVersionsClient
 
 __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
-           'MeteringLabelRulesClient', 'MeteringLabelsClient',
-           'NetworksClient', 'NetworkVersionsClient', 'PortsClient',
-           'QosClient', 'QosMinimumBandwidthRulesClient',
+           'FloatingIpsPortForwardingClient', 'MeteringLabelRulesClient',
+           'MeteringLabelsClient', 'NetworksClient', 'NetworkVersionsClient',
+           'PortsClient', 'QosClient', 'QosMinimumBandwidthRulesClient',
            'QosLimitBandwidthRulesClient', 'QuotasClient', 'RoutersClient',
            'SecurityGroupRulesClient', 'SecurityGroupsClient',
            'SegmentsClient', 'ServiceProvidersClient', 'SubnetpoolsClient',

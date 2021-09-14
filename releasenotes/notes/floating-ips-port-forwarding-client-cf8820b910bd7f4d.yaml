@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add a new client to lists, creates, shows information for,
+    updates and deletes neutron floating ips port forwarding
+    resource.

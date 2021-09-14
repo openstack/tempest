@@ -76,6 +76,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.subnetpools_client = cls.os_primary.subnetpools_client
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
+        cls.floating_ips_port_forwarding_client =\
+            cls.os_primary.floating_ips_port_forwarding_client
         cls.quotas_client = cls.os_primary.network_quotas_client
         cls.floating_ips_client = cls.os_primary.floating_ips_client
         cls.security_groups_client = cls.os_primary.security_groups_client
