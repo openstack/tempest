@@ -329,13 +329,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         floating_ip, server = self.floating_ip_tuple
         # get internal ports' ips:
         # get all network and compute ports in the new network
+        # NOTE(ralonsoh): device_owner="network:distributed" ports are OVN
+        # metadata ports and should be filtered out.
         internal_ips = (
             p['fixed_ips'][0]['ip_address'] for p in
             self.os_admin.ports_client.list_ports(
                 project_id=server['tenant_id'],
                 network_id=network['id'])['ports']
-            if p['device_owner'].startswith('network') or
-            p['device_owner'].startswith('compute')
+            if ((p['device_owner'].startswith('network') and
+                 not p['device_owner'] == 'network:distributed') or
+                p['device_owner'].startswith('compute'))
         )
 
         self._check_server_connectivity(floating_ip,
