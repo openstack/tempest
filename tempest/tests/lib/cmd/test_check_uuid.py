@@ -28,37 +28,33 @@ class TestCLInterface(base.TestCase):
            "    def test_tests(self):\n" \
            "        pass"
 
-    def create_tests_file(self, directory):
-        init_file = open(directory + "/__init__.py", "w")
+    def setUp(self):
+        super(TestCLInterface, self).setUp()
+        self.directory = tempfile.mkdtemp(prefix='check-uuid', dir=".")
+        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
+
+        init_file = open(self.directory + "/__init__.py", "w")
         init_file.close()
 
-        tests_file = directory + "/tests.py"
-        with open(tests_file, "w") as fake_file:
+        self.tests_file = self.directory + "/tests.py"
+        with open(self.tests_file, "w") as fake_file:
             fake_file.write(TestCLInterface.CODE)
             fake_file.close()
 
-        return tests_file
-
     def test_fix_argument_no(self):
-        temp_dir = tempfile.mkdtemp(prefix='check-uuid-no', dir=".")
-        self.addCleanup(shutil.rmtree, temp_dir, ignore_errors=True)
-        tests_file = self.create_tests_file(temp_dir)
         sys.argv = [sys.argv[0]] + ["--package",
-                                    os.path.relpath(temp_dir)]
+                                    os.path.relpath(self.directory)]
 
         self.assertRaises(SystemExit, check_uuid.run)
-        with open(tests_file, "r") as f:
+        with open(self.tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE == f.read())
 
     def test_fix_argument_yes(self):
-        temp_dir = tempfile.mkdtemp(prefix='check-uuid-yes', dir=".")
-        self.addCleanup(shutil.rmtree, temp_dir, ignore_errors=True)
-        tests_file = self.create_tests_file(temp_dir)
 
         sys.argv = [sys.argv[0]] + ["--fix", "--package",
-                                    os.path.relpath(temp_dir)]
+                                    os.path.relpath(self.directory)]
         check_uuid.run()
-        with open(tests_file, "r") as f:
+        with open(self.tests_file, "r") as f:
             self.assertTrue(TestCLInterface.CODE != f.read())
 
 
