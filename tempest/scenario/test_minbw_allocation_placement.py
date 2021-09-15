@@ -176,6 +176,7 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             consumer)['allocations']
         self.assertGreater(len(allocations), 0)
         bw_resource_in_alloc = False
+        allocation_rp = None
         for rp, resources in allocations.items():
             if self.INGRESS_RESOURCE_CLASS in resources['resources']:
                 self.assertEqual(
@@ -190,9 +191,19 @@ class MinBwAllocationPlacementTest(manager.NetworkScenarioTest):
             # the rp uuid
             for port_id in port_ids:
                 port = self.os_admin.ports_client.show_port(port_id)
-                self.assertEqual(
-                    allocation_rp,
-                    port['port']['binding:profile']['allocation'])
+                port_binding_alloc = port['port']['binding:profile'][
+                    'allocation']
+                # NOTE(gibi): the format of the allocation key depends on the
+                # existence of port-resource-request-groups API extension.
+                # TODO(gibi): drop the else branch once tempest does not need
+                # to support Xena release any more.
+                if utils.is_extension_enabled(
+                        'port-resource-request-groups', 'network'):
+                    self.assertEqual(
+                        {allocation_rp},
+                        set(port_binding_alloc.values()))
+                else:
+                    self.assertEqual(allocation_rp, port_binding_alloc)
 
     @decorators.idempotent_id('78625d92-212c-400e-8695-dd51706858b8')
     @utils.services('compute', 'network')
