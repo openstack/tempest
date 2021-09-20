@@ -1,0 +1,5 @@
+=====================
+v28.0.0 Release Notes
+=====================
+.. release-notes:: 28.0.0 Release Notes
+   :version: 28.0.0
