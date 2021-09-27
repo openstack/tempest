@@ -495,3 +495,37 @@ class TestVolumeWaiters(base.TestCase):
         # Assert that list_volume_attachments was actually called
         mock_list_volume_attachments.assert_called_once_with(
             mock.sentinel.server_id)
+
+
+class TestServerFloatingIPWaiters(base.TestCase):
+
+    def test_wait_for_server_floating_ip_associate_timeout(self):
+        mock_server = {'server': {'id': 'fake_uuid', 'addresses': {}}}
+        mock_client = mock.Mock(
+            spec=servers_client.ServersClient,
+            build_timeout=1, build_interval=1,
+            show_server=lambda id: mock_server)
+
+        fake_server = {'id': 'fake-uuid'}
+        fake_fip = {'floating_ip_address': 'fake_address'}
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_server_floating_ip, mock_client, fake_server,
+            fake_fip)
+
+    def test_wait_for_server_floating_ip_disassociate_timeout(self):
+        mock_addresses = {'shared': [{'OS-EXT-IPS:type': 'floating',
+                                      'addr': 'fake_address'}]}
+        mock_server = {'server': {'id': 'fake_uuid',
+                                  'addresses': mock_addresses}}
+        mock_client = mock.Mock(
+            spec=servers_client.ServersClient,
+            build_timeout=1, build_interval=1,
+            show_server=lambda id: mock_server)
+
+        fake_server = {'id': 'fake-uuid'}
+        fake_fip = {'floating_ip_address': 'fake_address'}
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_server_floating_ip, mock_client, fake_server,
+            fake_fip, wait_for_disassociate=True)
