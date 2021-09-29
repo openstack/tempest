@@ -13,6 +13,7 @@
 import abc
 
 from oslo_log import log as logging
+import testtools
 
 from tempest.api.volume import base
 from tempest.common import waiters
@@ -146,6 +147,8 @@ class VolumeRetypeWithMigrationTest(VolumeRetypeTest):
         self._retype_volume(src_vol, migration_policy='on-demand')
 
     @decorators.idempotent_id('d0d9554f-e7a5-4104-8973-f35b27ccb60d')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          "Cinder volume snapshots are disabled.")
     def test_volume_from_snapshot_retype_with_migration(self):
         """Test volume created from snapshot retype with migration
 

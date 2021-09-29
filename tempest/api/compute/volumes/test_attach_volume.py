@@ -455,6 +455,8 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
 
     @utils.services('image')
     @decorators.idempotent_id('885ac48a-2d7a-40c5-ae8b-1993882d724c')
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     def test_snapshot_volume_backed_multiattach(self):
         """Boots a server from a multiattach volume and snapshots the server.
 
