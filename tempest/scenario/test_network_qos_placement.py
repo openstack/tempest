@@ -68,7 +68,7 @@ class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
         cls.qos_client = cls.os_admin.qos_client
         cls.qos_min_bw_client = cls.os_admin.qos_min_bw_client
         cls.flavors_client = cls.os_adm.flavors_client
-        cls.servers_client = cls.os_adm.servers_client
+        cls.servers_client = cls.os_primary.servers_client
 
     def _create_flavor_to_resize_to(self):
         old_flavor = self.flavors_client.show_flavor(
@@ -189,7 +189,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         server = self.create_server(networks=[{'port': port['id']}],
                                     wait_until=wait_until)
         waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server['id'],
+            client=self.servers_client, server_id=server['id'],
             status=status, ready_wait=False, raise_on_error=False)
         return server, port
 
@@ -290,9 +290,9 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         self._assert_allocation_is_as_expected(server['id'],
                                                [valid_port['id']])
 
-        self.servers_client.migrate_server(server_id=server['id'])
+        self.os_adm.servers_client.migrate_server(server_id=server['id'])
         waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server['id'],
+            client=self.servers_client, server_id=server['id'],
             status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
 
         # TODO(lajoskatona): Check that the allocations are ok for the
@@ -300,9 +300,10 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         self._assert_allocation_is_as_expected(server['id'],
                                                [valid_port['id']])
 
-        self.servers_client.confirm_resize_server(server_id=server['id'])
+        self.os_adm.servers_client.confirm_resize_server(
+            server_id=server['id'])
         waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server['id'],
+            client=self.servers_client, server_id=server['id'],
             status='ACTIVE', ready_wait=False, raise_on_error=True)
         self._assert_allocation_is_as_expected(server['id'],
                                                [valid_port['id']])
@@ -332,7 +333,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         self.servers_client.resize_server(
             server_id=server['id'], flavor_ref=new_flavor['id'])
         waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server['id'],
+            client=self.servers_client, server_id=server['id'],
             status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
 
         # TODO(lajoskatona): Check that the allocations are ok for the
@@ -342,7 +343,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
 
         self.servers_client.confirm_resize_server(server_id=server['id'])
         waiters.wait_for_server_status(
-            client=self.os_primary.servers_client, server_id=server['id'],
+            client=self.servers_client, server_id=server['id'],
             status='ACTIVE', ready_wait=False, raise_on_error=True)
         self._assert_allocation_is_as_expected(server['id'],
                                                [valid_port['id']])
