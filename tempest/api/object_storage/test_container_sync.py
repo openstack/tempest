@@ -58,6 +58,7 @@ class ContainerSyncTest(base.BaseObjectTest):
 
         # Default container-server config only allows localhost
         cls.local_ip = '127.0.0.1'
+        cls.local_ip_v6 = '[::1]'
 
         # Must be configure according to container-sync interval
         container_sync_timeout = CONF.object_storage.container_sync_timeout
@@ -134,11 +135,18 @@ class ContainerSyncTest(base.BaseObjectTest):
         """Test container synchronization"""
         def make_headers(cont, cont_client):
             # tell first container to synchronize to a second
-            client_proxy_ip = \
-                urlparse.urlparse(cont_client.base_url).netloc.split(':')[0]
-            client_base_url = \
-                cont_client.base_url.replace(client_proxy_ip,
-                                             self.local_ip)
+            # use rsplit with a maxsplit of 1 to ensure ipv6 adresses are
+            # handled properly as well
+            client_proxy_ip = urlparse.urlparse(
+                cont_client.base_url).netloc.rsplit(':', 1)[0]
+            if client_proxy_ip.startswith("["):  # lazy check
+                client_base_url = \
+                    cont_client.base_url.replace(client_proxy_ip,
+                                                 self.local_ip_v6)
+            else:
+                client_base_url = \
+                    cont_client.base_url.replace(client_proxy_ip,
+                                                 self.local_ip)
             headers = {'X-Container-Sync-Key': 'sync_key',
                        'X-Container-Sync-To': "%s/%s" %
                        (client_base_url, str(cont))}
