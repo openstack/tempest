@@ -31,6 +31,8 @@
         - glance-multistore-cinder-import:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-xena:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-wallaby-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-victoria-py3:
@@ -150,6 +152,7 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
+        - tempest-full-xena
         - tempest-full-wallaby-py3
         - tempest-full-victoria-py3
         - tempest-full-ussuri-py3
