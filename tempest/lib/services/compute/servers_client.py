@@ -29,9 +29,12 @@ from tempest.lib.api_schema.response.compute.v2_26 import servers as schemav226
 from tempest.lib.api_schema.response.compute.v2_3 import servers as schemav23
 from tempest.lib.api_schema.response.compute.v2_47 import servers as schemav247
 from tempest.lib.api_schema.response.compute.v2_48 import servers as schemav248
+from tempest.lib.api_schema.response.compute.v2_51 import servers as schemav251
 from tempest.lib.api_schema.response.compute.v2_54 import servers as schemav254
 from tempest.lib.api_schema.response.compute.v2_57 import servers as schemav257
+from tempest.lib.api_schema.response.compute.v2_58 import servers as schemav258
 from tempest.lib.api_schema.response.compute.v2_6 import servers as schemav26
+from tempest.lib.api_schema.response.compute.v2_62 import servers as schemav262
 from tempest.lib.api_schema.response.compute.v2_63 import servers as schemav263
 from tempest.lib.api_schema.response.compute.v2_70 import servers as schemav270
 from tempest.lib.api_schema.response.compute.v2_71 import servers as schemav271
@@ -56,9 +59,12 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.19', 'max': '2.25', 'schema': schemav219},
         {'min': '2.26', 'max': '2.46', 'schema': schemav226},
         {'min': '2.47', 'max': '2.47', 'schema': schemav247},
-        {'min': '2.48', 'max': '2.53', 'schema': schemav248},
+        {'min': '2.48', 'max': '2.50', 'schema': schemav248},
+        {'min': '2.51', 'max': '2.53', 'schema': schemav251},
         {'min': '2.54', 'max': '2.56', 'schema': schemav254},
-        {'min': '2.57', 'max': '2.62', 'schema': schemav257},
+        {'min': '2.57', 'max': '2.57', 'schema': schemav257},
+        {'min': '2.58', 'max': '2.61', 'schema': schemav258},
+        {'min': '2.62', 'max': '2.62', 'schema': schemav262},
         {'min': '2.63', 'max': '2.69', 'schema': schemav263},
         {'min': '2.70', 'max': '2.70', 'schema': schemav270},
         {'min': '2.71', 'max': '2.72', 'schema': schemav271},
@@ -715,6 +721,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
                               (server_id, request_id))
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.show_instance_action, resp, body)
         return rest_client.ResponseBody(resp, body)
 

@@ -132,3 +132,4 @@ rebuild_server_with_admin_pass = copy.deepcopy(
 attach_volume = copy.deepcopy(servers247.attach_volume)
 show_volume_attachment = copy.deepcopy(servers247.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers247.list_volume_attachments)
+show_instance_action = copy.deepcopy(servers247.show_instance_action)
