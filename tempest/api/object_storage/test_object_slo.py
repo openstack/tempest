@@ -18,7 +18,6 @@ from oslo_utils.secretutils import md5
 from tempest.api.object_storage import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 # Each segment, except for the final one, must be at least 1 megabyte
@@ -34,11 +33,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self.objects = []
 
     def tearDown(self):
-        for obj in self.objects:
-            test_utils.call_and_ignore_notfound_exc(
-                self.object_client.delete_object,
-                self.container_name, obj)
-        self.container_client.delete_container(self.container_name)
+        self.delete_containers()
         super(ObjectSloTest, self).tearDown()
 
     def _create_object(self, container_name, object_name, data, params=None):

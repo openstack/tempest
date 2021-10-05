@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Improve cleanup after Swift testing. Ensures containers are empty before
+    deleting to prevent errors due to delayed execution.

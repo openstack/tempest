@@ -36,6 +36,11 @@ class ContainerNegativeTest(base.BaseObjectTest):
             body = cls.capabilities_client.list_capabilities()
             cls.constraints = body['swift']
 
+    @classmethod
+    def resource_cleanup(cls):
+        cls.delete_containers()
+        super(ContainerNegativeTest, cls).resource_cleanup()
+
     @decorators.attr(type=["negative"])
     @decorators.idempotent_id('30686921-4bed-4764-a038-40d741ed4e78')
     @testtools.skipUnless(
@@ -167,11 +172,7 @@ class ContainerNegativeTest(base.BaseObjectTest):
         # create a container and an object within it
         # attempt to delete a container that isn't empty.
         container_name = self.create_container()
-        self.addCleanup(self.container_client.delete_container,
-                        container_name)
         object_name, _ = self.create_object(container_name)
-        self.addCleanup(self.object_client.delete_object,
-                        container_name, object_name)
 
         ex = self.assertRaises(exceptions.Conflict,
                                self.container_client.delete_container,

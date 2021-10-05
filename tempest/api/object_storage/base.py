@@ -29,11 +29,6 @@ def delete_containers(containers, container_client, object_client):
 
     The containers should be visible from the container_client given.
     Will not throw any error if the containers don't exist.
-    Will not check that object and container deletions succeed.
-    After delete all the objects from a container, it will wait 2
-    seconds before delete the container itself, in order to deployments
-    using HA proxy sync the deletion properly, otherwise, the container
-    might fail to be deleted because it's not empty.
 
     :param containers: List of containers(or string of a container)
                        to be deleted
