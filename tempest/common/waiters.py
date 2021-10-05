@@ -489,18 +489,34 @@ def wait_for_interface_status(client, server_id, port_id, status):
     return body
 
 
-def wait_for_interface_detach(client, server_id, port_id):
+def wait_for_interface_detach(client, server_id, port_id, detach_request_id):
     """Waits for an interface to be detached from a server."""
-    body = client.list_interfaces(server_id)['interfaceAttachments']
-    ports = [iface['port_id'] for iface in body]
+    def _get_detach_event_results():
+        # NOTE(gibi): The obvious choice for this waiter would be to wait
+        # until the interface disappears from the client.list_interfaces()
+        # response. However that response is based on the binding status of the
+        # port in Neutron. Nova deallocates the port resources _after the port
+        # was  unbound in Neutron. This can cause that the naive waiter would
+        # return before the port is fully deallocated. Wait instead of the
+        # os-instance-action to succeed as that is recorded after both the
+        # port is fully deallocated.
+        events = client.show_instance_action(
+            server_id, detach_request_id)['instanceAction'].get('events', [])
+        return [
+            event['result'] for event in events
+            if event['event'] == 'compute_detach_interface'
+        ]
+
+    detach_event_results = _get_detach_event_results()
+
     start = int(time.time())
 
-    while port_id in ports:
+    while "Success" not in detach_event_results:
         time.sleep(client.build_interval)
-        body = client.list_interfaces(server_id)['interfaceAttachments']
-        ports = [iface['port_id'] for iface in body]
-        if port_id not in ports:
-            return body
+        detach_event_results = _get_detach_event_results()
+        if "Success" in detach_event_results:
+            return client.show_instance_action(
+                server_id, detach_request_id)['instanceAction']
 
         timed_out = int(time.time()) - start >= client.build_timeout
         if timed_out:
