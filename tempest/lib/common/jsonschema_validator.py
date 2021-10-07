@@ -31,7 +31,7 @@ FORMAT_CHECKER = jsonschema.draft4_format_checker
 @FORMAT_CHECKER.checks('iso8601-date-time')
 def _validate_datetime_format(instance):
     try:
-        if isinstance(instance, jsonschema.compat.str_types):
+        if instance is not None:
             timeutils.parse_isotime(instance)
     except ValueError:
         return False
