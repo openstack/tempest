@@ -21,8 +21,8 @@ from tempest.lib import decorators
 class GroupTypesTest(base.BaseVolumeAdminTest):
     """Test group types"""
 
-    min_microversion = '3.11'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.11'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('dd71e5f9-393e-4d4f-90e9-fa1b8d278864')
     def test_group_type_create_list_update_show(self):

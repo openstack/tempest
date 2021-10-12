@@ -25,8 +25,8 @@ CONF = config.CONF
 class GroupsTest(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.12"""
 
-    min_microversion = '3.13'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.13'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
@@ -155,8 +155,8 @@ class GroupsTest(base.BaseVolumeAdminTest):
 class GroupsV314Test(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.13"""
 
-    min_microversion = '3.14'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.14'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('2424af8c-7851-4888-986a-794b10c3210e')
     def test_create_group_from_group(self):
@@ -192,8 +192,8 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
 class GroupsV320Test(base.BaseVolumeAdminTest):
     """Tests of volume groups with microversion greater than 3.19"""
 
-    min_microversion = '3.20'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.20'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('b20c696b-0cbc-49a5-8b3a-b1fb9338f45c')
     def test_reset_group_status(self):

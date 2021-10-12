@@ -80,7 +80,7 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
     # NOTE(mriedem): The minimum required volume API version is 3.42 and the
     # minimum required compute API microversion is 2.51, but the compute call
     # is implicit - Cinder calls Nova at that microversion, Tempest does not.
-    min_microversion = '3.42'
+    volume_min_microversion = '3.42'
 
     def _find_extend_volume_instance_action(self, server_id):
         actions = self.servers_client.list_instance_actions(

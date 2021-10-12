@@ -24,8 +24,8 @@ CONF = config.CONF
 class UserMessagesTest(base.BaseVolumeAdminTest):
     """Test volume messages with microversion greater than 3.2"""
 
-    min_microversion = '3.3'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.3'
+    volume_max_microversion = 'latest'
 
     def _create_user_message(self):
         """Trigger a 'no valid host' situation to generate a message."""

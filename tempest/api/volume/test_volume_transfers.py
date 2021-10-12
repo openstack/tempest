@@ -109,8 +109,8 @@ class VolumesTransfersTest(base.BaseVolumeTest):
 class VolumesTransfersV355Test(VolumesTransfersTest):
     """Test volume transfer for the "new" Transfers API mv 3.55"""
 
-    min_microversion = '3.55'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.55'
+    volume_max_microversion = 'latest'
 
     credentials = ['primary', 'alt', 'admin']
 

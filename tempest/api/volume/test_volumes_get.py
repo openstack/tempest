@@ -143,8 +143,8 @@ class VolumesGetTest(base.BaseVolumeTest):
 class VolumesSummaryTest(base.BaseVolumeTest):
     """Test volume summary"""
 
-    min_microversion = '3.12'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.12'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('c4f2431e-4920-4736-9e00-4040386b6feb')
     def test_show_volume_summary(self):

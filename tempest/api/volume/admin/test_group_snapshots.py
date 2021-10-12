@@ -64,8 +64,8 @@ class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
 class GroupSnapshotsTest(BaseGroupSnapshotsTest):
     """Test group snapshot"""
 
-    min_microversion = '3.14'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.14'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('1298e537-f1f0-47a3-a1dd-8adec8168897')
     def test_group_snapshot_create_show_list_delete(self):
@@ -252,8 +252,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
     """Test group snapshot with volume microversion greater than 3.18"""
 
-    min_microversion = '3.19'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.19'
+    volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('3b42c9b9-c984-4444-816e-ca2e1ed30b40')
     @decorators.skip_because(bug='1770179')

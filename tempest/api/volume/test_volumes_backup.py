@@ -164,8 +164,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 class VolumesBackupsV39Test(base.BaseVolumeTest):
     """Test volumes backup with volume microversion greater than 3.8"""
 
-    min_microversion = '3.9'
-    max_microversion = 'latest'
+    volume_min_microversion = '3.9'
+    volume_max_microversion = 'latest'
 
     @classmethod
     def skip_checks(cls):

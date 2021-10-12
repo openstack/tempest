@@ -13,10 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume import api_microversion_fixture
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -43,7 +43,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             raise cls.skipException(skip_msg)
 
         api_version_utils.check_skip_with_microversion(
-            cls.min_microversion, cls.max_microversion,
+            cls.volume_min_microversion, cls.volume_max_microversion,
             CONF.volume.min_microversion, CONF.volume.max_microversion)
 
     @classmethod
@@ -78,15 +78,20 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def setUp(self):
         super(BaseVolumeTest, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            self.request_microversion))
+            compute_microversion=self.compute_request_microversion,
+            volume_microversion=self.volume_request_microversion))
 
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeTest, cls).resource_setup()
-        cls.request_microversion = (
+        cls.volume_request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.volume_min_microversion,
+                CONF.volume.min_microversion))
+        cls.compute_request_microversion = (
             api_version_utils.select_request_microversion(
                 cls.min_microversion,
-                CONF.volume.min_microversion))
+                CONF.compute.min_microversion))
 
         cls.image_ref = CONF.compute.image_ref
         cls.flavor_ref = CONF.compute.flavor_ref
