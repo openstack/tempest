@@ -25,6 +25,8 @@ from tempest.lib.services.network.metering_labels_client import \
 from tempest.lib.services.network.networks_client import NetworksClient
 from tempest.lib.services.network.ports_client import PortsClient
 from tempest.lib.services.network.qos_client import QosClient
+from tempest.lib.services.network.qos_limit_bandwidth_rules_client import \
+    QosLimitBandwidthRulesClient
 from tempest.lib.services.network.qos_minimum_bandwidth_rules_client import \
     QosMinimumBandwidthRulesClient
 from tempest.lib.services.network.quotas_client import QuotasClient
@@ -45,8 +47,9 @@ from tempest.lib.services.network.versions_client import NetworkVersionsClient
 __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'MeteringLabelRulesClient', 'MeteringLabelsClient',
            'NetworksClient', 'NetworkVersionsClient', 'PortsClient',
-           'QosClient', 'QosMinimumBandwidthRulesClient', 'QuotasClient',
-           'RoutersClient', 'SecurityGroupRulesClient', 'SecurityGroupsClient',
+           'QosClient', 'QosMinimumBandwidthRulesClient',
+           'QosLimitBandwidthRulesClient', 'QuotasClient', 'RoutersClient',
+           'SecurityGroupRulesClient', 'SecurityGroupsClient',
            'SegmentsClient', 'ServiceProvidersClient', 'SubnetpoolsClient',
            'SubnetsClient', 'TagsClient', 'TrunksClient', 'LogResourceClient',
            'LoggableResourceClient']

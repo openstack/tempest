@@ -71,6 +71,7 @@ class Manager(clients.ServiceClients):
         self.tags_client = self.network.TagsClient()
         self.qos_client = self.network.QosClient()
         self.qos_min_bw_client = self.network.QosMinimumBandwidthRulesClient()
+        self.qos_limit_bw_client = self.network.QosLimitBandwidthRulesClient()
         self.segments_client = self.network.SegmentsClient()
         self.trunks_client = self.network.TrunksClient()
         self.log_resource_client = self.network.LogResourceClient()
