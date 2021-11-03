@@ -3,11 +3,15 @@
       - check-requirements
       - integrated-gate-py3
       - openstack-cover-jobs
-      - openstack-python3-xena-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
       jobs:
+        - openstack-tox-pep8
+        - openstack-tox-py36
+        - openstack-tox-py37
+        - openstack-tox-py38
+        - openstack-tox-py39
         - tempest-full-parallel:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
@@ -120,6 +124,11 @@
             irrelevant-files: *tempest-irrelevant-files-2
     gate:
       jobs:
+        - openstack-tox-pep8
+        - openstack-tox-py36
+        - openstack-tox-py37
+        - openstack-tox-py38
+        - openstack-tox-py39
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
