@@ -105,16 +105,16 @@ blocking it from landing) and having the testing run in Tempest still has
 value.
 
 However, for the 3rd prong verification is a bit more subjective. The original
-intent of this prong was mostly for refstack/defcore and also for things that
+intent of this prong was mostly for interop/refstack and also for things that
 running on the stable branches. We don't want to remove any tests if that
 would break our API consistency checking between releases, or something that
-defcore/refstack is depending on being in Tempest. It's worth pointing out
-that if a test is used in `defcore`_ as part of `interop`_ testing then it will
-probably have continuing value being in Tempest as part of the
+interop/refstack is depending on being in Tempest. It's worth pointing out
+that if a test is used in `interop_wg`_ as part of `interop`_ testing then it
+will probably have continuing value being in Tempest as part of the
 integration/integrated tests in general. This is one area where some overlap
 is expected between testing in projects and Tempest, which is not a bad thing.
 
-.. _defcore: https://wiki.openstack.org/wiki/Governance/InteropWG
+.. _interop_wg: https://docs.opendev.org/openinfra/interop/latest/
 .. _interop: https://www.openstack.org/brand/interop
 
 Discussing the 3rd prong
