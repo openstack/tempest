@@ -78,6 +78,18 @@
     voting: false
 
 - job:
+    name: tempest-full-py3-centos-8-stream
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-centos-8-stream
+    description: |
+      Base integration test with Neutron networking and py36 running
+      on CentOS 8 stream
+    vars:
+      # Required until bug/1949606 is resolved when using libvirt and QEMU
+      # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
+      configure_swap_size: 4096
+
+- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
