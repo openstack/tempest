@@ -132,6 +132,7 @@
     name: tempest-integrated-compute-centos-8-stream
     parent: tempest-integrated-compute
     nodeset: devstack-single-node-centos-8-stream
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria)).*$
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
