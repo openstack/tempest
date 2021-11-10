@@ -73,10 +73,11 @@ class GroupTypeSpecsTest(base.BaseVolumeAdminTest):
         self.assertEqual(list_specs, body)
 
         # Delete specified item of group type specs
-        delete_key = 'key1'
-        self.admin_group_types_client.delete_group_type_specs_item(
-            group_type['id'], delete_key)
-        self.assertRaises(
-            lib_exc.NotFound,
-            self.admin_group_types_client.show_group_type_specs_item,
-            group_type['id'], delete_key)
+        delete_keys = ['key1', 'key2', 'key3']
+        for it in delete_keys:
+            self.admin_group_types_client.delete_group_type_specs_item(
+                group_type['id'], it)
+            self.assertRaises(
+                lib_exc.NotFound,
+                self.admin_group_types_client.show_group_type_specs_item,
+                group_type['id'], it)
