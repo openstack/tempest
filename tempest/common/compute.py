@@ -57,7 +57,7 @@ def is_scheduler_filter_enabled(filter_name):
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
-                       image_id=None, wait_for_sshable=True, **kwargs):
+                       image_id=None, **kwargs):
     """Common wrapper utility returning a test server.
 
     This method is a common wrapper returning a test server that can be
@@ -93,8 +93,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         CONF.compute.flavor_ref will be used instead.
     :param image_id: ID of the image to be used to provision the server. If not
         defined, CONF.compute.image_ref will be used instead.
-    :param wait_for_sshable: Check server's console log and wait until it will
-        be ready to login.
     :returns: a tuple
     """
 
@@ -264,10 +262,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                         except Exception:
                             LOG.exception('Server %s failed to delete in time',
                                           server['id'])
-
-    if (validatable and CONF.compute_feature_enabled.console_output and
-            wait_for_sshable):
-        waiters.wait_for_guest_os_boot(clients.servers_client, server['id'])
 
     return body, servers
 
