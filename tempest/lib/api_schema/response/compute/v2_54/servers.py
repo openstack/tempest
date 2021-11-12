@@ -12,7 +12,7 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_48 import servers as servers248
+from tempest.lib.api_schema.response.compute.v2_51 import servers as servers251
 # ****** Schemas changed in microversion 2.54 *****************
 
 # Note(gmann): This is schema for microversion 2.54 which includes the
@@ -26,14 +26,14 @@ key_name = {
     ]
 }
 
-rebuild_server = copy.deepcopy(servers248.rebuild_server)
+rebuild_server = copy.deepcopy(servers251.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update({'key_name': key_name})
 rebuild_server['response_body']['properties']['server'][
     'required'].append('key_name')
 
 rebuild_server_with_admin_pass = copy.deepcopy(
-    servers248.rebuild_server_with_admin_pass)
+    servers251.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'key_name': key_name})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
@@ -43,18 +43,19 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
 # ****** Schemas unchanged in microversion 2.54 since microversion 2.48 ***
-get_server = copy.deepcopy(servers248.get_server)
-list_servers_detail = copy.deepcopy(servers248.list_servers_detail)
-update_server = copy.deepcopy(servers248.update_server)
-list_servers = copy.deepcopy(servers248.list_servers)
-show_server_diagnostics = copy.deepcopy(servers248.show_server_diagnostics)
-get_remote_consoles = copy.deepcopy(servers248.get_remote_consoles)
-list_tags = copy.deepcopy(servers248.list_tags)
-update_all_tags = copy.deepcopy(servers248.update_all_tags)
-delete_all_tags = copy.deepcopy(servers248.delete_all_tags)
-check_tag_existence = copy.deepcopy(servers248.check_tag_existence)
-update_tag = copy.deepcopy(servers248.update_tag)
-delete_tag = copy.deepcopy(servers248.delete_tag)
-attach_volume = copy.deepcopy(servers248.attach_volume)
-show_volume_attachment = copy.deepcopy(servers248.show_volume_attachment)
-list_volume_attachments = copy.deepcopy(servers248.list_volume_attachments)
+get_server = copy.deepcopy(servers251.get_server)
+list_servers_detail = copy.deepcopy(servers251.list_servers_detail)
+update_server = copy.deepcopy(servers251.update_server)
+list_servers = copy.deepcopy(servers251.list_servers)
+show_server_diagnostics = copy.deepcopy(servers251.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers251.get_remote_consoles)
+list_tags = copy.deepcopy(servers251.list_tags)
+update_all_tags = copy.deepcopy(servers251.update_all_tags)
+delete_all_tags = copy.deepcopy(servers251.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers251.check_tag_existence)
+update_tag = copy.deepcopy(servers251.update_tag)
+delete_tag = copy.deepcopy(servers251.delete_tag)
+attach_volume = copy.deepcopy(servers251.attach_volume)
+show_volume_attachment = copy.deepcopy(servers251.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers251.list_volume_attachments)
+show_instance_action = copy.deepcopy(servers251.show_instance_action)

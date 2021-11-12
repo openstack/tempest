@@ -12,7 +12,7 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_57 import servers as servers257
+from tempest.lib.api_schema.response.compute.v2_62 import servers as servers262
 
 # Nova microversion 2.63 adds 'trusted_image_certificates' (a list of
 # certificate IDs) to the server rebuild and servers details responses.
@@ -29,32 +29,32 @@ trusted_certs = {
     }
 }
 
-list_servers_detail = copy.deepcopy(servers257.list_servers_detail)
+list_servers_detail = copy.deepcopy(servers262.list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('trusted_image_certificates')
 
-rebuild_server = copy.deepcopy(servers257.rebuild_server)
+rebuild_server = copy.deepcopy(servers262.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 rebuild_server['response_body']['properties']['server'][
     'required'].append('trusted_image_certificates')
 
 rebuild_server_with_admin_pass = copy.deepcopy(
-    servers257.rebuild_server_with_admin_pass)
+    servers262.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('trusted_image_certificates')
 
-update_server = copy.deepcopy(servers257.update_server)
+update_server = copy.deepcopy(servers262.update_server)
 update_server['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 update_server['response_body']['properties']['server'][
     'required'].append('trusted_image_certificates')
 
-get_server = copy.deepcopy(servers257.get_server)
+get_server = copy.deepcopy(servers262.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'trusted_image_certificates': trusted_certs})
 get_server['response_body']['properties']['server'][
@@ -64,15 +64,16 @@ get_server['response_body']['properties']['server'][
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
 # ****** Schemas unchanged since microversion 2.57 ***
-list_servers = copy.deepcopy(servers257.list_servers)
-show_server_diagnostics = copy.deepcopy(servers257.show_server_diagnostics)
-get_remote_consoles = copy.deepcopy(servers257.get_remote_consoles)
-list_tags = copy.deepcopy(servers257.list_tags)
-update_all_tags = copy.deepcopy(servers257.update_all_tags)
-delete_all_tags = copy.deepcopy(servers257.delete_all_tags)
-check_tag_existence = copy.deepcopy(servers257.check_tag_existence)
-update_tag = copy.deepcopy(servers257.update_tag)
-delete_tag = copy.deepcopy(servers257.delete_tag)
-attach_volume = copy.deepcopy(servers257.attach_volume)
-show_volume_attachment = copy.deepcopy(servers257.show_volume_attachment)
-list_volume_attachments = copy.deepcopy(servers257.list_volume_attachments)
+list_servers = copy.deepcopy(servers262.list_servers)
+show_server_diagnostics = copy.deepcopy(servers262.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers262.get_remote_consoles)
+list_tags = copy.deepcopy(servers262.list_tags)
+update_all_tags = copy.deepcopy(servers262.update_all_tags)
+delete_all_tags = copy.deepcopy(servers262.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers262.check_tag_existence)
+update_tag = copy.deepcopy(servers262.update_tag)
+delete_tag = copy.deepcopy(servers262.delete_tag)
+attach_volume = copy.deepcopy(servers262.attach_volume)
+show_volume_attachment = copy.deepcopy(servers262.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers262.list_volume_attachments)
+show_instance_action = copy.deepcopy(servers262.show_instance_action)

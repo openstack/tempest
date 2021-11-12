@@ -31,6 +31,7 @@ show_server_diagnostics = copy.deepcopy(servers.show_server_diagnostics)
 attach_volume = copy.deepcopy(servers.attach_volume)
 show_volume_attachment = copy.deepcopy(servers.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers.list_volume_attachments)
+show_instance_action = copy.deepcopy(servers.show_instance_action)
 
 # NOTE: The consolidated remote console API got introduced with v2.6
 # with bp/consolidate-console-api. See Nova commit 578bafeda
