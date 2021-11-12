@@ -66,7 +66,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # Setting network=True, subnet=True creates a default network
         cls.set_network_resources(
             network=cls.create_default_network,
-            subnet=cls.create_default_network)
+            subnet=cls.create_default_network,
+            router=cls.create_default_network,
+            dhcp=cls.create_default_network)
         super(BaseV2ComputeTest, cls).setup_credentials()
 
     @classmethod
