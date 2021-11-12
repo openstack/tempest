@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
+from tempest.api.compute.volumes import test_attach_volume
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -20,24 +20,15 @@ from tempest.lib import exceptions as lib_exc
 CONF = config.CONF
 
 
-class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
+class AttachVolumeNegativeTest(test_attach_volume.BaseAttachVolumeTest):
     """Negative tests of volume attaching"""
-
-    create_default_network = True
-
-    @classmethod
-    def skip_checks(cls):
-        super(AttachVolumeNegativeTest, cls).skip_checks()
-        if not CONF.service_available.cinder:
-            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
-            raise cls.skipException(skip_msg)
 
     @decorators.attr(type=['negative'])
     @decorators.related_bug('1630783', status_code=500)
     @decorators.idempotent_id('a313b5cd-fbd0-49cc-94de-870e99f763c7')
     def test_delete_attached_volume(self):
         """Test deleting attachemd volume should fail"""
-        server = self.create_test_server(wait_until='ACTIVE')
+        server, validation_resources = self._create_server()
         volume = self.create_volume()
         self.attach_volume(server, volume)
 
@@ -54,7 +45,7 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
         depending on whether or not cinder v3.27 is being used to attach
         the volume to the instance.
         """
-        server = self.create_test_server(wait_until='ACTIVE')
+        server, validation_resources = self._create_server()
         volume = self.create_volume()
 
         self.attach_volume(server, volume)
@@ -66,12 +57,12 @@ class AttachVolumeNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('ee37a796-2afb-11e7-bc0f-fa163e65f5ce')
     def test_attach_attached_volume_to_different_server(self):
         """Test attaching attached volume to different server should fail"""
-        server1 = self.create_test_server(wait_until='ACTIVE')
+        server1, validation_resources = self._create_server()
         volume = self.create_volume()
 
         self.attach_volume(server1, volume)
 
         # Create server2 and attach in-use volume
-        server2 = self.create_test_server(wait_until='ACTIVE')
+        server2, validation_resources = self._create_server()
         self.assertRaises(lib_exc.BadRequest,
                           self.attach_volume, server2, volume)
