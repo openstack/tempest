@@ -25,8 +25,8 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
     volume_max_microversion = 'latest'
 
     @decorators.idempotent_id('dd71e5f9-393e-4d4f-90e9-fa1b8d278864')
-    def test_group_type_create_list_update_show(self):
-        """Test create/list/update/show group type"""
+    def test_group_type_create_list_update_show_delete(self):
+        """Test create/list/update/show/delete group type"""
         name = data_utils.rand_name(self.__class__.__name__ + '-group-type')
         description = data_utils.rand_name("group-type-description")
         group_specs = {"consistent_group_snapshot_enabled": "<is> False"}
@@ -34,7 +34,8 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
                   'description': description,
                   'group_specs': group_specs,
                   'is_public': True}
-        body = self.create_group_type(**params)
+        body = self.admin_group_types_client.create_group_type(
+            **params)['group_type']
         self.assertIn('name', body)
         err_msg = ("The created group_type %(var)s is not equal to the "
                    "requested %(var)s")
@@ -64,3 +65,9 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
             self.assertEqual(params[key], fetched_group_type[key],
                              '%s of the fetched group_type is different '
                              'from the created group_type' % key)
+
+        self.admin_group_types_client.delete_group_type(body['id'])
+        group_list = (
+            self.admin_group_types_client.list_group_types()['group_types'])
+        group_ids = [it['id'] for it in group_list]
+        self.assertNotIn(body['id'], group_ids)
