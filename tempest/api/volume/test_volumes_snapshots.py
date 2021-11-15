@@ -167,7 +167,8 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     @decorators.idempotent_id('677863d1-3142-456d-b6ac-9924f667a7f4')
     def test_volume_from_snapshot(self):
         """Test creating volume from snapshot with extending size"""
-        self._create_volume_from_snapshot(extra_size=1)
+        self._create_volume_from_snapshot(
+            extra_size=CONF.volume.volume_size_extend)
 
     @decorators.idempotent_id('053d8870-8282-4fff-9dbb-99cb58bb5e0a')
     def test_volume_from_snapshot_no_size(self):
