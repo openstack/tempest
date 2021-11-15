@@ -186,37 +186,94 @@ class TestInterfaceWaiters(base.TestCase):
                                          mock.call('server_id', 'port_id')])
         sleep.assert_called_once_with(client.build_interval)
 
-    one_interface = {'interfaceAttachments': [{'port_id': 'port_one'}]}
-    two_interfaces = {'interfaceAttachments': [{'port_id': 'port_one'},
-                                               {'port_id': 'port_two'}]}
-
     def test_wait_for_interface_detach(self):
-        list_interfaces = mock.MagicMock(
-            side_effect=[self.two_interfaces, self.one_interface])
-        client = self.mock_client(list_interfaces=list_interfaces)
+        no_event = {
+            'instanceAction': {
+                'events': []
+            }
+        }
+        one_event_without_result = {
+            'instanceAction': {
+                'events': [
+                    {
+                        'event': 'compute_detach_interface',
+                        'result': None
+                    }
+
+                ]
+            }
+        }
+        one_event_successful = {
+            'instanceAction': {
+                'events': [
+                    {
+                        'event': 'compute_detach_interface',
+                        'result': 'Success'
+                    }
+                ]
+            }
+        }
+
+        show_instance_action = mock.MagicMock(
+            # there is an extra call to return the result from the waiter
+            side_effect=[
+                no_event,
+                one_event_without_result,
+                one_event_successful,
+                one_event_successful,
+            ]
+        )
+        client = self.mock_client(show_instance_action=show_instance_action)
         self.patch('time.time', return_value=0.)
         sleep = self.patch('time.sleep')
 
         result = waiters.wait_for_interface_detach(
-            client, 'server_id', 'port_two')
+            client, mock.sentinel.server_id, mock.sentinel.port_id,
+            mock.sentinel.detach_request_id
+        )
 
-        self.assertIs(self.one_interface['interfaceAttachments'], result)
-        list_interfaces.assert_has_calls([mock.call('server_id'),
-                                          mock.call('server_id')])
-        sleep.assert_called_once_with(client.build_interval)
+        self.assertIs(one_event_successful['instanceAction'], result)
+        show_instance_action.assert_has_calls(
+            # there is an extra call to return the result from the waiter
+            [
+                mock.call(
+                    mock.sentinel.server_id, mock.sentinel.detach_request_id)
+            ] * 4
+        )
+        sleep.assert_has_calls([mock.call(client.build_interval)] * 2)
 
     def test_wait_for_interface_detach_timeout(self):
-        list_interfaces = mock.MagicMock(return_value=self.one_interface)
-        client = self.mock_client(list_interfaces=list_interfaces)
+        one_event_without_result = {
+            'instanceAction': {
+                'events': [
+                    {
+                        'event': 'compute_detach_interface',
+                        'result': None
+                    }
+
+                ]
+            }
+        }
+
+        show_instance_action = mock.MagicMock(
+            return_value=one_event_without_result)
+        client = self.mock_client(show_instance_action=show_instance_action)
         self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
         sleep = self.patch('time.sleep')
 
-        self.assertRaises(lib_exc.TimeoutException,
-                          waiters.wait_for_interface_detach,
-                          client, 'server_id', 'port_one')
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_interface_detach,
+            client, mock.sentinel.server_id, mock.sentinel.port_id,
+            mock.sentinel.detach_request_id
+        )
 
-        list_interfaces.assert_has_calls([mock.call('server_id'),
-                                          mock.call('server_id')])
+        show_instance_action.assert_has_calls(
+            [
+                mock.call(
+                    mock.sentinel.server_id, mock.sentinel.detach_request_id)
+            ] * 2
+        )
         sleep.assert_called_once_with(client.build_interval)
 
     def test_wait_for_guest_os_boot(self):

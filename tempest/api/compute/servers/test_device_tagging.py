@@ -35,6 +35,8 @@ LOG = logging.getLogger(__name__)
 
 class DeviceTaggingBase(base.BaseV2ComputeTest):
 
+    credentials = ['primary', 'admin']
+
     @classmethod
     def skip_checks(cls):
         super(DeviceTaggingBase, cls).skip_checks()
@@ -54,6 +56,7 @@ class DeviceTaggingBase(base.BaseV2ComputeTest):
         cls.ports_client = cls.os_primary.ports_client
         cls.subnets_client = cls.os_primary.subnets_client
         cls.interfaces_client = cls.os_primary.interfaces_client
+        cls.servers_admin_client = cls.os_admin.servers_client
 
     @classmethod
     def setup_credentials(cls):
@@ -422,11 +425,13 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
         self.servers_client.detach_volume(server['id'], volume['id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
-        self.interfaces_client.delete_interface(server['id'],
-                                                interface['port_id'])
-        waiters.wait_for_interface_detach(self.interfaces_client,
+        req_id = self.interfaces_client.delete_interface(
+            server['id'], interface['port_id']
+        ).response['x-openstack-request-id']
+        waiters.wait_for_interface_detach(self.servers_admin_client,
                                           server['id'],
-                                          interface['port_id'])
+                                          interface['port_id'],
+                                          req_id)
         # FIXME(mriedem): The assertion that the tagged devices are removed
         # from the metadata for the server is being skipped until bug 1775947
         # is fixed.
