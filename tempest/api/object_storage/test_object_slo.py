@@ -14,7 +14,8 @@
 
 from oslo_serialization import jsonutils as json
 
-from oslo_utils.secretutils import md5
+#from oslo_utils.secretutils import md5
+from hashlib import md5
 from tempest.api.object_storage import base
 from tempest.common import utils
 from tempest.lib.common.utils import data_utils
