@@ -16,7 +16,8 @@ import os
 
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
-from oslo_utils.secretutils import md5
+#from oslo_utils.secretutils import md5
+from hashlib import md5
 import yaml
 
 from tempest.lib import auth
