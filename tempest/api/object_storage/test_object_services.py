@@ -18,7 +18,8 @@ import re
 import time
 import zlib
 
-from oslo_utils.secretutils import md5
+# from oslo_utils.secretutils import md5
+from hashlib import md5
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest import config
