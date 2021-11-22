@@ -197,6 +197,7 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     body = clients.servers_client.create_server(name=name, imageRef=image_id,
                                                 flavorRef=flavor,
                                                 **kwargs)
+    request_id = body.response['x-openstack-request-id']
 
     # handle the case of multiple servers
     if multiple_create_request:
@@ -234,7 +235,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         for server in servers:
             try:
                 waiters.wait_for_server_status(
-                    clients.servers_client, server['id'], wait_until)
+                    clients.servers_client, server['id'], wait_until,
+                    request_id=request_id)
 
                 # Multiple validatable servers are not supported for now. Their
                 # creation will fail with the condition above.
