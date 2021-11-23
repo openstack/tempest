@@ -96,13 +96,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
-    def _get_floating_ip_in_server_addresses(self, floating_ip, server):
-        for addresses in server['addresses'].values():
-            for address in addresses:
-                if (address['OS-EXT-IPS:type'] == 'floating' and
-                        address['addr'] == floating_ip['floating_ip_address']):
-                    return address
-
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
@@ -132,15 +125,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             fip = self.create_floating_ip(server)
             floating_ip = self.associate_floating_ip(
                 fip, server)
-            # fetch the server again to make sure the addresses were refreshed
-            # after associating the floating IP
-            server = self.servers_client.show_server(server['id'])['server']
-            address = self._get_floating_ip_in_server_addresses(
-                floating_ip, server)
-            self.assertIsNotNone(
-                address,
-                "Failed to find floating IP '%s' in server addresses: %s" %
-                (floating_ip['floating_ip_address'], server['addresses']))
+            waiters.wait_for_server_floating_ip(self.servers_client,
+                                                server, floating_ip)
             ssh_ip = floating_ip['floating_ip_address']
         else:
             ssh_ip = self.get_server_ip(server)
@@ -165,19 +151,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         if floating_ip:
             # delete the floating IP, this should refresh the server addresses
             self.disassociate_floating_ip(floating_ip)
-
-            def is_floating_ip_detached_from_server():
-                server_info = self.servers_client.show_server(
-                    server['id'])['server']
-                address = self._get_floating_ip_in_server_addresses(
-                    floating_ip, server_info)
-                return (not address)
-
-            if not test_utils.call_until_true(
-                is_floating_ip_detached_from_server,
-                CONF.compute.build_timeout,
-                CONF.compute.build_interval):
-                msg = ("Floating IP '%s' should not be in server addresses: %s"
-                       % (floating_ip['floating_ip_address'],
-                          server['addresses']))
-                raise exceptions.TimeoutException(msg)
+            waiters.wait_for_server_floating_ip(
+                self.servers_client, server, floating_ip,
+                wait_for_disassociate=True)

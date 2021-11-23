@@ -541,3 +541,45 @@ def wait_for_guest_os_boot(client, server_id):
                      server_id)
             return
         time.sleep(client.build_interval)
+
+
+def wait_for_server_floating_ip(servers_client, server, floating_ip,
+                                wait_for_disassociate=False):
+    """Wait for floating IP association or disassociation.
+
+    :param servers_client: The servers client to use when querying the server's
+    floating IPs.
+    :param server: The server JSON dict on which to wait.
+    :param floating_ip: The floating IP JSON dict on which to wait.
+    :param wait_for_disassociate: Boolean indiating whether to wait for
+    disassociation instead of association.
+    """
+
+    def _get_floating_ip_in_server_addresses(floating_ip, server):
+        for addresses in server['addresses'].values():
+            for address in addresses:
+                if (
+                    address['OS-EXT-IPS:type'] == 'floating' and
+                    address['addr'] == floating_ip['floating_ip_address']
+                ):
+                    return address
+        return None
+
+    start_time = int(time.time())
+    while True:
+        server = servers_client.show_server(server['id'])['server']
+        address = _get_floating_ip_in_server_addresses(floating_ip, server)
+        if address is None and wait_for_disassociate:
+            return None
+        if not wait_for_disassociate and address:
+            return address
+
+        if int(time.time()) - start_time >= servers_client.build_timeout:
+            if wait_for_disassociate:
+                msg = ('Floating ip %s failed to disassociate from server %s '
+                       'in time.' % (floating_ip, server['id']))
+            else:
+                msg = ('Floating ip %s failed to associate with server %s '
+                       'in time.' % (floating_ip, server['id']))
+            raise lib_exc.TimeoutException(msg)
+        time.sleep(servers_client.build_interval)
