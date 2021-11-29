@@ -26,6 +26,7 @@ Tempest Specific Commandments
 - [T116] Unsupported 'message' Exception attribute in PY3
 - [T117] Check negative tests have ``@decorators.attr(type=['negative'])``
   applied.
+- [T118] LOG.warn is deprecated. Enforce use of LOG.warning.
 
 It is recommended to use ``tox -eautopep8`` before submitting a patch.
 

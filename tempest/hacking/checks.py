@@ -318,3 +318,16 @@ def negative_test_attribute_always_applied_to_negative_tests(physical_line,
                        " to all negative API tests"
                 )
             _HAVE_NEGATIVE_DECORATOR = False
+
+
+@core.flake8ext
+def no_log_warn(logical_line):
+    """Disallow 'LOG.warn('
+
+    Use LOG.warning() instead of Deprecated LOG.warn().
+    https://docs.python.org/3/library/logging.html#logging.warning
+    """
+
+    msg = ("T118: LOG.warn is deprecated, please use LOG.warning!")
+    if "LOG.warn(" in logical_line:
+        yield (0, msg)

@@ -130,7 +130,7 @@ def verify_glance_api_versions(os, update):
             msg = ('Glance is available in the catalog, but no known version, '
                    '(v1.x or v2.x) of Glance could be found, so Glance should '
                    'be configured as not available')
-            LOG.warn(msg)
+            LOG.warning(msg)
             print_and_or_update('glance', 'service-available', False, update)
             return
 
