@@ -157,4 +157,4 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.delete_domain, domain['id'])
         expected_data = {'name': d_name, 'enabled': True}
         self.assertEqual('', domain['description'])
-        self.assertDictContainsSubset(expected_data, domain)
+        self.assertLessEqual(expected_data.items(), domain.items())

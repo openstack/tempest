@@ -44,7 +44,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
 
         # Verifying response body of create service
         expected_data = {'name': name, 'type': serv_type, 'description': desc}
-        self.assertDictContainsSubset(expected_data, create_service)
+        self.assertLessEqual(expected_data.items(), create_service.items())
 
         # Update description
         s_id = create_service['id']
@@ -61,7 +61,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         resp3_desc = fetched_service['description']
 
         self.assertEqual(resp2_desc, resp3_desc)
-        self.assertDictContainsSubset(update_service, fetched_service)
+        self.assertLessEqual(update_service.items(), fetched_service.items())
 
     @decorators.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
@@ -72,7 +72,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
             type=serv_type, name=name)['service']
         self.addCleanup(self.services_client.delete_service, service['id'])
         expected_data = {'name': name, 'type': serv_type}
-        self.assertDictContainsSubset(expected_data, service)
+        self.assertLessEqual(expected_data.items(), service.items())
 
     @decorators.idempotent_id('e55908e8-360e-439e-8719-c3230a3e179e')
     def test_list_services(self):
