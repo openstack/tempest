@@ -127,3 +127,34 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             self.flavor['id'], 'hw:numa_nodes')
         self.assertEqual(body['hw:numa_nodes'], '1')
         self.assertNotIn('hw:cpu_policy', body)
+
+
+class FlavorMetadataValidation(base.BaseV2ComputeAdminTest):
+
+    min_microversion = '2.86'
+
+    @classmethod
+    def resource_setup(cls):
+        super(FlavorMetadataValidation, cls).resource_setup()
+        cls.flavor_name_prefix = 'test_flavor_validate_metadata_'
+        cls.ram = 512
+        cls.vcpus = 1
+        cls.disk = 10
+        cls.ephemeral = 10
+        cls.swap = 1024
+        cls.rxtx = 2
+
+    @decorators.idempotent_id('d3114f03-b0f2-4dc7-be11-70c0abc178b3')
+    def test_flavor_update_with_custom_namespace(self):
+        """Test flavor creation with a custom namespace, key and value"""
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_id = self.create_flavor(ram=self.ram,
+                                       vcpus=self.vcpus,
+                                       disk=self.disk,
+                                       name=flavor_name)['id']
+        specs = {'hw:cpu_policy': 'shared', 'foo:bar': 'baz'}
+        body = self.admin_flavors_client.set_flavor_extra_spec(
+            flavor_id,
+            **specs)['extra_specs']
+        self.assertEqual(body['foo:bar'], 'baz')
+        self.assertEqual(body['hw:cpu_policy'], 'shared')

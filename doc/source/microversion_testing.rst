@@ -428,7 +428,11 @@ Microversion tests implemented in Tempest
 
   * `2.79`_
 
-  .. _2.79: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-train 
+  .. _2.79: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#maximum-in-train
+
+  * `2.86`_
+
+  .. _2.86: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#id79
 
 * Volume
 
