@@ -87,7 +87,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         # test that the specific values we set are actually in
         # the final result. There is nothing here that ensures there
         # would be no other values in there.
-        self.assertDictContainsSubset(new_quota_set, quota_set)
+        self.assertLessEqual(new_quota_set.items(), quota_set.items())
 
     @decorators.idempotent_id('18c51ae9-cb03-48fc-b234-14a19374dbed')
     def test_show_quota_usage(self):

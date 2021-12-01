@@ -144,11 +144,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                 extra_headers=True,
                                                 headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_get_update_headers(self):
@@ -156,11 +156,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                extra_headers=True,
                                                headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_delete_update_headers(self):
@@ -168,11 +168,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                   extra_headers=True,
                                                   headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_patch_update_headers(self):
@@ -180,11 +180,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                  extra_headers=True,
                                                  headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_put_update_headers(self):
@@ -192,11 +192,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                extra_headers=True,
                                                headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_head_update_headers(self):
@@ -207,11 +207,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                 extra_headers=True,
                                                 headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
     def test_copy_update_headers(self):
@@ -219,11 +219,11 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
                                                 extra_headers=True,
                                                 headers=self.headers)
 
-        self.assertDictContainsSubset(
+        self.assertLessEqual(
             {'X-Configuration-Session': 'session_id',
              'Content-Type': 'application/json',
-             'Accept': 'application/json'},
-            return_dict['headers']
+             'Accept': 'application/json'}.items(),
+            return_dict['headers'].items()
         )
 
 
