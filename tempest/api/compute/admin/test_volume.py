@@ -48,8 +48,8 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
 
         :param return image_id: The UUID of the newly created image.
         """
-        image = self.image_client.show_image(CONF.compute.image_ref)
-        image_data = self.image_client.show_image_file(
+        image = self.admin_image_client.show_image(CONF.compute.image_ref)
+        image_data = self.admin_image_client.show_image_file(
             CONF.compute.image_ref).data
         image_file = io.BytesIO(image_data)
         create_dict = {
@@ -60,11 +60,11 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
             'visibility': 'public',
         }
         create_dict.update(kwargs)
-        new_image = self.image_client.create_image(**create_dict)
-        self.addCleanup(self.image_client.wait_for_resource_deletion,
+        new_image = self.admin_image_client.create_image(**create_dict)
+        self.addCleanup(self.admin_image_client.wait_for_resource_deletion,
                         new_image['id'])
-        self.addCleanup(self.image_client.delete_image, new_image['id'])
-        self.image_client.store_image_file(new_image['id'], image_file)
+        self.addCleanup(self.admin_image_client.delete_image, new_image['id'])
+        self.admin_image_client.store_image_file(new_image['id'], image_file)
 
         return new_image['id']
 

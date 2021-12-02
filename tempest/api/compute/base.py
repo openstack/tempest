@@ -658,7 +658,7 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
             cls.os_admin.availability_zone_client)
         cls.admin_flavors_client = cls.os_admin.flavors_client
         cls.admin_servers_client = cls.os_admin.servers_client
-        cls.image_client = cls.os_admin.image_client_v2
+        cls.admin_image_client = cls.os_admin.image_client_v2
         cls.admin_assisted_volume_snapshots_client = \
             cls.os_admin.assisted_volume_snapshots_client
 
