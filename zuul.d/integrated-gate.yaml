@@ -318,10 +318,12 @@
       jobs:
         - grenade
         - tempest-integrated-networking
+        - openstacksdk-functional-devstack
     gate:
       jobs:
         - grenade
         - tempest-integrated-networking
+        - openstacksdk-functional-devstack
 
 - project-template:
     name: integrated-gate-compute
@@ -334,10 +336,12 @@
       jobs:
         - tempest-integrated-compute
         - tempest-integrated-compute-centos-8-stream
+        - openstacksdk-functional-devstack
     gate:
       jobs:
         - tempest-integrated-compute
         - tempest-integrated-compute-centos-8-stream
+        - openstacksdk-functional-devstack
 
 - project-template:
     name: integrated-gate-placement
@@ -350,10 +354,12 @@
       jobs:
         - grenade
         - tempest-integrated-placement
+        - openstacksdk-functional-devstack
     gate:
       jobs:
         - grenade
         - tempest-integrated-placement
+        - openstacksdk-functional-devstack
 
 - project-template:
     name: integrated-gate-storage
@@ -366,10 +372,12 @@
       jobs:
         - grenade
         - tempest-integrated-storage
+        - openstacksdk-functional-devstack
     gate:
       jobs:
         - grenade
         - tempest-integrated-storage
+        - openstacksdk-functional-devstack
 
 - project-template:
     name: integrated-gate-object-storage
@@ -382,7 +390,9 @@
       jobs:
         - grenade
         - tempest-integrated-object-storage
+        - openstacksdk-functional-devstack
     gate:
       jobs:
         - grenade
         - tempest-integrated-object-storage
+        - openstacksdk-functional-devstack
