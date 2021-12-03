@@ -110,6 +110,33 @@ class SecGroupTest(base.BaseSecGroupTest):
         # Delete security group
         self._delete_security_group(group_create_body['security_group']['id'])
 
+    @decorators.idempotent_id('fd1ea1c5-eedc-403f-898d-2b562e853f2e')
+    def test_delete_security_group_clear_associated_rules(self):
+        """Verify delete security group.
+
+        its associated security group rules are also deleted
+        """
+        group_create_body, _ = self._create_security_group()
+
+        # Create rules for tcp protocol
+        client = self.security_group_rules_client
+        rule_create_body = client.create_security_group_rule(
+            security_group_id=group_create_body['security_group']['id'],
+            protocol='tcp',
+            direction='ingress',
+            ethertype=self.ethertype
+        )
+        rule_id = rule_create_body['security_group_rule']['id']
+        # Delete security group
+        self._delete_security_group(group_create_body['security_group']['id'])
+
+        # List rules and verify created rule is not in response
+        rule_list_body = (
+            self.security_group_rules_client.list_security_group_rules())
+        rule_list = [rule['id']
+                     for rule in rule_list_body['security_group_rules']]
+        self.assertNotIn(rule_id, rule_list)
+
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('cfb99e0e-7410-4a3d-8a0c-959a63ee77e9')
     def test_create_show_delete_security_group_rule(self):
