@@ -30,7 +30,6 @@ from tempest.common.utils import net_utils
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -85,12 +84,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 cls.placement_min_microversion,
                 CONF.placement.min_microversion))
 
-    def setUp(self):
-        super(ScenarioTest, self).setUp()
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            compute_microversion=self.compute_request_microversion,
-            volume_microversion=self.volume_request_microversion,
-            placement_microversion=self.placement_request_microversion))
+        cls.setup_api_microversion_fixture(
+            compute_microversion=cls.compute_request_microversion,
+            volume_microversion=cls.volume_request_microversion,
+            placement_microversion=cls.placement_request_microversion)
 
     def setup_compute_client(cls):
         """Compute client"""

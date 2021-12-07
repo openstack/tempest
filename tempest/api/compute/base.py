@@ -21,7 +21,6 @@ from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
-from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import api_version_request
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
@@ -164,6 +163,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             api_version_utils.select_request_microversion(
                 cls.placement_min_microversion,
                 CONF.placement.min_microversion))
+        cls.setup_api_microversion_fixture(
+            compute_microversion=cls.request_microversion,
+            volume_microversion=cls.volume_request_microversion,
+            placement_microversion=cls.placement_request_microversion)
+
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.image_ref = CONF.compute.image_ref
@@ -498,13 +502,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
             raise lib_exc.InvalidConfiguration()
-
-    def setUp(self):
-        super(BaseV2ComputeTest, self).setUp()
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            compute_microversion=self.request_microversion,
-            volume_microversion=self.volume_request_microversion,
-            placement_microversion=self.placement_request_microversion))
 
     @classmethod
     def create_volume(cls, image_ref=None, **kwargs):

@@ -24,6 +24,9 @@ from tempest import clients
 from tempest import config
 from tempest.lib.common import validation_resources as vr
 from tempest.lib import exceptions as lib_exc
+from tempest.lib.services.compute import base_compute_client
+from tempest.lib.services.placement import base_placement_client
+from tempest.lib.services.volume import base_client as base_volume_client
 from tempest import test
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -749,3 +752,186 @@ class TestTempestBaseTestClassFixtures(base.TestCase):
                          self.test.fixtures_invoked)
         found_exc = log[0][1][1]
         self.assertIn(expected_exc, str(found_exc))
+
+
+class TestAPIMicroversionTest1(test.BaseTestCase):
+
+    @classmethod
+    def resource_setup(cls):
+        super(TestAPIMicroversionTest1, cls).resource_setup()
+        # Setting microvesions and checks that every tests
+        # of this class will have those microversion set
+        # on service clients requesting service APIs.
+        cls.setup_api_microversion_fixture(
+            compute_microversion='2.30',
+            volume_microversion='3.10',
+            placement_microversion='3.1')
+        # Check microvesion is set during resource_setup()
+        if base_compute_client.COMPUTE_MICROVERSION != '2.30':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_volume_client.VOLUME_MICROVERSION != '3.10':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_placement_client.PLACEMENT_MICROVERSION != '3.1':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(TestAPIMicroversionTest1, cls).resource_cleanup()
+        # Check microversion is reset back to None in resource_cleanup()
+        if base_compute_client.COMPUTE_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_volume_client.VOLUME_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_placement_client.PLACEMENT_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+
+    def setUp(self):
+        super(TestAPIMicroversionTest1, self).setUp()
+        # Check microversion is set in setUp method also.
+        self.assertEqual('2.30', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.10', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.1', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def tearDown(self):
+        super(TestAPIMicroversionTest1, self).tearDown()
+        # Check microversion is set in tearDown method also.
+        self.assertEqual('2.30', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.10', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.1', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_1(self):
+        self.assertEqual('2.30', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.10', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.1', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_2(self):
+        self.assertEqual('2.30', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.10', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.1', base_placement_client.PLACEMENT_MICROVERSION)
+
+
+class TestAPIMicroversionTest2(test.BaseTestCase):
+
+    @classmethod
+    def resource_setup(cls):
+        super(TestAPIMicroversionTest2, cls).resource_setup()
+        # Setting microvesions different from what set in
+        # MicroversionTest1 and checks that every tests
+        # of this class will have the new microversion set
+        # on service clients requesting service APIs.
+        cls.setup_api_microversion_fixture(
+            compute_microversion='2.80',
+            volume_microversion='3.80',
+            placement_microversion='3.8')
+        # Check microvesion is set during resource_setup()
+        if base_compute_client.COMPUTE_MICROVERSION != '2.80':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_volume_client.VOLUME_MICROVERSION != '3.80':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_placement_client.PLACEMENT_MICROVERSION != '3.8':
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(TestAPIMicroversionTest2, cls).resource_cleanup()
+        # Check microversion is reset back to None in resource_cleanup()
+        if base_compute_client.COMPUTE_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_volume_client.VOLUME_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_placement_client.PLACEMENT_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+
+    def setUp(self):
+        super(TestAPIMicroversionTest2, self).setUp()
+        # Check microversion is set in setUp method also.
+        self.assertEqual('2.80', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.80', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.8', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def tearDown(self):
+        super(TestAPIMicroversionTest2, self).tearDown()
+        # Check microversion is set in tearDown method also.
+        self.assertEqual('2.80', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.80', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.8', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_1(self):
+        self.assertEqual('2.80', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.80', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.8', base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_2(self):
+        self.assertEqual('2.80', base_compute_client.COMPUTE_MICROVERSION)
+        self.assertEqual('3.80', base_volume_client.VOLUME_MICROVERSION)
+        self.assertEqual('3.8', base_placement_client.PLACEMENT_MICROVERSION)
+
+
+class TestAPIMicroversionTest3(test.BaseTestCase):
+
+    @classmethod
+    def resource_setup(cls):
+        super(TestAPIMicroversionTest3, cls).resource_setup()
+        # Not setting microversion for this test class so
+        # there should not be any micorversion set on service
+        # clients requesting services APIs.
+        # Check microvesion is not set during resource_setup()
+        if base_compute_client.COMPUTE_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_volume_client.VOLUME_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+        if base_placement_client.PLACEMENT_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not set in resource_setup method")
+
+    @classmethod
+    def resource_cleanup(cls):
+        super(TestAPIMicroversionTest3, cls).resource_cleanup()
+        # Check microversion is set to None in resource_cleanup()
+        if base_compute_client.COMPUTE_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_volume_client.VOLUME_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+        if base_placement_client.PLACEMENT_MICROVERSION is not None:
+            raise testtools.TestCase.failureException(
+                "Microversion is not reset to None in resource_cleanup method")
+
+    def setUp(self):
+        super(TestAPIMicroversionTest3, self).setUp()
+        # Check microversion is None in setUp method also.
+        self.assertIsNone(base_compute_client.COMPUTE_MICROVERSION)
+        self.assertIsNone(base_volume_client.VOLUME_MICROVERSION)
+        self.assertIsNone(base_placement_client.PLACEMENT_MICROVERSION)
+
+    def tearDown(self):
+        super(TestAPIMicroversionTest3, self).tearDown()
+        # Check microversion is None in tearDown method also.
+        self.assertIsNone(base_compute_client.COMPUTE_MICROVERSION)
+        self.assertIsNone(base_volume_client.VOLUME_MICROVERSION)
+        self.assertIsNone(base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_1(self):
+        self.assertIsNone(base_compute_client.COMPUTE_MICROVERSION)
+        self.assertIsNone(base_volume_client.VOLUME_MICROVERSION)
+        self.assertIsNone(base_placement_client.PLACEMENT_MICROVERSION)
+
+    def test_2(self):
+        self.assertIsNone(base_compute_client.COMPUTE_MICROVERSION)
+        self.assertIsNone(base_volume_client.VOLUME_MICROVERSION)
+        self.assertIsNone(base_placement_client.PLACEMENT_MICROVERSION)

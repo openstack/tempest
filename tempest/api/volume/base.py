@@ -16,7 +16,6 @@
 from tempest.common import compute
 from tempest.common import waiters
 from tempest import config
-from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -75,12 +74,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             cls.os_primary.volume_availability_zone_client_latest)
         cls.volume_limits_client = cls.os_primary.volume_limits_client_latest
 
-    def setUp(self):
-        super(BaseVolumeTest, self).setUp()
-        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
-            compute_microversion=self.compute_request_microversion,
-            volume_microversion=self.volume_request_microversion))
-
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeTest, cls).resource_setup()
@@ -92,6 +85,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             api_version_utils.select_request_microversion(
                 cls.min_microversion,
                 CONF.compute.min_microversion))
+        cls.setup_api_microversion_fixture(
+            compute_microversion=cls.compute_request_microversion,
+            volume_microversion=cls.volume_request_microversion)
 
         cls.image_ref = CONF.compute.image_ref
         cls.flavor_ref = CONF.compute.flavor_ref
