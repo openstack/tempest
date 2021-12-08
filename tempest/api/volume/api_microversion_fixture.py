@@ -12,14 +12,23 @@
 # under the License.
 
 import fixtures
+from oslo_log import log as logging
 
 from tempest.lib.services.volume import base_client
+
+LOG = logging.getLogger(__name__)
 
 
 class APIMicroversionFixture(fixtures.Fixture):
 
     def __init__(self, volume_microversion):
         self.volume_microversion = volume_microversion
+        new_fixture = (
+            'tempest.lib.common.api_microversion_fixture.'
+            'APIMicroversionFixture')
+        LOG.warning("%s class is deprecated and moved to %s. It"
+                    " will be removed in Z cycle.",
+                    self.__class__.__name__, new_fixture)
 
     def _setUp(self):
         super(APIMicroversionFixture, self)._setUp()
