@@ -322,7 +322,14 @@ parallel.
 
 - If the execution of a set of tests is required to be serialized then locking
   can be used to perform this. See usage of ``LockFixture`` for examples of
-  using locking.
+  using locking. However, LockFixture only helps if you want to separate the
+  execution of two small sets of test cases. On the other hand, if you need to
+  run a set of tests separately from potentially all other tests then
+  ``LockFixture`` does not scale as you would need to take the lock in all the
+  other tests too. In this case, you can use the ``@serial`` decorator on top
+  of the test class holding the tests that need to run separately from the
+  potentially parallel test set. See more in :ref:`tempest_test_writing`.
+
 
 Sample Configuration File
 -------------------------

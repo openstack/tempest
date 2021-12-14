@@ -26,6 +26,7 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
+@decorators.serial
 class AggregatesAdminTestBase(base.BaseV2ComputeAdminTest):
     """Tests Aggregates API that require admin privileges"""
 

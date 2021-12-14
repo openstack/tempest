@@ -17,12 +17,14 @@ import os
 import unittest
 from unittest import mock
 
+from oslo_concurrency import lockutils
 from oslo_config import cfg
 import testtools
 
 from tempest import clients
 from tempest import config
 from tempest.lib.common import validation_resources as vr
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import base_compute_client
 from tempest.lib.services.placement import base_placement_client
@@ -32,6 +34,8 @@ from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests.lib import fake_credentials
 from tempest.tests.lib.services import registry_fixture
+
+CONF = config.CONF
 
 
 class LoggingTestResult(testtools.TestResult):
@@ -594,6 +598,52 @@ class TestTempestBaseTestClass(base.TestCase):
             str(log[0][2]['traceback']).replace('\n', ' '),
             RuntimeError.__name__ + ': .* ' + OverridesSetup.__name__)
 
+    @mock.patch.object(test.process_lock, 'InterProcessReaderWriterLock')
+    def test_serial_execution_if_requested(self, mock_lock):
+
+        @decorators.serial
+        class SerialTests(self.parent_test):
+            pass
+
+        class ParallelTests(self.parent_test):
+            pass
+
+        @decorators.serial
+        class SerialTests2(self.parent_test):
+            pass
+
+        suite = unittest.TestSuite(
+            (SerialTests(), ParallelTests(), SerialTests2()))
+        log = []
+        result = LoggingTestResult(log)
+        suite.run(result)
+
+        expected_lock_path = os.path.join(
+            lockutils.get_lock_path(CONF), 'tempest-serial-rw-lock')
+
+        # We except that each test class has a lock with the _same_ external
+        # path so that if they would run by different processes they would
+        # still use the same lock
+        # Also we expect that each serial class takes and releases the
+        # write-lock while each non-serial class takes and releases the
+        # read-lock.
+        self.assertEqual(
+            [
+                mock.call(expected_lock_path),
+                mock.call().acquire_write_lock(),
+                mock.call().release_write_lock(),
+
+                mock.call(expected_lock_path),
+                mock.call().acquire_read_lock(),
+                mock.call().release_read_lock(),
+
+                mock.call(expected_lock_path),
+                mock.call().acquire_write_lock(),
+                mock.call().release_write_lock(),
+            ],
+            mock_lock.mock_calls
+        )
+
 
 class TestTempestBaseTestClassFixtures(base.TestCase):
 
@@ -750,6 +800,11 @@ class TestTempestBaseTestClassFixtures(base.TestCase):
 
 class TestAPIMicroversionTest1(test.BaseTestCase):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.useFixture(fake_config.ConfigFixture())
+        config.TempestConfigPrivate = fake_config.FakePrivate
+
     @classmethod
     def resource_setup(cls):
         super(TestAPIMicroversionTest1, cls).resource_setup()
@@ -811,6 +866,11 @@ class TestAPIMicroversionTest1(test.BaseTestCase):
 
 
 class TestAPIMicroversionTest2(test.BaseTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.useFixture(fake_config.ConfigFixture())
+        config.TempestConfigPrivate = fake_config.FakePrivate
 
     @classmethod
     def resource_setup(cls):

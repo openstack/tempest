@@ -256,6 +256,33 @@ inheriting from classes other than the base TestCase in tempest/test.py it is
 worth checking the immediate parent for what is set to determine if your
 class needs to override that setting.
 
+Running some tests in serial
+----------------------------
+Tempest potentially runs test cases in parallel, depending on the configuration.
+However, sometimes you need to make sure that tests are not interfering with
+each other via OpenStack resources. Tempest creates separate projects for each
+test class to separate project based resources between test cases.
+
+If your tests use resources outside of projects, e.g. host aggregates then
+you might need to explicitly separate interfering test cases. If you only need
+to separate a small set of testcases from each other then you can use the
+``LockFixture``.
+
+However, in some cases a small set of tests needs to be run independently from
+the rest of the test cases. For example, some of the host aggregate and
+availability zone testing needs compute nodes without any running nova server
+to be able to move compute hosts between availability zones. But many tempest
+tests start one or more nova servers. In this scenario you can mark the small
+set of tests that needs to be independent from the rest with the ``@serial``
+class decorator. This will make sure that even if tempest is configured to run
+the tests in parallel the tests in the marked test class will always be executed
+separately from the rest of the test cases.
+
+Please note that due to test ordering optimization reasons test cases marked
+for ``@serial`` execution need to be put under ``tempest/serial_tests``
+directory. This will ensure that the serial tests will block the parallel tests
+in the least amount of time.
+
 Interacting with Credentials and Clients
 ========================================
 
