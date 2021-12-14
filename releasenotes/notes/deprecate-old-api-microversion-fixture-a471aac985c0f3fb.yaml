@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    Old APIMicroversionFixture classes ``tempest.api.compute.api_microversion_fixture.APIMicroversionFixture``
+    and ``tempest.api.volume.api_microversion_fixture.APIMicroversionFixture``
+    has been deprecated for removal in favor of new location
+    ``tempest.lib.common.api_microversion_fixture.APIMicroversionFixture``
