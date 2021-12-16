@@ -506,6 +506,10 @@ set_show_server_metadata_item = {
     }
 }
 
+create_backup = {
+    'status_code': [202]
+}
+
 server_actions_common_schema = {
     'status_code': [202]
 }

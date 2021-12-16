@@ -781,3 +781,28 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('novnc', body['type'])
         self.assertNotEqual('', body['url'])
         self._validate_url(body['url'])
+
+
+class ServersAaction247Test(base.BaseV2ComputeTest):
+    """Test compute server with microversion greater than 2.47
+
+    # NOTE(gmann): This test tests the Server create backup APIs
+    # response schema for 2.47 microversion. No specific assert
+    # or behaviour verification is needed.
+    """
+
+    min_microversion = '2.47'
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting not available, backup not possible.')
+    @utils.services('image')
+    @decorators.idempotent_id('252a4bdd-6366-4dae-9994-8c30aa660f23')
+    def test_create_backup(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+
+        backup1 = data_utils.rand_name('backup-1')
+        # Just check create_back to verify the schema with 2.47
+        self.servers_client.create_backup(server['id'],
+                                          backup_type='daily',
+                                          rotation=2,
+                                          name=backup1)

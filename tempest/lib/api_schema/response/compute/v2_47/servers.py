@@ -13,6 +13,7 @@
 import copy
 
 from tempest.lib.api_schema.response.compute.v2_26 import servers as servers226
+from tempest.lib.api_schema.response.compute.v2_45 import servers as servers245
 
 flavor = {
     'type': 'object',
@@ -34,39 +35,40 @@ flavor = {
     'required': ['original_name', 'disk', 'ephemeral', 'ram', 'swap', 'vcpus']
 }
 
-get_server = copy.deepcopy(servers226.get_server)
+get_server = copy.deepcopy(servers245.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update({'flavor': flavor})
-list_servers_detail = copy.deepcopy(servers226.list_servers_detail)
+list_servers_detail = copy.deepcopy(servers245.list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({'flavor': flavor})
 
-update_server = copy.deepcopy(servers226.update_server)
+update_server = copy.deepcopy(servers245.update_server)
 update_server['response_body']['properties']['server'][
     'properties'].update({'flavor': flavor})
 
-rebuild_server = copy.deepcopy(servers226.rebuild_server)
+rebuild_server = copy.deepcopy(servers245.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update({'flavor': flavor})
 
 rebuild_server_with_admin_pass = copy.deepcopy(
-    servers226.rebuild_server_with_admin_pass)
+    servers245.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'flavor': flavor})
 
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
-show_server_diagnostics = copy.deepcopy(servers226.show_server_diagnostics)
-get_remote_consoles = copy.deepcopy(servers226.get_remote_consoles)
-list_tags = copy.deepcopy(servers226.list_tags)
-update_all_tags = copy.deepcopy(servers226.update_all_tags)
-delete_all_tags = copy.deepcopy(servers226.delete_all_tags)
-check_tag_existence = copy.deepcopy(servers226.check_tag_existence)
-update_tag = copy.deepcopy(servers226.update_tag)
-delete_tag = copy.deepcopy(servers226.delete_tag)
-list_servers = copy.deepcopy(servers226.list_servers)
-attach_volume = copy.deepcopy(servers226.attach_volume)
-show_volume_attachment = copy.deepcopy(servers226.show_volume_attachment)
-list_volume_attachments = copy.deepcopy(servers226.list_volume_attachments)
+show_server_diagnostics = copy.deepcopy(servers245.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers245.get_remote_consoles)
+list_tags = copy.deepcopy(servers245.list_tags)
+update_all_tags = copy.deepcopy(servers245.update_all_tags)
+delete_all_tags = copy.deepcopy(servers245.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers245.check_tag_existence)
+update_tag = copy.deepcopy(servers245.update_tag)
+delete_tag = copy.deepcopy(servers245.delete_tag)
+list_servers = copy.deepcopy(servers245.list_servers)
+attach_volume = copy.deepcopy(servers245.attach_volume)
+show_volume_attachment = copy.deepcopy(servers245.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers245.list_volume_attachments)
 show_instance_action = copy.deepcopy(servers226.show_instance_action)
+create_backup = copy.deepcopy(servers245.create_backup)
