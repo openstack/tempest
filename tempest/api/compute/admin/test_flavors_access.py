@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common import utils
 from tempest.lib import decorators
 
 
@@ -23,13 +22,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     Add and remove Flavor Access require admin privileges.
     """
-
-    @classmethod
-    def skip_checks(cls):
-        super(FlavorsAccessTestJSON, cls).skip_checks()
-        if not utils.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
-            msg = "OS-FLV-EXT-DATA extension not enabled."
-            raise cls.skipException(msg)
 
     @classmethod
     def resource_setup(cls):

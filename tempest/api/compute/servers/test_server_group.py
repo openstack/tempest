@@ -17,7 +17,6 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
-from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
@@ -30,13 +29,6 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     It also adds the tests for list and get details of server-groups
     """
     create_default_network = True
-
-    @classmethod
-    def skip_checks(cls):
-        super(ServerGroupTestJSON, cls).skip_checks()
-        if not utils.is_extension_enabled('os-server-groups', 'compute'):
-            msg = "os-server-groups extension is not enabled."
-            raise cls.skipException(msg)
 
     @classmethod
     def setup_clients(cls):

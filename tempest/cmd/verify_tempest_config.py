@@ -214,7 +214,6 @@ def verify_api_versions(os, service, update):
 
 def get_extension_client(os, service):
     extensions_client = {
-        'nova': os.compute.ExtensionsClient(),
         'neutron': os.network.ExtensionsClient(),
         'swift': os.object_storage.CapabilitiesClient(),
         # NOTE: Cinder v3 API is current and v2 and v1 are deprecated.
@@ -231,7 +230,6 @@ def get_extension_client(os, service):
 
 def get_enabled_extensions(service):
     extensions_options = {
-        'nova': CONF.compute_feature_enabled.api_extensions,
         'cinder': CONF.volume_feature_enabled.api_extensions,
         'neutron': CONF.network_feature_enabled.api_extensions,
         'swift': CONF.object_storage_feature_enabled.discoverable_apis,
@@ -442,7 +440,7 @@ def main(opts=None):
         os = clients.Manager(icreds.get_primary_creds().credentials)
         services = check_service_availability(os, update)
         results = {}
-        for service in ['nova', 'cinder', 'neutron', 'swift']:
+        for service in ['cinder', 'neutron', 'swift']:
             if service not in services:
                 continue
             results = verify_extensions(os, service, results)

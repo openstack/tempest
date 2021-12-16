@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
@@ -25,13 +24,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     GET Flavor Extra specs can be performed even by without admin privileges.
     """
-
-    @classmethod
-    def skip_checks(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).skip_checks()
-        if not utils.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
-            msg = "OS-FLV-EXT-DATA extension not enabled."
-            raise cls.skipException(msg)
 
     @classmethod
     def resource_setup(cls):

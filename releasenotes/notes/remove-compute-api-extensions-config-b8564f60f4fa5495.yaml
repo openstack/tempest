@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Remove deprecated config option ``api_extensions`` from
+    ``compute_feature_enabled`` groups.
