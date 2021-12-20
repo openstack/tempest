@@ -392,6 +392,10 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self._creds['project_manager'] = project_manager
         return project_manager
 
+    def get_project_alt_manager_creds(self):
+        # TODO(msava):Implement alt manager hash.
+        return
+
     def get_project_member_creds(self):
         if self._creds.get('project_member'):
             return self._creds.get('project_member')
