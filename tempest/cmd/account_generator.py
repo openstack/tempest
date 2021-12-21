@@ -81,11 +81,11 @@ Optional Arguments
   will have the prefix with the given TAG in its name. Using tag is recommended
   for the further using, cleaning resources.
 
-* ``-r, --concurrency CONCURRENCY`` (Optional) Concurrency count
-  (default: 1). The number of accounts required can be estimated as
-  CONCURRENCY x 2. Each user provided in *accounts.yaml* file will be in
-  a different tenant. This is required to provide isolation between test for
-  running in parallel.
+* ``-r, --concurrency CONCURRENCY`` (Optional) Concurrency count (default: 2).
+  The number of accounts generated will be same as CONCURRENCY. The higher the
+  number, the more tests will run in parallel. If you want to run tests
+  sequentially then use 1 as value for concurrency (beware that tests that need
+  more credentials will fail).
 
 * ``--with-admin`` (Optional) Creates admin for each concurrent group
   (default: False).
@@ -236,7 +236,7 @@ def _parser_add_args(parser):
                         dest='tag',
                         help='Resources tag')
     parser.add_argument('-r', '--concurrency',
-                        default=1,
+                        default=2,
                         type=positive_int,
                         required=False,
                         dest='concurrency',

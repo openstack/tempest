@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    [`bug 1948935 <https://bugs.launchpad.net/tempest/+bug/1948935>`_]
+    The default value of account-generator --concurrency parameter is now
+    set to 2 instead of 1.
