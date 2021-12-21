@@ -21,6 +21,7 @@ import time
 import warnings
 
 from oslo_log import log as logging
+from oslo_utils.secretutils import md5
 
 from tempest.lib import exceptions
 
@@ -31,6 +32,21 @@ with warnings.catch_warnings():
 
 
 LOG = logging.getLogger(__name__)
+
+
+def get_fingerprint(self):
+    """Patch paramiko
+
+    This method needs to be patched to allow paramiko to work under FIPS.
+    Until the patch to do this merges, patch paramiko here.
+
+    TODO(alee) Remove this when paramiko is patched.
+    See https://github.com/paramiko/paramiko/pull/1928
+    """
+    return md5(self.asbytes(), usedforsecurity=False).digest()
+
+
+paramiko.pkey.PKey.get_fingerprint = get_fingerprint
 
 
 class Client(object):
