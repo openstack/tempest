@@ -38,7 +38,7 @@ UNIT_TESTS_EXCLUDE = 'tempest.tests'
 
 class SourcePatcher(object):
 
-    """"Lazy patcher for python source files"""
+    """Lazy patcher for python source files"""
 
     def __init__(self):
         self.source_files = None
@@ -431,14 +431,21 @@ def run():
                         help='Package with tests')
     parser.add_argument('--fix', action='store_true', dest='fix_tests',
                         help='Attempt to fix tests without UUIDs')
+    parser.add_argument('--libpath', action='store', dest='libpath',
+                        default=".", type=str,
+                        help='Path to package')
+
     args = parser.parse_args()
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+    sys.path.insert(0, args.libpath)
     pkg = importlib.import_module(args.package)
+
     checker = TestChecker(pkg)
     errors = False
     tests = checker.get_tests()
     untagged = checker.find_untagged(tests)
     errors = checker.report_collisions(tests) or errors
+
     if args.fix_tests and untagged:
         checker.fix_tests(untagged)
     else:
