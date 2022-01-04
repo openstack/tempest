@@ -21,7 +21,7 @@ attachments = {
     'items': {
         'type': 'object',
         'properties': {
-            'server_id': {'type': 'string', 'format': 'uuid'},
+            'server_id': {'type': ['string', 'null'], 'format': 'uuid'},
             'attachment_id': {'type': 'string', 'format': 'uuid'},
             'attached_at': parameter_types.date_time_or_null,
             'host_name': {'type': ['string', 'null']},
