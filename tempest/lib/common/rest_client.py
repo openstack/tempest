@@ -907,8 +907,8 @@ class RestClient(object):
             if int(time.time()) - start_time >= self.build_timeout:
                 message = ('Failed to delete %(resource_type)s %(id)s within '
                            'the required time (%(timeout)s s). Timer started '
-                           'at %(start_time)s. Timer ended at %(end_time)s'
-                           'waited for %(wait_time)s' %
+                           'at %(start_time)s. Timer ended at %(end_time)s. '
+                           'Waited for %(wait_time)s s.' %
                            {'resource_type': self.resource_type, 'id': id,
                             'timeout': self.build_timeout,
                             'start_time': start_time,
