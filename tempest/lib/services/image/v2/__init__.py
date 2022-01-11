@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest.lib.services.image.v2.image_cache_client import \
+    ImageCacheClient
 from tempest.lib.services.image.v2.image_members_client import \
     ImageMembersClient
 from tempest.lib.services.image.v2.images_client import ImagesClient
@@ -27,7 +29,7 @@ from tempest.lib.services.image.v2.resource_types_client import \
 from tempest.lib.services.image.v2.schemas_client import SchemasClient
 from tempest.lib.services.image.v2.versions_client import VersionsClient
 
-__all__ = ['ImageMembersClient', 'ImagesClient', 'NamespaceObjectsClient',
-           'NamespacePropertiesClient', 'NamespaceTagsClient',
-           'NamespacesClient', 'ResourceTypesClient', 'SchemasClient',
-           'VersionsClient']
+__all__ = ['ImageMembersClient', 'ImagesClient', 'ImageCacheClient',
+           'NamespaceObjectsClient', 'NamespacePropertiesClient',
+           'NamespaceTagsClient', 'NamespacesClient', 'ResourceTypesClient',
+           'SchemasClient', 'VersionsClient']

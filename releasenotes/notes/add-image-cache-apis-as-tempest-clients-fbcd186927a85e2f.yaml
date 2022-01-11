@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The following ``image_cache`` tempest client for glance v2 image
+    caching API is implemented in this release.
+
