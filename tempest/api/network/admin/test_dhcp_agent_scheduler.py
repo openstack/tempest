@@ -14,6 +14,7 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest.common import waiters
 from tempest.lib import decorators
 
 
@@ -35,6 +36,16 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         cls.network = cls.create_network()
         cls.create_subnet(cls.network)
         cls.port = cls.create_port(cls.network)
+
+    @decorators.idempotent_id('f164801e-1dd8-4b8b-b5d3-cc3ac77cfaa5')
+    def test_dhcp_port_status_active(self):
+        ports = self.admin_ports_client.list_ports(
+            network_id=self.network['id'])['ports']
+        for port in ports:
+            waiters.wait_for_port_status(
+                client=self.admin_ports_client,
+                port_id=port['id'],
+                status='ACTIVE')
 
     @decorators.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
     def test_list_dhcp_agent_hosting_network(self):
