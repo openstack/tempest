@@ -875,7 +875,10 @@ NetworkFeaturesGroup = [
                     'bandwidth allocation.'),
     cfg.StrOpt('provider_net_base_segmentation_id', default=3000,
                help='Base segmentation ID to create provider networks. '
-                    'This value will be increased in case of conflict.')
+                    'This value will be increased in case of conflict.'),
+    cfg.BoolOpt('qos_min_bw_and_pps', default=False,
+                help='Does the test environment have minimum bandwidth and '
+                     'packet rate inventories configured?'),
 ]
 
 dashboard_group = cfg.OptGroup(name="dashboard",

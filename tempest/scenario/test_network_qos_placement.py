@@ -49,6 +49,7 @@ class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
     compute_max_microversion = 'latest'
 
     INGRESS_DIRECTION = 'ingress'
+    ANY_DIRECTION = 'any'
     BW_RESOURCE_CLASS = "NET_BW_IGR_KILOBIT_PER_SEC"
 
     # For any realistic inventory value (that is inventory != MAX_INT) an
@@ -508,3 +509,500 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
             **{'description': 'foo'})
         self._assert_allocation_is_as_expected(server1['id'], [port['id']],
                                                self.BANDWIDTH_1)
+
+
+class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
+
+    PPS_RESOURCE_CLASS = "NET_PACKET_RATE_KILOPACKET_PER_SEC"
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
+        if not CONF.network_feature_enabled.qos_min_bw_and_pps:
+            msg = (
+                "Skipped as no resource inventories are configured for QoS "
+                "minimum bandwidth and packet rate testing.")
+            raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.qos_min_pps_client = cls.os_admin.qos_min_pps_client
+
+    def setUp(self):
+        super().setUp()
+        self.network = self._create_network()
+
+    def _create_qos_policy_with_bw_and_pps_rules(self, min_kbps, min_kpps):
+        policy = self.qos_client.create_qos_policy(
+            name=data_utils.rand_name(),
+            shared=True
+        )['policy']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.qos_client.delete_qos_policy,
+            policy['id']
+        )
+
+        if min_kbps > 0:
+            bw_rule = self.qos_min_bw_client.create_minimum_bandwidth_rule(
+                policy['id'],
+                min_kbps=min_kbps,
+                direction=self.INGRESS_DIRECTION
+            )['minimum_bandwidth_rule']
+            self.addCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                self.qos_min_bw_client.delete_minimum_bandwidth_rule,
+                policy['id'],
+                bw_rule['id']
+            )
+
+        if min_kpps > 0:
+            pps_rule = self.qos_min_pps_client.create_minimum_packet_rate_rule(
+                policy['id'],
+                min_kpps=min_kpps,
+                direction=self.ANY_DIRECTION
+            )['minimum_packet_rate_rule']
+            self.addCleanup(
+                test_utils.call_and_ignore_notfound_exc,
+                self.qos_min_pps_client.delete_minimum_packet_rate_rule,
+                policy['id'],
+                pps_rule['id']
+            )
+
+        return policy
+
+    def _create_network(self):
+        physnet_name = CONF.network_feature_enabled.qos_placement_physnet
+        base_segm = (
+            CONF.network_feature_enabled.provider_net_base_segmentation_id)
+
+        # setup_network_subnet_with_router will add the necessary cleanup calls
+        network, _, _ = self.setup_network_subnet_with_router(
+            networks_client=self.networks_client,
+            routers_client=self.routers_client,
+            subnets_client=self.subnets_client,
+            shared=True,
+            **{
+                'provider:network_type': 'vlan',
+                'provider:physical_network': physnet_name,
+                # +1 to be different from the segmentation_id used in
+                # MinBwAllocationPlacementTest
+                'provider:segmentation_id': int(base_segm) + 1,
+            }
+        )
+        return network
+
+    def _create_port_with_qos_policy(self, policy):
+        port = self.ports_client.create_port(
+            name=data_utils.rand_name(self.__class__.__name__),
+            network_id=self.network['id'],
+            qos_policy_id=policy['id'] if policy else None,
+        )['port']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.ports_client.delete_port, port['id']
+        )
+        return port
+
+    def assert_allocations(
+            self, server, port, expected_min_kbps, expected_min_kpps
+    ):
+        allocations = self.placement_client.list_allocations(
+            server['id'])['allocations']
+
+        # one allocation for the flavor related resources on the compute RP
+        expected_allocation = 1
+        # one allocation due to bw rule
+        if expected_min_kbps > 0:
+            expected_allocation += 1
+        # one allocation due to pps rule
+        if expected_min_kpps > 0:
+            expected_allocation += 1
+        self.assertEqual(expected_allocation, len(allocations), allocations)
+
+        expected_rp_uuids_in_binding_allocation = set()
+
+        if expected_min_kbps > 0:
+            bw_rp_allocs = {
+                rp: alloc['resources'][self.BW_RESOURCE_CLASS]
+                for rp, alloc in allocations.items()
+                if self.BW_RESOURCE_CLASS in alloc['resources']
+            }
+            self.assertEqual(1, len(bw_rp_allocs))
+            bw_rp, bw_alloc = list(bw_rp_allocs.items())[0]
+            self.assertEqual(expected_min_kbps, bw_alloc)
+            expected_rp_uuids_in_binding_allocation.add(bw_rp)
+
+        if expected_min_kpps > 0:
+            pps_rp_allocs = {
+                rp: alloc['resources'][self.PPS_RESOURCE_CLASS]
+                for rp, alloc in allocations.items()
+                if self.PPS_RESOURCE_CLASS in alloc['resources']
+            }
+            self.assertEqual(1, len(pps_rp_allocs))
+            pps_rp, pps_alloc = list(pps_rp_allocs.items())[0]
+            self.assertEqual(expected_min_kpps, pps_alloc)
+            expected_rp_uuids_in_binding_allocation.add(pps_rp)
+
+        # Let's check port.binding:profile.allocation points to the two
+        # provider resource allocated from
+        port = self.os_admin.ports_client.show_port(port['id'])
+        port_binding_alloc = port[
+            'port']['binding:profile'].get('allocation', {})
+        self.assertEqual(
+            expected_rp_uuids_in_binding_allocation,
+            set(port_binding_alloc.values())
+        )
+
+    def assert_no_allocation(self, server, port):
+        # check that there are no allocations
+        allocations = self.placement_client.list_allocations(
+            server['id'])['allocations']
+        self.assertEqual(0, len(allocations))
+
+        # check that binding_profile of the port is empty
+        port = self.os_admin.ports_client.show_port(port['id'])
+        self.assertEqual(0, len(port['port']['binding:profile']))
+
+    @decorators.idempotent_id('93d1a88d-235e-4b7b-b44d-2a17dcf4e213')
+    @utils.services('compute', 'network')
+    def test_server_create_delete(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+
+        self.assert_no_allocation(server, port)
+
+    def _test_create_server_negative(self, min_kbps=1000, min_kpps=100):
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until=None)
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='ERROR', ready_wait=False, raise_on_error=False)
+
+        # check that the creation failed with No valid host
+        server = self.servers_client.show_server(server['id'])['server']
+        self.assertIn('fault', server)
+        self.assertIn('No valid host', server['fault']['message'])
+
+        self.assert_no_allocation(server, port)
+
+    @decorators.idempotent_id('915dd2ce-4890-40c8-9db6-f3e04080c6c1')
+    @utils.services('compute', 'network')
+    def test_server_create_no_valid_host_due_to_bandwidth(self):
+        self._test_create_server_negative(min_kbps=self.PLACEMENT_MAX_INT)
+
+    @decorators.idempotent_id('2d4a755e-10b9-4ac0-bef2-3f89de1f150b')
+    @utils.services('compute', 'network')
+    def test_server_create_no_valid_host_due_to_packet_rate(self):
+        self._test_create_server_negative(min_kpps=self.PLACEMENT_MAX_INT)
+
+    @decorators.idempotent_id('69d93e4f-0dfc-4d17-8d84-cc5c3c842cd5')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.resize, 'Resize not available.')
+    @utils.services('compute', 'network')
+    def test_server_resize(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        new_flavor = self._create_flavor_to_resize_to()
+
+        self.servers_client.resize_server(
+            server_id=server['id'], flavor_ref=new_flavor['id']
+        )
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.servers_client.confirm_resize_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='ACTIVE', ready_wait=False, raise_on_error=True)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+    @decorators.idempotent_id('d01d4aee-ca06-4e4e-add7-8a47fe0daf96')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.resize, 'Resize not available.')
+    @utils.services('compute', 'network')
+    def test_server_resize_revert(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        new_flavor = self._create_flavor_to_resize_to()
+
+        self.servers_client.resize_server(
+            server_id=server['id'], flavor_ref=new_flavor['id']
+        )
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.servers_client.revert_resize_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='ACTIVE', ready_wait=False, raise_on_error=True)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+    @decorators.idempotent_id('bdd0b31c-c8b0-4b7b-b80a-545a46b32abe')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.cold_migration,
+        'Cold migration is not available.')
+    @testtools.skipUnless(
+        CONF.compute.min_compute_nodes > 1,
+        'Less than 2 compute nodes, skipping multinode tests.')
+    @utils.services('compute', 'network')
+    def test_server_migrate(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.os_adm.servers_client.migrate_server(server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='VERIFY_RESIZE', ready_wait=False, raise_on_error=False)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.os_adm.servers_client.confirm_resize_server(
+            server_id=server['id'])
+        waiters.wait_for_server_status(
+            client=self.servers_client, server_id=server['id'],
+            status='ACTIVE', ready_wait=False, raise_on_error=True)
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+    @decorators.idempotent_id('fdb260e3-caa5-482d-ac7c-8c22adf3d750')
+    @utils.services('compute', 'network')
+    def test_qos_policy_update_on_bound_port(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+
+        min_kbps2 = 2000
+        min_kpps2 = 50
+        policy2 = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps2, min_kpps2)
+
+        port = self._create_port_with_qos_policy(policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.ports_client.update_port(
+            port['id'],
+            qos_policy_id=policy2['id'])
+
+        self.assert_allocations(server, port, min_kbps2, min_kpps2)
+
+    @decorators.idempotent_id('e6a20125-a02e-49f5-bcf6-894305ee3715')
+    @utils.services('compute', 'network')
+    def test_qos_policy_update_on_bound_port_from_null_policy(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+
+        port = self._create_port_with_qos_policy(policy=None)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, 0, 0)
+
+        self.ports_client.update_port(
+            port['id'],
+            qos_policy_id=policy['id'])
+
+        # NOTE(gibi): This is unintuitive but it is the expected behavior.
+        # If there was no policy attached to the port when the server was
+        # created then neutron still allows adding a policy to the port later
+        # as this operation was support before placement enforcement was added
+        # for the qos minimum bandwidth rule. However neutron cannot create
+        # the placement resource allocation for this port.
+        self.assert_allocations(server, port, 0, 0)
+
+    @decorators.idempotent_id('f5864761-966c-4e49-b430-ac0044b7d658')
+    @utils.services('compute', 'network')
+    def test_qos_policy_update_on_bound_port_additional_rule(self):
+        min_kbps = 1000
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, 0)
+
+        min_kbps2 = 2000
+        min_kpps2 = 50
+        policy2 = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps2, min_kpps2)
+
+        port = self._create_port_with_qos_policy(policy=policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, 0)
+
+        self.ports_client.update_port(
+            port['id'],
+            qos_policy_id=policy2['id'])
+
+        # FIXME(gibi): Agree in the spec: do we ignore the pps request or we
+        # reject the update? It seems current implementation goes with
+        # ignoring the additional pps rule.
+        self.assert_allocations(server, port, min_kbps2, 0)
+
+    @decorators.idempotent_id('fbbb9c81-ed21-48c3-bdba-ce2361e93aad')
+    @utils.services('compute', 'network')
+    def test_qos_policy_update_on_bound_port_to_null_policy(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+
+        port = self._create_port_with_qos_policy(policy=policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        self.ports_client.update_port(
+            port['id'],
+            qos_policy_id=None)
+
+        self.assert_allocations(server, port, 0, 0)
+
+    @decorators.idempotent_id('0393d038-03ad-4844-a0e4-83010f69dabb')
+    @utils.services('compute', 'network')
+    def test_interface_attach_detach(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+
+        port = self._create_port_with_qos_policy(policy=None)
+
+        port2 = self._create_port_with_qos_policy(policy=policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, 0, 0)
+
+        self.interface_client.create_interface(
+            server_id=server['id'],
+            port_id=port2['id'])
+        waiters.wait_for_interface_status(
+            self.interface_client, server['id'], port2['id'], 'ACTIVE')
+
+        self.assert_allocations(server, port2, min_kbps, min_kpps)
+
+        req_id = self.interface_client.delete_interface(
+            server_id=server['id'],
+            port_id=port2['id']).response['x-openstack-request-id']
+        waiters.wait_for_interface_detach(
+            self.servers_client, server['id'], port2['id'], req_id)
+
+        self.assert_allocations(server, port2, 0, 0)
+
+    @decorators.idempotent_id('36ffdb85-6cc2-4cc9-a426-cad5bac8626b')
+    @testtools.skipUnless(
+        CONF.compute.min_compute_nodes > 1,
+        'Less than 2 compute nodes, skipping multinode tests.')
+    @testtools.skipUnless(
+        CONF.compute_feature_enabled.live_migration,
+        'Live migration not available')
+    @utils.services('compute', 'network')
+    def test_server_live_migrate(self):
+        min_kbps = 1000
+        min_kpps = 100
+        policy = self._create_qos_policy_with_bw_and_pps_rules(
+            min_kbps, min_kpps)
+
+        port = self._create_port_with_qos_policy(policy=policy)
+
+        server = self.create_server(
+            networks=[{'port': port['id']}],
+            wait_until='ACTIVE'
+        )
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)
+
+        server_details = self.os_adm.servers_client.show_server(server['id'])
+        source_host = server_details['server']['OS-EXT-SRV-ATTR:host']
+
+        self.os_adm.servers_client.live_migrate_server(
+            server['id'], block_migration=True, host=None)
+        waiters.wait_for_server_status(
+            self.servers_client, server['id'], 'ACTIVE')
+
+        server_details = self.os_adm.servers_client.show_server(server['id'])
+        new_host = server_details['server']['OS-EXT-SRV-ATTR:host']
+
+        self.assertNotEqual(source_host, new_host, "Live migration failed")
+
+        self.assert_allocations(server, port, min_kbps, min_kpps)

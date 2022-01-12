@@ -31,6 +31,8 @@ from tempest.lib.services.network.qos_limit_bandwidth_rules_client import \
     QosLimitBandwidthRulesClient
 from tempest.lib.services.network.qos_minimum_bandwidth_rules_client import \
     QosMinimumBandwidthRulesClient
+from tempest.lib.services.network.qos_minimum_packet_rate_rules_client import \
+    QosMinimumPacketRateRulesClient
 from tempest.lib.services.network.quotas_client import QuotasClient
 from tempest.lib.services.network.routers_client import RoutersClient
 from tempest.lib.services.network.security_group_rules_client import \
@@ -54,4 +56,4 @@ __all__ = ['AgentsClient', 'ExtensionsClient', 'FloatingIPsClient',
            'SecurityGroupRulesClient', 'SecurityGroupsClient',
            'SegmentsClient', 'ServiceProvidersClient', 'SubnetpoolsClient',
            'SubnetsClient', 'TagsClient', 'TrunksClient', 'LogResourceClient',
-           'LoggableResourceClient']
+           'LoggableResourceClient', 'QosMinimumPacketRateRulesClient']
