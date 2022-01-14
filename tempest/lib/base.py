@@ -28,11 +28,7 @@ def _handle_skip_exception():
         stestr_min = pkg_resources.parse_version('2.5.0')
         new_stestr = (stestr_version >= stestr_min)
         import unittest
-        import unittest2
-        if sys.version_info >= (3, 5) and new_stestr:
-            testtools.TestCase.skipException = unittest.case.SkipTest
-        else:
-            testtools.TestCase.skipException = unittest2.case.SkipTest
+        testtools.TestCase.skipException = unittest.case.SkipTest
     except Exception:
         pass
 

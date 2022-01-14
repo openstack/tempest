@@ -16,6 +16,7 @@
 import os
 import sys
 from unittest import mock
+import unittest
 
 from oslo_config import cfg
 import testtools
@@ -32,12 +33,6 @@ from tempest.tests import base
 from tempest.tests import fake_config
 from tempest.tests.lib import fake_credentials
 from tempest.tests.lib.services import registry_fixture
-
-
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
 
 
 class LoggingTestResult(testtools.TestResult):
