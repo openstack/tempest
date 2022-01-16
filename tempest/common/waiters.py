@@ -32,7 +32,8 @@ def _get_task_state(body):
 
 # NOTE(afazekas): This function needs to know a token and a subject.
 def wait_for_server_status(client, server_id, status, ready_wait=True,
-                           extra_timeout=0, raise_on_error=True):
+                           extra_timeout=0, raise_on_error=True,
+                           request_id=None):
     """Waits for a server to reach a given status."""
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
@@ -71,11 +72,12 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
         if (server_status == 'ERROR') and raise_on_error:
+            details = ''
             if 'fault' in body:
-                raise exceptions.BuildErrorException(body['fault'],
-                                                     server_id=server_id)
-            else:
-                raise exceptions.BuildErrorException(server_id=server_id)
+                details += 'Fault: %s.' % body['fault']
+            if request_id:
+                details += ' Server boot request ID: %s.' % request_id
+            raise exceptions.BuildErrorException(details, server_id=server_id)
 
         timed_out = int(time.time()) - start_time >= timeout
 
@@ -88,6 +90,8 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'status': status,
                         'expected_task_state': expected_task_state,
                         'timeout': timeout})
+            if request_id:
+                message += ' Server boot request ID: %s.' % request_id
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
             caller = test_utils.find_test_caller()
