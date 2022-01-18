@@ -131,8 +131,6 @@
 - job:
     name: tempest-integrated-compute-centos-8-stream
     parent: tempest-integrated-compute
-    # TODO(gmann): Make this job non voting until bug#1957941 if fixed.
-    voting: false
     nodeset: devstack-single-node-centos-8-stream
     branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria)).*$
     description: |
