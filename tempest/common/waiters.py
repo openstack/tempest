@@ -594,3 +594,21 @@ def wait_for_ssh(ssh_client, timeout=30):
         except lib_exc.SSHTimeout:
             pass
     raise lib_exc.TimeoutException()
+
+
+def wait_for_caching(client, cache_client, image_id):
+    """Waits until image is cached"""
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        caching = cache_client.list_cache()
+        output = [image['image_id'] for image in caching['cached_images']]
+        if output and image_id in output:
+            return caching
+
+        time.sleep(client.build_interval)
+
+    message = ('Image %s failed to cache in time.' % image_id)
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise lib_exc.TimeoutException(message)
