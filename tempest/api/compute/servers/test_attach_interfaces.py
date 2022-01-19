@@ -68,7 +68,8 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
             self.image_ssh_password,
             validation_resources['keypair']['private_key'],
             server=server,
-            servers_client=self.servers_client)
+            servers_client=self.servers_client,
+            ssh_key_type=CONF.validation.ssh_key_type)
         linux_client.validate_authentication()
 
     def _create_server_get_interfaces(self):

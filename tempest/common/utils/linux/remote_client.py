@@ -48,7 +48,8 @@ class RemoteClient(remote_client.RemoteClient):
             console_output_enabled=CONF.compute_feature_enabled.console_output,
             ssh_shell_prologue=CONF.validation.ssh_shell_prologue,
             ping_count=CONF.validation.ping_count,
-            ping_size=CONF.validation.ping_size)
+            ping_size=CONF.validation.ping_size,
+            ssh_key_type=CONF.validation.ssh_key_type)
 
     # Note that this method will not work on SLES11 guests, as they do
     # not support the TYPE column on lsblk

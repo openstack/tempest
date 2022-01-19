@@ -970,6 +970,10 @@ ValidationGroup = [
                default='public',
                help="Network used for SSH connections. Ignored if "
                     "connect_method=floating."),
+    cfg.StrOpt('ssh_key_type',
+               default='rsa',
+               help='Type of key to use for ssh connections. '
+                    'Valid types are rsa, ecdsa'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',

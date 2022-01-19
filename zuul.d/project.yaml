@@ -161,6 +161,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3-opensuse15:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-centos8-stream-fips:
+            irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
         - tempest-full-xena

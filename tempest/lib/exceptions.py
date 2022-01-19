@@ -256,6 +256,10 @@ class SSHClientProxyClientLoop(TempestException):
                "%(port)s and username: %(username)s as parent")
 
 
+class SSHClientUnsupportedKeyType(TempestException):
+    message = ("SSH client: unsupported key type %(key_type)s")
+
+
 class UnknownServiceClient(TempestException):
     message = "Service clients named %(services)s are not known"
 
