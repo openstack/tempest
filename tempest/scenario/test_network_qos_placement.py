@@ -49,8 +49,10 @@ class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
     compute_max_microversion = 'latest'
 
     INGRESS_DIRECTION = 'ingress'
+    EGRESS_DIRECTION = 'egress'
     ANY_DIRECTION = 'any'
-    BW_RESOURCE_CLASS = "NET_BW_IGR_KILOBIT_PER_SEC"
+    INGRESS_RESOURCE_CLASS = "NET_BW_IGR_KILOBIT_PER_SEC"
+    EGRESS_RESOURCE_CLASS = "NET_BW_EGR_KILOBIT_PER_SEC"
 
     # For any realistic inventory value (that is inventory != MAX_INT) an
     # allocation candidate request of MAX_INT is expected to be rejected, see:
@@ -107,7 +109,9 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         super(MinBwAllocationPlacementTest, self).setUp()
         self._check_if_allocation_is_possible()
 
-    def _create_policy_and_min_bw_rule(self, name_prefix, min_kbps):
+    def _create_policy_and_min_bw_rule(
+        self, name_prefix, min_kbps, direction="ingress"
+    ):
         policy = self.qos_client.create_qos_policy(
             name=data_utils.rand_name(name_prefix),
             shared=True)['policy']
@@ -117,7 +121,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
             policy['id'],
             **{
                 'min_kbps': min_kbps,
-                'direction': self.INGRESS_DIRECTION
+                'direction': direction,
             })['minimum_bandwidth_rule']
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
@@ -167,20 +171,20 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
 
     def _check_if_allocation_is_possible(self):
         alloc_candidates = self.placement_client.list_allocation_candidates(
-            resources1='%s:%s' % (self.BW_RESOURCE_CLASS,
+            resources1='%s:%s' % (self.INGRESS_RESOURCE_CLASS,
                                   self.SMALLEST_POSSIBLE_BW))
         if len(alloc_candidates['provider_summaries']) == 0:
             self.fail('No allocation candidates are available for %s:%s' %
-                      (self.BW_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
+                      (self.INGRESS_RESOURCE_CLASS, self.SMALLEST_POSSIBLE_BW))
 
         # Just to be sure check with impossible high (placement max_int),
         # allocation
         alloc_candidates = self.placement_client.list_allocation_candidates(
-            resources1='%s:%s' % (self.BW_RESOURCE_CLASS,
+            resources1='%s:%s' % (self.INGRESS_RESOURCE_CLASS,
                                   self.PLACEMENT_MAX_INT))
         if len(alloc_candidates['provider_summaries']) != 0:
             self.fail('For %s:%s there should be no available candidate!' %
-                      (self.BW_RESOURCE_CLASS, self.PLACEMENT_MAX_INT))
+                      (self.INGRESS_RESOURCE_CLASS, self.PLACEMENT_MAX_INT))
 
     def _boot_vm_with_min_bw(self, qos_policy_id, status='ACTIVE'):
         wait_until = (None if status == 'ERROR' else status)
@@ -194,22 +198,28 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
             status=status, ready_wait=False, raise_on_error=False)
         return server, port
 
-    def _assert_allocation_is_as_expected(self, consumer, port_ids,
-                                          min_kbps=SMALLEST_POSSIBLE_BW):
+    def _assert_allocation_is_as_expected(
+        self, consumer, port_ids, min_kbps=SMALLEST_POSSIBLE_BW,
+        expected_rc=NetworkQoSPlacementTestBase.INGRESS_RESOURCE_CLASS,
+    ):
         allocations = self.placement_client.list_allocations(
             consumer)['allocations']
         self.assertGreater(len(allocations), 0)
         bw_resource_in_alloc = False
         allocation_rp = None
         for rp, resources in allocations.items():
-            if self.BW_RESOURCE_CLASS in resources['resources']:
+            if expected_rc in resources['resources']:
                 self.assertEqual(
                     min_kbps,
-                    resources['resources'][self.BW_RESOURCE_CLASS])
+                    resources['resources'][expected_rc])
                 bw_resource_in_alloc = True
                 allocation_rp = rp
         if min_kbps:
-            self.assertTrue(bw_resource_in_alloc)
+            self.assertTrue(
+                bw_resource_in_alloc,
+                f"expected {min_kbps} bandwidth allocation from {expected_rc} "
+                f"but instance has allocation {allocations} instead."
+            )
 
             # Check binding_profile of the port is not empty and equals with
             # the rp uuid
@@ -510,6 +520,60 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         self._assert_allocation_is_as_expected(server1['id'], [port['id']],
                                                self.BANDWIDTH_1)
 
+    @decorators.idempotent_id('372b2728-cfed-469a-b5f6-b75779e1ccbe')
+    @utils.services('compute', 'network')
+    def test_qos_min_bw_allocation_update_policy_direction_change(self):
+        """Test QoS min bw direction change on a bound port
+
+        Related RFE in neutron: #1882804
+        The scenario is the following:
+        * Have a port with QoS policy and minimum bandwidth rule with ingress
+        direction
+        * Boot a VM with the port.
+        * Update the port with a new policy to egress direction in
+        minimum bandwidth rule.
+        * The allocation on placement side should be according to the new
+        rules.
+        """
+        if not utils.is_network_feature_enabled('update_port_qos'):
+            raise self.skipException("update_port_qos feature is not enabled")
+
+        def create_policies():
+            self.qos_policy_ingress = self._create_policy_and_min_bw_rule(
+                name_prefix='test_policy_ingress',
+                min_kbps=self.BANDWIDTH_1,
+                direction=self.INGRESS_DIRECTION,
+            )
+            self.qos_policy_egress = self._create_policy_and_min_bw_rule(
+                name_prefix='test_policy_egress',
+                min_kbps=self.BANDWIDTH_1,
+                direction=self.EGRESS_DIRECTION,
+            )
+
+        self._create_network_and_qos_policies(create_policies)
+
+        port = self.create_port(
+            self.prov_network['id'],
+            qos_policy_id=self.qos_policy_ingress['id'])
+
+        server1 = self.create_server(
+            networks=[{'port': port['id']}])
+
+        self._assert_allocation_is_as_expected(
+            server1['id'], [port['id']], self.BANDWIDTH_1,
+            expected_rc=self.INGRESS_RESOURCE_CLASS)
+
+        self.ports_client.update_port(
+            port['id'],
+            qos_policy_id=self.qos_policy_egress['id'])
+
+        self._assert_allocation_is_as_expected(
+            server1['id'], [port['id']], self.BANDWIDTH_1,
+            expected_rc=self.EGRESS_RESOURCE_CLASS)
+        self._assert_allocation_is_as_expected(
+            server1['id'], [port['id']], 0,
+            expected_rc=self.INGRESS_RESOURCE_CLASS)
+
 
 class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
@@ -625,9 +689,9 @@ class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
         if expected_min_kbps > 0:
             bw_rp_allocs = {
-                rp: alloc['resources'][self.BW_RESOURCE_CLASS]
+                rp: alloc['resources'][self.INGRESS_RESOURCE_CLASS]
                 for rp, alloc in allocations.items()
-                if self.BW_RESOURCE_CLASS in alloc['resources']
+                if self.INGRESS_RESOURCE_CLASS in alloc['resources']
             }
             self.assertEqual(1, len(bw_rp_allocs))
             bw_rp, bw_alloc = list(bw_rp_allocs.items())[0]
