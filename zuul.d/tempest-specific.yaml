@@ -80,6 +80,8 @@
 - job:
     name: tempest-full-py3-centos-8-stream
     parent: tempest-full-py3
+    # TODO(gmann): Make this job non voting until bug#1957941 if fixed.
+    voting: false
     nodeset: devstack-single-node-centos-8-stream
     description: |
       Base integration test with Neutron networking and py36 running
