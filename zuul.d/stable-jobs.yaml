@@ -178,3 +178,24 @@
       subnode:
         devstack_localrc:
           USE_PYTHON3: true
+
+- job:
+    name: tempest-full-py3-opensuse15
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-opensuse-15
+    description: |
+      Base integration test with Neutron networking and py36 running
+      on openSUSE Leap 15.x
+    voting: false
+    # This job is not used after stable/xena and can be
+    # removed once stable/xena is EOL.
+    branches:
+      - stable/pike
+      - stable/queens
+      - stable/rocky
+      - stable/stein
+      - stable/train
+      - stable/ussuri
+      - stable/victoria
+      - stable/wallaby
+      - stable/xena

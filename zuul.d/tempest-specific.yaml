@@ -69,15 +69,6 @@
         c-bak: false
 
 - job:
-    name: tempest-full-py3-opensuse15
-    parent: tempest-full-py3
-    nodeset: devstack-single-node-opensuse-15
-    description: |
-      Base integration test with Neutron networking and py36 running
-      on openSUSE Leap 15.x
-    voting: false
-
-- job:
     name: tempest-full-py3-centos-8-stream
     parent: tempest-full-py3
     # TODO(gmann): Make this job non voting until bug#1957941 if fixed.
