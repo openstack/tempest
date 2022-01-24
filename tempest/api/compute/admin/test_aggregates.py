@@ -17,6 +17,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -237,6 +238,10 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
                                          wait_until='ACTIVE')
         server_host = self.get_host_for_server(server['id'])
         self.assertEqual(host, server_host)
+        self.servers_client.delete_server(server['id'])
+        # NOTE(gmann): We need to wait for the server to delete before
+        # addCleanup remove the host from aggregate.
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
 
 
 class AggregatesAdminTestV241(AggregatesAdminTestBase):
