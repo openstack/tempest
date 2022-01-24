@@ -13,14 +13,9 @@
 #    under the License.
 
 import os
-import sys
+import unittest
 
 from tempest.test_discover import plugins
-
-if sys.version_info >= (2, 7):
-    import unittest
-else:
-    import unittest2 as unittest
 
 
 def load_tests(loader, tests, pattern):
