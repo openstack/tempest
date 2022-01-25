@@ -17,6 +17,9 @@ from urllib import parse as urllib
 
 from oslo_serialization import jsonutils as json
 
+from tempest.lib.api_schema.response.volume.v3_61 import volumes as schemav361
+from tempest.lib.api_schema.response.volume.v3_63 import volumes as schemav363
+from tempest.lib.api_schema.response.volume.v3_64 import volumes as schemav364
 from tempest.lib.api_schema.response.volume import volumes as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
@@ -25,6 +28,13 @@ from tempest.lib.services.volume import base_client
 
 class VolumesClient(base_client.BaseClient):
     """Client class to send CRUD Volume V3 API requests"""
+
+    schema_versions_info = [
+        {'min': None, 'max': '3.60', 'schema': schema},
+        {'min': '3.61', 'max': '3.62', 'schema': schemav361},
+        {'min': '3.63', 'max': '3.63', 'schema': schemav363},
+        {'min': '3.64', 'max': None, 'schema': schemav364}
+        ]
 
     def _prepare_params(self, params):
         """Prepares params for use in get or _ext_get methods.
@@ -56,6 +66,7 @@ class VolumesClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-accessible-volumes
         """
         url = 'volumes'
+        schema = self.get_schema(self.schema_versions_info)
         list_schema = schema.list_volumes_no_detail
         if detail:
             list_schema = schema.list_volumes_with_detail
@@ -86,6 +97,7 @@ class VolumesClient(base_client.BaseClient):
         url = "volumes/%s" % volume_id
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.show_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -99,6 +111,7 @@ class VolumesClient(base_client.BaseClient):
         post_body = json.dumps({'volume': kwargs})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
