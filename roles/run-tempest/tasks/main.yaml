@@ -25,11 +25,11 @@
     target_branch: "{{ zuul.override_checkout }}"
   when: zuul.override_checkout is defined
 
-- name: Use stable branch upper-constraints till stable/stein
+- name: Use stable branch upper-constraints till stable/train
   set_fact:
     # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
-  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
+  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein", "stable/train"]
 
 - name: Use Configured upper-constraints for non-master Tempest
   set_fact:
@@ -78,6 +78,17 @@
         exclude_list_option: "--exclude-list={{ tempest_test_exclude_list|quote }}"
       when: exclude_list_stat.stat.exists
 
+- name: stable/train workaround to fallback exclude-list to blacklist
+  # NOTE(gmann): stable/train use Tempest 26.1.0 and with stestr 2.5.1
+  # (beacause of upper constraints of stestr 2.5.1 in stable/train) which
+  # does not have new args exclude-list so let's fallback to old arg
+  # if new arg is passed.
+  set_fact:
+    exclude_list_option: "--blacklist-file={{ tempest_test_exclude_list|quote }}"
+  when:
+    - tempest_test_exclude_list is defined
+    - target_branch == "stable/train"
+
 # TODO(kopecmartin) remove this after all consumers of the role have switched
 # to tempest_exclude_regex option, until then it's kept here for the backward
 # compatibility
@@ -94,6 +105,19 @@
   when:
     - tempest_black_regex is not defined
     - tempest_exclude_regex is defined
+    - target_branch != "stable/train"
+
+- name: stable/train workaround to fallback exclude-regex to black-regex
+  # NOTE(gmann): stable/train use Tempest 26.1.0 and with stestr 2.5.1
+  # (beacause of upper constraints of stestr 2.5.1 in stable/train) which
+  # does not have new args exclude-regex so let's fallback to old arg
+  # if new arg is passed.
+  set_fact:
+    tempest_test_exclude_regex: "--black-regex={{tempest_exclude_regex|quote}}"
+  when:
+    - tempest_black_regex is not defined
+    - tempest_exclude_regex is defined
+    - target_branch == "stable/train"
 
 - name: Run Tempest
   command: tox -e {{tox_envlist}} {{tox_extra_args}} -- {{tempest_test_regex|quote}} \
