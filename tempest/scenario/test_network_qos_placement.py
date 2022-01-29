@@ -79,7 +79,7 @@ class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
         new_flavor = self.flavors_client.create_flavor(**{
             'ram': old_flavor['ram'],
             'vcpus': old_flavor['vcpus'],
-            'name': old_flavor['name'] + 'extra',
+            'name': old_flavor['name'] + 'extra-' + data_utils.rand_int_id(),
             'disk': old_flavor['disk'] + 1
         })['flavor']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
