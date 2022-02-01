@@ -42,6 +42,7 @@
         - tempest-full-victoria-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ussuri-py3:
+            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
