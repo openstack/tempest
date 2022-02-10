@@ -228,9 +228,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             fip_client.associate_floating_ip_to_server(
                 floating_ip=validation_resources['floating_ip']['ip'],
                 server_id=servers[0]['id'])
-        waiters.wait_for_server_floating_ip(
-            clients.servers_client,
-            servers[0], validation_resources['floating_ip'])
 
     if wait_until:
         for server in servers:
