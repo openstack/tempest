@@ -15,13 +15,17 @@
 
 import testtools
 
+from oslo_log import log
 from tempest.common import utils
+from tempest.common.utils import net_downtime
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
 
 CONF = config.CONF
+
+LOG = log.getLogger(__name__)
 
 
 class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
@@ -252,6 +256,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         block_migration = (CONF.compute_feature_enabled.
                            block_migration_for_live_migration)
         old_host = self.get_host_for_server(server['id'])
+
+        downtime_meter = net_downtime.NetDowntimeMeter(
+            floating_ip['floating_ip_address'])
+        self.useFixture(downtime_meter)
+
         self.admin_servers_client.live_migrate_server(
             server['id'], host=None, block_migration=block_migration,
             disk_over_commit=False)
@@ -260,6 +269,16 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         new_host = self.get_host_for_server(server['id'])
         self.assertNotEqual(old_host, new_host, 'Server did not migrate')
+
+        downtime = downtime_meter.get_downtime()
+        self.assertIsNotNone(downtime)
+        LOG.debug("Downtime seconds measured with downtime_meter = %r",
+                  downtime)
+        allowed_downtime = CONF.validation.allowed_network_downtime
+        self.assertLess(
+            downtime, allowed_downtime,
+            "Downtime of {} seconds is higher than expected '{}'".format(
+                downtime, allowed_downtime))
 
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)

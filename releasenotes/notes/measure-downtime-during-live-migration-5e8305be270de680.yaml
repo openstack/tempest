@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Added new module net_downtime including the fixture NetDowntimeMeter that
+    can be used to measure how long the connectivity with an IP is lost
+    during certain operations like a server live migration.
+    The configuration option allowed_network_downtime has been added with a
+    default value of 5.0 seconds, which would be the maximum time that
+    the connectivity downtime is expected to last.
