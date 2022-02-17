@@ -25,9 +25,11 @@ from oslo_utils import excutils
 
 from tempest.common import waiters
 from tempest import config
+from tempest import exceptions
 from tempest.lib.common import fixed_network
 from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -52,6 +54,33 @@ def is_scheduler_filter_enabled(filter_name):
     if filter_name in filters:
         return True
     return False
+
+
+def get_server_ip(server, validation_resources=None):
+    """Get the server fixed or floating IP.
+
+    Based on the configuration we're in, return a correct ip
+    address for validating that a guest is up.
+
+    :param server: The server dict as returned by the API
+    :param validation_resources: The dict of validation resources
+        provisioned for the server.
+    """
+    if CONF.validation.connect_method == 'floating':
+        if validation_resources:
+            return validation_resources['floating_ip']['ip']
+        else:
+            msg = ('When validation.connect_method equals floating, '
+                   'validation_resources cannot be None')
+            raise lib_exc.InvalidParam(invalid_param=msg)
+    elif CONF.validation.connect_method == 'fixed':
+        addresses = server['addresses'][CONF.validation.network_for_ssh]
+        for address in addresses:
+            if address['version'] == CONF.validation.ip_version_for_ssh:
+                return address['addr']
+        raise exceptions.ServerUnreachable(server_id=server['id'])
+    else:
+        raise lib_exc.InvalidConfiguration()
 
 
 def create_test_server(clients, validatable=False, validation_resources=None,
