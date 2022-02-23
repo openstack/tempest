@@ -335,6 +335,8 @@
     check:
       jobs:
         - grenade
+        - grenade-skip-level:
+            voting: false
         - tempest-integrated-networking
         - openstacksdk-functional-devstack
     gate:
@@ -352,6 +354,8 @@
       run on Nova gate only.
     check:
       jobs:
+        - grenade-skip-level:
+            voting: false
         - tempest-integrated-compute
         - tempest-integrated-compute-centos-8-stream
         - openstacksdk-functional-devstack
@@ -371,6 +375,8 @@
     check:
       jobs:
         - grenade
+        - grenade-skip-level:
+            voting: false
         - tempest-integrated-placement
         - openstacksdk-functional-devstack
     gate:
@@ -389,6 +395,8 @@
     check:
       jobs:
         - grenade
+        - grenade-skip-level:
+            voting: false
         - tempest-integrated-storage
         - openstacksdk-functional-devstack
     gate:
