@@ -822,3 +822,118 @@ class ServersAaction247Test(base.BaseV2ComputeTest):
                                           backup_type='daily',
                                           rotation=2,
                                           name=backup1)
+
+
+class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
+
+    min_microversion = '2.93'
+    volume_min_microversion = '3.68'
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServerActionsV293TestJSON, cls).setup_credentials()
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServerActionsV293TestJSON, cls).resource_setup()
+        cls.server_id = cls.recreate_server(None, validatable=True)
+
+    @utils.services('volume')
+    @decorators.idempotent_id('6652dab9-ea24-4c93-ab5a-93d79c3041cf')
+    def test_rebuild_volume_backed_server(self):
+        """Test rebuilding a volume backed server"""
+        # We have to create a new server that is volume-backed since the one
+        # from setUp is not volume-backed.
+        kwargs = {'volume_backed': True,
+                  'wait_until': 'ACTIVE'}
+        validation_resources = {}
+        if CONF.validation.run_validation:
+            validation_resources = self.get_test_validation_resources(
+                self.os_primary)
+            kwargs.update({'validatable': True,
+                           'validation_resources': validation_resources})
+        server = self.create_test_server(**kwargs)
+        server = self.servers_client.show_server(server['id'])['server']
+        self.addCleanup(self.delete_server, server['id'])
+        volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
+        volume_before_rebuild = self.volumes_client.show_volume(volume_id)
+        image_before_rebuild = (
+            volume_before_rebuild['volume']
+            ['volume_image_metadata']['image_id'])
+        # Verify that image inside volume is our initial image before rebuild
+        self.assertEqual(self.image_ref, image_before_rebuild)
+
+        # Authentication is attempted in the following order of priority:
+        # 1.The key passed in, if one was passed in.
+        # 2.Any key we can find through an SSH agent (if allowed).
+        # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+        #   ~/.ssh/ (if allowed).
+        # 4.Plain username/password auth, if a password was given.
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(server, validation_resources),
+            self.ssh_user,
+            password=None,
+            pkey=validation_resources['keypair']['private_key'],
+            server=server,
+            servers_client=self.servers_client)
+        output = linux_client.exec_command('touch test_file')
+        # No output means success
+        self.assertEqual('', output.strip())
+
+        # The server should be rebuilt using the provided image and data
+        meta = {'rebuild': 'server'}
+        new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
+        password = 'rebuildPassw0rd'
+        rebuilt_server = self.servers_client.rebuild_server(
+            server['id'],
+            self.image_ref_alt,
+            name=new_name,
+            metadata=meta,
+            adminPass=password)['server']
+
+        # Verify the properties in the initial response are correct
+        self.assertEqual(server['id'], rebuilt_server['id'])
+        rebuilt_image_id = rebuilt_server['image']
+        # Since it is a volume backed server, image id will remain empty
+        self.assertEqual('', rebuilt_image_id)
+        self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
+
+        # Verify the server properties after the rebuild completes
+        waiters.wait_for_server_status(self.servers_client,
+                                       rebuilt_server['id'], 'ACTIVE')
+        server = self.servers_client.show_server(
+            rebuilt_server['id'])['server']
+        volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
+        volume_after_rebuild = self.volumes_client.show_volume(volume_id)
+        image_after_rebuild = (
+            volume_after_rebuild['volume']
+            ['volume_image_metadata']['image_id'])
+
+        self.assertEqual(new_name, server['name'])
+        # Verify that volume ID remains same before and after rebuild
+        self.assertEqual(volume_before_rebuild['volume']['id'],
+                         volume_after_rebuild['volume']['id'])
+        # Verify that image inside volume is our final image after rebuild
+        self.assertEqual(self.image_ref_alt, image_after_rebuild)
+
+        # Authentication is attempted in the following order of priority:
+        # 1.The key passed in, if one was passed in.
+        # 2.Any key we can find through an SSH agent (if allowed).
+        # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+        #   ~/.ssh/ (if allowed).
+        # 4.Plain username/password auth, if a password was given.
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(rebuilt_server, validation_resources),
+            self.ssh_alt_user,
+            password,
+            validation_resources['keypair']['private_key'],
+            server=rebuilt_server,
+            servers_client=self.servers_client)
+        linux_client.validate_authentication()
+        e = self.assertRaises(lib_exc.SSHExecCommandFailed,
+                              linux_client.exec_command,
+                              'cat test_file')
+        # If we rebuilt the boot volume, then we should not find
+        # the file we touched.
+        self.assertIn('No such file or directory', str(e))
