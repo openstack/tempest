@@ -161,7 +161,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-pg-full:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-centos8-stream-fips:
+        - tempest-centos9-stream-fips:
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
@@ -177,3 +177,4 @@
         - tempest-all
         - tempest-full-oslo-master
         - tempest-stestr-master
+        - tempest-centos9-stream-fips
