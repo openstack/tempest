@@ -34,11 +34,6 @@ LOG = logging.getLogger(__name__)
 class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
     """Test live migration operations supported by admin user"""
 
-    # These tests don't attempt any SSH validation nor do they use
-    # floating IPs on the instance, so all we need is a network and
-    # a subnet so the instance being migrated has a single port, but
-    # we need that to make sure we are properly updating the port
-    # host bindings during the live migration.
     create_default_network = True
 
     @classmethod
@@ -103,6 +98,11 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 class LiveMigrationTest(LiveMigrationTestBase):
     max_microversion = '2.24'
     block_migration = None
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(LiveMigrationTest, cls).setup_credentials()
 
     def _test_live_migration(self, state='ACTIVE', volume_backed=False):
         """Tests live migration between two hosts.
@@ -182,7 +182,12 @@ class LiveMigrationTest(LiveMigrationTestBase):
         attach volume. This differs from test_volume_backed_live_migration
         above that tests live-migration with only an attached volume.
         """
-        server = self.create_test_server(wait_until="ACTIVE")
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until="SSHABLE")
         server_id = server['id']
         if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
             # not to specify a host so that the scheduler will pick one
