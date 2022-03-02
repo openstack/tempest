@@ -240,3 +240,9 @@ class HackingTestCase(base.TestCase):
             with_other_decorators=True,
             with_negative_decorator=False,
             expected_success=False)
+
+    def test_no_log_warn(self):
+        self.assertFalse(list(checks.no_log_warn(
+            'LOG.warning("LOG.warn is deprecated")')))
+        self.assertTrue(list(checks.no_log_warn(
+            'LOG.warn("LOG.warn is deprecated")')))
