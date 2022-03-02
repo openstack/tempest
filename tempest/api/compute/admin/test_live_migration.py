@@ -182,7 +182,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         attach volume. This differs from test_volume_backed_live_migration
         above that tests live-migration with only an attached volume.
         """
-        validation_resources = self.get_test_validation_resources(
+        validation_resources = self.get_class_validation_resources(
             self.os_primary)
         server = self.create_test_server(
             validatable=True,
