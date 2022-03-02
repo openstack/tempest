@@ -122,6 +122,8 @@
             irrelevant-files: *tempest-irrelevant-files-2
         - tempest-full-py3-centos-8-stream:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-centos-9-stream:
+            irrelevant-files: *tempest-irrelevant-files
     gate:
       jobs:
         - openstack-tox-pep8

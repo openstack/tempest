@@ -83,6 +83,12 @@
       configure_swap_size: 4096
 
 - job:
+    name: tempest-full-centos-9-stream
+    parent: tempest-full-py3-centos-8-stream
+    voting: false
+    nodeset: devstack-single-node-centos-9-stream
+
+- job:
     name: tempest-tox-plugin-sanity-check
     parent: tox
     description: |
