@@ -20,6 +20,8 @@ from tempest.lib.api_schema.response.compute.v2_1 import server_groups \
     as schema
 from tempest.lib.api_schema.response.compute.v2_13 import server_groups \
     as schemav213
+from tempest.lib.api_schema.response.compute.v2_64 import server_groups \
+    as schemav264
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -28,7 +30,8 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
 
     schema_versions_info = [
         {'min': None, 'max': '2.12', 'schema': schema},
-        {'min': '2.13', 'max': None, 'schema': schemav213}]
+        {'min': '2.13', 'max': '2.63', 'schema': schemav213},
+        {'min': '2.64', 'max': None, 'schema': schemav264}]
 
     def create_server_group(self, **kwargs):
         """Create the server group.

@@ -306,10 +306,18 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def create_test_server_group(cls, name="", policy=None):
         if not name:
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
-        if policy is None:
-            policy = ['affinity']
+        if cls.is_requested_microversion_compatible('2.63'):
+            policy = policy or ['affinity']
+            if not isinstance(policy, list):
+                policy = [policy]
+            kwargs = {'policies': policy}
+        else:
+            policy = policy or 'affinity'
+            if isinstance(policy, list):
+                policy = policy[0]
+            kwargs = {'policy': policy}
         body = cls.server_groups_client.create_server_group(
-            name=name, policies=policy)['server_group']
+            name=name, **kwargs)['server_group']
         cls.addClassResourceCleanup(
             test_utils.call_and_ignore_notfound_exc,
             cls.server_groups_client.delete_server_group,
