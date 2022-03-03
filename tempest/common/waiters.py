@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import re
 import time
 
@@ -570,3 +571,26 @@ def wait_for_server_floating_ip(servers_client, server, floating_ip,
                        'in time.' % (floating_ip, server['id']))
             raise lib_exc.TimeoutException(msg)
         time.sleep(servers_client.build_interval)
+
+
+def wait_for_ping(server_ip, timeout=30, interval=1):
+    """Waits for an address to become pingable"""
+    start_time = int(time.time())
+    while int(time.time()) - start_time < timeout:
+        response = os.system("ping -c 1 " + server_ip)
+        if response == 0:
+            return
+        time.sleep(interval)
+    raise lib_exc.TimeoutException()
+
+
+def wait_for_ssh(ssh_client, timeout=30):
+    """Waits for SSH connection to become usable"""
+    start_time = int(time.time())
+    while int(time.time()) - start_time < timeout:
+        try:
+            ssh_client.validate_authentication()
+            return
+        except lib_exc.SSHTimeout:
+            pass
+    raise lib_exc.TimeoutException()

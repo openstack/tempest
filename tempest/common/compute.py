@@ -23,6 +23,7 @@ from urllib import parse as urlparse
 from oslo_log import log as logging
 from oslo_utils import excutils
 
+from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -98,7 +99,9 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         server. Include a keypair, a security group and an IP.
     :param tenant_network: Tenant network to be used for creating a server.
     :param wait_until: Server status to wait for the server to reach after
-        its creation.
+        its creation. Additionally PINGABLE and SSHABLE states are also
+        accepted when the server is both validatable and has the required
+        validation_resources provided.
     :param volume_backed: Whether the server is volume backed or not.
         If this is true, a volume will be created and create server will be
         requested with 'block_device_mapping_v2' populated with below values:
@@ -124,8 +127,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         defined, CONF.compute.image_ref will be used instead.
     :returns: a tuple
     """
-
-    # TODO(jlanoux) add support of wait_until PINGABLE/SSHABLE
 
     if name is None:
         name = data_utils.rand_name(__name__ + "-instance")
@@ -259,17 +260,49 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 server_id=servers[0]['id'])
 
     if wait_until:
+
+        # NOTE(lyarwood): PINGABLE and SSHABLE both require the instance to
+        # go ACTIVE initially before we can setup the fip(s) etc so stash
+        # this additional wait state for later use.
+        wait_until_extra = None
+        if wait_until in ['PINGABLE', 'SSHABLE']:
+            wait_until_extra = wait_until
+            wait_until = 'ACTIVE'
+
         for server in servers:
             try:
                 waiters.wait_for_server_status(
                     clients.servers_client, server['id'], wait_until,
                     request_id=request_id)
 
-                # Multiple validatable servers are not supported for now. Their
-                # creation will fail with the condition above.
                 if CONF.validation.run_validation and validatable:
+
                     if CONF.validation.connect_method == 'floating':
                         _setup_validation_fip()
+
+                    server_ip = get_server_ip(
+                        server, validation_resources=validation_resources)
+
+                    if wait_until_extra == 'PINGABLE':
+                        waiters.wait_for_ping(
+                            server_ip,
+                            clients.servers_client.build_timeout,
+                            clients.servers_client.build_interval
+                        )
+
+                    if wait_until_extra == 'SSHABLE':
+                        pkey = validation_resources['keypair']['private_key']
+                        ssh_client = remote_client.RemoteClient(
+                            server_ip,
+                            CONF.validation.image_ssh_user,
+                            pkey=pkey,
+                            server=server,
+                            servers_client=clients.servers_client
+                        )
+                        waiters.wait_for_ssh(
+                            ssh_client,
+                            clients.servers_client.build_timeout
+                        )
 
             except Exception:
                 with excutils.save_and_reraise_exception():
