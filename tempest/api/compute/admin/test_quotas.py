@@ -253,3 +253,14 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
             'default')['quota_class_set']
         self.assertThat(show_body.items(),
                         matchers.ContainsAll(body.items()))
+
+
+class QuotaClassesAdmin257Test(QuotaClassesAdminTestJSON):
+    """Test compute quotas with microversion greater than 2.56
+
+    # NOTE(gmann): This test tests the Quota class APIs response schema
+    # for 2.57 microversion. No specific assert or behaviour verification
+    # is needed.
+    """
+
+    min_microversion = '2.57'

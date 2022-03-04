@@ -16,12 +16,21 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1\
-    import quota_classes as classes_schema
+    import quota_classes as schema
+from tempest.lib.api_schema.response.compute.v2_50 import quota_classes \
+    as schemav250
+from tempest.lib.api_schema.response.compute.v2_57 import quota_classes \
+    as schemav257
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
 
 class QuotaClassesClient(base_compute_client.BaseComputeClient):
+
+    schema_versions_info = [
+        {'min': None, 'max': '2.49', 'schema': schema},
+        {'min': '2.50', 'max': '2.56', 'schema': schemav250},
+        {'min': '2.57', 'max': None, 'schema': schemav257}]
 
     def show_quota_class_set(self, quota_class_id):
         """List the quota class set for a quota class."""
@@ -29,7 +38,8 @@ class QuotaClassesClient(base_compute_client.BaseComputeClient):
         url = 'os-quota-class-sets/%s' % quota_class_id
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(classes_schema.get_quota_class_set, resp, body)
+        _schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(_schema.get_quota_class_set, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def update_quota_class_set(self, quota_class_id, **kwargs):
@@ -45,6 +55,7 @@ class QuotaClassesClient(base_compute_client.BaseComputeClient):
                               post_body)
 
         body = json.loads(body)
-        self.validate_response(classes_schema.update_quota_class_set,
+        _schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(_schema.update_quota_class_set,
                                resp, body)
         return rest_client.ResponseBody(resp, body)
