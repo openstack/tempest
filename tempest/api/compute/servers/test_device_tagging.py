@@ -212,7 +212,7 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
 
         server = self.create_test_server(
             validatable=True,
-            wait_until='ACTIVE',
+            wait_until='SSHABLE',
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
             name=data_utils.rand_name('device-tagging-server'),
