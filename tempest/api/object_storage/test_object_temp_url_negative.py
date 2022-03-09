@@ -83,7 +83,7 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         hmac_body = '%s\n%s\n%s' % (method, expires, path)
         sig = hmac.new(
-            key.encode(), hmac_body.encode(), hashlib.sha1
+            key.encode(), hmac_body.encode(), hashlib.sha256
         ).hexdigest()
 
         url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
