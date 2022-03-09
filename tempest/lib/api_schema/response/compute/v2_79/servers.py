@@ -12,7 +12,7 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_73 import servers as servers273
+from tempest.lib.api_schema.response.compute.v2_75 import servers as servers275
 
 
 ###########################################################################
@@ -27,19 +27,19 @@ from tempest.lib.api_schema.response.compute.v2_73 import servers as servers273
 # - POST /servers/{server_id}/os-volume_attachments
 ###########################################################################
 
-attach_volume = copy.deepcopy(servers273.attach_volume)
+attach_volume = copy.deepcopy(servers275.attach_volume)
 attach_volume['response_body']['properties']['volumeAttachment'][
     'properties'].update({'delete_on_termination': {'type': 'boolean'}})
 attach_volume['response_body']['properties']['volumeAttachment'][
     'required'].append('delete_on_termination')
 
-show_volume_attachment = copy.deepcopy(servers273.show_volume_attachment)
+show_volume_attachment = copy.deepcopy(servers275.show_volume_attachment)
 show_volume_attachment['response_body']['properties']['volumeAttachment'][
     'properties'].update({'delete_on_termination': {'type': 'boolean'}})
 show_volume_attachment['response_body']['properties'][
     'volumeAttachment']['required'].append('delete_on_termination')
 
-list_volume_attachments = copy.deepcopy(servers273.list_volume_attachments)
+list_volume_attachments = copy.deepcopy(servers275.list_volume_attachments)
 list_volume_attachments['response_body']['properties']['volumeAttachments'][
     'items']['properties'].update(
         {'delete_on_termination': {'type': 'boolean'}})
@@ -49,21 +49,21 @@ list_volume_attachments['response_body']['properties'][
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We
 # need to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
-# ****** Schemas unchanged since microversion 2.73 ***
-rebuild_server = copy.deepcopy(servers273.rebuild_server)
+# ****** Schemas unchanged since microversion 2.75 ***
+rebuild_server = copy.deepcopy(servers275.rebuild_server)
 rebuild_server_with_admin_pass = copy.deepcopy(
-    servers273.rebuild_server_with_admin_pass)
-update_server = copy.deepcopy(servers273.update_server)
-get_server = copy.deepcopy(servers273.get_server)
-list_servers_detail = copy.deepcopy(servers273.list_servers_detail)
-list_servers = copy.deepcopy(servers273.list_servers)
-show_server_diagnostics = copy.deepcopy(servers273.show_server_diagnostics)
-get_remote_consoles = copy.deepcopy(servers273.get_remote_consoles)
-list_tags = copy.deepcopy(servers273.list_tags)
-update_all_tags = copy.deepcopy(servers273.update_all_tags)
-delete_all_tags = copy.deepcopy(servers273.delete_all_tags)
-check_tag_existence = copy.deepcopy(servers273.check_tag_existence)
-update_tag = copy.deepcopy(servers273.update_tag)
-delete_tag = copy.deepcopy(servers273.delete_tag)
-show_instance_action = copy.deepcopy(servers273.show_instance_action)
-create_backup = copy.deepcopy(servers273.create_backup)
+    servers275.rebuild_server_with_admin_pass)
+update_server = copy.deepcopy(servers275.update_server)
+get_server = copy.deepcopy(servers275.get_server)
+list_servers_detail = copy.deepcopy(servers275.list_servers_detail)
+list_servers = copy.deepcopy(servers275.list_servers)
+show_server_diagnostics = copy.deepcopy(servers275.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers275.get_remote_consoles)
+list_tags = copy.deepcopy(servers275.list_tags)
+update_all_tags = copy.deepcopy(servers275.update_all_tags)
+delete_all_tags = copy.deepcopy(servers275.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers275.check_tag_existence)
+update_tag = copy.deepcopy(servers275.update_tag)
+delete_tag = copy.deepcopy(servers275.delete_tag)
+show_instance_action = copy.deepcopy(servers275.show_instance_action)
+create_backup = copy.deepcopy(servers275.create_backup)

@@ -223,3 +223,32 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         }
         self.create_test_server(scheduler_hints=hints,
                                 wait_until='ACTIVE')
+
+
+class ServersAdmin275Test(base.BaseV2ComputeAdminTest):
+    """Test compute server with microversion greater than 2.75
+
+    # NOTE(gmann): This test tests the Server APIs response schema
+    # for 2.75 microversion. No specific assert or behaviour verification
+    # is needed.
+    """
+
+    min_microversion = '2.75'
+
+    @decorators.idempotent_id('bf2b4a00-73a3-4d53-81fa-acbcd97d6339')
+    def test_rebuild_update_server_275(self):
+        server = self.create_test_server()
+        # Checking update response schema.
+        self.servers_client.update_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
+        # Checking rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+        # Checking rebuild server with admin response schema.
+        self.os_admin.servers_client.rebuild_server(
+            server['id'], self.image_ref)
+        self.addCleanup(waiters.wait_for_server_status,
+                        self.os_admin.servers_client,
+                        server['id'], 'ACTIVE')
