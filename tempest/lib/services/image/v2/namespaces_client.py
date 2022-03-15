@@ -16,6 +16,7 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
+from tempest.lib import exceptions as lib_exc
 
 
 class NamespacesClient(rest_client.RestClient):
@@ -59,6 +60,13 @@ class NamespacesClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def is_resource_deleted(self, id):
+        try:
+            self.show_namespace(id)
+        except lib_exc.NotFound:
+            return True
+        return False
 
     def update_namespace(self, namespace, **kwargs):
         """Update a namespace.

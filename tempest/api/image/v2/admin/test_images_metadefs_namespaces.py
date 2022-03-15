@@ -64,6 +64,7 @@ class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
         self.assertEqual(False, body['protected'])
         # now able to delete the non-protected namespace
         self.namespaces_client.delete_namespace(namespace_name)
+        self.namespaces_client.wait_for_resource_deletion(namespace_name)
 
     def _cleanup_namespace(self, namespace_name):
         body = self.namespaces_client.show_namespace(namespace_name)
