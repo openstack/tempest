@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
@@ -25,8 +23,6 @@ from tempest.scenario import manager
 CONF = config.CONF
 
 
-@testtools.skipUnless(CONF.compute_feature_enabled.unified_limits,
-                      'Compute unified limits are not enabled')
 class ComputeProjectQuotaTest(manager.ScenarioTest):
     """The test base class for compute unified limits tests.
 
@@ -39,6 +35,12 @@ class ComputeProjectQuotaTest(manager.ScenarioTest):
     """
     credentials = ['primary', 'system_admin']
     force_tenant_isolation = True
+
+    @classmethod
+    def skip_checks(cls):
+        super(ComputeProjectQuotaTest, cls).skip_checks()
+        if not CONF.compute_feature_enabled.unified_limits:
+            raise cls.skipException('Compute unified limits are not enabled.')
 
     @classmethod
     def resource_setup(cls):
@@ -67,8 +69,6 @@ class ComputeProjectQuotaTest(manager.ScenarioTest):
             self.limit_ids[name], value)
 
 
-@testtools.skipUnless(CONF.compute_feature_enabled.unified_limits,
-                      'Compute unified limits are not enabled')
 class ServersQuotaTest(ComputeProjectQuotaTest):
 
     @classmethod
