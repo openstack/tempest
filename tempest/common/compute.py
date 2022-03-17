@@ -84,6 +84,73 @@ def get_server_ip(server, validation_resources=None):
         raise lib_exc.InvalidConfiguration()
 
 
+def _setup_validation_fip(
+        server, clients, tenant_network, validation_resources):
+    if CONF.service_available.neutron:
+        ifaces = clients.interfaces_client.list_interfaces(server['id'])
+        validation_port = None
+        for iface in ifaces['interfaceAttachments']:
+            if iface['net_id'] == tenant_network['id']:
+                validation_port = iface['port_id']
+                break
+        if not validation_port:
+            # NOTE(artom) This will get caught by the catch-all clause in
+            # the wait_until loop below
+            raise ValueError('Unable to setup floating IP for validation: '
+                             'port not found on tenant network')
+        clients.floating_ips_client.update_floatingip(
+            validation_resources['floating_ip']['id'],
+            port_id=validation_port)
+    else:
+        fip_client = clients.compute_floating_ips_client
+        fip_client.associate_floating_ip_to_server(
+            floating_ip=validation_resources['floating_ip']['ip'],
+            server_id=server['id'])
+
+
+def wait_for_ssh_or_ping(server, clients, tenant_network,
+                         validatable, validation_resources, wait_until,
+                         set_floatingip):
+    """Wait for the server for SSH or Ping as requested.
+
+    :param server: The server dict as returned by the API
+    :param clients: Client manager which provides OpenStack Tempest clients.
+    :param tenant_network: Tenant network to be used for creating a server.
+    :param validatable: Whether the server will be pingable or sshable.
+    :param validation_resources: Resources created for the connection to the
+        server. Include a keypair, a security group and an IP.
+    :param wait_until: Server status to wait for the server to reach.
+        It can be PINGABLE and SSHABLE states when the server is both
+        validatable and has the required validation_resources provided.
+    :param set_floatingip: If FIP needs to be associated to server
+    """
+    if set_floatingip and CONF.validation.connect_method == 'floating':
+        _setup_validation_fip(
+            server, clients, tenant_network, validation_resources)
+
+    server_ip = get_server_ip(
+        server, validation_resources=validation_resources)
+    if wait_until == 'PINGABLE':
+        waiters.wait_for_ping(
+            server_ip,
+            clients.servers_client.build_timeout,
+            clients.servers_client.build_interval
+        )
+    if wait_until == 'SSHABLE':
+        pkey = validation_resources['keypair']['private_key']
+        ssh_client = remote_client.RemoteClient(
+            server_ip,
+            CONF.validation.image_ssh_user,
+            pkey=pkey,
+            server=server,
+            servers_client=clients.servers_client
+        )
+        waiters.wait_for_ssh(
+            ssh_client,
+            clients.servers_client.build_timeout
+        )
+
+
 def create_test_server(clients, validatable=False, validation_resources=None,
                        tenant_network=None, wait_until=None,
                        volume_backed=False, name=None, flavor=None,
@@ -237,28 +304,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         body = rest_client.ResponseBody(body.response, body['server'])
         servers = [body]
 
-    def _setup_validation_fip():
-        if CONF.service_available.neutron:
-            ifaces = clients.interfaces_client.list_interfaces(server['id'])
-            validation_port = None
-            for iface in ifaces['interfaceAttachments']:
-                if iface['net_id'] == tenant_network['id']:
-                    validation_port = iface['port_id']
-                    break
-            if not validation_port:
-                # NOTE(artom) This will get caught by the catch-all clause in
-                # the wait_until loop below
-                raise ValueError('Unable to setup floating IP for validation: '
-                                 'port not found on tenant network')
-            clients.floating_ips_client.update_floatingip(
-                validation_resources['floating_ip']['id'],
-                port_id=validation_port)
-        else:
-            fip_client = clients.compute_floating_ips_client
-            fip_client.associate_floating_ip_to_server(
-                floating_ip=validation_resources['floating_ip']['ip'],
-                server_id=servers[0]['id'])
-
     if wait_until:
 
         # NOTE(lyarwood): PINGABLE and SSHABLE both require the instance to
@@ -274,35 +319,16 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                 waiters.wait_for_server_status(
                     clients.servers_client, server['id'], wait_until,
                     request_id=request_id)
-
                 if CONF.validation.run_validation and validatable:
-
                     if CONF.validation.connect_method == 'floating':
-                        _setup_validation_fip()
-
-                    server_ip = get_server_ip(
-                        server, validation_resources=validation_resources)
-
-                    if wait_until_extra == 'PINGABLE':
-                        waiters.wait_for_ping(
-                            server_ip,
-                            clients.servers_client.build_timeout,
-                            clients.servers_client.build_interval
-                        )
-
-                    if wait_until_extra == 'SSHABLE':
-                        pkey = validation_resources['keypair']['private_key']
-                        ssh_client = remote_client.RemoteClient(
-                            server_ip,
-                            CONF.validation.image_ssh_user,
-                            pkey=pkey,
-                            server=server,
-                            servers_client=clients.servers_client
-                        )
-                        waiters.wait_for_ssh(
-                            ssh_client,
-                            clients.servers_client.build_timeout
-                        )
+                        _setup_validation_fip(
+                            server, clients, tenant_network,
+                            validation_resources)
+                    if wait_until_extra:
+                        wait_for_ssh_or_ping(
+                            server, clients, tenant_network,
+                            validatable, validation_resources,
+                            wait_until_extra, False)
 
             except Exception:
                 with excutils.save_and_reraise_exception():
