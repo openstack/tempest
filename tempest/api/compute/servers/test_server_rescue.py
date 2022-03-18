@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
@@ -112,7 +113,6 @@ class ServerRescueTestJSONUnderV235(ServerRescueTestBase):
 
 
 class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
-    create_default_network = True
 
     @classmethod
     def skip_checks(cls):
@@ -124,19 +124,31 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
             msg = "Stable rescue not available."
             raise cls.skipException(msg)
 
+    @classmethod
+    def setup_credentials(cls):
+        cls.set_network_resources(network=True, subnet=True, router=True,
+                                  dhcp=True)
+        super(BaseServerStableDeviceRescueTest, cls).setup_credentials()
+
     def _create_server_and_rescue_image(self, hw_rescue_device=None,
                                         hw_rescue_bus=None,
-                                        block_device_mapping_v2=None):
-
-        server_id = self.create_test_server(
-            wait_until='ACTIVE')['id']
+                                        block_device_mapping_v2=None,
+                                        validatable=False,
+                                        validation_resources=None,
+                                        wait_until='ACTIVE'):
+        server = self.create_test_server(
+            wait_until=wait_until,
+            validatable=validatable,
+            validation_resources=validation_resources)
         image_id = self.create_image_from_server(
-            server_id, wait_until='ACTIVE')['id']
+            server['id'], wait_until='ACTIVE')['id']
 
         if block_device_mapping_v2:
-            server_id = self.create_test_server(
-                wait_until='ACTIVE',
-                block_device_mapping_v2=block_device_mapping_v2)['id']
+            server = self.create_test_server(
+                wait_until=wait_until,
+                validatable=validatable,
+                validation_resources=validation_resources,
+                block_device_mapping_v2=block_device_mapping_v2)
 
         if hw_rescue_bus:
             self.images_client.update_image(
@@ -146,16 +158,28 @@ class BaseServerStableDeviceRescueTest(base.BaseV2ComputeTest):
             self.images_client.update_image(
                 image_id, [dict(add='/hw_rescue_device',
                                 value=hw_rescue_device)])
-        return server_id, image_id
+        return server, image_id
 
-    def _test_stable_device_rescue(self, server_id, rescue_image_id):
+    def _test_stable_device_rescue(
+            self, server, rescue_image_id,
+            validation_resources=None):
         self.servers_client.rescue_server(
-            server_id, rescue_image_ref=rescue_image_id)
+            server['id'], rescue_image_ref=rescue_image_id)
         waiters.wait_for_server_status(
-            self.servers_client, server_id, 'RESCUE')
-        self.servers_client.unrescue_server(server_id)
-        waiters.wait_for_server_status(
-            self.servers_client, server_id, 'ACTIVE')
+            self.servers_client, server['id'], 'RESCUE')
+        self.servers_client.unrescue_server(server['id'])
+        # NOTE(gmann) In next addCleanup, server unrescue is called before the
+        # detach volume is called in cleanup (added by self.attach_volume()
+        # method) so to make sure server is ready before detach operation, we
+        # need to perform ssh on it, more details are in bug#1960346.
+        if validation_resources and CONF.validation.run_validation:
+            tenant_network = self.get_tenant_network()
+            compute.wait_for_ssh_or_ping(
+                server, self.os_primary, tenant_network,
+                True, validation_resources, "SSHABLE", True)
+        else:
+            waiters.wait_for_server_status(
+                self.servers_client, server['id'], 'ACTIVE')
 
 
 class ServerStableDeviceRescueTestIDE(BaseServerStableDeviceRescueTest):
@@ -172,9 +196,9 @@ class ServerStableDeviceRescueTestIDE(BaseServerStableDeviceRescueTest):
                       "Aarch64 does not support ide bus for cdrom")
     def test_stable_device_rescue_cdrom_ide(self):
         """Test rescuing server with cdrom and ide as the rescue disk"""
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='cdrom', hw_rescue_bus='ide')
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)
 
 
 class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
@@ -183,23 +207,23 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
     @decorators.idempotent_id('16865750-1417-4854-bcf7-496e6753c01e')
     def test_stable_device_rescue_disk_virtio(self):
         """Test rescuing server with disk and virtio as the rescue disk"""
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio')
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)
 
     @decorators.idempotent_id('12340157-6306-4745-bdda-cfa019908b48')
     def test_stable_device_rescue_disk_scsi(self):
         """Test rescuing server with disk and scsi as the rescue disk"""
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='scsi')
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)
 
     @decorators.idempotent_id('647d04cf-ad35-4956-89ab-b05c5c16f30c')
     def test_stable_device_rescue_disk_usb(self):
         """Test rescuing server with disk and usb as the rescue disk"""
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='usb')
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)
 
     @decorators.idempotent_id('a3772b42-00bf-4310-a90b-1cc6fd3e7eab')
     @utils.services('volume')
@@ -209,14 +233,25 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         Attach a volume to the server and then rescue the server with disk
         and virtio as the rescue disk.
         """
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
-            hw_rescue_device='disk', hw_rescue_bus='virtio')
-        server = self.servers_client.show_server(server_id)['server']
+        # This test just check detach fail and does not
+        # perfom the detach operation but in cleanup from
+        # self.attach_volume() it will try to detach the server
+        # after unrescue the server. Due to that we need to make
+        # server SSHable before it try to detach, more details are
+        # in bug#1960346
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        server, rescue_image_id = self._create_server_and_rescue_image(
+            hw_rescue_device='disk', hw_rescue_bus='virtio', validatable=True,
+            validation_resources=validation_resources, wait_until="SSHABLE")
+        server = self.servers_client.show_server(server['id'])['server']
         volume = self.create_volume()
         self.attach_volume(server, volume)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(
+            server, rescue_image_id,
+            validation_resources=validation_resources)
 
 
 class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
@@ -248,10 +283,10 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
             "source_type": "blank",
             "volume_size": CONF.volume.volume_size,
             "destination_type": "volume"}]
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio',
             block_device_mapping_v2=block_device_mapping_v2)
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('e4636333-c928-40fc-98b7-70a23eef4224')
@@ -267,7 +302,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
             "volume_size": CONF.volume.volume_size,
             "uuid": CONF.compute.image_ref,
             "destination_type": "volume"}]
-        server_id, rescue_image_id = self._create_server_and_rescue_image(
+        server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio',
             block_device_mapping_v2=block_device_mapping_v2)
-        self._test_stable_device_rescue(server_id, rescue_image_id)
+        self._test_stable_device_rescue(server, rescue_image_id)

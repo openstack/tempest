@@ -85,7 +85,7 @@
 - job:
     name: tempest-full-centos-9-stream
     parent: tempest-full-py3-centos-8-stream
-    voting: false
+    voting: true
     nodeset: devstack-single-node-centos-9-stream
 
 - job:
