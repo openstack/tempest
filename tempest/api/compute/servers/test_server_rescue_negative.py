@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.compute import base
+from tempest.common import compute
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
@@ -38,7 +39,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setup_credentials(cls):
-        cls.set_network_resources(network=True, subnet=True, router=True)
+        cls.set_network_resources(network=True, subnet=True, router=True,
+                                  dhcp=True)
         super(ServerRescueNegativeTestJSON, cls).setup_credentials()
 
     @classmethod
@@ -136,21 +138,41 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     def test_rescued_vm_detach_volume(self):
         """Test detaching volume from a rescued server should fail"""
         volume = self.create_volume()
-
+        # This test just check detach fail and does not
+        # perfom the detach operation but in cleanup from
+        # self.attach_volume() it will try to detach the server
+        # after unrescue the server. Due to that we need to make
+        # server SSHable before it try to detach, more details are
+        # in bug#1960346
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        server = self.create_test_server(
+            adminPass=self.password,
+            wait_until="SSHABLE",
+            validatable=True,
+            validation_resources=validation_resources)
         # Attach the volume to the server
-        server = self.servers_client.show_server(self.server_id)['server']
         self.attach_volume(server, volume)
 
         # Rescue the server
-        self.servers_client.rescue_server(self.server_id,
+        self.servers_client.rescue_server(server['id'],
                                           adminPass=self.password)
         waiters.wait_for_server_status(self.servers_client,
-                                       self.server_id, 'RESCUE')
+                                       server['id'], 'RESCUE')
+        # NOTE(gmann) In next addCleanup, server unrescue is called before the
+        # detach volume is called in cleanup (added by self.attach_volume()
+        # method) so to make sure server is ready before detach operation, we
+        # need to perform ssh on it, more details are in bug#1960346.
+        if CONF.validation.run_validation:
+            tenant_network = self.get_tenant_network()
+            self.addCleanup(compute.wait_for_ssh_or_ping,
+                            server, self.os_primary, tenant_network,
+                            True, validation_resources, "SSHABLE", True)
         # addCleanup is a LIFO queue
-        self.addCleanup(self._unrescue, self.server_id)
+        self.addCleanup(self._unrescue, server['id'])
 
         # Detach the volume from the server expecting failure
         self.assertRaises(lib_exc.Conflict,
                           self.servers_client.detach_volume,
-                          self.server_id,
+                          server['id'],
                           volume['id'])

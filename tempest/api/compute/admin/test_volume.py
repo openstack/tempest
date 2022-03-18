@@ -85,10 +85,14 @@ class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
             hw_scsi_model='virtio-scsi',
             hw_disk_bus='scsi',
             hw_cdrom_bus='scsi')
-        server = self.create_test_server(image_id=custom_img,
-                                         config_drive=True,
-                                         wait_until='ACTIVE')
-
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        server = self.create_test_server(
+            image_id=custom_img,
+            config_drive=True,
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until="SSHABLE")
         # NOTE(lyarwood): self.create_test_server delete the server
         # at class level cleanup so add server cleanup to ensure that
         # the instance is deleted first before created image. This
