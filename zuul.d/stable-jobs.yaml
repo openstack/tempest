@@ -1,5 +1,10 @@
 # NOTE(gmann): This file includes all stable release jobs definition.
 - job:
+    name: tempest-full-yoga
+    parent: tempest-full-py3
+    override-checkout: stable/yoga
+
+- job:
     name: tempest-full-xena
     parent: tempest-full-py3
     override-checkout: stable/xena
