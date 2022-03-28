@@ -876,7 +876,7 @@ NetworkFeaturesGroup = [
     cfg.StrOpt('qos_placement_physnet', default=None,
                help='Name of the physnet for placement based minimum '
                     'bandwidth allocation.'),
-    cfg.StrOpt('provider_net_base_segmentation_id', default=3000,
+    cfg.StrOpt('provider_net_base_segmentation_id', default='3000',
                help='Base segmentation ID to create provider networks. '
                     'This value will be increased in case of conflict.'),
     cfg.BoolOpt('qos_min_bw_and_pps', default=False,
