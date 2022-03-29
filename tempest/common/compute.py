@@ -15,7 +15,7 @@
 
 import base64
 import socket
-import ssl
+from ssl import SSLContext as sslc
 import struct
 import textwrap
 from urllib import parse as urlparse
@@ -395,7 +395,7 @@ def create_websocket(url):
         af, socktype, proto, _, sa = res
         client_socket = socket.socket(af, socktype, proto)
         if url.scheme == 'https':
-            client_socket = ssl.wrap_socket(client_socket)
+            client_socket = sslc().wrap_socket(client_socket)
         client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             client_socket.connect(sa)
