@@ -395,7 +395,8 @@ def create_websocket(url):
         af, socktype, proto, _, sa = res
         client_socket = socket.socket(af, socktype, proto)
         if url.scheme == 'https':
-            client_socket = sslc().wrap_socket(client_socket)
+            client_socket = sslc().wrap_socket(client_socket,
+                                               server_hostname=url.hostname)
         client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             client_socket.connect(sa)
