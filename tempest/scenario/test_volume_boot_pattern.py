@@ -246,14 +246,10 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         # Assert that the underlying volume is gone.
         self.volumes_client.wait_for_resource_deletion(volume_origin['id'])
 
-    @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
-    @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
-                          'Encrypted volume attach is not supported')
-    @utils.services('compute', 'volume')
-    def test_boot_server_from_encrypted_volume_luks(self):
+    def _do_test_boot_server_from_encrypted_volume_luks(self, provider):
         # Create an encrypted volume
-        volume = self.create_encrypted_volume('luks',
-                                              volume_type='luks')
+        volume = self.create_encrypted_volume(provider,
+                                              volume_type=provider)
 
         self.volumes_client.set_bootable_volume(volume['id'], bootable=True)
 
@@ -266,3 +262,21 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         server_info = self.servers_client.show_server(server['id'])['server']
         created_volume = server_info['os-extended-volumes:volumes_attached']
         self.assertEqual(volume['id'], created_volume[0]['id'])
+
+    @decorators.idempotent_id('cb78919a-e553-4bab-b73b-10cf4d2eb125')
+    @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
+                          'Encrypted volume attach is not supported')
+    @utils.services('compute', 'volume')
+    def test_boot_server_from_encrypted_volume_luks(self):
+        """LUKs v1 decrypts volume through libvirt."""
+        self._do_test_boot_server_from_encrypted_volume_luks('luks')
+
+    @decorators.idempotent_id('5ab6100f-1b31-4dd0-a774-68cfd837ef77')
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'Ceph only supports LUKSv2 if doing host attach.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.attach_encrypted_volume,
+                          'Encrypted volume attach is not supported')
+    @utils.services('compute', 'volume')
+    def test_boot_server_from_encrypted_volume_luksv2(self):
+        """LUKs v2 decrypts volume through os-brick."""
+        self._do_test_boot_server_from_encrypted_volume_luks('luks2')

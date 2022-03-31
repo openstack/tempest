@@ -31,5 +31,18 @@ class EncryptedVolumesExtendAttachedTest(extend.BaseVolumesExtendAttachedTest,
         "Attached encrypted volume extend is disabled.")
     @utils.services('compute')
     def test_extend_attached_encrypted_volume_luksv1(self):
+        """LUKs v1 decrypts and extends through libvirt."""
         volume = self.create_encrypted_volume(encryption_provider="luks")
+        self._test_extend_attached_volume(volume)
+
+    @decorators.idempotent_id('381a2a3a-b2f4-4631-a910-720881f2cc2f')
+    @testtools.skipUnless(
+        CONF.volume_feature_enabled.extend_attached_encrypted_volume,
+        "Attached encrypted volume extend is disabled.")
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'Ceph only supports LUKSv2 if doing host attach.')
+    @utils.services('compute')
+    def test_extend_attached_encrypted_volume_luksv2(self):
+        """LUKs v2 decrypts and extends through os-brick."""
+        volume = self.create_encrypted_volume(encryption_provider="luks2")
         self._test_extend_attached_volume(volume)
