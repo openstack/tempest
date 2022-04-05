@@ -641,7 +641,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_loginable_secgroup_rule(self, security_group_rules_client=None,
                                        secgroup=None,
-                                       security_groups_client=None):
+                                       security_groups_client=None,
+                                       rulesets=None):
         """Create loginable security group rule by neutron clients by default.
 
         This function will create:
@@ -655,24 +656,26 @@ class ScenarioTest(tempest.test.BaseTestCase):
             security_group_rules_client = self.security_group_rules_client
         if security_groups_client is None:
             security_groups_client = self.security_groups_client
+        if rulesets is None:
+            rulesets = [
+                dict(
+                    # ssh
+                    protocol='tcp',
+                    port_range_min=22,
+                    port_range_max=22,
+                ),
+                dict(
+                    # ping
+                    protocol='icmp',
+                ),
+                dict(
+                    # ipv6-icmp for ping6
+                    protocol='icmp',
+                    ethertype='IPv6',
+                )
+            ]
+
         rules = []
-        rulesets = [
-            dict(
-                # ssh
-                protocol='tcp',
-                port_range_min=22,
-                port_range_max=22,
-            ),
-            dict(
-                # ping
-                protocol='icmp',
-            ),
-            dict(
-                # ipv6-icmp for ping6
-                protocol='icmp',
-                ethertype='IPv6',
-            )
-        ]
         sec_group_rules_client = security_group_rules_client
         for ruleset in rulesets:
             for r_direction in ['ingress', 'egress']:
