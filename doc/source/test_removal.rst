@@ -50,19 +50,10 @@ test location. If you are linking to the Tempest removal patch please also put
 a Depends-On in the commit message for the commit which moved the test into
 another repo.
 
-For prong 2 you can use OpenStack-Health:
+For prong 2 you can use subunit2sql:
 
-Using OpenStack-Health
-""""""""""""""""""""""
-
-Go to: http://status.openstack.org/openstack-health and then navigate to a per
-test page for six months. You'll end up with a page that will graph the success
-and failure rates on the bottom graph. For example, something like `this URL`_.
-
-.. _this URL: http://status.openstack.org/openstack-health/#/test/tempest.scenario.test_volume_boot_pattern.TestVolumeBootPatternV2.test_volume_boot_pattern?groupKey=project&resolutionKey=day&duration=P6M
-
-The Old Way using subunit2sql directly
-""""""""""""""""""""""""""""""""""""""
+Using subunit2sql directly
+""""""""""""""""""""""""""
 
 ``SELECT * from tests where test_id like "%test_id%";``
 (where ``$test_id`` is the full test_id, but truncated to the class because of
