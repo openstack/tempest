@@ -280,6 +280,26 @@ class TestRestClientParseRespJSON(BaseRestClientTestClass):
         body = self.rest_client._parse_resp(json.dumps(empty_list))
         self.assertEqual(empty_list, body)
 
+    def test_parse_top_key_match(self):
+        body = self.rest_client._parse_resp(json.dumps(self.dict_expected),
+                                            top_key_to_verify="body_dict")
+        self.assertEqual(self.dict_expected["body_dict"], body)
+
+
+class TestRestClientParseErrorRespJSON(BaseRestClientTestClass):
+
+    dict_expected = {"body_dict": {"fake_key": "fake_value"}}
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRestClientParseErrorRespJSON, self).setUp()
+
+    def test_parse_top_key_no_match(self):
+        self.assertRaises(AssertionError,
+                          self.rest_client._parse_resp,
+                          json.dumps(self.dict_expected),
+                          top_key_to_verify="body_key")
+
 
 class TestRestClientErrorCheckerJSON(base.TestCase):
     c_type = "application/json"

@@ -492,7 +492,7 @@ class RestClient(object):
             self._log_request_full(resp, req_headers, req_body,
                                    resp_body, extra)
 
-    def _parse_resp(self, body):
+    def _parse_resp(self, body, top_key_to_verify=None):
         try:
             body = json.loads(body)
         except ValueError:
@@ -516,8 +516,17 @@ class RestClient(object):
             if not hasattr(body, "keys") or len(body.keys()) != 1:
                 return body
             # Just return the "wrapped" element
-            _, first_item = tuple(body.items())[0]
+            first_key, first_item = tuple(body.items())[0]
             if isinstance(first_item, (dict, list)):
+                if top_key_to_verify is not None:
+                    msg_args = {
+                        'top_key': top_key_to_verify,
+                        'actual_key': first_key,
+                    }
+                    assert_msg = ("The expected top level key is "
+                                  "'%(top_key)s' but we found "
+                                  "'%(actual_key)s'." % msg_args)
+                    assert top_key_to_verify == first_key, assert_msg
                 return first_item
         except (ValueError, IndexError):
             pass
