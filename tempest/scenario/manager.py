@@ -321,11 +321,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return server
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
-                      imageRef=None, volume_type=None, **kwargs):
+                      imageRef=None, volume_type=None, wait_until='available',
+                      **kwargs):
         """Creates volume
 
         This wrapper utility creates volume and waits for volume to be
-        in 'available' state.
+        in 'available' state by default. If wait_until is None, means no wait.
         This method returns the volume's full representation by GET request.
         """
 
@@ -358,11 +359,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.volumes_client.delete_volume, volume['id'])
         self.assertEqual(name, volume['name'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-        # The volume retrieved on creation has a non-up-to-date status.
-        # Retrieval after it becomes active ensures correct details.
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        if wait_until:
+            waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                    volume['id'], wait_until)
+            # The volume retrieved on creation has a non-up-to-date status.
+            # Retrieval after it becomes active ensures correct details.
+            volume = self.volumes_client.show_volume(volume['id'])['volume']
         return volume
 
     def create_backup(self, volume_id, name=None, description=None,
