@@ -1,0 +1,13 @@
+---
+prelude: |
+    This is an intermediate release during the Zed development cycle to
+    mark the end of support for EM Ussuri release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Yoga
+    * Xena
+    * Wallaby
+    * Victoria
+
+    Current development of Tempest is for OpenStack Zed development
+    cycle.

@@ -20,12 +20,6 @@
     override-checkout: stable/victoria
 
 - job:
-    name: tempest-full-ussuri-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/ussuri
-
-- job:
     name: tempest-full-py3
     parent: devstack-tempest
     # This job version is with swift disabled on py3
