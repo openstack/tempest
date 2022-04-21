@@ -75,7 +75,7 @@ class RemoteClient(object):
         :param ip_address: IP address to ssh to
         :param username: Ssh username
         :param password: Ssh password
-        :param pkey: Ssh public key
+        :param pkey: Ssh private key
         :param server: Server dict, used for debugging purposes
         :param servers_client: Servers client, used for debugging purposes
         :param ssh_timeout: Timeout in seconds to wait for the ssh banner
