@@ -87,6 +87,17 @@
         horizon: true
 
 - job:
+    name: tempest-full-centos-9-stream
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-centos-9-stream
+    description: |
+      Base integration test on CentOS 9 stream
+    vars:
+      # Required until bug/1949606 is resolved when using libvirt and QEMU
+      # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
+      configure_swap_size: 4096
+
+- job:
     name: tempest-integrated-networking
     parent: devstack-tempest
     branches: ^(?!stable/ocata).*$
@@ -129,17 +140,15 @@
         c-bak: false
 
 - job:
-    name: tempest-integrated-compute-centos-8-stream
+    name: tempest-integrated-compute-centos-9-stream
     parent: tempest-integrated-compute
-    # TODO(gmann): Make this job non voting until bug#1957941 if fixed.
-    voting: false
-    nodeset: devstack-single-node-centos-8-stream
+    nodeset: devstack-single-node-centos-9-stream
     branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria)).*$
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
       and Glance related tests. This is meant to be run on Nova gate only.
-      This version of the job also uses CentOS 8 stream.
+      This version of the job also uses CentOS 9 stream.
     vars:
       # Required until bug/1949606 is resolved when using libvirt and QEMU
       # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
@@ -357,12 +366,12 @@
         - grenade-skip-level:
             voting: false
         - tempest-integrated-compute
-        - tempest-integrated-compute-centos-8-stream
+        - tempest-integrated-compute-centos-9-stream
         - openstacksdk-functional-devstack
     gate:
       jobs:
         - tempest-integrated-compute
-        - tempest-integrated-compute-centos-8-stream
+        - tempest-integrated-compute-centos-9-stream
         - openstacksdk-functional-devstack
 
 - project-template:

@@ -120,8 +120,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - openstack-tox-bashate:
             irrelevant-files: *tempest-irrelevant-files-2
-        - tempest-full-py3-centos-8-stream:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-centos-9-stream:
             irrelevant-files: *tempest-irrelevant-files
     gate:
@@ -136,8 +134,6 @@
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3-centos-8-stream:
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
