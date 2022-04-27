@@ -90,6 +90,8 @@
     name: tempest-full-centos-9-stream
     parent: tempest-full-py3
     nodeset: devstack-single-node-centos-9-stream
+    # centos-9-stream is supported from yoga release onwards
+    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena)).*$
     description: |
       Base integration test on CentOS 9 stream
     vars:
@@ -143,7 +145,8 @@
     name: tempest-integrated-compute-centos-9-stream
     parent: tempest-integrated-compute
     nodeset: devstack-single-node-centos-9-stream
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria)).*$
+    # centos-9-stream is supported from yoga release onwards
+    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena)).*$
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
@@ -361,12 +364,22 @@
       (Nova, Neutron, Cinder and Glance related) in check and gate
       for the Nova integrated gate. This is meant to be
       run on Nova gate only.
+    # NOTE(gmann): This template is used for stable branches also so when we
+    # add/remove jobs here we need to make sure we should not change the
+    # behaviour for stable branches. For example, with branch variant we need
+    # to make sure old job keep running on stable branches and the new one run
+    # only from master(or the branch it was meant to run).
     check:
       jobs:
         - grenade-skip-level:
             voting: false
         - tempest-integrated-compute
-        - tempest-integrated-compute-centos-9-stream
+        # centos-8-stream is tested from wallaby -> yoga branches
+        - tempest-integrated-compute-centos-8-stream:
+            branches: ^stable/(wallaby|xena|yoga).*$
+        # centos-9-stream is tested from zed release onwards
+        - tempest-integrated-compute-centos-9-stream:
+            branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga)).*$
         - openstacksdk-functional-devstack
     gate:
       jobs:
