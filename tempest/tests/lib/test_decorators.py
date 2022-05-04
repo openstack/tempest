@@ -21,6 +21,7 @@ import testtools
 from tempest.lib import base as test
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions
 from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 
@@ -289,3 +290,109 @@ class TestRelatedBugDecorator(base.TestCase):
 
         with mock.patch.object(decorators.LOG, 'error'):
             self.assertRaises(lib_exc.InvalidParam, test_foo, object())
+
+
+class TestCleanupOrderDecorator(base.TestCase):
+
+    @decorators.cleanup_order
+    def _create_volume(self, raise_exception=False):
+        """Test doc"""
+        vol_id = "487ef6b6-546a-40c7-bc3f-b405d6239fc8"
+        self.cleanup(self._delete_dummy, vol_id)
+        if raise_exception:
+            raise exceptions.NotFound("Not found")
+        return "volume"
+
+    def _delete_dummy(self, vol_id):
+        pass
+
+    class DummyClassResourceCleanup(list):
+        """dummy list class simulate ClassResourceCleanup"""
+
+        def __call__(self, func, vol_id):
+            self.append((func, vol_id))
+
+    @classmethod
+    def resource_setup(cls):
+        cls.addClassResourceCleanup = cls.DummyClassResourceCleanup()
+        cls.volume = cls._create_volume()
+
+    @classmethod
+    def resource_setup_exception(cls):
+        cls.addClassResourceCleanup = cls.DummyClassResourceCleanup()
+        cls.volume = cls._create_volume(raise_exception=True)
+
+    def setUp(self):
+        super().setUp()
+        self.volume_instance = self._create_volume()
+
+    def test_cleanup_order_when_called_from_instance_testcase(self):
+        # create a volume
+        my_vol = self._create_volume()
+        # Verify method runs and return value
+        self.assertEqual(my_vol, "volume")
+        # Verify __doc__ exists from original function
+        self.assertEqual(self._create_volume.__doc__, "Test doc")
+        # New cleanup created and refers to addCleanup
+        self.assertTrue(hasattr(self, "cleanup"))
+        self.assertEqual(self.cleanup, self.addCleanup)
+        # New __name__ created from type(self)
+        self.assertEqual(self.__name__, type(self).__name__)
+        # Verify function added to instance _cleanups
+        self.assertIn(self._delete_dummy, [e[0] for e in self._cleanups])
+
+    def test_cleanup_order_when_called_from_setup_instance(self):
+        # create a volume
+        my_vol = self.volume_instance
+        # Verify method runs and return value
+        self.assertEqual(my_vol, "volume")
+        # Verify __doc__ exists from original function
+        self.assertEqual(self._create_volume.__doc__, "Test doc")
+        # New cleanup created and refers to addCleanup
+        self.assertTrue(hasattr(self, "cleanup"))
+        self.assertEqual(self.cleanup, self.addCleanup)
+        # New __name__ created from type(self)
+        self.assertEqual(self.__name__, type(self).__name__)
+        # Verify function added to instance _cleanups
+        self.assertIn(self._delete_dummy, [e[0] for e in self._cleanups])
+
+    def test_cleanup_order_when_called_from_instance_raise(self):
+        # create a volume when raised exceptions
+        self.assertRaises(exceptions.NotFound, self._create_volume,
+                          raise_exception=True)
+        # before raise exceptions
+        self.assertTrue(hasattr(self, "cleanup"))
+        self.assertEqual(self.cleanup, self.addCleanup)
+        # New __name__ created from type(self)
+        self.assertEqual(self.__name__, type(self).__name__)
+        # Verify function added to instance _cleanups before exception
+        self.assertIn(self._delete_dummy, [e[0] for e in self._cleanups])
+
+    def test_cleanup_order_when_called_from_class_method(self):
+        # call class method
+        type(self).resource_setup()
+        # create a volume
+        my_vol = self.volume
+        # Verify method runs and return value
+        self.assertEqual(my_vol, "volume")
+        # Verify __doc__ exists from original function
+        self.assertEqual(self._create_volume.__doc__, "Test doc")
+        # New cleanup created and refers to addClassResourceCleanup
+        self.assertTrue(hasattr(self, "cleanup"))
+        self.assertEqual(type(self).cleanup, self.addClassResourceCleanup)
+        # Verify function added to instance addClassResourceCleanup
+        self.assertIn(type(self)._delete_dummy,
+                      [e[0] for e in self.addClassResourceCleanup])
+
+    def test_cleanup_order_when_called_from_class_method_raise(self):
+        # call class method
+        self.assertRaises(exceptions.NotFound,
+                          type(self).resource_setup_exception)
+        # Verify __doc__ exists from original function
+        self.assertEqual(self._create_volume.__doc__, "Test doc")
+        # New cleanup created and refers to addClassResourceCleanup
+        self.assertTrue(hasattr(self, "cleanup"))
+        self.assertEqual(type(self).cleanup, self.addClassResourceCleanup)
+        # Verify function added to instance addClassResourceCleanup
+        self.assertIn(type(self)._delete_dummy,
+                      [e[0] for e in self.addClassResourceCleanup])
