@@ -412,7 +412,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         return image
 
     @classmethod
-    def recreate_server(cls, server_id, validatable=False, **kwargs):
+    def recreate_server(cls, server_id, validatable=False, wait_until='ACTIVE',
+                        **kwargs):
         """Destroy an existing class level server and creates a new one
 
         Some test classes use a test server that can be used by multiple
@@ -440,7 +441,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             validatable,
             validation_resources=cls.get_class_validation_resources(
                 cls.os_primary),
-            wait_until='ACTIVE',
+            wait_until=wait_until,
             adminPass=cls.password,
             **kwargs)
         return server['id']
