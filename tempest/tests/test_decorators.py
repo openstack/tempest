@@ -92,7 +92,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
     def setUp(self):
         super(TestRequiresExtDecorator, self).setUp()
         cfg.CONF.set_default('api_extensions', ['enabled_ext', 'another_ext'],
-                             'compute-feature-enabled')
+                             'network-feature-enabled')
 
     def _test_requires_ext_helper(self, expected_to_skip=True,
                                   **decorator_args):
@@ -116,18 +116,18 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
     def test_requires_ext_decorator(self):
         self._test_requires_ext_helper(expected_to_skip=False,
                                        extension='enabled_ext',
-                                       service='compute')
+                                       service='network')
 
     def test_requires_ext_decorator_disabled_ext(self):
         self._test_requires_ext_helper(extension='disabled_ext',
-                                       service='compute')
+                                       service='network')
 
     def test_requires_ext_decorator_with_all_ext_enabled(self):
         cfg.CONF.set_default('api_extensions', ['all'],
-                             group='compute-feature-enabled')
+                             group='network-feature-enabled')
         self._test_requires_ext_helper(expected_to_skip=False,
                                        extension='random_ext',
-                                       service='compute')
+                                       service='network')
 
     def test_requires_ext_decorator_bad_service(self):
         self.assertRaises(KeyError,

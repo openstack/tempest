@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common import utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
@@ -26,13 +25,6 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     max_microversion = 'latest'
 
     create_default_network = True
-
-    @classmethod
-    def skip_checks(cls):
-        super(ServerTagsTestJSON, cls).skip_checks()
-        if not utils.is_extension_enabled('os-server-tags', 'compute'):
-            msg = "os-server-tags extension is not enabled."
-            raise cls.skipException(msg)
 
     @classmethod
     def setup_clients(cls):
