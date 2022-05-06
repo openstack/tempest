@@ -98,7 +98,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def create_volume(cls, wait_until='available', **kwargs):
         """Wrapper utility that returns a test volume.
 
-           :param wait_until: wait till volume status.
+           :param wait_until: wait till volume status, None means no wait.
         """
         if 'size' not in kwargs:
             kwargs['size'] = CONF.volume.volume_size
@@ -127,8 +127,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
                                     cls.delete_volume, cls.volumes_client,
                                     volume['id'])
-        waiters.wait_for_volume_resource_status(cls.volumes_client,
-                                                volume['id'], wait_until)
+        if wait_until:
+            waiters.wait_for_volume_resource_status(cls.volumes_client,
+                                                    volume['id'], wait_until)
         return volume
 
     @classmethod
