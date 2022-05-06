@@ -20,6 +20,21 @@
     override-checkout: stable/victoria
 
 - job:
+    name: tempest-slow-yoga
+    parent: tempest-slow-py3
+    override-checkout: stable/yoga
+
+- job:
+    name: tempest-slow-xena
+    parent: tempest-slow-py3
+    override-checkout: stable/xena
+
+- job:
+    name: tempest-slow-wallaby
+    parent: tempest-slow-py3
+    override-checkout: stable/wallaby
+
+- job:
     name: tempest-full-py3
     parent: devstack-tempest
     # This job version is with swift disabled on py3
