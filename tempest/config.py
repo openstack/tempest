@@ -962,7 +962,7 @@ ValidationGroup = [
                help="Network used for SSH connections. Ignored if "
                     "connect_method=floating."),
     cfg.StrOpt('ssh_key_type',
-               default='rsa',
+               default='ecdsa',
                help='Type of key to use for ssh connections. '
                     'Valid types are rsa, ecdsa'),
 ]

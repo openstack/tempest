@@ -1,0 +1,12 @@
+---
+upgrade:
+  - |
+    As the version of cirros used in OpenStack CI does not support SHA-2
+    signatures for ssh, any connection from a FIPS enabled machine will fail
+    in case validation.ssh_key_type is set to rsa (the default until now).
+    Using ecdsa keys helps us avoid the mentioned issue.
+    From now on, the validation.ssh_key_type option will be set to ecdsa
+    by default for testing simplicity.
+    This change shouldn't have any drastic effect on any tempest consumer,
+    in case rsa ssh type is required in a consumer's scenario,
+    validation.ssh_key_type can be overridden to rsa.
