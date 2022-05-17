@@ -456,15 +456,31 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         except Exception:
             LOG.exception('Failed to delete server %s', server_id)
 
-    def resize_server(self, server_id, new_flavor_id, **kwargs):
+    def resize_server(
+        self, server_id, new_flavor_id, wait_until='ACTIVE', **kwargs
+    ):
         """resize and confirm_resize an server, waits for it to be ACTIVE."""
         self.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
         waiters.wait_for_server_status(self.servers_client, server_id,
                                        'VERIFY_RESIZE')
         self.servers_client.confirm_resize_server(server_id)
+
         waiters.wait_for_server_status(
             self.servers_client, server_id, 'ACTIVE')
         server = self.servers_client.show_server(server_id)['server']
+
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        if (
+            validation_resources and
+            wait_until in ("SSHABLE", "PINGABLE") and
+            CONF.validation.run_validation
+        ):
+            tenant_network = self.get_tenant_network()
+            compute.wait_for_ssh_or_ping(
+                server, self.os_primary, tenant_network,
+                True, validation_resources, wait_until, True)
+
         self.assert_flavor_equal(new_flavor_id, server['flavor'])
 
     def reboot_server(self, server_id, type):
