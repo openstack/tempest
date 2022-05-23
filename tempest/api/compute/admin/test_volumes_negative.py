@@ -28,21 +28,22 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     create_default_network = True
 
     @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(VolumesAdminNegativeTest, cls).setup_credentials()
+
+    @classmethod
     def skip_checks(cls):
         super(VolumesAdminNegativeTest, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @classmethod
-    def resource_setup(cls):
-        super(VolumesAdminNegativeTest, cls).resource_setup()
-        cls.server = cls.create_test_server(wait_until='ACTIVE')
-
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
     def test_update_attached_volume_with_nonexistent_volume_in_uri(self):
         """Test swapping non existent volume should fail"""
+        self.server = self.create_test_server(wait_until="ACTIVE")
         volume = self.create_volume()
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
@@ -55,6 +56,17 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
     def test_update_attached_volume_with_nonexistent_volume_in_body(self):
         """Test swapping volume to a non existence volume should fail"""
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        # NOTE(gibi): We need to wait for the guest to fully boot as
+        # test_update_attached_volume_with_nonexistent_volume_in_body case
+        # will attach a volume to it and therefore cleanup will try to detach
+        # it. See bug 1960346 for details.
+        self.server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until="SSHABLE")
+
         volume = self.create_volume()
         self.attach_volume(self.server, volume)
 
@@ -75,6 +87,13 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
 
     min_microversion = '2.60'
     volume_min_microversion = '3.27'
+
+    create_default_network = True
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(UpdateMultiattachVolumeNegativeTest, cls).setup_credentials()
 
     @classmethod
     def skip_checks(cls):
@@ -101,8 +120,21 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         vol2 = self.create_volume(multiattach=True)
 
         # Create two instances.
-        server1 = self.create_test_server(wait_until='ACTIVE')
-        server2 = self.create_test_server(wait_until='ACTIVE')
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        # NOTE(gibi): We need to wait for the guests to fully boot as the test
+        # will attach volumes to the servers and therefore cleanup will try to
+        # detach them. See bug 1960346 for details.
+        server1 = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='SSHABLE'
+        )
+        server2 = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='SSHABLE'
+        )
 
         # Attach vol1 to both of these instances.
         vol1_attachment1 = self.attach_volume(server1, vol1)

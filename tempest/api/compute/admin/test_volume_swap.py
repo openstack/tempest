@@ -26,6 +26,11 @@ class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
     create_default_network = True
 
     @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(TestVolumeSwapBase, cls).setup_credentials()
+
+    @classmethod
     def skip_checks(cls):
         super(TestVolumeSwapBase, cls).skip_checks()
         if not CONF.compute_feature_enabled.swap_volume:
@@ -100,7 +105,16 @@ class TestVolumeSwap(TestVolumeSwapBase):
         volume1 = self.create_volume()
         volume2 = self.create_volume()
         # Boot server
-        server = self.create_test_server(wait_until='ACTIVE')
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        # NOTE(gibi): We need to wait for the guest to fully boot as the test
+        # will attach a volume to the server and therefore cleanup will try to
+        # detach it. See bug 1960346 for details.
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='SSHABLE'
+        )
         # Attach "volume1" to server
         self.attach_volume(server, volume1)
         # Swap volume from "volume1" to "volume2"
@@ -200,9 +214,18 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
         volume2 = self.create_volume(multiattach=True)
 
         # Create two servers and wait for them to be ACTIVE.
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        # NOTE(gibi): We need to wait for the guests to fully boot as the test
+        # will attach volumes to the servers and therefore cleanup will try to
+        # detach them. See bug 1960346 for details.
         reservation_id = self.create_test_server(
-            wait_until='ACTIVE', min_count=2,
-            return_reservation_id=True)['reservation_id']
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='SSHABLE',
+            min_count=2,
+            return_reservation_id=True,
+        )['reservation_id']
         # Get the servers using the reservation_id.
         servers = self.servers_client.list_servers(
             reservation_id=reservation_id)['servers']
