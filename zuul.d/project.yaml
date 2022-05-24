@@ -49,9 +49,6 @@
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
-            # TODO(gmann): make it voting once murano-tempest-plugin
-            # is fixed- https://review.opendev.org/c/openstack/murano-tempest-plugin/+/8430407
-            voting: false
             irrelevant-files: &tempest-irrelevant-files-2
               - ^.*\.rst$
               - ^doc/.*$
