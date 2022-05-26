@@ -42,8 +42,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-wallaby-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-victoria-py3:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-wallaby:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
@@ -176,7 +174,6 @@
         - tempest-full-yoga
         - tempest-full-xena
         - tempest-full-wallaby-py3
-        - tempest-full-victoria-py3
         - tempest-slow-yoga
         - tempest-slow-xena
         - tempest-slow-wallaby

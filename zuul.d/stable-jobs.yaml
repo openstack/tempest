@@ -15,11 +15,6 @@
     override-checkout: stable/wallaby
 
 - job:
-    name: tempest-full-victoria-py3
-    parent: tempest-full-py3
-    override-checkout: stable/victoria
-
-- job:
     name: tempest-slow-yoga
     parent: tempest-slow-py3
     override-checkout: stable/yoga
