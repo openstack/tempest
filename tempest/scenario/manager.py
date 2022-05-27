@@ -419,8 +419,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         body = self.backups_client.restore_backup(backup_id, **kwargs)
         restore = body['restore']
-        self.addCleanup(self.volumes_client.delete_volume,
-                        restore['volume_id'])
+
+        using_pre_existing_volume = kwargs.get('volume_id', False)
+        if not using_pre_existing_volume:
+            self.addCleanup(self.volumes_client.delete_volume,
+                            restore['volume_id'])
+
         waiters.wait_for_volume_resource_status(self.backups_client,
                                                 backup_id, 'available')
         waiters.wait_for_volume_resource_status(self.volumes_client,
