@@ -378,10 +378,19 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
                   the created volume, and dict of server ID to volumeAttachment
                   dict entries
         """
+        validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+
         servers = []
         for x in range(2):
             name = 'multiattach-server-%i' % x
-            servers.append(self.create_test_server(name=name))
+            servers.append(
+                self.create_test_server(
+                    name=name,
+                    validatable=True,
+                    validation_resources=validation_resources
+                )
+            )
 
         # Now wait for the servers to be ACTIVE.
         for server in servers:
@@ -492,7 +501,10 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
         servers, volume, _ = self._create_and_multiattach()
 
         for server in servers:
-            self.resize_server(server['id'], self.flavor_ref_alt)
+            # We need to wait until the guest OS fully boots up as we are going
+            # to detach volumes after the resize. See bug #1960346.
+            self.resize_server(
+                server['id'], self.flavor_ref_alt, wait_until='SSHABLE')
 
         for server in servers:
             self._detach_multiattach_volume(volume['id'], server['id'])
