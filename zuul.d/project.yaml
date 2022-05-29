@@ -8,9 +8,6 @@
     check:
       jobs:
         - openstack-tox-pep8
-        # TODO(gmann): run these jobs once bug#1975036 is resolved
-        #- openstack-tox-py36
-        #- openstack-tox-py37
         - openstack-tox-py38
         - openstack-tox-py39
         - tempest-full-parallel:
@@ -132,9 +129,6 @@
     gate:
       jobs:
         - openstack-tox-pep8
-        # TODO(gmann): run these jobs once bug#1975036 is resolved
-        # - openstack-tox-py36
-        # - openstack-tox-py37
         - openstack-tox-py38
         - openstack-tox-py39
         - tempest-slow-py3:
