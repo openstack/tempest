@@ -350,12 +350,18 @@
         - grenade-skip-level:
             voting: false
         - tempest-integrated-networking
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-networking
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
 
 - project-template:
     name: integrated-gate-compute
@@ -380,12 +386,18 @@
         # centos-9-stream is tested from zed release onwards
         - tempest-integrated-compute-centos-9-stream:
             branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga)).*$
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
     gate:
       jobs:
         - tempest-integrated-compute
         - tempest-integrated-compute-centos-9-stream
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
 
 - project-template:
     name: integrated-gate-placement
@@ -400,12 +412,18 @@
         - grenade-skip-level:
             voting: false
         - tempest-integrated-placement
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-placement
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
 
 - project-template:
     name: integrated-gate-storage
@@ -420,12 +438,18 @@
         - grenade-skip-level:
             voting: false
         - tempest-integrated-storage
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-storage
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
 
 - project-template:
     name: integrated-gate-object-storage
@@ -438,9 +462,15 @@
       jobs:
         - grenade
         - tempest-integrated-object-storage
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-object-storage
-        - openstacksdk-functional-devstack
+        # Do not run it on ussuri until below issue is fixed
+        # https://storyboard.openstack.org/#!/story/2010057
+        - openstacksdk-functional-devstack:
+            branches: ^(?!stable/ussuri).*$
