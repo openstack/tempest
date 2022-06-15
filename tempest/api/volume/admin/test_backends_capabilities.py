@@ -47,6 +47,11 @@ class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
                         'volume_backend_name',
                         'storage_protocol')
 
+        # List of storage protocols variants defined in cinder.common.constants
+        # The canonical name for storage protocol comes first in the list
+        VARIANTS = [['iSCSI', 'iscsi'], ['FC', 'fibre_channel', 'fc'],
+                    ['NFS', 'nfs'], ['NVMe-oF', 'NVMeOF', 'nvmeof']]
+
         # Get list backend capabilities using show_pools
         cinder_pools = [
             pool['capabilities'] for pool in
@@ -64,4 +69,23 @@ class BackendsCapabilitiesAdminTestsJSON(base.BaseVolumeAdminTest):
                                         cinder_pools)))
         observed_list = sorted(list(map(operator.itemgetter(*VOLUME_STATS),
                                         capabilities)))
+
+        # Cinder Bug #1966103: Some drivers were reporting different strings
+        # to represent the same storage protocol. For backward compatibility,
+        # the scheduler can handle the variants, but to standardize this for
+        # operators (who may need to refer to the protocol in volume-type
+        # extra-specs), the get-pools response was changed by I07d74078dbb1
+        # to only report the canonical name for a storage protocol. Thus, the
+        # expected_list (which we got from the get-pools call) will only
+        # contain canonical names, while the observed_list (which we got
+        # from the driver capabilities call) may contain a variant. So before
+        # comparing the lists, we need to look for known variants in the
+        # observed_list elements and replace them with their canonical values
+        for item in range(len(observed_list)):
+            for variants in VARIANTS:
+                if observed_list[item][2] in variants:
+                    observed_list[item] = (observed_list[item][0],
+                                           observed_list[item][1],
+                                           variants[0])
+
         self.assertEqual(expected_list, observed_list)
