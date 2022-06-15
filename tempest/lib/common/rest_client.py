@@ -414,6 +414,11 @@ class RestClient(object):
                 return resp[i]
         return ""
 
+    def _get_global_request_id(self, resp):
+        if 'x-openstack-request-id' in resp:
+            return resp['x-openstack-request-id']
+        return ''
+
     def _safe_body(self, body, maxlen=4096):
         # convert a structure into a string safely
         try:
@@ -461,7 +466,10 @@ class RestClient(object):
         if req_headers is None:
             req_headers = {}
         # if we have the request id, put it in the right part of the log
-        extra = dict(request_id=self._get_request_id(resp))
+        extra = {
+            'request_id': self._get_request_id(resp),
+            'global_request_id': self._get_global_request_id(resp),
+        }
         # NOTE(sdague): while we still have 6 callers to this function
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
