@@ -43,6 +43,7 @@ class ImagesNegativeTestBase(base.BaseV2ComputeTest):
 
 class ImagesNegativeTestJSON(ImagesNegativeTestBase):
     """Negative tests of server image"""
+    create_default_network = True
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6cd5a89d-5b47-46a7-93bc-3916f0d84973')
