@@ -98,7 +98,6 @@
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
             # TODO(kopecmartin): make it voting once the below bug is fixed
@@ -147,6 +146,8 @@
         #    irrelevant-files: *tempest-irrelevant-files
         #- tempest-full-centos-9-stream:
         #    irrelevant-files: *tempest-irrelevant-files
+        - nova-live-migration:
+            irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
         - tempest-with-latest-microversion
