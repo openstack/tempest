@@ -477,7 +477,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         self.addCleanup(self.snapshots_client.wait_for_resource_deletion,
                         snapshot['id'])
-        self.addCleanup(self.snapshots_client.delete_snapshot, snapshot['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.snapshots_client.delete_snapshot, snapshot['id'])
         waiters.wait_for_volume_resource_status(self.snapshots_client,
                                                 snapshot['id'], 'available')
         snapshot = self.snapshots_client.show_snapshot(
