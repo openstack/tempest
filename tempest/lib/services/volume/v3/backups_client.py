@@ -18,6 +18,7 @@ from urllib import parse as urllib
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.volume import backups as schema
+from tempest.lib.api_schema.response.volume.v3_64 import backups as schemav364
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.volume import base_client
@@ -25,6 +26,11 @@ from tempest.lib.services.volume import base_client
 
 class BackupsClient(base_client.BaseClient):
     """Volume V3 Backups client"""
+
+    schema_versions_info = [
+        {'min': None, 'max': '3.63', 'schema': schema},
+        {'min': '3.64', 'max': None, 'schema': schemav364}
+        ]
 
     def create_backup(self, **kwargs):
         """Creates a backup of volume.
@@ -76,6 +82,7 @@ class BackupsClient(base_client.BaseClient):
         url = "backups/%s" % backup_id
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.show_backup, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -88,6 +95,7 @@ class BackupsClient(base_client.BaseClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-backups-with-detail
         """
         url = "backups"
+        schema = self.get_schema(self.schema_versions_info)
         list_backups_schema = schema.list_backups_no_detail
         if detail:
             url += "/detail"
