@@ -308,6 +308,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         body, _ = compute.create_test_server(
             clients,
+            validatable=validatable,
             tenant_network=tenant_network,
             wait_until=wait_until,
             name=name, flavor=flavor,

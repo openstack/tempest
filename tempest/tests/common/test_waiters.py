@@ -276,6 +276,36 @@ class TestInterfaceWaiters(base.TestCase):
         )
         sleep.assert_called_once_with(client.build_interval)
 
+    def test_wait_for_guest_os_boot(self):
+        get_console_output = mock.Mock(
+            side_effect=[
+                {'output': 'os not ready yet\n'},
+                {'output': 'login:\n'}
+            ])
+        client = self.mock_client(get_console_output=get_console_output)
+        self.patch('time.time', return_value=0.)
+        sleep = self.patch('time.sleep')
+
+        with mock.patch.object(waiters.LOG, "info") as log_info:
+            waiters.wait_for_guest_os_boot(client, 'server_id')
+
+        get_console_output.assert_has_calls([
+            mock.call('server_id'), mock.call('server_id')])
+        sleep.assert_called_once_with(client.build_interval)
+        log_info.assert_not_called()
+
+    def test_wait_for_guest_os_boot_timeout(self):
+        get_console_output = mock.Mock(
+            return_value={'output': 'os not ready yet\n'})
+        client = self.mock_client(get_console_output=get_console_output)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+
+        with mock.patch.object(waiters.LOG, "info") as log_info:
+            waiters.wait_for_guest_os_boot(client, 'server_id')
+
+        log_info.assert_called_once()
+
 
 class TestVolumeWaiters(base.TestCase):
     vol_migrating_src_host = {

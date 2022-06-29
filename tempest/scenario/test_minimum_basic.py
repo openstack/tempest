@@ -120,7 +120,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         image = self.image_create()
         keypair = self.create_keypair()
 
-        server = self.create_server(image_id=image, key_name=keypair['name'])
+        server = self.create_server(image_id=image, validatable=True, wait_until="SSHABLE", key_name=keypair['name'])
         servers = self.servers_client.list_servers()['servers']
         self.assertIn(server['id'], [x['id'] for x in servers])
 

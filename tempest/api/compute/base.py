@@ -237,7 +237,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def create_test_server(cls, validatable=False, volume_backed=False,
-                           validation_resources=None, clients=None, **kwargs):
+                           validation_resources=None, clients=None, wait_for_sshable=True, **kwargs):
         """Wrapper utility that returns a test server.
 
         This wrapper utility calls the common create test server and
@@ -250,6 +250,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param validation_resources: Dictionary of validation resources as
             returned by `get_class_validation_resources`.
         :param clients: Client manager, defaults to os_primary.
+        :param wait_for_sshable: Check server's console log and wait until it will be ready to login.
         :param kwargs: Extra arguments are passed down to the
             `compute.create_test_server` call.
         """
@@ -276,6 +277,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             tenant_network=tenant_network,
             volume_backed=volume_backed,
             **kwargs)
+
+        for server in servers:
+            if (validatable and CONF.compute_feature_enabled.console_output and
+                    wait_for_sshable):
+                waiters.wait_for_guest_os_boot(clients.servers_client, server['id'])
 
         # For each server schedule wait and delete, so we first delete all
         # and then wait for all
