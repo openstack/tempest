@@ -815,7 +815,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name(self.__class__.__name__ + 'snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
         image = _images_client.create_image(server['id'], name=name, **kwargs)
-        image_id = image.response['location'].split('images/')[1]
+        # microversion 2.45 and above returns image_id
+        image_id = image.get('image_id') or image.response['location'].split(
+            'images/')[1]
         waiters.wait_for_image_status(_image_client, image_id, 'active')
 
         self.addCleanup(_image_client.wait_for_resource_deletion,
