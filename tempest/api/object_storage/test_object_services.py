@@ -182,7 +182,6 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(data, body)
 
     @decorators.idempotent_id('4f84422a-e2f2-4403-b601-726a4220b54e')
-    @decorators.unstable_test(bug='1905432')
     def test_create_object_with_transfer_encoding(self):
         """Test creating object with transfer_encoding"""
         object_name = data_utils.rand_name(name='TestObject')
