@@ -234,6 +234,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                 fip, server)
             # fetch the server again to make sure the addresses were refreshed
             # after associating the floating IP
+            waiters.wait_for_server_floating_ip(self.servers_client, server,
+                                                floating_ip)
             server = self.servers_client.show_server(server['id'])['server']
             address = self._get_floating_ip_in_server_addresses(
                 floating_ip, server)
