@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Add configuration parameter `tempurl_digest_hashlib` into
+    `object-storage-feature-enabled` which configures the hashing algorithm to
+    use for the temp_url tests; defaults to 'sha256'.
+security:
+  - |
+    Swift used to support only 'sha1' for temp_url hashing but from many
+    years now 'sha256' and 'sha512' are also available. These are stronger
+    than 'sha1' and tempest now allows configuring which one to use.
