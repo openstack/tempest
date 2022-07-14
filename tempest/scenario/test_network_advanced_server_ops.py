@@ -283,7 +283,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-    @decorators.unstable_test(bug='1836595')
     @decorators.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
