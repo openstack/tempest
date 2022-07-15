@@ -1164,6 +1164,11 @@ ObjectStoreFeaturesGroup = [
     cfg.BoolOpt('discoverability',
                 default=True,
                 help="Execute discoverability tests"),
+    cfg.StrOpt('tempurl_digest_hashlib',
+               default='sha256',
+               help="Hashing algorithm to use for the temp_url tests. "
+                    "Needs to be supported both by Swift and the "
+                    "hashlib module, for example sha1 or sha256"),
 ]
 
 

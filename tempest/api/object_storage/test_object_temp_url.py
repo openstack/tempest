@@ -19,8 +19,11 @@ from urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ObjectTempUrlTest(base.BaseObjectTest):
@@ -77,8 +80,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
             container, object_name)
 
         hmac_body = '%s\n%s\n%s' % (method, expires, path)
+        hlib = getattr(
+            hashlib,
+            CONF.object_storage_feature_enabled.tempurl_digest_hashlib)
         sig = hmac.new(
-            key.encode(), hmac_body.encode(), hashlib.sha256
+            key.encode(), hmac_body.encode(), hlib
         ).hexdigest()
 
         url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
