@@ -383,9 +383,6 @@
         # centos-8-stream is tested from wallaby -> yoga branches
         - tempest-integrated-compute-centos-8-stream:
             branches: ^stable/(wallaby|xena|yoga).*$
-        # centos-9-stream is tested from zed release onwards
-        - tempest-integrated-compute-centos-9-stream:
-            branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga)).*$
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         - openstacksdk-functional-devstack:
@@ -393,11 +390,13 @@
     gate:
       jobs:
         - tempest-integrated-compute
-        - tempest-integrated-compute-centos-9-stream
-        # Do not run it on ussuri until below issue is fixed
-        # https://storyboard.openstack.org/#!/story/2010057
         - openstacksdk-functional-devstack:
             branches: ^(?!stable/ussuri).*$
+    periodic-weekly:
+      jobs:
+        # centos-9-stream is tested from zed release onwards
+        - tempest-integrated-compute-centos-9-stream:
+            branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga)).*$
 
 - project-template:
     name: integrated-gate-placement
