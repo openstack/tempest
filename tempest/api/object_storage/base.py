@@ -16,6 +16,7 @@
 import time
 
 from tempest.common import custom_matchers
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
@@ -124,6 +125,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                                                 object_name,
                                                 data,
                                                 metadata=metadata)
+                waiters.wait_for_object_create(cls.object_client,
+                                               container_name,
+                                               object_name)
                 return object_name, data
             # after bucket creation we might see Conflict
             except lib_exc.Conflict as e:
