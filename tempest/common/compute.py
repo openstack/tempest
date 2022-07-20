@@ -209,13 +209,6 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                                    kwargs.get('max_count', 0)) > 1)
 
     if CONF.validation.run_validation and validatable:
-        # As a first implementation, multiple pingable or sshable servers will
-        # not be supported
-        if multiple_create_request:
-            msg = ("Multiple pingable or sshable servers not supported at "
-                   "this stage.")
-            raise ValueError(msg)
-
         LOG.debug("Provisioning test server with validation resources %s",
                   validation_resources)
         if 'security_groups' in kwargs:
