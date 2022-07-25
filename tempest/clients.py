@@ -87,6 +87,7 @@ class Manager(clients.ServiceClients):
             self.image_member_client = self.image_v1.ImageMembersClient()
             self.image_client_v2 = self.image_v2.ImagesClient()
             self.image_member_client_v2 = self.image_v2.ImageMembersClient()
+            self.image_cache_client = self.image_v2.ImageCacheClient()
             self.namespaces_client = self.image_v2.NamespacesClient()
             self.resource_types_client = self.image_v2.ResourceTypesClient()
             self.namespace_objects_client = \
