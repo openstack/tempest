@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
@@ -27,7 +29,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
 
     This test is for verifying the functionality of encrypted cinder volumes.
 
-    For both LUKS and cryptsetup encryption types, this test performs
+    For both LUKS (v1 & v2) and cryptsetup encryption types, this test performs
     the following:
 
     * Boots an instance from an image (CONF.compute.image_ref)
@@ -55,9 +57,22 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
     @decorators.attr(type='slow')
     @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
+        """LUKs v1 decrypts volume through libvirt."""
         server = self.launch_instance()
         volume = self.create_encrypted_volume('luks',
                                               volume_type='luks')
+        self.attach_detach_volume(server, volume)
+
+    @decorators.idempotent_id('7abec0a3-61a0-42a5-9e36-ad3138fb38b4')
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'Ceph only supports LUKSv2 if doing host attach.')
+    @decorators.attr(type='slow')
+    @utils.services('compute', 'volume', 'image')
+    def test_encrypted_cinder_volumes_luksv2(self):
+        """LUKs v2 decrypts volume through os-brick."""
+        server = self.launch_instance()
+        volume = self.create_encrypted_volume('luks2',
+                                              volume_type='luksv2')
         self.attach_detach_volume(server, volume)
 
     @decorators.idempotent_id('cbc752ed-b716-4717-910f-956cce965722')
