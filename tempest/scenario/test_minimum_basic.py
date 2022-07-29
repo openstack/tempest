@@ -86,20 +86,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
-    def _get_floating_ip_in_server_addresses(self, floating_ip, server):
-        for addresses in server['addresses'].values():
-            for address in addresses:
-                if (address['OS-EXT-IPS:type'] == 'floating' and
-                        address['addr'] == floating_ip['floating_ip_address']):
-                    return address
-
-    def _is_floating_ip_detached_from_server(self, server, floating_ip):
-        server_info = self.servers_client.show_server(
-            server['id'])['server']
-        address = self._get_floating_ip_in_server_addresses(
-            floating_ip, server_info)
-        return (not address)
-
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
@@ -173,15 +159,6 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                 self.servers_client, server, floating_ip,
                 wait_for_disassociate=True)
 
-            if not test_utils.call_until_true(
-                    self._is_floating_ip_detached_from_server,
-                    CONF.compute.build_timeout,
-                    CONF.compute.build_interval, server, floating_ip):
-                msg = ("Floating IP '%s' should not be in server addresses: %s"
-                       % (floating_ip['floating_ip_address'],
-                          server['addresses']))
-                raise exceptions.TimeoutException(msg)
-
     @decorators.idempotent_id('a8fd48ec-1d01-4895-b932-02321661ec1e')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
                           "Cinder volume snapshots are disabled")
@@ -232,17 +209,8 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             fip = self.create_floating_ip(server)
             floating_ip = self.associate_floating_ip(
                 fip, server)
-            # fetch the server again to make sure the addresses were refreshed
-            # after associating the floating IP
             waiters.wait_for_server_floating_ip(self.servers_client, server,
                                                 floating_ip)
-            server = self.servers_client.show_server(server['id'])['server']
-            address = self._get_floating_ip_in_server_addresses(
-                floating_ip, server)
-            self.assertIsNotNone(
-                address,
-                "Failed to find floating IP '%s' in server addresses: %s" %
-                (floating_ip['floating_ip_address'], server['addresses']))
             ssh_ip = floating_ip['floating_ip_address']
         else:
             ssh_ip = self.get_server_ip(server)
@@ -278,12 +246,3 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
             waiters.wait_for_server_floating_ip(
                 self.servers_client, server, floating_ip,
                 wait_for_disassociate=True)
-
-            if not test_utils.call_until_true(
-                self._is_floating_ip_detached_from_server,
-                    CONF.compute.build_timeout, CONF.compute.build_interval,
-                    server, floating_ip):
-                msg = ("Floating IP '%s' should not be in server addresses: %s"
-                       % (floating_ip['floating_ip_address'],
-                          server['addresses']))
-                raise exceptions.TimeoutException(msg)
