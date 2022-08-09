@@ -206,7 +206,7 @@ class ImportImagesNegativeTest(base.BaseV2ImageTest):
         # import image from web to backend
         image_uri = 'http://does-not.exist/no/possible/way'
         self.client.image_import(image['id'], method='web-download',
-                                 image_uri=image_uri,
+                                 import_params={'uri': image_uri},
                                  stores=[stores[0]['id']])
 
         start_time = int(time.time())
