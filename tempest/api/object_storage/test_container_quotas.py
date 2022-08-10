@@ -15,6 +15,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common import utils
+from tempest.common import waiters
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -91,6 +92,9 @@ class ContainerQuotasTest(base.BaseObjectTest):
         for _ in range(QUOTA_COUNT):
             name = data_utils.rand_name(name="TestObject")
             self.object_client.create_object(self.container_name, name, "")
+            waiters.wait_for_object_create(self.object_client,
+                                           self.container_name,
+                                           name)
 
         nbefore = self._get_object_count()
         self.assertEqual(nbefore, QUOTA_COUNT)

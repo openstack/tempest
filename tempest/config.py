@@ -1148,6 +1148,9 @@ ObjectStoreGroup = [
                help="One name of cluster which is set in the realm whose name "
                     "is set in 'realm_name' item in this file. Set the "
                     "same cluster name as Swift's container-sync-realms.conf"),
+    cfg.IntOpt('build_timeout',
+               default=10,
+               help="Timeout in seconds to wait for objects to create."),
 ]
 
 object_storage_feature_group = cfg.OptGroup(

@@ -612,3 +612,17 @@ def wait_for_caching(client, cache_client, image_id):
     if caller:
         message = '(%s) %s' % (caller, message)
     raise lib_exc.TimeoutException(message)
+
+
+def wait_for_object_create(object_client, container_name, object_name,
+                           interval=1):
+    """Waits for created object to become available"""
+    start_time = time.time()
+    while time.time() - start_time < object_client.build_timeout:
+        try:
+            return object_client.get_object(container_name, object_name)
+        except lib_exc.NotFound:
+            time.sleep(interval)
+    message = ('Object %s failed to create within the required time (%s s).' %
+               (object_name, object_client.build_timeout))
+    raise lib_exc.TimeoutException(message)
