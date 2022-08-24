@@ -131,7 +131,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         # import image from web to backend
         image_uri = CONF.image.http_image
         self.client.image_import(image['id'], method='web-download',
-                                 image_uri=image_uri)
+                                 import_params={'uri': image_uri})
         waiters.wait_for_image_imported_to_stores(self.client, image['id'])
 
     @decorators.idempotent_id('e04761a1-22af-42c2-b8bc-a34a3f12b585')

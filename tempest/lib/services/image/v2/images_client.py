@@ -206,7 +206,7 @@ class ImagesClient(rest_client.RestClient):
 
     def image_import(self, image_id, method='glance-direct',
                      all_stores_must_succeed=None, all_stores=True,
-                     stores=None, image_uri=None):
+                     stores=None, import_params=None):
         """Import data from staging area to glance store.
 
         For a full list of available parameters, please refer to the official
@@ -222,9 +222,11 @@ class ImagesClient(rest_client.RestClient):
                            all available stores (incompatible with stores)
         :param stores: A list of destination store names for the import. Must
                        be None if server does not support multistore.
-        :param image_uri: A URL to be used with the web-download method
+        :param import_params: A dict of import method parameters
         """
         url = 'images/%s/import' % image_id
+        if import_params is None:
+            import_params = {}
         data = {
             "method": {
                 "name": method
@@ -237,8 +239,8 @@ class ImagesClient(rest_client.RestClient):
 
         if all_stores_must_succeed is not None:
             data['all_stores_must_succeed'] = all_stores_must_succeed
-        if image_uri:
-            data['method']['uri'] = image_uri
+        if import_params:
+            data['method'].update(import_params)
         data = json.dumps(data)
         headers = {'Content-Type': 'application/json'}
         resp, _ = self.post(url, data, headers=headers)
