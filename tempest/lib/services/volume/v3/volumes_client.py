@@ -20,6 +20,8 @@ from oslo_serialization import jsonutils as json
 from tempest.lib.api_schema.response.volume.v3_61 import volumes as schemav361
 from tempest.lib.api_schema.response.volume.v3_63 import volumes as schemav363
 from tempest.lib.api_schema.response.volume.v3_64 import volumes as schemav364
+from tempest.lib.api_schema.response.volume.v3_65 import volumes as schemav365
+from tempest.lib.api_schema.response.volume.v3_69 import volumes as schemav369
 from tempest.lib.api_schema.response.volume import volumes as schema
 from tempest.lib.common import rest_client
 from tempest.lib import exceptions as lib_exc
@@ -33,7 +35,9 @@ class VolumesClient(base_client.BaseClient):
         {'min': None, 'max': '3.60', 'schema': schema},
         {'min': '3.61', 'max': '3.62', 'schema': schemav361},
         {'min': '3.63', 'max': '3.63', 'schema': schemav363},
-        {'min': '3.64', 'max': None, 'schema': schemav364}
+        {'min': '3.64', 'max': '3.64', 'schema': schemav364},
+        {'min': '3.65', 'max': '3.68', 'schema': schemav365},
+        {'min': '3.69', 'max': None, 'schema': schemav369}
         ]
 
     def _prepare_params(self, params):

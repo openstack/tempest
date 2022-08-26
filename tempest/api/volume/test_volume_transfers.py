@@ -110,9 +110,7 @@ class VolumesTransfersV355Test(VolumesTransfersTest):
     """Test volume transfer for the "new" Transfers API mv 3.55"""
 
     volume_min_microversion = '3.55'
-    volume_max_microversion = 'latest'
-
-    credentials = ['primary', 'alt', 'admin']
+    volume_max_microversion = '3.56'
 
     @classmethod
     def setup_clients(cls):
@@ -130,4 +128,23 @@ class VolumesTransfersV355Test(VolumesTransfersTest):
     def test_create_list_delete_volume_transfer(self):
         """Test create, list, delete with volume-transfers API mv 3.55"""
         super(VolumesTransfersV355Test, self). \
+            test_create_list_delete_volume_transfer()
+
+
+class VolumesTransfersV357Test(VolumesTransfersV355Test):
+    """Test volume transfer for the "new" Transfers API mv 3.57"""
+
+    volume_min_microversion = '3.57'
+    volume_max_microversion = 'latest'
+
+    @decorators.idempotent_id('d746bd69-bb30-4414-9a1c-577959fac6a1')
+    def test_create_get_list_accept_volume_transfer(self):
+        """Test create, get, list, accept with volume-transfers API mv 3.57"""
+        super(VolumesTransfersV357Test, self). \
+            test_create_get_list_accept_volume_transfer()
+
+    @decorators.idempotent_id('d4b20ec2-e1bb-4068-adcf-6c20020a8e05')
+    def test_create_list_delete_volume_transfer(self):
+        """Test create, list, delete with volume-transfers API mv 3.57"""
+        super(VolumesTransfersV357Test, self). \
             test_create_list_delete_volume_transfer()

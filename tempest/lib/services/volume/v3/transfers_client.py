@@ -18,11 +18,22 @@ from urllib import parse as urllib
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.volume import transfers as schema
+from tempest.lib.api_schema.response.volume.v3_55 \
+    import transfers as schemav355
+from tempest.lib.api_schema.response.volume.v3_57 \
+    import transfers as schemav357
 from tempest.lib.common import rest_client
+from tempest.lib.services.volume import base_client
 
 
-class TransfersClient(rest_client.RestClient):
+class TransfersClient(base_client.BaseClient):
     """Client class to send CRUD Volume Transfer API requests"""
+
+    schema_versions_info = [
+        {'min': None, 'max': '3.54', 'schema': schema},
+        {'min': '3.55', 'max': '3.56', 'schema': schemav355},
+        {'min': '3.57', 'max': None, 'schema': schemav357}
+    ]
 
     resource_path = 'os-volume-transfer'
 
@@ -36,6 +47,7 @@ class TransfersClient(rest_client.RestClient):
         post_body = json.dumps({'transfer': kwargs})
         resp, body = self.post(self.resource_path, post_body)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.create_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -44,6 +56,7 @@ class TransfersClient(rest_client.RestClient):
         url = "%s/%s" % (self.resource_path, transfer_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.show_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -56,6 +69,7 @@ class TransfersClient(rest_client.RestClient):
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#list-volume-transfers-and-details
         """
         url = self.resource_path
+        schema = self.get_schema(self.schema_versions_info)
         schema_list_transfers = schema.list_volume_transfers_no_detail
         if detail:
             url += '/detail'
@@ -70,6 +84,7 @@ class TransfersClient(rest_client.RestClient):
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
         resp, body = self.delete("%s/%s" % (self.resource_path, transfer_id))
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.delete_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
@@ -84,6 +99,7 @@ class TransfersClient(rest_client.RestClient):
         post_body = json.dumps({'accept': kwargs})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.accept_volume_transfer, resp, body)
         return rest_client.ResponseBody(resp, body)
 
