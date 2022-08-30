@@ -16,6 +16,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 
@@ -125,3 +126,47 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         hostnames = list(hosts.values())
         self.assertEqual(hostnames[0], hostnames[1],
                          'Servers are on the different hosts: %s' % hosts)
+
+
+class UnshelveToHostMultiNodesTest(base.BaseV2ComputeAdminTest):
+    """Test to unshelve server in between hosts."""
+    min_microversion = '2.91'
+    max_microversion = 'latest'
+
+    @classmethod
+    def skip_checks(cls):
+        super(UnshelveToHostMultiNodesTest, cls).skip_checks()
+
+        if CONF.compute.min_compute_nodes < 2:
+            raise cls.skipException(
+                "Less than 2 compute nodes, skipping multi-nodes test.")
+
+    def _shelve_offload_then_unshelve_to_host(self, server, host):
+        compute.shelve_server(self.servers_client, server['id'],
+                              force_shelve_offload=True)
+
+        self.os_admin.servers_client.unshelve_server(
+            server['id'],
+            body={'unshelve': {'host': host}}
+            )
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'ACTIVE')
+
+    @decorators.idempotent_id('b5cc0889-50c2-46a0-b8ff-b5fb4c3a6e20')
+    def test_unshelve_to_specific_host(self):
+        """Test unshelve to a specific host, new behavior introduced in
+        microversion 2.91.
+        1. Shelve offload server.
+        2. Request unshelve to original host and verify server land on it.
+        3. Shelve offload server again.
+        4. Request unshelve to the other host and verify server land on it.
+        """
+        server = self.create_test_server(wait_until='ACTIVE')
+        host = self.get_host_for_server(server['id'])
+        otherhost = self.get_host_other_than(server['id'])
+
+        self._shelve_offload_then_unshelve_to_host(server, host)
+        self.assertEqual(host, self.get_host_for_server(server['id']))
+
+        self._shelve_offload_then_unshelve_to_host(server, otherhost)
+        self.assertEqual(otherhost, self.get_host_for_server(server['id']))
