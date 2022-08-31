@@ -49,12 +49,12 @@ class ImportImagesTest(base.BaseV2ImageTest):
             raise cls.skipException('Server does not support '
                                     'any import method')
 
-    def _create_image(self):
+    def _create_image(self, disk_format=None, container_format=None):
         # Create image
         uuid = '00000000-1111-2222-3333-444455556666'
         image_name = data_utils.rand_name('image')
-        container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
+        container_format = container_format or CONF.image.container_formats[0]
+        disk_format = disk_format or CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
                                   container_format=container_format,
                                   disk_format=disk_format,
@@ -133,6 +133,141 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.client.image_import(image['id'], method='web-download',
                                  import_params={'uri': image_uri})
         waiters.wait_for_image_imported_to_stores(self.client, image['id'])
+
+    @decorators.idempotent_id('8876c818-c40e-4b90-9742-31d231616305')
+    def test_image_glance_download_import_success(self):
+        # We use glance-direct initially, then glance-download for test
+        self._require_import_method('glance-direct')
+        self._require_import_method('glance-download')
+
+        # Create an image via the normal import process to be our source
+        src = self._stage_and_check()
+        self.client.image_import(src, method='glance-direct')
+        waiters.wait_for_image_imported_to_stores(self.client, src)
+
+        # Add some properties to it that will be copied by the default
+        # config (and one that won't)
+        self.client.update_image(src, [
+            {'add': '/hw_cpu_cores', 'value': '5'},
+            {'add': '/trait:STORAGE_DISK_SSD', 'value': 'required'},
+            {'add': '/os_distro', 'value': 'rhel'},
+            {'add': '/speed', 'value': '88mph'},
+        ])
+
+        # Make sure our properties stuck on the source image
+        src_image = self.client.show_image(src)
+        self.assertEqual('5', src_image['hw_cpu_cores'])
+        self.assertEqual('required', src_image['trait:STORAGE_DISK_SSD'])
+        self.assertEqual('rhel', src_image['os_distro'])
+        self.assertEqual('88mph', src_image['speed'])
+
+        # Create a new image which we will fill from another glance image
+        dst = self._create_image(container_format='ovf',
+                                 disk_format='iso')['id']
+
+        # Set some values that will conflict to make sure we get the
+        # new ones and confirm they stuck before the import.
+        self.client.update_image(dst, [
+            {'add': '/hw_cpu_cores', 'value': '1'},
+            {'add': '/os_distro', 'value': 'windows'},
+        ])
+        dst_image = self.client.show_image(dst)
+        self.assertEqual('1', dst_image['hw_cpu_cores'])
+        self.assertEqual('windows', dst_image['os_distro'])
+
+        params = {
+            'glance_image_id': src,
+            'glance_region': self.client.region,
+            'glance_service_interface': 'public',
+        }
+        self.client.image_import(dst, method='glance-download',
+                                 import_params=params)
+        waiters.wait_for_image_tasks_status(self.client, dst, 'success')
+
+        # Make sure the new image has all the keys imported from the
+        # original image that we expect
+        dst_image = self.client.show_image(dst)
+        self.assertEqual(src_image['disk_format'], dst_image['disk_format'])
+        self.assertEqual(src_image['container_format'],
+                         dst_image['container_format'])
+        self.assertEqual('5', dst_image['hw_cpu_cores'])
+        self.assertEqual('required', dst_image['trait:STORAGE_DISK_SSD'])
+        self.assertEqual('rhel', dst_image['os_distro'])
+        self.assertNotIn('speed', dst_image)
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('36d4b546-64a2-4bb9-bdd0-ba676aa48f2c')
+    def test_image_glance_download_import_bad_uuid(self):
+        self._require_import_method('glance-download')
+        image_id = self._create_image()['id']
+        params = {
+            'glance_image_id': 'foo',
+            'glance_region': self.client.region,
+            'glance_service_interface': 'public',
+        }
+
+        # A non-UUID-like image id should make us fail immediately
+        e = self.assertRaises(lib_exc.BadRequest,
+                              self.client.image_import,
+                              image_id, method='glance-download',
+                              import_params=params)
+        self.assertIn('image id does not look like a UUID', str(e))
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('77644240-dbbe-4744-ae28-09b2ac12e218')
+    def test_image_glance_download_import_bad_endpoint(self):
+        self._require_import_method('glance-download')
+        image_id = self._create_image()['id']
+
+        # Set some properties before the import to make sure they are
+        # undisturbed
+        self.client.update_image(image_id, [
+            {'add': '/hw_cpu_cores', 'value': '1'},
+            {'add': '/os_distro', 'value': 'windows'},
+        ])
+        image = self.client.show_image(image_id)
+        self.assertEqual('1', image['hw_cpu_cores'])
+        self.assertEqual('windows', image['os_distro'])
+
+        params = {
+            'glance_image_id': '36d4b546-64a2-4bb9-bdd0-ba676aa48f2c',
+            'glance_region': 'not a region',
+            'glance_service_interface': 'not an interface',
+        }
+
+        # A bad region or interface will cause us to fail when we
+        # contact the remote glance.
+        self.client.image_import(image_id, method='glance-download',
+                                 import_params=params)
+        waiters.wait_for_image_tasks_status(self.client, image_id, 'failure')
+
+        # Make sure we reverted the image status to queued on failure, and that
+        # our extra properties are still in place.
+        image = self.client.show_image(image_id)
+        self.assertEqual('queued', image['status'])
+        self.assertEqual('1', image['hw_cpu_cores'])
+        self.assertEqual('windows', image['os_distro'])
+
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('c7edec8e-24b5-416a-9d42-b3e773bab62c')
+    def test_image_glance_download_import_bad_missing_image(self):
+        self._require_import_method('glance-download')
+        image_id = self._create_image()['id']
+        params = {
+            'glance_image_id': '36d4b546-64a2-4bb9-bdd0-ba676aa48f2c',
+            'glance_region': self.client.region,
+            'glance_service_interface': 'public',
+        }
+
+        # A non-existent image will cause us to fail when we
+        # contact the remote glance.
+        self.client.image_import(image_id, method='glance-download',
+                                 import_params=params)
+        waiters.wait_for_image_tasks_status(self.client, image_id, 'failure')
+
+        # Make sure we reverted the image status to queued on failure
+        image = self.client.show_image(image_id)
+        self.assertEqual('queued', image['status'])
 
     @decorators.idempotent_id('e04761a1-22af-42c2-b8bc-a34a3f12b585')
     def test_remote_import(self):
