@@ -186,12 +186,10 @@ class ObjectTest(base.BaseObjectTest):
         """Test creating object with transfer_encoding"""
         object_name = data_utils.rand_name(name='TestObject')
         data = data_utils.random_bytes(1024)
-        headers = {'Transfer-Encoding': 'chunked'}
         resp, _ = self.object_client.create_object(
             self.container_name,
             object_name,
             data=data_utils.chunkify(data, 512),
-            headers=headers,
             chunked=True)
 
         self.assertHeaders(resp, 'Object', 'PUT')
