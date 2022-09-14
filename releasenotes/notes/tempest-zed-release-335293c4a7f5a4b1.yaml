@@ -1,0 +1,17 @@
+---
+prelude: |
+    This release is to tag Tempest for OpenStack Zed release.
+    This release marks the start of Zed release support in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Zed
+    * Yoga
+    * Xena
+    * Wallaby
+
+    Current development of Tempest is for OpenStack 2023.1 development
+    cycle. Every Tempest commit is also tested against master during
+    the 2023.1 cycle. However, this does not necessarily mean that using
+    Tempest as of this tag will work against a 2023.1 (or future release)
+    cloud.
+    To be on safe side, use this tag to test the OpenStack Zed release.
