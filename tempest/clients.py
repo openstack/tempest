@@ -118,7 +118,6 @@ class Manager(clients.ServiceClients):
             enable_instance_password=eip)
         self.server_groups_client = self.compute.ServerGroupsClient()
         self.limits_client = self.compute.LimitsClient()
-        self.compute_images_client = self.compute.ImagesClient()
         self.keypairs_client = self.compute.KeyPairsClient(
             ssh_key_type=CONF.validation.ssh_key_type)
         self.quotas_client = self.compute.QuotasClient()
@@ -158,6 +157,8 @@ class Manager(clients.ServiceClients):
             **params_volume)
         self.snapshots_extensions_client = self.compute.SnapshotsClient(
             **params_volume)
+        self.compute_images_client = self.compute.ImagesClient(
+            build_timeout=CONF.image.build_timeout)
 
     def _set_placement_clients(self):
         self.placement_client = self.placement.PlacementClient()
