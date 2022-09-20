@@ -1,0 +1,5 @@
+=====================
+v32.0.0 Release Notes
+=====================
+.. release-notes:: 32.0.0 Release Notes
+   :version: 32.0.0
