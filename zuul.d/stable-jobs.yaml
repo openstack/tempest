@@ -1,5 +1,10 @@
 # NOTE(gmann): This file includes all stable release jobs definition.
 - job:
+    name: tempest-full-zed
+    parent: tempest-full-py3
+    override-checkout: stable/zed
+
+- job:
     name: tempest-full-yoga
     parent: tempest-full-py3
     override-checkout: stable/yoga
@@ -13,6 +18,11 @@
     name: tempest-full-wallaby-py3
     parent: tempest-full-py3
     override-checkout: stable/wallaby
+
+- job:
+    name: tempest-slow-zed
+    parent: tempest-slow-py3
+    override-checkout: stable/zed
 
 - job:
     name: tempest-slow-yoga

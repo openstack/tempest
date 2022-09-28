@@ -34,6 +34,8 @@
         - glance-multistore-cinder-import:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-zed:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-yoga:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-xena:
@@ -168,9 +170,11 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
+        - tempest-full-zed
         - tempest-full-yoga
         - tempest-full-xena
         - tempest-full-wallaby-py3
+        - tempest-slow-zed
         - tempest-slow-yoga
         - tempest-slow-xena
         - tempest-slow-wallaby
