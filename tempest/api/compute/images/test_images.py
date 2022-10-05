@@ -128,3 +128,27 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               wait_for_server=False)
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
+
+    @decorators.idempotent_id('f3cac456-e3fe-4183-a7a7-a59f7f017088')
+    def test_create_server_from_snapshot(self):
+        # Create one server normally
+        server = self.create_test_server(wait_until='ACTIVE')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+
+        # Snapshot it
+        snapshot_name = data_utils.rand_name('test-snap')
+        image = self.create_image_from_server(server['id'],
+                                              name=snapshot_name,
+                                              wait_until='ACTIVE',
+                                              wait_for_server=False)
+        self.addCleanup(self.client.delete_image, image['id'])
+
+        # Try to create another server from that snapshot
+        server2 = self.create_test_server(wait_until='ACTIVE',
+                                          image_id=image['id'])
+
+        # Delete server 2 before we finish otherwise we'll race with
+        # the cleanup which tries to delete the image before the
+        # server is gone.
+        self.servers_client.delete_server(server2['id'])
+        waiters.wait_for_server_termination(self.servers_client, server2['id'])
