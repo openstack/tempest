@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add a new config option
+    `[image_feature_enabled]/manage_locations` which enables
+    tests for the `show_multiple_locations=True` functionality in
+    glance. In order for this to work you must also have a store
+    capable of hosting images with an HTTP URI.

@@ -767,3 +767,245 @@ class ListSharedImagesTest(base.BaseV2ImageTest):
         fetched_images = self.alt_img_client.list_images(params)['images']
         self.assertEqual(1, len(fetched_images))
         self.assertEqual(image['id'], fetched_images[0]['id'])
+
+
+class ImageLocationsTest(base.BaseV2ImageTest):
+    @classmethod
+    def skip_checks(cls):
+        super(ImageLocationsTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.manage_locations:
+            skip_msg = (
+                "%s skipped as show_multiple_locations is not available" % (
+                    cls.__name__))
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('58b0fadc-219d-40e1-b159-1c902cec323a')
+    def test_location_after_upload(self):
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+
+        # Locations should be empty when there is no data
+        self.assertEqual('queued', image['status'])
+        self.assertEqual([], image['locations'])
+
+        # Now try uploading an image file
+        file_content = data_utils.random_bytes()
+        image_file = io.BytesIO(file_content)
+        self.client.store_image_file(image['id'], image_file)
+        waiters.wait_for_image_status(self.client, image['id'], 'active')
+
+        # Locations should now have one item
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']),
+                         'Expected one location in %r' % image['locations'])
+
+        # NOTE(danms): If show_image_direct_url is enabled, then this
+        # will be present. If so, it should match the one location we set
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        return image
+
+    def _check_set_location(self):
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+
+        # Locations should be empty when there is no data
+        self.assertEqual('queued', image['status'])
+        self.assertEqual([], image['locations'])
+
+        # Add a new location
+        new_loc = {'metadata': {'foo': 'bar'},
+                   'url': CONF.image.http_image}
+        self.client.update_image(image['id'], [
+            dict(add='/locations/-', value=new_loc)])
+
+        # The image should now be active, with one location that looks
+        # like we expect
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']),
+                         'Image should have one location but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(new_loc['url'], image['locations'][0]['url'])
+        self.assertEqual('bar', image['locations'][0]['metadata'].get('foo'))
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        # If we added the location directly, the image goes straight
+        # to active and no hashing is done
+        self.assertEqual('active', image['status'])
+        self.assertIsNone(None, image['os_hash_algo'])
+        self.assertIsNone(None, image['os_hash_value'])
+
+        return image
+
+    @decorators.idempotent_id('37599b8a-d5c0-4590-aee5-73878502be15')
+    def test_set_location(self):
+        self._check_set_location()
+
+    def _check_set_multiple_locations(self):
+        image = self._check_set_location()
+
+        new_loc = {'metadata': {'speed': '88mph'},
+                   'url': '%s#new' % CONF.image.http_image}
+        self.client.update_image(image['id'], [
+            dict(add='/locations/-', value=new_loc)])
+
+        # The image should now have two locations and the last one
+        # (locations are ordered) should have the new URL.
+        image = self.client.show_image(image['id'])
+        self.assertEqual(2, len(image['locations']),
+                         'Image should have two locations but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(new_loc['url'], image['locations'][1]['url'])
+
+        # The image should still be active and still have no hashes
+        self.assertEqual('active', image['status'])
+        self.assertIsNone(None, image['os_hash_algo'])
+        self.assertIsNone(None, image['os_hash_value'])
+
+        # The direct_url should still match the first location
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        return image
+
+    @decorators.idempotent_id('f67495c6-518a-4397-938e-dc7b135698a8')
+    def test_set_multiple_locations(self):
+        self._check_set_multiple_locations()
+
+    @decorators.idempotent_id('8a648de4-b745-4c28-a7b5-20de1c3da4d2')
+    def test_delete_locations(self):
+        image = self._check_set_multiple_locations()
+        expected_remaining_loc = image['locations'][1]
+
+        self.client.update_image(image['id'], [
+            dict(remove='/locations/0')])
+
+        # The image should now have only the one location we did not delete
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']),
+                         'Image should have one location but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(expected_remaining_loc['url'],
+                         image['locations'][0]['url'])
+
+        # The direct_url should now be the last remaining location
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        # Removing the last location should be disallowed
+        self.assertRaises(lib_exc.Forbidden,
+                          self.client.update_image, image['id'], [
+                              dict(remove='/locations/0')])
+
+    @decorators.idempotent_id('a9a20396-8399-4b36-909d-564949be098f')
+    def test_set_location_bad_scheme(self):
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+
+        # Locations should be empty when there is no data
+        self.assertEqual('queued', image['status'])
+        self.assertEqual([], image['locations'])
+
+        # Adding a new location using a scheme that is not allowed
+        # should result in an error
+        new_loc = {'metadata': {'foo': 'bar'},
+                   'url': 'gopher://info.cern.ch'}
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.update_image, image['id'], [
+                              dict(add='/locations/-', value=new_loc)])
+
+    def _check_set_location_with_hash(self):
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+
+        # Create a new location with validation data
+        new_loc = {'validation_data': {'checksum': '1' * 32,
+                                       'os_hash_value': 'deadbeef' * 16,
+                                       'os_hash_algo': 'sha512'},
+                   'metadata': {},
+                   'url': CONF.image.http_image}
+        self.client.update_image(image['id'], [
+            dict(add='/locations/-', value=new_loc)])
+
+        # Expect that all of our values ended up on the image
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']))
+        self.assertEqual('1' * 32, image['checksum'])
+        self.assertEqual('deadbeef' * 16, image['os_hash_value'])
+        self.assertEqual('sha512', image['os_hash_algo'])
+        self.assertNotIn('validation_data', image['locations'][0])
+        self.assertEqual('active', image['status'])
+
+        return image
+
+    @decorators.idempotent_id('42d6f7db-c9f5-4bae-9e15-a90262fe445a')
+    def test_set_location_with_hash(self):
+        self._check_set_location_with_hash()
+
+    @decorators.idempotent_id('304c8a19-aa86-47dd-a022-ec4c7f433f1b')
+    def test_set_location_with_hash_second_matching(self):
+        orig_image = self._check_set_location_with_hash()
+
+        new_loc = {
+            'validation_data': {'checksum': orig_image['checksum'],
+                                'os_hash_value': orig_image['os_hash_value'],
+                                'os_hash_algo': orig_image['os_hash_algo']},
+            'metadata': {},
+            'url': '%s#new' % CONF.image.http_image}
+        self.client.update_image(orig_image['id'], [
+            dict(add='/locations/-', value=new_loc)])
+
+        # Setting the same exact values on a new location should work
+        image = self.client.show_image(orig_image['id'])
+        self.assertEqual(2, len(image['locations']))
+        self.assertEqual(orig_image['checksum'], image['checksum'])
+        self.assertEqual(orig_image['os_hash_value'], image['os_hash_value'])
+        self.assertEqual(orig_image['os_hash_algo'], image['os_hash_algo'])
+        self.assertNotIn('validation_data', image['locations'][0])
+        self.assertNotIn('validation_data', image['locations'][1])
+
+    @decorators.idempotent_id('f3ce99c2-9ffb-4b9f-b2cb-876929382553')
+    def test_set_location_with_hash_not_matching(self):
+        orig_image = self._check_set_location_with_hash()
+        values = {
+            'checksum': '2' * 32,
+            'os_hash_value': 'beefdead' * 16,
+            'os_hash_algo': 'sha256',
+        }
+
+        # Try to set a new location with one each of the above
+        # substitutions
+        for k, v in values.items():
+            new_loc = {
+                'validation_data': {
+                    'checksum': orig_image['checksum'],
+                    'os_hash_value': orig_image['os_hash_value'],
+                    'os_hash_algo': orig_image['os_hash_algo']},
+                'metadata': {},
+                'url': '%s#new' % CONF.image.http_image}
+            new_loc['validation_data'][k] = v
+
+            # This should always fail due to the mismatch
+            self.assertRaises(lib_exc.Conflict,
+                              self.client.update_image,
+                              orig_image['id'], [
+                                  dict(add='/locations/-', value=new_loc)])
+
+        # Now try to add a new location with all of the substitutions,
+        # which should also fail
+        new_loc['validation_data'] = values
+        self.assertRaises(lib_exc.Conflict,
+                          self.client.update_image,
+                          orig_image['id'], [
+                              dict(add='/locations/-', value=new_loc)])
+
+        # Make sure nothing has changed on our image after all the
+        # above failures
+        image = self.client.show_image(orig_image['id'])
+        self.assertEqual(1, len(image['locations']))
+        self.assertEqual(orig_image['checksum'], image['checksum'])
+        self.assertEqual(orig_image['os_hash_value'], image['os_hash_value'])
+        self.assertEqual(orig_image['os_hash_algo'], image['os_hash_algo'])
+        self.assertNotIn('validation_data', image['locations'][0])
