@@ -363,10 +363,12 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
 
         if all_stores:
             stores_list = ','.join([store['id']
-                                    for store in self.available_stores])
+                                    for store in self.available_stores
+                                    if store.get('read-only') != 'true'])
         else:
-            stores = [store['id'] for store in self.available_stores]
-            stores_list = stores[::len(stores) - 1]
+            stores = [store['id'] for store in self.available_stores
+                      if store.get('read-only') != 'true']
+            stores_list = stores[::max(1, len(stores) - 1)]
 
         return body, stores_list
 
