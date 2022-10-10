@@ -49,19 +49,19 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
         # between the UNKNOWN->ACTIVE transition.
         # TODO(afazekas): enumerate and validate the stable status set
         if status == 'BUILD' and server_status != 'UNKNOWN':
-            return
+            return body
         if server_status == status:
             if ready_wait:
                 if status == 'BUILD':
-                    return
+                    return body
                 # NOTE(afazekas): The instance is in "ready for action state"
                 # when no task in progress
                 if task_state is None:
                     # without state api extension 3 sec usually enough
                     time.sleep(CONF.compute.ready_wait)
-                    return
+                    return body
             else:
-                return
+                return body
 
         time.sleep(client.build_interval)
         body = client.show_server(server_id)['server']

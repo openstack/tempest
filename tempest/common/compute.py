@@ -291,11 +291,11 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     if multiple_create_request:
         # Get servers created which name match with name param.
         body_servers = clients.servers_client.list_servers()
-        servers = \
+        created_servers = \
             [s for s in body_servers['servers'] if s['name'].startswith(name)]
     else:
         body = rest_client.ResponseBody(body.response, body['server'])
-        servers = [body]
+        created_servers = [body]
 
     if wait_until:
 
@@ -307,11 +307,19 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             wait_until_extra = wait_until
             wait_until = 'ACTIVE'
 
-        for server in servers:
-            try:
-                waiters.wait_for_server_status(
+        servers = []
+        try:
+            # Wait for server to be in active state and populate servers list
+            # with those full server response so that we will have addresses
+            # field present in server which is needed to be used for wait for
+            # ssh
+            for server in created_servers:
+                server = waiters.wait_for_server_status(
                     clients.servers_client, server['id'], wait_until,
                     request_id=request_id)
+                servers.append(server)
+
+            for server in servers:
                 if CONF.validation.run_validation and validatable:
                     if CONF.validation.connect_method == 'floating':
                         _setup_validation_fip(
@@ -322,31 +330,31 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                             server, clients, tenant_network,
                             validatable, validation_resources,
                             wait_until_extra, False)
+        except Exception:
+            with excutils.save_and_reraise_exception():
+                for server in created_servers:
+                    try:
+                        clients.servers_client.delete_server(
+                            server['id'])
+                    except Exception:
+                        LOG.exception('Deleting server %s failed',
+                                      server['id'])
+                for server in created_servers:
+                    # NOTE(artom) If the servers were booted with volumes
+                    # and with delete_on_termination=False we need to wait
+                    # for the servers to go away before proceeding with
+                    # cleanup, otherwise we'll attempt to delete the
+                    # volumes while they're still attached to servers that
+                    # are in the process of being deleted.
+                    try:
+                        waiters.wait_for_server_termination(
+                            clients.servers_client, server['id'])
+                    except Exception:
+                        LOG.exception('Server %s failed to delete in time',
+                                      server['id'])
+        return body, servers
 
-            except Exception:
-                with excutils.save_and_reraise_exception():
-                    for server in servers:
-                        try:
-                            clients.servers_client.delete_server(
-                                server['id'])
-                        except Exception:
-                            LOG.exception('Deleting server %s failed',
-                                          server['id'])
-                    for server in servers:
-                        # NOTE(artom) If the servers were booted with volumes
-                        # and with delete_on_termination=False we need to wait
-                        # for the servers to go away before proceeding with
-                        # cleanup, otherwise we'll attempt to delete the
-                        # volumes while they're still attached to servers that
-                        # are in the process of being deleted.
-                        try:
-                            waiters.wait_for_server_termination(
-                                clients.servers_client, server['id'])
-                        except Exception:
-                            LOG.exception('Server %s failed to delete in time',
-                                          server['id'])
-
-    return body, servers
+    return body, created_servers
 
 
 def shelve_server(servers_client, server_id, force_shelve_offload=False):
