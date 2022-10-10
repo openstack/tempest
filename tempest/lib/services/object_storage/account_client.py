@@ -14,8 +14,8 @@
 #    under the License.
 
 from urllib import parse as urllib
-from xml.etree import ElementTree as etree
 
+from defusedxml import ElementTree as etree
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.common import rest_client
