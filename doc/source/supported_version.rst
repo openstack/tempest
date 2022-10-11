@@ -9,10 +9,10 @@ Compatible OpenStack Releases
 
 Tempest master supports the below OpenStack Releases:
 
+* Zed
 * Yoga
 * Xena
 * Wallaby
-* Victoria
 
 For older OpenStack Release:
 
