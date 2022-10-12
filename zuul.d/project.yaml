@@ -28,6 +28,8 @@
               - ^.mailmap$
         - tempest-full-py3:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-ubuntu-focal:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3-ipv6:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -135,6 +137,8 @@
         - openstack-tox-py39
         - openstack-tox-py310
         - tempest-slow-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-ubuntu-focal:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
