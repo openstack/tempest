@@ -59,11 +59,19 @@ class TestImageWaiters(base.TestCase):
     def test_wait_for_image_imported_to_stores(self):
         self.client.show_image.return_value = ({'status': 'active',
                                                 'stores': 'fake_store'})
+        self.client.info_stores.return_value = {
+            'stores': [{'id': 'fake_store',
+                        'description': 'A writable store'},
+                       {'id': 'another_fake_store',
+                        'description': 'A read-only store',
+                        'read-only': 'true'}]
+        }
         start_time = int(time.time())
         waiters.wait_for_image_imported_to_stores(
-            self.client, 'fake_image_id', 'fake_store')
+            self.client, 'fake_image_id', 'fake_store,another_fake_store')
         end_time = int(time.time())
-        # Ensure waiter returns before build_timeout
+        # Ensure waiter returns before build_timeout, and did not wait
+        # for the read-only store
         self.assertLess((end_time - start_time), 10)
 
     def test_wait_for_image_imported_to_stores_failure(self):
@@ -94,6 +102,22 @@ class TestImageWaiters(base.TestCase):
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_image_imported_to_stores,
                           client, 'fake_image_id', 'fake_store')
+
+    def test_wait_for_image_imported_to_stores_no_stores(self):
+        client = mock.MagicMock()
+        client.show_image.return_value = ({'status': 'active'})
+        client.info_stores.side_effect = lib_exc.NotFound
+        client.build_timeout = 2
+        start_time = time.time()
+        waiters.wait_for_image_imported_to_stores(
+            client, 'fake_image_id', None)
+        end_time = time.time()
+        self.assertLess(end_time - start_time, 10)
+
+        exc = self.assertRaises(lib_exc.TimeoutException,
+                                waiters.wait_for_image_imported_to_stores,
+                                client, 'fake_image_id', 'foo,bar')
+        self.assertIn('cowardly', str(exc))
 
     def test_wait_for_image_copied_to_stores(self):
         self.client.show_image.return_value = ({
