@@ -1242,29 +1242,39 @@ enforce_scope_group = cfg.OptGroup(name="enforce_scope",
 EnforceScopeGroup = [
     cfg.BoolOpt('nova',
                 default=False,
-                help='Does the compute service API policies enforce scope? '
-                     'This configuration value should be same as '
-                     'nova.conf: [oslo_policy].enforce_scope option.'),
+                help='Does the compute service API policies enforce scope and '
+                     'new defaults? This configuration value should be '
+                     'enabled when nova.conf: [oslo_policy]. '
+                     'enforce_new_defaults and nova.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in nova conf.'),
     cfg.BoolOpt('neutron',
                 default=False,
-                help='Does the network service API policies enforce scope? '
-                     'This configuration value should be same as '
-                     'neutron.conf: [oslo_policy].enforce_scope option.'),
+                help='Does the network service API policies enforce scope and '
+                     'new defaults? This configuration value should be '
+                     'enabled when neutron.conf: [oslo_policy]. '
+                     'enforce_new_defaults and neutron.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in neutron conf.'),
     cfg.BoolOpt('glance',
                 default=False,
-                help='Does the Image service API policies enforce scope? '
-                     'This configuration value should be same as '
-                     'glance.conf: [oslo_policy].enforce_scope option.'),
+                help='Does the Image service API policies enforce scope and '
+                     'new defaults? This configuration value should be '
+                     'enabled when glance.conf: [oslo_policy]. '
+                     'enforce_new_defaults and glance.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in glance conf.'),
     cfg.BoolOpt('cinder',
                 default=False,
-                help='Does the Volume service API policies enforce scope? '
-                     'This configuration value should be same as '
-                     'cinder.conf: [oslo_policy].enforce_scope option.'),
+                help='Does the Volume service API policies enforce scope and '
+                     'new defaults? This configuration value should be '
+                     'enabled when cinder.conf: [oslo_policy]. '
+                     'enforce_new_defaults and cinder.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in cinder conf.'),
     cfg.BoolOpt('keystone',
                 default=False,
-                help='Does the Identity service API policies enforce scope? '
-                     'This configuration value should be same as '
-                     'keystone.conf: [oslo_policy].enforce_scope option.'),
+                help='Does the Identity service API policies enforce scope '
+                     'and new defaults? This configuration value should be '
+                     'enabled when keystone.conf: [oslo_policy]. '
+                     'enforce_new_defaults and keystone.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in keystone conf.'),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
