@@ -735,6 +735,11 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('os_glance_reserved',
                 default=False,
                 help="Should we check that os_glance namespace is reserved"),
+    cfg.BoolOpt('manage_locations',
+                default=False,
+                help=('Is show_multiple_locations enabled in glance. '
+                      'Note that at least one http store must be enabled as '
+                      'well, because we use that location scheme to test.')),
 ]
 
 network_group = cfg.OptGroup(name='network',
