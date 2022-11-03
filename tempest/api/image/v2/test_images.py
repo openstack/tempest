@@ -870,9 +870,44 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
         return image
 
-    @decorators.idempotent_id('f67495c6-518a-4397-938e-dc7b135698a8')
-    def test_set_multiple_locations(self):
-        self._check_set_multiple_locations()
+    @decorators.idempotent_id('bf6e0009-c039-4884-b498-db074caadb10')
+    def test_replace_location(self):
+        image = self._check_set_multiple_locations()
+        original_locs = image['locations']
+
+        # Replacing with the exact thing should work
+        self.client.update_image(image['id'], [
+            dict(replace='/locations', value=image['locations'])])
+
+        # Changing metadata on a location should work
+        original_locs[0]['metadata']['date'] = '2015-10-15'
+        self.client.update_image(image['id'], [
+            dict(replace='/locations', value=original_locs)])
+
+        # Deleting a location should not work
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.client.update_image,
+            image['id'], [
+                dict(replace='/locations', value=[original_locs[0]])])
+
+        # Replacing a location (with a different URL) should not work
+        new_loc = {'metadata': original_locs[1]['metadata'],
+                   'url': '%s#new3' % CONF.image.http_image}
+        self.assertRaises(
+            lib_exc.BadRequest,
+            self.client.update_image,
+            image['id'], [
+                dict(replace='/locations', value=[original_locs[0],
+                                                  new_loc])])
+
+        # Make sure the locations haven't changed with the above failures,
+        # but the metadata we updated should be changed.
+        image = self.client.show_image(image['id'])
+        self.assertEqual(2, len(image['locations']),
+                         'Image should have two locations but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(original_locs, image['locations'])
 
     @decorators.idempotent_id('8a648de4-b745-4c28-a7b5-20de1c3da4d2')
     def test_delete_locations(self):
