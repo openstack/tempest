@@ -207,21 +207,21 @@ should only be run on the unit test directory. The default value of ``test_path`
 is ``test_path=./tempest/test_discover`` which will only run test discover on the
 Tempest suite.
 
-Alternatively, there are the py27 and py36 tox jobs which will run the unit
-tests with the corresponding version of python.
+Alternatively, there is the py39 tox job which will run the unit tests with
+the corresponding version of python.
 
 One common activity is to just run a single test, you can do this with tox
-simply by specifying to just run py27 or py36 tests against a single test::
+simply by specifying to just run py39 tests against a single test::
 
-    $ tox -e py36 -- -n tempest.tests.test_microversions.TestMicroversionsTestsClass.test_config_version_none_23
+    $ tox -e py39 -- -n tempest.tests.test_microversions.TestMicroversionsTestsClass.test_config_version_none_23
 
 Or all tests in the test_microversions.py file::
 
-    $ tox -e py36 -- -n tempest.tests.test_microversions
+    $ tox -e py39 -- -n tempest.tests.test_microversions
 
 You may also use regular expressions to run any matching tests::
 
-    $ tox -e py36 -- test_microversions
+    $ tox -e py39 -- test_microversions
 
 Additionally, when running a single test, or test-file, the ``-n/--no-discover``
 argument is no longer required, however it may perform faster if included.
