@@ -190,7 +190,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 server, self.os_primary, tenant_network,
                 True, self.validation_resources, "SSHABLE", True)
         else:
-            waiters.wait_for_server_status(self.client, self.server['id'],
+            waiters.wait_for_server_status(self.client, server['id'],
                                            'ACTIVE')
 
         msg = ('Server was not rebuilt to the original image. '
