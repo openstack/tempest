@@ -352,6 +352,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
                     except Exception:
                         LOG.exception('Server %s failed to delete in time',
                                       server['id'])
+        if servers and not multiple_create_request:
+            body = rest_client.ResponseBody(body.response, servers[0])
         return body, servers
 
     return body, created_servers
