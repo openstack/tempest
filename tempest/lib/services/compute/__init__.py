@@ -52,6 +52,8 @@ from tempest.lib.services.compute.security_group_rules_client import \
     SecurityGroupRulesClient
 from tempest.lib.services.compute.security_groups_client import \
     SecurityGroupsClient
+from tempest.lib.services.compute.server_external_events_client \
+    import ServerExternalEventsClient
 from tempest.lib.services.compute.server_groups_client import \
     ServerGroupsClient
 from tempest.lib.services.compute.servers_client import ServersClient
@@ -75,6 +77,6 @@ __all__ = ['AgentsClient', 'AggregatesClient', 'AssistedVolumeSnapshotsClient',
            'MigrationsClient', 'NetworksClient', 'QuotaClassesClient',
            'QuotasClient', 'SecurityGroupDefaultRulesClient',
            'SecurityGroupRulesClient', 'SecurityGroupsClient',
-           'ServerGroupsClient', 'ServersClient', 'ServicesClient',
-           'SnapshotsClient', 'TenantNetworksClient', 'TenantUsagesClient',
-           'VersionsClient', 'VolumesClient']
+           'ServerExternalEventsClient', 'ServerGroupsClient', 'ServersClient',
+           'ServicesClient', 'SnapshotsClient', 'TenantNetworksClient',
+           'TenantUsagesClient', 'VersionsClient', 'VolumesClient']

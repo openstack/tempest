@@ -144,6 +144,8 @@ class Manager(clients.ServiceClients):
         self.tenant_networks_client = self.compute.TenantNetworksClient()
         self.assisted_volume_snapshots_client = (
             self.compute.AssistedVolumeSnapshotsClient())
+        self.server_external_events_client = (
+            self.compute.ServerExternalEventsClient())
 
         # NOTE: The following client needs special timeout values because
         # the API is a proxy for the other component.
