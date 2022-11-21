@@ -86,6 +86,15 @@
         # Enbale horizon so that we can run horizon test.
         horizon: true
 
+# TODO(gmann): As per the 2023.1 testing runtime, we need to run at least
+# one job on Focal. This job can be removed as per the future testing
+# runtime (whenever we drop the Ubuntu Focal testing).
+- job:
+    name: tempest-full-ubuntu-focal
+    description: This is tempest-full python3 job on Ubuntu Focal(20.04)
+    parent: tempest-full-py3
+    nodeset: openstack-single-node-focal
+
 - job:
     name: tempest-full-centos-9-stream
     parent: tempest-full-py3
@@ -225,22 +234,11 @@
         TEMPEST_PLACEMENT_MIN_MICROVERSION: 'latest'
 
 - job:
-    name: tempest-multinode-full
-    parent: tempest-multinode-full-base
-    nodeset: openstack-two-node-focal
-    # This job runs on Focal from stable/victoria on.
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri)).*$
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
-
-- job:
     name: tempest-multinode-full-py3
-    parent: tempest-multinode-full
+    parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-jammy
+    # This job runs on ubuntu Jammy and after stable/zed.
+    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga|zed)).*$
     vars:
       devstack_localrc:
         USE_PYTHON3: true

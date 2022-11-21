@@ -2,41 +2,49 @@
 - job:
     name: tempest-full-zed
     parent: tempest-full-py3
+    nodeset: openstack-single-node-focal
     override-checkout: stable/zed
 
 - job:
     name: tempest-full-yoga
     parent: tempest-full-py3
+    nodeset: openstack-single-node-focal
     override-checkout: stable/yoga
 
 - job:
     name: tempest-full-xena
     parent: tempest-full-py3
+    nodeset: openstack-single-node-focal
     override-checkout: stable/xena
 
 - job:
     name: tempest-full-wallaby-py3
     parent: tempest-full-py3
+    nodeset: openstack-single-node-focal
     override-checkout: stable/wallaby
 
 - job:
     name: tempest-slow-zed
     parent: tempest-slow-py3
+    nodeset: openstack-two-node-focal
     override-checkout: stable/zed
 
 - job:
     name: tempest-slow-yoga
     parent: tempest-slow-py3
+    nodeset: openstack-two-node-focal
     override-checkout: stable/yoga
 
 - job:
     name: tempest-slow-xena
     parent: tempest-slow-py3
+    nodeset: openstack-two-node-focal
     override-checkout: stable/xena
 
 - job:
     name: tempest-slow-wallaby
     parent: tempest-slow-py3
+    nodeset: openstack-two-node-focal
     override-checkout: stable/wallaby
 
 - job:
@@ -93,6 +101,51 @@
         c-bak: false
         neutron-placement: true
         neutron-qos: true
+
+- job:
+    name: tempest-multinode-full-py3
+    parent: tempest-multinode-full
+    nodeset: openstack-two-node-focal
+    # This job runs on Focal and supposed to run until stable/zed.
+    branches:
+      - stable/stein
+      - stable/train
+      - stable/ussuri
+      - stable/victoria
+      - stable/wallaby
+      - stable/xena
+      - stable/yoga
+      - stable/zed
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: true
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        neutron-trunk: true
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: true
+
+- job:
+    name: tempest-multinode-full
+    parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-focal
+    # This job runs on Focal and on python2. This is for stable/victoria to stable/zed.
+    branches:
+      - stable/victoria
+      - stable/wallaby
+      - stable/xena
+      - stable/yoga
+      - stable/zed
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: False
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: False
 
 - job:
     name: tempest-multinode-full
