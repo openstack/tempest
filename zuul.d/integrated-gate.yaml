@@ -344,6 +344,30 @@
         # ENABLE_FILE_INJECTION: true
         DATABASE_TYPE: postgresql
 
+- job:
+    name: tempest-full-enforce-scope-new-defaults
+    parent: tempest-full-py3
+    description: |
+      This job runs the Tempest tests with scope and new defaults enabled.
+    # TODO: remove this once https://review.opendev.org/c/openstack/neutron-lib/+/864213
+    # fix is released in neutron-lib
+    required-projects:
+      - openstack/neutron-lib
+      - openstack/neutron
+    vars:
+      devstack_localrc:
+        # Enabeling the scope and new defaults for services.
+        # NOTE: (gmann) We need to keep keystone scope check disable as
+        # services (except ironic) does not support the system scope and
+        # they need keystone to continue working with project scope. Until
+        # Keystone policies are changed to work for both system as well as
+        # for project scoped, we need to keep scope check disable for
+        # keystone.
+        NOVA_ENFORCE_SCOPE: true
+        CINDER_ENFORCE_SCOPE: true
+        GLANCE_ENFORCE_SCOPE: true
+        NEUTRON_ENFORCE_SCOPE: true
+
 - project-template:
     name: integrated-gate-networking
     description: |
