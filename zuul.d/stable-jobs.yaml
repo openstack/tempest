@@ -105,12 +105,30 @@
 - job:
     name: tempest-multinode-full-py3
     parent: tempest-multinode-full
-    nodeset: openstack-two-node-focal
-    # This job runs on Focal and supposed to run until stable/zed.
+    nodeset: openstack-two-node-bionic
+    # This job runs on Bionic.
     branches:
       - stable/stein
       - stable/train
       - stable/ussuri
+    vars:
+      devstack_localrc:
+        USE_PYTHON3: true
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        neutron-trunk: true
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: true
+
+- job:
+    name: tempest-multinode-full-py3
+    parent: tempest-multinode-full
+    nodeset: openstack-two-node-focal
+    # This job runs on Focal and supposed to run until stable/zed.
+    branches:
       - stable/victoria
       - stable/wallaby
       - stable/xena
