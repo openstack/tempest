@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The ``server_external_events`` tempest client for compute
+    Server External Events API is implemented in this release.
