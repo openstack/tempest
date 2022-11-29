@@ -324,6 +324,7 @@
     parent: devstack-tempest
     description: |
       Integration testing for a FIPS enabled Centos 9 system
+    timeout: 10800
     nodeset: devstack-single-node-centos-9-stream
     pre-run: playbooks/enable-fips.yaml
     vars:
