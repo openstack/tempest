@@ -1,0 +1,12 @@
+---
+prelude: |
+    This is an intermediate release during the 2023.1 development cycle to
+    mark the end of support for EM Wallaby release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * Zed
+    * Yoga
+    * Xena
+
+    Current development of Tempest is for OpenStack 2023.1 development
+    cycle.

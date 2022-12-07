@@ -18,12 +18,6 @@
     override-checkout: stable/xena
 
 - job:
-    name: tempest-full-wallaby-py3
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/wallaby
-
-- job:
     name: tempest-slow-zed
     parent: tempest-slow-py3
     nodeset: openstack-two-node-focal
@@ -40,12 +34,6 @@
     parent: tempest-slow-py3
     nodeset: openstack-two-node-focal
     override-checkout: stable/xena
-
-- job:
-    name: tempest-slow-wallaby
-    parent: tempest-slow-py3
-    nodeset: openstack-two-node-focal
-    override-checkout: stable/wallaby
 
 - job:
     name: tempest-full-py3
