@@ -103,6 +103,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-enforce-scope-new-defaults:
+            irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
             # TODO(kopecmartin): make it voting once the below bug is fixed
             # https://bugs.launchpad.net/devstack-plugin-ceph/+bug/1975648
@@ -149,6 +151,8 @@
         - tempest-ipv6-only:
             irrelevant-files: *tempest-irrelevant-files-3
         - tempest-multinode-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-enforce-scope-new-defaults:
             irrelevant-files: *tempest-irrelevant-files
         #- devstack-plugin-ceph-tempest-py3:
         #    irrelevant-files: *tempest-irrelevant-files
