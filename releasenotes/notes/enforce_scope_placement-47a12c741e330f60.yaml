@@ -1,0 +1,4 @@
+---
+prelude: >
+    Adding placement service for config options ``enforce_scope`` so that
+    we can switch the scope and new defaults enforcement for placement service.

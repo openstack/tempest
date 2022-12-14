@@ -1280,6 +1280,13 @@ EnforceScopeGroup = [
                      'enabled when keystone.conf: [oslo_policy]. '
                      'enforce_new_defaults and keystone.conf: [oslo_policy]. '
                      'enforce_scope options are enabled in keystone conf.'),
+    cfg.BoolOpt('placement',
+                default=False,
+                help='Does the placement service API policies enforce scope '
+                     'and new defaults? This configuration value should be '
+                     'enabled when placement.conf: [oslo_policy]. '
+                     'enforce_new_defaults and nova.conf: [oslo_policy]. '
+                     'enforce_scope options are enabled in placement conf.'),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
