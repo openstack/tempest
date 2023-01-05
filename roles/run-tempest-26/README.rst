@@ -21,7 +21,7 @@ variable (through the `register` statement).
    A regular expression used to select the tests.
 
    It works only when used with some specific tox environments
-   ('all', 'all-plugin'.)
+   ('all', 'all-site-packages')
 
    In the following example only api scenario and third party tests
    will be executed.
@@ -47,7 +47,7 @@ variable (through the `register` statement).
    A regular expression used to skip the tests.
 
    It works only when used with some specific tox environments
-   ('all', 'all-plugin'.)
+   ('all', 'all-site-packages').
 
        ::
            vars:

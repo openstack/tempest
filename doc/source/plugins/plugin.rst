@@ -345,6 +345,8 @@ isolate the Tempest install from the rest of your system so just installing the
 plugin package on your system and then running Tempest inside a venv will not
 work.
 
-Tempest also exposes a tox job, all-plugin, which will setup a tox virtualenv
-with system site-packages enabled. This will let you leverage tox without
-requiring to manually install plugins in the tox venv before running tests.
+For example, you can use tox to install and run tests from a tempest plugin like
+this::
+
+    [~/tempest] $ tox -e venv-tempest -- pip install (path to the plugin directory)
+    [~/tempest] $ tox -e all
