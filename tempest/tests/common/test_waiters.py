@@ -21,6 +21,7 @@ from tempest.common import waiters
 from tempest import exceptions
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services.compute import servers_client
+from tempest.lib.services.network import ports_client
 from tempest.lib.services.volume.v2 import volumes_client
 from tempest.tests import base
 import tempest.tests.utils as utils
@@ -610,6 +611,48 @@ class TestVolumeWaiters(base.TestCase):
             mock_ssh_client,
             .1
         )
+
+
+class TestPortCreationWaiter(base.TestCase):
+    def test_wait_for_port_status(self):
+        """Test that the waiter replies with the port before the timeout"""
+
+        def client_response(self):
+            """Mock client response, replies with the final status after
+            2 calls
+            """
+            if mock_client.call_count >= 2:
+                return mock_port
+            else:
+                mock_client.call_count += 1
+                return mock_port_build
+
+        mock_port = {'port': {'id': '1234', 'status': "DOWN"}}
+        mock_port_build = {'port': {'id': '1234', 'status': "BUILD"}}
+        mock_client = mock.Mock(
+            spec=ports_client.PortsClient,
+            build_timeout=30, build_interval=1,
+            show_port=client_response)
+        fake_port_id = "1234"
+        fake_status = "DOWN"
+        self.assertEqual(mock_port, waiters.wait_for_port_status(
+            mock_client, fake_port_id, fake_status))
+
+    def test_wait_for_port_status_timeout(self):
+        """Negative test - checking that a timeout
+        presented by a small 'fake_timeout' and a static status of
+        'BUILD' in the mock will raise a timeout exception
+        """
+        mock_port = {'port': {'id': '1234', 'status': "BUILD"}}
+        mock_client = mock.Mock(
+            spec=ports_client.PortsClient,
+            build_timeout=2, build_interval=1,
+            show_port=lambda id: mock_port)
+        fake_port_id = "1234"
+        fake_status = "ACTIVE"
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_port_status, mock_client,
+                          fake_port_id, fake_status)
 
 
 class TestServerFloatingIPWaiters(base.TestCase):

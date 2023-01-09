@@ -604,6 +604,22 @@ def wait_for_ping(server_ip, timeout=30, interval=1):
     raise lib_exc.TimeoutException()
 
 
+def wait_for_port_status(client, port_id, status):
+    """Wait for a port reach a certain status : ["BUILD" | "DOWN" | "ACTIVE"]
+    :param client: The network client to use when querying the port's
+    status
+    :param status: A string to compare the current port status-to.
+    :param port_id: The uuid of the port we would like queried for status.
+    """
+    start_time = time.time()
+    while (time.time() - start_time <= client.build_timeout):
+        result = client.show_port(port_id)
+        if result['port']['status'].lower() == status.lower():
+            return result
+        time.sleep(client.build_interval)
+    raise lib_exc.TimeoutException
+
+
 def wait_for_ssh(ssh_client, timeout=30):
     """Waits for SSH connection to become usable"""
     start_time = int(time.time())

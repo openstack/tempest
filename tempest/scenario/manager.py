@@ -145,6 +145,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             - 'binding:vnic_type' - defaults to CONF.network.port_vnic_type
             - 'binding:profile' - defaults to CONF.network.port_profile
         """
+
         if not client:
             client = self.ports_client
         name = data_utils.rand_name(
@@ -158,10 +159,12 @@ class ScenarioTest(tempest.test.BaseTestCase):
             network_id=network_id,
             **kwargs)
         self.assertIsNotNone(result, 'Unable to allocate port')
-        port = result['port']
+        port_id = result['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        client.delete_port, port['id'])
-        return port
+                        client.delete_port, port_id)
+        port = waiters.wait_for_port_status(
+            client=client, port_id=port_id, status="DOWN")
+        return port["port"]
 
     def create_keypair(self, client=None, **kwargs):
         """Creates keypair
