@@ -19,6 +19,7 @@ from tempest import config
 from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+from tempest.lib.decorators import cleanup_order
 import tempest.test
 
 CONF = config.CONF
@@ -94,8 +95,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.build_interval = CONF.volume.build_interval
         cls.build_timeout = CONF.volume.build_timeout
 
-    @classmethod
-    def create_volume(cls, wait_until='available', **kwargs):
+    @cleanup_order
+    def create_volume(self, wait_until='available', **kwargs):
         """Wrapper utility that returns a test volume.
 
            :param wait_until: wait till volume status, None means no wait.
@@ -104,12 +105,12 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             kwargs['size'] = CONF.volume.volume_size
 
         if 'imageRef' in kwargs:
-            image = cls.images_client.show_image(kwargs['imageRef'])
+            image = self.images_client.show_image(kwargs['imageRef'])
             min_disk = image['min_disk']
             kwargs['size'] = max(kwargs['size'], min_disk)
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + '-Volume')
+            name = data_utils.rand_name(self.__name__ + '-Volume')
             kwargs['name'] = name
 
         if CONF.volume.volume_type and 'volume_type' not in kwargs:
@@ -123,27 +124,26 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             kwargs.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
 
-        volume = cls.volumes_client.create_volume(**kwargs)['volume']
-        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
-                                    cls.delete_volume, cls.volumes_client,
-                                    volume['id'])
+        volume = self.volumes_client.create_volume(**kwargs)['volume']
+        self.cleanup(test_utils.call_and_ignore_notfound_exc,
+                     self.delete_volume, self.volumes_client, volume['id'])
         if wait_until:
-            waiters.wait_for_volume_resource_status(cls.volumes_client,
+            waiters.wait_for_volume_resource_status(self.volumes_client,
                                                     volume['id'], wait_until)
         return volume
 
-    @classmethod
-    def create_snapshot(cls, volume_id=1, **kwargs):
+    @cleanup_order
+    def create_snapshot(self, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + '-Snapshot')
+            name = data_utils.rand_name(self.__name__ + '-Snapshot')
             kwargs['name'] = name
 
-        snapshot = cls.snapshots_client.create_snapshot(
+        snapshot = self.snapshots_client.create_snapshot(
             volume_id=volume_id, **kwargs)['snapshot']
-        cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
-                                    cls.delete_snapshot, snapshot['id'])
-        waiters.wait_for_volume_resource_status(cls.snapshots_client,
+        self.cleanup(test_utils.call_and_ignore_notfound_exc,
+                     self.delete_snapshot, snapshot['id'])
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
                                                 snapshot['id'], 'available')
         return snapshot
 
@@ -175,11 +175,11 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         client.delete_volume(volume_id)
         client.wait_for_resource_deletion(volume_id)
 
-    @classmethod
-    def delete_snapshot(cls, snapshot_id, snapshots_client=None):
+    @cleanup_order
+    def delete_snapshot(self, snapshot_id, snapshots_client=None):
         """Delete snapshot by the given client"""
         if snapshots_client is None:
-            snapshots_client = cls.snapshots_client
+            snapshots_client = self.snapshots_client
         snapshots_client.delete_snapshot(snapshot_id)
         snapshots_client.wait_for_resource_deletion(snapshot_id)
 
@@ -278,23 +278,23 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.admin_scheduler_stats_client = \
             cls.os_admin.volume_scheduler_stats_client_latest
 
-    @classmethod
-    def create_test_qos_specs(cls, name=None, consumer=None, **kwargs):
+    @cleanup_order
+    def create_test_qos_specs(self, name=None, consumer=None, **kwargs):
         """create a test Qos-Specs."""
-        name = name or data_utils.rand_name(cls.__name__ + '-QoS')
+        name = name or data_utils.rand_name(self.__name__ + '-QoS')
         consumer = consumer or 'front-end'
-        qos_specs = cls.admin_volume_qos_client.create_qos(
+        qos_specs = self.admin_volume_qos_client.create_qos(
             name=name, consumer=consumer, **kwargs)['qos_specs']
-        cls.addClassResourceCleanup(cls.clear_qos_spec, qos_specs['id'])
+        self.cleanup(self.clear_qos_spec, qos_specs['id'])
         return qos_specs
 
-    @classmethod
-    def create_volume_type(cls, name=None, **kwargs):
+    @cleanup_order
+    def create_volume_type(self, name=None, **kwargs):
         """Create a test volume-type"""
-        name = name or data_utils.rand_name(cls.__name__ + '-volume-type')
-        volume_type = cls.admin_volume_types_client.create_volume_type(
+        name = name or data_utils.rand_name(self.__name__ + '-volume-type')
+        volume_type = self.admin_volume_types_client.create_volume_type(
             name=name, **kwargs)['volume_type']
-        cls.addClassResourceCleanup(cls.clear_volume_type, volume_type['id'])
+        self.cleanup(self.clear_volume_type, volume_type['id'])
         return volume_type
 
     def create_encryption_type(self, type_id=None, provider=None,
@@ -328,19 +328,19 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                         group_type['id'])
         return group_type
 
-    @classmethod
-    def clear_qos_spec(cls, qos_id):
+    @cleanup_order
+    def clear_qos_spec(self, qos_id):
         test_utils.call_and_ignore_notfound_exc(
-            cls.admin_volume_qos_client.delete_qos, qos_id)
+            self.admin_volume_qos_client.delete_qos, qos_id)
 
         test_utils.call_and_ignore_notfound_exc(
-            cls.admin_volume_qos_client.wait_for_resource_deletion, qos_id)
+            self.admin_volume_qos_client.wait_for_resource_deletion, qos_id)
 
-    @classmethod
-    def clear_volume_type(cls, vol_type_id):
+    @cleanup_order
+    def clear_volume_type(self, vol_type_id):
         test_utils.call_and_ignore_notfound_exc(
-            cls.admin_volume_types_client.delete_volume_type, vol_type_id)
+            self.admin_volume_types_client.delete_volume_type, vol_type_id)
 
         test_utils.call_and_ignore_notfound_exc(
-            cls.admin_volume_types_client.wait_for_resource_deletion,
+            self.admin_volume_types_client.wait_for_resource_deletion,
             vol_type_id)

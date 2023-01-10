@@ -108,11 +108,17 @@ class GroupsTest(base.BaseVolumeAdminTest):
         grp = self.create_group(group_type=group_type['id'],
                                 volume_types=[volume_type['id']])
 
-        # Create volumes
+        # Create volume is instance level, can not be deleted before group.
+        # Volume delete handled by delete_group method, cleanup method.
         grp_vols = []
         for _ in range(2):
-            vol = self.create_volume(volume_type=volume_type['id'],
-                                     group_id=grp['id'])
+            params = {'name': data_utils.rand_name("volume"),
+                      'volume_type': volume_type['id'],
+                      'group_id': grp['id'],
+                      'size': CONF.volume.volume_size}
+            vol = self.volumes_client.create_volume(**params)['volume']
+            waiters.wait_for_volume_resource_status(
+                self.volumes_client, vol['id'], 'available')
             grp_vols.append(vol)
         vol2 = grp_vols[1]
 
@@ -171,8 +177,15 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
         grp = self.create_group(group_type=group_type['id'],
                                 volume_types=[volume_type['id']])
 
-        # Create volume
-        self.create_volume(volume_type=volume_type['id'], group_id=grp['id'])
+        # Create volume is instance level, can not be deleted before group.
+        # Volume delete handled by delete_group method, cleanup method.
+        params = {'name': data_utils.rand_name("volume"),
+                  'volume_type': volume_type['id'],
+                  'group_id': grp['id'],
+                  'size': CONF.volume.volume_size}
+        vol = self.volumes_client.create_volume(**params)['volume']
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, vol['id'], 'available')
 
         # Create Group from Group
         grp_name2 = data_utils.rand_name('Group_from_grp')

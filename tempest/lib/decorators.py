@@ -13,6 +13,7 @@
 # under the License.
 
 import functools
+from types import MethodType
 import uuid
 
 from oslo_log import log as logging
@@ -189,3 +190,34 @@ def unstable_test(*args, **kwargs):
                     raise e
         return inner
     return decor
+
+
+class cleanup_order:
+    """Descriptor for base create function to cleanup based on caller.
+
+    There are functions created as classmethod and the cleanup
+    was managed by the class with addClassResourceCleanup,
+    In case the function called from a class level (resource_setup) its ok
+    But when it is called from testcase level there is no reson to delete the
+    resource when class tears down.
+
+    The testcase results will not reflect the resources cleanup because test
+    may pass but the class cleanup fails. if the resources were created by
+    testcase its better to let the testcase delete them and report failure
+    part of the testcase
+    """
+
+    def __init__(self, func):
+        self.func = func
+        functools.update_wrapper(self, func)
+
+    def __get__(self, instance, owner):
+        if instance:
+            # instance is the caller
+            instance.cleanup = instance.addCleanup
+            instance.__name__ = owner.__name__
+            return MethodType(self.func, instance)
+        elif owner:
+            # class is the caller
+            owner.cleanup = owner.addClassResourceCleanup
+            return MethodType(self.func, owner)
