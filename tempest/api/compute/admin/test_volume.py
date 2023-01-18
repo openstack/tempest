@@ -72,6 +72,12 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
 class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
     """Test attaching scsi volume to server"""
 
+    # NOTE(gibi): https://bugs.launchpad.net/nova/+bug/2002951/comments/5 shows
+    # that calling _create_image_with_custom_property can cause excessive
+    # memory usage in the test executor as it downloads a glance image in
+    # memory. This is causing gate failures so the test is disabled. One
+    # potential fix is to do a chunked data download / upload loop instead.
+    @decorators.skip_because(bug="2002951", condition=True)
     @decorators.idempotent_id('777e468f-17ca-4da4-b93d-b7dbf56c0494')
     def test_attach_scsi_disk_with_config_drive(self):
         """Test the attach/detach volume with config drive/scsi disk
