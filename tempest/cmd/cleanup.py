@@ -90,7 +90,6 @@ from oslo_serialization import jsonutils as json
 from tempest import clients
 from tempest.cmd import cleanup_service
 from tempest.common import credentials_factory as credentials
-from tempest.common import identity
 from tempest import config
 from tempest.lib import exceptions
 
@@ -139,11 +138,6 @@ class TempestCleanup(command.Command):
             credentials.get_configured_admin_credentials())
         self.dry_run_data = {}
         self.json_data = {}
-
-        self.admin_id = ""
-        self.admin_role_id = ""
-        self.admin_project_id = ""
-        self._init_admin_ids()
 
         # available services
         self.project_associated_services = (
@@ -226,26 +220,6 @@ class TempestCleanup(command.Command):
         for service in self.project_associated_services:
             svc = service(self.admin_mgr, **kwargs)
             svc.run()
-
-    def _init_admin_ids(self):
-        pr_cl = self.admin_mgr.projects_client
-        rl_cl = self.admin_mgr.roles_v3_client
-        rla_cl = self.admin_mgr.role_assignments_client
-        us_cl = self.admin_mgr.users_v3_client
-
-        project = identity.get_project_by_name(pr_cl,
-                                               CONF.auth.admin_project_name)
-        self.admin_project_id = project['id']
-        user = identity.get_user_by_project(us_cl, rla_cl,
-                                            self.admin_project_id,
-                                            CONF.auth.admin_username)
-        self.admin_id = user['id']
-
-        roles = rl_cl.list_roles()['roles']
-        for role in roles:
-            if role['name'] == CONF.identity.admin_role:
-                self.admin_role_id = role['id']
-                break
 
     def get_parser(self, prog_name):
         parser = super(TempestCleanup, self).get_parser(prog_name)
