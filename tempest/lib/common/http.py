@@ -60,7 +60,12 @@ class ClosingProxyHttp(urllib3.ProxyManager):
             retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingProxyHttp, self).request(method, url, retries=retry,
                                                   *args, **new_kwargs)
-        return Response(r), r.data
+        if not kwargs.get('preload_content', True):
+            # This means we asked urllib3 for streaming content, so we
+            # need to return the raw response and not read any data yet
+            return r, b''
+        else:
+            return Response(r), r.data
 
 
 class ClosingHttp(urllib3.poolmanager.PoolManager):
@@ -109,4 +114,9 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
             retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingHttp, self).request(method, url, retries=retry,
                                              *args, **new_kwargs)
-        return Response(r), r.data
+        if not kwargs.get('preload_content', True):
+            # This means we asked urllib3 for streaming content, so we
+            # need to return the raw response and not read any data yet
+            return r, b''
+        else:
+            return Response(r), r.data

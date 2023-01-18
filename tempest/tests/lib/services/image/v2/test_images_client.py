@@ -13,6 +13,9 @@
 #    under the License.
 
 import io
+from unittest import mock
+
+import fixtures
 
 from tempest.lib.common.utils import data_utils
 from tempest.lib.services.image.v2 import images_client
@@ -238,6 +241,21 @@ class TestImagesClient(base.BaseServiceTest):
             image_id=self.FAKE_CREATE_UPDATE_SHOW_IMAGE["id"],
             headers={'Content-Type': 'application/octet-stream'},
             status=200)
+
+    def test_show_image_file_chunked(self):
+        # Since chunked=True on a GET should pass the response object
+        # basically untouched, we use a mock here so we get some assurances.
+        http_response = mock.MagicMock()
+        http_response.status = 200
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.rest_client.RestClient.get',
+            return_value=(http_response, b'')))
+        resp = self.client.show_image_file(
+            self.FAKE_CREATE_UPDATE_SHOW_IMAGE['id'],
+            chunked=True)
+        self.assertEqual(http_response, resp)
+        resp.__contains__.assert_not_called()
+        resp.__getitem__.assert_not_called()
 
     def test_add_image_tag(self):
         self.check_service_client_function(

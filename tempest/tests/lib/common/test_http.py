@@ -149,6 +149,31 @@ class TestClosingHttp(base.TestCase):
              'xtra key': 'Xtra Value'},
             response)
 
+    def test_request_preload(self):
+        # Given
+        connection = self.closing_http()
+        headers = {'Xtra Key': 'Xtra Value'}
+        http_response = urllib3.HTTPResponse(headers=headers)
+        request = self.patch('urllib3.PoolManager.request',
+                             return_value=http_response)
+        retry = self.patch('urllib3.util.Retry')
+
+        # When
+        response, _ = connection.request(
+            method=REQUEST_METHOD,
+            url=REQUEST_URL,
+            headers=headers,
+            preload_content=False)
+
+        # Then
+        request.assert_called_once_with(
+            REQUEST_METHOD,
+            REQUEST_URL,
+            headers=dict(headers, connection='close'),
+            preload_content=False,
+            retries=retry(raise_on_redirect=False, redirect=5))
+        self.assertIsInstance(response, urllib3.HTTPResponse)
+
 
 class TestClosingProxyHttp(TestClosingHttp):
 

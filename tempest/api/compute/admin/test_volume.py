@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import io
-
 from tempest.api.compute import base
 from tempest.common import waiters
 from tempest import config
@@ -49,9 +47,11 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
         :param return image_id: The UUID of the newly created image.
         """
         image = self.admin_image_client.show_image(CONF.compute.image_ref)
-        image_data = self.admin_image_client.show_image_file(
-            CONF.compute.image_ref).data
-        image_file = io.BytesIO(image_data)
+        # NOTE(danms): We need to stream this, so chunked=True means we get
+        # back a urllib3.HTTPResponse and have to carefully pass it to
+        # store_image_file() to upload it in pieces.
+        image_data_resp = self.admin_image_client.show_image_file(
+            CONF.compute.image_ref, chunked=True)
         create_dict = {
             'container_format': image['container_format'],
             'disk_format': image['disk_format'],
@@ -60,24 +60,22 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
             'visibility': 'public',
         }
         create_dict.update(kwargs)
-        new_image = self.admin_image_client.create_image(**create_dict)
-        self.addCleanup(self.admin_image_client.wait_for_resource_deletion,
-                        new_image['id'])
-        self.addCleanup(self.admin_image_client.delete_image, new_image['id'])
-        self.admin_image_client.store_image_file(new_image['id'], image_file)
-
+        try:
+            new_image = self.admin_image_client.create_image(**create_dict)
+            self.addCleanup(self.admin_image_client.wait_for_resource_deletion,
+                            new_image['id'])
+            self.addCleanup(
+                self.admin_image_client.delete_image, new_image['id'])
+            self.admin_image_client.store_image_file(new_image['id'],
+                                                     image_data_resp)
+        finally:
+            image_data_resp.release_conn()
         return new_image['id']
 
 
 class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
     """Test attaching scsi volume to server"""
 
-    # NOTE(gibi): https://bugs.launchpad.net/nova/+bug/2002951/comments/5 shows
-    # that calling _create_image_with_custom_property can cause excessive
-    # memory usage in the test executor as it downloads a glance image in
-    # memory. This is causing gate failures so the test is disabled. One
-    # potential fix is to do a chunked data download / upload loop instead.
-    @decorators.skip_because(bug="2002951", condition=True)
     @decorators.idempotent_id('777e468f-17ca-4da4-b93d-b7dbf56c0494')
     def test_attach_scsi_disk_with_config_drive(self):
         """Test the attach/detach volume with config drive/scsi disk
