@@ -163,7 +163,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.network.PortsClient(),
                     os.network.SecurityGroupsClient())
 
-    def _create_creds(self, admin=False, roles=None, scope='project'):
+    def _create_creds(self, admin=False, roles=None, scope='project',
+                      project_id=None):
         """Create credentials with random name.
 
         Creates user and role assignments on a project, domain, or system. When
@@ -177,6 +178,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         :type roles: list
         :param str scope: The scope for the role assignment, may be one of
                           'project', 'domain', or 'system'.
+        :param str project_id: The project id of already created project
+                               for credentials under same project.
         :return: Readonly Credentials with network resources
         :raises: Exception if scope is invalid
         """
@@ -190,12 +193,20 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             'system': None
         }
         if scope == 'project':
-            project_name = data_utils.rand_name(
-                root, prefix=self.resource_prefix)
-            project_desc = project_name + '-desc'
-            project = self.creds_client.create_project(
-                name=project_name, description=project_desc)
-
+            if not project_id:
+                project_name = data_utils.rand_name(
+                    root, prefix=self.resource_prefix)
+                project_desc = project_name + '-desc'
+                project = self.creds_client.create_project(
+                    name=project_name, description=project_desc)
+            else:
+                # NOTE(gmann) This is the case where creds are requested
+                # from the existing creds within same project. We should
+                # not create the new project in this case.
+                project = self.creds_client.show_project(project_id)
+                project_name = project['name']
+                LOG.info("Using the existing project %s for scope %s and "
+                         "roles: %s", project['id'], scope, roles)
             # NOTE(andreaf) User and project can be distinguished from the
             # context, having the same ID in both makes it easier to match them
             # and debug.
@@ -372,48 +383,78 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.routers_admin_client.add_router_interface(router_id,
                                                        subnet_id=subnet_id)
 
-    def get_credentials(self, credential_type, scope=None):
-        if not scope and self._creds.get(str(credential_type)):
-            credentials = self._creds[str(credential_type)]
-        elif scope and (
-                self._creds.get("%s_%s" % (scope, str(credential_type)))):
-            credentials = self._creds["%s_%s" % (scope, str(credential_type))]
+    def _get_project_id(self, credential_type, scope):
+        same_creds = [['admin'], ['member'], ['reader']]
+        same_alt_creds = [['alt_admin'], ['alt_member'], ['alt_reader']]
+        search_in = []
+        if credential_type in same_creds:
+            search_in = same_creds
+        elif credential_type in same_alt_creds:
+            search_in = same_alt_creds
+        for cred in search_in:
+            found_cred = self._creds.get("%s_%s" % (scope, str(cred)))
+            if found_cred:
+                project_id = found_cred.get("%s_%s" % (scope, 'id'))
+                LOG.debug("Reusing existing project %s from creds: %s ",
+                          project_id, found_cred)
+                return project_id
+        return None
+
+    def get_credentials(self, credential_type, scope=None, by_role=False):
+        cred_prefix = ''
+        if by_role:
+            cred_prefix = 'role_'
+        if not scope and self._creds.get(
+                "%s%s" % (cred_prefix, str(credential_type))):
+            credentials = self._creds[
+                "%s%s" % (cred_prefix, str(credential_type))]
+        elif scope and (self._creds.get(
+                "%s%s_%s" % (cred_prefix, scope, str(credential_type)))):
+            credentials = self._creds[
+                "%s%s_%s" % (cred_prefix, scope, str(credential_type))]
         else:
             LOG.debug("Creating new dynamic creds for scope: %s and "
                       "credential_type: %s", scope, credential_type)
+            project_id = None
             if scope:
-                if credential_type in [['admin'], ['alt_admin']]:
+                if scope == 'project':
+                    project_id = self._get_project_id(
+                        credential_type, 'project')
+                if by_role:
                     credentials = self._create_creds(
-                        admin=True, scope=scope)
+                        roles=credential_type, scope=scope)
+                elif credential_type in [['admin'], ['alt_admin']]:
+                    credentials = self._create_creds(
+                        admin=True, scope=scope, project_id=project_id)
                 elif credential_type in [['alt_member'], ['alt_reader']]:
                     cred_type = credential_type[0][4:]
                     if isinstance(cred_type, str):
                         cred_type = [cred_type]
                     credentials = self._create_creds(
-                        roles=cred_type, scope=scope)
-                else:
+                        roles=cred_type, scope=scope, project_id=project_id)
+                elif credential_type in [['member'], ['reader']]:
                     credentials = self._create_creds(
-                        roles=credential_type, scope=scope)
+                        roles=credential_type, scope=scope,
+                        project_id=project_id)
             elif credential_type in ['primary', 'alt', 'admin']:
                 is_admin = (credential_type == 'admin')
                 credentials = self._create_creds(admin=is_admin)
             else:
                 credentials = self._create_creds(roles=credential_type)
             if scope:
-                self._creds["%s_%s" %
-                            (scope, str(credential_type))] = credentials
+                self._creds["%s%s_%s" % (
+                    cred_prefix, scope, str(credential_type))] = credentials
             else:
-                self._creds[str(credential_type)] = credentials
+                self._creds[
+                    "%s%s" % (cred_prefix, str(credential_type))] = credentials
             # Maintained until tests are ported
             LOG.info("Acquired dynamic creds:\n"
                      " credentials: %s", credentials)
             # NOTE(gmann): For 'domain' and 'system' scoped token, there is no
             # project_id so we are skipping the network creation for both
-            # scope. How these scoped token can create the network, Nova
-            # server or other project mapped resources is one of the open
-            # question and discussed a lot in Xena cycle PTG. Once we sort
-            # out that then if needed we can update the network creation here.
-            if (not scope or scope == 'project'):
+            # scope.
+            # We need to create nework resource once per project.
+            if (not project_id and (not scope or scope == 'project')):
                 if (self.neutron_available and self.create_networks):
                     network, subnet, router = self._create_network_resources(
                         credentials.tenant_id)
@@ -422,24 +463,22 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     LOG.info("Created isolated network resources for:\n"
                              " credentials: %s", credentials)
             else:
-                LOG.info("Network resources are not created for scope: %s",
-                         scope)
+                LOG.info("Network resources are not created for requested "
+                         "scope: %s and credentials: %s", scope, credentials)
         return credentials
 
     # TODO(gmann): Remove this method in favor of get_project_member_creds()
     # after the deprecation phase.
     def get_primary_creds(self):
-        return self.get_credentials('primary')
+        return self.get_project_member_creds()
 
-    # TODO(gmann): Remove this method in favor of get_project_admin_creds()
-    # after the deprecation phase.
     def get_admin_creds(self):
         return self.get_credentials('admin')
 
-    # TODO(gmann): Replace this method with more appropriate name.
-    # like get_project_alt_member_creds()
+    # TODO(gmann): Remove this method in favor of
+    # get_project_alt_member_creds() after the deprecation phase.
     def get_alt_creds(self):
-        return self.get_credentials('alt')
+        return self.get_project_alt_member_creds()
 
     def get_system_admin_creds(self):
         return self.get_credentials(['admin'], scope='system')
@@ -481,9 +520,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         roles = list(set(roles))
         # The roles list as a str will become the index as the dict key for
         # the created credentials set in the dynamic_creds dict.
-        creds_name = str(roles)
+        creds_name = "role_%s" % str(roles)
         if scope:
-            creds_name = "%s_%s" % (scope, str(roles))
+            creds_name = "role_%s_%s" % (scope, str(roles))
         exist_creds = self._creds.get(creds_name)
         # If force_new flag is True 2 cred sets with the same roles are needed
         # handle this by creating a separate index for old one to store it
@@ -492,7 +531,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             new_index = creds_name + '-' + str(len(self._creds))
             self._creds[new_index] = exist_creds
             del self._creds[creds_name]
-        return self.get_credentials(roles, scope=scope)
+        return self.get_credentials(roles, scope=scope, by_role=True)
 
     def _clear_isolated_router(self, router_id, router_name):
         client = self.routers_admin_client
@@ -553,31 +592,20 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         if not self._creds:
             return
         self._clear_isolated_net_resources()
+        project_ids = set()
         for creds in self._creds.values():
+            # NOTE(gmann): With new RBAC personas, we can have single project
+            # and multiple user created under it, to avoid conflict let's
+            # cleanup the projects at the end.
+            # Adding project if id is not None, means leaving domain and
+            # system creds.
+            if creds.project_id:
+                project_ids.add(creds.project_id)
             try:
                 self.creds_client.delete_user(creds.user_id)
             except lib_exc.NotFound:
                 LOG.warning("user with name: %s not found for delete",
                             creds.username)
-            if creds.tenant_id:
-                # NOTE(zhufl): Only when neutron's security_group ext is
-                # enabled, cleanup_default_secgroup will not raise error. But
-                # here cannot use test_utils.is_extension_enabled for it will
-                # cause "circular dependency". So here just use try...except to
-                # ensure tenant deletion without big changes.
-                try:
-                    if self.neutron_available:
-                        self.cleanup_default_secgroup(
-                            self.security_groups_admin_client, creds.tenant_id)
-                except lib_exc.NotFound:
-                    LOG.warning("failed to cleanup tenant %s's secgroup",
-                                creds.tenant_name)
-                try:
-                    self.creds_client.delete_project(creds.tenant_id)
-                except lib_exc.NotFound:
-                    LOG.warning("tenant with name: %s not found for delete",
-                                creds.tenant_name)
-
             # if cred is domain scoped, delete ephemeral domain
             # do not delete default domain
             if (hasattr(creds, 'domain_id') and
@@ -587,6 +615,28 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 except lib_exc.NotFound:
                     LOG.warning("domain with name: %s not found for delete",
                                 creds.domain_name)
+        for project_id in project_ids:
+            # NOTE(zhufl): Only when neutron's security_group ext is
+            # enabled, cleanup_default_secgroup will not raise error. But
+            # here cannot use test_utils.is_extension_enabled for it will
+            # cause "circular dependency". So here just use try...except to
+            # ensure tenant deletion without big changes.
+            LOG.info("Deleting project and security group for project: %s",
+                     project_id)
+
+            try:
+                if self.neutron_available:
+                    self.cleanup_default_secgroup(
+                        self.security_groups_admin_client, project_id)
+            except lib_exc.NotFound:
+                LOG.warning("failed to cleanup tenant %s's secgroup",
+                            project_id)
+            try:
+                self.creds_client.delete_project(project_id)
+            except lib_exc.NotFound:
+                LOG.warning("tenant with id: %s not found for delete",
+                            project_id)
+
         self._creds = {}
 
     def is_multi_user(self):

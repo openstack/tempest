@@ -60,6 +60,7 @@ class TestDynamicCredentialProvider(base.TestCase):
     fake_response = fake_identity._fake_v2_response
     tenants_client_class = tenants_client.TenantsClient
     delete_tenant = 'delete_tenant'
+    create_tenant = 'create_tenant'
 
     def setUp(self):
         super(TestDynamicCredentialProvider, self).setUp()
@@ -140,7 +141,9 @@ class TestDynamicCredentialProvider(base.TestCase):
             return_value=(rest_client.ResponseBody
                           (200, {'roles': [
                               {'id': '1', 'name': 'FakeRole'},
-                              {'id': '2', 'name': 'member'}]}))))
+                              {'id': '2', 'name': 'member'},
+                              {'id': '3', 'name': 'reader'},
+                              {'id': '4', 'name': 'admin'}]}))))
         return roles_fix
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
@@ -190,6 +193,205 @@ class TestDynamicCredentialProvider(base.TestCase):
         # Verify IDs
         self.assertEqual(primary_creds.tenant_id, '1234')
         self.assertEqual(primary_creds.user_id, '1234')
+
+    def _request_and_check_second_creds(
+            self, creds_obj, func, creds_to_compare,
+            show_mock, sm_count=1, sm_count_in_diff_project=0,
+            same_project_request=True, **func_kwargs):
+        self._mock_user_create('111', 'fake_user')
+        with mock.patch.object(creds_obj.creds_client,
+                               'create_project') as create_mock:
+            create_mock.return_value = {'id': '22', 'name': 'fake_project'}
+            new_creds = func(**func_kwargs)
+        if same_project_request:
+            # Check that with second creds request, create_project is not
+            # called and show_project is called. Which means new project is
+            # not created for the second requested creds instead new user is
+            # created under existing project.
+            self.assertEqual(len(create_mock.mock_calls), 0)
+            self.assertEqual(len(show_mock.mock_calls), sm_count)
+            # Verify project name and id is same as creds_to_compare
+            self.assertEqual(creds_to_compare.tenant_name,
+                             new_creds.tenant_name)
+            self.assertEqual(creds_to_compare.tenant_id,
+                             new_creds.tenant_id)
+        else:
+            # Check that with different project creds request, create_project
+            # is called and show_project is not called. Which means new project
+            # is created for this new creds request.
+            self.assertEqual(len(create_mock.mock_calls), 1)
+            self.assertEqual(len(show_mock.mock_calls),
+                             sm_count_in_diff_project)
+            # Verify project name and id is not same as creds_to_compare
+            self.assertNotEqual(creds_to_compare.tenant_name,
+                                new_creds.tenant_name)
+            self.assertNotEqual(creds_to_compare.tenant_id,
+                                new_creds.tenant_id)
+            self.assertEqual(new_creds.tenant_name, 'fake_project')
+            self.assertEqual(new_creds.tenant_id, '22')
+        # Verify new user name and id
+        self.assertEqual(new_creds.username, 'fake_user')
+        self.assertEqual(new_creds.user_id, '111')
+        return new_creds
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def _creds_within_same_project(self, MockRestClient, test_alt_creds=False):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        if test_alt_creds:
+            admin_func = creds.get_project_alt_admin_creds
+            member_func = creds.get_project_alt_member_creds
+            reader_func = creds.get_project_alt_reader_creds
+        else:
+            admin_func = creds.get_project_admin_creds
+            member_func = creds.get_project_member_creds
+            reader_func = creds.get_project_reader_creds
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('11', 'fake_user1')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+        with mock.patch.object(creds.creds_client,
+                               'create_project') as create_mock:
+            create_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+            member_creds = member_func()
+        # Check that with first creds request, create_project is called and
+        # show_project is not called. Which means new project is created for
+        # the requested creds.
+        self.assertEqual(len(create_mock.mock_calls), 1)
+        self.assertEqual(len(show_mock.mock_calls), 0)
+        # Verify project, user name and IDs
+        self.assertEqual(member_creds.username, 'fake_user1')
+        self.assertEqual(member_creds.tenant_name, 'fake_project1')
+        self.assertEqual(member_creds.tenant_id, '21')
+        self.assertEqual(member_creds.user_id, '11')
+
+        # Now request for the project reader creds which should not create new
+        # project instead should use the project_id of member_creds already
+        # created project.
+        self._request_and_check_second_creds(
+            creds, reader_func, member_creds, show_mock)
+
+        # Now request for the project admin creds which should not create new
+        # project instead should use the project_id of member_creds already
+        # created project.
+        self._request_and_check_second_creds(
+            creds, admin_func, member_creds, show_mock, sm_count=2)
+
+    def test_creds_within_same_project(self):
+        self._creds_within_same_project()
+
+    def test_alt_creds_within_same_project(self):
+        self._creds_within_same_project(test_alt_creds=True)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_creds_in_different_project(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('11', 'fake_user1')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+        with mock.patch.object(creds.creds_client,
+                               'create_project') as create_mock:
+            create_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+            member_creds = creds.get_project_member_creds()
+        # Check that with first creds request, create_project is called and
+        # show_project is not called. Which means new project is created for
+        # the requested creds.
+        self.assertEqual(len(create_mock.mock_calls), 1)
+        self.assertEqual(len(show_mock.mock_calls), 0)
+        # Verify project, user name and IDs
+        self.assertEqual(member_creds.username, 'fake_user1')
+        self.assertEqual(member_creds.tenant_name, 'fake_project1')
+        self.assertEqual(member_creds.tenant_id, '21')
+        self.assertEqual(member_creds.user_id, '11')
+
+        # Now request for the project alt reader creds which should create
+        # new project as this request is for alt creds.
+        alt_reader_creds = self._request_and_check_second_creds(
+            creds, creds.get_project_alt_reader_creds,
+            member_creds, show_mock, same_project_request=False)
+
+        # Check that with second creds request, create_project is not called
+        # and show_project is called. Which means new project is not created
+        # for the second requested creds instead new user is created under
+        # existing project.
+        self._request_and_check_second_creds(
+            creds, creds.get_project_reader_creds, member_creds, show_mock)
+
+        # Now request for the project alt member creds which should not create
+        # new project instead use the alt project already created for
+        # alt_reader creds.
+        show_mock.return_value = {
+            'id': alt_reader_creds.tenant_id,
+            'name': alt_reader_creds.tenant_name}
+        self._request_and_check_second_creds(
+            creds, creds.get_project_alt_member_creds,
+            alt_reader_creds, show_mock, sm_count=2,
+            same_project_request=True)
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_creds_by_role_in_different_project(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('11', 'fake_user1')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+        with mock.patch.object(creds.creds_client,
+                               'create_project') as create_mock:
+            create_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+            member_creds = creds.get_project_member_creds()
+        # Check that with first creds request, create_project is called and
+        # show_project is not called. Which means new project is created for
+        # the requested creds.
+        self.assertEqual(len(create_mock.mock_calls), 1)
+        self.assertEqual(len(show_mock.mock_calls), 0)
+        # Verify project, user name and IDs
+        self.assertEqual(member_creds.username, 'fake_user1')
+        self.assertEqual(member_creds.tenant_name, 'fake_project1')
+        self.assertEqual(member_creds.tenant_id, '21')
+        self.assertEqual(member_creds.user_id, '11')
+        # Check that with second creds request, create_project is not called
+        # and show_project is called. Which means new project is not created
+        # for the second requested creds instead new user is created under
+        # existing project.
+        self._request_and_check_second_creds(
+            creds, creds.get_project_reader_creds, member_creds, show_mock)
+        # Now request the creds by role which should create new project.
+        self._request_and_check_second_creds(
+            creds, creds.get_creds_by_roles, member_creds, show_mock,
+            sm_count_in_diff_project=1, same_project_request=False,
+            roles=['member'], scope='project')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_legacy_admin_creds_in_different_project(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_assign_user_role()
+        self._mock_list_role()
+        self._mock_user_create('11', 'fake_user1')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+        with mock.patch.object(creds.creds_client,
+                               'create_project') as create_mock:
+            create_mock.return_value = {'id': '21', 'name': 'fake_project1'}
+            member_creds = creds.get_project_member_creds()
+        # Check that with first creds request, create_project is called and
+        # show_project is not called. Which means new project is created for
+        # the requested creds.
+        self.assertEqual(len(create_mock.mock_calls), 1)
+        self.assertEqual(len(show_mock.mock_calls), 0)
+        # Verify project, user name and IDs
+        self.assertEqual(member_creds.username, 'fake_user1')
+        self.assertEqual(member_creds.tenant_name, 'fake_project1')
+        self.assertEqual(member_creds.tenant_id, '21')
+        self.assertEqual(member_creds.user_id, '11')
+
+        # Now request for the legacy admin creds which should create
+        # new project instead of using project member creds project.
+        self._request_and_check_second_creds(
+            creds, creds.get_admin_creds,
+            member_creds, show_mock, same_project_request=False)
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_admin_creds(self, MockRestClient):
@@ -321,7 +523,8 @@ class TestDynamicCredentialProvider(base.TestCase):
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
     def _test_get_same_role_creds_with_project_scope(self, MockRestClient,
-                                                     scope=None):
+                                                     scope=None,
+                                                     force_new=False):
         creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
         self._mock_list_2_roles()
         self._mock_user_create('1234', 'fake_role_user')
@@ -329,7 +532,7 @@ class TestDynamicCredentialProvider(base.TestCase):
         with mock.patch.object(self.roles_client.RolesClient,
                                'create_user_role_on_project') as user_mock:
             role_creds = creds.get_creds_by_roles(
-                roles=['role1', 'role2'], scope=scope)
+                roles=['role1', 'role2'], force_new=force_new, scope=scope)
         calls = user_mock.mock_calls
         # Assert that the role creation is called with the 2 specified roles
         self.assertEqual(len(calls), 2)
@@ -338,19 +541,31 @@ class TestDynamicCredentialProvider(base.TestCase):
         with mock.patch.object(self.roles_client.RolesClient,
                                'create_user_role_on_project') as user_mock1:
             role_creds_new = creds.get_creds_by_roles(
-                roles=['role1', 'role2'], scope=scope)
+                roles=['role1', 'role2'], force_new=force_new, scope=scope)
         calls = user_mock1.mock_calls
+        # With force_new, assert that new creds are created
+        if force_new:
+            self.assertEqual(len(calls), 2)
+            self.assertNotEqual(role_creds, role_creds_new)
         # Assert that previously created creds are return and no call to
-        # role creation.
-        self.assertEqual(len(calls), 0)
+        # role creation
         # Check if previously created creds are returned.
-        self.assertEqual(role_creds, role_creds_new)
+        else:
+            self.assertEqual(len(calls), 0)
+            self.assertEqual(role_creds, role_creds_new)
 
     def test_get_same_role_creds_with_project_scope(self):
         self._test_get_same_role_creds_with_project_scope(scope='project')
 
     def test_get_same_role_creds_with_default_scope(self):
         self._test_get_same_role_creds_with_project_scope()
+
+    def test_get_same_role_creds_with_project_scope_force_new(self):
+        self._test_get_same_role_creds_with_project_scope(
+            scope='project', force_new=True)
+
+    def test_get_same_role_creds_with_default_scope_force_new(self):
+        self._test_get_same_role_creds_with_project_scope(force_new=True)
 
     @mock.patch('tempest.lib.common.rest_client.RestClient')
     def _test_get_different_role_creds_with_project_scope(
@@ -391,8 +606,12 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_assign_user_role()
         self._mock_list_role()
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        self._mock_user_create('1234', 'fake_prim_user')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '1234', 'name': 'fake_prim_tenant'}
+        self._mock_user_create('1234', 'fake_project1_user')
         creds.get_primary_creds()
+        self._mock_user_create('12341', 'fake_project1_user')
+        creds.get_project_admin_creds()
         self._mock_tenant_create('12345', 'fake_alt_tenant')
         self._mock_user_create('12345', 'fake_alt_user')
         creds.get_alt_creds()
@@ -407,10 +626,11 @@ class TestDynamicCredentialProvider(base.TestCase):
         creds.clear_creds()
         # Verify user delete calls
         calls = user_mock.mock_calls
-        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(calls), 4)
         args = map(lambda x: x[1][0], calls)
         args = list(args)
         self.assertIn('1234', args)
+        self.assertIn('12341', args)
         self.assertIn('12345', args)
         self.assertIn('123456', args)
         # Verify tenant delete calls
@@ -512,6 +732,9 @@ class TestDynamicCredentialProvider(base.TestCase):
         self._mock_list_role()
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
+        show_mock = self.patchobject(creds.creds_client, 'show_project')
+        show_mock.return_value = {'id': '1234', 'name': 'fake_prim_tenant'}
+        self._mock_user_create('12341', 'fake_project1_user')
         self._mock_network_create(creds, '1234', 'fake_net')
         self._mock_subnet_create(creds, '1234', 'fake_subnet')
         self._mock_router_create('1234', 'fake_router')
@@ -519,6 +742,7 @@ class TestDynamicCredentialProvider(base.TestCase):
             'tempest.lib.services.network.routers_client.RoutersClient.'
             'add_router_interface')
         creds.get_primary_creds()
+        creds.get_project_admin_creds()
         router_interface_mock.assert_called_once_with('1234', subnet_id='1234')
         router_interface_mock.reset_mock()
         # Create alternate tenant and network
@@ -779,6 +1003,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
     fake_response = fake_identity._fake_v3_response
     tenants_client_class = tenants_client.ProjectsClient
     delete_tenant = 'delete_project'
+    create_tenant = 'create_project'
 
     def setUp(self):
         super(TestDynamicCredentialProviderV3, self).setUp()

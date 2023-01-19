@@ -58,6 +58,10 @@ class CredsClient(object, metaclass=abc.ABCMeta):
     def create_project(self, name, description):
         pass
 
+    @abc.abstractmethod
+    def show_project(self, project_id):
+        pass
+
     def _check_role_exists(self, role_name):
         try:
             roles = self._list_roles()
@@ -118,6 +122,9 @@ class V2CredsClient(CredsClient):
             name=name, description=description)['tenant']
         return tenant
 
+    def show_project(self, project_id):
+        return self.projects_client.show_tenant(project_id)['tenant']
+
     def delete_project(self, project_id):
         self.projects_client.delete_tenant(project_id)
 
@@ -158,6 +165,9 @@ class V3CredsClient(CredsClient):
             name=name, description=description,
             domain_id=self.creds_domain['id'])['project']
         return project
+
+    def show_project(self, project_id):
+        return self.projects_client.show_project(project_id)['project']
 
     def delete_project(self, project_id):
         self.projects_client.delete_project(project_id)
