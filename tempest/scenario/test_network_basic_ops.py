@@ -897,10 +897,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.check_remote_connectivity(ssh_client, dest=peer_address,
                                        nic=spoof_nic, should_succeed=True)
         # Set a mac address by making nic down temporary
+        spoof_ip_addresses = ssh_client.get_nic_ip_addresses(spoof_nic)
         cmd = ("sudo ip link set {nic} down;"
                "sudo ip link set dev {nic} address {mac};"
-               "sudo ip link set {nic} up").format(nic=spoof_nic,
-                                                   mac=spoof_mac)
+               "sudo ip link set {nic} up;"
+               "sudo ip address flush dev {nic};").format(nic=spoof_nic,
+                                                          mac=spoof_mac)
+        for ip_address in spoof_ip_addresses:
+            cmd += (
+                "sudo ip addr add {ip_address} dev {nic};"
+            ).format(ip_address=ip_address, nic=spoof_nic)
+
         ssh_client.exec_command(cmd)
 
         new_mac = ssh_client.get_mac_address(nic=spoof_nic)
