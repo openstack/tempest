@@ -28,10 +28,16 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     """Test servers API"""
     create_default_network = True
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(ServersTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.servers_client
+        else:
+            cls.reader_client = cls.client
 
     @decorators.idempotent_id('b92d5ec7-b1dd-44a2-87e4-45e888c46ef0')
     @testtools.skipUnless(CONF.compute_feature_enabled.
@@ -64,9 +70,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         id2 = server['id']
         self.addCleanup(self.delete_server, id2)
         self.assertNotEqual(id1, id2, "Did not create a new server")
-        server = self.client.show_server(id1)['server']
+        server = self.reader_client.show_server(id1)['server']
         name1 = server['name']
-        server = self.client.show_server(id2)['server']
+        server = self.reader_client.show_server(id2)['server']
         name2 = server['name']
         self.assertEqual(name1, name2)
 
@@ -80,7 +86,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(key_name=key_name,
                                          wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
-        server = self.client.show_server(server['id'])['server']
+        server = self.reader_client.show_server(server['id'])['server']
         self.assertEqual(key_name, server['key_name'])
 
     def _update_server_name(self, server_id, status, prefix_name='server'):
@@ -93,7 +99,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, server_id, status)
 
         # Verify the name of the server has changed
-        server = self.client.show_server(server_id)['server']
+        server = self.reader_client.show_server(server_id)['server']
         self.assertEqual(new_name, server['name'])
         return server
 
@@ -128,7 +134,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.client, server['id'], 'ACTIVE')
 
         # Verify the access addresses have been updated
-        server = self.client.show_server(server['id'])['server']
+        server = self.reader_client.show_server(server['id'])['server']
         self.assertEqual('1.1.1.1', server['accessIPv4'])
         self.assertEqual('::babe:202:202', server['accessIPv6'])
 
@@ -138,7 +144,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         server = self.create_test_server(accessIPv6='2001:2001::3',
                                          wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server['id'])
-        server = self.client.show_server(server['id'])['server']
+        server = self.reader_client.show_server(server['id'])['server']
         self.assertEqual('2001:2001::3', server['accessIPv6'])
 
     @decorators.related_bug('1730756')
@@ -169,12 +175,22 @@ class ServerShowV247Test(base.BaseV2ComputeTest):
     # also. 2.47 APIs schema are on top of 2.9->2.19->2.26 schema so
     # below tests cover all of the schema.
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerShowV247Test, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.servers_client
+        else:
+            cls.reader_client = cls.servers_client
+
     @decorators.idempotent_id('88b0bdb2-494c-11e7-a919-92ebcb67fe33')
     def test_show_server(self):
         """Test getting server detail"""
         server = self.create_test_server()
         # All fields will be checked by API schema
-        self.servers_client.show_server(server['id'])
+        self.reader_client.show_server(server['id'])
 
     @decorators.idempotent_id('8de397c2-57d0-4b90-aa30-e5d668f21a8b')
     def test_update_rebuild_list_server(self):
@@ -198,6 +214,16 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
     min_microversion = '2.63'
     max_microversion = 'latest'
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerShowV263Test, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.servers_client
+        else:
+            cls.reader_client = cls.servers_client
+
     @testtools.skipUnless(CONF.compute.certified_image_ref,
                           '``[compute]/certified_image_ref`` required to test '
                           'image certificate validation.')
@@ -214,7 +240,7 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
             wait_until='ACTIVE')
 
         # Check show API response schema
-        self.servers_client.show_server(server['id'])['server']
+        self.reader_client.show_server(server['id'])['server']
 
         # Check update API response schema
         self.servers_client.update_server(server['id'])
