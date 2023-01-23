@@ -20,6 +20,7 @@ from tempest.lib import decorators
 from tempest.scenario import manager
 
 
+@decorators.serial
 class TestAggregatesBasicOps(manager.ScenarioTest):
     """Creates an aggregate within an availability zone
 

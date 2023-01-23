@@ -221,3 +221,10 @@ class cleanup_order:
             # class is the caller
             owner.cleanup = owner.addClassResourceCleanup
             return MethodType(self.func, owner)
+
+
+def serial(cls):
+    """A decorator to mark a test class for serial execution"""
+    cls._serial = True
+    LOG.debug('marked %s for serial execution', cls.__name__)
+    return cls

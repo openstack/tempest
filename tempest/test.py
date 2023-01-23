@@ -18,7 +18,9 @@ import os
 import sys
 
 import debtcollector.moves
+from fasteners import process_lock
 import fixtures
+from oslo_concurrency import lockutils
 from oslo_log import log as logging
 import testtools
 
@@ -123,6 +125,23 @@ class BaseTestCase(testtools.testcase.WithAttributes,
     # A way to adjust slow test classes
     TIMEOUT_SCALING_FACTOR = 1
 
+    # An interprocess lock to implement serial test execution if requested.
+    # The serial test classes are the writers as only one of them can be
+    # executed. The rest of the test classes are the readers as many of them
+    # can be run in parallel.
+    # Only classes can be decorated with @serial decorator not individual test
+    # cases as tempest allows test class level resource setup which could
+    # interfere with serialized execution on test cases level. I.e. the class
+    # setup of one of the test cases could run before taking a test case level
+    # lock.
+    # We cannot init the lock here as external lock needs oslo configuration
+    # to be loaded first to get the lock_path
+    serial_rw_lock = None
+
+    # Defines if the tests in this class should be run without any parallelism
+    # Use the @serial decorator on your test class to indicate such requirement
+    _serial = False
+
     @classmethod
     def _reset_class(cls):
         cls.__setup_credentials_called = False
@@ -134,14 +153,33 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         cls._teardowns = []
 
     @classmethod
+    def is_serial_execution_requested(cls):
+        return cls._serial
+
+    @classmethod
     def setUpClass(cls):
         cls.__setupclass_called = True
+
+        if cls.serial_rw_lock is None:
+            path = os.path.join(
+                lockutils.get_lock_path(CONF), 'tempest-serial-rw-lock')
+            cls.serial_rw_lock = (
+                process_lock.InterProcessReaderWriterLock(path)
+            )
+
         # Reset state
         cls._reset_class()
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
         try:
+            if cls.is_serial_execution_requested():
+                LOG.debug('%s taking the write lock', cls.__name__)
+                cls.serial_rw_lock.acquire_write_lock()
+                LOG.debug('%s took the write lock', cls.__name__)
+            else:
+                cls.serial_rw_lock.acquire_read_lock()
+
             cls.skip_checks()
 
             if not cls.__skip_checks_called:
@@ -184,35 +222,44 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # If there was no exception during setup we shall re-raise the first
         # exception in teardown
         re_raise = (etype is None)
-        while cls._teardowns:
-            name, teardown = cls._teardowns.pop()
-            # Catch any exception in tearDown so we can re-raise the original
-            # exception at the end
-            try:
-                teardown()
-                if name == 'resources':
-                    if not cls.__resource_cleanup_called:
-                        raise RuntimeError(
-                            "resource_cleanup for %s did not call the "
-                            "super's resource_cleanup" % cls.__name__)
-            except Exception as te:
-                sys_exec_info = sys.exc_info()
-                tetype = sys_exec_info[0]
-                # TODO(andreaf): Resource cleanup is often implemented by
-                # storing an array of resources at class level, and cleaning
-                # them up during `resource_cleanup`.
-                # In case of failure during setup, some resource arrays might
-                # not be defined at all, in which case the cleanup code might
-                # trigger an AttributeError. In such cases we log
-                # AttributeError as info instead of exception. Once all
-                # cleanups are migrated to addClassResourceCleanup we can
-                # remove this.
-                if tetype is AttributeError and name == 'resources':
-                    LOG.info("tearDownClass of %s failed: %s", name, te)
-                else:
-                    LOG.exception("teardown of %s failed: %s", name, te)
-                if not etype:
-                    etype, value, trace = sys_exec_info
+        try:
+            while cls._teardowns:
+                name, teardown = cls._teardowns.pop()
+                # Catch any exception in tearDown so we can re-raise the
+                # original exception at the end
+                try:
+                    teardown()
+                    if name == 'resources':
+                        if not cls.__resource_cleanup_called:
+                            raise RuntimeError(
+                                "resource_cleanup for %s did not call the "
+                                "super's resource_cleanup" % cls.__name__)
+                except Exception as te:
+                    sys_exec_info = sys.exc_info()
+                    tetype = sys_exec_info[0]
+                    # TODO(andreaf): Resource cleanup is often implemented by
+                    # storing an array of resources at class level, and
+                    # cleaning them up during `resource_cleanup`.
+                    # In case of failure during setup, some resource arrays
+                    # might not be defined at all, in which case the cleanup
+                    # code might trigger an AttributeError. In such cases we
+                    # log AttributeError as info instead of exception. Once all
+                    # cleanups are migrated to addClassResourceCleanup we can
+                    # remove this.
+                    if tetype is AttributeError and name == 'resources':
+                        LOG.info("tearDownClass of %s failed: %s", name, te)
+                    else:
+                        LOG.exception("teardown of %s failed: %s", name, te)
+                    if not etype:
+                        etype, value, trace = sys_exec_info
+        finally:
+            if cls.is_serial_execution_requested():
+                LOG.debug('%s releasing the write lock', cls.__name__)
+                cls.serial_rw_lock.release_write_lock()
+                LOG.debug('%s released the write lock', cls.__name__)
+            else:
+                cls.serial_rw_lock.release_read_lock()
+
         # If exceptions were raised during teardown, and not before, re-raise
         # the first one
         if re_raise and etype is not None:
