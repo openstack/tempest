@@ -1200,7 +1200,6 @@ ScenarioGroup = [
                help='Image container format'),
     cfg.DictOpt('img_properties', help='Glance image properties. '
                 'Use for custom images which require them'),
-    # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
                choices=["udhcpc", "dhclient", "dhcpcd", ""],
