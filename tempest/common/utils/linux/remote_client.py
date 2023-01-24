@@ -145,15 +145,20 @@ class RemoteClient(remote_client.RemoteClient):
         cmd = "sudo /sbin/dhclient -r && sudo /sbin/dhclient"
         self.exec_command(cmd)
 
+    def _renew_lease_dhcpcd(self, fixed_ip=None):
+        """Renews DHCP lease via dhcpcd client. """
+        cmd = "sudo /sbin/dhcpcd --rebind"
+        self.exec_command(cmd)
+
     def renew_lease(self, fixed_ip=None, dhcp_client='udhcpc'):
         """Wrapper method for renewing DHCP lease via given client
 
         Supporting:
         * udhcpc
         * dhclient
+        * dhcpcd
         """
-        # TODO(yfried): add support for dhcpcd
-        supported_clients = ['udhcpc', 'dhclient']
+        supported_clients = ['udhcpc', 'dhclient', 'dhcpcd']
         if dhcp_client not in supported_clients:
             raise tempest.lib.exceptions.InvalidConfiguration(
                 '%s DHCP client unsupported' % dhcp_client)

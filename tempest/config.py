@@ -1203,10 +1203,10 @@ ScenarioGroup = [
     # TODO(yfried): add support for dhcpcd
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
-               choices=["udhcpc", "dhclient", ""],
+               choices=["udhcpc", "dhclient", "dhcpcd", ""],
                help='DHCP client used by images to renew DCHP lease. '
                     'If left empty, update operation will be skipped. '
-                    'Supported clients: "udhcpc", "dhclient"'),
+                    'Supported clients: "udhcpc", "dhclient", "dhcpcd"'),
     cfg.StrOpt('protocol',
                default='icmp',
                choices=('icmp', 'tcp', 'udp'),
