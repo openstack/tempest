@@ -109,6 +109,15 @@ class RemoteClient(remote_client.RemoteClient):
         LOG.debug('(get_nic_name_by_ip) Command result: %s', nic)
         return nic.strip().strip(":").split('@')[0].lower()
 
+    def get_nic_ip_addresses(self, nic_name, ip_version=None):
+        cmd = "ip "
+        if ip_version:
+            cmd += "-%s " % ip_version
+        cmd += "-o addr | awk '/%s/ {print $4}'" % nic_name
+        ip_addresses = self.exec_command(cmd)
+        LOG.debug('(get_nic_ip_address): Command result: %s', ip_addresses)
+        return ip_addresses.strip().split()
+
     def _get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
         resolve_file = self.exec_command(cmd).strip().split('\n')
