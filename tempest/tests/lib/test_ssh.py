@@ -75,7 +75,8 @@ class TestSshClient(base.TestCase):
             look_for_keys=False,
             timeout=10.0,
             password=None,
-            sock=None
+            sock=None,
+            allow_agent=True
         )]
         self.assertEqual(expected_connect, client_mock.connect.mock_calls)
         self.assertEqual(0, s_mock.call_count)
@@ -91,7 +92,8 @@ class TestSshClient(base.TestCase):
 
         proxy_client = ssh.Client('proxy-host', 'proxy-user', timeout=2)
         client = ssh.Client('localhost', 'root', timeout=2,
-                            proxy_client=proxy_client)
+                            proxy_client=proxy_client,
+                            ssh_allow_agent=False)
         client._get_ssh_connection(sleep=1)
 
         aa_mock.assert_has_calls([mock.call(), mock.call()])
@@ -106,7 +108,8 @@ class TestSshClient(base.TestCase):
             look_for_keys=False,
             timeout=10.0,
             password=None,
-            sock=None
+            sock=None,
+            allow_agent=True
         )]
         self.assertEqual(proxy_expected_connect,
                          proxy_client_mock.connect.mock_calls)
@@ -121,7 +124,8 @@ class TestSshClient(base.TestCase):
             look_for_keys=False,
             timeout=10.0,
             password=None,
-            sock=proxy_client_mock.get_transport().open_session()
+            sock=proxy_client_mock.get_transport().open_session(),
+            allow_agent=False
         )]
         self.assertEqual(expected_connect, client_mock.connect.mock_calls)
         self.assertEqual(0, s_mock.call_count)

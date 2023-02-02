@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Adds a ``ssh_allow_agent`` parameter to the ``RemoteClient`` class
+    wrapper and the direct ssh ``Client`` class to allow a caller to
+    explicitly request that the SSH Agent is not consulted for
+    authentication. This is useful if your attempting explicit password
+    based authentication as ``paramiko``, the underlying library used for
+    SSH, defaults to utilizing an ssh-agent process before attempting
+    password authentication.
