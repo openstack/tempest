@@ -136,3 +136,97 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             servers_client=self.client)
         disks_num_eph = len(linux_client.get_disks().split('\n'))
         self.assertEqual(disks_num + 1, disks_num_eph)
+
+
+class ServersWithFlavorSwapResizeTest(base.BaseV2ComputeAdminTest):
+    """Test resizing flavor swap size"""
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServersWithFlavorSwapResizeTest, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersWithFlavorSwapResizeTest, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    def _create_server_with_swap(self, swap=0):
+        admin_pass = self.image_ssh_password
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+
+        flavor_id = self.create_flavor(
+            ram=1024, vcpus=1, disk=1, swap=swap)['id']
+
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='ACTIVE',
+            adminPass=admin_pass,
+            flavor=flavor_id)
+
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.servers_client, server['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.servers_client.delete_server,
+                        server['id'])
+
+        server = self.client.show_server(server['id'])['server']
+
+        ssh_client = self.get_ssh_client(
+            server, validation_resources, admin_pass)
+        return server, ssh_client
+
+    def _resize_server_with_new_swap(self, server, swap=0):
+        flavor_id = self.create_flavor(
+            ram=1024, vcpus=1, disk=1, swap=swap)['id']
+        self.resize_server(server['id'], flavor_id)
+
+    @decorators.idempotent_id('b2c7bcfc-bb5b-4e22-b517-c7f686b80211')
+    def test_flavor_swap_0_to_1024(self):
+        server, ssh_client = self._create_server_with_swap(swap=0)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 0)
+
+        self._resize_server_with_new_swap(server, swap=1024)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 1)
+
+        self.reboot_server(server['id'], 'hard')
+        swap_devs = len(ssh_client.get_swap_devs())
+        self.assertEqual(swap_devs, 1)
+
+    @decorators.idempotent_id('b2c7bcfc-bb5b-4e22-b517-c7f686b80212')
+    def test_flavor_swap_2048_to_1024(self):
+        server, ssh_client = self._create_server_with_swap(swap=2048)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 1)
+
+        self._resize_server_with_new_swap(server, swap=1024)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 1)
+
+        self.reboot_server(server['id'], 'hard')
+        swap_devs = len(ssh_client.get_swap_devs())
+        self.assertEqual(swap_devs, 1)
+
+    @decorators.idempotent_id('b2c7bcfc-bb5b-4e22-b517-c7f686b80213')
+    def test_flavor_swap_1024_to_0(self):
+        server, ssh_client = self._create_server_with_swap(swap=1024)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 1)
+
+        self._resize_server_with_new_swap(server, swap=0)
+        swap_devs = len(ssh_client.get_swap_devs())
+
+        self.assertEqual(swap_devs, 0)
+
+        self.reboot_server(server['id'], 'hard')
+        swap_devs = len(ssh_client.get_swap_devs())
+        self.assertEqual(swap_devs, 0)
