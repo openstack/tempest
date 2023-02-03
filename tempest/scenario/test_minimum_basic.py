@@ -86,6 +86,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                    '%s' % (secgroup['id'], server['id']))
             raise exceptions.TimeoutException(msg)
 
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('bdbb5441-9204-419d-a225-b4fdbfb1a1a8')
     @utils.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
@@ -159,6 +160,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
                 self.servers_client, server, floating_ip,
                 wait_for_disassociate=True)
 
+    @decorators.attr(type='slow')
     @decorators.idempotent_id('a8fd48ec-1d01-4895-b932-02321661ec1e')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
                           "Cinder volume snapshots are disabled")
