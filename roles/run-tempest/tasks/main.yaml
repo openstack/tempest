@@ -120,10 +120,11 @@
     - target_branch in ["stable/train", "stable/ussuri", "stable/victoria"]
 
 - name: Run Tempest
-  command: tox -e {{tox_envlist}} {{tox_extra_args}} -- {{tempest_test_regex|quote}} \
-           {{blacklist_option|default('')}}  {{exclude_list_option|default('')}} \
+  command: tox -e {{tox_envlist}} {{tox_extra_args}} -- \
+           {{tempest_test_regex|quote if (tempest_test_regex|length>0)|default(None, True)}} \
+           {{blacklist_option|default(None)}}  {{exclude_list_option|default(None)}} \
             --concurrency={{tempest_concurrency|default(default_concurrency)}} \
-           {{tempest_test_exclude_regex|default('')}}
+           {{tempest_test_exclude_regex|default(None)}}
   args:
     chdir: "{{devstack_base_dir}}/tempest"
   register: tempest_run_result
