@@ -14,8 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
 import io
 import random
+import time
 
 from oslo_log import log as logging
 from tempest.api.image import base
@@ -27,6 +29,19 @@ from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def retry_bad_request(fn):
+    retries = 3
+    for i in range(retries):
+        try:
+            yield
+        except lib_exc.BadRequest:
+            if i < retries:
+                time.sleep(1)
+            else:
+                raise
 
 
 class ImportImagesTest(base.BaseV2ImageTest):
@@ -817,8 +832,14 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         # Add a new location
         new_loc = {'metadata': {'foo': 'bar'},
                    'url': CONF.image.http_image}
-        self.client.update_image(image['id'], [
-            dict(add='/locations/-', value=new_loc)])
+
+        # NOTE(danms): If glance was unable to fetch the remote image via
+        # HTTP, it will return BadRequest. Because this can be transient in
+        # CI, we try this a few times before we agree that it has failed
+        # for a reason worthy of failing the test.
+        with retry_bad_request():
+            self.client.update_image(image['id'], [
+                dict(add='/locations/-', value=new_loc)])
 
         # The image should now be active, with one location that looks
         # like we expect
@@ -848,8 +869,14 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
         new_loc = {'metadata': {'speed': '88mph'},
                    'url': '%s#new' % CONF.image.http_image}
-        self.client.update_image(image['id'], [
-            dict(add='/locations/-', value=new_loc)])
+
+        # NOTE(danms): If glance was unable to fetch the remote image via
+        # HTTP, it will return BadRequest. Because this can be transient in
+        # CI, we try this a few times before we agree that it has failed
+        # for a reason worthy of failing the test.
+        with retry_bad_request():
+            self.client.update_image(image['id'], [
+                dict(add='/locations/-', value=new_loc)])
 
         # The image should now have two locations and the last one
         # (locations are ordered) should have the new URL.
