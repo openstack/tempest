@@ -383,20 +383,20 @@
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
 
 - project-template:
     name: integrated-gate-compute
@@ -420,15 +420,15 @@
             branches: ^stable/(wallaby|xena|yoga).*$
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     periodic-weekly:
       jobs:
         # centos-9-stream is tested from zed release onwards
@@ -450,20 +450,20 @@
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/ussuri).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
 
 - project-template:
     name: integrated-gate-storage
@@ -480,20 +480,20 @@
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
 
 - project-template:
     name: integrated-gate-object-storage
@@ -508,17 +508,17 @@
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
         - grenade
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
-        # and job is broken on wallaby branch due to the issue
+        # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|wallaby)).*$
+            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
