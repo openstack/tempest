@@ -30,15 +30,10 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ubuntu-focal:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-py3-ipv6:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-zed:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-yoga:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-xena:
             irrelevant-files: *tempest-irrelevant-files
@@ -122,16 +117,8 @@
         - tempest-full-test-account-py3:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-test-account-no-admin-py3:
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
         - openstack-tox-bashate:
             irrelevant-files: *tempest-irrelevant-files-2
-        - tempest-full-centos-9-stream:
-            # TODO(gmann): make it voting once below fix is merged
-            # https://review.opendev.org/c/openstack/tempest/+/842140
-            voting: false
-            irrelevant-files: *tempest-irrelevant-files
     gate:
       jobs:
         - openstack-tox-pep8
@@ -157,8 +144,6 @@
             irrelevant-files: *tempest-irrelevant-files
         #- devstack-plugin-ceph-tempest-py3:
         #    irrelevant-files: *tempest-irrelevant-files
-        #- tempest-full-centos-9-stream:
-        #    irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
     experimental:
@@ -178,7 +163,13 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-pg-full:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-py3-ipv6:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-centos-9-stream:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-centos9-stream-fips:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-test-account-no-admin-py3:
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
@@ -193,4 +184,7 @@
         - tempest-all
         - tempest-full-oslo-master
         - tempest-stestr-master
+        - tempest-full-py3-ipv6
         - tempest-centos9-stream-fips
+        - tempest-full-centos-9-stream
+        - tempest-full-test-account-no-admin-py3
