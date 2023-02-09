@@ -14,7 +14,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import contextlib
 import io
 import random
 import time
@@ -29,19 +28,7 @@ from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
-
-
-@contextlib.contextmanager
-def retry_bad_request(fn):
-    retries = 3
-    for i in range(retries):
-        try:
-            yield
-        except lib_exc.BadRequest:
-            if i < retries:
-                time.sleep(1)
-            else:
-                raise
+BAD_REQUEST_RETRIES = 3
 
 
 class ImportImagesTest(base.BaseV2ImageTest):
@@ -837,9 +824,16 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         # HTTP, it will return BadRequest. Because this can be transient in
         # CI, we try this a few times before we agree that it has failed
         # for a reason worthy of failing the test.
-        with retry_bad_request():
-            self.client.update_image(image['id'], [
-                dict(add='/locations/-', value=new_loc)])
+        for i in range(BAD_REQUEST_RETRIES):
+            try:
+                self.client.update_image(image['id'], [
+                    dict(add='/locations/-', value=new_loc)])
+                break
+            except lib_exc.BadRequest:
+                if i + 1 == BAD_REQUEST_RETRIES:
+                    raise
+                else:
+                    time.sleep(1)
 
         # The image should now be active, with one location that looks
         # like we expect
@@ -874,9 +868,16 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         # HTTP, it will return BadRequest. Because this can be transient in
         # CI, we try this a few times before we agree that it has failed
         # for a reason worthy of failing the test.
-        with retry_bad_request():
-            self.client.update_image(image['id'], [
-                dict(add='/locations/-', value=new_loc)])
+        for i in range(BAD_REQUEST_RETRIES):
+            try:
+                self.client.update_image(image['id'], [
+                    dict(add='/locations/-', value=new_loc)])
+                break
+            except lib_exc.BadRequest:
+                if i + 1 == BAD_REQUEST_RETRIES:
+                    raise
+                else:
+                    time.sleep(1)
 
         # The image should now have two locations and the last one
         # (locations are ordered) should have the new URL.
