@@ -53,7 +53,8 @@ class Client(object):
 
     def __init__(self, host, username, password=None, timeout=300, pkey=None,
                  channel_timeout=10, look_for_keys=False, key_filename=None,
-                 port=22, proxy_client=None, ssh_key_type='rsa'):
+                 port=22, proxy_client=None, ssh_key_type='rsa',
+                 ssh_allow_agent=True):
         """SSH client.
 
         Many of parameters are just passed to the underlying implementation
@@ -76,6 +77,9 @@ class Client(object):
             for ssh-over-ssh.  The default is None, which means
             not to use ssh-over-ssh.
         :param ssh_key_type: ssh key type (rsa, ecdsa)
+        :param ssh_allow_agent: boolean, default True, if the SSH client is
+            allowed to also utilize the ssh-agent. Explicit use of passwords
+            in some tests may need this set as False.
         :type proxy_client: ``tempest.lib.common.ssh.Client`` object
         """
         self.host = host
@@ -105,6 +109,7 @@ class Client(object):
             raise exceptions.SSHClientProxyClientLoop(
                 host=self.host, port=self.port, username=self.username)
         self._proxy_conn = None
+        self.ssh_allow_agent = ssh_allow_agent
 
     def _get_ssh_connection(self, sleep=1.5, backoff=1):
         """Returns an ssh connection to the specified host."""
@@ -133,7 +138,7 @@ class Client(object):
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
                             timeout=self.channel_timeout, pkey=self.pkey,
-                            sock=proxy_chan)
+                            sock=proxy_chan, allow_agent=self.ssh_allow_agent)
                 LOG.info("ssh connection to %s@%s successfully created",
                          self.username, self.host)
                 return ssh
