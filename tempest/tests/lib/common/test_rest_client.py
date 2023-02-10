@@ -55,6 +55,7 @@ class TestRestClientHTTPMethods(BaseRestClientTestClass):
     def test_get(self):
         __, return_dict = self.rest_client.get(self.url)
         self.assertEqual('GET', return_dict['method'])
+        self.assertTrue(return_dict['preload_content'])
 
     def test_delete(self):
         __, return_dict = self.rest_client.delete(self.url)
@@ -77,6 +78,17 @@ class TestRestClientHTTPMethods(BaseRestClientTestClass):
     def test_copy(self):
         __, return_dict = self.rest_client.copy(self.url)
         self.assertEqual('COPY', return_dict['method'])
+
+    def test_get_chunked(self):
+        self.useFixture(fixtures.MockPatchObject(self.rest_client,
+                                                 '_log_request'))
+        __, return_dict = self.rest_client.get(self.url, chunked=True)
+        # Default is preload_content=True, make sure we passed False
+        self.assertFalse(return_dict['preload_content'])
+        # Make sure we did not pass chunked=True to urllib3 for GET
+        self.assertFalse(return_dict['chunked'])
+        # Make sure we did not call _log_request() on the raw response
+        self.rest_client._log_request.assert_not_called()
 
 
 class TestRestClientNotFoundHandling(BaseRestClientTestClass):

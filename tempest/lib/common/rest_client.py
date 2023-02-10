@@ -19,6 +19,7 @@ import email.utils
 import re
 import time
 import urllib
+import urllib3
 
 import jsonschema
 from oslo_log import log as logging
@@ -298,7 +299,7 @@ class RestClient(object):
         """
         return self.request('POST', url, extra_headers, headers, body, chunked)
 
-    def get(self, url, headers=None, extra_headers=False):
+    def get(self, url, headers=None, extra_headers=False, chunked=False):
         """Send a HTTP GET request using keystone service catalog and auth
 
         :param str url: the relative url to send the get request to
@@ -307,11 +308,19 @@ class RestClient(object):
                                    returned by the get_headers() method are to
                                    be used but additional headers are needed in
                                    the request pass them in as a dict.
+        :param bool chunked: Boolean value that indicates if we should stream
+                             the response instead of reading it all at once.
+                             If True, data will be empty and the raw urllib3
+                             response object will be returned.
+                             NB: If you pass True here, you **MUST** call
+                             release_conn() on the response object before
+                             finishing!
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('GET', url, extra_headers, headers)
+        return self.request('GET', url, extra_headers, headers,
+                            chunked=chunked)
 
     def delete(self, url, headers=None, body=None, extra_headers=False):
         """Send a HTTP DELETE request using keystone service catalog and auth
@@ -480,7 +489,7 @@ class RestClient(object):
         self.LOG.info(
             'Request (%s): %s %s %s%s',
             caller_name,
-            resp['status'],
+            resp.status,
             method,
             req_url,
             secs,
@@ -617,17 +626,30 @@ class RestClient(object):
         """
         if headers is None:
             headers = self.get_headers()
+        # In urllib3, chunked only affects the upload. However, we may
+        # want to read large responses to GET incrementally. Re-purpose
+        # chunked=True on a GET to also control how we handle the response.
+        preload = not (method.lower() == 'get' and chunked)
+        if not preload:
+            # NOTE(danms): Not specifically necessary, but don't send
+            # chunked=True to urllib3 on a GET, since it is technically
+            # for PUT/POST type operations
+            chunked = False
         # Do the actual request, and time it
         start = time.time()
         self._log_request_start(method, url)
         resp, resp_body = self.http_obj.request(
             url, method, headers=headers,
-            body=body, chunked=chunked)
+            body=body, chunked=chunked, preload_content=preload)
         end = time.time()
         req_body = body if log_req_body is None else log_req_body
-        self._log_request(method, url, resp, secs=(end - start),
-                          req_headers=headers, req_body=req_body,
-                          resp_body=resp_body)
+        if preload:
+            # NOTE(danms): If we are reading the whole response, we can do
+            # this logging. If not, skip the logging because it will result
+            # in us reading the response data prematurely.
+            self._log_request(method, url, resp, secs=(end - start),
+                              req_headers=headers, req_body=req_body,
+                              resp_body=resp_body)
         return resp, resp_body
 
     def request(self, method, url, extra_headers=False, headers=None,
@@ -773,6 +795,10 @@ class RestClient(object):
         # resp this could possibly fail
         if str(type(resp)) == "<type 'instance'>":
             ctype = resp.getheader('content-type')
+        elif isinstance(resp, urllib3.HTTPResponse):
+            # If we requested chunked=True streaming, this will be a raw
+            # urllib3.HTTPResponse
+            ctype = resp.getheaders()['content-type']
         else:
             try:
                 ctype = resp['content-type']

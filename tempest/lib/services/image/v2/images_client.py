@@ -248,17 +248,26 @@ class ImagesClient(rest_client.RestClient):
         self.expected_success(202, resp.status)
         return rest_client.ResponseBody(resp)
 
-    def show_image_file(self, image_id):
+    def show_image_file(self, image_id, chunked=False):
         """Download binary image data.
+
+        :param bool chunked: If True, do not read the body and return only
+                             the raw urllib3 response object for processing.
+                             NB: If you pass True here, you **MUST** call
+                             release_conn() on the response object before
+                             finishing!
 
         For a full list of available parameters, please refer to the official
         API reference:
         https://docs.openstack.org/api-ref/image/v2/#download-binary-image-data
         """
         url = 'images/%s/file' % image_id
-        resp, body = self.get(url)
+        resp, body = self.get(url, chunked=chunked)
         self.expected_success([200, 204, 206], resp.status)
-        return rest_client.ResponseBodyData(resp, body)
+        if chunked:
+            return resp
+        else:
+            return rest_client.ResponseBodyData(resp, body)
 
     def add_image_tag(self, image_id, tag):
         """Add an image tag.
