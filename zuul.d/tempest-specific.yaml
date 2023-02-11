@@ -34,7 +34,6 @@
 - job:
     name: tempest-full-parallel
     parent: tempest-full-py3
-    voting: false
     branches:
       - master
     description: |

@@ -11,7 +11,7 @@
         - openstack-tox-py38
         - openstack-tox-py39
         - openstack-tox-py310
-        - tempest-full-parallel:
+        - tempest-full-py3:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
               - ^.*\.rst$
@@ -26,8 +26,6 @@
               - ^.gitignore$
               - ^.gitreview$
               - ^.mailmap$
-        - tempest-full-py3:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ubuntu-focal:
             irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:
@@ -182,6 +180,8 @@
     periodic:
       jobs:
         - tempest-all
+        - tempest-slow-parallel
+        - tempest-full-parallel
         - tempest-full-oslo-master
         - tempest-stestr-master
         - tempest-full-py3-ipv6
