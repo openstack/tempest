@@ -140,6 +140,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
             LOG.info("Live migrate back to source %s", source_host)
             self._live_migrate(server_id, source_host, state, volume_backed)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('1dce86b8-eb04-4c03-a9d8-9c1dc3ee0c7b')
     @testtools.skipUnless(CONF.compute_feature_enabled.
                           block_migration_for_live_migration,
@@ -148,6 +149,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         """Test live migrating an active server"""
         self._test_live_migration()
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('1e107f21-61b2-4988-8f22-b196e938ab88')
     @testtools.skipUnless(CONF.compute_feature_enabled.
                           block_migration_for_live_migration,
@@ -158,6 +160,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         """Test live migrating a paused server"""
         self._test_live_migration(state='PAUSED')
 
+    @decorators.attr(type='multinode')
     @testtools.skipUnless(CONF.compute_feature_enabled.
                           volume_backed_live_migration,
                           'Volume-backed live migration not available')
@@ -167,6 +170,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         """Test live migrating an active server booted from volume"""
         self._test_live_migration(volume_backed=True)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('e19c0cc6-6720-4ed8-be83-b6603ed5c812')
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
@@ -253,6 +257,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         port = self.ports_client.show_port(port_id)['port']
         return port['status'] == 'ACTIVE'
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('0022c12e-a482-42b0-be2d-396b5f0cffe3')
     @utils.requires_ext(service='network', extension='trunk')
     @utils.services('network')
@@ -297,6 +302,7 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTestBase):
     min_microversion = '2.6'
     max_microversion = 'latest'
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('6190af80-513e-4f0f-90f2-9714e84955d7')
     @testtools.skipUnless(CONF.compute_feature_enabled.serial_console,
                           'Serial console not supported.')

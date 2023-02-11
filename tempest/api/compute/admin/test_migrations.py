@@ -158,6 +158,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         dst_host = self.get_host_for_server(server['id'])
         assert_func(src_host, dst_host)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('4bf0be52-3b6f-4746-9a27-3143636fe30d')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration not available.')
@@ -165,6 +166,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         """Test cold migrating server and then confirm the migration"""
         self._test_cold_migrate_server(revert=False)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('caa1aa8b-f4ef-4374-be0d-95f001c2ac2d')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration not available.')

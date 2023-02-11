@@ -72,7 +72,8 @@
       and a tempest one exist.
     timeout: 10800
     vars:
-      tox_envlist: full
+      # This job run multinode and smoke tests.
+      tox_envlist: multinode
       devstack_localrc:
         FORCE_CONFIG_DRIVE: false
         NOVA_ALLOW_MOVE_TO_SAME_HOST: false

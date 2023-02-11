@@ -61,6 +61,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
 
         return hosts
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('26a9d5df-6890-45f2-abc4-a659290cb130')
     @testtools.skipUnless(
         compute.is_scheduler_filter_enabled("SameHostFilter"),
@@ -73,6 +74,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         host02 = self.get_host_for_server(server02)
         self.assertEqual(self.host01, host02)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('cc7ca884-6e3e-42a3-a92f-c522fcf25e8e')
     @testtools.skipUnless(
         compute.is_scheduler_filter_enabled("DifferentHostFilter"),
@@ -85,6 +87,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         host02 = self.get_host_for_server(server02)
         self.assertNotEqual(self.host01, host02)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('7869cc84-d661-4e14-9f00-c18cdc89cf57')
     @testtools.skipUnless(
         compute.is_scheduler_filter_enabled("DifferentHostFilter"),
@@ -97,6 +100,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         host02 = self.get_host_for_server(server02)
         self.assertNotEqual(self.host01, host02)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('f8bd0867-e459-45f5-ba53-59134552fe04')
     @testtools.skipUnless(
         compute.is_scheduler_filter_enabled("ServerGroupAntiAffinityFilter"),
@@ -112,6 +116,7 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
         self.assertNotEqual(hostnames[0], hostnames[1],
                             'Servers are on the same host: %s' % hosts)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('9d2e924a-baf4-11e7-b856-fa163e65f5ce')
     @testtools.skipUnless(
         compute.is_scheduler_filter_enabled("ServerGroupAffinityFilter"),
@@ -152,6 +157,7 @@ class UnshelveToHostMultiNodesTest(base.BaseV2ComputeAdminTest):
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'ACTIVE')
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('b5cc0889-50c2-46a0-b8ff-b5fb4c3a6e20')
     def test_unshelve_to_specific_host(self):
         """Test unshelve to a specific host, new behavior introduced in
