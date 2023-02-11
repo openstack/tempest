@@ -60,6 +60,15 @@
         c-bak: false
 
 - job:
+    name: tempest-extra-tests
+    parent: devstack-tempest
+    description: |
+      This job runs the extra tests mentioned in
+      tools/tempest-extra-tests-list.txt.
+    vars:
+      tox_envlist: extra-tests
+
+- job:
     name: tempest-full-py3
     parent: devstack-tempest
     # This job version is with swift enabled on py3
@@ -74,7 +83,7 @@
     required-projects:
       - openstack/horizon
     vars:
-      tox_envlist: full
+      tox_envlist: integrated-full
       devstack_localrc:
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
@@ -107,6 +116,7 @@
       # Required until bug/1949606 is resolved when using libvirt and QEMU
       # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
       configure_swap_size: 4096
+      tox_envlist: full
 
 - job:
     name: tempest-integrated-networking

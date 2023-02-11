@@ -30,6 +30,8 @@
       - opendev.org/openstack/oslo.utils
       - opendev.org/openstack/oslo.versionedobjects
       - opendev.org/openstack/oslo.vmware
+    vars:
+      tox_envlist: full
 
 - job:
     name: tempest-full-parallel
