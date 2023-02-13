@@ -49,6 +49,7 @@
       run_tempest_dry_cleanup: true
       devstack_localrc:
         DEVSTACK_PARALLEL: True
+        MYSQL_REDUCE_MEMORY: true
 
 - job:
     name: tempest-full-py3-ipv6
