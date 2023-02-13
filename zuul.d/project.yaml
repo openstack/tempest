@@ -149,6 +149,8 @@
     experimental:
       jobs:
         - nova-multi-cell
+        - nova-ceph-multistore:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-with-latest-microversion
         - tempest-stestr-master
         - tempest-cinder-v2-api:
