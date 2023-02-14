@@ -368,6 +368,7 @@
         CINDER_ENFORCE_SCOPE: true
         GLANCE_ENFORCE_SCOPE: true
         NEUTRON_ENFORCE_SCOPE: true
+        PLACEMENT_ENFORCE_SCOPE: true
 
 - project-template:
     name: integrated-gate-networking
