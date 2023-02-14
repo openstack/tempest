@@ -194,6 +194,13 @@ functionality, like listing servers or flavors or creating volumes. The
 attribute should be sparingly applied to only the tests that sanity-check the
 most essential functionality of an OpenStack cloud.
 
+Multinode Attribute
+^^^^^^^^^^^^^^^^^^^
+The ``type='multinode'`` attribute is used to signify that a test is desired
+to be executed in a multinode environment. By marking the tests with this
+attribute we can avoid running tests which aren't that beneficial for the
+multinode setup and thus reduce the consumption of resources.
+
 Test fixtures and resources
 ---------------------------
 Test level resources should be cleaned-up after the test execution. Clean-up
