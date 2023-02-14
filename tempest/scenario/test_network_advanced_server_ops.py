@@ -218,7 +218,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
                           'Less than 2 compute nodes, skipping multinode '
                           'tests.')
-    @decorators.attr(type='slow')
+    @decorators.attr(type=['slow', 'multinode'])
     @utils.services('compute', 'network')
     def test_server_connectivity_cold_migration(self):
         keypair = self.create_keypair()
@@ -244,7 +244,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
                           'Less than 2 compute nodes, skipping multinode '
                           'tests.')
-    @decorators.attr(type='slow')
+    @decorators.attr(type=['slow', 'multinode'])
     @utils.services('compute', 'network')
     def test_server_connectivity_live_migration(self):
         keypair = self.create_keypair()
@@ -289,7 +289,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @testtools.skipUnless(CONF.compute.min_compute_nodes > 1,
                           'Less than 2 compute nodes, skipping multinode '
                           'tests.')
-    @decorators.attr(type='slow')
+    @decorators.attr(type=['slow', 'multinode'])
     @utils.services('compute', 'network')
     def test_server_connectivity_cold_migration_revert(self):
         keypair = self.create_keypair()

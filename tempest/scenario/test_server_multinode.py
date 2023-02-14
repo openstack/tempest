@@ -35,7 +35,7 @@ class TestServerMultinode(manager.ScenarioTest):
                 "Less than 2 compute nodes, skipping multinode tests.")
 
     @decorators.idempotent_id('9cecbe35-b9d4-48da-a37e-7ce70aa43d30')
-    @decorators.attr(type='smoke')
+    @decorators.attr(type=['smoke', 'multinode'])
     @utils.services('compute', 'network')
     def test_schedule_to_all_nodes(self):
         available_zone = \

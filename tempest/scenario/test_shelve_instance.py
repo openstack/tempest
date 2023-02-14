@@ -119,7 +119,7 @@ class TestShelveInstance(manager.ScenarioTest):
     def test_shelve_volume_backed_instance(self):
         self._create_server_then_shelve_and_unshelve(boot_from_volume=True)
 
-    @decorators.attr(type='slow')
+    @decorators.attr(type=['slow', 'multinode'])
     @decorators.idempotent_id('1295fd9e-193a-4cf8-b211-55358e021bae')
     @testtools.skipUnless(CONF.network.public_network_id,
                           'The public_network_id option must be specified.')

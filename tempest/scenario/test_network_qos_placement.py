@@ -278,6 +278,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         port = self.os_admin.ports_client.show_port(not_valid_port['id'])
         self.assertEqual(0, len(port['port']['binding:profile']))
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('8a98150c-a506-49a5-96c6-73a5e7b04ada')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
                           'Cold migration is not available.')
@@ -851,6 +852,7 @@ class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
         self.assert_allocations(server, port, min_kbps, min_kpps)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('bdd0b31c-c8b0-4b7b-b80a-545a46b32abe')
     @testtools.skipUnless(
         CONF.compute_feature_enabled.cold_migration,
@@ -1033,6 +1035,7 @@ class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
         self.assert_allocations(server, port2, 0, 0)
 
+    @decorators.attr(type='multinode')
     @decorators.idempotent_id('36ffdb85-6cc2-4cc9-a426-cad5bac8626b')
     @testtools.skipUnless(
         CONF.compute.min_compute_nodes > 1,
