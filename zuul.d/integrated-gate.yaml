@@ -294,6 +294,13 @@
     vars: *tempest_slow_vars
 
 - job:
+    name: tempest-slow-parallel
+    parent: tempest-slow-py3
+    # This job run slow tests in parallel.
+    vars:
+      tox_envlist: slow
+
+- job:
     name: tempest-cinder-v2-api
     parent: devstack-tempest
     # NOTE(gmann): Cinder v2 APIs are available until
