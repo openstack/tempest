@@ -246,10 +246,15 @@
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
         neutron-trunk: true
+        br-ex-tcpdump: true
+        br-int-flows: true
     group-vars:
       subnode:
         devstack_localrc:
           USE_PYTHON3: true
+        devstack_services:
+          br-ex-tcpdump: true
+          br-int-flows: true
 
 - job:
     name: tempest-slow
