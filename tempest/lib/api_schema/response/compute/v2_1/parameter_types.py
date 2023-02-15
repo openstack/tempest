@@ -30,7 +30,7 @@ links = {
 
 mac_address = {
     'type': 'string',
-    'pattern': '(?:[a-f0-9]{2}:){5}[a-f0-9]{2}'
+    'pattern': '(?:[a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}'
 }
 
 ip_address = {
