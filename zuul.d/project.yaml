@@ -37,11 +37,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-xena:
             irrelevant-files: *tempest-irrelevant-files
-        # Temporarily marked as n-v due to the below bug which blocks
-        # the CI and complicates merging of patches.
-        # https://bugs.launchpad.net/tempest/+bug/1998916
         - tempest-multinode-full-py3:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
             irrelevant-files: &tempest-irrelevant-files-2
@@ -141,9 +137,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-ipv6-only:
             irrelevant-files: *tempest-irrelevant-files-3
-        # https://bugs.launchpad.net/tempest/+bug/1998916
-        #- tempest-multinode-full-py3:
-        #    irrelevant-files: *tempest-irrelevant-files
+        - tempest-multinode-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-enforce-scope-new-defaults:
             irrelevant-files: *tempest-irrelevant-files
         #- devstack-plugin-ceph-tempest-py3:
