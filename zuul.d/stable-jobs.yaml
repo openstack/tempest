@@ -18,6 +18,24 @@
     override-checkout: stable/xena
 
 - job:
+    name: tempest-full-zed-extra-tests
+    parent: tempest-extra-tests
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/zed
+
+- job:
+    name: tempest-full-yoga-extra-tests
+    parent: tempest-extra-tests
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/yoga
+
+- job:
+    name: tempest-full-xena-extra-tests
+    parent: tempest-extra-tests
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/xena
+
+- job:
     name: tempest-slow-zed
     parent: tempest-slow-py3
     nodeset: openstack-two-node-focal

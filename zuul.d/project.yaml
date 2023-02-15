@@ -26,6 +26,8 @@
               - ^.gitignore$
               - ^.gitreview$
               - ^.mailmap$
+        - tempest-extra-tests:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-ubuntu-focal:
             irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:
@@ -63,6 +65,7 @@
               - ^tools/tempest-integrated-gate-placement-exclude-list.txt
               - ^tools/tempest-integrated-gate-storage-blacklist.txt
               - ^tools/tempest-integrated-gate-storage-exclude-list.txt
+              - ^tools/tempest-extra-tests-list.txt
               - ^tools/verify-ipv6-only-deployments.sh
               - ^tools/with_venv.sh
               # tools/ is not here since this relies on a script in tools/.
@@ -86,6 +89,7 @@
               - ^tools/tempest-integrated-gate-placement-exclude-list.txt
               - ^tools/tempest-integrated-gate-storage-blacklist.txt
               - ^tools/tempest-integrated-gate-storage-exclude-list.txt
+              - ^tools/tempest-extra-tests-list.txt
               - ^tools/tempest-plugin-sanity.sh
               - ^tools/with_venv.sh
               - ^.coveragerc$
@@ -130,6 +134,8 @@
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
@@ -179,6 +185,9 @@
         - tempest-slow-zed
         - tempest-slow-yoga
         - tempest-slow-xena
+        - tempest-full-zed-extra-tests
+        - tempest-full-yoga-extra-tests
+        - tempest-full-xena-extra-tests
     periodic:
       jobs:
         - tempest-all

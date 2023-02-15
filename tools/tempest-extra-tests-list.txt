@@ -1,0 +1,20 @@
+# This file includes the list of tests which need to be
+# excluded to run from integrated testing (tempest-full job
+# or other generic jobs. We will run these tests in a separate
+# jobs. This is needed to avoid the job timeout, details in
+# bug#2004780.
+# Basic criteria to add test in this list is:
+# * Admin test which are not needed for interop and most of them
+#   are running as part of other API and Scenario tests.
+# * Negative tests which are mostly covered in tempest API tests
+#   or service unit/functional tests.
+
+# All admin tests except keystone admin test which might not have much
+# coverage in existing other tests
+tempest.api.compute.admin
+tempest.api.volume.admin
+tempest.api.image.admin
+tempest.api.network.admin
+
+# All negative tests
+negative
