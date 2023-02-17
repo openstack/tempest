@@ -819,21 +819,8 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         # Add a new location
         new_loc = {'metadata': {'foo': 'bar'},
                    'url': CONF.image.http_image}
-
-        # NOTE(danms): If glance was unable to fetch the remote image via
-        # HTTP, it will return BadRequest. Because this can be transient in
-        # CI, we try this a few times before we agree that it has failed
-        # for a reason worthy of failing the test.
-        for i in range(BAD_REQUEST_RETRIES):
-            try:
-                self.client.update_image(image['id'], [
-                    dict(add='/locations/-', value=new_loc)])
-                break
-            except lib_exc.BadRequest:
-                if i + 1 == BAD_REQUEST_RETRIES:
-                    raise
-                else:
-                    time.sleep(1)
+        self._update_image_with_retries(image['id'], [
+            dict(add='/locations/-', value=new_loc)])
 
         # The image should now be active, with one location that looks
         # like we expect
@@ -858,26 +845,29 @@ class ImageLocationsTest(base.BaseV2ImageTest):
     def test_set_location(self):
         self._check_set_location()
 
-    def _check_set_multiple_locations(self):
-        image = self._check_set_location()
-
-        new_loc = {'metadata': {'speed': '88mph'},
-                   'url': '%s#new' % CONF.image.http_image}
-
+    def _update_image_with_retries(self, image, patch):
         # NOTE(danms): If glance was unable to fetch the remote image via
         # HTTP, it will return BadRequest. Because this can be transient in
         # CI, we try this a few times before we agree that it has failed
         # for a reason worthy of failing the test.
         for i in range(BAD_REQUEST_RETRIES):
             try:
-                self.client.update_image(image['id'], [
-                    dict(add='/locations/-', value=new_loc)])
+                self.client.update_image(image, patch)
                 break
             except lib_exc.BadRequest:
                 if i + 1 == BAD_REQUEST_RETRIES:
                     raise
                 else:
                     time.sleep(1)
+
+    def _check_set_multiple_locations(self):
+        image = self._check_set_location()
+
+        new_loc = {'metadata': {'speed': '88mph'},
+                   'url': '%s#new' % CONF.image.http_image}
+        self._update_image_with_retries(image['id'],
+                                        [dict(add='/locations/-',
+                                              value=new_loc)])
 
         # The image should now have two locations and the last one
         # (locations are ordered) should have the new URL.
@@ -989,8 +979,9 @@ class ImageLocationsTest(base.BaseV2ImageTest):
                                        'os_hash_algo': 'sha512'},
                    'metadata': {},
                    'url': CONF.image.http_image}
-        self.client.update_image(image['id'], [
-            dict(add='/locations/-', value=new_loc)])
+        self._update_image_with_retries(image['id'],
+                                        [dict(add='/locations/-',
+                                              value=new_loc)])
 
         # Expect that all of our values ended up on the image
         image = self.client.show_image(image['id'])
@@ -1017,8 +1008,9 @@ class ImageLocationsTest(base.BaseV2ImageTest):
                                 'os_hash_algo': orig_image['os_hash_algo']},
             'metadata': {},
             'url': '%s#new' % CONF.image.http_image}
-        self.client.update_image(orig_image['id'], [
-            dict(add='/locations/-', value=new_loc)])
+        self._update_image_with_retries(orig_image['id'],
+                                        [dict(add='/locations/-',
+                                              value=new_loc)])
 
         # Setting the same exact values on a new location should work
         image = self.client.show_image(orig_image['id'])
@@ -1052,17 +1044,17 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
             # This should always fail due to the mismatch
             self.assertRaises(lib_exc.Conflict,
-                              self.client.update_image,
-                              orig_image['id'], [
-                                  dict(add='/locations/-', value=new_loc)])
+                              self._update_image_with_retries,
+                              orig_image['id'],
+                              [dict(add='/locations/-', value=new_loc)])
 
         # Now try to add a new location with all of the substitutions,
         # which should also fail
         new_loc['validation_data'] = values
         self.assertRaises(lib_exc.Conflict,
-                          self.client.update_image,
-                          orig_image['id'], [
-                              dict(add='/locations/-', value=new_loc)])
+                          self._update_image_with_retries,
+                          orig_image['id'],
+                          [dict(add='/locations/-', value=new_loc)])
 
         # Make sure nothing has changed on our image after all the
         # above failures
