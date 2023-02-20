@@ -975,12 +975,12 @@ ValidationGroup = [
                default='ecdsa',
                help='Type of key to use for ssh connections. '
                     'Valid types are rsa, ecdsa'),
-    cfg.IntOpt('allowed_network_downtime',
-               default=5.0,
-               help="Allowed VM network connection downtime during live "
-                    "migration, in seconds. "
-                    "When the measured downtime exceeds this value, an "
-                    "exception is raised."),
+    cfg.FloatOpt('allowed_network_downtime',
+                 default=5.0,
+                 help="Allowed VM network connection downtime during live "
+                      "migration, in seconds. "
+                      "When the measured downtime exceeds this value, an "
+                      "exception is raised."),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
