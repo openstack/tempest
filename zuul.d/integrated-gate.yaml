@@ -73,7 +73,11 @@
     parent: devstack-tempest
     # This job version is with swift enabled on py3
     # as swift is ready on py3 from stable/ussuri onwards.
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
+    # As this use 'integrated-full' tox env which is not
+    # available in old tempest used till stable/wallaby,
+    # this job definition is only for stable/xena onwards
+    # and separate job definition until stable/wallaby
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria|wallaby)).*$
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
       and py3.

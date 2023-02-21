@@ -56,6 +56,36 @@
 - job:
     name: tempest-full-py3
     parent: devstack-tempest
+    # This job version is to use the 'full' tox env which
+    # is available for stable/ussuri to stable/wallaby also.
+    branches:
+      - stable/ussuri
+      - stable/victoria
+      - stable/wallaby
+    description: |
+      Base integration test with Neutron networking, horizon, swift enable,
+      and py3.
+      Former names for this job where:
+        * legacy-tempest-dsvm-py35
+        * gate-tempest-dsvm-py35
+    required-projects:
+      - openstack/horizon
+    vars:
+      tox_envlist: full
+      devstack_localrc:
+        USE_PYTHON3: true
+        FORCE_CONFIG_DRIVE: true
+        ENABLE_VOLUME_MULTIATTACH: true
+        GLANCE_USE_IMPORT_WORKFLOW: True
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        # Enbale horizon so that we can run horizon test.
+        horizon: true
+
+- job:
+    name: tempest-full-py3
+    parent: devstack-tempest
     # This job version is with swift disabled on py3
     # as swift was not ready on py3 until stable/train.
     branches:
