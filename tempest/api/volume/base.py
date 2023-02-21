@@ -191,7 +191,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume_id, 'in-use')
         self.addCleanup(waiters.wait_for_volume_resource_status,
-                        self.volumes_client, volume_id, 'available')
+                        self.volumes_client, volume_id, 'available',
+                        server_id, self.servers_client)
         self.addCleanup(self.servers_client.detach_volume, server_id,
                         volume_id)
 
