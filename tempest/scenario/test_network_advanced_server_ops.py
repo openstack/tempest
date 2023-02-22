@@ -275,7 +275,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         LOG.debug("Downtime seconds measured with downtime_meter = %r",
                   downtime)
         allowed_downtime = CONF.validation.allowed_network_downtime
-        self.assertLess(
+        self.assertLessEqual(
             downtime, allowed_downtime,
             "Downtime of {} seconds is higher than expected '{}'".format(
                 downtime, allowed_downtime))
