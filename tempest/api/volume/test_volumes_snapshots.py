@@ -44,11 +44,13 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     @utils.services('compute')
     def test_snapshot_create_delete_with_volume_in_use(self):
         """Test create/delete snapshot from volume attached to server"""
-        # Create a test instance
-        server = self.create_server(wait_until='SSHABLE')
         # NOTE(zhufl) Here we create volume from self.image_ref for adding
         # coverage for "creating snapshot from non-blank volume".
         volume = self.create_volume(imageRef=self.image_ref)
+
+        # Create a test instance
+        server = self.create_server(wait_until='SSHABLE')
+
         self.attach_volume(server['id'], volume['id'])
 
         # Snapshot a volume which attached to an instance with force=False
