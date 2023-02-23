@@ -51,7 +51,10 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # Create a test instance
         server = self.create_server(wait_until='SSHABLE')
 
-        self.attach_volume(server['id'], volume['id'])
+        # NOTE(danms): We are attaching this volume to a server, but we do
+        # not need to block on detach during cleanup because we will be
+        # deleting the server anyway.
+        self.attach_volume(server['id'], volume['id'], wait_for_detach=False)
 
         # Snapshot a volume which attached to an instance with force=False
         self.assertRaises(lib_exc.BadRequest, self.create_snapshot,
@@ -83,7 +86,11 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
         # Create a server and attach it
         server = self.create_server(wait_until='SSHABLE')
-        self.attach_volume(server['id'], self.volume_origin['id'])
+        # NOTE(danms): We are attaching this volume to a server, but we do
+        # not need to block on detach during cleanup because we will be
+        # deleting the server anyway.
+        self.attach_volume(server['id'], self.volume_origin['id'],
+                           wait_for_detach=False)
 
         # Now that the volume is attached, create other snapshots
         snapshot2 = self.create_snapshot(self.volume_origin['id'], force=True)

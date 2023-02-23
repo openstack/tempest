@@ -20,6 +20,7 @@ from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib.decorators import cleanup_order
+from tempest.lib import exceptions as lib_exc
 import tempest.test
 
 CONF = config.CONF
@@ -126,11 +127,31 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 
         volume = self.volumes_client.create_volume(**kwargs)['volume']
         self.cleanup(test_utils.call_and_ignore_notfound_exc,
-                     self.delete_volume, self.volumes_client, volume['id'])
+                     self._delete_volume_for_cleanup,
+                     self.volumes_client, volume['id'])
         if wait_until:
             waiters.wait_for_volume_resource_status(self.volumes_client,
                                                     volume['id'], wait_until)
         return volume
+
+    @staticmethod
+    def _delete_volume_for_cleanup(volumes_client, volume_id):
+        """Delete a volume (only) for cleanup.
+
+        If it is attached to a server, wait for it to become available,
+        assuming we have already deleted the server and just need nova to
+        complete the delete operation before it is available to be deleted.
+        Otherwise proceed to the regular delete_volume().
+        """
+        try:
+            vol = volumes_client.show_volume(volume_id)['volume']
+            if vol['status'] == 'in-use':
+                waiters.wait_for_volume_resource_status(volumes_client,
+                                                        volume_id,
+                                                        'available')
+        except lib_exc.NotFound:
+            pass
+        BaseVolumeTest.delete_volume(volumes_client, volume_id)
 
     @cleanup_order
     def create_snapshot(self, volume_id=1, **kwargs):
@@ -183,16 +204,17 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         snapshots_client.delete_snapshot(snapshot_id)
         snapshots_client.wait_for_resource_deletion(snapshot_id)
 
-    def attach_volume(self, server_id, volume_id):
+    def attach_volume(self, server_id, volume_id, wait_for_detach=True):
         """Attach a volume to a server"""
         self.servers_client.attach_volume(
             server_id, volumeId=volume_id,
             device='/dev/%s' % CONF.compute.volume_device_name)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume_id, 'in-use')
-        self.addCleanup(waiters.wait_for_volume_resource_status,
-                        self.volumes_client, volume_id, 'available',
-                        server_id, self.servers_client)
+        if wait_for_detach:
+            self.addCleanup(waiters.wait_for_volume_resource_status,
+                            self.volumes_client, volume_id, 'available',
+                            server_id, self.servers_client)
         self.addCleanup(self.servers_client.detach_volume, server_id,
                         volume_id)
 
