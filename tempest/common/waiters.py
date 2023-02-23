@@ -303,12 +303,16 @@ def wait_for_image_copied_to_stores(client, image_id):
     raise lib_exc.TimeoutException(message)
 
 
-def wait_for_volume_resource_status(client, resource_id, status):
+def wait_for_volume_resource_status(client, resource_id, status,
+                                    server_id=None, servers_client=None):
     """Waits for a volume resource to reach a given status.
 
     This function is a common function for volume, snapshot and backup
     resources. The function extracts the name of the desired resource from
     the client class name of the resource.
+
+    If server_id and servers_client are provided, dump the console for that
+    server on failure.
     """
     resource_name = re.findall(
         r'(volume|group-snapshot|snapshot|backup|group)',
@@ -330,6 +334,11 @@ def wait_for_volume_resource_status(client, resource_id, status):
             raise exceptions.VolumeExtendErrorException(volume_id=resource_id)
 
         if int(time.time()) - start >= client.build_timeout:
+            if server_id and servers_client:
+                console_output = servers_client.get_console_output(
+                    server_id)['output']
+                LOG.debug('Console output for %s\nbody=\n%s',
+                          server_id, console_output)
             message = ('%s %s failed to reach %s status (current %s) '
                        'within the required time (%s s).' %
                        (resource_name, resource_id, status, resource_status,

@@ -386,6 +386,29 @@ class TestVolumeWaiters(base.TestCase):
         mock_sleep.assert_called_once_with(1)
 
     @mock.patch.object(time, 'sleep')
+    def test_wait_for_volume_status_timeout_console(self, mock_sleep):
+        # Tests that the wait method gets the server console log if the
+        # timeout is hit.
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1)
+        servers_client = mock.Mock()
+        servers_client.get_console_output.return_value = {
+            'output': 'console log'}
+        volume = {'volume': {'status': 'detaching'}}
+        mock_show = mock.Mock(return_value=volume)
+        client.show_volume = mock_show
+        volume_id = '7532b91e-aa0a-4e06-b3e5-20c0c5ee1caa'
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_resource_status,
+                          client, volume_id, 'available',
+                          server_id='someserver',
+                          servers_client=servers_client)
+        servers_client.get_console_output.assert_called_once_with(
+            'someserver')
+
+    @mock.patch.object(time, 'sleep')
     def test_wait_for_volume_status_error_extending(self, mock_sleep):
         # Tests that the wait method raises VolumeExtendErrorException if
         # the volume status is 'error_extending'.
