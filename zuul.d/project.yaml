@@ -156,6 +156,11 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
             irrelevant-files: *tempest-irrelevant-files
+        - tempest-slow-parallel
+        - tempest-full-parallel
+        - tempest-full-zed-extra-tests
+        - tempest-full-yoga-extra-tests
+        - tempest-full-xena-extra-tests
         - neutron-ovs-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - nova-tempest-v2-api:
