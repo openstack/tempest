@@ -1,0 +1,19 @@
+---
+fixes:
+  - |
+    There was a bug (bug#1964509) in dynamic credentials creation where
+    project credentials with different roles are created with the new
+    projects. Credential of different role of projects must be created
+    within the same project. For exmaple, 'project_admin', 'project_member',
+    'project_reader', and 'primary', credentials will be created in the
+    same projects. 'alt', 'project_alt_admin', 'project_alt_member',
+    'project_alt_reader' will be created within the same project.
+
+    'admin' credenatials is considered and kept as legacy admin and
+    will be created under new project. If any test want to test with
+    admin role in projectA and non-admin/admin in projectB then test
+    can request projectA admin using 'admin' or 'project_alt_admin'
+    and non-admin in projectB using 'primary', 'project_member',
+    or 'project_reader'/admin in projectB using 'project_admin'. Many
+    existing tests using the 'admin' with new project to assert on the
+    resource list so we are keeping 'admin' a kind of legacy admin.

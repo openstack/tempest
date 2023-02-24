@@ -203,6 +203,10 @@ Project scoped personas:
                  cls.az_p_reader_client = (
                      cls.os_project_reader.availability_zone_client)
 
+     .. note::
+         'primary', 'project_admin', 'project_member', and 'project_reader'
+         credentials will be created under same project.
+
   #. Project alternate Admin: This is supported and can be requested and used from
      the test as below:
 
@@ -248,6 +252,10 @@ Project scoped personas:
                  cls.az_p_alt_reader_client = (
                      cls.os_project_alt_reader.availability_zone_client)
 
+     .. note::
+         'alt', 'project_alt_admin', 'project_alt_member', and
+         'project_alt_reader' credentials will be created under same project.
+
   #. Project other roles: This is supported and can be requested and used from
      the test as below:
 
@@ -268,6 +276,16 @@ Project scoped personas:
                      cls.os_project_my_role1.availability_zone_client)
                  cls.az_role2_client = (
                      cls.os_project_my_role2.availability_zone_client)
+
+  .. note::
+      'admin' credenatials is considered and kept as legacy admin and
+      will be created under new project. If any test want to test with
+      admin role in projectA and non-admin/admin in projectB then test
+      can request projectA admin using 'admin' or 'project_alt_admin'
+      and non-admin in projectB using 'primary', 'project_member',
+      or 'project_reader'/admin in projectB using 'project_admin'. Many
+      existing tests using the 'admin' with new project to assert on the
+      resource list so we are keeping 'admin' a kind of legacy admin.
 
 Pre-Provisioned Credentials
 ---------------------------
