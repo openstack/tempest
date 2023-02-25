@@ -11,10 +11,11 @@
     vars:
       tox_envlist: all
       tempest_test_regex: tempest
-      # TODO(gmann): Enable File injection tests once nova bug is fixed
-      # https://bugs.launchpad.net/nova/+bug/1882421
-      # devstack_localrc:
-      #   ENABLE_FILE_INJECTION: true
+      devstack_localrc:
+        MYSQL_REDUCE_MEMORY: true
+        # TODO(gmann): Enable File injection tests once nova bug is fixed
+        # https://bugs.launchpad.net/nova/+bug/1882421
+        #   ENABLE_FILE_INJECTION: true
 
 - job:
     name: tempest-ipv6-only
@@ -318,6 +319,8 @@
     # This job run slow tests in parallel.
     vars:
       tox_envlist: slow
+      devstack_localrc:
+        MYSQL_REDUCE_MEMORY: true
 
 - job:
     name: tempest-cinder-v2-api
