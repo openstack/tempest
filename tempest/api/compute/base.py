@@ -568,7 +568,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             # is already detached.
             pass
 
-    def attach_volume(self, server, volume, device=None, tag=None):
+    def attach_volume(self, server, volume, device=None, tag=None,
+                      wait_for_detach=True):
         """Attaches volume to server and waits for 'in-use' volume status.
 
         The volume will be detached when the test tears down.
@@ -605,7 +606,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         # the contents of the console log. The final check of the volume state
         # should be a no-op by this point and is just added for completeness
         # when detaching non-multiattach volumes.
-        if not volume['multiattach']:
+        if not volume['multiattach'] and wait_for_detach:
             self.addCleanup(
                 waiters.wait_for_volume_resource_status, self.volumes_client,
                 volume['id'], 'available')

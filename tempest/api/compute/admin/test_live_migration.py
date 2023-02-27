@@ -202,7 +202,8 @@ class LiveMigrationTest(LiveMigrationTestBase):
         volume = self.create_volume()
 
         # Attach the volume to the server
-        self.attach_volume(server, volume, device='/dev/xvdb')
+        self.attach_volume(server, volume, device='/dev/xvdb',
+                           wait_for_detach=False)
         server = self.admin_servers_client.show_server(server_id)['server']
         volume_id1 = server["os-extended-volumes:volumes_attached"][0]["id"]
         self._live_migrate(server_id, target_host, 'ACTIVE')
