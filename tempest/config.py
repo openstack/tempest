@@ -1015,6 +1015,10 @@ VolumeGroup = [
     cfg.StrOpt('volume_type',
                default='',
                help='Volume type to be used while creating volume.'),
+    cfg.StrOpt('volume_type_multiattach',
+               default='',
+               help='Multiattach volume type used while creating multiattach '
+                    'volume.'),
     cfg.StrOpt('storage_protocol',
                default='iSCSI',
                help='Backend protocol to target when creating volume types'),

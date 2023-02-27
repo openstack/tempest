@@ -199,11 +199,12 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
            "server1"
         8. Check "volume2" is attached to "server1".
         """
+        multiattach_vol_type = CONF.volume.volume_type_multiattach
         # Create two volumes.
         # NOTE(gmann): Volumes are created before server creation so that
         # volumes cleanup can happen successfully irrespective of which volume
         # is attached to server.
-        volume1 = self.create_volume(multiattach=True)
+        volume1 = self.create_volume(volume_type=multiattach_vol_type)
         # Make volume1 read-only since you can't swap from a volume with
         # multiple read/write attachments, and you can't change the readonly
         # flag on an in-use volume so we have to do this before attaching
@@ -211,7 +212,7 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
         # attach modes, then we can handle this differently.
         self.admin_volumes_client.update_volume_readonly(
             volume1['id'], readonly=True)
-        volume2 = self.create_volume(multiattach=True)
+        volume2 = self.create_volume(volume_type=multiattach_vol_type)
 
         # Create two servers and wait for them to be ACTIVE.
         validation_resources = self.get_class_validation_resources(
