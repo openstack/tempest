@@ -18,7 +18,7 @@ from oslo_utils import timeutils
 
 # JSON Schema validator and format checker used for JSON Schema validation
 JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
-FORMAT_CHECKER = jsonschema.draft4_format_checker
+FORMAT_CHECKER = jsonschema.Draft4Validator.FORMAT_CHECKER
 
 
 # NOTE(gmann): Add customized format checker for 'date-time' format because:
@@ -39,7 +39,7 @@ def _validate_datetime_format(instance):
         return True
 
 
-@jsonschema.FormatChecker.cls_checks('base64')
+@FORMAT_CHECKER.checks('base64')
 def _validate_base64_format(instance):
     try:
         if isinstance(instance, str):
