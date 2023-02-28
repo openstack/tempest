@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest.common import waiters
 from tempest.lib import decorators
 
 
@@ -34,8 +35,15 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
             wait_until='ACTIVE',
             min_count=2,
             tenant_network=tenant_network)
+
+        for server in servers:
+            self.addCleanup(waiters.wait_for_server_termination,
+                            self.servers_client,
+                            server['id'])
+
         for server in servers:
             self.addCleanup(self.servers_client.delete_server, server['id'])
+
         # NOTE(maurosr): do status response check and also make sure that
         # reservation_id is not in the response body when the request send
         # contains return_reservation_id=False
