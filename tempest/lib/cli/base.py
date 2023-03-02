@@ -97,6 +97,10 @@ class CLIClient(object):
     :type identity_api_version: string
     """
 
+    CLIENTS_WITHOUT_IDENTITY_VERSION = ['nova', 'nova_manage', 'keystone',
+                                        'glance', 'ceilometer', 'heat',
+                                        'cinder', 'neutron', 'sahara']
+
     def __init__(self, username='', password='', tenant_name='', uri='',
                  cli_dir='', insecure=False, prefix='', user_domain_name=None,
                  user_domain_id=None, project_domain_name=None,
@@ -377,8 +381,9 @@ class CLIClient(object):
                   self.password,
                   self.uri))
         if self.identity_api_version:
-            creds += ' --os-identity-api-version %s' % (
-                self.identity_api_version)
+            if cmd not in self.CLIENTS_WITHOUT_IDENTITY_VERSION:
+                creds += ' --os-identity-api-version %s' % (
+                    self.identity_api_version)
         if self.user_domain_name is not None:
             creds += ' --os-user-domain-name %s' % self.user_domain_name
         if self.user_domain_id is not None:
