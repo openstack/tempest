@@ -462,9 +462,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         self, server_id, new_flavor_id, wait_until='ACTIVE', **kwargs
     ):
         """resize and confirm_resize an server, waits for it to be ACTIVE."""
-        self.servers_client.resize_server(server_id, new_flavor_id, **kwargs)
-        waiters.wait_for_server_status(self.servers_client, server_id,
-                                       'VERIFY_RESIZE')
+        body = self.servers_client.resize_server(
+            server_id, new_flavor_id, **kwargs)
+        waiters.wait_for_server_status(
+            self.servers_client, server_id, 'VERIFY_RESIZE',
+            request_id=body.response['x-openstack-request-id'])
         self.servers_client.confirm_resize_server(server_id)
 
         waiters.wait_for_server_status(
