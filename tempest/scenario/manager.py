@@ -325,13 +325,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_volume(self, size=None, name=None, snapshot_id=None,
                       imageRef=None, volume_type=None, wait_until='available',
-                      **kwargs):
+                      client=None, **kwargs):
         """Creates volume
 
         This wrapper utility creates volume and waits for volume to be
         in 'available' state by default. If wait_until is None, means no wait.
         This method returns the volume's full representation by GET request.
         """
+        if client is None:
+            client = self.volumes_client
 
         if size is None:
             size = CONF.volume.volume_size
@@ -355,19 +357,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
             kwargs.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
 
-        volume = self.volumes_client.create_volume(**kwargs)['volume']
+        volume = client.create_volume(**kwargs)['volume']
 
-        self.addCleanup(self.volumes_client.wait_for_resource_deletion,
+        self.addCleanup(client.wait_for_resource_deletion,
                         volume['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.volumes_client.delete_volume, volume['id'])
+                        client.delete_volume, volume['id'])
         self.assertEqual(name, volume['name'])
         if wait_until:
-            waiters.wait_for_volume_resource_status(self.volumes_client,
+            waiters.wait_for_volume_resource_status(client,
                                                     volume['id'], wait_until)
             # The volume retrieved on creation has a non-up-to-date status.
             # Retrieval after it becomes active ensures correct details.
-            volume = self.volumes_client.show_volume(volume['id'])['volume']
+            volume = client.show_volume(volume['id'])['volume']
+
         return volume
 
     def create_backup(self, volume_id, name=None, description=None,
@@ -858,32 +861,43 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   image_name, server['name'])
         return snapshot_image
 
-    def nova_volume_attach(self, server, volume_to_attach, **kwargs):
+    def nova_volume_attach(self, server, volume_to_attach,
+                           volumes_client=None, servers_client=None,
+                           **kwargs):
         """Compute volume attach
 
         This utility attaches volume from compute and waits for the
         volume status to be 'in-use' state.
         """
-        volume = self.servers_client.attach_volume(
+        if volumes_client is None:
+            volumes_client = self.volumes_client
+        if servers_client is None:
+            servers_client = self.servers_client
+
+        volume = servers_client.attach_volume(
             server['id'], volumeId=volume_to_attach['id'],
             **kwargs)['volumeAttachment']
         self.assertEqual(volume_to_attach['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
+        waiters.wait_for_volume_resource_status(volumes_client,
                                                 volume['id'], 'in-use')
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.nova_volume_detach, server, volume)
+                        self.nova_volume_detach, server, volume,
+                        servers_client)
         # Return the updated volume after the attachment
-        return self.volumes_client.show_volume(volume['id'])['volume']
+        return volumes_client.show_volume(volume['id'])['volume']
 
-    def nova_volume_detach(self, server, volume):
+    def nova_volume_detach(self, server, volume, servers_client=None):
         """Compute volume detach
 
         This utility detaches the volume from the server and checks whether the
         volume attachment has been removed from Nova.
         """
-        self.servers_client.detach_volume(server['id'], volume['id'])
+        if servers_client is None:
+            servers_client = self.servers_client
+
+        servers_client.detach_volume(server['id'], volume['id'])
         waiters.wait_for_volume_attachment_remove_from_server(
-            self.servers_client, server['id'], volume['id'])
+            servers_client, server['id'], volume['id'])
 
     def ping_ip_address(self, ip_address, should_succeed=True,
                         ping_timeout=None, mtu=None, server=None):
