@@ -61,7 +61,7 @@
 
 - job:
     name: tempest-extra-tests
-    parent: devstack-tempest
+    parent: tempest-full-py3
     description: |
       This job runs the extra tests mentioned in
       tools/tempest-extra-tests-list.txt.
