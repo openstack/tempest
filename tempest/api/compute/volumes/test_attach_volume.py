@@ -369,7 +369,9 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
         kwargs = {}
         if bootable:
             kwargs['image_ref'] = CONF.compute.image_ref
-        return self.create_volume(multiattach=True, **kwargs)
+        multiattach_vol_type = CONF.volume.volume_type_multiattach
+        return self.create_volume(volume_type=multiattach_vol_type,
+                                  **kwargs)
 
     def _create_and_multiattach(self):
         """Creates two server instances and a volume and attaches to both.

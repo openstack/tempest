@@ -115,9 +115,11 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         5. Check "vol1" is still attached to both servers
         6. Check "vol2" is not attached to any server
         """
+        multiattach_vol_type = CONF.volume.volume_type_multiattach
+
         # Create two multiattach capable volumes.
-        vol1 = self.create_volume(multiattach=True)
-        vol2 = self.create_volume(multiattach=True)
+        vol1 = self.create_volume(volume_type=multiattach_vol_type)
+        vol2 = self.create_volume(volume_type=multiattach_vol_type)
 
         # Create two instances.
         validation_resources = self.get_class_validation_resources(
