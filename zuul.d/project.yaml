@@ -33,7 +33,12 @@
         - glance-multistore-cinder-import:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-zed:
+        # NOTE(gmann): We will be testing the latest and oldest
+        # supported stable branch in Tempest master gate with assuming
+        # if things are working in latest and oldest it will work in between
+        # stable branches also. If anything is breaking we will be catching
+        # those in respective stable branch gate.
+        - tempest-full-2023-1:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-xena:
             irrelevant-files: *tempest-irrelevant-files
@@ -179,12 +184,15 @@
             irrelevant-files: *tempest-irrelevant-files
     periodic-stable:
       jobs:
+        - tempest-full-2023-1
         - tempest-full-zed
         - tempest-full-yoga
         - tempest-full-xena
+        - tempest-slow-2023-1
         - tempest-slow-zed
         - tempest-slow-yoga
         - tempest-slow-xena
+        - tempest-full-2023-1-extra-tests
         - tempest-full-zed-extra-tests
         - tempest-full-yoga-extra-tests
         - tempest-full-xena-extra-tests
