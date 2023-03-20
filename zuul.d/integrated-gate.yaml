@@ -410,6 +410,8 @@
         - grenade
         - grenade-skip-level:
             voting: false
+            branches:
+              - stable/2023.1
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -444,6 +446,17 @@
       jobs:
         - grenade-skip-level:
             voting: false
+            branches:
+              - stable/2023.1
+        # NOTE(gmann): Nova decided to run grenade skip level testing always
+        # (on SLURP as well as non SLURP release) so we are adding grenade-skip-level-always
+        # job in integrated gate and we do not need to update skip level job
+        # here until Nova change the decision.
+        # This is added from 2023.2 relese cycle onwards so we need to use branch variant
+        # to make sure we do not run this job on older than 2023.2 gate.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-compute
         # centos-8-stream is tested from wallaby -> yoga branches
         - tempest-integrated-compute-centos-8-stream:
@@ -456,6 +469,9 @@
             branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
     gate:
       jobs:
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
             branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
@@ -477,6 +493,8 @@
         - grenade
         - grenade-skip-level:
             voting: false
+            branches:
+              - stable/2023.1
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -507,6 +525,8 @@
         - grenade
         - grenade-skip-level:
             voting: false
+            branches:
+              - stable/2023.1
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
