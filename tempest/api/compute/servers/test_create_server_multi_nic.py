@@ -23,6 +23,28 @@ from tempest.lib import decorators
 CONF = config.CONF
 
 
+def get_subnets(count=2):
+    """Returns a list of requested subnets from project_network_cidr block.
+
+    Args:
+        count (int):    Number of blocks required.
+
+    Returns:
+        CIDRs as a list of strings
+            e.g. ['19.80.0.0/24', '19.86.0.0/24']
+    """
+    default_rtn = ['19.80.0.0/24', '19.86.0.0/24']
+    _net = netaddr.IPNetwork(CONF.network.project_network_cidr)
+
+    # Split the subnet into the requested number of smaller subnets.
+    sub_prefix_len = (32 - _net.prefixlen) // count
+    if sub_prefix_len < 1:
+        return default_rtn
+
+    _new_cidr = _net.prefixlen + sub_prefix_len
+    return [str(net) for _, net in zip(range(count), _net.subnet(_new_cidr))]
+
+
 class ServersTestMultiNic(base.BaseV2ComputeTest):
     """Test multiple networks in servers"""
 
@@ -65,8 +87,9 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         The networks order given at the server creation is preserved within
         the server.
         """
-        net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')
-        net2 = self._create_net_subnet_ret_net_from_cidr('19.86.0.0/24')
+        _cidrs = get_subnets()
+        net1 = self._create_net_subnet_ret_net_from_cidr(_cidrs[0])
+        net2 = self._create_net_subnet_ret_net_from_cidr(_cidrs[1])
 
         networks = [{'uuid': net1['network']['id']},
                     {'uuid': net2['network']['id']}]
@@ -86,14 +109,12 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
                      ['addresses'])
 
         # We can't predict the ip addresses assigned to the server on networks.
-        # Sometimes the assigned addresses are ['19.80.0.2', '19.86.0.2'], at
-        # other times ['19.80.0.3', '19.86.0.3']. So we check if the first
-        # address is in first network, similarly second address is in second
-        # network.
+        # So we check if the first address is in first network, similarly
+        # second address is in second network.
         addr = [addresses[net1['network']['name']][0]['addr'],
                 addresses[net2['network']['name']][0]['addr']]
-        networks = [netaddr.IPNetwork('19.80.0.0/24'),
-                    netaddr.IPNetwork('19.86.0.0/24')]
+        networks = [netaddr.IPNetwork(_cidrs[0]),
+                    netaddr.IPNetwork(_cidrs[1])]
         for address, network in zip(addr, networks):
             self.assertIn(address, network)
 
@@ -107,8 +128,9 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         """
         # Verify that server creation does not fail when more than one nic
         # is created on the same network.
-        net1 = self._create_net_subnet_ret_net_from_cidr('19.80.0.0/24')
-        net2 = self._create_net_subnet_ret_net_from_cidr('19.86.0.0/24')
+        _cidrs = get_subnets()
+        net1 = self._create_net_subnet_ret_net_from_cidr(_cidrs[0])
+        net2 = self._create_net_subnet_ret_net_from_cidr(_cidrs[1])
 
         networks = [{'uuid': net1['network']['id']},
                     {'uuid': net2['network']['id']},
@@ -124,8 +146,8 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         addr = [addresses[net1['network']['name']][0]['addr'],
                 addresses[net2['network']['name']][0]['addr'],
                 addresses[net1['network']['name']][1]['addr']]
-        networks = [netaddr.IPNetwork('19.80.0.0/24'),
-                    netaddr.IPNetwork('19.86.0.0/24'),
-                    netaddr.IPNetwork('19.80.0.0/24')]
+        networks = [netaddr.IPNetwork(_cidrs[0]),
+                    netaddr.IPNetwork(_cidrs[1]),
+                    netaddr.IPNetwork(_cidrs[0])]
         for address, network in zip(addr, networks):
             self.assertIn(address, network)
