@@ -166,6 +166,7 @@
         - tempest-full-zed-extra-tests
         - tempest-full-yoga-extra-tests
         - tempest-full-xena-extra-tests
+        - tempest-full-enforce-scope-new-defaults-zed
         - neutron-ovs-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
         - nova-tempest-v2-api:
@@ -207,3 +208,4 @@
         - tempest-centos9-stream-fips
         - tempest-full-centos-9-stream
         - tempest-full-test-account-no-admin-py3
+        - tempest-full-enforce-scope-new-defaults-zed
