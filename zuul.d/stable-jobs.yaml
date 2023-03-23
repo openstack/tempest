@@ -54,6 +54,12 @@
     override-checkout: stable/2023-1
 
 - job:
+    name: tempest-full-enforce-scope-new-defaults-zed
+    parent: tempest-full-enforce-scope-new-defaults
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/zed
+
+- job:
     name: tempest-slow-zed
     parent: tempest-slow-py3
     nodeset: openstack-two-node-focal
