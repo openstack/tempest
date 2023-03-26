@@ -342,11 +342,11 @@
     description: |
       Integration testing for a FIPS enabled Centos 8 system
     nodeset: devstack-single-node-centos-8-stream
-    pre-run: playbooks/enable-fips.yaml
     vars:
       tox_envlist: full
       configure_swap_size: 4096
       nslookup_target: 'opendev.org'
+      enable_fips: True
 
 - job:
     name: tempest-centos9-stream-fips
@@ -355,11 +355,11 @@
       Integration testing for a FIPS enabled Centos 9 system
     timeout: 10800
     nodeset: devstack-single-node-centos-9-stream
-    pre-run: playbooks/enable-fips.yaml
     vars:
       tox_envlist: full
       configure_swap_size: 4096
       nslookup_target: 'opendev.org'
+      enable_fips: True
 
 - job:
     name: tempest-pg-full
