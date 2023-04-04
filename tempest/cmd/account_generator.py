@@ -155,7 +155,7 @@ def generate_resources(cred_provider, admin):
     # Create the list of resources to be provisioned for each process
     # NOTE(andreaf) get_credentials expects a string for types or a list for
     # roles. Adding all required inputs to the spec list.
-    spec = ['primary', 'alt']
+    spec = ['primary', 'alt', 'project_reader']
     if CONF.service_available.swift:
         spec.append([CONF.object_storage.operator_role])
         spec.append([CONF.object_storage.reseller_admin_role])
@@ -163,8 +163,13 @@ def generate_resources(cred_provider, admin):
         spec.append('admin')
     resources = []
     for cred_type in spec:
+        scope = None
+        if "_" in cred_type:
+            scope = cred_type.split("_")[0]
+            cred_type = cred_type.split("_")[1:2]
+
         resources.append((cred_type, cred_provider.get_credentials(
-            credential_type=cred_type)))
+            credential_type=cred_type, scope=scope)))
     return resources
 
 

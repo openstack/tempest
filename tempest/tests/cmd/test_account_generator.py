@@ -153,13 +153,14 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=False)
         resource_types = [k for k, _ in resources]
-        # No admin, no swift, expect two credentials only
-        self.assertEqual(2, len(resources))
-        # Ensure create_user was invoked twice (two distinct users)
-        self.assertEqual(2, self.user_create_fixture.mock.call_count)
+        # No admin, no swift, expect three credentials only
+        self.assertEqual(3, len(resources))
+        # Ensure create_user was invoked three times (three distinct users)
+        self.assertEqual(3, self.user_create_fixture.mock.call_count)
         self.assertIn('primary', resource_types)
         self.assertIn('alt', resource_types)
         self.assertNotIn('admin', resource_types)
+        self.assertIn(['reader'], resource_types)
         self.assertNotIn(['fake_operator'], resource_types)
         self.assertNotIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
@@ -178,12 +179,13 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
             self.cred_provider, admin=True)
         resource_types = [k for k, _ in resources]
         # Admin, no swift, expect three credentials only
-        self.assertEqual(3, len(resources))
-        # Ensure create_user was invoked 3 times (3 distinct users)
-        self.assertEqual(3, self.user_create_fixture.mock.call_count)
+        self.assertEqual(4, len(resources))
+        # Ensure create_user was invoked 4 times (4 distinct users)
+        self.assertEqual(4, self.user_create_fixture.mock.call_count)
         self.assertIn('primary', resource_types)
         self.assertIn('alt', resource_types)
         self.assertIn('admin', resource_types)
+        self.assertIn(['reader'], resource_types)
         self.assertNotIn(['fake_operator'], resource_types)
         self.assertNotIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
@@ -201,13 +203,14 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=True)
         resource_types = [k for k, _ in resources]
-        # all options on, expect five credentials
-        self.assertEqual(5, len(resources))
-        # Ensure create_user was invoked 5 times (5 distinct users)
-        self.assertEqual(5, self.user_create_fixture.mock.call_count)
+        # all options on, expect six credentials
+        self.assertEqual(6, len(resources))
+        # Ensure create_user was invoked 6 times (6 distinct users)
+        self.assertEqual(6, self.user_create_fixture.mock.call_count)
         self.assertIn('primary', resource_types)
         self.assertIn('alt', resource_types)
         self.assertIn('admin', resource_types)
+        self.assertIn(['reader'], resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
         for resource in resources:
@@ -224,13 +227,14 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=False)
         resource_types = [k for k, _ in resources]
-        # No Admin, swift, expect four credentials only
-        self.assertEqual(4, len(resources))
-        # Ensure create_user was invoked 4 times (4 distinct users)
-        self.assertEqual(4, self.user_create_fixture.mock.call_count)
+        # No Admin, swift, expect five credentials only
+        self.assertEqual(5, len(resources))
+        # Ensure create_user was invoked 5 times (5 distinct users)
+        self.assertEqual(5, self.user_create_fixture.mock.call_count)
         self.assertIn('primary', resource_types)
         self.assertIn('alt', resource_types)
         self.assertNotIn('admin', resource_types)
+        self.assertIn(['reader'], resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
@@ -284,14 +288,14 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         # Ordered args in [0], keyword args in [1]
         accounts, f = yaml_dump_mock.call_args[0]
         self.assertEqual(handle, f)
-        self.assertEqual(5, len(accounts))
+        self.assertEqual(6, len(accounts))
         if self.domain_is_in:
             self.assertIn('domain_name', accounts[0].keys())
         else:
             self.assertNotIn('domain_name', accounts[0].keys())
         self.assertEqual(1, len([x for x in accounts if
                                  x.get('types') == ['admin']]))
-        self.assertEqual(2, len([x for x in accounts if 'roles' in x]))
+        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
         for account in accounts:
             self.assertIn('resources', account)
             self.assertIn('network', account.get('resources'))
@@ -315,14 +319,14 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         # Ordered args in [0], keyword args in [1]
         accounts, f = yaml_dump_mock.call_args[0]
         self.assertEqual(handle, f)
-        self.assertEqual(5, len(accounts))
+        self.assertEqual(6, len(accounts))
         if self.domain_is_in:
             self.assertIn('domain_name', accounts[0].keys())
         else:
             self.assertNotIn('domain_name', accounts[0].keys())
         self.assertEqual(1, len([x for x in accounts if
                                  x.get('types') == ['admin']]))
-        self.assertEqual(2, len([x for x in accounts if 'roles' in x]))
+        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
         for account in accounts:
             self.assertIn('resources', account)
             self.assertIn('network', account.get('resources'))
