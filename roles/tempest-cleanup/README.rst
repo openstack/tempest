@@ -40,6 +40,12 @@ saved_state.json file.
    some must have been leaked. This can be also used to verify that tempest
    cleanup was successful.
 
+.. zuul:rolevar:: run_tempest_cleanup_prefix
+   :default: false
+
+   When true, tempest cleanup will be called with '--prefix tempest' to delete
+   only resources with names that match the prefix. This option can be used
+   together with dry_run.
 
 Role usage
 ----------

@@ -17,6 +17,16 @@
     # fail early if anything missing the IPv6 settings or deployments.
     - devstack-ipv6-only-deployments-verification
   tasks:
+    - name: Run tempest cleanup init-saved-state
+      include_role:
+        name: tempest-cleanup
+      vars:
+        init_saved_state: true
+      when: (run_tempest_dry_cleanup is defined and run_tempest_dry_cleanup | bool) or
+            (run_tempest_cleanup is defined and run_tempest_cleanup | bool) or
+            (run_tempest_fail_if_leaked_resources is defined and run_tempest_fail_if_leaked_resources | bool) or
+            (run_tempest_cleanup_prefix is defined and run_tempest_cleanup_prefix | bool)
+
     - name: Run Tempest version <= 26.0.0
       include_role:
         name: run-tempest-26
@@ -30,3 +40,15 @@
       when:
         - zuul.branch is defined
         - zuul.branch not in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein"]
+
+    - name: Run tempest cleanup dry-run
+      include_role:
+        name: tempest-cleanup
+      vars:
+        dry_run: true
+      when: run_tempest_dry_cleanup is defined and run_tempest_dry_cleanup | bool
+
+    - name: Run tempest cleanup
+      include_role:
+        name: tempest-cleanup
+      when: run_tempest_cleanup is defined and run_tempest_cleanup | bool

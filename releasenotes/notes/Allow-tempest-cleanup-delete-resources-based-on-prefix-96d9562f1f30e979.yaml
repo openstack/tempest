@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    We add a new argument, ``--prefix``, to ``tempest cleanup`` tool that will
+    allow users delete only resources that match the prefix. When this option
+    is used, ``saved_state.json`` file is not needed (no need to run with
+    ``--init-saved-state`` first). If there is one, it will be ignored and the
+    cleanup will be done based on the given prefix only.
+    Note, that some resources are not named thus they will not be deleted when
+    filtering based on the prefix.

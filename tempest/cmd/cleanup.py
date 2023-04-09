@@ -28,6 +28,10 @@ Example Run
 
 .. warning::
 
+    We advice not to run tempest cleanup on production environments.
+
+.. warning::
+
     If step 1 is skipped in the example below, the cleanup procedure
     may delete resources that existed in the cloud before the test run. This
     may cause an unwanted destruction of cloud resources, so use caution with
@@ -45,7 +49,10 @@ Runtime Arguments
 * ``--init-saved-state``: Initializes the saved state of the OpenStack
   deployment and will output a ``saved_state.json`` file containing resources
   from your deployment that will be preserved from the cleanup command. This
-  should be done prior to running Tempest tests.
+  should be done prior to running Tempest tests. Note, that if other users of
+  your cloud could have created resources after running ``--init-saved-state``,
+  it would not protect those resources as they wouldn't be present in the
+  saved_state.json file.
 
 * ``--delete-tempest-conf-objects``: If option is present, then the command
   will delete the admin project in addition to the resources associated with
@@ -58,7 +65,27 @@ Runtime Arguments
   global objects that will be removed (domains, flavors, images, roles,
   projects, and users). Once the cleanup command is executed (e.g. run without
   parameters), running it again with ``--dry-run`` should yield an empty
-  report.
+  report. We STRONGLY ENCOURAGE to run ``tempest cleanup`` with ``--dry-run``
+  first and then verify that the resources listed in the ``dry_run.json`` file
+  are meant to be deleted.
+
+* ``--prefix``: Only resources that match the prefix will be deleted. When this
+  option is used, ``saved_state.json`` file is not needed (no need to run with
+  ``--init-saved-state`` first).
+
+  All tempest resources are created with the prefix value from the config
+  option ``resource_name_prefix`` in tempest.conf. To cleanup only the
+  resources created by tempest, you should use the prefix set in your
+  tempest.conf (the default value of ``resource_name_prefix`` is ``tempest``.
+
+  Note, that some resources are not named thus they will not be deleted when
+  filtering based on the prefix. This option will be ignored when
+  ``--init-saved-state`` is used so that it can capture the true init state -
+  all resources present at that moment. If there is any ``saved_state.json``
+  file present (e.g. if you ran the tempest cleanup with ``--init-saved-state``
+  before) and you run the tempest cleanup with ``--prefix``, the
+  ``saved_state.json`` file will be ignored and cleanup will be done based on
+  the passed prefix only.
 
 * ``--help``: Print the help text for the command and parameters.
 
@@ -157,6 +184,7 @@ class TempestCleanup(command.Command):
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
         is_save_state = False
+        cleanup_prefix = self.options.prefix
 
         if is_dry_run:
             self.dry_run_data["_projects_to_clean"] = {}
@@ -168,7 +196,8 @@ class TempestCleanup(command.Command):
                   'is_dry_run': is_dry_run,
                   'saved_state_json': self.json_data,
                   'is_preserve': False,
-                  'is_save_state': is_save_state}
+                  'is_save_state': is_save_state,
+                  'prefix': cleanup_prefix}
         project_service = cleanup_service.ProjectService(admin_mgr, **kwargs)
         projects = project_service.list()
         LOG.info("Processing %s projects", len(projects))
@@ -182,6 +211,7 @@ class TempestCleanup(command.Command):
                   'saved_state_json': self.json_data,
                   'is_preserve': is_preserve,
                   'is_save_state': is_save_state,
+                  'prefix': cleanup_prefix,
                   'got_exceptions': self.GOT_EXCEPTIONS}
         LOG.info("Processing global services")
         for service in self.global_services:
@@ -206,6 +236,7 @@ class TempestCleanup(command.Command):
         project_id = project['id']
         project_name = project['name']
         project_data = None
+        cleanup_prefix = self.options.prefix
         if is_dry_run:
             project_data = dry_run_data["_projects_to_clean"][project_id] = {}
             project_data['name'] = project_name
@@ -216,6 +247,7 @@ class TempestCleanup(command.Command):
                   'is_preserve': is_preserve,
                   'is_save_state': False,
                   'project_id': project_id,
+                  'prefix': cleanup_prefix,
                   'got_exceptions': self.GOT_EXCEPTIONS}
         for service in self.project_associated_services:
             svc = service(self.admin_mgr, **kwargs)
@@ -243,10 +275,26 @@ class TempestCleanup(command.Command):
                             help="Generate JSON file:" + DRY_RUN_JSON +
                             ", that reports the objects that would have "
                             "been deleted had a full cleanup been run.")
+        parser.add_argument('--prefix', dest='prefix', default=None,
+                            help="Only resources that match the prefix will "
+                            "be deleted (resources in saved_state.json are "
+                            "not taken into account). All tempest resources "
+                            "are created with the prefix value set by "
+                            "resource_name_prefix in tempest.conf, default "
+                            "prefix is tempest. Note that some resources are "
+                            "not named thus they will not be deleted when "
+                            "filtering based on the prefix. This opt will be "
+                            "ignored when --init-saved-state is used so that "
+                            "it can capture the true init state - all "
+                            "resources present at that moment.")
         return parser
 
     def get_description(self):
-        return 'Cleanup after tempest run'
+        return ('tempest cleanup tool, read the full documentation before '
+                'using this tool. We advice not to run it on production '
+                'environments. On environments where also other users may '
+                'create resources, we strongly advice using --dry-run '
+                'argument first and verify the content of dry_run.json file.')
 
     def _init_state(self):
         LOG.info("Initializing saved state.")
@@ -257,6 +305,10 @@ class TempestCleanup(command.Command):
                   'saved_state_json': data,
                   'is_preserve': False,
                   'is_save_state': True,
+                  # must be None as we want to capture true init state
+                  # (all resources present) thus no filtering based
+                  # on the prefix
+                  'prefix': None,
                   'got_exceptions': self.GOT_EXCEPTIONS}
         for service in self.global_services:
             svc = service(admin_mgr, **kwargs)
