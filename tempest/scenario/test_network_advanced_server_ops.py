@@ -270,6 +270,11 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         new_host = self.get_host_for_server(server['id'])
         self.assertNotEqual(old_host, new_host, 'Server did not migrate')
 
+        # we first wait until the VM replies pings again, then check the
+        # network downtime
+        self._wait_server_status_and_check_network_connectivity(
+            server, keypair, floating_ip)
+
         downtime = downtime_meter.get_downtime()
         self.assertIsNotNone(downtime)
         LOG.debug("Downtime seconds measured with downtime_meter = %r",
@@ -279,9 +284,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             downtime, allowed_downtime,
             "Downtime of {} seconds is higher than expected '{}'".format(
                 downtime, allowed_downtime))
-
-        self._wait_server_status_and_check_network_connectivity(
-            server, keypair, floating_ip)
 
     @decorators.idempotent_id('25b188d7-0183-4b1e-a11d-15840c8e2fd6')
     @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
