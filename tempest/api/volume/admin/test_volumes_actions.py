@@ -83,7 +83,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         server_id = self.create_server()['id']
         volume_id = self.create_volume()['id']
 
-        # Attach volume
+        # Request Cinder to map & export volume (it's not attached to instance)
         self.volumes_client.attach_volume(
             volume_id,
             instance_uuid=server_id,
@@ -101,7 +101,9 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume_id, 'error')
 
-        # Force detach volume
+        # The force detach volume calls works because the volume is not really
+        # connected to the instance (it is safe), otherwise it would be
+        # rejected for security reasons (bug #2004555).
         self.admin_volume_client.force_detach_volume(
             volume_id, connector=None,
             attachment_id=attachment['attachment_id'])

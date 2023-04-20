@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add delete_attachment to the v3 AttachmentsClient and terminate_connection
+    to the v3 VolumesClient.
