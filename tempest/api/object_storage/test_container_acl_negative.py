@@ -41,6 +41,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         super(ObjectACLsNegativeTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
         self.container_client.update_container(self.container_name)
+        self.containers.append(self.container_name)
 
     @classmethod
     def resource_cleanup(cls):

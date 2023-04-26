@@ -1016,9 +1016,10 @@ class PublicObjectTest(base.BaseObjectTest):
         super(PublicObjectTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
         self.container_client.update_container(self.container_name)
+        self.containers.append(self.container_name)
 
     def tearDown(self):
-        self.delete_containers([self.container_name])
+        self.delete_containers()
         super(PublicObjectTest, self).tearDown()
 
     @decorators.idempotent_id('07c9cf95-c0d4-4b49-b9c8-0ef2c9b27193')
