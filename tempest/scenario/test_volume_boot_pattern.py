@@ -187,6 +187,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
             source_id=volume_origin['id'],
             source_type='volume',
             delete_on_termination=True,
+            wait_until='SSHABLE',
             name=name)
         # Create a snapshot image from the volume-backed server.
         # The compute service will have the block service create a snapshot of
@@ -200,7 +201,8 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         # disk for the server.
         name = data_utils.rand_name(self.__class__.__name__ +
                                     '-image-snapshot-server')
-        instance2 = self.create_server(image_id=image['id'], name=name)
+        instance2 = self.create_server(image_id=image['id'], name=name,
+                                       wait_until='SSHABLE')
 
         # Verify the server was created from the image-defined BDM.
         volume_attachments = instance2['os-extended-volumes:volumes_attached']

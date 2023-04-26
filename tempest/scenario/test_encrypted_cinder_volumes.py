@@ -45,9 +45,7 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
             raise cls.skipException('Encrypted volume attach is not supported')
 
     def launch_instance(self):
-        keypair = self.create_keypair()
-
-        return self.create_server(key_name=keypair['name'])
+        return self.create_server(wait_until='SSHABLE')
 
     def attach_detach_volume(self, server, volume):
         attached_volume = self.nova_volume_attach(server, volume)

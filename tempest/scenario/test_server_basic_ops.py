@@ -133,7 +133,8 @@ class TestServerBasicOps(manager.ScenarioTest):
         security_group = self.create_security_group()
         self.md = {'meta1': 'data1', 'meta2': 'data2', 'metaN': 'dataN'}
         self.instance = self.create_server(
-            key_name=keypair['name'],
+            keypair=keypair,
+            wait_until='SSHABLE',
             security_groups=[{'name': security_group['name']}],
             config_drive=CONF.compute_feature_enabled.config_drive,
             metadata=self.md)

@@ -14,6 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import os
 import subprocess
 
@@ -88,6 +89,16 @@ class ScenarioTest(tempest.test.BaseTestCase):
             compute_microversion=cls.compute_request_microversion,
             volume_microversion=cls.volume_request_microversion,
             placement_microversion=cls.placement_request_microversion)
+
+    @classmethod
+    def setup_credentials(cls):
+        # Setting network=True, subnet=True creates a default network
+        cls.set_network_resources(
+            network=True,
+            subnet=True,
+            router=True,
+            dhcp=True)
+        super(ScenarioTest, cls).setup_credentials()
 
     def setup_compute_client(cls):
         """Compute client"""
@@ -308,6 +319,24 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if CONF.compute.compute_volume_common_az:
             kwargs.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
+
+        keypair = kwargs.pop('keypair', None)
+        if wait_until == 'SSHABLE':
+            # NOTE(danms): We should do this whether valdiation is enabled or
+            # not to consistently provide the resources to the
+            # create_test_server() function. If validation is disabled, then
+            # get_test_validation_resources() is basically a no-op for
+            # performance.
+            validation_resources = self.get_test_validation_resources(
+                self.os_primary)
+            if keypair:
+                validation_resources = copy.deepcopy(validation_resources)
+                validation_resources.update(
+                    keypair=keypair)
+            kwargs.update({'validatable': True,
+                           'validation_resources': validation_resources})
+        if keypair:
+            kwargs.update({'key_name': keypair['name']})
 
         body, _ = compute.create_test_server(
             clients,
@@ -1054,6 +1083,20 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         floating_ip['id'])
         return floating_ip
 
+    def get_floating_ip(self, server):
+        """Attempt to get an existing floating ip or a server
+
+        If one exists, return it, else return None
+        """
+        port_id, ip4 = self.get_server_port_id_and_ip4(server)
+        ips = self.floating_ips_client.list_floatingips(
+            floating_network_id=CONF.network.public_network_id,
+            port_id=port_id)
+        try:
+            return ips['floatingips'][0]['floating_ip_address']
+        except (KeyError, IndexError):
+            return None
+
     def associate_floating_ip(self, floating_ip, server):
         """Associate floating ip to server
 
@@ -1148,8 +1191,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
             # The tests calling this method don't have a floating IP
             # and can't make use of the validation resources. So the
             # method is creating the floating IP there.
-            return self.create_floating_ip(
-                server, **kwargs)['floating_ip_address']
+            fip = self.get_floating_ip(server)
+            if fip:
+                # Already have a floating ip, so use it instead of creating
+                # another
+                return fip
+            else:
+                return self.create_floating_ip(
+                    server, **kwargs)['floating_ip_address']
         elif CONF.validation.connect_method == 'fixed':
             # Determine the network name to look for based on config or creds
             # provider network resources.
@@ -1198,7 +1247,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         create_kwargs = dict({'image_id': ''})
         if keypair:
-            create_kwargs['key_name'] = keypair['name']
+            create_kwargs['keypair'] = keypair
         if security_group:
             create_kwargs['security_groups'] = [
                 {'name': security_group['name']}]
