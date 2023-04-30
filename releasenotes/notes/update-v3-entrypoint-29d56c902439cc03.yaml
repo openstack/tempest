@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    Update default value of config option ``CONF.identity.v3_entrypoint_type``
+    from adminURL to public. This was deprecated in Q release, and was missed.
+    The default entrypoint used by tempest should be the public one.
