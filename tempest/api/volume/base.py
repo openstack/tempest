@@ -51,6 +51,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def setup_credentials(cls):
         cls.set_network_resources(
             network=cls.create_default_network,
+            router=cls.create_default_network,
+            dhcp=cls.create_default_network,
             subnet=cls.create_default_network)
         super(BaseVolumeTest, cls).setup_credentials()
 

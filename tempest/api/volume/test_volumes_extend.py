@@ -114,7 +114,10 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
           if the action on the server fails.
         """
         # Create a test server. Will be automatically cleaned up on teardown.
-        server = self.create_server(wait_until='SSHABLE')
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        server = self.create_server(wait_until='SSHABLE', validatable=True,
+                                    validation_resources=validation_resources)
         # Attach the volume to the server and wait for the volume status to be
         # "in-use".
         self.attach_volume(server['id'], volume['id'])
