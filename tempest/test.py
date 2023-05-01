@@ -809,7 +809,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         @param os_clients: Clients to be used to provision the resources.
         """
         if not CONF.validation.run_validation:
-            return
+            return {}
 
         if os_clients in cls._validation_resources:
             return cls._validation_resources[os_clients]

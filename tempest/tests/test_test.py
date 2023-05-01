@@ -69,7 +69,7 @@ class TestValidationResources(base.TestCase):
         creds = fake_credentials.FakeKeystoneV3Credentials()
         osclients = clients.Manager(creds)
         vr = self.test_test_class.get_class_validation_resources(osclients)
-        self.assertIsNone(vr)
+        self.assertEqual({}, vr)
 
     def test_validation_resources_exists(self):
         cfg.CONF.set_default('run_validation', True, 'validation')
