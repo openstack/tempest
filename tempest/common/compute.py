@@ -299,16 +299,15 @@ def create_test_server(clients, validatable=False, validation_resources=None,
 
     if wait_until:
 
-        if wait_until == 'SSHABLE' and not (
-                validatable and validation_resources is not None):
-            raise RuntimeError('SSHABLE requires validatable=True and '
-                               'validation_resources to be passed')
-
         # NOTE(lyarwood): PINGABLE and SSHABLE both require the instance to
         # go ACTIVE initially before we can setup the fip(s) etc so stash
         # this additional wait state for later use.
         wait_until_extra = None
         if wait_until in ['PINGABLE', 'SSHABLE']:
+            if not validatable and validation_resources is None:
+                raise RuntimeError(
+                    'SSHABLE/PINGABLE requires validatable=True '
+                    'and validation_resources to be passed')
             wait_until_extra = wait_until
             wait_until = 'ACTIVE'
 
