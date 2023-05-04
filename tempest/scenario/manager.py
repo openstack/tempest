@@ -195,7 +195,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return body['keypair']
 
     def create_server(self, name=None, image_id=None, flavor=None,
-                      validatable=False, wait_until='ACTIVE',
+                      validatable=None, wait_until='ACTIVE',
                       clients=None, **kwargs):
         """Wrapper utility that returns a test server.
 
@@ -320,8 +320,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             kwargs.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
 
+        kwargs['validatable'] = bool(validatable)
         keypair = kwargs.pop('keypair', None)
-        if wait_until == 'SSHABLE':
+        if wait_until == 'SSHABLE' and (
+                kwargs.get('validation_resources') is None):
             # NOTE(danms): We should do this whether valdiation is enabled or
             # not to consistently provide the resources to the
             # create_test_server() function. If validation is disabled, then
@@ -333,8 +335,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 validation_resources = copy.deepcopy(validation_resources)
                 validation_resources.update(
                     keypair=keypair)
-            kwargs.update({'validatable': True,
-                           'validation_resources': validation_resources})
+            kwargs.update({
+                'validatable': (validatable if validatable is not None
+                                else True),
+                'validation_resources': validation_resources})
         if keypair:
             kwargs.update({'key_name': keypair['name']})
 
