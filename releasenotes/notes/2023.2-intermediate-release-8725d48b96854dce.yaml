@@ -1,0 +1,5 @@
+---
+prelude: >
+    This is an intermediate release during the 2023.2 development cycle to
+    make scenario tests server SSHABLE functionality available to plugins
+    and other consumers.
