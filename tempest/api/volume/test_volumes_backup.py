@@ -29,6 +29,8 @@ CONF = config.CONF
 class VolumesBackupsTest(base.BaseVolumeTest):
     """Test volumes backup"""
 
+    create_default_network = True
+
     @classmethod
     def skip_checks(cls):
         super(VolumesBackupsTest, cls).skip_checks()
@@ -116,7 +118,11 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         # Create a server
         volume = self.create_volume()
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
-        server = self.create_server()
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        server = self.create_server(wait_until='SSHABLE',
+                                    validation_resources=validation_resources,
+                                    validatable=True)
         # Attach volume to instance
         self.attach_volume(server['id'], volume['id'])
         # Create backup using force flag
