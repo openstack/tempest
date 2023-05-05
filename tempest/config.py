@@ -1107,7 +1107,13 @@ VolumeFeaturesGroup = [
                      'server instance? This depends on the 3.42 volume API '
                      'microversion and the 2.51 compute API microversion. '
                      'Also, not all volume or compute backends support this '
+                     'operation.'),
+    cfg.BoolOpt('extend_volume_with_snapshot',
+                default=True,
+                help='Does the cloud support extending the size of a volume '
+                     'which has snapshot? Some drivers do not support this '
                      'operation.')
+
 ]
 
 

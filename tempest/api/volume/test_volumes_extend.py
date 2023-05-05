@@ -46,6 +46,9 @@ class VolumesExtendTest(base.BaseVolumeTest):
     @decorators.idempotent_id('86be1cba-2640-11e5-9c82-635fb964c912')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
                           "Cinder volume snapshots are disabled")
+    @testtools.skipUnless(
+        CONF.volume_feature_enabled.extend_volume_with_snapshot,
+        "Extending volume with snapshot is disabled.")
     def test_volume_extend_when_volume_has_snapshot(self):
         """Test extending a volume which has a snapshot"""
         volume = self.create_volume()
