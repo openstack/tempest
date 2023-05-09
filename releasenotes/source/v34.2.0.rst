@@ -1,0 +1,6 @@
+=====================
+v34.2.0 Release Notes
+=====================
+
+.. release-notes:: 34.2.0 Release Notes
+   :version: 34.2.0
