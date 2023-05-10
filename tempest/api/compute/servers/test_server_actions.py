@@ -718,8 +718,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
-        self.client.unshelve_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        body = self.client.unshelve_server(self.server_id)
+        waiters.wait_for_server_status(
+            self.client,
+            self.server_id,
+            "ACTIVE",
+            request_id=body.response["x-openstack-request-id"],
+        )
         glance_client.wait_for_resource_deletion(images[0]['id'])
 
     @decorators.idempotent_id('8cf9f450-a871-42cf-9bef-77eba189c0b0')
