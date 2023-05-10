@@ -701,12 +701,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         compute.shelve_server(self.client, self.server_id,
                               force_shelve_offload=True)
 
-        def _unshelve_server():
-            server_info = self.client.show_server(self.server_id)['server']
-            if 'SHELVED' in server_info['status']:
-                self.client.unshelve_server(self.server_id)
-        self.addCleanup(_unshelve_server)
-
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
