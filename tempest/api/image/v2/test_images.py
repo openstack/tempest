@@ -16,7 +16,6 @@
 
 import io
 import random
-import time
 
 from oslo_log import log as logging
 from tempest.api.image import base
@@ -28,7 +27,6 @@ from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
-BAD_REQUEST_RETRIES = 3
 
 
 class ImportImagesTest(base.BaseV2ImageTest):
@@ -808,89 +806,13 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
         return image
 
-    def _check_set_location(self):
-        image = self.client.create_image(container_format='bare',
-                                         disk_format='raw')
-
-        # Locations should be empty when there is no data
-        self.assertEqual('queued', image['status'])
-        self.assertEqual([], image['locations'])
-
-        # Add a new location
-        new_loc = {'metadata': {'foo': 'bar'},
-                   'url': CONF.image.http_image}
-        self._update_image_with_retries(image['id'], [
-            dict(add='/locations/-', value=new_loc)])
-
-        # The image should now be active, with one location that looks
-        # like we expect
-        image = self.client.show_image(image['id'])
-        self.assertEqual(1, len(image['locations']),
-                         'Image should have one location but has %i' % (
-                         len(image['locations'])))
-        self.assertEqual(new_loc['url'], image['locations'][0]['url'])
-        self.assertEqual('bar', image['locations'][0]['metadata'].get('foo'))
-        if 'direct_url' in image:
-            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
-
-        # If we added the location directly, the image goes straight
-        # to active and no hashing is done
-        self.assertEqual('active', image['status'])
-        self.assertIsNone(None, image['os_hash_algo'])
-        self.assertIsNone(None, image['os_hash_value'])
-
-        return image
-
     @decorators.idempotent_id('37599b8a-d5c0-4590-aee5-73878502be15')
     def test_set_location(self):
-        self._check_set_location()
-
-    def _update_image_with_retries(self, image, patch):
-        # NOTE(danms): If glance was unable to fetch the remote image via
-        # HTTP, it will return BadRequest. Because this can be transient in
-        # CI, we try this a few times before we agree that it has failed
-        # for a reason worthy of failing the test.
-        for i in range(BAD_REQUEST_RETRIES):
-            try:
-                self.client.update_image(image, patch)
-                break
-            except lib_exc.BadRequest:
-                if i + 1 == BAD_REQUEST_RETRIES:
-                    raise
-                else:
-                    time.sleep(1)
-
-    def _check_set_multiple_locations(self):
-        image = self._check_set_location()
-
-        new_loc = {'metadata': {'speed': '88mph'},
-                   'url': '%s#new' % CONF.image.http_image}
-        self._update_image_with_retries(image['id'],
-                                        [dict(add='/locations/-',
-                                              value=new_loc)])
-
-        # The image should now have two locations and the last one
-        # (locations are ordered) should have the new URL.
-        image = self.client.show_image(image['id'])
-        self.assertEqual(2, len(image['locations']),
-                         'Image should have two locations but has %i' % (
-                         len(image['locations'])))
-        self.assertEqual(new_loc['url'], image['locations'][1]['url'])
-
-        # The image should still be active and still have no hashes
-        self.assertEqual('active', image['status'])
-        self.assertIsNone(None, image['os_hash_algo'])
-        self.assertIsNone(None, image['os_hash_value'])
-
-        # The direct_url should still match the first location
-        if 'direct_url' in image:
-            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
-
-        return image
+        self.check_set_location()
 
     @decorators.idempotent_id('bf6e0009-c039-4884-b498-db074caadb10')
     def test_replace_location(self):
-        image = self._check_set_multiple_locations()
+        image = self.check_set_multiple_locations()
         original_locs = image['locations']
 
         # Replacing with the exact thing should work
@@ -926,31 +848,6 @@ class ImageLocationsTest(base.BaseV2ImageTest):
                          'Image should have two locations but has %i' % (
                          len(image['locations'])))
         self.assertEqual(original_locs, image['locations'])
-
-    @decorators.idempotent_id('8a648de4-b745-4c28-a7b5-20de1c3da4d2')
-    def test_delete_locations(self):
-        image = self._check_set_multiple_locations()
-        expected_remaining_loc = image['locations'][1]
-
-        self.client.update_image(image['id'], [
-            dict(remove='/locations/0')])
-
-        # The image should now have only the one location we did not delete
-        image = self.client.show_image(image['id'])
-        self.assertEqual(1, len(image['locations']),
-                         'Image should have one location but has %i' % (
-                         len(image['locations'])))
-        self.assertEqual(expected_remaining_loc['url'],
-                         image['locations'][0]['url'])
-
-        # The direct_url should now be the last remaining location
-        if 'direct_url' in image:
-            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
-
-        # Removing the last location should be disallowed
-        self.assertRaises(lib_exc.Forbidden,
-                          self.client.update_image, image['id'], [
-                              dict(remove='/locations/0')])
 
     @decorators.idempotent_id('a9a20396-8399-4b36-909d-564949be098f')
     def test_set_location_bad_scheme(self):
