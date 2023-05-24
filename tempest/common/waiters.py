@@ -77,7 +77,8 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
             if 'fault' in body:
                 details += 'Fault: %s.' % body['fault']
             if request_id:
-                details += ' Server boot request ID: %s.' % request_id
+                details += ' Request ID of server operation performed before'
+                details += ' checking the server status %s.' % request_id
             raise exceptions.BuildErrorException(details, server_id=server_id)
 
         timed_out = int(time.time()) - start_time >= timeout
@@ -92,7 +93,8 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'expected_task_state': expected_task_state,
                         'timeout': timeout})
             if request_id:
-                message += ' Server boot request ID: %s.' % request_id
+                message += ' Request ID of server operation performed before'
+                message += ' checking the server status %s.' % request_id
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
             caller = test_utils.find_test_caller()
