@@ -205,12 +205,21 @@ class VolumesClient(base_client.BaseClient):
         self.validate_response(schema.set_bootable_volume, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def detach_volume(self, volume_id):
+    def detach_volume(self, volume_id, **kwargs):
         """Detaches a volume from an instance."""
-        post_body = json.dumps({'os-detach': {}})
+        post_body = json.dumps({'os-detach': kwargs})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
         self.validate_response(schema.detach_volume, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def terminate_connection(self, volume_id, connector):
+        """Detaches a volume from an instance using terminate_connection."""
+        post_body = json.dumps(
+            {'os-terminate_connection': {'connector': connector}})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body)
+        self.validate_response(schema.terminate_connection, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def reserve_volume(self, volume_id):

@@ -295,6 +295,7 @@ show_volume_summary = {
 attach_volume = {'status_code': [202]}
 set_bootable_volume = {'status_code': [200]}
 detach_volume = {'status_code': [202]}
+terminate_connection = {'status_code': [202]}
 reserve_volume = {'status_code': [202]}
 unreserve_volume = {'status_code': [202]}
 extend_volume = {'status_code': [202]}
