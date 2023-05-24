@@ -13,6 +13,7 @@
 #    under the License.
 
 import io
+import time
 
 from tempest.common import image as common_image
 from tempest import config
@@ -22,6 +23,7 @@ from tempest.lib import exceptions
 import tempest.test
 
 CONF = config.CONF
+BAD_REQUEST_RETRIES = 3
 
 
 class BaseImageTest(tempest.test.BaseTestCase):
@@ -158,6 +160,82 @@ class BaseV2ImageTest(BaseImageTest):
         except exceptions.NotFound:
             pass
         return stores
+
+    def _update_image_with_retries(self, image, patch):
+        # NOTE(danms): If glance was unable to fetch the remote image via
+        # HTTP, it will return BadRequest. Because this can be transient in
+        # CI, we try this a few times before we agree that it has failed
+        # for a reason worthy of failing the test.
+        for i in range(BAD_REQUEST_RETRIES):
+            try:
+                self.client.update_image(image, patch)
+                break
+            except exceptions.BadRequest:
+                if i + 1 == BAD_REQUEST_RETRIES:
+                    raise
+                else:
+                    time.sleep(1)
+
+    def check_set_location(self):
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+
+        # Locations should be empty when there is no data
+        self.assertEqual('queued', image['status'])
+        self.assertEqual([], image['locations'])
+
+        # Add a new location
+        new_loc = {'metadata': {'foo': 'bar'},
+                   'url': CONF.image.http_image}
+        self._update_image_with_retries(image['id'], [
+            dict(add='/locations/-', value=new_loc)])
+
+        # The image should now be active, with one location that looks
+        # like we expect
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']),
+                         'Image should have one location but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(new_loc['url'], image['locations'][0]['url'])
+        self.assertEqual('bar', image['locations'][0]['metadata'].get('foo'))
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        # If we added the location directly, the image goes straight
+        # to active and no hashing is done
+        self.assertEqual('active', image['status'])
+        self.assertIsNone(None, image['os_hash_algo'])
+        self.assertIsNone(None, image['os_hash_value'])
+
+        return image
+
+    def check_set_multiple_locations(self):
+        image = self.check_set_location()
+
+        new_loc = {'metadata': {'speed': '88mph'},
+                   'url': '%s#new' % CONF.image.http_image}
+        self._update_image_with_retries(image['id'],
+                                        [dict(add='/locations/-',
+                                              value=new_loc)])
+
+        # The image should now have two locations and the last one
+        # (locations are ordered) should have the new URL.
+        image = self.client.show_image(image['id'])
+        self.assertEqual(2, len(image['locations']),
+                         'Image should have two locations but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(new_loc['url'], image['locations'][1]['url'])
+
+        # The image should still be active and still have no hashes
+        self.assertEqual('active', image['status'])
+        self.assertIsNone(None, image['os_hash_algo'])
+        self.assertIsNone(None, image['os_hash_value'])
+
+        # The direct_url should still match the first location
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        return image
 
 
 class BaseV2MemberImageTest(BaseV2ImageTest):

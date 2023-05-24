@@ -20,6 +20,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -120,3 +121,40 @@ class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
         self.assertEqual(0, len(failed_stores),
                          "Failed to copy the following stores: %s" %
                          str(failed_stores))
+
+
+class ImageLocationsAdminTest(base.BaseV2ImageAdminTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(ImageLocationsAdminTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.manage_locations:
+            skip_msg = (
+                "%s skipped as show_multiple_locations is not available" % (
+                    cls.__name__))
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('8a648de4-b745-4c28-a7b5-20de1c3da4d2')
+    def test_delete_locations(self):
+        image = self.check_set_multiple_locations()
+        expected_remaining_loc = image['locations'][1]
+
+        self.admin_client.update_image(image['id'], [
+            dict(remove='/locations/0')])
+
+        # The image should now have only the one location we did not delete
+        image = self.client.show_image(image['id'])
+        self.assertEqual(1, len(image['locations']),
+                         'Image should have one location but has %i' % (
+                         len(image['locations'])))
+        self.assertEqual(expected_remaining_loc['url'],
+                         image['locations'][0]['url'])
+
+        # The direct_url should now be the last remaining location
+        if 'direct_url' in image:
+            self.assertEqual(image['direct_url'], image['locations'][0]['url'])
+
+        # Removing the last location should be disallowed
+        self.assertRaises(lib_exc.Forbidden,
+                          self.admin_client.update_image, image['id'], [
+                              dict(remove='/locations/0')])
