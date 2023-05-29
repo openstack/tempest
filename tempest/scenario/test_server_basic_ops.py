@@ -49,16 +49,8 @@ class TestServerBasicOps(manager.ScenarioTest):
 
     def verify_ssh(self, keypair):
         if self.run_ssh:
-            # Obtain a floating IP if floating_ips is enabled
-            if (CONF.network_feature_enabled.floating_ips and
-                CONF.network.floating_network_name):
-                fip = self.create_floating_ip(self.instance)
-                self.ip = self.associate_floating_ip(
-                    fip, self.instance)['floating_ip_address']
-            else:
-                server = self.servers_client.show_server(
-                    self.instance['id'])['server']
-                self.ip = self.get_server_ip(server)
+            # Obtain server IP
+            self.ip = self.get_server_ip(self.instance)
             # Check ssh
             self.ssh_client = self.get_remote_client(
                 ip_address=self.ip,
