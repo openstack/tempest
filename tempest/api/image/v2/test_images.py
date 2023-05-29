@@ -23,6 +23,7 @@ from tempest.api.image import base
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -734,6 +735,30 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         schema = "images"
         body = self.schemas_client.show_schema(schema)
         self.assertEqual("images", body['name'])
+
+    @decorators.idempotent_id('d43f3efc-da4c-4af9-b636-868f0c6acedb')
+    def test_list_hidden_image(self):
+        image = self.client.create_image(os_hidden=True)
+        image = image['image'] if 'image' in image else image
+        self.addCleanup(self.client.wait_for_resource_deletion, image['id'])
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        self.client.delete_image, image['id'])
+        images_list = self.client.list_images()['images']
+        fetched_images_id = [img['id'] for img in images_list]
+        self.assertNotIn(image['id'], fetched_images_id)
+
+    @decorators.idempotent_id('fdb96b81-257b-42ac-978b-ddeefa3760e4')
+    def test_list_update_hidden_image(self):
+        image = self.create_image()
+        images_list = self.client.list_images()['images']
+        fetched_images_id = [img['id'] for img in images_list]
+        self.assertIn(image['id'], fetched_images_id)
+
+        self.client.update_image(image['id'],
+                                 [dict(replace='/os_hidden', value=True)])
+        images_list = self.client.list_images()['images']
+        fetched_images_id = [img['id'] for img in images_list]
+        self.assertNotIn(image['id'], fetched_images_id)
 
 
 class ListSharedImagesTest(base.BaseV2ImageTest):
