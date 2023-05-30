@@ -93,7 +93,12 @@
     vars:
       devstack_localrc:
         TEMPEST_USE_TEST_ACCOUNTS: True
-
+        # FIXME(gmann): Nova and Glance have enabled the new defaults and scope
+        # by default in devstack and pre provisioned account code and testing
+        # needs to be move to new RBAC design testing. Until we do that, let's
+        # run these jobs with old defaults.
+        NOVA_ENFORCE_SCOPE: false
+        GLANCE_ENFORCE_SCOPE: false
 - job:
     name: tempest-full-test-account-no-admin-py3
     parent: tempest-full-test-account-py3
