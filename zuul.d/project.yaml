@@ -28,8 +28,6 @@
               - ^.mailmap$
         - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-ubuntu-focal:
-            irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -129,8 +127,6 @@
         - openstack-tox-py39
         - openstack-tox-py310
         - tempest-slow-py3:
-            irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-ubuntu-focal:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
