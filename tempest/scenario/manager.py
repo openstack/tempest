@@ -1140,14 +1140,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                             server=server,
                                             username=username)
 
+        # Default the directory in which to write the timestamp file to /tmp
+        # and only use the mount_path as the target directory if we mounted
+        # dev_name to mount_path.
+        target_dir = '/tmp'
         if dev_name is not None:
             ssh_client.make_fs(dev_name, fs=fs)
             ssh_client.exec_command('sudo mount /dev/%s %s' % (dev_name,
                                                                mount_path))
-        cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % mount_path
+            target_dir = mount_path
+        cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % target_dir
         ssh_client.exec_command(cmd_timestamp)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
-                                            % mount_path)
+                                            % target_dir)
         if dev_name is not None:
             ssh_client.exec_command('sudo umount %s' % mount_path)
         return timestamp
@@ -1172,10 +1177,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
                                             server=server,
                                             username=username)
 
+        # Default the directory from which to read the timestamp file to /tmp
+        # and only use the mount_path as the target directory if we mounted
+        # dev_name to mount_path.
+        target_dir = '/tmp'
         if dev_name is not None:
             ssh_client.mount(dev_name, mount_path)
+            target_dir = mount_path
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
-                                            % mount_path)
+                                            % target_dir)
         if dev_name is not None:
             ssh_client.exec_command('sudo umount %s' % mount_path)
         return timestamp
