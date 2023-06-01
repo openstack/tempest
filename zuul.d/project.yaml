@@ -40,7 +40,7 @@
         # those in respective stable branch gate.
         - tempest-full-2023-1:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-xena:
+        - tempest-full-yoga:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
@@ -165,7 +165,6 @@
         - tempest-full-parallel
         - tempest-full-zed-extra-tests
         - tempest-full-yoga-extra-tests
-        - tempest-full-xena-extra-tests
         - tempest-full-enforce-scope-new-defaults-zed
         - neutron-ovs-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
@@ -188,15 +187,12 @@
         - tempest-full-2023-1
         - tempest-full-zed
         - tempest-full-yoga
-        - tempest-full-xena
         - tempest-slow-2023-1
         - tempest-slow-zed
         - tempest-slow-yoga
-        - tempest-slow-xena
         - tempest-full-2023-1-extra-tests
         - tempest-full-zed-extra-tests
         - tempest-full-yoga-extra-tests
-        - tempest-full-xena-extra-tests
     periodic:
       jobs:
         - tempest-all
