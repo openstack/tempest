@@ -172,6 +172,52 @@ class VolumesBackupsTest(base.BaseVolumeTest):
 
         self.assertTrue(restored_volume_info['bootable'])
 
+    @decorators.idempotent_id('f86eff09-2a6d-43c1-905e-8079e5754f1e')
+    @utils.services('compute')
+    @decorators.related_bug('1703011')
+    def test_volume_backup_incremental(self):
+        """Test create a backup when latest incremental backup is deleted"""
+        # Create a volume
+        volume = self.create_volume()
+
+        # Create a server
+        server = self.create_server(wait_until='SSHABLE')
+
+        # Attach volume to the server
+        self.attach_volume(server['id'], volume['id'])
+
+        # Create a backup to the attached volume
+        backup1 = self.create_backup(volume['id'], force=True)
+
+        # Validate backup details
+        backup_info = self.backups_client.show_backup(backup1['id'])['backup']
+        self.assertEqual(False, backup_info['has_dependent_backups'])
+        self.assertEqual(False, backup_info['is_incremental'])
+
+        # Create another incremental backup
+        backup2 = self.backups_client.create_backup(
+            volume_id=volume['id'], incremental=True, force=True)['backup']
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup2['id'], 'available')
+
+        # Validate incremental backup details
+        backup2_info = self.backups_client.show_backup(backup2['id'])['backup']
+        self.assertEqual(True, backup2_info['is_incremental'])
+        self.assertEqual(False, backup2_info['has_dependent_backups'])
+
+        # Delete the last incremental backup that was created
+        self.backups_client.delete_backup(backup2['id'])
+        self.backups_client.wait_for_resource_deletion(backup2['id'])
+
+        # Create another incremental backup
+        backup3 = self.create_backup(
+            volume_id=volume['id'], incremental=True, force=True)
+
+        # Validate incremental backup details
+        backup3_info = self.backups_client.show_backup(backup3['id'])['backup']
+        self.assertEqual(True, backup3_info['is_incremental'])
+        self.assertEqual(False, backup3_info['has_dependent_backups'])
+
 
 class VolumesBackupsV39Test(base.BaseVolumeTest):
     """Test volumes backup with volume microversion greater than 3.8"""
