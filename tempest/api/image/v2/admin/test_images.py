@@ -60,6 +60,24 @@ class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
         self.assertNotEqual(created_image_info['owner'],
                             updated_image_info['owner'])
 
+    @decorators.idempotent_id('f6ab4aa0-035e-4664-9f2d-c57c6df50605')
+    def test_list_public_image(self):
+        """Test create image as admin and list public image as none admin"""
+        name = data_utils.rand_name(self.__class__.__name__ + '-Image')
+        image = self.admin_client.create_image(
+            name=name,
+            container_format='bare',
+            visibility='public',
+            disk_format='raw')
+        waiters.wait_for_image_status(self.admin_client, image['id'], 'queued')
+        created_image = self.admin_client.show_image(image['id'])
+        self.assertEqual(image['id'], created_image['id'])
+        self.addCleanup(self.admin_client.delete_image, image['id'])
+
+        images_list = self.client.list_images()['images']
+        fetched_images_id = [img['id'] for img in images_list]
+        self.assertIn(image['id'], fetched_images_id)
+
 
 class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
     """Test the import copy-image operations"""
