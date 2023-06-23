@@ -15,10 +15,6 @@
     vars: &base_vars
       devstack_localrc:
         IMAGE_URLS: http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img, http://download.cirros-cloud.net/0.6.1/cirros-0.6.1-x86_64-disk.img
-        # When DEFAULT_IMAGE_NAME is set and the image exists in glance,
-        # devstack sets both image_ref and image_ref_alt with same image
-        # which we don't want here.
-        DEFAULT_IMAGE_NAME: 'non-existent-image'
       devstack_services:
         tempest: true
       devstack_local_conf:
