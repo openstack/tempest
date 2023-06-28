@@ -286,7 +286,6 @@
       devstack_services:
         neutron-placement: true
         neutron-qos: true
-      tempest_concurrency: 2
     group-vars:
       # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
       # the controller and subnode prior to Rocky so we have to make sure the
