@@ -157,7 +157,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-slow-parallel
         - tempest-full-parallel
         - tempest-full-zed-extra-tests
         - tempest-full-yoga-extra-tests
@@ -192,7 +191,6 @@
     periodic:
       jobs:
         - tempest-all
-        - tempest-slow-parallel
         - tempest-full-parallel
         - tempest-full-oslo-master
         - tempest-stestr-master
