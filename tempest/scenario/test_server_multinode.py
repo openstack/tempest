@@ -46,7 +46,8 @@ class TestServerMultinode(manager.ScenarioTest):
             if zone['zoneState']['available']:
                 for host in zone['hosts']:
                     if 'nova-compute' in zone['hosts'][host] and \
-                        zone['hosts'][host]['nova-compute']['available']:
+                        zone['hosts'][host]['nova-compute']['available'] and \
+                        not host.endswith('-ironic'):
                         hosts.append({'zone': zone['zoneName'],
                                       'host_name': host})
 
