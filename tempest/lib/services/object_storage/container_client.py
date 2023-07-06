@@ -43,7 +43,7 @@ class ContainerClient(rest_client.RestClient):
         url = str(container_name)
 
         resp, body = self.put(url, body=None, headers=headers)
-        self.expected_success([201, 202], resp.status)
+        self.expected_success([201, 202, 204], resp.status)
         return resp, body
 
     # NOTE: This alias is for the usability because PUT can be used for both
