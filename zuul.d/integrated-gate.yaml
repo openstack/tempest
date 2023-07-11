@@ -276,7 +276,7 @@
     timeout: 10800
     # This job runs on stable/stein onwards.
     branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
-    vars: &tempest_slow_vars
+    vars:
       tox_envlist: slow-serial
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
@@ -301,16 +301,23 @@
     # as swift is ready on py3 from stable/ussuri onwards.
     timeout: 10800
     branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
-    vars: *tempest_slow_vars
-
-- job:
-    name: tempest-slow-parallel
-    parent: tempest-slow-py3
-    # This job run slow tests in parallel.
     vars:
       tox_envlist: slow
       devstack_localrc:
-        MYSQL_REDUCE_MEMORY: true
+        CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
+        ENABLE_VOLUME_MULTIATTACH: true
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        neutron-placement: true
+        neutron-qos: true
+    group-vars:
+      # NOTE(mriedem): The ENABLE_VOLUME_MULTIATTACH variable is used on both
+      # the controller and subnode prior to Rocky so we have to make sure the
+      # variable is set in both locations.
+      subnode:
+        devstack_localrc:
+          ENABLE_VOLUME_MULTIATTACH: true
 
 - job:
     name: tempest-cinder-v2-api
