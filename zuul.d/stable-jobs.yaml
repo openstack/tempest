@@ -311,6 +311,18 @@
           USE_PYTHON3: true
 
 - job:
+    name: tempest-slow-py3
+    parent: tempest-slow
+    # This job version is to use the 'slow-serial' tox env for
+    # the stable/ussuri to stable/wallaby testing.
+    branches:
+      - stable/ussuri
+      - stable/victoria
+      - stable/wallaby
+    vars:
+      tox_envlist: slow-serial
+
+- job:
     name: tempest-full-py3-opensuse15
     parent: tempest-full-py3
     nodeset: devstack-single-node-opensuse-15

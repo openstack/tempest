@@ -300,7 +300,10 @@
     # This job version is with swift enabled on py3
     # as swift is ready on py3 from stable/ussuri onwards.
     timeout: 10800
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train)).*$
+    # As the 'slow' tox env which is not available in old tempest used
+    # till stable/wallaby, this job definition is only for stable/xena
+    # onwards and separate job definition until stable/wallaby
+    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria|wallaby)).*$
     vars:
       tox_envlist: slow
       devstack_localrc:
