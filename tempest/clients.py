@@ -97,6 +97,7 @@ class Manager(clients.ServiceClients):
                 self.image_v2.NamespacePropertiesClient()
             self.namespace_tags_client = self.image_v2.NamespaceTagsClient()
             self.image_versions_client = self.image_v2.VersionsClient()
+            self.tasks_client = self.image_v2.TaskClient()
             # NOTE(danms): If no alternate endpoint is configured,
             # this client will work the same as the base self.images_client.
             # If your test needs to know if these are different, check the
