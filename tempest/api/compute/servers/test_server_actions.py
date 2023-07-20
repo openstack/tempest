@@ -34,13 +34,13 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ServerActionsTestJSON(base.BaseV2ComputeTest):
+class ServerActionsBase(base.BaseV2ComputeTest):
     """Test server actions"""
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ServerActionsTestJSON, self).setUp()
+        super().setUp()
         # Check if the server is in a clean state after test
         try:
             self.validation_resources = self.get_class_validation_resources(
@@ -73,7 +73,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 self.server_id, validatable=True, wait_until='SSHABLE')
 
     def tearDown(self):
-        super(ServerActionsTestJSON, self).tearDown()
+        super(ServerActionsBase, self).tearDown()
         # NOTE(zhufl): Because server_check_teardown will raise Exception
         # which will prevent other cleanup steps from being executed, so
         # server_check_teardown should be called after super's tearDown.
@@ -82,50 +82,18 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
-        super(ServerActionsTestJSON, cls).setup_credentials()
+        super(ServerActionsBase, cls).setup_credentials()
 
     @classmethod
     def setup_clients(cls):
-        super(ServerActionsTestJSON, cls).setup_clients()
+        super(ServerActionsBase, cls).setup_clients()
         cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
-        super(ServerActionsTestJSON, cls).resource_setup()
+        super(ServerActionsBase, cls).resource_setup()
         cls.server_id = cls.recreate_server(None, validatable=True,
                                             wait_until='SSHABLE')
-
-    @decorators.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
-    @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
-                          'Change password not available.')
-    def test_change_server_password(self):
-        """Test changing server's password
-
-        The server's password should be set to the provided password and
-        the user can authenticate with the new password.
-        """
-        # Since this test messes with the password and makes the
-        # server unreachable, it should create its own server
-        newserver = self.create_test_server(
-            validatable=True,
-            validation_resources=self.validation_resources,
-            wait_until='ACTIVE')
-        self.addCleanup(self.delete_server, newserver['id'])
-        # The server's password should be set to the provided password
-        new_password = 'Newpass1234'
-        self.client.change_password(newserver['id'], adminPass=new_password)
-        waiters.wait_for_server_status(self.client, newserver['id'], 'ACTIVE')
-
-        if CONF.validation.run_validation:
-            # Verify that the user can authenticate with the new password
-            server = self.client.show_server(newserver['id'])['server']
-            linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server, self.validation_resources),
-                self.ssh_user,
-                new_password,
-                server=server,
-                servers_client=self.client)
-            linux_client.validate_authentication()
 
     def _test_reboot_server(self, reboot_type):
         if CONF.validation.run_validation:
@@ -158,45 +126,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time,
                                '%s > %s' % (new_boot_time, boot_time))
-
-    @decorators.attr(type='smoke')
-    @decorators.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
-    def test_reboot_server_hard(self):
-        """Test hard rebooting server
-
-        The server should be power cycled.
-        """
-        self._test_reboot_server('HARD')
-
-    @decorators.idempotent_id('1d1c9104-1b0a-11e7-a3d4-fa163e65f5ce')
-    def test_remove_server_all_security_groups(self):
-        """Test removing all security groups from server"""
-        server = self.create_test_server(wait_until='ACTIVE')
-
-        # Remove all Security group
-        self.client.remove_security_group(
-            server['id'], name=server['security_groups'][0]['name'])
-
-        # Verify all Security group
-        server = self.client.show_server(server['id'])['server']
-        self.assertNotIn('security_groups', server)
-
-    def _rebuild_server_and_check(self, image_ref, server):
-        rebuilt_server = (self.client.rebuild_server(server['id'], image_ref)
-                          ['server'])
-        if CONF.validation.run_validation:
-            tenant_network = self.get_tenant_network()
-            compute.wait_for_ssh_or_ping(
-                server, self.os_primary, tenant_network,
-                True, self.validation_resources, "SSHABLE", True)
-        else:
-            waiters.wait_for_server_status(self.client, server['id'],
-                                           'ACTIVE')
-
-        msg = ('Server was not rebuilt to the original image. '
-               'The original image: {0}. The current image: {1}'
-               .format(image_ref, rebuilt_server['image']['id']))
-        self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
 
     def _test_rebuild_server(self):
         # Get the IPs the server has before rebuilding it
@@ -250,6 +179,108 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             linux_client.validate_authentication()
 
+    def _test_resize_server_confirm(self, server_id, stop=False):
+        # The server's RAM and disk space should be modified to that of
+        # the provided flavor
+
+        if stop:
+            self.client.stop_server(server_id)
+            waiters.wait_for_server_status(self.client, server_id,
+                                           'SHUTOFF')
+
+        self.client.resize_server(server_id, self.flavor_ref_alt)
+        # NOTE(jlk): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, server_id)
+        waiters.wait_for_server_status(self.client, server_id,
+                                       'VERIFY_RESIZE')
+
+        self.client.confirm_resize_server(server_id)
+        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
+        waiters.wait_for_server_status(self.client, server_id,
+                                       expected_status)
+
+        server = self.client.show_server(server_id)['server']
+        self.assert_flavor_equal(self.flavor_ref_alt, server['flavor'])
+
+        if stop:
+            # NOTE(mriedem): tearDown requires the server to be started.
+            self.client.start_server(server_id)
+
+    def _get_output(self):
+        output = self.client.get_console_output(
+            self.server_id, length=3)['output']
+        self.assertTrue(output, "Console output was empty.")
+        lines = len(output.split('\n'))
+        self.assertEqual(lines, 3)
+
+    def _validate_url(self, url):
+        valid_scheme = ['http', 'https']
+        parsed_url = urlparse.urlparse(url)
+        self.assertNotEqual('None', parsed_url.port)
+        self.assertNotEqual('None', parsed_url.hostname)
+        self.assertIn(parsed_url.scheme, valid_scheme)
+
+    def _rebuild_server_and_check(self, image_ref, server):
+        rebuilt_server = (self.client.rebuild_server(server['id'], image_ref)
+                          ['server'])
+        if CONF.validation.run_validation:
+            tenant_network = self.get_tenant_network()
+            compute.wait_for_ssh_or_ping(
+                server, self.os_primary, tenant_network,
+                True, self.validation_resources, "SSHABLE", True)
+        else:
+            waiters.wait_for_server_status(self.client, server['id'],
+                                           'ACTIVE')
+
+        msg = ('Server was not rebuilt to the original image. '
+               'The original image: {0}. The current image: {1}'
+               .format(image_ref, rebuilt_server['image']['id']))
+        self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
+
+
+class ServerActionsTestJSON(ServerActionsBase):
+    @decorators.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
+    @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
+                          'Change password not available.')
+    def test_change_server_password(self):
+        """Test changing server's password
+
+        The server's password should be set to the provided password and
+        the user can authenticate with the new password.
+        """
+        # Since this test messes with the password and makes the
+        # server unreachable, it should create its own server
+        newserver = self.create_test_server(
+            validatable=True,
+            validation_resources=self.validation_resources,
+            wait_until='ACTIVE')
+        self.addCleanup(self.delete_server, newserver['id'])
+        # The server's password should be set to the provided password
+        new_password = 'Newpass1234'
+        self.client.change_password(newserver['id'], adminPass=new_password)
+        waiters.wait_for_server_status(self.client, newserver['id'], 'ACTIVE')
+
+        if CONF.validation.run_validation:
+            # Verify that the user can authenticate with the new password
+            server = self.client.show_server(newserver['id'])['server']
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server, self.validation_resources),
+                self.ssh_user,
+                new_password,
+                server=server,
+                servers_client=self.client)
+            linux_client.validate_authentication()
+
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('2cb1baf6-ac8d-4429-bf0d-ba8a0ba53e32')
+    def test_reboot_server_hard(self):
+        """Test hard rebooting server
+
+        The server should be power cycled.
+        """
+        self._test_reboot_server('HARD')
+
     @decorators.idempotent_id('aaa6cdf3-55a7-461a-add9-1c8596b9a07c')
     def test_rebuild_server(self):
         """Test rebuilding server
@@ -257,6 +288,120 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         The server should be rebuilt using the provided image and data.
         """
         self._test_rebuild_server()
+
+    @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    def test_resize_server_confirm(self):
+        """Test resizing server and then confirming"""
+        self._test_resize_server_confirm(self.server_id, stop=False)
+
+    @decorators.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    def test_resize_server_revert(self):
+        """Test resizing server and then reverting
+
+        The server's RAM and disk space should return to its original
+        values after a resize is reverted.
+        """
+
+        self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        # NOTE(zhufl): Explicitly delete the server to get a new one for later
+        # tests. Avoids resize down race issues.
+        self.addCleanup(self.delete_server, self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'VERIFY_RESIZE')
+
+        self.client.revert_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+
+        server = self.client.show_server(self.server_id)['server']
+        self.assert_flavor_equal(self.flavor_ref, server['flavor'])
+
+    @decorators.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
+    def test_get_console_output(self):
+        """Test getting console output for a server
+
+        Should be able to GET the console output for a given server_id and
+        number of lines.
+        """
+
+        # This reboot is necessary for outputting some console log after
+        # creating an instance backup. If an instance backup, the console
+        # log file is truncated and we cannot get any console log through
+        # "console-log" API.
+        # The detail is https://bugs.launchpad.net/nova/+bug/1251920
+        self.reboot_server(self.server_id, type='HARD')
+        self.wait_for(self._get_output)
+
+    @decorators.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
+    def test_pause_unpause_server(self):
+        """Test pausing and unpausing server"""
+        self.client.pause_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'PAUSED')
+        self.client.unpause_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+
+    @decorators.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
+    def test_suspend_resume_server(self):
+        """Test suspending and resuming server"""
+        self.client.suspend_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id,
+                                       'SUSPENDED')
+        self.client.resume_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+
+    @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
+    def test_stop_start_server(self):
+        """Test stopping and starting server"""
+        self.client.stop_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
+        self.client.start_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+
+    @decorators.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
+    def test_lock_unlock_server(self):
+        """Test locking and unlocking server
+
+        Lock the server, and trying to stop it will fail because locked
+        server is not allowed to be stopped by non-admin user.
+        Then unlock the server, now the server can be stopped and started.
+        """
+        # Lock the server,try server stop(exceptions throw),unlock it and retry
+        self.client.lock_server(self.server_id)
+        self.addCleanup(self.client.unlock_server, self.server_id)
+        server = self.client.show_server(self.server_id)['server']
+        self.assertEqual(server['status'], 'ACTIVE')
+        # Locked server is not allowed to be stopped by non-admin user
+        self.assertRaises(lib_exc.Conflict,
+                          self.client.stop_server, self.server_id)
+        self.client.unlock_server(self.server_id)
+        self.client.stop_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
+        self.client.start_server(self.server_id)
+        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+
+
+class ServerActionsTestOtherA(ServerActionsBase):
+    @decorators.idempotent_id('1d1c9104-1b0a-11e7-a3d4-fa163e65f5ce')
+    def test_remove_server_all_security_groups(self):
+        """Test removing all security groups from server"""
+        server = self.create_test_server(wait_until='ACTIVE')
+
+        # Remove all Security group
+        self.client.remove_security_group(
+            server['id'], name=server['security_groups'][0]['name'])
+
+        # Verify all Security group
+        server = self.client.show_server(server['id'])['server']
+        self.assertNotIn('security_groups', server)
 
     @decorators.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
     def test_rebuild_server_in_stop_state(self):
@@ -330,41 +475,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             linux_client.validate_authentication()
 
-    def _test_resize_server_confirm(self, server_id, stop=False):
-        # The server's RAM and disk space should be modified to that of
-        # the provided flavor
-
-        if stop:
-            self.client.stop_server(server_id)
-            waiters.wait_for_server_status(self.client, server_id,
-                                           'SHUTOFF')
-
-        self.client.resize_server(server_id, self.flavor_ref_alt)
-        # NOTE(jlk): Explicitly delete the server to get a new one for later
-        # tests. Avoids resize down race issues.
-        self.addCleanup(self.delete_server, server_id)
-        waiters.wait_for_server_status(self.client, server_id,
-                                       'VERIFY_RESIZE')
-
-        self.client.confirm_resize_server(server_id)
-        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
-        waiters.wait_for_server_status(self.client, server_id,
-                                       expected_status)
-
-        server = self.client.show_server(server_id)['server']
-        self.assert_flavor_equal(self.flavor_ref_alt, server['flavor'])
-
-        if stop:
-            # NOTE(mriedem): tearDown requires the server to be started.
-            self.client.start_server(server_id)
-
-    @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    def test_resize_server_confirm(self):
-        """Test resizing server and then confirming"""
-        self._test_resize_server_confirm(self.server_id, stop=False)
-
     @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @decorators.related_bug('1728603')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -402,35 +512,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 servers_client=self.client)
             linux_client.validate_authentication()
 
+
+class ServerActionsTestOtherB(ServerActionsBase):
     @decorators.idempotent_id('138b131d-66df-48c9-a171-64f45eb92962')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     def test_resize_server_confirm_from_stopped(self):
         """Test resizing a stopped server and then confirming"""
         self._test_resize_server_confirm(self.server_id, stop=True)
-
-    @decorators.idempotent_id('c03aab19-adb1-44f5-917d-c419577e9e68')
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    def test_resize_server_revert(self):
-        """Test resizing server and then reverting
-
-        The server's RAM and disk space should return to its original
-        values after a resize is reverted.
-        """
-
-        self.client.resize_server(self.server_id, self.flavor_ref_alt)
-        # NOTE(zhufl): Explicitly delete the server to get a new one for later
-        # tests. Avoids resize down race issues.
-        self.addCleanup(self.delete_server, self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id,
-                                       'VERIFY_RESIZE')
-
-        self.client.revert_resize_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-
-        server = self.client.show_server(self.server_id)['server']
-        self.assert_flavor_equal(self.flavor_ref, server['flavor'])
 
     @decorators.idempotent_id('fbbf075f-a812-4022-bc5c-ccb8047eef12')
     @decorators.related_bug('1737599')
@@ -595,31 +684,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual((backup2, backup3),
                          (image_list[0]['name'], image_list[1]['name']))
 
-    def _get_output(self):
-        output = self.client.get_console_output(
-            self.server_id, length=3)['output']
-        self.assertTrue(output, "Console output was empty.")
-        lines = len(output.split('\n'))
-        self.assertEqual(lines, 3)
-
-    @decorators.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
-    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
-                          'Console output not supported.')
-    def test_get_console_output(self):
-        """Test getting console output for a server
-
-        Should be able to GET the console output for a given server_id and
-        number of lines.
-        """
-
-        # This reboot is necessary for outputting some console log after
-        # creating an instance backup. If an instance backup, the console
-        # log file is truncated and we cannot get any console log through
-        # "console-log" API.
-        # The detail is https://bugs.launchpad.net/nova/+bug/1251920
-        self.reboot_server(self.server_id, type='HARD')
-        self.wait_for(self._get_output)
-
     @decorators.idempotent_id('89104062-69d8-4b19-a71b-f47b7af093d7')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
@@ -662,27 +726,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.stop_server(temp_server_id)
         waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
         self.wait_for(self._get_output)
-
-    @decorators.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
-    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
-                          'Pause is not available.')
-    def test_pause_unpause_server(self):
-        """Test pausing and unpausing server"""
-        self.client.pause_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'PAUSED')
-        self.client.unpause_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-
-    @decorators.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
-    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
-                          'Suspend is not available.')
-    def test_suspend_resume_server(self):
-        """Test suspending and resuming server"""
-        self.client.suspend_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id,
-                                       'SUSPENDED')
-        self.client.resume_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
 
     @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
@@ -735,43 +778,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Check if Shelve operation is successful on paused server.
         compute.shelve_server(self.client, server['id'],
                               force_shelve_offload=True)
-
-    @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
-    def test_stop_start_server(self):
-        """Test stopping and starting server"""
-        self.client.stop_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-
-    @decorators.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
-    def test_lock_unlock_server(self):
-        """Test locking and unlocking server
-
-        Lock the server, and trying to stop it will fail because locked
-        server is not allowed to be stopped by non-admin user.
-        Then unlock the server, now the server can be stopped and started.
-        """
-        # Lock the server,try server stop(exceptions throw),unlock it and retry
-        self.client.lock_server(self.server_id)
-        self.addCleanup(self.client.unlock_server, self.server_id)
-        server = self.client.show_server(self.server_id)['server']
-        self.assertEqual(server['status'], 'ACTIVE')
-        # Locked server is not allowed to be stopped by non-admin user
-        self.assertRaises(lib_exc.Conflict,
-                          self.client.stop_server, self.server_id)
-        self.client.unlock_server(self.server_id)
-        self.client.stop_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-
-    def _validate_url(self, url):
-        valid_scheme = ['http', 'https']
-        parsed_url = urlparse.urlparse(url)
-        self.assertNotEqual('None', parsed_url.port)
-        self.assertNotEqual('None', parsed_url.hostname)
-        self.assertIn(parsed_url.scheme, valid_scheme)
 
     @decorators.idempotent_id('c6bc11bf-592e-4015-9319-1c98dc64daf5')
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
