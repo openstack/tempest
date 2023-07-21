@@ -116,7 +116,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         is "available" or "in-use".
         """
         # Create a server
-        volume = self.create_volume()
+        volume = self.create_volume(wait_until=False)
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
         validation_resources = self.get_test_validation_resources(
             self.os_primary)
@@ -124,6 +124,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                     validation_resources=validation_resources,
                                     validatable=True)
         # Attach volume to instance
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.attach_volume(server['id'], volume['id'])
         # Create backup using force flag
         backup_name = data_utils.rand_name(
