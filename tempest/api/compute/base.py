@@ -524,6 +524,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         """Create a volume and wait for it to become 'available'.
 
         :param image_ref: Specify an image id to create a bootable volume.
+        :param wait_for_available: Wait until the volume becomes available
+               before returning
         :param kwargs: other parameters to create volume.
         :returns: The available volume.
         """
@@ -534,6 +536,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             kwargs['display_name'] = vol_name
         if image_ref is not None:
             kwargs['imageRef'] = image_ref
+        wait = kwargs.pop('wait_for_available', True)
         if CONF.volume.volume_type and 'volume_type' not in kwargs:
             # If volume_type is not provided in config then no need to
             # add a volume type and
@@ -549,8 +552,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
                                     cls.volumes_client.delete_volume,
                                     volume['id'])
-        waiters.wait_for_volume_resource_status(cls.volumes_client,
-                                                volume['id'], 'available')
+        if wait:
+            waiters.wait_for_volume_resource_status(cls.volumes_client,
+                                                    volume['id'], 'available')
         return volume
 
     def _detach_volume(self, server, volume):

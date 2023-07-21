@@ -239,13 +239,15 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         # after unrescue the server. Due to that we need to make
         # server SSHable before it try to detach, more details are
         # in bug#1960346
+        volume = self.create_volume(wait_for_available=False)
         validation_resources = self.get_class_validation_resources(
             self.os_primary)
         server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio', validatable=True,
             validation_resources=validation_resources, wait_until="SSHABLE")
         server = self.servers_client.show_server(server['id'])['server']
-        volume = self.create_volume()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.attach_volume(server, volume)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
