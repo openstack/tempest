@@ -64,5 +64,5 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
             configured_network = CONF.compute.fixed_network_name
             self.assertIn(configured_network, [x['label'] for x in networks])
         else:
-            network_labels = [x['label'] for x in networks]
-            self.assertNotEmpty(network_labels)
+            raise self.skipException(
+                "Environment has no known-for-sure existing network.")
