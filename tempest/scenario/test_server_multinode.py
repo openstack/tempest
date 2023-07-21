@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.common import utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions
@@ -61,6 +62,7 @@ class TestServerMultinode(manager.ScenarioTest):
         # threshold (so that things don't get crazy if you have 1000
         # compute nodes but set min to 3).
         servers = []
+        host_server_ids = {}
 
         for host in hosts[:CONF.compute.min_compute_nodes]:
             # by getting to active state here, this means this has
@@ -68,12 +70,18 @@ class TestServerMultinode(manager.ScenarioTest):
             # in order to use the availability_zone:host scheduler hint,
             # admin client is need here.
             inst = self.create_server(
+                wait_until=None,
                 clients=self.os_admin,
                 availability_zone='%(zone)s:%(host_name)s' % host)
+            host_server_ids[host['host_name']] = inst['id']
+
+        for host_name, server_id in host_server_ids.items():
+            waiters.wait_for_server_status(self.os_admin.servers_client,
+                                           server_id, 'ACTIVE')
             server = self.os_admin.servers_client.show_server(
-                inst['id'])['server']
+                server_id)['server']
             # ensure server is located on the requested host
-            self.assertEqual(host['host_name'], server['OS-EXT-SRV-ATTR:host'])
+            self.assertEqual(host_name, server['OS-EXT-SRV-ATTR:host'])
             servers.append(server)
 
         # make sure we really have the number of servers we think we should

@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.common import utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
 from tempest.scenario import manager
@@ -56,9 +57,16 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
     @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
         """LUKs v1 decrypts volume through libvirt."""
-        server = self.launch_instance()
         volume = self.create_encrypted_volume('luks',
-                                              volume_type='luks')
+                                              volume_type='luks',
+                                              wait_until=None)
+        server = self.launch_instance()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+
         self.attach_detach_volume(server, volume)
 
     @decorators.idempotent_id('7abec0a3-61a0-42a5-9e36-ad3138fb38b4')
@@ -68,16 +76,30 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
     @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luksv2(self):
         """LUKs v2 decrypts volume through os-brick."""
-        server = self.launch_instance()
         volume = self.create_encrypted_volume('luks2',
-                                              volume_type='luksv2')
+                                              volume_type='luksv2',
+                                              wait_until=None)
+        server = self.launch_instance()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+
         self.attach_detach_volume(server, volume)
 
     @decorators.idempotent_id('cbc752ed-b716-4717-910f-956cce965722')
     @decorators.attr(type='slow')
     @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
-        server = self.launch_instance()
         volume = self.create_encrypted_volume('plain',
-                                              volume_type='cryptsetup')
+                                              volume_type='cryptsetup',
+                                              wait_until=None)
+        server = self.launch_instance()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+
         self.attach_detach_volume(server, volume)

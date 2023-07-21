@@ -69,11 +69,18 @@ class TestServerVolumeAttachmentScenario(BaseAttachmentTest):
     @utils.services('compute', 'volume', 'image', 'network')
     def test_server_detach_rules(self):
         """Test that various methods of detaching a volume honors the rules"""
+        volume = self.create_volume(wait_until=None)
+        volume2 = self.create_volume(wait_until=None)
+
         server = self.create_server(wait_until='SSHABLE')
         servers = self.servers_client.list_servers()['servers']
         self.assertIn(server['id'], [x['id'] for x in servers])
 
-        volume = self.create_volume()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
 
         volume = self.nova_volume_attach(server, volume)
         self.addCleanup(self.nova_volume_detach, server, volume)
@@ -143,7 +150,12 @@ class TestServerVolumeAttachmentScenario(BaseAttachmentTest):
                 volume['id'], connector=None, attachment_id=att_id)
 
         # Test user call to detach with mismatch is rejected
-        volume2 = self.create_volume()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume2['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume2 = self.volumes_client.show_volume(volume2['id'])['volume']
+
         volume2 = self.nova_volume_attach(server, volume2)
         att_id2 = volume2['attachments'][0]['attachment_id']
         self.assertRaises(
