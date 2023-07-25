@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.common import utils
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
@@ -84,7 +85,7 @@ class TestStampPattern(manager.ScenarioTest):
         security_group = self.create_security_group()
 
         # boot an instance and create a timestamp file in it
-        volume = self.create_volume()
+        volume = self.create_volume(wait_until=None)
         server = self.create_server(
             key_name=keypair['name'],
             security_groups=[{'name': security_group['name']}])
@@ -97,6 +98,12 @@ class TestStampPattern(manager.ScenarioTest):
             ip_for_server, private_key=keypair['private_key'],
             server=server)
         disks_list_before_attach = linux_client.list_disks()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+
         self.nova_volume_attach(server, volume)
         volume_device_name = self._attached_volume_name(
             disks_list_before_attach, ip_for_server, keypair['private_key'])
@@ -115,7 +122,7 @@ class TestStampPattern(manager.ScenarioTest):
 
         # create second volume from the snapshot(volume2)
         volume_from_snapshot = self.create_volume(
-            snapshot_id=volume_snapshot['id'])
+            snapshot_id=volume_snapshot['id'], wait_until=None)
 
         # boot second instance from the snapshot(instance2)
         server_from_snapshot = self.create_server(
@@ -135,6 +142,14 @@ class TestStampPattern(manager.ScenarioTest):
         disks_list_before_attach = linux_client.list_disks()
 
         # attach volume2 to instance2
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume_from_snapshot['id'],
+                                                'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume_from_snapshot = self.volumes_client.show_volume(
+            volume_from_snapshot['id'])['volume']
+
         self.nova_volume_attach(server_from_snapshot, volume_from_snapshot)
         volume_device_name = self._attached_volume_name(
             disks_list_before_attach, ip_for_snapshot, keypair['private_key'])
