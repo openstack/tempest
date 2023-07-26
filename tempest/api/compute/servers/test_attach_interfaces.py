@@ -295,8 +295,8 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
     def test_reassign_port_between_servers(self):
         """Tests reassigning port between servers
 
-        1. Create a port in Neutron.
-        2. Create two servers in Nova.
+        1. Create two servers in Nova.
+        2. Create a port in Neutron.
         3. Attach the port to the first server.
         4. Detach the port from the first server.
         5. Attach the port to the second server.
@@ -304,11 +304,6 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         """
         network = self.get_tenant_network()
         network_id = network['id']
-        port = self.ports_client.create_port(
-            network_id=network_id,
-            name=data_utils.rand_name(self.__class__.__name__))
-        port_id = port['port']['id']
-        self.addCleanup(self.ports_client.delete_port, port_id)
 
         # NOTE(artom) We create two servers one at a time because
         # create_test_server doesn't support multiple validatable servers.
@@ -318,11 +313,20 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         def _create_validatable_server():
             _, servers = compute.create_test_server(
                 self.os_primary, tenant_network=network,
-                wait_until='ACTIVE', validatable=True,
+                validatable=True,
                 validation_resources=validation_resources)
             return servers[0]
 
+        # NOTE(danms): We create these with no waiters because we will wait
+        # for them to be validatable (i.e. SSHABLE) below. That way some of
+        # the server creation overlap each other and with create_port.
         servers = [_create_validatable_server(), _create_validatable_server()]
+
+        port = self.ports_client.create_port(
+            network_id=network_id,
+            name=data_utils.rand_name(self.__class__.__name__))
+        port_id = port['port']['id']
+        self.addCleanup(self.ports_client.delete_port, port_id)
 
         # add our cleanups for the servers since we bypassed the base class
         for server in servers:
@@ -332,7 +336,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
             # NOTE(mgoddard): Get detailed server to ensure addresses are
             # present in fixed IP case.
             server = self.servers_client.show_server(server['id'])['server']
-            self._wait_for_validation(server, validation_resources)
+            compute.wait_for_ssh_or_ping(server, self.os_primary, network,
+                                         True, validation_resources,
+                                         'SSHABLE', True)
             # attach the port to the server
             iface = self.interfaces_client.create_interface(
                 server['id'], port_id=port_id)['interfaceAttachment']
