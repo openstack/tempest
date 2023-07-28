@@ -898,10 +898,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                        nic=spoof_nic, should_succeed=True)
         # Set a mac address by making nic down temporary
         spoof_ip_addresses = ssh_client.get_nic_ip_addresses(spoof_nic)
-        cmd = ("sudo ip link set {nic} down;"
+        dhcp_cmd = ("sudo start-stop-daemon -K -x /sbin/dhcpcd -p "
+                    "/var/run/dhcpcd/pid -o || true")
+        cmd = ("{dhcp_cmd}; sudo ip link set {nic} down;"
                "sudo ip link set dev {nic} address {mac};"
                "sudo ip link set {nic} up;"
                "sudo ip address flush dev {nic};").format(nic=spoof_nic,
+                                                          dhcp_cmd=dhcp_cmd,
                                                           mac=spoof_mac)
         for ip_address in spoof_ip_addresses:
             cmd += (
