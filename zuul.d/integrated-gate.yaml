@@ -393,11 +393,23 @@
         # Keystone policies are changed to work for both system as well as
         # for project scoped, we need to keep scope check disable for
         # keystone.
-        NOVA_ENFORCE_SCOPE: true
+        # Nova and Glance have enabled the new defaults and scope by default
+        # in devstack.
         CINDER_ENFORCE_SCOPE: true
-        GLANCE_ENFORCE_SCOPE: true
         NEUTRON_ENFORCE_SCOPE: true
         PLACEMENT_ENFORCE_SCOPE: true
+
+- job:
+    name: tempest-all-rbac-old-defaults
+    parent: tempest-all
+    description: |
+      Integration test that runs all tests on RBAC old defaults.
+      devstack_localrc:
+        # NOTE(gmann): Nova and Glance have enabled the new defaults and scope
+        # by default in devstack so we need some jobs keep testing the old
+        # defaults until they are removed from service side.
+        NOVA_ENFORCE_SCOPE: false
+        GLANCE_ENFORCE_SCOPE: false
 
 - project-template:
     name: integrated-gate-networking
