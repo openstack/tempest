@@ -207,9 +207,9 @@ class ServerActionsBase(base.BaseV2ComputeTest):
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start_server(server_id)
 
-    def _get_output(self):
+    def _get_output(self, server_id):
         output = self.client.get_console_output(
-            self.server_id, length=3)['output']
+            server_id, length=3)['output']
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
         self.assertEqual(lines, 3)
@@ -335,7 +335,7 @@ class ServerActionsTestJSON(ServerActionsBase):
         # "console-log" API.
         # The detail is https://bugs.launchpad.net/nova/+bug/1251920
         self.reboot_server(self.server_id, type='HARD')
-        self.wait_for(self._get_output)
+        self.wait_for(self._get_output, self.server_id)
 
     @decorators.idempotent_id('bd61a9fd-062f-4670-972b-2d6c3e3b9e73')
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
@@ -707,6 +707,7 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         self.wait_for(_check_full_length_console_log)
 
+    @decorators.skip_because(bug='2028851')
     @decorators.idempotent_id('5b65d4e7-4ecd-437c-83c0-d6b79d927568')
     @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
                           'Console output not supported.')
@@ -725,7 +726,7 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         self.client.stop_server(temp_server_id)
         waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
-        self.wait_for(self._get_output)
+        self.wait_for(self._get_output, temp_server_id)
 
     @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,

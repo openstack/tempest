@@ -326,18 +326,18 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             body['id'])
         return body
 
-    def wait_for(self, condition):
+    def wait_for(self, condition, *args):
         """Repeatedly calls condition() until a timeout."""
         start_time = int(time.time())
         while True:
             try:
-                condition()
+                condition(*args)
             except Exception:
                 pass
             else:
                 return
             if int(time.time()) - start_time >= self.build_timeout:
-                condition()
+                condition(*args)
                 return
             time.sleep(self.build_interval)
 
