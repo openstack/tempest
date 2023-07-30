@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -31,6 +32,8 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
      managed by Cinder from a storage back end to Cinder
     """
 
+    create_default_network = True
+
     @classmethod
     def skip_checks(cls):
         super(SnapshotManageAdminTest, cls).skip_checks()
@@ -46,14 +49,20 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
                    "it should be a list of two elements")
             raise exceptions.InvalidConfiguration(msg)
 
-    @decorators.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
-    def test_unmanage_manage_snapshot(self):
+    def _test_unmanage_manage_snapshot(self, attached_volume=False):
         """Test unmanaging and managing volume snapshot"""
         # Create a volume
         volume = self.create_volume()
 
         # Create a snapshot
         snapshot = self.create_snapshot(volume_id=volume['id'])
+
+        if attached_volume:
+            # Create a server
+            server = self.create_server(wait_until='SSHABLE')
+            # Attach volume to instance
+            self.attach_volume(server['id'], volume['id'],
+                               wait_for_detach=False)
 
         # Unmanage the snapshot
         # Unmanage snapshot function works almost the same as delete snapshot,
@@ -100,3 +109,17 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
         self.assertEqual(snapshot['size'], new_snapshot_info['size'])
         for key in ['volume_id', 'name', 'description', 'metadata']:
             self.assertEqual(snapshot_ref[key], new_snapshot_info[key])
+
+    @decorators.idempotent_id('0132f42d-0147-4b45-8501-cc504bbf7810')
+    def test_unmanage_manage_snapshot(self):
+        self._test_unmanage_manage_snapshot()
+
+    @decorators.idempotent_id('7c735385-e953-4198-8534-68137f72dbdc')
+    @utils.services('compute')
+    def test_snapshot_manage_with_attached_volume(self):
+        """Test manage a snapshot with an attached volume.
+
+           The case validates manage snapshot operation while
+           the parent volume is attached to an instance.
+        """
+        self._test_unmanage_manage_snapshot(attached_volume=True)
