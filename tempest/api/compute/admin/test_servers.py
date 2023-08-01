@@ -25,6 +25,8 @@ CONF = config.CONF
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Servers API using admin privileges"""
 
+    create_default_network = True
+
     @classmethod
     def setup_clients(cls):
         super(ServersAdminTestJSON, cls).setup_clients()

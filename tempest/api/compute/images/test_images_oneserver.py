@@ -24,6 +24,8 @@ CONF = config.CONF
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     """Test server images API"""
 
+    create_default_network = True
+
     @classmethod
     def resource_setup(cls):
         super(ImagesOneServerTestJSON, cls).resource_setup()
