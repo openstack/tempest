@@ -96,10 +96,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         waiters.wait_for_volume_retype(self.volumes_client,
                                        volume_id, new_volume_type)
 
-    @decorators.attr(type='slow')
-    @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
-    @utils.services('compute', 'volume')
-    def test_volume_retype_attached(self):
+    def _test_volume_retype_attached(self, dev_name=None):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
         security_group = self.create_security_group()
@@ -108,18 +105,30 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Creating Volume types")
         source_type, dest_type = self._create_volume_types()
 
-        # create an instance from volume
-        LOG.info("Booting instance from volume")
-        volume_id = self.create_volume(imageRef=CONF.compute.image_ref,
-                                       volume_type=source_type['name'])['id']
+        if dev_name is None:
+            # create an instance from volume
+            LOG.info("Booting instance from volume")
+            volume_id = self.create_volume(
+                imageRef=CONF.compute.image_ref,
+                volume_type=source_type['name'])['id']
 
-        instance = self._boot_instance_from_volume(volume_id, keypair,
-                                                   security_group)
+            instance = self._boot_instance_from_volume(volume_id, keypair,
+                                                       security_group)
+        else:
+            LOG.info("Booting instance from image and attaching data volume")
+            key_name = keypair['name']
+            security_groups = [{'name': security_group['name']}]
+            instance = self.create_server(key_name=key_name,
+                                          security_groups=security_groups)
+            volume = self.create_volume(volume_type=source_type['name'])
+            volume_id = volume['id']
+            volume = self.nova_volume_attach(instance, volume)
 
         # write content to volume on instance
         LOG.info("Setting timestamp in instance %s", instance['id'])
         ip_instance = self.get_server_ip(instance)
         timestamp = self.create_timestamp(ip_instance,
+                                          dev_name=dev_name,
                                           private_key=keypair['private_key'],
                                           server=instance)
 
@@ -134,6 +143,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Getting timestamp in postmigrated instance %s",
                  instance['id'])
         timestamp2 = self.get_timestamp(ip_instance,
+                                        dev_name=dev_name,
                                         private_key=keypair['private_key'],
                                         server=instance)
         self.assertEqual(timestamp, timestamp2)
@@ -152,10 +162,35 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
             instance['id'])['volumeAttachments']
         self.assertEqual(volume_id, attached_volumes[0]['id'])
 
+        # Reboot the instance and verify it boots successfully
+        LOG.info("Hard rebooting instance %s", instance['id'])
+        self.servers_client.reboot_server(instance['id'], type='HARD')
+        waiters.wait_for_server_status(
+            self.servers_client, instance['id'], 'ACTIVE')
+
+        # check the content of written file to verify the instance is working
+        # after being rebooted
+        LOG.info("Getting timestamp in postmigrated rebooted instance %s",
+                 instance['id'])
+        timestamp2 = self.get_timestamp(ip_instance,
+                                        dev_name=dev_name,
+                                        private_key=keypair['private_key'],
+                                        server=instance)
+        self.assertEqual(timestamp, timestamp2)
+
     @decorators.attr(type='slow')
-    @decorators.idempotent_id('fe47b1ed-640e-4e3b-a090-200e25607362')
+    @decorators.idempotent_id('deadd2c2-beef-4dce-98be-f86765ff311b')
     @utils.services('compute', 'volume')
-    def test_volume_migrate_attached(self):
+    def test_volume_retype_attached(self):
+        self._test_volume_retype_attached()
+
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('122e070c-a5b2-470c-af2b-81e9dbefb9e8')
+    @utils.services('compute', 'volume')
+    def test_volume_retype_attached_data_volume(self):
+        self._test_volume_retype_attached(dev_name='vdb')
+
+    def _test_volume_migrate_attached(self, dev_name=None):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
         security_group = self.create_security_group()
@@ -163,16 +198,26 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Creating volume")
         # Create a unique volume type to avoid using the backend default
         migratable_type = self.create_volume_type()['name']
-        volume_id = self.create_volume(imageRef=CONF.compute.image_ref,
-                                       volume_type=migratable_type)['id']
-        volume = self.admin_volumes_client.show_volume(volume_id)
 
-        LOG.info("Booting instance from volume")
-        instance = self._boot_instance_from_volume(volume_id, keypair,
-                                                   security_group)
+        if dev_name is None:
+            volume_id = self.create_volume(imageRef=CONF.compute.image_ref,
+                                           volume_type=migratable_type)['id']
+            LOG.info("Booting instance from volume")
+            instance = self._boot_instance_from_volume(volume_id, keypair,
+                                                       security_group)
+        else:
+            LOG.info("Booting instance from image and attaching data volume")
+            key_name = keypair['name']
+            security_groups = [{'name': security_group['name']}]
+            instance = self.create_server(key_name=key_name,
+                                          security_groups=security_groups)
+            volume = self.create_volume(volume_type=migratable_type)
+            volume_id = volume['id']
+            volume = self.nova_volume_attach(instance, volume)
 
         # Identify the source and destination hosts for the migration
-        src_host = volume['volume']['os-vol-host-attr:host']
+        volume = self.admin_volumes_client.show_volume(volume_id)['volume']
+        src_host = volume['os-vol-host-attr:host']
 
         # Select the first c-vol host that isn't hosting the volume as the dest
         # host['host_name'] should take the format of host@backend.
@@ -186,6 +231,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
 
         ip_instance = self.get_server_ip(instance)
         timestamp = self.create_timestamp(ip_instance,
+                                          dev_name=dev_name,
                                           private_key=keypair['private_key'],
                                           server=instance)
 
@@ -202,6 +248,7 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         LOG.info("Getting timestamp in postmigrated instance %s",
                  instance['id'])
         timestamp2 = self.get_timestamp(ip_instance,
+                                        dev_name=dev_name,
                                         private_key=keypair['private_key'],
                                         server=instance)
         self.assertEqual(timestamp, timestamp2)
@@ -216,3 +263,31 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
             instance['id'])['volumeAttachments']
         attached_volume_id = attached_volumes[0]['id']
         self.assertEqual(volume_id, attached_volume_id)
+
+        # Reboot the instance and verify it boots successfully
+        LOG.info("Hard rebooting instance %s", instance['id'])
+        self.servers_client.reboot_server(instance['id'], type='HARD')
+        waiters.wait_for_server_status(
+            self.servers_client, instance['id'], 'ACTIVE')
+
+        # check the content of written file to verify the instance is working
+        # after being rebooted
+        LOG.info("Getting timestamp in postmigrated rebooted instance %s",
+                 instance['id'])
+        timestamp2 = self.get_timestamp(ip_instance,
+                                        dev_name=dev_name,
+                                        private_key=keypair['private_key'],
+                                        server=instance)
+        self.assertEqual(timestamp, timestamp2)
+
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('fe47b1ed-640e-4e3b-a090-200e25607362')
+    @utils.services('compute', 'volume')
+    def test_volume_migrate_attached(self):
+        self._test_volume_migrate_attached()
+
+    @decorators.attr(type='slow')
+    @decorators.idempotent_id('1b8661cb-db93-4110-860b-201295027b78')
+    @utils.services('compute', 'volume')
+    def test_volume_migrate_attached_data_volume(self):
+        self._test_volume_migrate_attached(dev_name='vdb')
