@@ -1129,7 +1129,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
                          private_key=None, server=None, username=None,
-                         fs='ext4'):
+                         fs='vfat'):
         """Creates timestamp
 
         This wrapper utility does ssh, creates timestamp and returns the
