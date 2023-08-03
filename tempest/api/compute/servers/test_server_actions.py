@@ -838,25 +838,16 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(ServerActionsV293TestJSON, cls).resource_setup()
-        cls.server_id = cls.recreate_server(None, validatable=True)
+        cls.server_id = cls.recreate_server(None, volume_backed=True,
+                                            validatable=True)
 
     @utils.services('volume')
     @decorators.idempotent_id('6652dab9-ea24-4c93-ab5a-93d79c3041cf')
     def test_rebuild_volume_backed_server(self):
         """Test rebuilding a volume backed server"""
-        # We have to create a new server that is volume-backed since the one
-        # from setUp is not volume-backed.
-        kwargs = {'volume_backed': True,
-                  'wait_until': 'ACTIVE'}
-        validation_resources = {}
-        if CONF.validation.run_validation:
-            validation_resources = self.get_test_validation_resources(
-                self.os_primary)
-            kwargs.update({'validatable': True,
-                           'validation_resources': validation_resources})
-        server = self.create_test_server(**kwargs)
-        server = self.servers_client.show_server(server['id'])['server']
-        self.addCleanup(self.delete_server, server['id'])
+        self.validation_resources = self.get_class_validation_resources(
+            self.os_primary)
+        server = self.servers_client.show_server(self.server_id)['server']
         volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
         volume_before_rebuild = self.volumes_client.show_volume(volume_id)
         image_before_rebuild = (
@@ -872,10 +863,10 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         #   ~/.ssh/ (if allowed).
         # 4.Plain username/password auth, if a password was given.
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(server, validation_resources),
+            self.get_server_ip(server, self.validation_resources),
             self.ssh_user,
             password=None,
-            pkey=validation_resources['keypair']['private_key'],
+            pkey=self.validation_resources['keypair']['private_key'],
             server=server,
             servers_client=self.servers_client)
         output = linux_client.exec_command('touch test_file')
@@ -925,10 +916,10 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         #   ~/.ssh/ (if allowed).
         # 4.Plain username/password auth, if a password was given.
         linux_client = remote_client.RemoteClient(
-            self.get_server_ip(rebuilt_server, validation_resources),
+            self.get_server_ip(rebuilt_server, self.validation_resources),
             self.ssh_alt_user,
             password,
-            validation_resources['keypair']['private_key'],
+            self.validation_resources['keypair']['private_key'],
             server=rebuilt_server,
             servers_client=self.servers_client)
         linux_client.validate_authentication()
