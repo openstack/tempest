@@ -18,7 +18,6 @@ import time
 import testtools
 
 from tempest.api.volume import base
-from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
@@ -181,10 +180,16 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
 
 class VolumesExtendAttachedTest(BaseVolumesExtendAttachedTest):
 
+    @classmethod
+    def skip_checks(cls):
+        super(VolumesExtendAttachedTest, cls).skip_checks()
+        if not CONF.service_available.nova:
+            skip_msg = ("%s skipped as Nova is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+        if not CONF.volume_feature_enabled.extend_attached_volume:
+            raise cls.skipException("Attached volume extend is disabled.")
+
     @decorators.idempotent_id('301f5a30-1c6f-4ea0-be1a-91fd28d44354')
-    @testtools.skipUnless(CONF.volume_feature_enabled.extend_attached_volume,
-                          "Attached volume extend is disabled.")
-    @utils.services('compute')
     def test_extend_attached_volume(self):
         volume = self.create_volume()
         self._test_extend_attached_volume(volume)

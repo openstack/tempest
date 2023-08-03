@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
@@ -26,6 +29,13 @@ class ImagesMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     """
 
     max_microversion = '2.38'
+
+    @classmethod
+    def skip_checks(cls):
+        super(ImagesMetadataNegativeTestJSON, cls).skip_checks()
+        if not CONF.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def setup_clients(cls):

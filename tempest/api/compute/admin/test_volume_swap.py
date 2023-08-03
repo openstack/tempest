@@ -13,7 +13,6 @@
 import time
 
 from tempest.api.compute import base
-from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import decorators
@@ -33,6 +32,8 @@ class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
     @classmethod
     def skip_checks(cls):
         super(TestVolumeSwapBase, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
         if not CONF.compute_feature_enabled.swap_volume:
             raise cls.skipException("Swapping volumes is not supported.")
 
@@ -81,7 +82,6 @@ class TestVolumeSwap(TestVolumeSwapBase):
     # so it's marked as such.
     @decorators.attr(type='slow')
     @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
-    @utils.services('volume')
     def test_volume_swap(self):
         """Test swapping of volume attached to server with admin user
 
@@ -183,7 +183,6 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
     # multiple computes but that would just side-step the underlying bug.
     @decorators.skip_because(bug='1807723',
                              condition=CONF.compute.min_compute_nodes > 1)
-    @utils.services('volume')
     def test_volume_swap_with_multiattach(self):
         """Test swapping volume attached to multiple servers
 

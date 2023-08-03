@@ -304,13 +304,17 @@ class LiveMigrationRemoteConsolesV26Test(LiveMigrationTestBase):
     min_microversion = '2.6'
     max_microversion = 'latest'
 
+    @classmethod
+    def skip_checks(cls):
+        super(LiveMigrationRemoteConsolesV26Test, cls).skip_checks()
+        if not CONF.compute_feature_enabled.serial_console:
+            skip_msg = ("Serial console not supported.")
+            raise cls.skipException(skip_msg)
+        if not compute.is_scheduler_filter_enabled("DifferentHostFilter"):
+            raise cls.skipException("DifferentHostFilter is not available.")
+
     @decorators.attr(type='multinode')
     @decorators.idempotent_id('6190af80-513e-4f0f-90f2-9714e84955d7')
-    @testtools.skipUnless(CONF.compute_feature_enabled.serial_console,
-                          'Serial console not supported.')
-    @testtools.skipUnless(
-        compute.is_scheduler_filter_enabled("DifferentHostFilter"),
-        'DifferentHostFilter is not available.')
     def test_live_migration_serial_console(self):
         """Test the live-migration of an instance which has a serial console
 

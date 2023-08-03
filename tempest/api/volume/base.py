@@ -42,6 +42,10 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+        if cls.create_default_network and not CONF.service_available.neutron:
+            skip_msg = (
+                "%s skipped as Neutron is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
         api_version_utils.check_skip_with_microversion(
             cls.volume_min_microversion, cls.volume_max_microversion,

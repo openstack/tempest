@@ -31,6 +31,12 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
     """Test identity user password"""
 
     @classmethod
+    def skip_checks(cls):
+        super(IdentityV3UsersTest, cls).skip_checks()
+        if not CONF.identity_feature_enabled.security_compliance:
+            raise cls.skipException("Security compliance not available.")
+
+    @classmethod
     def resource_setup(cls):
         super(IdentityV3UsersTest, cls).resource_setup()
         cls.creds = cls.os_primary.credentials
@@ -77,8 +83,6 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         time.sleep(1)
         self.non_admin_users_client.auth_provider.set_auth()
 
-    @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
-                          'Security compliance not available.')
     @decorators.idempotent_id('ad71bd23-12ad-426b-bb8b-195d2b635f27')
     @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
                       'Skipped because environment has an '
@@ -107,8 +111,6 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                           user_id=self.user_id,
                           password=old_pass)
 
-    @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
-                          'Security compliance not available.')
     @decorators.idempotent_id('941784ee-5342-4571-959b-b80dd2cea516')
     @testtools.skipIf(CONF.identity_feature_enabled.immutable_user_source,
                       'Skipped because environment has an '
@@ -142,8 +144,6 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
         # A different password can be set
         self._update_password(original_password=new_pass1, password=new_pass2)
 
-    @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,
-                          'Security compliance not available.')
     @decorators.idempotent_id('a7ad8bbf-2cff-4520-8c1d-96332e151658')
     def test_user_account_lockout(self):
         """Test locking out user account after failure attempts"""

@@ -10,8 +10,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.lib import decorators
@@ -20,10 +18,14 @@ from tempest.lib import decorators
 class ServiceProvidersTest(base.BaseNetworkTest):
     """Test network service providers"""
 
+    @classmethod
+    def skip_checks(cls):
+        super(ServiceProvidersTest, cls).skip_checks()
+        if not utils.is_extension_enabled('service-type', 'network'):
+            skip_msg = ("service-type extension not enabled.")
+            raise cls.skipException(skip_msg)
+
     @decorators.idempotent_id('2cbbeea9-f010-40f6-8df5-4eaa0c918ea6')
-    @testtools.skipUnless(
-        utils.is_extension_enabled('service-type', 'network'),
-        'service-type extension not enabled.')
     def test_service_providers_list(self):
         """Test listing network service providers"""
         body = self.service_providers_client.list_service_providers()

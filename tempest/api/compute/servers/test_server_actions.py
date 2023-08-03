@@ -810,9 +810,15 @@ class ServersAaction247Test(base.BaseV2ComputeTest):
 
     min_microversion = '2.47'
 
+    @classmethod
+    def skip_checks(cls):
+        if not CONF.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+        super(ServersAaction247Test, cls).skip_checks()
+
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
-    @utils.services('image')
     @decorators.idempotent_id('252a4bdd-6366-4dae-9994-8c30aa660f23')
     def test_create_backup(self):
         server = self.create_test_server(wait_until='ACTIVE')
@@ -841,7 +847,6 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         cls.server_id = cls.recreate_server(None, volume_backed=True,
                                             validatable=True)
 
-    @utils.services('volume')
     @decorators.idempotent_id('6652dab9-ea24-4c93-ab5a-93d79c3041cf')
     def test_rebuild_volume_backed_server(self):
         """Test rebuilding a volume backed server"""
