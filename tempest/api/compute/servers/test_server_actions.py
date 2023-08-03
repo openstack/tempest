@@ -831,6 +831,12 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
     volume_min_microversion = '3.68'
 
     @classmethod
+    def skip_checks(cls):
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
+        return super().skip_checks()
+
+    @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
         super(ServerActionsV293TestJSON, cls).setup_credentials()
