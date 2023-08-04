@@ -79,7 +79,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.flavors_client = cls.os_primary.flavors_client
         cls.compute_images_client = cls.os_primary.compute_images_client
         cls.extensions_client = cls.os_primary.extensions_client
-        cls.floating_ip_pools_client = cls.os_primary.floating_ip_pools_client
         cls.floating_ips_client = cls.os_primary.compute_floating_ips_client
         cls.keypairs_client = cls.os_primary.keypairs_client
         cls.security_group_rules_client = (
@@ -94,7 +93,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         cls.snapshots_extensions_client =\
             cls.os_primary.snapshots_extensions_client
         cls.interfaces_client = cls.os_primary.interfaces_client
-        cls.fixed_ips_client = cls.os_primary.fixed_ips_client
         cls.availability_zone_client = cls.os_primary.availability_zone_client
         cls.agents_client = cls.os_primary.agents_client
         cls.aggregates_client = cls.os_primary.aggregates_client
@@ -120,35 +118,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                 raise lib_exc.InvalidConfiguration(
                     'Either api_v1 or api_v2 must be True in '
                     '[image-feature-enabled].')
-        cls._check_depends_on_nova_network()
-
-    @classmethod
-    def _check_depends_on_nova_network(cls):
-        # Since nova-network APIs were removed from Nova in the Rocky release,
-        # determine, based on the max version from the version document, if
-        # the compute API is >Queens and if so, skip tests that rely on
-        # nova-network.
-        if not getattr(cls, 'depends_on_nova_network', False):
-            return
-        versions = cls.versions_client.list_versions()['versions']
-        # Find the v2.1 version which will tell us our max version for the
-        # compute API we're testing against.
-        for version in versions:
-            if version['id'] == 'v2.1':
-                max_version = api_version_request.APIVersionRequest(
-                    version['version'])
-                break
-        else:
-            LOG.warning(
-                'Unable to determine max v2.1 compute API version: %s',
-                versions)
-            return
-
-        # The max compute API version in Queens is 2.60 so we cap
-        # at that version.
-        queens = api_version_request.APIVersionRequest('2.60')
-        if max_version > queens:
-            raise cls.skipException('nova-network is gone')
 
     @classmethod
     def resource_setup(cls):

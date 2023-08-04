@@ -24,12 +24,7 @@ from tempest.lib.services.compute.certificates_client import \
     CertificatesClient
 from tempest.lib.services.compute.extensions_client import \
     ExtensionsClient
-from tempest.lib.services.compute.fixed_ips_client import FixedIPsClient
 from tempest.lib.services.compute.flavors_client import FlavorsClient
-from tempest.lib.services.compute.floating_ip_pools_client import \
-    FloatingIPPoolsClient
-from tempest.lib.services.compute.floating_ips_bulk_client import \
-    FloatingIPsBulkClient
 from tempest.lib.services.compute.floating_ips_client import \
     FloatingIPsClient
 from tempest.lib.services.compute.hosts_client import HostsClient
@@ -69,10 +64,9 @@ from tempest.lib.services.compute.volumes_client import \
 
 __all__ = ['AgentsClient', 'AggregatesClient', 'AssistedVolumeSnapshotsClient',
            'AvailabilityZoneClient', 'BaremetalNodesClient',
-           'CertificatesClient', 'ExtensionsClient', 'FixedIPsClient',
-           'FlavorsClient', 'FloatingIPPoolsClient',
-           'FloatingIPsBulkClient', 'FloatingIPsClient', 'HostsClient',
-           'HypervisorClient', 'ImagesClient', 'InstanceUsagesAuditLogClient',
+           'CertificatesClient', 'ExtensionsClient', 'FlavorsClient',
+           'FloatingIPsClient', 'HostsClient', 'HypervisorClient',
+           'ImagesClient', 'InstanceUsagesAuditLogClient',
            'InterfacesClient', 'KeyPairsClient', 'LimitsClient',
            'MigrationsClient', 'NetworksClient', 'QuotaClassesClient',
            'QuotasClient', 'SecurityGroupDefaultRulesClient',

@@ -250,33 +250,6 @@ rescue_server_with_admin_pass['response_body'].update(
 rescue_server_with_admin_pass['response_body'].update(
     {'required': ['adminPass']})
 
-
-list_virtual_interfaces = {
-    'status_code': [200],
-    'response_body': {
-        'type': 'object',
-        'properties': {
-            'virtual_interfaces': {
-                'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {'type': 'string'},
-                        'mac_address': parameter_types.mac_address,
-                        'OS-EXT-VIF-NET:net_id': {'type': 'string'}
-                    },
-                    'additionalProperties': False,
-                    # 'OS-EXT-VIF-NET:net_id' is API extension So it is
-                    # not defined as 'required'
-                    'required': ['id', 'mac_address']
-                }
-            }
-        },
-        'additionalProperties': False,
-        'required': ['virtual_interfaces']
-    }
-}
-
 common_attach_volume_info = {
     'type': 'object',
     'properties': {

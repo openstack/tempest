@@ -124,15 +124,12 @@ class Manager(clients.ServiceClients):
         self.quota_classes_client = self.compute.QuotaClassesClient()
         self.flavors_client = self.compute.FlavorsClient()
         self.extensions_client = self.compute.ExtensionsClient()
-        self.floating_ip_pools_client = self.compute.FloatingIPPoolsClient()
-        self.floating_ips_bulk_client = self.compute.FloatingIPsBulkClient()
         self.compute_floating_ips_client = self.compute.FloatingIPsClient()
         self.compute_security_group_rules_client = (
             self.compute.SecurityGroupRulesClient())
         self.compute_security_groups_client = (
             self.compute.SecurityGroupsClient())
         self.interfaces_client = self.compute.InterfacesClient()
-        self.fixed_ips_client = self.compute.FixedIPsClient()
         self.availability_zone_client = self.compute.AvailabilityZoneClient()
         self.aggregates_client = self.compute.AggregatesClient()
         self.services_client = self.compute.ServicesClient()

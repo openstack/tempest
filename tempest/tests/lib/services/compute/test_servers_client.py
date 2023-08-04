@@ -789,21 +789,6 @@ class TestServersClient(base.BaseServiceTest):
             length='fake-length'
             )
 
-    def test_list_virtual_interfaces_with_str_body(self):
-        self._test_list_virtual_interfaces()
-
-    def test_list_virtual_interfaces_with_bytes_body(self):
-        self._test_list_virtual_interfaces(True)
-
-    def _test_list_virtual_interfaces(self, bytes_body=False):
-        self.check_service_client_function(
-            self.client.list_virtual_interfaces,
-            'tempest.lib.common.rest_client.RestClient.get',
-            {'virtual_interfaces': [self.FAKE_VIRTUAL_INTERFACES]},
-            bytes_body,
-            server_id=self.server_id
-            )
-
     def test_rescue_server_with_str_body(self):
         self._test_rescue_server()
 
