@@ -38,6 +38,12 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     * check command outputs
     """
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestMinimumBasicScenario, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
+
     def nova_show(self, server):
         got_server = (self.servers_client.show_server(server['id'])
                       ['server'])

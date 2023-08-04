@@ -31,6 +31,12 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     # breathing room to get through deletes in the time allotted.
     TIMEOUT_SCALING_FACTOR = 2
 
+    @classmethod
+    def skip_checks(cls):
+        super(TestVolumeBootPattern, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
+
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])

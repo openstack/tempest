@@ -51,6 +51,8 @@ class TestStampPattern(manager.ScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(TestStampPattern, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
 

@@ -26,6 +26,13 @@ CONF = config.CONF
 
 
 class BaseAttachmentTest(manager.ScenarioTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super(BaseAttachmentTest, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
+
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
