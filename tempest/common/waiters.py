@@ -224,6 +224,24 @@ def wait_for_image_tasks_status(client, image_id, status):
     raise lib_exc.TimeoutException(message)
 
 
+def wait_for_tasks_status(client, task_id, status):
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        task = client.show_tasks(task_id)
+        if task['status'] == status:
+            return task
+        time.sleep(client.build_interval)
+    message = ('Task %(task_id)s tasks: '
+               'failed to reach %(status)s state within the required '
+               'time (%(timeout)s s).' % {'task_id': task_id,
+                                          'status': status,
+                                          'timeout': client.build_timeout})
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise lib_exc.TimeoutException(message)
+
+
 def wait_for_image_imported_to_stores(client, image_id, stores=None):
     """Waits for an image to be imported to all requested stores.
 

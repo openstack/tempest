@@ -27,9 +27,11 @@ from tempest.lib.services.image.v2.namespaces_client import NamespacesClient
 from tempest.lib.services.image.v2.resource_types_client import \
     ResourceTypesClient
 from tempest.lib.services.image.v2.schemas_client import SchemasClient
+from tempest.lib.services.image.v2.tasks_client import TaskClient
 from tempest.lib.services.image.v2.versions_client import VersionsClient
+
 
 __all__ = ['ImageMembersClient', 'ImagesClient', 'ImageCacheClient',
            'NamespaceObjectsClient', 'NamespacePropertiesClient',
            'NamespaceTagsClient', 'NamespacesClient', 'ResourceTypesClient',
-           'SchemasClient', 'VersionsClient']
+           'SchemasClient', 'TaskClient', 'VersionsClient']
