@@ -14,13 +14,24 @@
 
 from tempest.api.compute import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ComputeTenantNetworksTest(base.BaseV2ComputeTest):
     """Test compute tenant networks API with microversion less than 2.36"""
 
     max_microversion = '2.35'
+
+    @classmethod
+    def skip_checks(cls):
+        super(ComputeTenantNetworksTest, cls).skip_checks()
+        if not CONF.service_available.neutron:
+            skip_msg = (
+                "%s skipped as Neutron is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def resource_setup(cls):

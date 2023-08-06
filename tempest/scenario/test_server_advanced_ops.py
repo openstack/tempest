@@ -14,7 +14,6 @@
 #    under the License.
 
 from oslo_log import log as logging
-import testtools
 
 from tempest.common import utils
 from tempest.common import waiters
@@ -36,14 +35,21 @@ class TestServerAdvancedOps(manager.ScenarioTest):
     """
 
     @classmethod
+    def skip_checks(cls):
+        super(TestServerAdvancedOps, cls).skip_checks()
+        if not CONF.service_available.nova:
+            skip_msg = ("%s skipped as Nova is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+        if not CONF.compute_feature_enabled.suspend:
+            raise cls.skipException("Suspend is not available.")
+
+    @classmethod
     def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True)
         super(TestServerAdvancedOps, cls).setup_credentials()
 
     @decorators.attr(type='slow')
     @decorators.idempotent_id('949da7d5-72c8-4808-8802-e3d70df98e2c')
-    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
-                          'Suspend is not available.')
     @utils.services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test

@@ -51,6 +51,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         super(BaseV2ComputeTest, cls).skip_checks()
         if not CONF.service_available.nova:
             raise cls.skipException("Nova is not available")
+        if cls.create_default_network and not CONF.service_available.neutron:
+            raise cls.skipException("Neutron is not available")
+
         api_version_utils.check_skip_with_microversion(
             cls.min_microversion, cls.max_microversion,
             CONF.compute.min_microversion, CONF.compute.max_microversion)
