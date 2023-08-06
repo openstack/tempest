@@ -77,6 +77,9 @@ NON_ACTIVE_LIST = [
     'x/ranger-tempest-plugin'
     'x/tap-as-a-service-tempest-plugin'
     'x/trio2o'
+    # No changes are merging in this
+    # https://review.opendev.org/q/project:x%252Fnetworking-fortinet
+    'x/networking-fortinet'
 ]
 
 url = 'https://review.opendev.org/projects/'
