@@ -113,14 +113,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.attachments_client = cls.os_primary.attachments_client_latest
             cls.snapshots_client = cls.os_primary.snapshots_client_latest
         if CONF.service_available.glance:
-            if CONF.image_feature_enabled.api_v1:
-                cls.images_client = cls.os_primary.image_client
-            elif CONF.image_feature_enabled.api_v2:
+            if CONF.image_feature_enabled.api_v2:
                 cls.images_client = cls.os_primary.image_client_v2
             else:
                 raise lib_exc.InvalidConfiguration(
-                    'Either api_v1 or api_v2 must be True in '
-                    '[image-feature-enabled].')
+                    'api_v2 must be True in [image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):

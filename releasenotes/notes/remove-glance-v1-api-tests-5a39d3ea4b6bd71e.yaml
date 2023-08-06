@@ -1,0 +1,8 @@
+---
+prelude: >
+    Glance v1 APIs were removed in Rocky release and last
+    supported release for v1 was Queens. Tempest master does
+    not support the Rocky or Queens release so we removed
+    the Glance v1 tests, config option, and its service clients.
+    If you would like to test the v1 APIs then you can use the old
+    Tempest version.

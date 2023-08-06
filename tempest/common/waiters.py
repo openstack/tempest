@@ -16,12 +16,10 @@ import time
 
 from oslo_log import log as logging
 
-from tempest.common import image as common_image
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
-from tempest.lib.services.image.v1 import images_client as images_v1_client
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -156,17 +154,7 @@ def wait_for_image_status(client, image_id, status):
     The client should have a show_image(image_id) method to get the image.
     The client should also have build_interval and build_timeout attributes.
     """
-    if isinstance(client, images_v1_client.ImagesClient):
-        # The 'check_image' method is used here because the show_image method
-        # returns image details plus the image itself which is very expensive.
-        # The 'check_image' method returns just image details.
-        def _show_image_v1(image_id):
-            resp = client.check_image(image_id)
-            return common_image.get_image_meta_from_headers(resp)
-
-        show_image = _show_image_v1
-    else:
-        show_image = client.show_image
+    show_image = client.show_image
 
     current_status = 'An unknown status'
     start = int(time.time())

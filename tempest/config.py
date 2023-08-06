@@ -712,14 +712,6 @@ ImageFeaturesGroup = [
                                   'are current one. In future, Tempest will '
                                   'test v2 APIs only so this config option '
                                   'will be removed.'),
-    cfg.BoolOpt('api_v1',
-                default=False,
-                help="Is the v1 image API enabled",
-                deprecated_for_removal=True,
-                deprecated_reason='Glance v1 APIs are deprecated and v2 APIs '
-                                  'are current one. In future, Tempest will '
-                                  'test v2 APIs only so this config option '
-                                  'will be removed.'),
     # Image import feature is setup in devstack victoria onwards.
     # Once all stable branches setup the same via glance standalone
     # mode or with uwsgi, we can remove this config option.
