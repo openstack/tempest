@@ -183,7 +183,7 @@ class RemoteClient(remote_client.RemoteClient):
         self.exec_command('sudo umount %s' % mount_path)
 
     def make_fs(self, dev_name, fs='ext4'):
-        cmd_mkfs = 'sudo mke2fs -t %s /dev/%s' % (fs, dev_name)
+        cmd_mkfs = 'sudo mkfs -t %s /dev/%s' % (fs, dev_name)
         try:
             self.exec_command(cmd_mkfs)
         except tempest.lib.exceptions.SSHExecCommandFailed:
