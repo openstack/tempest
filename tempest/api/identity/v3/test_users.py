@@ -88,6 +88,10 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                       'Skipped because environment has an '
                       'immutable user source and solely '
                       'provides read-only access to users.')
+    @testtools.skipIf(CONF.identity.user_minimum_password_age > 0,
+                      'Skipped because password cannot '
+                      'be changed immediately, resulting '
+                      'in failed password update.')
     def test_user_update_own_password(self):
         """Test updating user's own password"""
         old_pass = self.creds.password
@@ -116,6 +120,10 @@ class IdentityV3UsersTest(base.BaseIdentityV3Test):
                       'Skipped because environment has an '
                       'immutable user source and solely '
                       'provides read-only access to users.')
+    @testtools.skipIf(CONF.identity.user_minimum_password_age > 0,
+                      'Skipped because password cannot '
+                      'be changed immediately, resulting '
+                      'in failed password update.')
     def test_password_history_check_self_service_api(self):
         """Test checking password changing history"""
         old_pass = self.creds.password

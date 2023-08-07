@@ -199,8 +199,15 @@ IdentityGroup = [
                     "default value is 0 meaning disabling this feature. "
                     "NOTE: This config option value must be same as "
                     "keystone.conf: security_compliance.unique_last_password_"
-                    "count otherwise test might fail"
-               ),
+                    "count otherwise test might fail"),
+    cfg.IntOpt('user_minimum_password_age',
+               default=0,
+               help="The number of days that a password must be used before "
+                    "the user can change it. This only takes effect when "
+                    "identity-feature-enabled.security_compliance is set to "
+                    "'True'. For more details, refer to keystone config "
+                    "options "
+                    "keystone.conf:security_compliance.minimum_password_age.")
 ]
 
 service_clients_group = cfg.OptGroup(name='service-clients',
