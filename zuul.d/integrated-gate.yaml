@@ -88,6 +88,11 @@
     required-projects:
       - openstack/horizon
     vars:
+      # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
+      # end up 6 in upstream CI. Higher concurrency means high parallel
+      # requests to services and can cause more oom issues. To avoid the
+      # oom issue, setting the concurrency to 4 in this job.
+      tempest_concurrency: 4
       tox_envlist: integrated-full
       devstack_localrc:
         USE_PYTHON3: true
@@ -143,6 +148,11 @@
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
       and Glance related tests. This is meant to be run on Nova gate only.
     vars:
+      # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
+      # end up 6 in upstream CI. Higher concurrency means high parallel
+      # requests to services and can cause more oom issues. To avoid the
+      # oom issue, setting the concurrency to 4 in this job.
+      tempest_concurrency: 4
       tox_envlist: integrated-compute
       tempest_exclude_regex: ""
       devstack_localrc:
@@ -181,6 +191,11 @@
       subset of 'tempest-full-py3' job and run Nova and Neutron
       related tests. This is meant to be run on Placement gate only.
     vars:
+      # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
+      # end up 6 in upstream CI. Higher concurrency means high parallel
+      # requests to services and can cause more oom issues. To avoid the
+      # oom issue, setting the concurrency to 4 in this job.
+      tempest_concurrency: 4
       tox_envlist: integrated-placement
       devstack_localrc:
         USE_PYTHON3: true
@@ -246,6 +261,11 @@
     # This job runs on ubuntu Jammy and after stable/zed.
     branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga|zed)).*$
     vars:
+      # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
+      # end up 6 in upstream CI. Higher concurrency means high parallel
+      # requests to services and can cause more oom issues. To avoid the
+      # oom issue, setting the concurrency to 4 in this job.
+      tempest_concurrency: 4
       devstack_localrc:
         USE_PYTHON3: true
       devstack_plugins:
