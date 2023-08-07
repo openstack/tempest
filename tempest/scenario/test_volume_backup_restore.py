@@ -41,6 +41,8 @@ class TestVolumeBackupRestore(manager.ScenarioTest):
     @classmethod
     def skip_checks(cls):
         super(TestVolumeBackupRestore, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            raise cls.skipException("Cinder is not available")
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException('Backup is not enable.')
 
