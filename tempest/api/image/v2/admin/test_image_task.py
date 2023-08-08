@@ -94,6 +94,7 @@ class ImageTaskCreate(base.BaseV2ImageAdminTest):
         self.assertEqual(observed_disk_format, expected_disk_format,
                          message="Expected disk format not match ")
 
+    @decorators.skip_because(bug='2030527')
     @decorators.idempotent_id('669d5387-0340-4abf-b62d-7cc89f539c8c')
     def test_image_tasks_create(self):
         """Test task type 'import' image """
