@@ -127,29 +127,23 @@ class ServerActionsBase(base.BaseV2ComputeTest):
             self.assertGreater(new_boot_time, boot_time,
                                '%s > %s' % (new_boot_time, boot_time))
 
-    def _test_rebuild_server(self):
+    def _test_rebuild_server(self, server_id):
         # Get the IPs the server has before rebuilding it
-        original_addresses = (self.client.show_server(self.server_id)['server']
+        original_addresses = (self.client.show_server(server_id)['server']
                               ['addresses'])
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
         password = 'rebuildPassw0rd'
         rebuilt_server = self.client.rebuild_server(
-            self.server_id,
+            server_id,
             self.image_ref_alt,
             name=new_name,
             metadata=meta,
             adminPass=password)['server']
 
-        # If the server was rebuilt on a different image, restore it to the
-        # original image once the test ends
-        if self.image_ref_alt != self.image_ref:
-            self.addCleanup(self._rebuild_server_and_check, self.image_ref,
-                            rebuilt_server)
-
         # Verify the properties in the initial response are correct
-        self.assertEqual(self.server_id, rebuilt_server['id'])
+        self.assertEqual(server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
@@ -221,23 +215,6 @@ class ServerActionsBase(base.BaseV2ComputeTest):
         self.assertNotEqual('None', parsed_url.hostname)
         self.assertIn(parsed_url.scheme, valid_scheme)
 
-    def _rebuild_server_and_check(self, image_ref, server):
-        rebuilt_server = (self.client.rebuild_server(server['id'], image_ref)
-                          ['server'])
-        if CONF.validation.run_validation:
-            tenant_network = self.get_tenant_network()
-            compute.wait_for_ssh_or_ping(
-                server, self.os_primary, tenant_network,
-                True, self.validation_resources, "SSHABLE", True)
-        else:
-            waiters.wait_for_server_status(self.client, server['id'],
-                                           'ACTIVE')
-
-        msg = ('Server was not rebuilt to the original image. '
-               'The original image: {0}. The current image: {1}'
-               .format(image_ref, rebuilt_server['image']['id']))
-        self.assertEqual(image_ref, rebuilt_server['image']['id'], msg)
-
 
 class ServerActionsTestJSON(ServerActionsBase):
     @decorators.idempotent_id('6158df09-4b82-4ab3-af6d-29cf36af858d')
@@ -287,7 +264,18 @@ class ServerActionsTestJSON(ServerActionsBase):
 
         The server should be rebuilt using the provided image and data.
         """
-        self._test_rebuild_server()
+        tenant_network = self.get_tenant_network()
+        _, servers = compute.create_test_server(
+            self.os_primary,
+            wait_until='ACTIVE',
+            tenant_network=tenant_network)
+        server = servers[0]
+
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.client, server['id'])
+        self.addCleanup(self.client.delete_server, server['id'])
+
+        self._test_rebuild_server(server_id=server['id'])
 
     @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -410,21 +398,27 @@ class ServerActionsTestOtherA(ServerActionsBase):
         The server in stop state should be rebuilt using the provided
         image and remain in SHUTOFF state.
         """
-        server = self.client.show_server(self.server_id)['server']
+        tenant_network = self.get_tenant_network()
+        _, servers = compute.create_test_server(
+            self.os_primary,
+            wait_until='ACTIVE',
+            tenant_network=tenant_network)
+        server = servers[0]
+
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.client, server['id'])
+        self.addCleanup(self.client.delete_server, server['id'])
+        server = self.client.show_server(server['id'])['server']
         old_image = server['image']['id']
         new_image = (self.image_ref_alt
                      if old_image == self.image_ref else self.image_ref)
-        self.client.stop_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        rebuilt_server = (self.client.rebuild_server(self.server_id, new_image)
+        self.client.stop_server(server['id'])
+        waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
+        rebuilt_server = (self.client.rebuild_server(server['id'], new_image)
                           ['server'])
-        # If the server was rebuilt on a different image, restore it to the
-        # original image once the test ends
-        if self.image_ref_alt != self.image_ref:
-            self.addCleanup(self._rebuild_server_and_check, old_image, server)
 
         # Verify the properties in the initial response are correct
-        self.assertEqual(self.server_id, rebuilt_server['id'])
+        self.assertEqual(server['id'], rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
         self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
@@ -435,8 +429,6 @@ class ServerActionsTestOtherA(ServerActionsBase):
         server = self.client.show_server(rebuilt_server['id'])['server']
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
-
-        self.client.start_server(self.server_id)
 
     # NOTE(mriedem): Marked as slow because while rebuild and volume-backed is
     # common, we don't actually change the image (you can't with volume-backed
@@ -451,29 +443,34 @@ class ServerActionsTestOtherA(ServerActionsBase):
         The volume should be attached to the instance after rebuild.
         """
         # create a new volume and attach it to the server
-        volume = self.create_volume()
+        volume = self.create_volume(wait_for_available=False)
+        network = self.get_tenant_network()
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+        _, servers = compute.create_test_server(
+            self.os_primary, tenant_network=network,
+            validatable=True,
+            validation_resources=validation_resources,
+            wait_until='SSHABLE')
+        server = servers[0]
+        self.addCleanup(waiters.wait_for_server_termination,
+                        self.client, server['id'])
+        self.addCleanup(self.client.delete_server, server['id'])
 
-        server = self.client.show_server(self.server_id)['server']
+        server = self.client.show_server(server['id'])['server']
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
         self.attach_volume(server, volume)
 
         # run general rebuild test
-        self._test_rebuild_server()
+        self._test_rebuild_server(server_id=server['id'])
 
         # make sure the volume is attached to the instance after rebuild
         vol_after_rebuild = self.volumes_client.show_volume(volume['id'])
         vol_after_rebuild = vol_after_rebuild['volume']
         self.assertEqual('in-use', vol_after_rebuild['status'])
-        self.assertEqual(self.server_id,
+        self.assertEqual(server['id'],
                          vol_after_rebuild['attachments'][0]['server_id'])
-        if CONF.validation.run_validation:
-            linux_client = remote_client.RemoteClient(
-                self.get_server_ip(server, self.validation_resources),
-                self.ssh_alt_user,
-                password=None,
-                pkey=self.validation_resources['keypair']['private_key'],
-                server=server,
-                servers_client=self.client)
-            linux_client.validate_authentication()
 
     @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @decorators.related_bug('1728603')
