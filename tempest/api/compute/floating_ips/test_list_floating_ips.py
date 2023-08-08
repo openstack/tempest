@@ -66,10 +66,3 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
         self.assertEqual(floating_ip_fixed_ip,
                          body['fixed_ip'])
         self.assertEqual(floating_ip_id, body['id'])
-
-    @decorators.idempotent_id('df389fc8-56f5-43cc-b290-20eda39854d3')
-    def test_list_floating_ip_pools(self):
-        """Test listing floating ip pools"""
-        floating_ip_pools = self.pools_client.list_floating_ip_pools()
-        self.assertNotEmpty(floating_ip_pools['floating_ip_pools'],
-                            "Expected floating IP Pools. Got zero.")

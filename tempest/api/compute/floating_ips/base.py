@@ -41,4 +41,3 @@ class BaseFloatingIPsTest(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(BaseFloatingIPsTest, cls).setup_clients()
         cls.client = cls.floating_ips_client
-        cls.pools_client = cls.floating_ip_pools_client

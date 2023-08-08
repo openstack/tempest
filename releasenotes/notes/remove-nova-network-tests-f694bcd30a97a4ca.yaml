@@ -1,0 +1,11 @@
+---
+prelude: >
+    Tempest remove the nova-network tests and service clients.
+    The nova-network was removed from Rocky release and current
+    Tempest master does not support the Rocky release. Below are
+    the service clients have been removed:
+
+    * floating_ip_pools_client
+    * floating_ips_bulk_client
+    * fixed_ips_client
+    * list_virtual_interfaces

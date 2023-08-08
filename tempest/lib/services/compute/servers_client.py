@@ -676,14 +676,6 @@ class ServersClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.get_remote_consoles, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_virtual_interfaces(self, server_id):
-        """List the virtual interfaces used in an instance."""
-        resp, body = self.get('/'.join(['servers', server_id,
-                                        'os-virtual-interfaces']))
-        body = json.loads(body)
-        self.validate_response(schema.list_virtual_interfaces, resp, body)
-        return rest_client.ResponseBody(resp, body)
-
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server.
 
