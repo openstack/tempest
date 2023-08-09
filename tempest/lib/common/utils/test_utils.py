@@ -93,6 +93,7 @@ def call_and_ignore_notfound_exc(func, *args, **kwargs):
             if attempt >= 3:
                 raise
             LOG.warning('Got ServerFault while running %s, retrying...', func)
+            time.sleep(1)
 
 
 def call_until_true(func, duration, sleep_for, *args, **kwargs):
