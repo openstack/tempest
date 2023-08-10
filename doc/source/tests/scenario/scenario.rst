@@ -148,6 +148,14 @@ scenario.test\_snapshot\_pattern module
    :show-inheritance:
    :undoc-members:
 
+scenario.test\_snapshots\_with\_add\_location module
+----------------------------------------------------
+
+.. automodule:: tempest.scenario.test_snapshots_with_add_location
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 scenario.test\_stamp\_pattern module
 ------------------------------------
 

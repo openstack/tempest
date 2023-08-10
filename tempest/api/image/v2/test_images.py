@@ -14,10 +14,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import hashlib
 import io
 import random
 
+import testtools
+
 from oslo_log import log as logging
+import requests
 from tempest.api.image import base
 from tempest.common import image as image_utils
 from tempest.common import waiters
@@ -319,6 +323,251 @@ class ImportImagesTest(base.BaseV2ImageTest):
         # delete image from staging to backend, but on the alternate worker
         self.os_primary.image_client_remote.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
+
+
+class BaseLocationImport(base.BaseV2ImageTest):
+    """Base test class for image add location operations."""
+
+    # NOTE(pdeore): requests.get has no default timeout. 60s is more than
+    # enough to download CONF.image.http_image (small Cirros/local test
+    # image) for hash computation; prefer fail-fast over hanging forever.
+    _HTTP_IMAGE_FETCH_TIMEOUT = 60
+
+    def _assert_add_location_success(self, image, os_hash_value, checksum,
+                                     os_hash_algo='sha256'):
+        self.assertEqual('active', image['status'])
+        self.assertEqual(os_hash_algo, image['os_hash_algo'])
+        self.assertEqual(checksum, image['checksum'])
+        self.assertEqual(os_hash_value, image['os_hash_value'])
+        # NOTE(pdeore): 'stores' property will be available to
+        # image only if multistores are enabled hence can't be
+        # assert when single store is enabled
+        if len(self.get_available_stores()) > 1:
+            self.assertEqual('web', image['stores'])
+
+    def _assert_add_location_failure(self, image):
+        self.assertEqual('queued', image['status'])
+        self.assertIsNone(image['os_hash_algo'])
+        self.assertIsNone(image['checksum'])
+        self.assertIsNone(image['os_hash_value'])
+        # NOTE(pdeore): `http` store doesn't allow deletion of
+        # location hence location will be there for `queued`
+        # image.
+        # see: https://bugs.launchpad.net/glance/+bug/2076648
+        # 'stores' property will be available to image only if
+        # multistores are enabled hence can't be assert when
+        # single store is enabled
+        if len(self.get_available_stores()) > 1:
+            self.assertEqual('web', image['stores'])
+
+    def _add_location_and_verify(self, do_secure_hash=True):
+
+        uuid = data_utils.rand_uuid()
+        image_name = data_utils.rand_name('image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private',
+                                  ramdisk_id=uuid)
+        self.assertEqual(image_name, image['name'])
+        self.assertEqual('queued', image['status'])
+
+        # --- Negative tests: invalid validation_data (sync 400 errors) ---
+        url = CONF.image.http_image
+
+        # Invalid os_hash_value (wrong size for sha512)
+        validation_data = {
+            'os_hash_algo': "sha512",
+            'os_hash_value': "dbc9e0f80d131e64b94913a7b40bb5"
+        }
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.add_image_location,
+                          image['id'], url,
+                          validation_data=validation_data)
+
+        # Missing os_hash_algo (only os_hash_value provided)
+        with requests.get(url, timeout=self._HTTP_IMAGE_FETCH_TIMEOUT) as r:
+            expect_h = hashlib.sha512(r.content).hexdigest()
+        validation_data = {'os_hash_value': expect_h}
+
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.add_image_location,
+                          image['id'], url,
+                          validation_data=validation_data)
+
+        # Invalid hash algorithm
+        validation_data = {
+            'os_hash_algo': 'sha123',
+            'os_hash_value': expect_h}
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.add_image_location,
+                          image['id'], url,
+                          validation_data=validation_data)
+
+        # Mismatch hash_value size with hash algo
+        with requests.get(url, timeout=self._HTTP_IMAGE_FETCH_TIMEOUT) as r:
+            expect_c = hashlib.md5(r.content,
+                                   usedforsecurity=False).hexdigest()
+            expect_h = hashlib.sha256(r.content).hexdigest()
+
+        validation_data = {
+            'os_hash_algo': 'sha512',
+            'os_hash_value': expect_h}
+        self.assertRaises(lib_exc.BadRequest,
+                          self.client.add_image_location,
+                          image['id'], url,
+                          validation_data=validation_data)
+
+        # --- Positive test: Add location with matching hash_value
+        #     and hash algo ---
+        validation_data = {
+            'os_hash_algo': 'sha256',
+            'os_hash_value': expect_h}
+
+        self.client.add_image_location(image['id'], url,
+                                       validation_data=validation_data)
+
+        waiters.wait_for_image_tasks_status(
+            self.client, image['id'], 'success')
+        image = self.client.show_image(image['id'])
+        self._assert_add_location_success(
+            image, expect_h, expect_c if do_secure_hash else None)
+
+        # --- Wrong hash value causing async failure ---
+        # Add location with invalid validation_data
+        # (wrong hash value in validation data).
+        # Image will be reverted to queued state from importing.
+        # NOTE: This test only applies when do_secure_hash is True,
+        # because when do_secure_hash is False, Glance does not verify
+        # the hash and the task succeeds regardless of hash correctness.
+        if do_secure_hash:
+            # Create an image 2
+            image = self.client.create_image(container_format='bare',
+                                             disk_format='raw')
+            self.addCleanup(self.client.delete_image, image['id'])
+            self.assertEqual('queued', image['status'])
+            validation_data = {
+                'os_hash_algo': 'sha512',
+                'os_hash_value': 'beefdead' * 16}
+            self.client.add_image_location(image['id'], url,
+                                           validation_data=validation_data)
+            waiters.wait_for_image_tasks_status(self.client, image['id'],
+                                                'failure')
+
+            image = self.client.show_image(image['id'])
+            self._assert_add_location_failure(image)
+
+        # --- Add location without validation_data ---
+        # When do_secure_hash is enabled (enforced by skip condition
+        # on calling test method), glance computes hash values
+        # automatically. When do_secure_hash is disabled, hash values
+        # remain None.
+        # Create an image 3
+        image = self.client.create_image(container_format='bare',
+                                         disk_format='raw')
+        self.addCleanup(self.client.delete_image, image['id'])
+        self.assertEqual('queued', image['status'])
+        self.client.add_image_location(image['id'], url)
+
+        tasks = waiters.wait_for_image_tasks_status(
+            self.client, image['id'], 'success')
+        self.assertEqual(1, len(tasks))
+        image = self.client.show_image(image['id'])
+
+        if do_secure_hash:
+            with requests.get(
+                    url, timeout=self._HTTP_IMAGE_FETCH_TIMEOUT) as r:
+                expect_c = hashlib.md5(
+                    r.content,
+                    usedforsecurity=False).hexdigest()
+                expect_h = hashlib.sha512(
+                    r.content).hexdigest()
+            self._assert_add_location_success(image, expect_h, expect_c,
+                                              os_hash_algo='sha512')
+        else:
+            self.assertEqual('active', image['status'])
+            self.assertIsNotNone(image['size'])
+            self.assertIsNone(image['checksum'])
+            self.assertIsNone(image['os_hash_value'])
+
+
+class LocationImportTest(BaseLocationImport):
+    """Here we test the new location apis for image with single store
+       enabled for glance
+    """
+    @classmethod
+    def resource_setup(cls):
+        super(LocationImportTest, cls).resource_setup()
+
+        if not cls.versions_client.has_version('2.17'):
+            # API is not new enough to support add location API
+            skip_msg = (
+                '%s skipped as Glance does not support v2.17'
+                % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('9ca1b69e-375e-11ee-be56-0242ac120002')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.do_secure_hash,
+        'do_secure_hash is disabled')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.http_store_enabled,
+        'http store is disabled')
+    def test_add_location_for_image_with_do_secure_hash_true(self):
+        self._add_location_and_verify(do_secure_hash=True)
+
+    @decorators.idempotent_id('b6963da4-375e-11ee-be56-0242ac120002')
+    @testtools.skipIf(
+        CONF.image_feature_enabled.do_secure_hash,
+        'do_secure_hash is enabled')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.http_store_enabled,
+        'http store is disabled')
+    def test_add_location_with_do_secure_hash_false(self):
+        self._add_location_and_verify(do_secure_hash=False)
+
+
+class MultistoreLocationImportTest(BaseLocationImport):
+    """Here we test the new location apis for image"""
+    @classmethod
+    def resource_setup(cls):
+        super(MultistoreLocationImportTest, cls).resource_setup()
+        cls.available_stores = cls.get_available_stores()
+
+        if not cls.versions_client.has_version('2.17'):
+            # API is not new enough to support add location API
+            skip_msg = (
+                '%s skipped as Glance does not support v2.17'
+                % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+        if not len(cls.available_stores) > 1:
+            skip_msg = (
+                '%s skipped as only one store is available: %s'
+                % (cls.__name__, cls.available_stores))
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('3f84b819-0df8-4f81-af30-7c2d4e242bc9')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.do_secure_hash,
+        'do_secure_hash is disabled')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.http_store_enabled,
+        'http store is disabled')
+    def test_add_location_for_image_with_do_secure_hash_true(self):
+        self._add_location_and_verify(do_secure_hash=True)
+
+    @decorators.idempotent_id('507ecfef-9e1c-40c0-b801-64bf00a71ab2')
+    @testtools.skipIf(
+        CONF.image_feature_enabled.do_secure_hash,
+        'do_secure_hash is enabled')
+    @testtools.skipIf(
+        not CONF.image_feature_enabled.http_store_enabled,
+        'http store is disabled')
+    def test_add_location_with_do_secure_hash_false(self):
+        self._add_location_and_verify(do_secure_hash=False)
 
 
 class MultiStoresImportImagesTest(base.BaseV2ImageTest):
