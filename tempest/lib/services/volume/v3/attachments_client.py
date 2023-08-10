@@ -31,5 +31,6 @@ class AttachmentsClient(base_client.BaseClient):
         """Delete volume attachment."""
         url = "attachments/%s" % (attachment_id)
         resp, body = self.delete(url)
+        body = json.loads(body)
         self.expected_success(200, resp.status)
         return rest_client.ResponseBody(resp, body)
