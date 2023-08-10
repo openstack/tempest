@@ -1,0 +1,5 @@
+---
+features:
+  - Add a new config options migration_source_host and migration_dest_host
+    in the compute section, which if is set takes source or destination
+    host from options, otherwise a host is chosen automatically.

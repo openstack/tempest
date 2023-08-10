@@ -405,6 +405,17 @@ ComputeGroup = [
                     'allow_availability_zone_fallback=False in cinder.conf), '
                     'the volume create request will fail and the instance '
                     'will fail the build request.'),
+    cfg.StrOpt('migration_source_host',
+               default=None,
+               help="Specify source host for live-migration, cold-migration"
+                    " and resize tests. If option is not set tests will use"
+                    " host automatically."),
+    cfg.StrOpt('migration_dest_host',
+               default=None,
+               help="Specify destination host for live-migration and cold"
+                    " migration. If option is not set tests will use host"
+                    " automatically."),
+
 ]
 
 placement_group = cfg.OptGroup(name='placement',
