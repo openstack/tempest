@@ -178,13 +178,13 @@ class TestDiscovery(base.TestCase):
     def test_verify_glance_version_no_v2_with_v1_1(self):
         # This test verifies that wrong config api_v2 = True is detected
         class FakeClient(object):
-            def get_versions(self):
-                return (None, ['v1.1'])
+            def list_versions(self):
+                return {'versions': [{'id': 'v1.1'}]}
 
         fake_os = mock.MagicMock()
         fake_module = mock.MagicMock()
-        fake_module.ImagesClient = FakeClient
-        fake_os.image_v1 = fake_module
+        fake_module.VersionsClient = FakeClient
+        fake_os.image_v2 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
@@ -194,53 +194,28 @@ class TestDiscovery(base.TestCase):
     def test_verify_glance_version_no_v2_with_v1_0(self):
         # This test verifies that wrong config api_v2 = True is detected
         class FakeClient(object):
-            def get_versions(self):
-                return (None, ['v1.0'])
+            def list_versions(self):
+                return {'versions': [{'id': 'v1.0'}]}
 
         fake_os = mock.MagicMock()
         fake_module = mock.MagicMock()
-        fake_module.ImagesClient = FakeClient
-        fake_os.image_v1 = fake_module
+        fake_module.VersionsClient = FakeClient
+        fake_os.image_v2 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
         print_mock.assert_called_with('api_v2', 'image-feature-enabled',
                                       False, True)
 
-    def test_verify_glance_version_no_v1(self):
-        # This test verifies that wrong config api_v1 = True is detected
-        class FakeClient(object):
-            def get_versions(self):
-                raise lib_exc.NotFound()
-
-            def list_versions(self):
-                return {'versions': [{'id': 'v2.0'}]}
-
-        fake_os = mock.MagicMock()
-        fake_module = mock.MagicMock()
-        fake_module.ImagesClient = FakeClient
-        fake_module.VersionsClient = FakeClient
-        fake_os.image_v1 = fake_module
-        fake_os.image_v2 = fake_module
-        with mock.patch.object(verify_tempest_config,
-                               'print_and_or_update') as print_mock:
-            verify_tempest_config.verify_glance_api_versions(fake_os, True)
-        print_mock.assert_not_called()
-
     def test_verify_glance_version_no_version(self):
-        # This test verifies that wrong config api_v1 = True is detected
+        # This test verifies that wrong config api_v2 = True is detected
         class FakeClient(object):
-            def get_versions(self):
-                raise lib_exc.NotFound()
-
             def list_versions(self):
                 raise lib_exc.NotFound()
 
         fake_os = mock.MagicMock()
         fake_module = mock.MagicMock()
-        fake_module.ImagesClient = FakeClient
         fake_module.VersionsClient = FakeClient
-        fake_os.image_v1 = fake_module
         fake_os.image_v2 = fake_module
         with mock.patch.object(verify_tempest_config,
                                'print_and_or_update') as print_mock:

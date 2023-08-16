@@ -17,7 +17,6 @@ import io
 import random
 
 from tempest.api.compute import base
-from tempest.common import image as common_image
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -48,23 +47,15 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
             'name': data_utils.rand_name('image'),
             'container_format': CONF.image.container_formats[0],
             'disk_format': CONF.image.disk_formats[0],
-            'min_ram': min_img_ram
+            'min_ram': min_img_ram,
+            'visibility': 'private'
         }
-
-        if CONF.image_feature_enabled.api_v1:
-            params.update({'is_public': False})
-            params = {'headers': common_image.image_meta_to_headers(**params)}
-        else:
-            params.update({'visibility': 'private'})
 
         image = self.images_client.create_image(**params)
         image = image['image'] if 'image' in image else image
         self.addCleanup(self.images_client.delete_image, image['id'])
 
-        if CONF.image_feature_enabled.api_v1:
-            self.images_client.update_image(image['id'], data=image_file)
-        else:
-            self.images_client.store_image_file(image['id'], data=image_file)
+        self.images_client.store_image_file(image['id'], data=image_file)
 
         self.assertEqual(min_img_ram, image['min_ram'])
 

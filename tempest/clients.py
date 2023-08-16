@@ -83,8 +83,6 @@ class Manager(clients.ServiceClients):
 
     def _set_image_clients(self):
         if CONF.service_available.glance:
-            self.image_client = self.image_v1.ImagesClient()
-            self.image_member_client = self.image_v1.ImageMembersClient()
             self.image_client_v2 = self.image_v2.ImagesClient()
             self.image_member_client_v2 = self.image_v2.ImageMembersClient()
             self.image_cache_client = self.image_v2.ImageCacheClient()

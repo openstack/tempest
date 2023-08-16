@@ -118,25 +118,16 @@ def verify_glance_api_versions(os, update):
     # Since we want to verify that the configuration is correct, we cannot
     # rely on a specific version of the API being available.
     try:
-        _, versions = os.image_v1.ImagesClient().get_versions()
+        versions = os.image_v2.VersionsClient().list_versions()['versions']
+        versions = [x['id'] for x in versions]
     except lib_exc.NotFound:
-        # If not found, we use v2. The assumption is that either v1 or v2
-        # are available, since glance is marked as available in the catalog.
-        # If not, glance should be disabled in Tempest conf.
-        try:
-            versions = os.image_v2.VersionsClient().list_versions()['versions']
-            versions = [x['id'] for x in versions]
-        except lib_exc.NotFound:
-            msg = ('Glance is available in the catalog, but no known version, '
-                   '(v1.x or v2.x) of Glance could be found, so Glance should '
-                   'be configured as not available')
-            LOG.warning(msg)
-            print_and_or_update('glance', 'service-available', False, update)
-            return
+        msg = ('Glance is available in the catalog, but no known version, '
+               'of Glance could be found, so Glance should '
+               'be configured as not available')
+        LOG.warning(msg)
+        print_and_or_update('glance', 'service-available', False, update)
+        return
 
-    if CONF.image_feature_enabled.api_v1 != contains_version('v1.', versions):
-        print_and_or_update('api_v1', 'image-feature-enabled',
-                            not CONF.image_feature_enabled.api_v1, update)
     if CONF.image_feature_enabled.api_v2 != contains_version('v2.', versions):
         print_and_or_update('api_v2', 'image-feature-enabled',
                             not CONF.image_feature_enabled.api_v2, update)

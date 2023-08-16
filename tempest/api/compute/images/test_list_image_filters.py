@@ -19,7 +19,6 @@ import io
 import testtools
 
 from tempest.api.compute import base
-from tempest.common import image as common_image
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -46,17 +45,11 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ListImageFiltersTestJSON, cls).setup_clients()
         cls.client = cls.compute_images_client
-        # Check if glance v1 is available to determine which client to use. We
-        # prefer glance v1 for the compute API tests since the compute image
-        # API proxy was written for glance v1.
-        if CONF.image_feature_enabled.api_v1:
-            cls.glance_client = cls.os_primary.image_client
-        elif CONF.image_feature_enabled.api_v2:
+        if CONF.image_feature_enabled.api_v2:
             cls.glance_client = cls.os_primary.image_client_v2
         else:
             raise exceptions.InvalidConfiguration(
-                'Either api_v1 or api_v2 must be True in '
-                '[image-feature-enabled].')
+                'api_v2 must be True in [image-feature-enabled].')
 
     @classmethod
     def resource_setup(cls):
@@ -66,14 +59,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             params = {
                 'name': data_utils.rand_name(cls.__name__ + '-image'),
                 'container_format': 'bare',
-                'disk_format': 'raw'
+                'disk_format': 'raw',
+                'visibility': 'private'
             }
-            if CONF.image_feature_enabled.api_v1:
-                params.update({'is_public': False})
-                params = {'headers':
-                          common_image.image_meta_to_headers(**params)}
-            else:
-                params.update({'visibility': 'private'})
 
             body = cls.glance_client.create_image(**params)
             body = body['image'] if 'image' in body else body
@@ -86,10 +74,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             # between created_at and updated_at.
             time.sleep(1)
             image_file = io.BytesIO((b'*' * 1024))
-            if CONF.image_feature_enabled.api_v1:
-                cls.glance_client.update_image(image_id, data=image_file)
-            else:
-                cls.glance_client.store_image_file(image_id, data=image_file)
+            cls.glance_client.store_image_file(image_id, data=image_file)
             waiters.wait_for_image_status(cls.client, image_id, 'ACTIVE')
             body = cls.client.show_image(image_id)['image']
             return body

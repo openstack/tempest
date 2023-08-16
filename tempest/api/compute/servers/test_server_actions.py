@@ -569,17 +569,11 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         # create the first and the second backup
 
-        # Check if glance v1 is available to determine which client to use. We
-        # prefer glance v1 for the compute API tests since the compute image
-        # API proxy was written for glance v1.
-        if CONF.image_feature_enabled.api_v1:
-            glance_client = self.os_primary.image_client
-        elif CONF.image_feature_enabled.api_v2:
+        if CONF.image_feature_enabled.api_v2:
             glance_client = self.os_primary.image_client_v2
         else:
             raise lib_exc.InvalidConfiguration(
-                'Either api_v1 or api_v2 must be True in '
-                '[image-feature-enabled].')
+                'api_v2 must be True in [image-feature-enabled].')
 
         backup1 = data_utils.rand_name('backup-1')
         resp = self.client.create_backup(self.server_id,
@@ -635,16 +629,9 @@ class ServerActionsTestOtherB(ServerActionsBase):
             'sort_key': 'created_at',
             'sort_dir': 'asc'
         }
-        if CONF.image_feature_enabled.api_v1:
-            for key, value in properties.items():
-                params['property-%s' % key] = value
-            image_list = glance_client.list_images(
-                detail=True,
-                **params)['images']
-        else:
-            # Additional properties are flattened in glance v2.
-            params.update(properties)
-            image_list = glance_client.list_images(params)['images']
+        # Additional properties are flattened in glance v2.
+        params.update(properties)
+        image_list = glance_client.list_images(params)['images']
 
         self.assertEqual(2, len(image_list))
         self.assertEqual((backup1, backup2),
@@ -668,11 +655,7 @@ class ServerActionsTestOtherB(ServerActionsBase):
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         glance_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
-        if CONF.image_feature_enabled.api_v1:
-            image_list = glance_client.list_images(
-                detail=True, **params)['images']
-        else:
-            image_list = glance_client.list_images(params)['images']
+        image_list = glance_client.list_images(params)['images']
         self.assertEqual(2, len(image_list),
                          'Unexpected number of images for '
                          'v2:test_create_backup; was the oldest backup not '
@@ -733,23 +716,16 @@ class ServerActionsTestOtherB(ServerActionsBase):
         """Test shelving and unshelving server"""
         if CONF.image_feature_enabled.api_v2:
             glance_client = self.os_primary.image_client_v2
-        elif CONF.image_feature_enabled.api_v1:
-            glance_client = self.os_primary.image_client
         else:
             raise lib_exc.InvalidConfiguration(
-                'Either api_v1 or api_v2 must be True in '
-                '[image-feature-enabled].')
+                'api_v2 must be True in [image-feature-enabled].')
         compute.shelve_server(self.client, self.server_id,
                               force_shelve_offload=True)
 
         server = self.client.show_server(self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
-        if CONF.image_feature_enabled.api_v2:
-            images = glance_client.list_images(params)['images']
-        elif CONF.image_feature_enabled.api_v1:
-            images = glance_client.list_images(
-                detail=True, **params)['images']
+        images = glance_client.list_images(params)['images']
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 

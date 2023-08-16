@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-from tempest.lib.services.image import v1
 from tempest.lib.services.image import v2
 
-__all__ = ['v1', 'v2']
+__all__ = ['v2']

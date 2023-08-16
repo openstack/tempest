@@ -25,7 +25,6 @@ from oslo_serialization import jsonutils as json
 from oslo_utils import netutils
 
 from tempest.common import compute
-from tempest.common import image as common_image
 from tempest.common.utils.linux import remote_client
 from tempest.common.utils import net_utils
 from tempest.common import waiters
@@ -124,15 +123,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """This setup the service clients for the tests"""
         super(ScenarioTest, cls).setup_clients()
         if CONF.service_available.glance:
-            # Check if glance v1 is available to determine which client to use.
-            if CONF.image_feature_enabled.api_v1:
-                cls.image_client = cls.os_primary.image_client
-            elif CONF.image_feature_enabled.api_v2:
+            if CONF.image_feature_enabled.api_v2:
                 cls.image_client = cls.os_primary.image_client_v2
             else:
                 raise lib_exc.InvalidConfiguration(
-                    'Either api_v1 or api_v2 must be True in '
-                    '[image-feature-enabled].')
+                    'api_v2 must be True in [image-feature-enabled].')
 
         cls.setup_compute_client(cls)
         cls.setup_network_client(cls)
@@ -371,11 +366,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if size is None:
             size = CONF.volume.volume_size
         if imageRef:
-            if CONF.image_feature_enabled.api_v1:
-                resp = self.image_client.check_image(imageRef)
-                image = common_image.get_image_meta_from_headers(resp)
-            else:
-                image = self.image_client.show_image(imageRef)
+            image = self.image_client.show_image(imageRef)
             min_disk = image.get('min_disk')
             size = max(size, min_disk)
         if name is None:
@@ -796,27 +787,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
             'name': name,
             'container_format': img_container_format,
             'disk_format': img_disk_format or img_container_format,
+            'visibility': 'private'
         }
-        if CONF.image_feature_enabled.api_v1:
-            params['is_public'] = 'False'
-            if img_properties:
-                params['properties'] = img_properties
-            params = {'headers': common_image.image_meta_to_headers(**params)}
-        else:
-            params['visibility'] = 'private'
-            # Additional properties are flattened out in the v2 API.
-            if img_properties:
-                params.update(img_properties)
+        # Additional properties are flattened out in the v2 API.
+        if img_properties:
+            params.update(img_properties)
         params.update(kwargs)
         body = self.image_client.create_image(**params)
         image = body['image'] if 'image' in body else body
         self.addCleanup(self.image_client.delete_image, image['id'])
         self.assertEqual("queued", image['status'])
         with open(img_path, 'rb') as image_file:
-            if CONF.image_feature_enabled.api_v1:
-                self.image_client.update_image(image['id'], data=image_file)
-            else:
-                self.image_client.store_image_file(image['id'], image_file)
+            self.image_client.store_image_file(image['id'], image_file)
         LOG.debug("image:%s", image['id'])
         return image['id']
 
@@ -864,15 +846,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         _image_client.delete_image, image_id)
 
-        if CONF.image_feature_enabled.api_v1:
-            # In glance v1 the additional properties are stored in the headers
-            resp = _image_client.check_image(image_id)
-            snapshot_image = common_image.get_image_meta_from_headers(resp)
-            image_props = snapshot_image.get('properties', {})
-        else:
-            # In glance v2 the additional properties are flattened.
-            snapshot_image = _image_client.show_image(image_id)
-            image_props = snapshot_image
+        # In glance v2 the additional properties are flattened.
+        snapshot_image = _image_client.show_image(image_id)
+        image_props = snapshot_image
 
         bdm = image_props.get('block_device_mapping')
         if bdm:

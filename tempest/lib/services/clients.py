@@ -48,7 +48,6 @@ def tempest_modules():
         'placement': placement,
         'identity.v2': identity.v2,
         'identity.v3': identity.v3,
-        'image.v1': image.v1,
         'image.v2': image.v2,
         'network': network,
         'object-storage': object_storage,
