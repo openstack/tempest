@@ -898,6 +898,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not isinstance(exc, lib_exc.SSHTimeout):
             LOG.debug('Network information on a devstack host')
 
+    def get_snapshot_id(self, bdms):
+        if isinstance(bdms, str):
+            bdms = json.loads(bdms)
+        snapshot_id = None
+        for bdm in bdms:
+            # Look for the block device mapping that actually has a
+            # snapshot. If the server has ephemeral or swap disk, their
+            # block device mappings will be present with snapshot_id = None
+            if 'snapshot_id' in bdm and bdm['snapshot_id'] is not None:
+                snapshot_id = bdm['snapshot_id']
+                break
+        return snapshot_id
+
     def create_server_snapshot(self, server, name=None, **kwargs):
         """Creates server snapshot"""
         # Glance client
@@ -924,20 +937,19 @@ class ScenarioTest(tempest.test.BaseTestCase):
         snapshot_image = _image_client.show_image(image_id)
         image_props = snapshot_image
 
-        bdm = image_props.get('block_device_mapping')
-        if bdm:
-            bdm = json.loads(bdm)
-            if bdm and 'snapshot_id' in bdm[0]:
-                snapshot_id = bdm[0]['snapshot_id']
-                self.addCleanup(
-                    self.snapshots_client.wait_for_resource_deletion,
-                    snapshot_id)
-                self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                                self.snapshots_client.delete_snapshot,
-                                snapshot_id)
-                waiters.wait_for_volume_resource_status(self.snapshots_client,
-                                                        snapshot_id,
-                                                        'available')
+        bdms = image_props.get('block_device_mapping')
+        if bdms:
+            snapshot_id = self.get_snapshot_id(bdms)
+            self.assertIsNotNone(snapshot_id)
+            self.addCleanup(
+                self.snapshots_client.wait_for_resource_deletion,
+                snapshot_id)
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.snapshots_client.delete_snapshot,
+                            snapshot_id)
+            waiters.wait_for_volume_resource_status(
+                self.snapshots_client, snapshot_id, 'available')
+
         image_name = snapshot_image['name']
         self.assertEqual(name, image_name)
         LOG.debug("Created snapshot image %s for server %s",
