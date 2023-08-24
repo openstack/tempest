@@ -26,6 +26,13 @@ class VolumesAssistedSnapshotsTest(base.BaseV2ComputeAdminTest):
 
     create_default_network = True
 
+    # TODO(gmann): Remove the admin access to service user
+    # once nova change the default of this API to service
+    # role. To merge the nova changing the policy default
+    # we need to use token with admin as well as service
+    # role and later we can use only service token.
+    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
+
     @classmethod
     def skip_checks(cls):
         super(VolumesAssistedSnapshotsTest, cls).skip_checks()
@@ -37,7 +44,7 @@ class VolumesAssistedSnapshotsTest(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(VolumesAssistedSnapshotsTest, cls).setup_clients()
         cls.assisted_v_client = (
-            cls.os_admin.assisted_volume_snapshots_client)
+            cls.os_service_user.assisted_volume_snapshots_client)
         cls.volumes_client = cls.os_admin.volumes_client_latest
         cls.servers_client = cls.os_admin.servers_client
 
