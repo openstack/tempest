@@ -19,6 +19,13 @@ from tempest.lib import decorators
 class ServerExternalEventsTest(base.BaseV2ComputeAdminTest):
     """Test server external events test"""
 
+    # TODO(gmann): Remove the admin access to service user
+    # once nova change the default of this API to service
+    # role. To merge the nova changing the policy default
+    # we need to use token with admin as well as service
+    # role and later we can use only service token.
+    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
+
     @decorators.idempotent_id('6bbf4723-61d2-4372-af55-7ba27f1c9ba6')
     def test_create_server_external_events(self):
         """Test create a server and add some external events"""
@@ -29,7 +36,7 @@ class ServerExternalEventsTest(base.BaseV2ComputeAdminTest):
                 "server_uuid": server_id,
             }
         ]
-        client = self.os_admin.server_external_events_client
+        client = self.os_service_user.server_external_events_client
         events_resp = client.create_server_external_events(
             events=events)['events'][0]
         self.assertEqual(server_id, events_resp['server_uuid'])
