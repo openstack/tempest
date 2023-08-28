@@ -258,7 +258,6 @@ class LiveMigrationTest(LiveMigrationTestBase):
         port = self.ports_client.show_port(port_id)['port']
         return port['status'] == 'ACTIVE'
 
-    @decorators.unstable_test(bug='2027605')
     @decorators.attr(type='multinode')
     @decorators.idempotent_id('0022c12e-a482-42b0-be2d-396b5f0cffe3')
     @utils.requires_ext(service='network', extension='trunk')
