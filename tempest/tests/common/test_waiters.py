@@ -27,6 +27,78 @@ from tempest.tests import base
 import tempest.tests.utils as utils
 
 
+class TestServerWaiters(base.TestCase):
+    def setUp(self):
+        super(TestServerWaiters, self).setUp()
+        self.client = mock.MagicMock()
+        self.client.build_timeout = 1
+        self.client.build_interval = 1
+
+    def test_wait_for_server_status(self):
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'ACTIVE'}
+        self.client.show_server.return_value = ({'server': fake_server})
+        start_time = int(time.time())
+        waiters.wait_for_server_status(
+            self.client, fake_server['id'], 'ACTIVE')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_server_status_build(self):
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'BUILD'}
+        self.client.show_server.return_value = ({'server': fake_server})
+        start_time = int(time.time())
+        waiters.wait_for_server_status(self.client, fake_server['id'], 'BUILD')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_server_status_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'SAVING'}
+        self.client.show_server.return_value = ({'server': fake_server})
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_server_status,
+                          self.client, fake_server['id'], 'ACTIVE')
+
+    def test_wait_for_server_status_error_on_server_build(self):
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'ERROR'}
+        self.client.show_server.return_value = ({'server': fake_server})
+        self.assertRaises(exceptions.BuildErrorException,
+                          waiters.wait_for_server_status,
+                          self.client, fake_server['id'], 'ACTIVE')
+
+    def test_wait_for_server_termination(self):
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'ACTIVE'}
+        self.client.show_server.side_effect = lib_exc.NotFound
+        waiters.wait_for_server_termination(self.client, fake_server['id'])
+
+    def test_wait_for_server_termination_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'ACTIVE'}
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_server_termination,
+                          self.client, fake_server['id'])
+
+    def test_wait_for_server_termination_error_status(self):
+        fake_server = {'id': 'fake-uuid',
+                       'status': 'ERROR'}
+        self.client.show_server.return_value = ({'server': fake_server})
+        self.assertRaises(lib_exc.DeleteErrorException,
+                          waiters.wait_for_server_termination,
+                          self.client, fake_server['id'])
+
+
 class TestImageWaiters(base.TestCase):
     def setUp(self):
         super(TestImageWaiters, self).setUp()
@@ -145,6 +217,15 @@ class TestImageWaiters(base.TestCase):
                           waiters.wait_for_image_copied_to_stores,
                           self.client, 'fake_image_id')
 
+    def test_wait_for_image_copied_to_stores_status_killed(self):
+        self.client.show_image.return_value = ({
+            'status': 'killed',
+            'os_glance_importing_to_stores': None,
+            'os_glance_failed_import': 'fake_os_glance_failed_import'})
+        self.assertRaises(exceptions.ImageKilledException,
+                          waiters.wait_for_image_copied_to_stores,
+                          self.client, 'fake_image_id')
+
     def test_wait_for_image_tasks_status(self):
         self.client.show_image_tasks.return_value = ({
             'tasks': [{'status': 'success'}]})
@@ -167,6 +248,28 @@ class TestImageWaiters(base.TestCase):
         self.assertRaises(lib_exc.TimeoutException,
                           waiters.wait_for_image_tasks_status,
                           self.client, 'fake_image_id', 'success')
+
+    def test_wait_for_tasks_status(self):
+        self.client.show_tasks.return_value = ({
+            'status': 'success'})
+        start_time = int(time.time())
+        waiters.wait_for_tasks_status(
+            self.client, 'fake_task_id', 'success')
+        end_time = int(time.time())
+        # Ensure waiter returns before build_timeout
+        self.assertLess((end_time - start_time), 10)
+
+    def test_wait_for_tasks_status_timeout(self):
+        time_mock = self.patch('time.time')
+        self.patch('time.time', side_effect=[0., 1.])
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        self.client.show_tasks.return_value = (
+            {'status': 'success'},
+            {'status': 'processing'})
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_tasks_status,
+                          self.client, 'fake_task_id', 'success')
 
 
 class TestInterfaceWaiters(base.TestCase):
@@ -366,6 +469,31 @@ class TestVolumeWaiters(base.TestCase):
                                       mock.call(mock.sentinel.volume_id),
                                       mock.call(mock.sentinel.volume_id)])
 
+    def test_wait_for_volume_retype(self):
+        fake_volume = {'volume_type': {'id': 'fake-uuid'}}
+        show_volume = mock.Mock(return_value={'volume': fake_volume})
+        client = mock.Mock(resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        waiters.wait_for_volume_retype(
+            client, mock.sentinel.volume_id, fake_volume['volume_type'])
+
+    def test_wait_for_volume_retype_timeout(self):
+        fake_volume = {'volume_type': {'id': 'fake-uuid'}}
+        show_volume = mock.Mock(return_value={'volume': fake_volume})
+        client = mock.Mock(resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_retype,
+                          client, mock.sentinel.volume_id,
+                          'fake_volume_type')
+
     @mock.patch.object(time, 'sleep')
     def test_wait_for_volume_status_error_restoring(self, mock_sleep):
         # Tests that the wait method raises VolumeRestoreErrorException if
@@ -450,7 +578,25 @@ class TestVolumeWaiters(base.TestCase):
                                       mock.call(uuids.volume_id),
                                       mock.call(uuids.volume_id)])
 
-    def test_wait_for_volume_attachment(self):
+    def test_wait_for_volume_attachment_create_timeout(self):
+        show_volume = mock.MagicMock(return_value={
+            'volume': {'attachments': [
+                {'attachment_id': uuids.attachment_id,
+                 'server_id': uuids.server_id,
+                 'volume_id': uuids.volume_id}]}})
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        # Assert that a timeout is raised if the attachment is not
+        # created within required time
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_attachment_create,
+                          client, 'fake_volume_id', 'fake_server_id')
+
+    def test_wait_for_volume_attachment_remove(self):
         vol_detached = {'volume': {'attachments': []}}
         vol_attached = {'volume': {'attachments': [
                        {'attachment_id': uuids.attachment_id}]}}
@@ -469,7 +615,7 @@ class TestVolumeWaiters(base.TestCase):
                                       mock.call(uuids.volume_id),
                                       mock.call(uuids.volume_id)])
 
-    def test_wait_for_volume_attachment_timeout(self):
+    def test_wait_for_volume_attachment_remove_timeout(self):
         show_volume = mock.MagicMock(return_value={
             'volume': {'attachments': [
                 {'attachment_id': uuids.attachment_id}]}})
@@ -632,6 +778,67 @@ class TestVolumeWaiters(base.TestCase):
             lib_exc.TimeoutException,
             waiters.wait_for_ssh,
             mock_ssh_client,
+            .1
+        )
+
+    def test_wait_for_caching(self):
+        mock_client = mock.Mock(
+            build_interval=1,
+            build_timeout=1
+        )
+        mock_cache_client = mock.Mock()
+        mock_cache_client.list_cache.return_value = {
+            "cached_images": [{
+                "image_id": 'fake_image_id'}]}
+        waiters.wait_for_caching(
+            mock_client, mock_cache_client, 'fake_image_id')
+
+    def test_wait_for_caching_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        mock_client = mock.Mock(
+            build_interval=1,
+            build_timeout=1
+        )
+        mock_cache_client = mock.Mock()
+        mock_cache_client.list_cache.return_value = {
+            "cached_images": [{
+                "image_id": 'fake_image_id'}]}
+        # Assert that TimeoutException is raised when the image
+        # failed to cache in time
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_caching,
+            mock_client,
+            mock_cache_client,
+            'fake_image_id'
+        )
+
+    def test_wait_for_object_create(self):
+        mock_object_client = mock.Mock(
+            build_interval=1,
+            build_timeout=1
+        )
+        waiters.wait_for_object_create(
+            mock_object_client, 'fake_container', 'fake_object')
+
+    def test_wait_for_object_create_timeout(self):
+        time_mock = self.patch('time.time')
+        time_mock.side_effect = utils.generate_timeout_series(1)
+
+        mock_object_client = mock.Mock(
+            build_interval=1,
+            build_timeout=1
+        )
+        # Assert that TimeoutException is raised when the object is not
+        # created in time
+        self.assertRaises(
+            lib_exc.TimeoutException,
+            waiters.wait_for_object_create,
+            mock_object_client,
+            'fake_container',
+            'fake_object',
             .1
         )
 

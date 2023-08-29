@@ -38,6 +38,13 @@ class TestCredClientV2(base.TestCase):
         self.projects_client.create_tenant.assert_called_once_with(
             name='fake_name', description='desc')
 
+    def test_show_project(self):
+        self.projects_client.show_tenant.return_value = {
+            'tenant': 'a_tenant'
+        }
+        res = self.creds_client.show_project('fake_id')
+        self.assertEqual('a_tenant', res)
+
     def test_delete_project(self):
         self.creds_client.delete_project('fake_id')
         self.projects_client.delete_tenant.assert_called_once_with(
@@ -79,9 +86,30 @@ class TestCredClientV3(base.TestCase):
         self.projects_client.create_project.assert_called_once_with(
             name='fake_name', description='desc', domain_id='fake_domain_id')
 
+    def test_show_project(self):
+        self.projects_client.show_project.return_value = {
+            'project': 'a_tenant'
+        }
+        res = self.creds_client.show_project('fake_id')
+        self.assertEqual('a_tenant', res)
+
     def test_delete_project(self):
         self.creds_client.delete_project('fake_id')
         self.projects_client.delete_project.assert_called_once_with(
+            'fake_id')
+
+    def test_create_domain(self):
+        self.domains_client.create_domain.return_value = {
+            'domain': 'a_tenant'
+        }
+        res = self.creds_client.create_domain('fake_name', 'desc')
+        self.assertEqual('a_tenant', res)
+        self.domains_client.create_domain.assert_called_once_with(
+            name='fake_name', description='desc')
+
+    def test_delete_domain(self):
+        self.creds_client.delete_domain('fake_id')
+        self.domains_client.delete_domain.assert_called_once_with(
             'fake_id')
 
     def test_get_credentials(self):

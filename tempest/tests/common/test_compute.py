@@ -17,8 +17,9 @@ from unittest import mock
 
 from urllib import parse as urlparse
 
-
 from tempest.common import compute
+from tempest import exceptions
+from tempest.lib import exceptions as lib_exc
 from tempest.tests import base
 
 
@@ -27,6 +28,58 @@ class TestCompute(base.TestCase):
         super(TestCompute, self).setUp()
         self.client_sock = mock.Mock()
         self.url = urlparse.urlparse("http://www.fake.com:80")
+
+    @mock.patch('tempest.common.compute.' 'config.CONF.validation')
+    def test_get_server_ip_connect_method_floating(self, mock_conf):
+        fake_server = {'id': 'fake-uuid'}
+        fake_vr = {'floating_ip': {'ip': '10.10.10.1'}}
+        mock_conf.connect_method = 'floating'
+
+        fake_server_ip = compute.get_server_ip(fake_server, fake_vr)
+        self.assertEqual(fake_server_ip, '10.10.10.1')
+
+        # assert that InvalidParam is raised when validadation
+        # resources are not set
+        self.assertRaises(lib_exc.InvalidParam,
+                          compute.get_server_ip,
+                          fake_server)
+
+    @mock.patch('tempest.common.compute.' 'config.CONF.validation')
+    def test_get_server_ip_connect_method_fixed(self, mock_conf):
+        fake_server = {'id': 'fake-uuid',
+                       'addresses': {
+                           'private': [
+                               {'addr': '192.168.0.3',
+                                'version': 4}]}}
+        mock_conf.connect_method = 'fixed'
+        mock_conf.network_for_ssh = 'private'
+        mock_conf.ip_version_for_ssh = 4
+
+        fake_server_ip = compute.get_server_ip(fake_server)
+        self.assertEqual(fake_server_ip, '192.168.0.3')
+
+        fake_server_v6 = {'id': 'fake-uuid',
+                          'addresses': {
+                              'private': [
+                                  {'addr': '2345:0425:2CA1::0567:5673:23b5',
+                                   'version': 6}]}}
+        # assert when server is unreachable
+        self.assertRaises(exceptions.ServerUnreachable,
+                          compute.get_server_ip,
+                          fake_server_v6)
+
+    @mock.patch('tempest.common.compute.' 'config.CONF.validation')
+    def test_get_server_ip_invalid_config(self, mock_conf):
+        fake_server = {'id': 'fake-uuid',
+                       'addresses': {
+                           'private': [
+                               {'addr': '192.168.0.3',
+                                'version': 4}]}}
+        mock_conf.connect_method = 'fake-method'
+        # assert when the connection method is not correctly set
+        self.assertRaises(lib_exc.InvalidConfiguration,
+                          compute.get_server_ip,
+                          fake_server)
 
     def test_rfp_frame_not_cached(self):
         # rfp negotiation frame arrived separately after upgrade
