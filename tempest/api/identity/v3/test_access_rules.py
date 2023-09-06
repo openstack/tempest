@@ -17,6 +17,7 @@
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
@@ -37,10 +38,6 @@ class AccessRulesV3Test(base.BaseIdentityV3Test):
         super(AccessRulesV3Test, cls).resource_setup()
         cls.user_id = cls.os_primary.credentials.user_id
         cls.project_id = cls.os_primary.credentials.project_id
-
-    def setUp(self):
-        super(AccessRulesV3Test, self).setUp()
-        ac = self.non_admin_app_creds_client
         access_rules = [
             {
                 "path": "/v2.1/servers/*/ips",
@@ -48,11 +45,15 @@ class AccessRulesV3Test(base.BaseIdentityV3Test):
                 "service": "compute"
             }
         ]
-        self.app_cred = ac.create_application_credential(
-            self.user_id,
+        cls.ac = cls.non_admin_app_creds_client
+        cls.app_cred = cls.ac.create_application_credential(
+            cls.user_id,
             name=data_utils.rand_name('application_credential'),
             access_rules=access_rules
         )['application_credential']
+        cls.addClassResourceCleanup(
+            cls.ac.delete_application_credential,
+            cls.user_id, cls.app_cred['id'])
 
     @decorators.idempotent_id('2354c498-5119-4ba5-9f0d-44f16f78fb0e')
     def test_list_access_rules(self):
@@ -67,18 +68,33 @@ class AccessRulesV3Test(base.BaseIdentityV3Test):
 
     @decorators.idempotent_id('278757e9-e193-4bf8-adf2-0b0a229a17d0')
     def test_delete_access_rule(self):
-        access_rule_id = self.app_cred['access_rules'][0]['id']
-        app_cred_id = self.app_cred['id']
+        access_rules = [
+            {
+                "path": "/v2.1/servers/*/ips",
+                "method": "GET",
+                "service": "monitoring"
+            }
+        ]
+        app_cred = self.ac.create_application_credential(
+            self.user_id,
+            name=data_utils.rand_name('application_credential'),
+            access_rules=access_rules
+        )['application_credential']
+        self.addCleanup(
+            test_utils.call_and_ignore_notfound_exc,
+            self.ac.delete_application_credential,
+            self.user_id, app_cred['id'])
+        access_rule_id = app_cred['access_rules'][0]['id']
         self.assertRaises(
             lib_exc.Forbidden,
             self.non_admin_access_rules_client.delete_access_rule,
             self.user_id,
             access_rule_id)
-        self.non_admin_app_creds_client.delete_application_credential(
-            self.user_id, app_cred_id)
+        self.ac.delete_application_credential(
+            self.user_id, app_cred['id'])
         ar = self.non_admin_access_rules_client.list_access_rules(self.user_id)
-        self.assertEqual(1, len(ar['access_rules']))
+        self.assertIn(access_rule_id, [x['id'] for x in ar['access_rules']])
         self.non_admin_access_rules_client.delete_access_rule(
             self.user_id, access_rule_id)
         ar = self.non_admin_access_rules_client.list_access_rules(self.user_id)
-        self.assertEqual(0, len(ar['access_rules']))
+        self.assertNotIn(access_rule_id, [x['id'] for x in ar['access_rules']])
