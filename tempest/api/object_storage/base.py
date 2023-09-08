@@ -18,7 +18,6 @@ import time
 from oslo_log import log
 
 from tempest.common import custom_matchers
-from tempest.common import object_storage
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -27,6 +26,51 @@ import tempest.test
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
+
+
+def delete_containers(containers, container_client, object_client):
+    """Remove containers and all objects in them.
+
+    The containers should be visible from the container_client given.
+    Will not throw any error if the containers don't exist.
+
+    :param containers: List of containers(or string of a container)
+                       to be deleted
+    :param container_client: Client to be used to delete containers
+    :param object_client: Client to be used to delete objects
+    """
+    if isinstance(containers, str):
+        containers = [containers]
+
+    for cont in containers:
+        try:
+            delete_objects(cont, container_client, object_client)
+            container_client.delete_container(cont)
+            container_client.wait_for_resource_deletion(cont)
+        except lib_exc.NotFound:
+            LOG.warning(f"Container {cont} wasn't deleted as it wasn't found.")
+
+
+def delete_objects(container, container_client, object_client):
+    """Remove all objects from container.
+
+    Will not throw any error if the objects do not exist
+
+    :param container: Name of the container that contains the objects to be
+                      deleted
+    :param container_client: Client to be used to list objects in
+                             the container
+    :param object_client: Client to be used to delete objects
+    """
+    params = {'limit': 9999, 'format': 'json'}
+    _, objlist = container_client.list_container_objects(container, params)
+
+    for obj in objlist:
+        try:
+            object_client.delete_object(container, obj['name'])
+            object_client.wait_for_resource_deletion(obj['name'], container)
+        except lib_exc.NotFound:
+            LOG.warning(f"Object {obj} wasn't deleted as it wasn't found.")
 
 
 class BaseObjectTest(tempest.test.BaseTestCase):
@@ -116,8 +160,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             container_client = cls.container_client
         if object_client is None:
             object_client = cls.object_client
-        object_storage.delete_containers(cls.containers, container_client,
-                                         object_client)
+        delete_containers(cls.containers, container_client, object_client)
 
     def assertHeaders(self, resp, target, method):
         """Check the existence and the format of response headers"""

@@ -19,7 +19,6 @@ from urllib import parse as urlparse
 import testtools
 
 from tempest.api.object_storage import base
-from tempest.common import object_storage
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -75,7 +74,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             (cls.container_client_alt, cls.object_client_alt)
         for cont_name, client in cls.clients.items():
             client[0].create_container(cont_name)
-            cls.addClassResourceCleanup(object_storage.delete_containers,
+            cls.addClassResourceCleanup(base.delete_containers,
                                         cont_name,
                                         client[0],
                                         client[1])
