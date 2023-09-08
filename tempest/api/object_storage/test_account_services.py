@@ -18,7 +18,6 @@ import testtools
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
-from tempest.common import object_storage
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -44,7 +43,7 @@ class AccountTest(base.BaseObjectTest):
         for i in range(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % bytes((i,)))
             cls.container_client.update_container(name)
-            cls.addClassResourceCleanup(object_storage.delete_containers,
+            cls.addClassResourceCleanup(base.delete_containers,
                                         [name],
                                         cls.container_client,
                                         cls.object_client)

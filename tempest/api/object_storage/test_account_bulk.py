@@ -16,7 +16,6 @@ import tarfile
 import tempfile
 
 from tempest.api.object_storage import base
-from tempest.common import object_storage
 from tempest.common import utils
 from tempest.lib import decorators
 
@@ -31,9 +30,8 @@ class BulkTest(base.BaseObjectTest):
     def tearDown(self):
         # NOTE(andreaf) BulkTests needs to cleanup containers after each
         # test is executed.
-        object_storage.delete_containers(self.containers,
-                                         self.container_client,
-                                         self.object_client)
+        base.delete_containers(self.containers, self.container_client,
+                               self.object_client)
         super(BulkTest, self).tearDown()
 
     def _create_archive(self):

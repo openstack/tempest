@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.common import compute
-from tempest.common import object_storage
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common import api_version_utils
@@ -65,8 +64,6 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if CONF.service_available.glance:
             cls.images_client = cls.os_primary.image_client_v2
 
-        cls.container_client = cls.os_primary.container_client
-        cls.object_client = cls.os_primary.object_client
         cls.backups_client = cls.os_primary.backups_client_latest
         cls.volumes_client = cls.os_primary.volumes_client_latest
         cls.messages_client = cls.os_primary.volume_messages_client_latest
@@ -173,31 +170,16 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                                                 snapshot['id'], 'available')
         return snapshot
 
-    def create_backup(self, volume_id, backup_client=None, object_client=None,
-                      container_client=None, **kwargs):
+    def create_backup(self, volume_id, backup_client=None, **kwargs):
         """Wrapper utility that returns a test backup."""
         if backup_client is None:
             backup_client = self.backups_client
-        if container_client is None:
-            container_client = self.container_client
-        if object_client is None:
-            object_client = self.object_client
         if 'name' not in kwargs:
             name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
             kwargs['name'] = name
-        if 'container' not in kwargs:
-            cont_name = self.__class__.__name__ + '-backup-container'
-            cont = data_utils.rand_name(cont_name)
-            kwargs['container'] = cont
 
         backup = backup_client.create_backup(
             volume_id=volume_id, **kwargs)['backup']
-
-        if CONF.service_available.swift:
-            self.addCleanup(object_storage.delete_containers,
-                            kwargs['container'], container_client,
-                            object_client)
-
         # addCleanup uses list pop to cleanup. Wait should be added before
         # the backup is deleted
         self.addCleanup(backup_client.wait_for_resource_deletion,
