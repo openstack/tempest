@@ -39,7 +39,7 @@
     name: tempest-slow-2023-1
     parent: tempest-slow-py3
     nodeset: openstack-two-node-jammy
-    override-checkout: stable/2023-1
+    override-checkout: stable/2023.1
 
 - job:
     name: tempest-full-enforce-scope-new-defaults-zed
