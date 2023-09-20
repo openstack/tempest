@@ -54,7 +54,6 @@
 - job:
     name: tempest-full-py3-ipv6
     parent: devstack-tempest-ipv6
-    branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking, IPv6 and py3.
     vars:

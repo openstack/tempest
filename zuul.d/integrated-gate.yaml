@@ -20,8 +20,6 @@
 - job:
     name: tempest-ipv6-only
     parent: devstack-tempest-ipv6
-    # This currently works from stable/pike on.
-    branches: ^(?!stable/ocata).*$
     description: |
       Integration test of IPv6-only deployments. This job runs
       smoke and IPv6 relates tests only. Basic idea is to test
@@ -33,10 +31,6 @@
 - job:
     name: tempest-full
     parent: devstack-tempest
-    # This currently works from stable/pike on.
-    # Before stable/pike, legacy version of tempest-full
-    # 'legacy-tempest-dsvm-neutron-full' run.
-    branches: ^(?!stable/ocata).*$
     description: |
       Base integration test with Neutron networking and py27.
       This job is supposed to run until stable/train setup only.
@@ -78,7 +72,9 @@
     # available in old tempest used till stable/wallaby,
     # this job definition is only for stable/xena onwards
     # and separate job definition until stable/wallaby
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria|wallaby)).*$
+    branches:
+      regex: ^stable/(stein|train|ussuri|victoria|wallaby)$
+      negate: true
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
       and py3.
@@ -110,7 +106,9 @@
     parent: tempest-full-py3
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
-    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena)).*$
+    branches:
+      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena)$
+      negate: true
     description: |
       Base integration test on CentOS 9 stream
     vars:
@@ -122,7 +120,6 @@
 - job:
     name: tempest-integrated-networking
     parent: devstack-tempest
-    branches: ^(?!stable/ocata).*$
     description: |
       This  job runs integration tests for networking. This is subset of
       'tempest-full-py3' job and run only Neutron and Nova related tests.
@@ -142,7 +139,6 @@
 - job:
     name: tempest-integrated-compute
     parent: devstack-tempest
-    branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
@@ -171,7 +167,9 @@
     parent: tempest-integrated-compute
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
-    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena)).*$
+    branches:
+      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena)$
+      negate: true
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
@@ -185,7 +183,6 @@
 - job:
     name: tempest-integrated-placement
     parent: devstack-tempest
-    branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for placement. This is
       subset of 'tempest-full-py3' job and run Nova and Neutron
@@ -211,7 +208,6 @@
 - job:
     name: tempest-integrated-storage
     parent: devstack-tempest
-    branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for image & block storage. This is
       subset of 'tempest-full-py3' job and run Cinder, Glance, Swift and Nova
@@ -227,7 +223,6 @@
 - job:
     name: tempest-integrated-object-storage
     parent: devstack-tempest
-    branches: ^(?!stable/ocata).*$
     description: |
       This job runs integration tests for object storage. This is
       subset of 'tempest-full-py3' job and run Swift, Cinder and Glance
@@ -259,7 +254,9 @@
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-jammy
     # This job runs on ubuntu Jammy and after stable/zed.
-    branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga|zed)).*$
+    branches:
+      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena|yoga|zed)$
+      negate: true
     vars:
       # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
       # end up 6 in upstream CI. Higher concurrency means high parallel
@@ -294,8 +291,6 @@
         * legacy-tempest-dsvm-neutron-scenario-multinode-lvm-multibackend
         * tempest-scenario-multinode-lvm-multibackend
     timeout: 10800
-    # This job runs on stable/stein onwards.
-    branches: ^(?!stable/(ocata|pike|queens|rocky)).*$
     vars:
       tox_envlist: slow-serial
       devstack_localrc:
@@ -323,7 +318,9 @@
     # As the 'slow' tox env which is not available in old tempest used
     # till stable/wallaby, this job definition is only for stable/xena
     # onwards and separate job definition until stable/wallaby
-    branches: ^(?!stable/(ocata|pike|queens|rocky|stein|train|ussuri|victoria|wallaby)).*$
+    branches:
+      regex: ^stable/(stein|train|ussuri|victoria|wallaby)$
+      negate: true
     vars:
       tox_envlist: slow
       devstack_localrc:
@@ -450,7 +447,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     gate:
       jobs:
         - grenade
@@ -460,7 +459,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
 
 - project-template:
     name: integrated-gate-compute
@@ -498,7 +499,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     gate:
       jobs:
         - grenade-skip-level-always:
@@ -506,12 +509,16 @@
               - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     periodic-weekly:
       jobs:
         # centos-9-stream is tested from zed release onwards
         - tempest-integrated-compute-centos-9-stream:
-            branches: ^(?!stable/(pike|queens|rocky|stein|train|ussuri|victoria|wallaby|xena|yoga)).*$
+            branches:
+              regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena|yoga)$
+              negate: true
 
 - project-template:
     name: integrated-gate-placement
@@ -533,7 +540,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     gate:
       jobs:
         - grenade
@@ -543,7 +552,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
 
 - project-template:
     name: integrated-gate-storage
@@ -565,7 +576,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     gate:
       jobs:
         - grenade
@@ -575,7 +588,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
 
 - project-template:
     name: integrated-gate-object-storage
@@ -593,7 +608,9 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
     gate:
       jobs:
         - grenade
@@ -603,4 +620,6 @@
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
-            branches: ^(?!stable/(ussuri|victoria|wallaby)).*$
+            branches:
+              regex: ^stable/(ussuri|victoria|wallaby)$
+              negate: true
