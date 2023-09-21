@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new tempest.conf option called backup_driver was added to tempest to
+    indicate which backup driver is used by Cinder. This option allows us
+    to create a resource properly and avoid cleanup issues when Swift is used as the
+    backup driver.

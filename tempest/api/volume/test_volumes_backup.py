@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 from testtools import matchers
 
 from tempest.api.volume import base
@@ -53,8 +52,6 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                                 'available')
         return restored_volume
 
-    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
-                      'ceph does not support arbitrary container names')
     @decorators.idempotent_id('a66eb488-8ee1-47d4-8e9f-575a095728c6')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
         """Test create/get/list/restore/delete volume backup
@@ -75,22 +72,24 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
 
         # Create a backup
-        backup_name = data_utils.rand_name(
+        kwargs = {}
+        kwargs["name"] = data_utils.rand_name(
             self.__class__.__name__ + '-Backup')
-        description = data_utils.rand_name("volume-backup-description")
-        backup = self.create_backup(volume_id=volume['id'],
-                                    name=backup_name,
-                                    description=description,
-                                    container='container')
-        self.assertEqual(backup_name, backup['name'])
+        kwargs["description"] = data_utils.rand_name("backup-description")
+        if CONF.volume.backup_driver == "swift":
+            kwargs["container"] = data_utils.rand_name(
+                self.__class__.__name__ + '-Backup-container')
+        backup = self.create_backup(volume_id=volume['id'], **kwargs)
+        self.assertEqual(kwargs["name"], backup['name'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
 
         # Get a given backup
         backup = self.backups_client.show_backup(backup['id'])['backup']
-        self.assertEqual(backup_name, backup['name'])
-        self.assertEqual(description, backup['description'])
-        self.assertEqual('container', backup['container'])
+        self.assertEqual(kwargs["name"], backup['name'])
+        self.assertEqual(kwargs["description"], backup['description'])
+        if CONF.volume.backup_driver == "swift":
+            self.assertEqual(kwargs["container"], backup['container'])
 
         # Get all backups with detail
         backups = self.backups_client.list_backups(detail=True)['backups']

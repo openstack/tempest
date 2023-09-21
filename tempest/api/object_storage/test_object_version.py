@@ -16,6 +16,7 @@
 import testtools
 
 from tempest.api.object_storage import base
+from tempest.common import object_storage
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -53,7 +54,7 @@ class ContainerTest(base.BaseObjectTest):
         # create container
         vers_container_name = data_utils.rand_name(name='TestVersionContainer')
         resp, _ = self.container_client.update_container(vers_container_name)
-        self.addCleanup(base.delete_containers,
+        self.addCleanup(object_storage.delete_containers,
                         [vers_container_name],
                         self.container_client,
                         self.object_client)
@@ -65,7 +66,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container(
             base_container_name,
             **headers)
-        self.addCleanup(base.delete_containers,
+        self.addCleanup(object_storage.delete_containers,
                         [base_container_name],
                         self.container_client,
                         self.object_client)
