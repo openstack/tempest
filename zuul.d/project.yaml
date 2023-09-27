@@ -120,9 +120,6 @@
             voting: false
             irrelevant-files: *tempest-irrelevant-files
         - ironic-tempest-bios-ipmi-direct-tinyipa:
-            # TODO(gmann): make it voting again once this
-            # is merged- https://review.opendev.org/c/openstack/tempest/+/895985
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - openstack-tox-bashate:
             irrelevant-files: *tempest-irrelevant-files-2
@@ -153,10 +150,8 @@
         #    irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
-        # TODO(gmann): make it voting again once this
-        # is merged- https://review.opendev.org/c/openstack/tempest/+/895985
-        #- ironic-tempest-bios-ipmi-direct-tinyipa:
-        #    irrelevant-files: *tempest-irrelevant-files
+        - ironic-tempest-bios-ipmi-direct-tinyipa:
+            irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
         - nova-multi-cell
