@@ -1,0 +1,6 @@
+=====================
+v36.0.0 Release Notes
+=====================
+
+.. release-notes:: 36.0.0 Release Notes
+   :version: 36.0.0
