@@ -437,10 +437,18 @@
     check:
       jobs:
         - grenade
+        # NOTE(gmann): These template are generic and used on stable branch
+        # as well as master testing. So grenade-skip-level on stable/2023.1
+        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
         - grenade-skip-level:
             voting: false
             branches:
               - stable/2023.1
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -454,6 +462,11 @@
       jobs:
         - grenade
         - tempest-integrated-networking
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -477,6 +490,9 @@
     # only from master(or the branch it was meant to run).
     check:
       jobs:
+        # NOTE(gmann): These template are generic and used on stable branch
+        # as well as master testing. So grenade-skip-level on stable/2023.1
+        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
         - grenade-skip-level:
             voting: false
             branches:
@@ -530,10 +546,18 @@
     check:
       jobs:
         - grenade
+        # NOTE(gmann): These template are generic and used on stable branch
+        # as well as master testing. So grenade-skip-level on stable/2023.1
+        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
         - grenade-skip-level:
             voting: false
             branches:
               - stable/2023.1
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -547,6 +571,11 @@
       jobs:
         - grenade
         - tempest-integrated-placement
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -566,10 +595,18 @@
     check:
       jobs:
         - grenade
+        # NOTE(gmann): These template are generic and used on stable branch
+        # as well as master testing. So grenade-skip-level on stable/2023.1
+        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
         - grenade-skip-level:
             voting: false
             branches:
               - stable/2023.1
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -582,6 +619,11 @@
     gate:
       jobs:
         - grenade
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -602,6 +644,11 @@
     check:
       jobs:
         - grenade
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -614,6 +661,11 @@
     gate:
       jobs:
         - grenade
+        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
+        # to stable/2024.1 upgrade is voting.
+        - grenade-skip-level:
+            branches:
+              - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
