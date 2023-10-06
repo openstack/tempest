@@ -111,6 +111,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
             irrelevant-files: *tempest-irrelevant-files
+        - grenade-skip-level:
+            irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-tempest-dvr:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
@@ -139,6 +141,8 @@
         - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
         - grenade:
+            irrelevant-files: *tempest-irrelevant-files
+        - grenade-skip-level:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-ipv6-only:
             irrelevant-files: *tempest-irrelevant-files-3
