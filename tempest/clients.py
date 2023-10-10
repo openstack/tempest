@@ -13,8 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
+from oslo_concurrency import lockutils
+
 from tempest import config
 from tempest.lib import auth
+from tempest.lib.common.rest_client import RestClient
 from tempest.lib import exceptions as lib_exc
 from tempest.lib.services import clients
 
@@ -35,6 +40,11 @@ class Manager(clients.ServiceClients):
         super(Manager, self).__init__(
             credentials=credentials, identity_uri=identity_uri, scope=scope,
             region=CONF.identity.region)
+        if CONF.record_resources:
+            RestClient.lock_dir = os.path.join(
+                lockutils.get_lock_path(CONF),
+                'tempest-rec-rw-lock')
+            RestClient.record_resources = True
         # TODO(andreaf) When clients are initialised without the right
         # parameters available, the calls below will trigger a KeyError.
         # We should catch that and raise a better error.

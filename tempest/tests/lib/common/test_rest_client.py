@@ -13,6 +13,7 @@
 #    under the License.
 
 import copy
+from unittest import mock
 
 import fixtures
 import jsonschema
@@ -747,6 +748,110 @@ class TestExpectedSuccess(BaseRestClientTestClass):
         read_code = 202
         self.assertRaises(AssertionError, self.rest_client.expected_success,
                           expected_code, read_code)
+
+
+class TestRecordResources(BaseRestClientTestClass):
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRecordResources, self).setUp()
+
+    def _cleanup_test_resource_record(self):
+        # clear resource_list.json file
+        with open('resource_list.json', 'w') as f:
+            f.write('{}')
+
+    def test_post_record_resources(self):
+        self.rest_client.record_resources = True
+        __, return_dict = self.rest_client.post(self.url, {}, {})
+        self.assertEqual({}, return_dict['headers'])
+        self.assertEqual({}, return_dict['body'])
+
+    def test_resource_record_no_top_key(self):
+        test_body_no_key = b'{}'
+        self.rest_client.resource_record(test_body_no_key)
+
+    def test_resource_record_dict(self):
+        test_dict_body = b'{"project": {"id": "test-id", "name": ""}}\n'
+        self.rest_client.resource_record(test_dict_body)
+
+        with open('resource_list.json', 'r') as f:
+            content = f.read()
+            resource_list_content = json.loads(content)
+
+        test_resource_list = {
+            "projects": {"test-id": ""}
+        }
+        self.assertEqual(resource_list_content, test_resource_list)
+
+        # cleanup
+        self._cleanup_test_resource_record()
+
+    def test_resource_record_list(self):
+        test_list_body = '''{
+            "user": [
+                {
+                    "id": "test-uuid",
+                    "name": "test-name"
+                },
+                {
+                    "id": "test-uuid2",
+                    "name": "test-name2"
+                }
+            ]
+        }'''
+        test_list_body = test_list_body.encode('utf-8')
+        self.rest_client.resource_record(test_list_body)
+
+        with open('resource_list.json', 'r') as f:
+            content = f.read()
+            resource_list_content = json.loads(content)
+
+        test_resource_list = {
+            "users": {
+                "test-uuid": "test-name",
+                "test-uuid2": "test-name2"
+            }
+        }
+        self.assertEqual(resource_list_content, test_resource_list)
+
+        # cleanup
+        self._cleanup_test_resource_record()
+
+    def test_resource_update_id(self):
+        data = {}
+        res_dict = {'id': 'test-uuid', 'name': 'test-name'}
+
+        self.rest_client.rec_rw_lock = mock.MagicMock()
+        self.rest_client.resource_update(data, 'user', res_dict)
+        result = {'users': {'test-uuid': 'test-name'}}
+        self.assertEqual(data, result)
+
+    def test_resource_update_name(self):
+        data = {'keypairs': {}}
+        res_dict = {'name': 'test-keypair'}
+
+        self.rest_client.rec_rw_lock = mock.MagicMock()
+        self.rest_client.resource_update(data, 'keypair', res_dict)
+        result = {'keypairs': {'test-keypair': ""}}
+        self.assertEqual(data, result)
+
+    def test_resource_update_no_id(self):
+        data = {}
+        res_dict = {'type': 'test', 'description': 'example'}
+
+        self.rest_client.rec_rw_lock = mock.MagicMock()
+        self.rest_client.resource_update(data, 'projects', res_dict)
+        result = {'projects': {}}
+        self.assertEqual(data, result)
+
+    def test_resource_update_not_dict(self):
+        data = {}
+        res_dict = 'test-string'
+
+        self.rest_client.rec_rw_lock = mock.MagicMock()
+        self.rest_client.resource_update(data, 'user', res_dict)
+        self.assertEqual(data, {})
 
 
 class TestResponseBody(base.TestCase):

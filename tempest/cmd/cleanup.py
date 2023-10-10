@@ -87,6 +87,23 @@ Runtime Arguments
   ``saved_state.json`` file will be ignored and cleanup will be done based on
   the passed prefix only.
 
+* ``--resource-list``: Allows the use of file ``./resource_list.json``, which
+  contains all resources created by Tempest during all Tempest runs, to
+  create another method for removing only resources created by Tempest.
+  List of these resources is created when config option ``record_resources``
+  in default section is set to true. After using this option for cleanup,
+  the existing ``./resource_list.json`` is cleared from deleted resources.
+
+  When this option is used, ``saved_state.json`` file is not needed (no
+  need to run with ``--init-saved-state`` first). If there is any
+  ``saved_state.json`` file present and you run the tempest cleanup with
+  ``--resource-list``, the ``saved_state.json`` file will be ignored and
+  cleanup will be done based on the ``resource_list.json`` only.
+
+  If you run tempest cleanup with both ``--prefix`` and ``--resource-list``,
+  the ``--resource-list`` option will be ignored and cleanup will be done
+  based on the ``--prefix`` option only.
+
 * ``--help``: Print the help text for the command and parameters.
 
 .. [1] The ``_projects_to_clean`` dictionary in ``dry_run.json`` lists the
@@ -122,6 +139,7 @@ from tempest.lib import exceptions
 
 SAVED_STATE_JSON = "saved_state.json"
 DRY_RUN_JSON = "dry_run.json"
+RESOURCE_LIST_JSON = "resource_list.json"
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
@@ -164,6 +182,7 @@ class TempestCleanup(command.Command):
         self.admin_mgr = clients.Manager(
             credentials.get_configured_admin_credentials())
         self.dry_run_data = {}
+        self.resource_data = {}
         self.json_data = {}
 
         # available services
@@ -177,12 +196,20 @@ class TempestCleanup(command.Command):
             self._init_state()
             return
 
-        self._load_json()
+        if parsed_args.prefix:
+            return
+
+        if parsed_args.resource_list:
+            self._load_resource_list()
+            return
+
+        self._load_saved_state()
 
     def _cleanup(self):
         LOG.info("Begin cleanup")
         is_dry_run = self.options.dry_run
         is_preserve = not self.options.delete_tempest_conf_objects
+        is_resource_list = self.options.resource_list
         is_save_state = False
         cleanup_prefix = self.options.prefix
 
@@ -194,8 +221,10 @@ class TempestCleanup(command.Command):
         # they are in saved state json. Therefore is_preserve is False
         kwargs = {'data': self.dry_run_data,
                   'is_dry_run': is_dry_run,
+                  'resource_list_json': self.resource_data,
                   'saved_state_json': self.json_data,
                   'is_preserve': False,
+                  'is_resource_list': is_resource_list,
                   'is_save_state': is_save_state,
                   'prefix': cleanup_prefix}
         project_service = cleanup_service.ProjectService(admin_mgr, **kwargs)
@@ -208,8 +237,10 @@ class TempestCleanup(command.Command):
 
         kwargs = {'data': self.dry_run_data,
                   'is_dry_run': is_dry_run,
+                  'resource_list_json': self.resource_data,
                   'saved_state_json': self.json_data,
                   'is_preserve': is_preserve,
+                  'is_resource_list': is_resource_list,
                   'is_save_state': is_save_state,
                   'prefix': cleanup_prefix,
                   'got_exceptions': self.GOT_EXCEPTIONS}
@@ -228,11 +259,17 @@ class TempestCleanup(command.Command):
                 f.write(json.dumps(self.dry_run_data, sort_keys=True,
                                    indent=2, separators=(',', ': ')))
 
+        if is_resource_list:
+            LOG.info("Clearing 'resource_list.json' file.")
+            with open(RESOURCE_LIST_JSON, 'w') as f:
+                f.write('{}')
+
     def _clean_project(self, project):
         LOG.debug("Cleaning project:  %s ", project['name'])
         is_dry_run = self.options.dry_run
         dry_run_data = self.dry_run_data
         is_preserve = not self.options.delete_tempest_conf_objects
+        is_resource_list = self.options.resource_list
         project_id = project['id']
         project_name = project['name']
         project_data = None
@@ -244,7 +281,9 @@ class TempestCleanup(command.Command):
         kwargs = {'data': project_data,
                   'is_dry_run': is_dry_run,
                   'saved_state_json': self.json_data,
+                  'resource_list_json': self.resource_data,
                   'is_preserve': is_preserve,
+                  'is_resource_list': is_resource_list,
                   'is_save_state': False,
                   'project_id': project_id,
                   'prefix': cleanup_prefix,
@@ -287,6 +326,19 @@ class TempestCleanup(command.Command):
                             "ignored when --init-saved-state is used so that "
                             "it can capture the true init state - all "
                             "resources present at that moment.")
+        parser.add_argument('--resource-list', action="store_true",
+                            dest='resource_list', default=False,
+                            help="Runs tempest cleanup with generated "
+                            "JSON file: " + RESOURCE_LIST_JSON + " to "
+                            "erase resources created during Tempest run. "
+                            "NOTE: To create " + RESOURCE_LIST_JSON + " "
+                            "set config option record_resources under default "
+                            "section in tempest.conf file to true. This "
+                            "option will be ignored when --init-saved-state "
+                            "is used so that it can capture the true init "
+                            "state - all resources present at that moment. "
+                            "This option will be ignored if passed with "
+                            "--prefix.")
         return parser
 
     def get_description(self):
@@ -304,6 +356,7 @@ class TempestCleanup(command.Command):
                   'is_dry_run': False,
                   'saved_state_json': data,
                   'is_preserve': False,
+                  'is_resource_list': False,
                   'is_save_state': True,
                   # must be None as we want to capture true init state
                   # (all resources present) thus no filtering based
@@ -326,15 +379,31 @@ class TempestCleanup(command.Command):
             f.write(json.dumps(data, sort_keys=True,
                                indent=2, separators=(',', ': ')))
 
-    def _load_json(self, saved_state_json=SAVED_STATE_JSON):
+    def _load_resource_list(self, resource_list_json=RESOURCE_LIST_JSON):
+        try:
+            with open(resource_list_json, 'rb') as json_file:
+                self.resource_data = json.load(json_file)
+        except IOError as ex:
+            LOG.exception(
+                "Failed loading 'resource_list.json', please "
+                "be sure you created this file by setting config "
+                "option record_resources in default section to true "
+                "prior to running tempest. Exception: %s", ex)
+            sys.exit(ex)
+        except Exception as ex:
+            LOG.exception(
+                "Exception parsing 'resource_list.json' : %s", ex)
+            sys.exit(ex)
+
+    def _load_saved_state(self, saved_state_json=SAVED_STATE_JSON):
         try:
             with open(saved_state_json, 'rb') as json_file:
                 self.json_data = json.load(json_file)
-
         except IOError as ex:
-            LOG.exception("Failed loading saved state, please be sure you"
-                          " have first run cleanup with --init-saved-state "
-                          "flag prior to running tempest. Exception: %s", ex)
+            LOG.exception(
+                "Failed loading saved state, please be sure you"
+                " have first run cleanup with --init-saved-state "
+                "flag prior to running tempest. Exception: %s", ex)
             sys.exit(ex)
         except Exception as ex:
             LOG.exception("Exception parsing saved state json : %s", ex)

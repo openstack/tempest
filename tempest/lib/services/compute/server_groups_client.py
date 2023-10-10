@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from urllib import parse as urllib
+
 from oslo_serialization import jsonutils as json
 
 from tempest.lib.api_schema.response.compute.v2_1 import server_groups \
@@ -55,9 +57,14 @@ class ServerGroupsClient(base_compute_client.BaseComputeClient):
         self.validate_response(schema.delete_server_group, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def list_server_groups(self):
+    def list_server_groups(self, **params):
         """List the server-groups."""
-        resp, body = self.get("os-server-groups")
+
+        url = 'os-server-groups'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url)
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_server_groups, resp, body)
