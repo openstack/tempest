@@ -31,6 +31,15 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(DHCPAgentSchedulersTestJSON, cls).resource_setup()
+        # NOTE(slaweq): In some cases (like default ML2/OVN deployment)
+        # extension is enabled but there may not be any DHCP agent available.
+        # In such case those tests should be also skipped.
+        dhcp_agents = cls.admin_agents_client.list_agents(
+            agent_type="DHCP Agent")['agents']
+        if not dhcp_agents:
+            msg = ("At least one DHCP agent is required to be running in "
+                   "the environment for those tests.")
+            raise cls.skipException(msg)
         # Create a network and make sure it will be hosted by a
         # dhcp agent: this is done by creating a regular port
         cls.network = cls.create_network()
