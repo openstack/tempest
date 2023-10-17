@@ -179,3 +179,59 @@ class ImageLocationsAdminTest(base.BaseV2ImageAdminTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.admin_client.update_image, image['id'], [
                               dict(remove='/locations/0')])
+
+
+class MultiStoresImagesTest(base.BaseV2ImageAdminTest, base.BaseV2ImageTest):
+    """Test importing and deleting image in multiple stores"""
+    @classmethod
+    def skip_checks(cls):
+        super(MultiStoresImagesTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.import_image:
+            skip_msg = (
+                "%s skipped as image import is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def resource_setup(cls):
+        super(MultiStoresImagesTest, cls).resource_setup()
+        cls.available_import_methods = \
+            cls.client.info_import()['import-methods']['value']
+        if not cls.available_import_methods:
+            raise cls.skipException('Server does not support '
+                                    'any import method')
+
+        # NOTE(pdeore): Skip if glance-direct import method and mutlistore
+        # are not enabled/configured, or only one store is configured in
+        # multiple stores setup.
+        cls.available_stores = cls.get_available_stores()
+        if ('glance-direct' not in cls.available_import_methods or
+                not len(cls.available_stores) > 1):
+            raise cls.skipException(
+                'Either glance-direct import method not present in %s or '
+                'None or only one store is '
+                'configured %s' % (cls.available_import_methods,
+                                   cls.available_stores))
+
+    @decorators.idempotent_id('1ecec683-41d4-4470-a0df-54969ec74514')
+    def test_delete_image_from_specific_store(self):
+        """Test delete image from specific store"""
+        # Import image to available stores
+        image, stores = self.create_and_stage_image(all_stores=True)
+        self.client.image_import(image['id'],
+                                 method='glance-direct',
+                                 all_stores=True)
+        self.addCleanup(self.admin_client.delete_image, image['id'])
+        waiters.wait_for_image_imported_to_stores(
+            self.client,
+            image['id'], stores)
+        observed_image = self.client.show_image(image['id'])
+
+        # Image will be deleted from first store
+        first_image_store_deleted = (observed_image['stores'].split(","))[0]
+        self.admin_client.delete_image_from_store(
+            observed_image['id'], first_image_store_deleted)
+        waiters.wait_for_image_deleted_from_store(
+            self.admin_client,
+            observed_image,
+            stores,
+            first_image_store_deleted)
