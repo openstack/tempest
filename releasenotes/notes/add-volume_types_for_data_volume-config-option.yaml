@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new config option in the ``volume_feature_enabled`` section,
+    ``volume_types_for_data_volume``, is added to allow the user to specify
+    which volume types can be used for data volumes in a new test
+    ``test_instances_with_cinder_volumes_on_all_compute_nodes``. By default,
+    this option is set to None.

@@ -734,6 +734,31 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return rules
 
+    def create_and_add_security_group_to_server(self, server):
+        """Create a security group and add it to the server.
+
+        :param server: The server to add the security group to.
+        :return: The security group was added to the server.
+        """
+
+        secgroup = self.create_security_group()
+        self.servers_client.add_security_group(server['id'],
+                                               name=secgroup['name'])
+        self.addCleanup(self.servers_client.remove_security_group,
+                        server['id'], name=secgroup['name'])
+
+        def wait_for_secgroup_add():
+            body = (self.servers_client.show_server(server['id'])
+                    ['server'])
+            return {'name': secgroup['name']} in body['security_groups']
+
+        if not test_utils.call_until_true(wait_for_secgroup_add,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
+            msg = ('Timed out waiting for adding security group %s to server '
+                   '%s' % (secgroup['id'], server['id']))
+            raise lib_exc.TimeoutException(msg)
+
     def get_remote_client(self, ip_address, username=None, private_key=None,
                           server=None):
         """Get a SSH client to a remote server
@@ -1102,6 +1127,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
             floating_ip['id'], **kwargs)['floatingip']
         self.assertIsNone(floating_ip['port_id'])
         return floating_ip
+
+    def create_file(self, ip_address, path, private_key=None, server=None,
+                    username=None):
+        """Create a file on a remote server"""
+        ssh_client = self.get_remote_client(ip_address,
+                                            private_key=private_key,
+                                            server=server,
+                                            username=username)
+        ssh_client.exec_command('sudo mkdir -p %s' % path)
 
     def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
                          private_key=None, server=None, username=None,
