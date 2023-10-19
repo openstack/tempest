@@ -1005,6 +1005,13 @@ VolumeGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the volume service."),
+    cfg.StrOpt('backup_driver',
+               default='ceph',
+               choices=['ceph', 'swift', 'nfs', 'glusterfs', 'posix', 'google',
+                        's3'],
+               help="What kind of backup_driver does cinder use?"
+                    "https://docs.openstack.org/cinder/latest/configuration/"
+                    "block-storage/backup-drivers.html"),
     cfg.ListOpt('backend_names',
                 default=['BACKEND_1', 'BACKEND_2'],
                 help='A list of backend names separated by comma. '
