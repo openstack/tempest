@@ -396,11 +396,6 @@
     parent: tempest-full-py3
     description: |
       This job runs the Tempest tests with scope and new defaults enabled.
-    # TODO: remove this once https://review.opendev.org/c/openstack/neutron-lib/+/864213
-    # fix is released in neutron-lib
-    required-projects:
-      - openstack/neutron-lib
-      - openstack/neutron
     vars:
       devstack_localrc:
         # Enabeling the scope and new defaults for services.
@@ -410,10 +405,9 @@
         # Keystone policies are changed to work for both system as well as
         # for project scoped, we need to keep scope check disable for
         # keystone.
-        # Nova and Glance have enabled the new defaults and scope by default
-        # in devstack.
+        # Nova, Glance, and Neutron have enabled the new defaults and scope
+        # by default in devstack.
         CINDER_ENFORCE_SCOPE: true
-        NEUTRON_ENFORCE_SCOPE: true
         PLACEMENT_ENFORCE_SCOPE: true
 
 - job:
@@ -421,12 +415,14 @@
     parent: tempest-all
     description: |
       Integration test that runs all tests on RBAC old defaults.
+    vars:
       devstack_localrc:
-        # NOTE(gmann): Nova and Glance have enabled the new defaults and scope
-        # by default in devstack so we need some jobs keep testing the old
-        # defaults until they are removed from service side.
+        # NOTE(gmann): Nova, Glance, and Neutron have enabled the new defaults
+        # and scope by default in devstack so we need some jobs keep testing
+        # the old defaults until they are removed from service side.
         NOVA_ENFORCE_SCOPE: false
         GLANCE_ENFORCE_SCOPE: false
+        NEUTRON_ENFORCE_SCOPE: false
 
 - project-template:
     name: integrated-gate-networking
