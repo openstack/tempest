@@ -206,7 +206,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             self.assertEqual(resize_flavor, server['flavor']['id'])
         else:
             flavor = self.flavors_client.show_flavor(resize_flavor)['flavor']
-            self.assertEqual(flavor['name'], server['original_name'])
+            self.assertEqual(flavor['name'], server['flavor']['original_name'])
             for key in ['ram', 'vcpus', 'disk']:
                 self.assertEqual(flavor[key], server['flavor'][key])
         self._wait_server_status_and_check_network_connectivity(
@@ -261,9 +261,18 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             floating_ip['floating_ip_address'])
         self.useFixture(downtime_meter)
 
+        migration_kwargs = {'host': None, 'block_migration': block_migration}
+
+        # check if microversion is less than 2.25 because of
+        # disk_over_commit is depracted since compute api version 2.25
+        # if min_microversion is None, it runs on version < 2.25
+        if (CONF.compute.min_microversion is None or
+            CONF.compute.min_microversion < 2.25):
+            migration_kwargs['disk_over_commit'] = False
+
         self.admin_servers_client.live_migrate_server(
-            server['id'], host=None, block_migration=block_migration,
-            disk_over_commit=False)
+            server['id'], **migration_kwargs)
+
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
 
