@@ -371,19 +371,22 @@ def shelve_server(servers_client, server_id, force_shelve_offload=False):
                                  is configured not to offload server
                                  automatically after offload time.
     """
-    servers_client.shelve_server(server_id)
+    body = servers_client.shelve_server(server_id)
+    request_id = body.response['x-openstack-request-id']
 
     offload_time = CONF.compute.shelved_offload_time
     if offload_time >= 0:
         waiters.wait_for_server_status(servers_client, server_id,
                                        'SHELVED_OFFLOADED',
-                                       extra_timeout=offload_time)
+                                       extra_timeout=offload_time,
+                                       request_id=request_id)
     else:
         waiters.wait_for_server_status(servers_client, server_id, 'SHELVED')
         if force_shelve_offload:
             servers_client.shelve_offload_server(server_id)
             waiters.wait_for_server_status(servers_client, server_id,
-                                           'SHELVED_OFFLOADED')
+                                           'SHELVED_OFFLOADED',
+                                           request_id=request_id)
 
 
 def create_websocket(url):
