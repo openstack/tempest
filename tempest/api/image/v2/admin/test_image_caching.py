@@ -37,13 +37,17 @@ class ImageCachingTest(base.BaseV2ImageTest):
         # NOTE(abhishekk): As caching is enabled instance boot or volume
         # boot or image download can also cache image, so we are going to
         # maintain our caching information to avoid disturbing other tests
-        self.cached_info = {}
+        self.cached_info = []
+        self.cached_info_remote = []
 
     def tearDown(self):
         # Delete all from cache/queue if we exit abruptly
         for image_id in self.cached_info:
-            self.os_admin.image_cache_client.cache_delete(
-                image_id)
+            self.os_admin.image_cache_client.cache_delete(image_id)
+
+        for image_id in self.cached_info_remote:
+            self.os_admin.image_cache_client.cache_delete(image_id)
+
         super(ImageCachingTest, self).tearDown()
 
     @classmethod
@@ -75,19 +79,13 @@ class ImageCachingTest(base.BaseV2ImageTest):
         image = self.client.show_image(image['id'])
         return image
 
-    def _assertCheckQueues(self, queued_images):
-        for image in self.cached_info:
-            if self.cached_info[image] == 'queued':
-                self.assertIn(image, queued_images)
-
-    def _assertCheckCache(self, cached_images):
+    def _assertCheckCache(self, cached_images, cached):
         cached_list = []
         for image in cached_images:
             cached_list.append(image['image_id'])
 
-        for image in self.cached_info:
-            if self.cached_info[image] == 'cached':
-                self.assertIn(image, cached_list)
+        for image in cached:
+            self.assertIn(image, cached_list)
 
     @decorators.idempotent_id('4bf6adba-2f9f-47e9-a6d5-37f21ad4387c')
     def test_image_caching_cycle(self):
@@ -97,10 +95,9 @@ class ImageCachingTest(base.BaseV2ImageTest):
         self.assertRaises(lib_exc.Forbidden,
                           self.os_primary.image_cache_client.list_cache)
 
-        # Check there is nothing is queued for cached by us
+        # Check there is nothing cached by us
         output = self.os_admin.image_cache_client.list_cache()
-        self._assertCheckQueues(output['queued_images'])
-        self._assertCheckCache(output['cached_images'])
+        self._assertCheckCache(output['cached_images'], self.cached_info)
 
         # Non-existing image should raise NotFound exception
         self.assertRaises(lib_exc.NotFound,
@@ -122,12 +119,6 @@ class ImageCachingTest(base.BaseV2ImageTest):
 
         # Queue image for caching
         self.os_admin.image_cache_client.cache_queue(image['id'])
-        self.cached_info[image['id']] = 'queued'
-        # Verify that we have 1 image for queueing and 0 for caching
-        output = self.os_admin.image_cache_client.list_cache()
-        self._assertCheckQueues(output['queued_images'])
-        self._assertCheckCache(output['cached_images'])
-
         # Wait for image caching
         LOG.info("Waiting for image %s to get cached", image['id'])
         caching = waiters.wait_for_caching(
@@ -135,10 +126,9 @@ class ImageCachingTest(base.BaseV2ImageTest):
             self.os_admin.image_cache_client,
             image['id'])
 
-        self.cached_info[image['id']] = 'cached'
-        # verify that we have image in cache and not in queued
-        self._assertCheckQueues(caching['queued_images'])
-        self._assertCheckCache(caching['cached_images'])
+        self.cached_info.append(image['id'])
+        # verify that we have image cached
+        self._assertCheckCache(caching['cached_images'], self.cached_info)
 
         # Verify that we can delete images from caching and queueing with
         # api call.
@@ -152,4 +142,78 @@ class ImageCachingTest(base.BaseV2ImageTest):
                           self.os_admin.image_cache_client.cache_clear,
                           target="invalid")
         # Remove all data from local information
-        self.cached_info = {}
+        self.cached_info = []
+
+    @decorators.idempotent_id('0a6b7e10-bc30-4a41-91ff-69fb4f5e65f2')
+    def test_remote_and_self_cache(self):
+        """Test image cache works with self and remote glance service"""
+        if not CONF.image.alternate_image_endpoint:
+            raise self.skipException('No image_remote service to test '
+                                     'against')
+
+        # Check there is nothing is cached by us on current and
+        # remote node
+        output = self.os_admin.image_cache_client.list_cache()
+        self._assertCheckCache(output['cached_images'], self.cached_info)
+
+        output = self.os_admin.cache_client_remote.list_cache()
+        self._assertCheckCache(output['cached_images'],
+                               self.cached_info_remote)
+
+        # Create one image
+        image = self.image_create_and_upload(name='first',
+                                             container_format='bare',
+                                             disk_format='raw',
+                                             visibility='private')
+        self.assertEqual('active', image['status'])
+
+        # Queue image for caching on local node
+        self.os_admin.image_cache_client.cache_queue(image['id'])
+        # Wait for image caching
+        LOG.info("Waiting for image %s to get cached", image['id'])
+        caching = waiters.wait_for_caching(
+            self.client,
+            self.os_admin.image_cache_client,
+            image['id'])
+        self.cached_info.append(image['id'])
+        # verify that we have image in cache on local node
+        self._assertCheckCache(caching['cached_images'], self.cached_info)
+        # verify that we don't have anything cached on remote node
+        output = self.os_admin.cache_client_remote.list_cache()
+        self._assertCheckCache(output['cached_images'],
+                               self.cached_info_remote)
+
+        # cache same image on remote node
+        self.os_admin.cache_client_remote.cache_queue(image['id'])
+        # Wait for image caching
+        LOG.info("Waiting for image %s to get cached", image['id'])
+        caching = waiters.wait_for_caching(
+            self.client,
+            self.os_admin.cache_client_remote,
+            image['id'])
+        self.cached_info_remote.append(image['id'])
+
+        # verify that we have image cached on remote node
+        output = self.os_admin.cache_client_remote.list_cache()
+        self._assertCheckCache(output['cached_images'],
+                               self.cached_info_remote)
+
+        # Verify that we can delete image from remote cache and it
+        # still present in local cache
+        self.os_admin.cache_client_remote.cache_clear()
+        output = self.os_admin.cache_client_remote.list_cache()
+        self.assertEqual(0, len(output['queued_images']))
+        self.assertEqual(0, len(output['cached_images']))
+
+        output = self.os_admin.image_cache_client.list_cache()
+        self._assertCheckCache(output['cached_images'], self.cached_info)
+
+        # Delete image from local cache as well
+        self.os_admin.image_cache_client.cache_clear()
+        output = self.os_admin.image_cache_client.list_cache()
+        self.assertEqual(0, len(output['queued_images']))
+        self.assertEqual(0, len(output['cached_images']))
+
+        # Remove all data from local and remote information
+        self.cached_info = []
+        self.cached_info_remote = []

@@ -104,6 +104,15 @@ class Manager(clients.ServiceClients):
                 service=CONF.image.alternate_image_endpoint,
                 endpoint_type=CONF.image.alternate_image_endpoint_type,
                 region=CONF.image.region)
+            # NOTE(abhishekk): If no alternate endpoint is configured,
+            # this client will work the same as the base
+            # self.image_cache_client. If your test needs to know if
+            # these are different, check the config option to see if
+            # the alternate_image_endpoint is set.
+            self.cache_client_remote = self.image_v2.ImageCacheClient(
+                service=CONF.image.alternate_image_endpoint,
+                endpoint_type=CONF.image.alternate_image_endpoint_type,
+                region=CONF.image.region)
 
     def _set_compute_clients(self):
         self.agents_client = self.compute.AgentsClient()
