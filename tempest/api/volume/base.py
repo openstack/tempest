@@ -120,7 +120,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
             kwargs['size'] = max(kwargs['size'], min_disk)
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(self.__name__ + '-Volume')
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__name__ + '-Volume')
             kwargs['name'] = name
 
         if CONF.volume.volume_type and 'volume_type' not in kwargs:
@@ -166,7 +168,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def create_snapshot(self, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
         if 'name' not in kwargs:
-            name = data_utils.rand_name(self.__name__ + '-Snapshot')
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__name__ + '-Snapshot')
             kwargs['name'] = name
 
         snapshot = self.snapshots_client.create_snapshot(
@@ -187,13 +191,17 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         if object_client is None:
             object_client = self.object_client
         if 'name' not in kwargs:
-            name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-Backup')
             kwargs['name'] = name
 
         if CONF.volume.backup_driver == "swift":
             if 'container' not in kwargs:
                 cont_name = self.__class__.__name__ + '-backup-container'
-                cont = data_utils.rand_name(cont_name)
+                cont = data_utils.rand_name(
+                    prefix=CONF.resource_name_prefix,
+                    name=cont_name)
                 kwargs['container'] = cont
 
             self.addCleanup(object_storage.delete_containers,
@@ -246,7 +254,9 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def create_server(self, wait_until='ACTIVE', **kwargs):
         name = kwargs.pop(
             'name',
-            data_utils.rand_name(self.__class__.__name__ + '-instance'))
+            data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-instance'))
 
         if wait_until == 'SSHABLE' and not kwargs.get('validation_resources'):
             # If we were asked for SSHABLE but were not provided with the
@@ -274,7 +284,8 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     def create_group(self, **kwargs):
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name(
-                self.__class__.__name__ + '-Group')
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-Group')
 
         group = self.groups_client.create_group(**kwargs)['group']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -337,7 +348,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     @cleanup_order
     def create_test_qos_specs(self, name=None, consumer=None, **kwargs):
         """create a test Qos-Specs."""
-        name = name or data_utils.rand_name(self.__name__ + '-QoS')
+        name = name or data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__name__ + '-QoS')
         consumer = consumer or 'front-end'
         qos_specs = self.admin_volume_qos_client.create_qos(
             name=name, consumer=consumer, **kwargs)['qos_specs']
@@ -347,7 +360,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     @cleanup_order
     def create_volume_type(self, name=None, **kwargs):
         """Create a test volume-type"""
-        name = name or data_utils.rand_name(self.__name__ + '-volume-type')
+        name = name or data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__name__ + '-volume-type')
         volume_type = self.admin_volume_types_client.create_volume_type(
             name=name, **kwargs)['volume_type']
         self.cleanup(self.clear_volume_type, volume_type['id'])
@@ -377,7 +392,8 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def create_group_type(self, name=None, **kwargs):
         """Create a test group-type"""
         name = name or data_utils.rand_name(
-            self.__class__.__name__ + '-group-type')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-group-type')
         group_type = self.admin_group_types_client.create_group_type(
             name=name, **kwargs)['group_type']
         self.addCleanup(self.admin_group_types_client.delete_group_type,

@@ -52,7 +52,9 @@ class ContainerTest(base.BaseObjectTest):
         6. delete object version 1
         """
         # create container
-        vers_container_name = data_utils.rand_name(name='TestVersionContainer')
+        vers_container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='TestVersionContainer')
         resp, _ = self.container_client.update_container(vers_container_name)
         self.addCleanup(object_storage.delete_containers,
                         [vers_container_name],
@@ -61,7 +63,9 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
-        base_container_name = data_utils.rand_name(name='TestBaseContainer')
+        base_container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
         resp, _ = self.container_client.update_container(
             base_container_name,
@@ -73,7 +77,8 @@ class ContainerTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
-        object_name = data_utils.rand_name(name='TestObject')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestObject')
         # create object
         data_1 = data_utils.random_bytes()
         resp, _ = self.object_client.create_object(base_container_name,

@@ -132,7 +132,8 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
         # Updates snapshot with new values
         new_s_name = data_utils.rand_name(
-            self.__class__.__name__ + '-new-snap')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-new-snap')
         new_desc = 'This is the new description of snapshot.'
         params = {'name': new_s_name,
                   'description': new_desc}

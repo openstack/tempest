@@ -29,12 +29,16 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
 
     def _create_user_message(self):
         """Trigger a 'no valid host' situation to generate a message."""
-        bad_protocol = data_utils.rand_name('storage_protocol')
-        bad_vendor = data_utils.rand_name('vendor_name')
+        bad_protocol = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='storage_protocol')
+        bad_vendor = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='vendor_name')
         extra_specs = {'storage_protocol': bad_protocol,
                        'vendor_name': bad_vendor}
         vol_type_name = data_utils.rand_name(
-            self.__class__.__name__ + '-volume-type')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-volume-type')
         bogus_type = self.create_volume_type(
             name=vol_type_name, extra_specs=extra_specs)
         params = {'volume_type': bogus_type['id'],

@@ -31,7 +31,8 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         cls.network = cls.create_network()
 
     def _create_network(self, external=True):
-        post_body = {'name': data_utils.rand_name('network-')}
+        post_body = {'name': data_utils.rand_name(
+            name='network-', prefix=CONF.resource_name_prefix)}
         if external:
             post_body['router:external'] = external
         body = self.admin_networks_client.create_network(**post_body)

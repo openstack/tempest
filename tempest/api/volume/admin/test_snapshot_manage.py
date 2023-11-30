@@ -77,10 +77,12 @@ class SnapshotManageAdminTest(base.BaseVolumeAdminTest):
         self.assertNotIn(snapshot['id'], [v['id'] for v in all_snapshots])
 
         # Manage the snapshot
-        name = data_utils.rand_name(self.__class__.__name__ +
-                                    '-Managed-Snapshot')
-        description = data_utils.rand_name(self.__class__.__name__ +
-                                           '-Managed-Snapshot-Description')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Managed-Snapshot')
+        description = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Managed-Snapshot-Description')
         metadata = {"manage-snap-meta1": "value1",
                     "manage-snap-meta2": "value2",
                     "manage-snap-meta3": "value3"}

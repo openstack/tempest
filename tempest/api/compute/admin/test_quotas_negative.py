@@ -133,8 +133,9 @@ class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
         # when we reach limit maxSecurityGroupRules
         self._update_quota('security_group_rules', 0)
 
-        s_name = data_utils.rand_name('securitygroup')
-        s_description = data_utils.rand_name('description')
+        prefix = CONF.resource_name_prefix
+        s_name = data_utils.rand_name(prefix=prefix, name='securitygroup')
+        s_description = data_utils.rand_name(prefix=prefix, name='description')
         securitygroup = self.sg_client.create_security_group(
             name=s_name, description=s_description)['security_group']
         self.addCleanup(self.sg_client.delete_security_group,

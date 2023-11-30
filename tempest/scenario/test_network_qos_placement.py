@@ -113,7 +113,8 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         self, name_prefix, min_kbps, direction="ingress"
     ):
         policy = self.qos_client.create_qos_policy(
-            name=data_utils.rand_name(name_prefix),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name=name_prefix),
             shared=True)['policy']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.qos_client.delete_qos_policy, policy['id'])
@@ -600,7 +601,7 @@ class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
     def _create_qos_policy_with_bw_and_pps_rules(self, min_kbps, min_kpps):
         policy = self.qos_client.create_qos_policy(
-            name=data_utils.rand_name(),
+            name=data_utils.rand_name(prefix=CONF.resource_name_prefix),
             shared=True
         )['policy']
         self.addCleanup(
@@ -660,10 +661,11 @@ class QoSBandwidthAndPacketRateTests(NetworkQoSPlacementTestBase):
 
     def _create_port_with_qos_policy(self, policy):
         port = self.ports_client.create_port(
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__),
             network_id=self.network['id'],
-            qos_policy_id=policy['id'] if policy else None,
-        )['port']
+            qos_policy_id=policy['id'] if policy else None)['port']
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
             self.ports_client.delete_port, port['id']

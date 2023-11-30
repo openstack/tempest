@@ -11,8 +11,11 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
@@ -31,7 +34,8 @@ class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
         body = self.resource_types_client.create_resource_type_association(
             namespace['namespace'], name=resource_name)
         # Create a property
-        property_title = data_utils.rand_name('property')
+        property_title = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='property')
         body = self.namespace_properties_client.create_namespace_property(
             namespace=namespace['namespace'], title=property_title,
             name=resource_name, type="string", enum=enum)
@@ -41,7 +45,9 @@ class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
             namespace['namespace'], resource_name)
         self.assertEqual(resource_name, body['name'])
         # Update namespace property
-        update_property_title = data_utils.rand_name('update-property')
+        update_property_title = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='update-property')
         body = self.namespace_properties_client.update_namespace_properties(
             namespace['namespace'], resource_name,
             title=update_property_title, type="string",

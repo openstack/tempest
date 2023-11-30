@@ -53,7 +53,9 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
         volume = self.create_volume()
         self.addCleanup(self.delete_volume, volume['id'])
 
-        s_name = data_utils.rand_name(self.__class__.__name__ + '-Snapshot')
+        s_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Snapshot')
         # Create snapshot
         snapshot = self.snapshots_client.create_snapshot(
             volume_id=volume['id'],

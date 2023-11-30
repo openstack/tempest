@@ -15,8 +15,11 @@
 from oslo_serialization import jsonutils as json
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
@@ -35,8 +38,11 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
                           ['access', 'secret']]
         for _ in range(2):
             project = cls.projects_client.create_project(
-                data_utils.rand_name('project'),
-                description=data_utils.rand_name('project-desc'))['project']
+                data_utils.rand_name(
+                    name='project', prefix=CONF.resource_name_prefix),
+                description=data_utils.rand_name(
+                    name='project-desc',
+                    prefix=CONF.resource_name_prefix))['project']
             cls.addClassResourceCleanup(
                 cls.projects_client.delete_project, project['id'])
             cls.projects.append(project['id'])
@@ -50,8 +56,10 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('7cd59bf9-bda4-4c72-9467-d21cab278355')
     def test_credentials_create_get_update_delete(self):
         """Test creating, getting, updating, deleting of credentials"""
+        prefix = CONF.resource_name_prefix
         blob = '{"access": "%s", "secret": "%s"}' % (
-            data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
+            data_utils.rand_name(name='Access', prefix=prefix),
+            data_utils.rand_name(name='Secret', prefix=prefix))
         cred = self.creds_client.create_credential(
             user_id=self.user_body['id'], project_id=self.projects[0],
             blob=blob, type='ec2')['credential']
@@ -61,8 +69,8 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         for value2 in self.creds_list[1]:
             self.assertIn(value2, cred['blob'])
 
-        new_keys = [data_utils.rand_name('NewAccess'),
-                    data_utils.rand_name('NewSecret')]
+        new_keys = [data_utils.rand_name(name='NewAccess', prefix=prefix),
+                    data_utils.rand_name(name='NewSecret', prefix=prefix)]
         blob = '{"access": "%s", "secret": "%s"}' % (new_keys[0], new_keys[1])
         update_body = self.creds_client.update_credential(
             cred['id'], blob=blob, project_id=self.projects[1],
@@ -88,10 +96,12 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         """Test listing credentials"""
         created_cred_ids = list()
         fetched_cred_ids = list()
+        prefix = CONF.resource_name_prefix
 
         for _ in range(2):
             blob = '{"access": "%s", "secret": "%s"}' % (
-                data_utils.rand_name('Access'), data_utils.rand_name('Secret'))
+                data_utils.rand_name(name='Access', prefix=prefix),
+                data_utils.rand_name(name='Secret', prefix=prefix))
             cred = self.creds_client.create_credential(
                 user_id=self.user_body['id'], project_id=self.projects[0],
                 blob=blob, type='ec2')['credential']

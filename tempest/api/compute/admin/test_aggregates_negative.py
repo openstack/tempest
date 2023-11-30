@@ -15,9 +15,12 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -40,7 +43,9 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                      if v['status'] == 'enabled' and v['state'] == 'up']
 
     def _create_test_aggregate(self):
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.aggregate_name_prefix)
         aggregate = (self.client.create_aggregate(name=aggregate_name)
                      ['aggregate'])
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
@@ -50,7 +55,9 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('86a1cb14-da37-4a70-b056-903fd56dfe29')
     def test_aggregate_create_as_user(self):
         """Regular user is not allowed to create an aggregate"""
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.aggregate_name_prefix)
         self.assertRaises(lib_exc.Forbidden,
                           self.aggregates_client.create_aggregate,
                           name=aggregate_name)
@@ -125,7 +132,9 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_add_non_exist_host(self):
         """Adding a non-exist host to an aggregate should fail"""
         while True:
-            non_exist_host = data_utils.rand_name('nonexist_host')
+            non_exist_host = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='nonexist_host')
             if non_exist_host not in self.hosts:
                 break
         aggregate = self._create_test_aggregate()

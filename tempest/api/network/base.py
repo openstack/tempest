@@ -104,7 +104,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_network(cls, network_name=None, **kwargs):
         """Wrapper utility that returns a test network."""
         network_name = network_name or data_utils.rand_name(
-            cls.__name__ + '-test-network')
+            cls.__name__ + '-test-network', prefix=CONF.resource_name_prefix)
 
         body = cls.networks_client.create_network(name=network_name, **kwargs)
         network = body['network']
@@ -161,7 +161,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_port(cls, network, **kwargs):
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name(cls.__name__)
+            kwargs['name'] = data_utils.rand_name(
+                cls.__name__, prefix=CONF.resource_name_prefix)
         """Wrapper utility that returns a test port."""
         body = cls.ports_client.create_port(network_id=network['id'],
                                             **kwargs)
@@ -182,7 +183,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                       external_network_id=None, enable_snat=None,
                       **kwargs):
         router_name = router_name or data_utils.rand_name(
-            cls.__name__ + "-router")
+            cls.__name__ + "-router", prefix=CONF.resource_name_prefix)
 
         ext_gw_info = {}
         if external_network_id:

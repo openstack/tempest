@@ -29,7 +29,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_check_get_delete_token(self):
         """Test getting create/check/get/delete token for user via v2 API"""
         # get a token by username and password
-        user_name = data_utils.rand_name(name='user')
+        user_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         user_password = data_utils.rand_password()
         # first:create a tenant
         tenant = self.setup_test_tenant()
@@ -67,7 +68,8 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         """
 
         # Create a user.
-        user_name = data_utils.rand_name(name='user')
+        user_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         user_password = data_utils.rand_password()
         tenant_id = None  # No default tenant so will get unscoped token.
         user = self.create_test_user(name=user_name,
@@ -76,10 +78,12 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                                      email='')
 
         # Create a couple tenants.
-        tenant1_name = data_utils.rand_name(name='tenant')
+        tenant1_name = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         tenant1 = self.setup_test_tenant(name=tenant1_name)
 
-        tenant2_name = data_utils.rand_name(name='tenant')
+        tenant2_name = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         tenant2 = self.setup_test_tenant(name=tenant2_name)
 
         # Create a role

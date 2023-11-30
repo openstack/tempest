@@ -81,7 +81,8 @@ class AccountQuotasTest(base.BaseObjectTest):
     @utils.requires_ext(extension='account_quotas', service='object')
     def test_upload_valid_object(self):
         """Test uploading valid object"""
-        object_name = data_utils.rand_name(name="TestObject")
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name="TestObject")
         data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)

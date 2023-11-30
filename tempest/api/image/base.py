@@ -51,7 +51,9 @@ class BaseImageTest(tempest.test.BaseTestCase):
         """Wrapper that returns a test image."""
 
         if 'name' not in kwargs:
-            name = data_utils.rand_name(cls.__name__ + "-image")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=cls.__name__ + "-image")
             kwargs['name'] = name
 
         image = cls.client.create_image(**kwargs)
@@ -83,7 +85,8 @@ class BaseV2ImageTest(BaseImageTest):
                          description='Tempest', protected=False,
                          **kwargs):
         if not namespace_name:
-            namespace_name = data_utils.rand_name('test-ns')
+            namespace_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='test-ns')
         kwargs.setdefault('display_name', namespace_name)
         namespace = self.namespaces_client.create_namespace(
             namespace=namespace_name, visibility=visibility,
@@ -200,7 +203,9 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         return image_ids
 
     def _create_image(self):
-        name = data_utils.rand_name(self.__class__.__name__ + '-image')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-image')
         image = self.client.create_image(name=name,
                                          container_format='bare',
                                          disk_format='raw')

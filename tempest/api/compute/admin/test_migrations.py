@@ -74,7 +74,9 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         flavor = self.admin_flavors_client.show_flavor(
             self.flavor_ref)['flavor']
         flavor = self.admin_flavors_client.create_flavor(
-            name=data_utils.rand_name('test_resize_flavor_'),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='test_resize_flavor_'),
             ram=flavor['ram'],
             disk=flavor['disk'],
             vcpus=flavor['vcpus']

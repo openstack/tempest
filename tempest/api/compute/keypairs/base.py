@@ -14,7 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
+
+CONF = config.CONF
 
 
 class BaseKeypairTest(base.BaseV2ComputeTest):
@@ -32,7 +35,8 @@ class BaseKeypairTest(base.BaseV2ComputeTest):
             client = self.keypairs_client
         if keypair_name is None:
             keypair_name = data_utils.rand_name(
-                self.__class__.__name__ + '-keypair')
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-keypair')
         kwargs = {'name': keypair_name}
         delete_params = {}
         if pub_key:

@@ -61,7 +61,8 @@ class ImageTaskCreate(base.BaseV2ImageAdminTest):
         i = 0
         tasks = list()
         while i < len(disk_format):
-            image_name = data_utils.rand_name("task_image")
+            image_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name="task_image")
             image_property = {"container_format": "bare",
                               "disk_format": disk_format[0],
                               "visibility": "public",
@@ -126,8 +127,12 @@ class ImageTaskCreate(base.BaseV2ImageAdminTest):
     @decorators.idempotent_id("ad6450c6-7060-4ee7-a2d1-41c2604b446c")
     @decorators.attr(type=['negative'])
     def test_task_create_fake_image_location(self):
+        kwargs = {
+            'prefix': CONF.resource_name_prefix,
+            'name': 'dummy-img-file'
+        }
         http_fake_url = ''.join(
-            ["http://", data_utils.rand_name('dummy-img-file'), ".qcow2"])
+            ["http://", data_utils.rand_name(**kwargs), ".qcow2"])
         task = self._prepare_image_tasks_param(
             image_from_format=['qcow2'],
             disk_format=['qcow2'],

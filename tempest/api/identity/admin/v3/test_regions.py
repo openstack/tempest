@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class RegionsTestJSON(base.BaseIdentityV3AdminTest):
@@ -37,7 +40,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         super(RegionsTestJSON, cls).resource_setup()
         cls.setup_regions = list()
         for _ in range(2):
-            r_description = data_utils.rand_name('description')
+            r_description = data_utils.rand_name(
+                name='description', prefix=CONF.resource_name_prefix)
             region = cls.client.create_region(
                 description=r_description)['region']
             cls.addClassResourceCleanup(
@@ -48,7 +52,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_update_get_delete_region(self):
         """Test creating, updating, getting and updating region"""
         # Create region
-        r_description = data_utils.rand_name('description')
+        r_description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         region = self.client.create_region(
             description=r_description,
             parent_region_id=self.setup_regions[0]['id'])['region']
@@ -62,7 +67,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.setup_regions[0]['id'],
                          region['parent_region_id'])
         # Update region with new description and parent ID
-        r_alt_description = data_utils.rand_name('description')
+        r_alt_description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         region = self.client.update_region(
             region['id'],
             description=r_alt_description,
@@ -86,7 +92,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_region_with_specific_id(self):
         """Test creating region with specific id"""
         r_region_id = data_utils.rand_uuid()
-        r_description = data_utils.rand_name('description')
+        r_description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         region = self.client.create_region(
             region_id=r_region_id, description=r_description)['region']
         self.addCleanup(self.client.delete_region, region['id'])
@@ -109,7 +116,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_regions_filter_by_parent_region_id(self):
         """Test listing regions filtered by parent region id"""
         # Add a sub-region to one of the existing test regions
-        r_description = data_utils.rand_name('description')
+        r_description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         region = self.client.create_region(
             description=r_description,
             parent_region_id=self.setup_regions[0]['id'])['region']

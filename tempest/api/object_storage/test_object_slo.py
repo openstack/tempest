@@ -17,9 +17,11 @@ from oslo_serialization import jsonutils as json
 from oslo_utils.secretutils import md5
 from tempest.api.object_storage import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+CONF = config.CONF
 # Each segment, except for the final one, must be at least 1 megabyte
 MIN_SEGMENT_SIZE = 1024 * 1024
 
@@ -47,7 +49,8 @@ class ObjectSloTest(base.BaseObjectTest):
 
     def _create_manifest(self):
         # Create a manifest file for SLO uploading
-        object_name = data_utils.rand_name(name='TestObject')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestObject')
         object_name_base_1 = object_name + '_01'
         object_name_base_2 = object_name + '_02'
         data_size = MIN_SEGMENT_SIZE
@@ -80,7 +83,8 @@ class ObjectSloTest(base.BaseObjectTest):
         manifest = self._create_manifest()
 
         params = {'multipart-manifest': 'put'}
-        object_name = data_utils.rand_name(name='TestObject')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestObject')
         self._create_object(self.container_name,
                             object_name,
                             manifest,
@@ -109,7 +113,8 @@ class ObjectSloTest(base.BaseObjectTest):
         manifest = self._create_manifest()
 
         params = {'multipart-manifest': 'put'}
-        object_name = data_utils.rand_name(name='TestObject')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestObject')
         resp = self._create_object(self.container_name,
                                    object_name,
                                    manifest,

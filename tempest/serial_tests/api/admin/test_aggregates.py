@@ -63,7 +63,9 @@ class AggregatesAdminTestBase(base.BaseV2ComputeAdminTest):
 
     def _create_test_aggregate(self, **kwargs):
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name(self.aggregate_name_prefix)
+            kwargs['name'] = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.aggregate_name_prefix)
         aggregate = self.client.create_aggregate(**kwargs)['aggregate']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.client.delete_aggregate, aggregate['id'])
@@ -87,7 +89,8 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
     @decorators.idempotent_id('5873a6f8-671a-43ff-8838-7ce430bb6d0b')
     def test_aggregate_create_delete_with_az(self):
         """Test create/delete aggregate with availability_zone"""
-        az_name = data_utils.rand_name(self.az_name_prefix)
+        az_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
         self.assertEqual(az_name, aggregate['availability_zone'])
 
@@ -125,8 +128,10 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
     @decorators.idempotent_id('4d2b2004-40fa-40a1-aab2-66f4dab81beb')
     def test_aggregate_create_update_with_az(self):
         """Test create/update aggregate with availability_zone"""
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        az_name = data_utils.rand_name(self.az_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.aggregate_name_prefix)
+        az_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.az_name_prefix)
         aggregate = self._create_test_aggregate(
             name=aggregate_name, availability_zone=az_name)
 
@@ -153,7 +158,8 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
     def test_aggregate_add_remove_host(self):
         """Test adding host to and removing host from aggregate"""
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
 
         body = (self.client.add_host(aggregate['id'], host=self.host)
@@ -177,7 +183,8 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
         Add a host to the given aggregate and list.
         """
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
 
         self.client.add_host(aggregate['id'], host=self.host)
@@ -199,7 +206,8 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
         Add a host to the given aggregate and get details.
         """
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.aggregate_name_prefix)
         aggregate = self._create_test_aggregate(name=aggregate_name)
 
         self.client.add_host(aggregate['id'], host=self.host)
@@ -215,7 +223,8 @@ class AggregatesAdminTestJSON(AggregatesAdminTestBase):
     def test_aggregate_add_host_create_server_with_az(self):
         """Test adding a host to the given aggregate and creating a server"""
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        az_name = data_utils.rand_name(self.az_name_prefix)
+        az_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.az_name_prefix)
         aggregate = self._create_test_aggregate(availability_zone=az_name)
 
         # Find a host that has not been added to other availability zone,
@@ -269,7 +278,8 @@ class AggregatesAdminTestV241(AggregatesAdminTestBase):
         # Checking create aggregate API response schema
         aggregate = self._create_test_aggregate()
 
-        new_aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        new_aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=self.aggregate_name_prefix)
         # Checking update aggregate API response schema
         self.client.update_aggregate(aggregate['id'], name=new_aggregate_name)
         # Checking show aggregate API response schema

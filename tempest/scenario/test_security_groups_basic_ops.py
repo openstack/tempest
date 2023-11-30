@@ -300,7 +300,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                    tenant=tenant.creds.tenant_name,
                    num=i
             )
-            name = data_utils.rand_name(name)
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name=name)
             server = self._create_server(name, tenant,
                                          [tenant.security_groups['default']])
             tenant.servers.append(server)
@@ -312,7 +313,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         secgroups = tenant.security_groups.values()
         name = 'server-{tenant}-access_point'.format(
             tenant=tenant.creds.tenant_name)
-        name = data_utils.rand_name(name)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=name)
         server = self._create_server(name, tenant,
                                      security_groups=secgroups)
         tenant.access_point = server
@@ -555,7 +557,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         name = 'server-{tenant}-gen-1'.format(
                tenant=new_tenant.creds.tenant_name
         )
-        name = data_utils.rand_name(name)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=name)
         server = self._create_server(name, new_tenant,
                                      [new_tenant.security_groups['default']])
 
@@ -624,7 +627,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         name = 'server-{tenant}-gen-1'.format(
                tenant=new_tenant.creds.tenant_name
         )
-        name = data_utils.rand_name(name)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=name)
         server = self._create_server(name, new_tenant,
                                      [new_tenant.security_groups['default']])
 
@@ -668,7 +672,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         tenant = self.primary_tenant
         self._create_tenant_network(tenant, port_security_enabled=False)
         self.assertFalse(tenant.network['port_security_enabled'])
-        name = data_utils.rand_name('server-smoke')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='server-smoke')
         sec_groups = []
         server = self._create_server(name, tenant, sec_groups)
         server_id = server['id']

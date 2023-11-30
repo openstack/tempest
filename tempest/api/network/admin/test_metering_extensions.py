@@ -14,9 +14,12 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class MeteringTestJSON(base.BaseAdminNetworkTest):
@@ -37,7 +40,8 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     def resource_setup(cls):
         super(MeteringTestJSON, cls).resource_setup()
         description = "metering label created by tempest"
-        name = data_utils.rand_name("metering-label")
+        name = data_utils.rand_name(
+            name="metering-label", prefix=CONF.resource_name_prefix)
         cls.metering_label = cls.create_metering_label(name, description)
         remote_ip_prefix = ("10.0.0.0/24" if cls._ip_version == 4
                             else "fd02::/64")
@@ -101,7 +105,8 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     def test_create_delete_metering_label_with_filters(self):
         """Verifies creating and deleting metering label with filters"""
         # Creates a label
-        name = data_utils.rand_name('metering-label-')
+        name = data_utils.rand_name(
+            name='metering-label-', prefix=CONF.resource_name_prefix)
         description = "label created by tempest"
         body = self.admin_metering_labels_client.create_metering_label(
             name=name, description=description)

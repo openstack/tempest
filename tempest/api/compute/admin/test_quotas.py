@@ -43,7 +43,9 @@ class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
 
     def _get_updated_quotas(self):
         # Verify that GET shows the updated quota set of project
-        project_name = data_utils.rand_name('cpu_quota_project')
+        project_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='cpu_quota_project')
         project_desc = project_name + '-desc'
         project = identity.identity_utils(self.os_admin).create_project(
             name=project_name, description=project_desc)
@@ -59,7 +61,9 @@ class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
         self.assertEqual(5120, quota_set['ram']['limit'])
 
         # Verify that GET shows the updated quota set of user
-        user_name = data_utils.rand_name('cpu_quota_user')
+        user_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='cpu_quota_user')
         password = data_utils.rand_password()
         email = user_name + '@testmail.tm'
         user = identity.identity_utils(self.os_admin).create_user(
@@ -157,7 +161,9 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
                       'Legacy quota update not available with unified limits')
     def test_delete_quota(self):
         """Test admin can delete the compute quota set for a project"""
-        project_name = data_utils.rand_name('ram_quota_project')
+        project_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='ram_quota_project')
         project_desc = project_name + '-desc'
         project = identity.identity_utils(self.os_admin).create_project(
             name=project_name, description=project_desc)

@@ -18,8 +18,11 @@ import time
 from testtools import matchers
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class UsersTestJSON(base.BaseIdentityV2AdminTest):
@@ -28,7 +31,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(UsersTestJSON, cls).resource_setup()
-        cls.alt_user = data_utils.rand_name('test_user')
+        cls.alt_user = data_utils.rand_name(
+            name='test_user', prefix=CONF.resource_name_prefix)
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @decorators.attr(type='smoke')
@@ -43,7 +47,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_enabled(self):
         """Test creating a user with enabled : False via v2 API"""
         tenant = self.setup_test_tenant()
-        name = data_utils.rand_name('test_user')
+        name = data_utils.rand_name(
+            name='test_user', prefix=CONF.resource_name_prefix)
         user = self.create_test_user(name=name,
                                      tenantId=tenant['id'],
                                      email=self.alt_email,
@@ -59,7 +64,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         user = self.create_test_user(tenantId=tenant['id'])
 
         # Updating user details with new values
-        u_name2 = data_utils.rand_name('user2')
+        u_name2 = data_utils.rand_name(
+            name='user2', prefix=CONF.resource_name_prefix)
         u_email2 = u_name2 + '@testmail.tm'
         update_user = self.users_client.update_user(user['id'], name=u_name2,
                                                     email=u_email2,

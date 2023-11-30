@@ -38,20 +38,23 @@ class GroupsTest(base.BaseVolumeAdminTest):
         group_type = self.create_group_type()
 
         # Create group
-        grp1_name = data_utils.rand_name('Group1')
+        grp1_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Group1')
         grp1 = self.create_group(group_type=group_type['id'],
                                  volume_types=[volume_type['id']],
                                  name=grp1_name)
         grp1_id = grp1['id']
 
-        grp2_name = data_utils.rand_name('Group2')
+        grp2_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Group2')
         grp2 = self.create_group(group_type=group_type['id'],
                                  volume_types=[volume_type['id']],
                                  name=grp2_name)
         grp2_id = grp2['id']
 
         # Create volume
-        vol1_name = data_utils.rand_name("volume")
+        vol1_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name="volume")
         params = {'name': vol1_name,
                   'volume_type': volume_type['id'],
                   'group_id': grp1['id'],
@@ -108,11 +111,13 @@ class GroupsTest(base.BaseVolumeAdminTest):
         grp = self.create_group(group_type=group_type['id'],
                                 volume_types=[volume_type['id']])
 
+        prefix = CONF.resource_name_prefix
         # Create volume is instance level, can not be deleted before group.
         # Volume delete handled by delete_group method, cleanup method.
         grp_vols = []
         for _ in range(2):
-            params = {'name': data_utils.rand_name("volume"),
+            params = {'name': data_utils.rand_name(prefix=prefix,
+                                                   name="volume"),
                       'volume_type': volume_type['id'],
                       'group_id': grp['id'],
                       'size': CONF.volume.volume_size}
@@ -177,9 +182,10 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
         grp = self.create_group(group_type=group_type['id'],
                                 volume_types=[volume_type['id']])
 
+        prefix = CONF.resource_name_prefix
         # Create volume is instance level, can not be deleted before group.
         # Volume delete handled by delete_group method, cleanup method.
-        params = {'name': data_utils.rand_name("volume"),
+        params = {'name': data_utils.rand_name(prefix=prefix, name="volume"),
                   'volume_type': volume_type['id'],
                   'group_id': grp['id'],
                   'size': CONF.volume.volume_size}
@@ -188,7 +194,7 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
             self.volumes_client, vol['id'], 'available')
 
         # Create Group from Group
-        grp_name2 = data_utils.rand_name('Group_from_grp')
+        grp_name2 = data_utils.rand_name(prefix=prefix, name='Group_from_grp')
         grp2 = self.groups_client.create_group_from_source(
             source_group_id=grp['id'], name=grp_name2)['group']
         self.addCleanup(self.delete_group, grp2['id'])

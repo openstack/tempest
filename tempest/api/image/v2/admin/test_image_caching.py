@@ -57,7 +57,9 @@ class ImageCachingTest(base.BaseV2ImageTest):
     def image_create_and_upload(self, upload=True, **kwargs):
         """Wrapper that returns a test image."""
         if 'name' not in kwargs:
-            name = data_utils.rand_name(self.__name__ + "-image")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__name__ + "-image")
             kwargs['name'] = name
 
         params = dict(kwargs)

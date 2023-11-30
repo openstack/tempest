@@ -51,7 +51,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
         def create_flavor_with_ephemeral(ephem_disk):
             name = 'flavor_with_ephemeral_%s' % ephem_disk
-            flavor_name = data_utils.rand_name(name)
+            flavor_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name=name)
 
             ram = flavor_base['ram']
             vcpus = flavor_base['vcpus']

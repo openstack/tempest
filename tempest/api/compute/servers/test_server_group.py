@@ -17,8 +17,11 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common import compute
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ServerGroupTestJSON(base.BaseV2ComputeTest):
@@ -80,7 +83,8 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
 
     def _create_delete_server_group(self, policy):
         # Create and Delete the server-group with given policy
-        name = data_utils.rand_name('server-group')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='server-group')
         server_group = self._create_server_group(name, policy)
         self._delete_server_group(server_group)
 
@@ -99,7 +103,8 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     def test_create_delete_multiple_server_groups_with_same_name_policy(self):
         """Test Create/Delete the server-groups with same name and policy"""
         server_groups = []
-        server_group_name = data_utils.rand_name('server-group')
+        server_group_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='server-group')
         for _ in range(0, 2):
             server_groups.append(self._create_server_group(server_group_name,
                                                            self.policy))

@@ -37,20 +37,21 @@ class InheritsV3TestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def resource_setup(cls):
         super(InheritsV3TestJSON, cls).resource_setup()
-        u_name = data_utils.rand_name('user-')
+        prefix = CONF.resource_name_prefix
+        u_name = data_utils.rand_name(name='user-', prefix=prefix)
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_password()
         cls.domain = cls.create_domain()
         cls.project = cls.projects_client.create_project(
-            data_utils.rand_name('project-'),
-            description=data_utils.rand_name('project-desc-'),
+            data_utils.rand_name(name='project-', prefix=prefix),
+            description=data_utils.rand_name('project-desc-', prefix=prefix),
             domain_id=cls.domain['id'])['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.project['id'])
         cls.group = cls.groups_client.create_group(
-            name=data_utils.rand_name('group-'), project_id=cls.project['id'],
-            domain_id=cls.domain['id'])['group']
+            name=data_utils.rand_name(name='group-', prefix=prefix),
+            project_id=cls.project['id'], domain_id=cls.domain['id'])['group']
         cls.addClassResourceCleanup(cls.groups_client.delete_group,
                                     cls.group['id'])
         if not CONF.identity_feature_enabled.immutable_user_source:

@@ -14,15 +14,19 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
+
+CONF = config.CONF
 
 
 class BaseSecGroupTest(base.BaseNetworkTest):
 
     def _create_security_group(self):
         # Create a security group
-        name = data_utils.rand_name('secgroup-')
+        name = data_utils.rand_name(
+            name='secgroup-', prefix=CONF.resource_name_prefix)
         group_create_body = (
             self.security_groups_client.create_security_group(name=name))
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

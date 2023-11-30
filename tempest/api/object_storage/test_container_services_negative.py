@@ -66,7 +66,8 @@ class ContainerNegativeTest(base.BaseObjectTest):
     def test_create_container_metadata_name_exceeds_max_length(self):
         """Test creating container with metadata name longer than max"""
         max_length = self.constraints['max_meta_name_length']
-        container_name = data_utils.rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestContainer')
         metadata_name = 'X-Container-Meta-' + data_utils.arbitrary_string(
             size=max_length + 1)
         metadata = {metadata_name: 'penguin'}
@@ -84,7 +85,8 @@ class ContainerNegativeTest(base.BaseObjectTest):
     def test_create_container_metadata_value_exceeds_max_length(self):
         """Test creating container with metadata value longer than max"""
         max_length = self.constraints['max_meta_value_length']
-        container_name = data_utils.rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestContainer')
         metadata_value = data_utils.arbitrary_string(size=max_length + 1)
         metadata = {'X-Container-Meta-animal': metadata_value}
         ex = self.assertRaises(
@@ -101,7 +103,8 @@ class ContainerNegativeTest(base.BaseObjectTest):
     def test_create_container_metadata_exceeds_overall_metadata_count(self):
         """Test creating container with metadata exceeding default count"""
         max_count = self.constraints['max_meta_count']
-        container_name = data_utils.rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestContainer')
         metadata = {}
         for i in range(max_count + 1):
             metadata['X-Container-Meta-animal-' + str(i)] = 'penguin'

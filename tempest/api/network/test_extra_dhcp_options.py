@@ -15,9 +15,12 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
@@ -61,7 +64,8 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
         """Test creating a port with Extra DHCP Options and list those"""
         body = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             extra_dhcp_opts=self.extra_dhcp_opts)
         port_id = body['port']['id']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -77,7 +81,8 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('9a6aebf4-86ee-4f47-b07a-7f7232c55607')
     def test_update_show_port_with_extra_dhcp_options(self):
         """Test updating port with extra DHCP options and show that port"""
-        name = data_utils.rand_name('new-port-name')
+        name = data_utils.rand_name(
+            name='new-port-name', prefix=CONF.resource_name_prefix)
         self.ports_client.update_port(
             self.port['id'],
             name=name,

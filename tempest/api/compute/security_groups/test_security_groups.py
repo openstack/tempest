@@ -15,9 +15,12 @@
 
 from tempest.api.compute.security_groups import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
@@ -69,7 +72,8 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         Security group should be created, fetched and deleted
         with char space between name along with leading and trailing spaces.
         """
-        s_name = ' %s ' % data_utils.rand_name('securitygroup ')
+        s_name = ' %s ' % data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='securitygroup ')
         securitygroup = self.create_security_group(name=s_name)
         securitygroup_name = securitygroup['name']
         self.assertEqual(securitygroup_name, s_name,
@@ -133,8 +137,9 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         securitygroup = self.create_security_group()
         securitygroup_id = securitygroup['id']
         # Update the name and description
-        s_new_name = data_utils.rand_name('sg-hth')
-        s_new_des = data_utils.rand_name('description-hth')
+        prefix = CONF.resource_name_prefix
+        s_new_name = data_utils.rand_name(prefix=prefix, name='sg-hth')
+        s_new_des = data_utils.rand_name(prefix=prefix, name='description-hth')
         self.client.update_security_group(securitygroup_id,
                                           name=s_new_name,
                                           description=s_new_des)

@@ -15,9 +15,12 @@
 
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
+
+CONF = config.CONF
 
 
 @decorators.serial
@@ -119,7 +122,8 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
     def test_aggregate_basic_ops(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         az = 'foo_zone'
-        aggregate_name = data_utils.rand_name('aggregate-scenario')
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='aggregate-scenario')
         aggregate = self._create_aggregate(name=aggregate_name,
                                            availability_zone=az)
 
@@ -131,7 +135,9 @@ class TestAggregatesBasicOps(manager.ScenarioTest):
         self._check_aggregate_details(aggregate, aggregate_name, az, [host],
                                       metadata)
 
-        aggregate_name = data_utils.rand_name('renamed-aggregate-scenario')
+        aggregate_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='renamed-aggregate-scenario')
         # Updating the name alone. The az must be specified again otherwise
         # the tempest client would send None in the put body
         aggregate = self._update_aggregate(aggregate, aggregate_name, az)

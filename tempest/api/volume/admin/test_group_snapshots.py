@@ -35,7 +35,8 @@ class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
     def _create_group_snapshot(self, **kwargs):
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name(
-                self.__class__.__name__ + '-Group_Snapshot')
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-Group_Snapshot')
 
         group_snapshot = self.group_snapshots_client.create_group_snapshot(
             **kwargs)['group_snapshot']
@@ -93,7 +94,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
         # Create volume is instance level, can not be deleted before group.
         # Volume delete handled by delete_group method, cleanup method.
-        params = {'name': data_utils.rand_name("volume"),
+        prefix = CONF.resource_name_prefix
+        params = {'name': data_utils.rand_name(prefix=prefix, name="volume"),
                   'volume_type': volume_type['id'],
                   'group_id': grp['id'],
                   'size': CONF.volume.volume_size}
@@ -102,7 +104,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
             self.volumes_client, vol['id'], 'available')
 
         # Create group snapshot
-        group_snapshot_name = data_utils.rand_name('group_snapshot')
+        group_snapshot_name = data_utils.rand_name(prefix=prefix,
+                                                   name='group_snapshot')
         group_snapshot = self._create_group_snapshot(
             group_id=grp['id'], name=group_snapshot_name)
         snapshots = self.snapshots_client.list_snapshots(
@@ -161,7 +164,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
         # Create volume is instance level, can not be deleted before group.
         # Volume delete handled by delete_group method, cleanup method.
-        params = {'name': data_utils.rand_name("volume"),
+        prefix = CONF.resource_name_prefix
+        params = {'name': data_utils.rand_name(prefix=prefix, name="volume"),
                   'volume_type': volume_type['id'],
                   'group_id': grp['id'],
                   'size': CONF.volume.volume_size}
@@ -170,7 +174,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
             self.volumes_client, vol['id'], 'available')
 
         # Create group_snapshot
-        group_snapshot_name = data_utils.rand_name('group_snapshot')
+        group_snapshot_name = data_utils.rand_name(prefix=prefix,
+                                                   name='group_snapshot')
         group_snapshot = self._create_group_snapshot(
             group_id=grp['id'], name=group_snapshot_name)
         self.assertEqual(group_snapshot_name, group_snapshot['name'])
@@ -182,7 +187,7 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
                     self.snapshots_client, snap['id'], 'available')
 
         # Create Group from Group snapshot
-        grp_name2 = data_utils.rand_name('Group_from_snap')
+        grp_name2 = data_utils.rand_name(prefix=prefix, name='Group_from_snap')
         grp2 = self.groups_client.create_group_from_source(
             group_snapshot_id=group_snapshot['id'], name=grp_name2)['group']
         self.addCleanup(self.delete_group, grp2['id'])
@@ -219,7 +224,7 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
         # Create a volume group
         grp = self.create_group(group_type=group_type['id'],
                                 volume_types=[volume_type['id']])
-
+        prefix = CONF.resource_name_prefix
         # Note: When dealing with consistency groups all volumes must
         # reside on the same backend. Adding volumes to the same consistency
         # group from multiple backends isn't supported. In order to ensure all
@@ -229,7 +234,8 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
         for _ in range(2):
             # Create volume is instance level, can't be deleted before group.
             # Volume delete handled by delete_group method, cleanup method.
-            params = {'name': data_utils.rand_name("volume"),
+            params = {'name': data_utils.rand_name(prefix=prefix,
+                                                   name="volume"),
                       'volume_type': volume_type['id'],
                       'group_id': grp['id'],
                       'size': CONF.volume.volume_size}
@@ -287,9 +293,10 @@ class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
         group = self.create_group(group_type=group_type['id'],
                                   volume_types=[volume_type['id']])
 
+        prefix = CONF.resource_name_prefix
         # Create volume is instance level, can not be deleted before group.
         # Volume delete handled by delete_group method, cleanup method.
-        params = {'name': data_utils.rand_name("volume"),
+        params = {'name': data_utils.rand_name(prefix=prefix, name="volume"),
                   'volume_type': volume_type['id'],
                   'group_id': group['id'],
                   'size': CONF.volume.volume_size}

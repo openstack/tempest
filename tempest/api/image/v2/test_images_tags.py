@@ -13,8 +13,11 @@
 # under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ImagesTagsTest(base.BaseV2ImageTest):
@@ -26,7 +29,8 @@ class ImagesTagsTest(base.BaseV2ImageTest):
         image = self.create_image(container_format='bare',
                                   disk_format='raw',
                                   visibility='private')
-        tag = data_utils.rand_name('tag')
+        tag = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='tag')
         self.addCleanup(self.client.delete_image, image['id'])
 
         # Creating image tag and verify it.

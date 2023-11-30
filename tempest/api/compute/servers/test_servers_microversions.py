@@ -15,6 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
@@ -30,6 +31,8 @@ from tempest.lib import decorators
 # their integration tests, you can add tests to cover those schema
 # in this file.
 
+CONF = config.CONF
+
 
 class ServerShowV254Test(base.BaseV2ComputeTest):
     """Test servers API schema for compute microversion greater than 2.53"""
@@ -41,7 +44,8 @@ class ServerShowV254Test(base.BaseV2ComputeTest):
         """Test rebuilding server with microversion greater than 2.53"""
         server = self.create_test_server(wait_until='ACTIVE')
         keypair_name = data_utils.rand_name(
-            self.__class__.__name__ + '-keypair')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-keypair')
         kwargs = {'name': keypair_name}
         self.keypairs_client.create_keypair(**kwargs)
         self.addCleanup(self.keypairs_client.delete_keypair,

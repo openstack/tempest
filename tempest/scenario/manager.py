@@ -155,7 +155,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not client:
             client = self.ports_client
         name = data_utils.rand_name(
-            kwargs.pop('namestart', self.__class__.__name__))
+            prefix=CONF.resource_name_prefix,
+            name=kwargs.pop('namestart', self.__class__.__name__))
         if CONF.network.port_vnic_type and 'binding:vnic_type' not in kwargs:
             kwargs['binding:vnic_type'] = CONF.network.port_vnic_type
         if CONF.network.port_profile and 'binding:profile' not in kwargs:
@@ -183,7 +184,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if not client:
             client = self.keypairs_client
         if not kwargs.get('name'):
-            kwargs['name'] = data_utils.rand_name(self.__class__.__name__)
+            kwargs['name'] = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__)
         # We don't need to create a keypair by pubkey in scenario
         body = client.create_keypair(**kwargs)
         self.addCleanup(client.delete_keypair, kwargs['name'])
@@ -246,7 +249,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             clients = self.os_primary
 
         if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + "-server")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + "-server")
 
         vnic_type = kwargs.pop('vnic_type', CONF.network.port_vnic_type)
         profile = kwargs.pop('port_profile', CONF.network.port_profile)
@@ -370,7 +375,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
             min_disk = image.get('min_disk')
             size = max(size, min_disk)
         if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + "-volume")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + "-volume")
         kwargs.update({'name': name,
                        'snapshot_id': snapshot_id,
                        'imageRef': imageRef,
@@ -420,7 +427,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """
 
         name = name or data_utils.rand_name(
-            self.__class__.__name__ + "-backup")
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + "-backup")
         args = {'name': name,
                 'description': description,
                 'force': force,
@@ -496,7 +504,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         """
 
         name = name or data_utils.rand_name(
-            self.__class__.__name__ + '-snapshot')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-snapshot')
         snapshot = self.snapshots_client.create_snapshot(
             volume_id=volume_id,
             force=force,
@@ -557,8 +566,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.os_admin.volume_types_client_latest
         if not name:
             class_name = self.__class__.__name__
-            name = data_utils.rand_name(class_name + '-volume-type')
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=class_name + '-volume-type')
+        randomized_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='scenario-type-' + name)
 
         LOG.debug("Creating a volume type: %s on backend %s",
                   randomized_name, backend_name)
@@ -613,7 +625,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             client = self.security_groups_client
         if not project_id:
             project_id = client.project_id
-        sg_name = data_utils.rand_name(namestart)
+        sg_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=namestart)
         sg_desc = sg_name + " description"
         sg_dict = dict(name=sg_name,
                        description=sg_desc)
@@ -782,7 +795,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   img_properties)
         if img_properties is None:
             img_properties = {}
-        name = data_utils.rand_name('%s-' % name)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='%s-' % name)
         params = {
             'name': name,
             'container_format': img_container_format,
@@ -833,7 +847,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Compute client
         _images_client = self.compute_images_client
         if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + 'snapshot')
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + 'snapshot')
         LOG.debug("Creating a snapshot image for server: %s", server['name'])
         image = _images_client.create_image(server['id'], name=name, **kwargs)
         # microversion 2.45 and above returns image_id
@@ -1264,7 +1280,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         name = kwargs.pop('name', None)
         if not name:
             namestart = self.__class__.__name__ + '-volume-origin'
-            name = data_utils.rand_name(namestart)
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name=namestart)
         return self.create_volume(name=name, imageRef=image_id, **kwargs)
 
 
@@ -1294,7 +1311,8 @@ class NetworkScenarioTest(ScenarioTest):
             networks_client = self.networks_client
         if not project_id:
             project_id = networks_client.project_id
-        name = data_utils.rand_name(namestart)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=namestart)
         network_kwargs = dict(name=name, project_id=project_id)
         if net_dict:
             network_kwargs.update(net_dict)
@@ -1352,7 +1370,8 @@ class NetworkScenarioTest(ScenarioTest):
                                         ip_version, subnets_client, **kwargs):
 
             subnet = dict(
-                name=data_utils.rand_name(namestart),
+                name=data_utils.rand_name(
+                    prefix=CONF.resource_name_prefix, name=namestart),
                 network_id=network['id'],
                 project_id=network['project_id'],
                 ip_version=ip_version,
@@ -1540,7 +1559,8 @@ class NetworkScenarioTest(ScenarioTest):
             name = kwargs.pop('name', None)
             if not name:
                 namestart = self.__class__.__name__ + '-router'
-                name = data_utils.rand_name(namestart)
+                name = data_utils.rand_name(
+                    prefix=CONF.resource_name_prefix, name=namestart)
 
             ext_gw_info = kwargs.pop('external_gateway_info', None)
             if not ext_gw_info:
@@ -1698,7 +1718,7 @@ class ObjectStorageScenarioTest(ScenarioTest):
     def create_container(self, container_name=None):
         """Creates container"""
         name = container_name or data_utils.rand_name(
-            'swift-scenario-container')
+            prefix=CONF.resource_name_prefix, name='swift-scenario-container')
         self.container_client.update_container(name)
         # look for the container to assure it is created
         self.list_and_check_container_objects(name)
@@ -1715,7 +1735,8 @@ class ObjectStorageScenarioTest(ScenarioTest):
 
     def upload_object_to_container(self, container_name, obj_name=None):
         """Uploads object to container"""
-        obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
+        obj_name = obj_name or data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='swift-scenario-object')
         obj_data = data_utils.random_bytes()
         self.object_client.create_object(container_name, obj_name, obj_data)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

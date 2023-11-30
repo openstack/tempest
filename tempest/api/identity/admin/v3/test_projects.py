@@ -33,7 +33,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
         """Test creating project with a description"""
-        project_desc = data_utils.rand_name('desc')
+        project_desc = data_utils.rand_name(
+            name='desc', prefix=CONF.resource_name_prefix)
         project = self.setup_test_project(description=project_desc)
         project_id = project['id']
         desc1 = project['description']
@@ -48,7 +49,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     def test_project_create_with_domain(self):
         """Test creating project with a domain"""
         domain = self.setup_test_domain()
-        project_name = data_utils.rand_name('project')
+        project_name = data_utils.rand_name(
+            name='project', prefix=CONF.resource_name_prefix)
         project = self.setup_test_project(
             name=project_name, domain_id=domain['id'])
         project_id = project['id']
@@ -64,7 +66,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         domain = self.setup_test_domain()
         domain_id = domain['id']
 
-        root_project_name = data_utils.rand_name('root_project')
+        root_project_name = data_utils.rand_name(
+            name='root_project', prefix=CONF.resource_name_prefix)
         root_project = self.setup_test_project(
             name=root_project_name, domain_id=domain_id)
 
@@ -76,7 +79,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(domain_id, parent_id)
 
         # Create a project using root_project_id as parent_id
-        project_name = data_utils.rand_name('project')
+        project_name = data_utils.rand_name(
+            name='project', prefix=CONF.resource_name_prefix)
         project = self.setup_test_project(
             name=project_name, domain_id=domain_id, parent_id=root_project_id)
         parent_id = project['parent_id']
@@ -127,12 +131,14 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('f608f368-048c-496b-ad63-d286c26dab6b')
     def test_project_update_name(self):
         """Test updating name attribute of a project"""
-        p_name1 = data_utils.rand_name('project')
+        p_name1 = data_utils.rand_name(
+            name='project', prefix=CONF.resource_name_prefix)
         project = self.setup_test_project(name=p_name1)
 
         resp1_name = project['name']
 
-        p_name2 = data_utils.rand_name('project2')
+        p_name2 = data_utils.rand_name(
+            name='project2', prefix=CONF.resource_name_prefix)
         body = self.projects_client.update_project(project['id'],
                                                    name=p_name2)['project']
         resp2_name = body['name']
@@ -148,11 +154,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('f138b715-255e-4a7d-871d-351e1ef2e153')
     def test_project_update_desc(self):
         """Test updating description attribute of a project"""
-        p_desc = data_utils.rand_name('desc')
+        p_desc = data_utils.rand_name(
+            name='desc', prefix=CONF.resource_name_prefix)
         project = self.setup_test_project(description=p_desc)
         resp1_desc = project['description']
 
-        p_desc2 = data_utils.rand_name('desc2')
+        p_desc2 = data_utils.rand_name(
+            name='desc2', prefix=CONF.resource_name_prefix)
         body = self.projects_client.update_project(
             project['id'], description=p_desc2)['project']
         resp2_desc = body['description']
@@ -197,7 +205,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project = self.setup_test_project()
 
         # Create a User
-        u_name = data_utils.rand_name('user')
+        u_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()

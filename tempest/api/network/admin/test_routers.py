@@ -54,16 +54,17 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('e54dd3a3-4352-4921-b09d-44369ae17397')
     def test_create_router_setting_project_id(self):
+        prefix = CONF.resource_name_prefix
         """Test creating router from admin user setting project_id."""
-        project = data_utils.rand_name('test_tenant_')
-        description = data_utils.rand_name('desc_')
+        project = data_utils.rand_name(name='test_tenant_', prefix=prefix)
+        description = data_utils.rand_name(name='desc_', prefix=prefix)
         project = identity.identity_utils(self.os_admin).create_project(
             name=project, description=description)
         project_id = project['id']
         self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
                         project_id)
 
-        name = data_utils.rand_name('router-')
+        name = data_utils.rand_name(name='router-', prefix=prefix)
         create_body = self.admin_routers_client.create_router(
             name=name, project_id=project_id)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -89,7 +90,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
                           'The public_network_id option must be specified.')
     def test_create_router_with_snat_explicit(self):
         """Test creating router with specified enable_snat value"""
-        name = data_utils.rand_name('snat-router')
+        name = data_utils.rand_name(
+            'snat-router', prefix=CONF.resource_name_prefix)
         # Create a router enabling snat attributes
         enable_snat_states = [False, True]
         for enable_snat in enable_snat_states:
@@ -226,7 +228,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         """Test creating router setting gateway with fixed ip"""
         # At first create an external network and then use that
         # to create address and delete
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network_1 = self.admin_networks_client.create_network(
             name=network_name, **{'router:external': True})['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -237,7 +240,8 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_subnets_client.delete_subnet, subnet['id'])
         port = self.admin_ports_client.create_port(
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             network_id=network_1['id'])['port']
         self.admin_ports_client.delete_port(port_id=port['id'])
         fixed_ip = {

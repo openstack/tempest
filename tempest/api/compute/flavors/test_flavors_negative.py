@@ -44,7 +44,8 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
         size = random.randint(1024, 4096)
         image_file = io.BytesIO(data_utils.random_bytes(size))
         params = {
-            'name': data_utils.rand_name('image'),
+            'name': data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='image'),
             'container_format': CONF.image.container_formats[0],
             'disk_format': CONF.image.disk_formats[0],
             'min_ram': min_img_ram,

@@ -52,9 +52,12 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     def resource_setup(cls):
         super(ImagesMetadataTestJSON, cls).resource_setup()
         cls.image_id = None
-
+        image_name_kwargs = {
+            'prefix': CONF.resource_name_prefix,
+            'name': 'image'
+        }
         params = {
-            'name': data_utils.rand_name('image'),
+            'name': data_utils.rand_name(**image_name_kwargs),
             'container_format': 'bare',
             'disk_format': 'raw',
             'visibility': 'private'

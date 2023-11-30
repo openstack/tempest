@@ -54,8 +54,12 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     @classmethod
     def _create_type_and_volume(cls, backend_name_key, with_prefix):
         # Volume/Type creation
-        type_name = data_utils.rand_name(cls.__name__ + '-Type')
-        vol_name = data_utils.rand_name(cls.__name__ + '-Volume')
+        type_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-Type')
+        vol_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-Volume')
         spec_key_with_prefix = "capabilities:volume_backend_name"
         spec_key_without_prefix = "volume_backend_name"
         if with_prefix:

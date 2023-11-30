@@ -78,7 +78,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     @classmethod
     def create_container(cls):
         # wrapper that returns a test container
-        container_name = data_utils.rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestContainer')
         cls.container_client.update_container(container_name)
         cls.containers.append(container_name)
 
@@ -89,7 +90,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                       data=None, metadata=None):
         # wrapper that returns a test object
         if object_name is None:
-            object_name = data_utils.rand_name(name='TestObject')
+            object_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='TestObject')
         if data is None:
             data = data_utils.random_bytes()
 

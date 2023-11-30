@@ -51,7 +51,9 @@ class AgentsAdminTestJSON(base.BaseV2ComputeAdminTest):
             # If you try to create an agent with the same hypervisor,
             # os and architecture as an existing agent, Nova will return
             # an HTTPConflict or HTTPServerError.
-            kwargs[rand_key] = data_utils.rand_name(kwargs[rand_key])
+            kwargs[rand_key] = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=kwargs[rand_key])
         return kwargs
 
     @decorators.idempotent_id('1fc6bdc8-0b6d-4cc7-9f30-9b04fabe5b90')

@@ -14,8 +14,11 @@
 
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils as utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class QosSpecsTestJSON(base.BaseVolumeAdminTest):
@@ -30,7 +33,8 @@ class QosSpecsTestJSON(base.BaseVolumeAdminTest):
         super(QosSpecsTestJSON, cls).resource_setup()
         # Create admin qos client
         # Create a test shared qos-specs for tests
-        cls.qos_name = utils.rand_name(cls.__name__ + '-QoS')
+        cls.qos_name = utils.rand_name(
+            cls.__name__ + '-QoS', prefix=CONF.resource_name_prefix)
         cls.qos_consumer = 'front-end'
 
         cls.created_qos = cls.create_test_qos_specs(cls.qos_name,
@@ -38,7 +42,8 @@ class QosSpecsTestJSON(base.BaseVolumeAdminTest):
                                                     read_iops_sec='2000')
 
     def _create_delete_test_qos_with_given_consumer(self, consumer):
-        name = utils.rand_name(self.__class__.__name__ + '-qos')
+        name = utils.rand_name(
+            self.__class__.__name__ + '-qos', prefix=CONF.resource_name_prefix)
         qos = {'name': name, 'consumer': consumer}
         body = self.create_test_qos_specs(name, consumer)
         for key in ['name', 'consumer']:

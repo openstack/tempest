@@ -15,9 +15,12 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class RoutersNegativeTest(base.BaseNetworkTest):
@@ -65,9 +68,11 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     def test_add_router_interfaces_on_overlapping_subnets_returns_400(self):
         """Test adding router interface which is on overlapping subnets"""
         network01 = self.create_network(
-            network_name=data_utils.rand_name('router-network01-'))
+            network_name=data_utils.rand_name(
+                name='router-network01-', prefix=CONF.resource_name_prefix))
         network02 = self.create_network(
-            network_name=data_utils.rand_name('router-network02-'))
+            network_name=data_utils.rand_name(
+                name='router-network02-', prefix=CONF.resource_name_prefix))
         subnet01 = self.create_subnet(network01)
         subnet02 = self.create_subnet(network02)
         interface = self.routers_client.add_router_interface(
@@ -96,7 +101,8 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('c2a70d72-8826-43a7-8208-0209e6360c47')
     def test_show_non_existent_router_returns_404(self):
         """Test showing non existent router"""
-        router = data_utils.rand_name('non_exist_router')
+        router = data_utils.rand_name(
+            name='non_exist_router', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.NotFound, self.routers_client.show_router,
                           router)
 
@@ -104,7 +110,8 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('b23d1569-8b0c-4169-8d4b-6abd34fad5c7')
     def test_update_non_existent_router_returns_404(self):
         """Test updating non existent router"""
-        router = data_utils.rand_name('non_exist_router')
+        router = data_utils.rand_name(
+            name='non_exist_router', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.NotFound, self.routers_client.update_router,
                           router, name="new_name")
 
@@ -112,7 +119,8 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('c7edc5ad-d09d-41e6-a344-5c0c31e2e3e4')
     def test_delete_non_existent_router_returns_404(self):
         """Test deleting non existent router"""
-        router = data_utils.rand_name('non_exist_router')
+        router = data_utils.rand_name(
+            name='non_exist_router', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.NotFound, self.routers_client.delete_router,
                           router)
 

@@ -13,9 +13,12 @@
 # under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ImagesTagsNegativeTest(base.BaseV2ImageTest):
@@ -25,7 +28,8 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     @decorators.idempotent_id('8cd30f82-6f9a-4c6e-8034-c1b51fba43d9')
     def test_update_tags_for_non_existing_image(self):
         """Update image tag with non existing image"""
-        tag = data_utils.rand_name('tag')
+        tag = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='tag')
         non_exist_image = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
@@ -38,7 +42,8 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
                                   disk_format='raw',
                                   visibility='private'
                                   )
-        tag = data_utils.rand_name('non-exist-tag')
+        tag = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='non-exist-tag')
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertRaises(lib_exc.NotFound, self.client.delete_image_tag,
                           image['id'], tag)

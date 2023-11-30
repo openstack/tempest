@@ -172,11 +172,15 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
 
         # Create networks
         net1 = self.networks_client.create_network(
-            name=data_utils.rand_name('device-tagging-net1'))['network']
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='device-tagging-net1'))['network']
         self.addCleanup(self.networks_client.delete_network, net1['id'])
 
         net2 = self.networks_client.create_network(
-            name=data_utils.rand_name('device-tagging-net2'))['network']
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='device-tagging-net2'))['network']
         self.addCleanup(self.networks_client.delete_network, net2['id'])
 
         # Create subnets
@@ -195,13 +199,17 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
         # Create ports
         self.port1 = self.ports_client.create_port(
             network_id=net1['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__),
             fixed_ips=[{'subnet_id': subnet1['id']}])['port']
         self.addCleanup(self.ports_client.delete_port, self.port1['id'])
 
         self.port2 = self.ports_client.create_port(
             network_id=net1['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__),
             fixed_ips=[{'subnet_id': subnet1['id']}])['port']
         self.addCleanup(self.ports_client.delete_port, self.port2['id'])
 
@@ -215,7 +223,9 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
             wait_until='SSHABLE',
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
-            name=data_utils.rand_name('device-tagging-server'),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='device-tagging-server'),
             networks=[
                 # Validation network for ssh
                 {
@@ -378,7 +388,8 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
         # Create network
         net = self.networks_client.create_network(
             name=data_utils.rand_name(
-                'tagged-attachments-test-net'))['network']
+                prefix=CONF.resource_name_prefix,
+                name='tagged-attachments-test-net'))['network']
         self.addCleanup(self.networks_client.delete_network, net['id'])
 
         # Create subnet
@@ -400,7 +411,9 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
             validatable=True,
             validation_resources=validation_resources,
             config_drive=config_drive_enabled,
-            name=data_utils.rand_name('device-tagging-server'),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='device-tagging-server'),
             networks=[{'uuid': self.get_tenant_network()['id']}],
             wait_until='SSHABLE')
         self.addCleanup(self.delete_server, server['id'])

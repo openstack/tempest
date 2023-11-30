@@ -42,7 +42,9 @@ class AccountTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(AccountTest, cls).resource_setup()
         for i in range(ord('a'), ord('f') + 1):
-            name = data_utils.rand_name(name='%s-' % bytes((i,)))
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='%s-' % bytes((i,)))
             cls.container_client.update_container(name)
             cls.addClassResourceCleanup(object_storage.delete_containers,
                                         [name],

@@ -39,7 +39,9 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     def create_image(self):
         # Create image
-        image_name = data_utils.rand_name(self.__class__.__name__ + "-image")
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + "-image")
         image = self.images_client.create_image(
             name=image_name,
             container_format=CONF.image.container_formats[0],
@@ -133,8 +135,11 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('e66e40d6-65e6-4e75-bdc7-636792fa152d')
     def test_update_volume_with_invalid_volume_id(self):
         """Test updating volume with invalid volume id should fail"""
-        self.assertRaises(lib_exc.NotFound, self.volumes_client.update_volume,
-                          volume_id=data_utils.rand_name('invalid'), name="n")
+        self.assertRaises(
+            lib_exc.NotFound, self.volumes_client.update_volume,
+            volume_id=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='invalid'), name="n")
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('72aeca85-57a5-4c1f-9057-f320f9ea575b')
@@ -147,8 +152,10 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('30799cfd-7ee4-446c-b66c-45b383ed211b')
     def test_get_invalid_volume_id(self):
         """Test getting volume with invalid volume id should fail"""
-        self.assertRaises(lib_exc.NotFound, self.volumes_client.show_volume,
-                          data_utils.rand_name('invalid'))
+        self.assertRaises(
+            lib_exc.NotFound, self.volumes_client.show_volume,
+            data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='invalid'))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c6c3db06-29ad-4e91-beb0-2ab195fe49e3')
@@ -161,8 +168,10 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('1f035827-7c32-4019-9240-b4ec2dbd9dfd')
     def test_delete_invalid_volume_id(self):
         """Test deleting volume with invalid volume id should fail"""
-        self.assertRaises(lib_exc.NotFound, self.volumes_client.delete_volume,
-                          data_utils.rand_name('invalid'))
+        self.assertRaises(
+            lib_exc.NotFound, self.volumes_client.delete_volume,
+            data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='invalid'))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('441a1550-5d44-4b30-af0f-a6d402f52026')
@@ -268,7 +277,9 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('0f4aa809-8c7b-418f-8fb3-84c7a5dfc52f')
     def test_list_volumes_with_nonexistent_name(self):
         """Test listing volumes with non existent name should get nothing"""
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
+        v_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Volume')
         params = {'name': v_name}
         fetched_volume = self.volumes_client.list_volumes(
             params=params)['volumes']
@@ -281,7 +292,9 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
         Listing volume details with non existent name should get nothing.
         """
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
+        v_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Volume')
         params = {'name': v_name}
         fetched_volume = \
             self.volumes_client.list_volumes(

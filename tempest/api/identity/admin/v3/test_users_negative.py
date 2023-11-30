@@ -29,7 +29,8 @@ class UsersNegativeTest(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('e75f006c-89cc-477b-874d-588e4eab4b17')
     def test_create_user_for_non_existent_domain(self):
         """Attempt to create a user in a non-existent domain should fail"""
-        u_name = data_utils.rand_name('user')
+        u_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
         self.assertRaises(lib_exc.NotFound, self.users_client.create_user,

@@ -56,7 +56,9 @@ class RoutersTest(base.BaseNetworkTest):
     def test_create_show_list_update_delete_router(self):
         """Test create/show/list/update/delete of a router"""
         # Create a router
-        router_name = data_utils.rand_name(self.__class__.__name__ + '-router')
+        router_name = data_utils.rand_name(
+            self.__class__.__name__ + '-router',
+            prefix=CONF.resource_name_prefix)
         router = self.create_router(
             router_name,
             admin_state_up=False,
@@ -90,7 +92,8 @@ class RoutersTest(base.BaseNetworkTest):
     @decorators.idempotent_id('b42e6e39-2e37-49cc-a6f4-8467e940900a')
     def test_add_remove_router_interface_with_subnet_id(self):
         """Test adding and removing router interface with subnet id"""
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network = self.networks_client.create_network(
             name=network_name)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -117,7 +120,8 @@ class RoutersTest(base.BaseNetworkTest):
     @decorators.idempotent_id('2b7d2f37-6748-4d78-92e5-1d590234f0d5')
     def test_add_remove_router_interface_with_port_id(self):
         """Test adding and removing router interface with port id"""
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network = self.networks_client.create_network(
             name=network_name)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -128,7 +132,8 @@ class RoutersTest(base.BaseNetworkTest):
         self.addCleanup(self.delete_router, router)
         port_body = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         # add router interface to port created above
         interface = self.routers_client.add_router_interface(
             router['id'],
@@ -165,7 +170,8 @@ class RoutersTest(base.BaseNetworkTest):
         # Update router extra route, second ip of the range is
         # used as next hop
         for i in range(routes_num):
-            network_name = data_utils.rand_name(self.__class__.__name__)
+            network_name = data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix)
             network = self.networks_client.create_network(
                 name=network_name)['network']
             self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -235,12 +241,14 @@ class RoutersTest(base.BaseNetworkTest):
     @decorators.idempotent_id('802c73c9-c937-4cef-824b-2191e24a6aab')
     def test_add_multiple_router_interfaces(self):
         """Test adding multiple router interfaces"""
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network01 = self.networks_client.create_network(
             name=network_name)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.networks_client.delete_network, network01['id'])
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network02 = self.networks_client.create_network(
             name=network_name)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -266,7 +274,8 @@ class RoutersTest(base.BaseNetworkTest):
     @decorators.idempotent_id('96522edf-b4b5-45d9-8443-fa11c26e6eff')
     def test_router_interface_port_update_with_fixed_ip(self):
         """Test updating router interface port's fixed ip"""
-        network_name = data_utils.rand_name(self.__class__.__name__)
+        network_name = data_utils.rand_name(
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network = self.networks_client.create_network(
             name=network_name)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

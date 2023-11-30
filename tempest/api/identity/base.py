@@ -71,7 +71,8 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
         if kwargs.get('password', None) is None:
             kwargs['password'] = data_utils.rand_password()
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name('test_user')
+            kwargs['name'] = data_utils.rand_name(
+                name='test_user', prefix=CONF.resource_name_prefix)
         if 'email' not in kwargs:
             kwargs['email'] = kwargs['name'] + '@testmail.tm'
 
@@ -84,7 +85,8 @@ class BaseIdentityTest(tempest.test.BaseTestCase):
 
     def setup_test_role(self, name=None, domain_id=None):
         """Set up a test role."""
-        params = {'name': name or data_utils.rand_name('test_role')}
+        params = {'name': name or data_utils.rand_name(
+            name='test_role', prefix=CONF.resource_name_prefix)}
         if domain_id:
             params['domain_id'] = domain_id
 
@@ -161,9 +163,12 @@ class BaseIdentityV2AdminTest(BaseIdentityV2Test):
     def setup_test_tenant(self, **kwargs):
         """Set up a test tenant."""
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name('test_tenant')
+            kwargs['name'] = data_utils.rand_name(
+                name='test_tenant',
+                prefix=CONF.resource_name_prefix)
         if 'description' not in kwargs:
-            kwargs['description'] = data_utils.rand_name('desc')
+            kwargs['description'] = data_utils.rand_name(
+                name='desc', prefix=CONF.resource_name_prefix)
         tenant = self.projects_client.create_tenant(**kwargs)['tenant']
         # Delete the tenant at the end of the test
         self.addCleanup(
@@ -249,9 +254,11 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def create_domain(cls, **kwargs):
         """Create a domain."""
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name('test_domain')
+            kwargs['name'] = data_utils.rand_name(
+                name='test_domain', prefix=CONF.resource_name_prefix)
         if 'description' not in kwargs:
-            kwargs['description'] = data_utils.rand_name('desc')
+            kwargs['description'] = data_utils.rand_name(
+                name='desc', prefix=CONF.resource_name_prefix)
         domain = cls.domains_client.create_domain(**kwargs)['domain']
         cls.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
                                     cls.delete_domain, domain['id'])
@@ -274,9 +281,11 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
     def setup_test_project(self, **kwargs):
         """Set up a test project."""
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name('test_project')
+            kwargs['name'] = data_utils.rand_name(
+                name='test_project', prefix=CONF.resource_name_prefix)
         if 'description' not in kwargs:
-            kwargs['description'] = data_utils.rand_name('test_description')
+            kwargs['description'] = data_utils.rand_name(
+                name='test_description', prefix=CONF.resource_name_prefix)
         project = self.projects_client.create_project(**kwargs)['project']
         # Delete the project at the end of the test
         self.addCleanup(
@@ -297,10 +306,12 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
         """Set up a test group."""
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name(
-                self.__class__.__name__ + '_test_project')
+                self.__class__.__name__ + '_test_project',
+                prefix=CONF.resource_name_prefix)
         if 'description' not in kwargs:
             kwargs['description'] = data_utils.rand_name(
-                self.__class__.__name__ + '_test_description')
+                self.__class__.__name__ + '_test_description',
+                prefix=CONF.resource_name_prefix)
         group = self.groups_client.create_group(**kwargs)['group']
         self.addCleanup(
             test_utils.call_and_ignore_notfound_exc,
@@ -324,7 +335,8 @@ class BaseApplicationCredentialsV3Test(BaseIdentityV3Test):
         cls.project_id = cls.os_primary.credentials.project_id
 
     def create_application_credential(self, name=None, **kwargs):
-        name = name or data_utils.rand_name('application_credential')
+        name = name or data_utils.rand_name(
+            name='application_credential', prefix=CONF.resource_name_prefix)
         application_credential = (
             self.non_admin_app_creds_client.create_application_credential(
                 self.user_id, name=name, **kwargs))['application_credential']

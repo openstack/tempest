@@ -16,9 +16,12 @@
 import uuid
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -76,7 +79,9 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         This operation requires the user to have 'admin' role
         """
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.flavor_name_prefix)
 
         # Create the flavor
         self.create_flavor(name=flavor_name,
@@ -107,7 +112,9 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
             self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'], 0)
             self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
 
         # Create the flavor
@@ -143,7 +150,9 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         tenant is not automatically added access list.
         This operation requires the user to have 'admin' role
         """
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.flavor_name_prefix)
 
         # Create the flavor
         self.create_flavor(name=flavor_name,
@@ -178,7 +187,9 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         Try to List/Get flavor with another user
         """
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.flavor_name_prefix)
 
         # Create the flavor
         self.create_flavor(name=flavor_name,
@@ -192,8 +203,11 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('fb9cbde6-3a0e-41f2-a983-bdb0a823c44e')
     def test_is_public_string_variations(self):
         """Test creating public and non public flavors"""
-        flavor_name_not_public = data_utils.rand_name(self.flavor_name_prefix)
-        flavor_name_public = data_utils.rand_name(self.flavor_name_prefix)
+        prefix = CONF.resource_name_prefix
+        flavor_name_not_public = data_utils.rand_name(
+            prefix=prefix, name=self.flavor_name_prefix)
+        flavor_name_public = data_utils.rand_name(
+            prefix=prefix, name=self.flavor_name_prefix)
 
         # Create a non public flavor
         self.create_flavor(name=flavor_name_not_public,

@@ -161,7 +161,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         network_id = ifs[0]['net_id']
         port = self.ports_client.create_port(
             network_id=network_id,
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__))
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
         iface = self.interfaces_client.create_interface(
@@ -324,7 +326,9 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
 
         port = self.ports_client.create_port(
             network_id=network_id,
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__))
         port_id = port['port']['id']
         self.addCleanup(self.ports_client.delete_port, port_id)
 

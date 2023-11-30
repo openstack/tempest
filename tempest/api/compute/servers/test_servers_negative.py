@@ -267,7 +267,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_with_non_existent_keypair(self):
         """Creating a server with non-existent keypair should fail"""
         # Pass a non-existent keypair while creating a server
-        key_name = data_utils.rand_name('key')
+        key_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='key')
         self.assertRaises(lib_exc.BadRequest,
                           self.create_test_server,
                           key_name=key_name)
@@ -288,7 +289,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         """Updating name of a non-existent server should fail"""
         nonexistent_server = data_utils.rand_uuid()
         new_name = data_utils.rand_name(
-            self.__class__.__name__ + '-server') + '_updated'
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-server') + '_updated'
 
         self.assertRaises(lib_exc.NotFound, self.client.update_server,
                           nonexistent_server, name=new_name)

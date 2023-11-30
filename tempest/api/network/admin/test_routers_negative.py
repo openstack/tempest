@@ -45,7 +45,8 @@ class RoutersAdminNegativeTest(base.BaseAdminNetworkTest):
         """Test creating router with gateway set to used ip should fail"""
         # At first create a address from public_network_id
         port = self.admin_ports_client.create_port(
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             network_id=CONF.network.public_network_id)['port']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.admin_ports_client.delete_port,

@@ -48,7 +48,9 @@ class AccessRulesV3Test(base.BaseIdentityV3Test):
         cls.ac = cls.non_admin_app_creds_client
         cls.app_cred = cls.ac.create_application_credential(
             cls.user_id,
-            name=data_utils.rand_name('application_credential'),
+            name=data_utils.rand_name(
+                name='application_credential',
+                prefix=CONF.resource_name_prefix),
             access_rules=access_rules
         )['application_credential']
         cls.addClassResourceCleanup(
@@ -77,7 +79,9 @@ class AccessRulesV3Test(base.BaseIdentityV3Test):
         ]
         app_cred = self.ac.create_application_credential(
             self.user_id,
-            name=data_utils.rand_name('application_credential'),
+            name=data_utils.rand_name(
+                name='application_credential',
+                prefix=CONF.resource_name_prefix),
             access_rules=access_rules
         )['application_credential']
         self.addCleanup(

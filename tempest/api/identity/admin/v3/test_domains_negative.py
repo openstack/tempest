@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
@@ -73,7 +76,8 @@ class DomainsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('e6f9e4a2-4f36-4be8-bdbc-4e199ae29427')
     def test_domain_create_duplicate(self):
         """Test creating domain with duplicate name should fail"""
-        domain_name = data_utils.rand_name('domain-dup')
+        domain_name = data_utils.rand_name(
+            name='domain-dup', prefix=CONF.resource_name_prefix)
         domain = self.domains_client.create_domain(name=domain_name)['domain']
         domain_id = domain['id']
         self.addCleanup(self.delete_domain, domain_id)

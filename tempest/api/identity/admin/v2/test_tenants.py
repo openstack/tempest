@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class TenantsTestJSON(base.BaseIdentityV2AdminTest):
@@ -46,7 +49,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('d25e9f24-1310-4d29-b61b-d91299c21d6d')
     def test_tenant_create_with_description(self):
         """Test creating tenant with a description via v2 API"""
-        tenant_desc = data_utils.rand_name(name='desc')
+        tenant_desc = data_utils.rand_name(
+            name='desc', prefix=CONF.resource_name_prefix)
         tenant = self.setup_test_tenant(description=tenant_desc)
         tenant_id = tenant['id']
         desc1 = tenant['description']
@@ -83,12 +87,14 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('781f2266-d128-47f3-8bdb-f70970add238')
     def test_tenant_update_name(self):
         """Test updating name attribute of a tenant via v2 API"""
-        t_name1 = data_utils.rand_name(name='tenant')
+        t_name1 = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         tenant = self.setup_test_tenant(name=t_name1)
         t_id = tenant['id']
         resp1_name = tenant['name']
 
-        t_name2 = data_utils.rand_name(name='tenant2')
+        t_name2 = data_utils.rand_name(
+            name='tenant2', prefix=CONF.resource_name_prefix)
         body = self.tenants_client.update_tenant(t_id, name=t_name2)['tenant']
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
@@ -105,12 +111,14 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('859fcfe1-3a03-41ef-86f9-b19a47d1cd87')
     def test_tenant_update_desc(self):
         """Test updating description attribute of a tenant via v2 API"""
-        t_desc = data_utils.rand_name(name='desc')
+        t_desc = data_utils.rand_name(
+            name='desc', prefix=CONF.resource_name_prefix)
         tenant = self.setup_test_tenant(description=t_desc)
         t_id = tenant['id']
         resp1_desc = tenant['description']
 
-        t_desc2 = data_utils.rand_name(name='desc2')
+        t_desc2 = data_utils.rand_name(
+            name='desc2', prefix=CONF.resource_name_prefix)
         body = self.tenants_client.update_tenant(t_id, description=t_desc2)
         updated_tenant = body['tenant']
         resp2_desc = updated_tenant['description']

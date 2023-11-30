@@ -53,9 +53,10 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         super(TrustsV3TestJSON, self).tearDown()
 
     def create_trustor_and_roles(self):
+        prefix = CONF.resource_name_prefix
         # create a project that trusts will be granted on
         trustor_project_name = data_utils.rand_name(
-            name=self.__class__.__name__)
+            name=self.__class__.__name__, prefix=prefix)
         project = self.projects_client.create_project(
             trustor_project_name,
             domain_id=CONF.identity.default_domain_id)['project']
@@ -64,7 +65,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
-        trustor_username = data_utils.rand_name('user')
+        trustor_username = data_utils.rand_name(name='user', prefix=prefix)
         u_desc = trustor_username + 'description'
         u_email = trustor_username + '@testmail.xx'
         trustor_password = data_utils.rand_password()
@@ -79,8 +80,10 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
-        self.delegated_role = data_utils.rand_name('DelegatedRole')
-        self.not_delegated_role = data_utils.rand_name('NotDelegatedRole')
+        self.delegated_role = data_utils.rand_name(
+            name='DelegatedRole', prefix=prefix)
+        self.not_delegated_role = data_utils.rand_name(
+            name='NotDelegatedRole', prefix=prefix)
 
         role = self.roles_client.create_role(name=self.delegated_role)['role']
         self.addCleanup(self.roles_client.delete_role, role['id'])
