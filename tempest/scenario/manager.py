@@ -16,7 +16,11 @@
 
 import copy
 import os
+import re
+import shutil
 import subprocess
+import tarfile
+import tempfile
 
 import netaddr
 
@@ -793,6 +797,60 @@ class ScenarioTest(tempest.test.BaseTestCase):
         if img_properties:
             params.update(img_properties)
         params.update(kwargs)
+
+        # This code is basically copying the devstack code that extracts and
+        # uploads split kernel/ramdisk images.
+        if tarfile.is_tarfile(img_path):
+            extract_dir = os.path.join(tempfile.gettempdir(), 'images', name)
+            self.addCleanup(shutil.rmtree, extract_dir)
+            os.makedirs(extract_dir)
+            with tarfile.open(img_path) as tar:
+                tar.extractall(extract_dir, filter='data')
+            filenames = os.listdir(extract_dir)
+            for fname in filenames:
+                if re.search(r'(.*-vmlinuz.*|aki-.*/image$)', fname):
+                    kernel_img_path = os.path.join(extract_dir, fname)
+                elif re.search(r'(.*-initrd.*|ari-.*/image$)', fname):
+                    ramdisk_img_path = os.path.join(extract_dir, fname)
+                elif re.search(f'(.*\\.img$|ami-.*/image$)', fname):
+                    img_path = os.path.join(extract_dir, fname)
+            # Create the kernel image.
+            kparams = {
+                'name': name + '-kernel',
+                'container_format': 'aki',
+                'disk_format': 'aki',
+                'visibility': 'private'
+            }
+            body = self.image_client.create_image(**kparams)
+            image = body['image'] if 'image' in body else body
+            kernel_id = image['id']
+            self.addCleanup(self.image_client.delete_image, kernel_id)
+            self.assertEqual("queued", image['status'])
+            with open(kernel_img_path, 'rb') as image_file:
+                self.image_client.store_image_file(kernel_id, image_file)
+            LOG.debug("image:%s", kernel_id)
+            # Create the ramdisk image.
+            rparams = {
+                'name': name + '-ramdisk',
+                'container_format': 'ari',
+                'disk_format': 'ari',
+                'visibility': 'private'
+            }
+            body = self.image_client.create_image(**rparams)
+            image = body['image'] if 'image' in body else body
+            ramdisk_id = image['id']
+            self.addCleanup(self.image_client.delete_image, ramdisk_id)
+            self.assertEqual("queued", image['status'])
+            with open(ramdisk_img_path, 'rb') as image_file:
+                self.image_client.store_image_file(ramdisk_id, image_file)
+            LOG.debug("image:%s", ramdisk_id)
+            # Set the kernel_id, ramdisk_id, container format, disk format for
+            # the split image.
+            params['kernel_id'] = kernel_id
+            params['ramdisk_id'] = ramdisk_id
+            params['container_format'] = 'ami'
+            params['disk_format'] = 'ami'
+
         body = self.image_client.create_image(**params)
         image = body['image'] if 'image' in body else body
         self.addCleanup(self.image_client.delete_image, image['id'])

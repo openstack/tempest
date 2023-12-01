@@ -59,6 +59,11 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
             'min_ram': image['min_ram'],
             'visibility': 'public',
         }
+        if 'kernel_id' in image:
+            create_dict['kernel_id'] = image['kernel_id']
+        if 'ramdisk_id' in image:
+            create_dict['ramdisk_id'] = image['ramdisk_id']
+
         create_dict.update(kwargs)
         try:
             new_image = self.admin_image_client.create_image(**create_dict)
