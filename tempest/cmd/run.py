@@ -269,6 +269,8 @@ class TempestRun(command.Command):
                 return_code = commands.run_command(
                     **params, blacklist_file=ex_list,
                     whitelist_file=in_list, black_regex=ex_regex)
+            if parsed_args.slowest:
+                commands.slowest_command()
             if return_code > 0:
                 sys.exit(return_code)
         return return_code
@@ -392,6 +394,9 @@ class TempestRun(command.Command):
                             help='Combine the output of this run with the '
                                  "previous run's as a combined stream in the "
                                  "stestr repository after it finish")
+        parser.add_argument('--slowest', action='store_true',
+                            help='Show the longest running tests in the '
+                                 'stestr repository after it finishes')
 
         parser.set_defaults(parallel=True)
         return parser
