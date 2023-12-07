@@ -1350,6 +1350,13 @@ A test can be run as follows:
  $ stestr run --pdb TEST_ID
 or
  $ python -m testtools.run TEST_ID"""),
+    cfg.StrOpt('resource_name_prefix',
+               default='tempest',
+               help="Define the prefix name for the resources created by "
+                    "tempest. Tempest cleanup CLI will use this config option "
+                    "to cleanup only the resources that match the prefix. "
+                    "Make sure this prefix does not match with the resource "
+                    "name you do not want Tempest cleanup CLI to delete."),
 ]
 
 _opts = [

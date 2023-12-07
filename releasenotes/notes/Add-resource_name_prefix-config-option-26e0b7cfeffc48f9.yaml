@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    A new config option in the default section, resource_name_prefix,
+    is added to allow users to customize the name (specifically the prefix)
+    of the resources created by Tempest during a test run. By default it is
+    set to tempest.
+    Tempest cleanup CLI will then use this config option to cleanup only the
+    resources that match the prefix. Make sure this prefix does not match with
+    the resource name you do not want Tempest cleanup CLI to delete.
