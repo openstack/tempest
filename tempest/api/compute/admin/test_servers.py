@@ -37,11 +37,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(ServersAdminTestJSON, cls).resource_setup()
 
-        cls.s1_name = data_utils.rand_name(cls.__name__ + '-server')
+        prefix = CONF.resource_name_prefix
+        cls.s1_name = data_utils.rand_name(prefix=prefix,
+                                           name=cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s1_name)
         cls.s1_id = server['id']
 
-        cls.s2_name = data_utils.rand_name(cls.__name__ + '-server')
+        cls.s2_name = data_utils.rand_name(prefix=prefix,
+                                           name=cls.__name__ + '-server')
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']

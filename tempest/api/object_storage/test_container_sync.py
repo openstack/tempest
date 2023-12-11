@@ -69,9 +69,13 @@ class ContainerSyncTest(base.BaseObjectTest):
             int(container_sync_timeout / cls.container_sync_interval)
 
         # define container and object clients
-        cls.clients[data_utils.rand_name(name='TestContainerSync')] = \
+        cls.clients[data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='TestContainerSync')] = \
             (cls.container_client, cls.object_client)
-        cls.clients[data_utils.rand_name(name='TestContainerSync')] = \
+        cls.clients[data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='TestContainerSync')] = \
             (cls.container_client_alt, cls.object_client_alt)
         for cont_name, client in cls.clients.items():
             client[0].create_container(cont_name)
@@ -92,7 +96,9 @@ class ContainerSyncTest(base.BaseObjectTest):
             headers = make_headers(cont[1], cont_client[1])
             cont_client[0].put(str(cont[0]), body=None, headers=headers)
             # create object in container
-            object_name = data_utils.rand_name(name='TestSyncObject')
+            object_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name='TestSyncObject')
             data = object_name[::-1].encode()  # Raw data, we need bytes
             obj_client[0].create_object(cont[0], object_name, data)
             self.objects.append(object_name)

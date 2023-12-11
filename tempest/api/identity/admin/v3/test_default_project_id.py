@@ -42,7 +42,8 @@ class TestDefaultProjectId(base.BaseIdentityV3AdminTest):
     def test_default_project_id(self):
         """Creating a token without project will default to user's project"""
         # create a domain
-        dom_name = data_utils.rand_name('dom')
+        dom_name = data_utils.rand_name(
+            name='dom', prefix=CONF.resource_name_prefix)
         domain_body = self.domains_client.create_domain(
             name=dom_name)['domain']
         dom_id = domain_body['id']
@@ -57,7 +58,8 @@ class TestDefaultProjectId(base.BaseIdentityV3AdminTest):
 
         # create a user in the domain, with the previous project as his
         # default project
-        user_name = data_utils.rand_name('user')
+        user_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         user_pass = data_utils.rand_password()
         user_body = self.users_client.create_user(
             name=user_name,

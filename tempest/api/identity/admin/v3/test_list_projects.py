@@ -45,20 +45,21 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
     @classmethod
     def resource_setup(cls):
         super(ListProjectsTestJSON, cls).resource_setup()
+        prefix = CONF.resource_name_prefix
         domain_id = cls.os_admin.credentials.domain_id
         # Create project with domain
-        p1_name = data_utils.rand_name(cls.__name__)
+        p1_name = data_utils.rand_name(cls.__name__, prefix=prefix)
         cls.p1 = cls.projects_client.create_project(
             p1_name, enabled=False, domain_id=domain_id)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p1['id'])
         # Create default project
-        p2_name = data_utils.rand_name(cls.__name__)
+        p2_name = data_utils.rand_name(cls.__name__, prefix=prefix)
         cls.p2 = cls.projects_client.create_project(p2_name)['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
                                     cls.p2['id'])
         # Create a new project (p3) using p2 as parent project
-        p3_name = data_utils.rand_name(cls.__name__)
+        p3_name = data_utils.rand_name(cls.__name__, prefix=prefix)
         cls.p3 = cls.projects_client.create_project(
             p3_name, parent_id=cls.p2['id'])['project']
         cls.addClassResourceCleanup(cls.projects_client.delete_project,
@@ -99,7 +100,8 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
         cls.p1 = cls.projects_client.show_project(
             cls.os_primary.credentials.project_id)['project']
         # Create a test project
-        p2_name = data_utils.rand_name(cls.__name__)
+        p2_name = data_utils.rand_name(
+            cls.__name__, prefix=CONF.resource_name_prefix)
         p2_domain_id = CONF.identity.default_domain_id
         cls.p2 = cls.projects_client.create_project(
             p2_name, domain_id=p2_domain_id)['project']

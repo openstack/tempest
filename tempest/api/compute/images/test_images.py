@@ -57,7 +57,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         # in task_state image_snapshot
         self.addCleanup(waiters.wait_for_server_status, self.servers_client,
                         server['id'], 'ACTIVE')
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         try:
             image = self.create_image_from_server(server['id'],
                                                   name=snapshot_name,
@@ -83,7 +84,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'SHUTOFF')
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
@@ -102,7 +104,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                        server['id'], 'PAUSED')
         self.addCleanup(self.servers_client.delete_server, server['id'])
 
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
@@ -121,7 +124,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                        server['id'], 'SUSPENDED')
         self.addCleanup(self.servers_client.delete_server, server['id'])
 
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
@@ -136,7 +140,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.servers_client.delete_server, server['id'])
 
         # Snapshot it
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         image = self.create_image_from_server(server['id'],
                                               name=snapshot_name,
                                               wait_until='ACTIVE',

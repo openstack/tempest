@@ -45,7 +45,9 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
         """Test creating port with extended attribute"""
         post_body = {"network_id": self.network['id'],
                      "binding:host_id": self.host_id,
-                     "name": data_utils.rand_name(self.__class__.__name__)}
+                     "name": data_utils.rand_name(
+            self.__class__.__name__,
+            prefix=CONF.resource_name_prefix)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
         self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
@@ -62,7 +64,9 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     def test_update_port_binding_ext_attr(self):
         """Test updating port's extended attribute"""
         post_body = {"network_id": self.network['id'],
-                     "name": data_utils.rand_name(self.__class__.__name__)}
+                     "name": data_utils.rand_name(
+            self.__class__.__name__,
+            prefix=CONF.resource_name_prefix)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
         self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
@@ -83,7 +87,9 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
         """Test updating and listing port's extended attribute"""
         # Create a new port
         post_body = {"network_id": self.network['id'],
-                     "name": data_utils.rand_name(self.__class__.__name__)}
+                     "name": data_utils.rand_name(
+            self.__class__.__name__,
+            prefix=CONF.resource_name_prefix)}
         body = self.admin_ports_client.create_port(**post_body)
         port = body['port']
         self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,
@@ -113,7 +119,8 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     def test_show_port_binding_ext_attr(self):
         """Test showing port's extended attribute"""
         body = self.admin_ports_client.create_port(
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             network_id=self.network['id'])
         port = body['port']
         self.addCleanup(self.admin_ports_client.wait_for_resource_deletion,

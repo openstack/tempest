@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class GroupTypesTest(base.BaseVolumeAdminTest):
@@ -27,8 +30,12 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('dd71e5f9-393e-4d4f-90e9-fa1b8d278864')
     def test_group_type_create_list_update_show_delete(self):
         """Test create/list/update/show/delete group type"""
-        name = data_utils.rand_name(self.__class__.__name__ + '-group-type')
-        description = data_utils.rand_name("group-type-description")
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-group-type')
+        description = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="group-type-description")
         group_specs = {"consistent_group_snapshot_enabled": "<is> False"}
         params = {'name': name,
                   'description': description,
@@ -50,7 +57,8 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
 
         update_params = {
             'name': data_utils.rand_name(
-                self.__class__.__name__ + '-updated-group-type'),
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-updated-group-type'),
             'description': 'updated-group-type-desc'
         }
         updated_group_type = self.admin_group_types_client.update_group_type(
@@ -75,8 +83,10 @@ class GroupTypesTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('3d5e5cec-72b4-4511-b135-7cc2b7a053ae')
     def test_group_type_list_by_optional_params(self):
         """Test list group type sort/public"""
-        type_a_name = "a_{}".format(data_utils.rand_name('group-type'))
-        type_b_name = "b_{}".format(data_utils.rand_name('group-type'))
+        type_a_name = "a_{}".format(data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='group-type'))
+        type_b_name = "b_{}".format(data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='group-type'))
         self.create_group_type(name=type_a_name, **{'is_public': True})
         self.create_group_type(name=type_b_name, **{'is_public': False})
 

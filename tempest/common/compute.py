@@ -196,7 +196,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
     """
 
     if name is None:
-        name = data_utils.rand_name(__name__ + "-instance")
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=__name__ + "-instance")
     if flavor is None:
         flavor = CONF.compute.flavor_ref
     if image_id is None:
@@ -245,7 +246,8 @@ def create_test_server(clients, validatable=False, validation_resources=None,
             kwargs['user_data'] = script_b64
 
     if volume_backed:
-        volume_name = data_utils.rand_name(__name__ + '-volume')
+        volume_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=__name__ + '-volume')
         volumes_client = clients.volumes_client_latest
         params = {'name': volume_name,
                   'imageRef': image_id,

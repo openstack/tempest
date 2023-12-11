@@ -67,7 +67,9 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         cls.subnets_client = cls.os_primary.subnets_client
 
     def _create_net_subnet_ret_net_from_cidr(self, cidr):
-        name_net = data_utils.rand_name(self.__class__.__name__)
+        name_net = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__)
         net = self.networks_client.create_network(name=name_net)
         self.addCleanup(self.networks_client.delete_network,
                         net['network']['id'])

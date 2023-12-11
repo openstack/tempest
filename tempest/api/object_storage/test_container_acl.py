@@ -50,7 +50,8 @@ class ObjectTestACLs(base.BaseObjectTest):
                 create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.os_roles_operator.object_client.create_object(
             self.container_name, object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -84,7 +85,8 @@ class ObjectTestACLs(base.BaseObjectTest):
             auth_data=self.os_roles_operator_alt.object_client.auth_provider.
             auth_data)
         # Trying to write the object with rights
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.os_roles_operator.object_client.create_object(
             self.container_name,
             object_name, 'data', headers={})

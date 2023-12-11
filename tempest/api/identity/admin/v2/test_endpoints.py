@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
@@ -24,9 +27,12 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(EndPointsTestJSON, cls).resource_setup()
-        s_name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        s_description = data_utils.rand_name('description')
+        s_name = data_utils.rand_name(
+            name='service', prefix=CONF.resource_name_prefix)
+        s_type = data_utils.rand_name(
+            name='type', prefix=CONF.resource_name_prefix)
+        s_description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         service_data = cls.services_client.create_service(
             name=s_name, type=s_type,
             description=s_description)['OS-KSADM:service']
@@ -36,7 +42,8 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
         for _ in range(2):
-            region = data_utils.rand_name('region')
+            region = data_utils.rand_name(
+                name='region', prefix=CONF.resource_name_prefix)
             url = data_utils.rand_url()
             endpoint = cls.endpoints_client.create_endpoint(
                 service_id=cls.service_id,
@@ -65,7 +72,8 @@ class EndPointsTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('9974530a-aa28-4362-8403-f06db02b26c1')
     def test_create_list_delete_endpoint(self):
         """Test creating, listing and deleting a keystone endpoint"""
-        region = data_utils.rand_name('region')
+        region = data_utils.rand_name(
+            name='region', prefix=CONF.resource_name_prefix)
         url = data_utils.rand_url()
         endpoint = self.endpoints_client.create_endpoint(
             service_id=self.service_id,

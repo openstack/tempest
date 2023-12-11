@@ -39,7 +39,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()
-        self.container_name = data_utils.rand_name(name='TestContainer')
+        self.container_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='TestContainer')
         self.container_client.update_container(self.container_name)
         self.containers.append(self.container_name)
 
@@ -54,7 +55,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         """Test writing object without using credentials"""
         # trying to create object with empty headers
         # X-Auth-Token is not provided
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=None
@@ -68,7 +70,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_delete_object_without_using_creds(self):
         """Test deleting object without using credentials"""
         # create object
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         self.object_client.create_object(self.container_name, object_name,
                                          'data')
         # trying to delete object with empty headers
@@ -86,7 +89,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_write_object_with_non_authorized_user(self):
         """Test writing object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         # trying to create object with non-authorized user
         self.object_client.auth_provider.set_alt_auth_data(
             request_part='headers',
@@ -101,7 +105,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_read_object_with_non_authorized_user(self):
         """Test reading object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -119,7 +124,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def test_delete_object_with_non_authorized_user(self):
         """Test deleting object with non-authorized user"""
         # User provided token is forbidden. ACL are not set
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -144,7 +150,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                 create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')
@@ -173,7 +180,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
@@ -199,7 +207,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
             request_part='headers',
             auth_data=self.test_auth_data
         )
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         self.assertRaises(lib_exc.Forbidden,
                           self.object_client.create_object,
                           self.container_name,
@@ -221,7 +230,8 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                 create_update_metadata_prefix=''))
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
-        object_name = data_utils.rand_name(name='Object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
         self.assertHeaders(resp, 'Object', 'PUT')

@@ -40,8 +40,9 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('b537d090-afb9-4519-b95d-270b0708e87e')
     def test_user_update(self):
         """Test case to check if updating of user attributes is successful"""
+        prefix = CONF.resource_name_prefix
         # Creating first user
-        u_name = data_utils.rand_name('user')
+        u_name = data_utils.rand_name(name='user', prefix=prefix)
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()
@@ -55,7 +56,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         project = self.setup_test_project()
 
         # Updating user details with new values
-        update_kwargs = {'name': data_utils.rand_name('user2'),
+        update_kwargs = {'name': data_utils.rand_name('user2', prefix=prefix),
                          'description': data_utils.rand_name('desc2'),
                          'project_id': project['id'],
                          'email': 'user2@testmail.tm',
@@ -75,7 +76,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_update_user_password(self):
         """Test updating user password"""
         # Creating User to check password updation
-        u_name = data_utils.rand_name('user')
+        u_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         original_password = data_utils.rand_password()
         user = self.users_client.create_user(
             name=u_name, password=original_password)['user']
@@ -105,7 +107,8 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         fetched_project_ids = list()
         u_project = self.setup_test_project()
         # Create a user.
-        u_name = data_utils.rand_name('user')
+        u_name = data_utils.rand_name(
+            name='user', prefix=CONF.resource_name_prefix)
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_password()

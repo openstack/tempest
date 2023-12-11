@@ -38,9 +38,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('2e80343b-6c81-4ac3-88c7-452f3e9d5129')
     def test_group_create_update_get(self):
         """Test creating, updating and getting keystone group"""
+        prefix = CONF.resource_name_prefix
         # Verify group creation works.
-        name = data_utils.rand_name('Group')
-        description = data_utils.rand_name('Description')
+        name = data_utils.rand_name(name='Group', prefix=prefix)
+        description = data_utils.rand_name(name='Description', prefix=prefix)
         group = self.setup_test_group(name=name, domain_id=self.domain['id'],
                                       description=description)
         self.assertEqual(group['name'], name)
@@ -48,8 +49,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.domain['id'], group['domain_id'])
 
         # Verify updating name and description works.
-        first_name_update = data_utils.rand_name('UpdateGroup')
-        first_desc_update = data_utils.rand_name('UpdateDescription')
+        first_name_update = data_utils.rand_name(
+            name='UpdateGroup', prefix=prefix)
+        first_desc_update = data_utils.rand_name(
+            name='UpdateDescription', prefix=prefix)
         updated_group = self.groups_client.update_group(
             group['id'], name=first_name_update,
             description=first_desc_update)['group']
@@ -65,7 +68,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # Verify that updating a single field for a group (name) leaves the
         # other fields (description, domain_id) unchanged.
         second_name_update = data_utils.rand_name(
-            self.__class__.__name__ + 'UpdateGroup')
+            self.__class__.__name__ + 'UpdateGroup', prefix=prefix)
         updated_group = self.groups_client.update_group(
             group['id'], name=second_name_update)['group']
         self.assertEqual(second_name_update, updated_group['name'])

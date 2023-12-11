@@ -468,8 +468,11 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
     def test_bulk_create_delete_network(self):
         """Verify creating and deleting multiple networks in one request"""
         # Creates 2 networks in one request
-        network_list = [{'name': data_utils.rand_name('network-')},
-                        {'name': data_utils.rand_name('network-')}]
+        network_list = [
+            {'name': data_utils.rand_name(
+                'network-', prefix=CONF.resource_name_prefix)},
+            {'name': data_utils.rand_name(
+                'network-', prefix=CONF.resource_name_prefix)}]
         body = self.networks_client.create_bulk_networks(networks=network_list)
         created_networks = body['networks']
         self.addCleanup(self._delete_networks, created_networks)
@@ -489,7 +492,9 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         cidrs = [subnet_cidr
                  for subnet_cidr in self.cidr.subnet(self.mask_bits)]
 
-        names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
+        names = [data_utils.rand_name(
+            name='subnet-', prefix=CONF.resource_name_prefix)
+            for i in range(len(networks))]
         subnets_list = []
         for i in range(len(names)):
             p1 = {
@@ -516,7 +521,9 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         """Verify creating and deleting multiple ports in one request"""
         networks = [self.create_network(), self.create_network()]
         # Creates 2 ports in one request
-        names = [data_utils.rand_name('port-') for i in range(len(networks))]
+        names = [data_utils.rand_name(
+            name='port-', prefix=CONF.resource_name_prefix)
+            for i in range(len(networks))]
         port_list = []
         state = [True, False]
         for i in range(len(names)):

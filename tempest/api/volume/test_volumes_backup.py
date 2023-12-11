@@ -74,11 +74,15 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         # Create a backup
         kwargs = {}
         kwargs["name"] = data_utils.rand_name(
-            self.__class__.__name__ + '-Backup')
-        kwargs["description"] = data_utils.rand_name("backup-description")
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Backup')
+        kwargs["description"] = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="backup-description")
         if CONF.volume.backup_driver == "swift":
             kwargs["container"] = data_utils.rand_name(
-                self.__class__.__name__ + '-Backup-container')
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-Backup-container')
         backup = self.create_backup(volume_id=volume['id'], **kwargs)
         self.assertEqual(kwargs["name"], backup['name'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
@@ -128,7 +132,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         self.attach_volume(server['id'], volume['id'])
         # Create backup using force flag
         backup_name = data_utils.rand_name(
-            self.__class__.__name__ + '-Backup')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'],
                                     name=backup_name, force=True)
         waiters.wait_for_volume_resource_status(self.volumes_client,
@@ -191,8 +196,12 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
 
         # Update backup and assert response body for update_backup method
         update_kwargs = {
-            'name': data_utils.rand_name(self.__class__.__name__ + '-Backup'),
-            'description': data_utils.rand_name("volume-backup-description")
+            'name': data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + '-Backup'),
+            'description': data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name="volume-backup-description")
         }
         update_backup = self.backups_client.update_backup(
             backup['id'], **update_kwargs)['backup']

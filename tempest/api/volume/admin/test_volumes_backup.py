@@ -59,7 +59,9 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         """
         volume = self.create_volume()
         # Create backup
-        backup_name = data_utils.rand_name(self.__class__.__name__ + '-Backup')
+        backup_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'], name=backup_name)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
@@ -124,7 +126,8 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
         volume = self.create_volume()
         # Create a backup
         backup_name = data_utils.rand_name(
-            self.__class__.__name__ + '-Backup')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Backup')
         backup = self.create_backup(volume_id=volume['id'], name=backup_name)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')

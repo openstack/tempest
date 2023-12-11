@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
@@ -33,10 +36,11 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('5193aad5-bcb7-411d-85b0-b3b61b96ef06')
     def test_create_update_get_service(self):
         """Test creating, updating and getting of keystone service"""
+        prefix = CONF.resource_name_prefix
         # Creating a Service
-        name = data_utils.rand_name('service')
-        serv_type = data_utils.rand_name('type')
-        desc = data_utils.rand_name('description')
+        name = data_utils.rand_name(name='service', prefix=prefix)
+        serv_type = data_utils.rand_name(name='type', prefix=prefix)
+        desc = data_utils.rand_name(name='description', prefix=prefix)
         create_service = self.services_client.create_service(
             type=serv_type, name=name, description=desc)['service']
         self.addCleanup(self._del_service, create_service['id'])
@@ -49,7 +53,7 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         # Update description
         s_id = create_service['id']
         resp1_desc = create_service['description']
-        s_desc2 = data_utils.rand_name('desc2')
+        s_desc2 = data_utils.rand_name(name='desc2', prefix=prefix)
         update_service = self.services_client.update_service(
             s_id, description=s_desc2)['service']
         resp2_desc = update_service['description']
@@ -66,8 +70,10 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('d1dcb1a1-2b6b-4da8-bbb8-5532ef6e8269')
     def test_create_service_without_description(self):
         """Create a keystone service only with name and type"""
-        name = data_utils.rand_name('service')
-        serv_type = data_utils.rand_name('type')
+        name = data_utils.rand_name(
+            name='service', prefix=CONF.resource_name_prefix)
+        serv_type = data_utils.rand_name(
+            name='type', prefix=CONF.resource_name_prefix)
         service = self.services_client.create_service(
             type=serv_type, name=name)['service']
         self.addCleanup(self.services_client.delete_service, service['id'])
@@ -80,8 +86,12 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         service_ids = list()
         service_types = list()
         for _ in range(3):
-            name = data_utils.rand_name(self.__class__.__name__ + '-Service')
-            serv_type = data_utils.rand_name(self.__class__.__name__ + '-Type')
+            name = data_utils.rand_name(
+                self.__class__.__name__ + '-Service',
+                prefix=CONF.resource_name_prefix)
+            serv_type = data_utils.rand_name(
+                self.__class__.__name__ + '-Type',
+                prefix=CONF.resource_name_prefix)
             create_service = self.services_client.create_service(
                 type=serv_type, name=name)['service']
             self.addCleanup(self.services_client.delete_service,

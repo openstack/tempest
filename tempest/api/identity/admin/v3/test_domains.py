@@ -76,9 +76,10 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('f2f5b44a-82e8-4dad-8084-0661ea3b18cf')
     def test_create_update_delete_domain(self):
         """Test creating, updating and deleting domain"""
+        prefix = CONF.resource_name_prefix
         # Create domain
-        d_name = data_utils.rand_name('domain')
-        d_desc = data_utils.rand_name('domain-desc')
+        d_name = data_utils.rand_name(name='domain', prefix=prefix)
+        d_desc = data_utils.rand_name(name='domain-desc', prefix=prefix)
         domain = self.domains_client.create_domain(
             name=d_name, description=d_desc)['domain']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -92,8 +93,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(d_desc, domain['description'])
         self.assertEqual(True, domain['enabled'])
         # Update domain
-        new_desc = data_utils.rand_name('new-desc')
-        new_name = data_utils.rand_name('new-name')
+        new_desc = data_utils.rand_name(name='new-desc', prefix=prefix)
+        new_name = data_utils.rand_name(name='new-name', prefix=prefix)
         updated_domain = self.domains_client.update_domain(
             domain['id'], name=new_name, description=new_desc,
             enabled=False)['domain']
@@ -139,8 +140,10 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_domain_with_disabled_status(self):
         """Test creating domain with disabled status"""
         # Create domain with enabled status as false
-        d_name = data_utils.rand_name('domain')
-        d_desc = data_utils.rand_name('domain-desc')
+        d_name = data_utils.rand_name(
+            name='domain', prefix=CONF.resource_name_prefix)
+        d_desc = data_utils.rand_name(
+            name='domain-desc', prefix=CONF.resource_name_prefix)
         domain = self.domains_client.create_domain(
             name=d_name, description=d_desc, enabled=False)['domain']
         self.addCleanup(self.domains_client.delete_domain, domain['id'])
@@ -152,7 +155,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_domain_without_description(self):
         """Test creating domain without description"""
         # Create domain only with name
-        d_name = data_utils.rand_name('domain')
+        d_name = data_utils.rand_name(
+            name='domain', prefix=CONF.resource_name_prefix)
         domain = self.domains_client.create_domain(name=d_name)['domain']
         self.addCleanup(self.delete_domain, domain['id'])
         expected_data = {'name': d_name, 'enabled': True}

@@ -58,7 +58,8 @@ class VolumeManageAdminTest(base.BaseVolumeAdminTest):
 
         # Manage volume
         new_vol_name = data_utils.rand_name(
-            self.__class__.__name__ + '-volume')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-volume')
         new_vol_ref = {
             'name': new_vol_name,
             'host': org_vol_info['os-vol-host-attr:host'],

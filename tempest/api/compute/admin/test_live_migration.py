@@ -214,7 +214,8 @@ class LiveMigrationTest(LiveMigrationTestBase):
         self.assertEqual(volume_id1, volume_id2)
 
     def _create_net_subnet(self, name, cidr):
-        net_name = data_utils.rand_name(name=name)
+        net_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=name)
         net = self.networks_client.create_network(name=net_name)['network']
         self.addClassResourceCleanup(
             self.networks_client.delete_network, net['id'])
@@ -228,7 +229,8 @@ class LiveMigrationTest(LiveMigrationTestBase):
         return net
 
     def _create_port(self, network_id, name):
-        name = data_utils.rand_name(name=name)
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=name)
         port = self.ports_client.create_port(name=name,
                                              network_id=network_id)['port']
         self.addClassResourceCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -244,7 +246,8 @@ class LiveMigrationTest(LiveMigrationTestBase):
         subport = self._create_port(network_id=net['id'], name='subport')
 
         trunk = self.trunks_client.create_trunk(
-            name=data_utils.rand_name('trunk'),
+            name=data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='trunk'),
             port_id=parent['id'],
             sub_ports=[{"segmentation_id": 42, "port_id": subport['id'],
                         "segmentation_type": "vlan"}]

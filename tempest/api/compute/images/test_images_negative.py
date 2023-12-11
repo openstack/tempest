@@ -66,8 +66,12 @@ class ImagesNegativeTestJSON(ImagesNegativeTestBase):
         """Check server image should not be created with invalid server id"""
         # Create a new image with invalid server id
         meta = {'image_type': 'test'}
-        self.assertRaises(lib_exc.NotFound, self.create_image_from_server,
-                          data_utils.rand_name('invalid'), metadata=meta)
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.create_image_from_server,
+            data_utils.rand_name(prefix=CONF.resource_name_prefix,
+                                 name='invalid'),
+            metadata=meta)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ec176029-73dc-4037-8d72-2e4ff60cf538')
@@ -76,7 +80,8 @@ class ImagesNegativeTestJSON(ImagesNegativeTestBase):
 
         Return an error if server id passed is 35 characters or less
         """
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         test_uuid = ('a' * 35)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
                           test_uuid, name=snapshot_name)
@@ -88,7 +93,8 @@ class ImagesNegativeTestJSON(ImagesNegativeTestBase):
 
         Return an error if sever id passed is 37 characters or more
         """
-        snapshot_name = data_utils.rand_name('test-snap')
+        snapshot_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-snap')
         test_uuid = ('a' * 37)
         self.assertRaises(lib_exc.NotFound, self.client.create_image,
                           test_uuid, name=snapshot_name)
@@ -105,8 +111,10 @@ class ImagesDeleteNegativeTestJSON(ImagesNegativeTestBase):
     @decorators.idempotent_id('381acb65-785a-4942-94ce-d8f8c84f1f0f')
     def test_delete_image_with_invalid_image_id(self):
         """Check an image should not be deleted with invalid image id"""
-        self.assertRaises(lib_exc.NotFound, self.client.delete_image,
-                          data_utils.rand_name('invalid'))
+        self.assertRaises(
+            lib_exc.NotFound, self.client.delete_image,
+            data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='invalid'))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('137aef61-39f7-44a1-8ddf-0adf82511701')

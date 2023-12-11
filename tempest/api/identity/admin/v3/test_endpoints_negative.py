@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
@@ -34,10 +37,11 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
 
     @classmethod
     def resource_setup(cls):
+        prefix = CONF.resource_name_prefix
         super(EndpointsNegativeTestJSON, cls).resource_setup()
-        s_name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        s_description = data_utils.rand_name('description')
+        s_name = data_utils.rand_name(name='service', prefix=prefix)
+        s_type = data_utils.rand_name(name='type', prefix=prefix)
+        s_description = data_utils.rand_name(name='description', prefix=prefix)
         service_data = (
             cls.services_client.create_service(name=s_name, type=s_type,
                                                description=s_description)
@@ -56,7 +60,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         """
         interface = 'public'
         url = data_utils.rand_url()
-        region = data_utils.rand_name('region')
+        region = data_utils.rand_name(
+            name='region', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
                           service_id=self.service_id, interface=interface,
                           url=url, region=region, enabled='False')
@@ -70,7 +75,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         """
         interface = 'public'
         url = data_utils.rand_url()
-        region = data_utils.rand_name('region')
+        region = data_utils.rand_name(
+            name='region', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.BadRequest, self.client.create_endpoint,
                           service_id=self.service_id, interface=interface,
                           url=url, region=region, enabled='True')
@@ -78,7 +84,8 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def _assert_update_raises_bad_request(self, enabled):
 
         # Create an endpoint
-        region1_name = data_utils.rand_name('region')
+        region1_name = data_utils.rand_name(
+            name='region', prefix=CONF.resource_name_prefix)
         url1 = data_utils.rand_url()
         interface1 = 'public'
         endpoint_for_update = (

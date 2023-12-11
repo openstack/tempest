@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
@@ -42,8 +45,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
         cls.addClassResourceCleanup(
             cls.services_client.delete_service, service_id)
 
-        name = data_utils.rand_name('service_group')
-        description = data_utils.rand_name('description')
+        name = data_utils.rand_name(
+            name='service_group', prefix=CONF.resource_name_prefix)
+        description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         filters = {'service_id': service_id}
 
         endpoint_group = cls.client.create_endpoint_group(
@@ -57,9 +62,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
 
     @classmethod
     def _create_service(cls):
-        s_name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        s_description = data_utils.rand_name('description')
+        prefix = CONF.resource_name_prefix
+        s_name = data_utils.rand_name(name='service', prefix=prefix)
+        s_type = data_utils.rand_name(name='type', prefix=prefix)
+        s_description = data_utils.rand_name(name='description', prefix=prefix)
         service_data = (
             cls.services_client.create_service(name=s_name,
                                                type=s_type,
@@ -73,8 +79,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
         """Test create/list/show/check/delete of endpoint group"""
         service_id = self._create_service()
         self.addCleanup(self.services_client.delete_service, service_id)
-        name = data_utils.rand_name('service_group')
-        description = data_utils.rand_name('description')
+        name = data_utils.rand_name(
+            name='service_group', prefix=CONF.resource_name_prefix)
+        description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         filters = {'service_id': service_id}
 
         endpoint_group = self.client.create_endpoint_group(
@@ -135,8 +143,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
         # with new values
         service1_id = self._create_service()
         self.addCleanup(self.services_client.delete_service, service1_id)
-        name = data_utils.rand_name('service_group')
-        description = data_utils.rand_name('description')
+        name = data_utils.rand_name(
+            name='service_group', prefix=CONF.resource_name_prefix)
+        description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         filters = {'service_id': service1_id}
 
         endpoint_group = self.client.create_endpoint_group(
@@ -149,8 +159,10 @@ class EndPointGroupsTest(base.BaseIdentityV3AdminTest):
         # Creating new attr values to update endpoint group
         service2_id = self._create_service()
         self.addCleanup(self.services_client.delete_service, service2_id)
-        name2 = data_utils.rand_name('service_group2')
-        description2 = data_utils.rand_name('description2')
+        name2 = data_utils.rand_name(
+            name='service_group2', prefix=CONF.resource_name_prefix)
+        description2 = data_utils.rand_name(
+            name='description2', prefix=CONF.resource_name_prefix)
         filters = {'service_id': service2_id}
 
         # Updating endpoint group with new attr values

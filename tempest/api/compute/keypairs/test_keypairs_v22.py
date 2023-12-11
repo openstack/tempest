@@ -13,8 +13,11 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import test_keypairs
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
@@ -29,7 +32,8 @@ class KeyPairsV22TestJSON(test_keypairs.KeyPairsV2TestJSON):
         self.assertEqual(keypair_type, keypair['type'])
 
     def _test_keypairs_create_list_show(self, keypair_type=None):
-        k_name = data_utils.rand_name('keypair')
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='keypair')
         keypair = self.create_keypair(k_name, keypair_type=keypair_type)
         # Verify whether 'type' is present in keypair create response of
         # version 2.2 and it is with default value 'ssh'.

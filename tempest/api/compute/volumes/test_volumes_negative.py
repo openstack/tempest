@@ -64,7 +64,9 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('5125ae14-152b-40a7-b3c5-eae15e9022ef')
     def test_create_volume_with_invalid_size(self):
         """Test creating volume with invalid size should fail"""
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
+        v_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
@@ -73,7 +75,9 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('131cb3a1-75cc-4d40-b4c3-1317f64719b0')
     def test_create_volume_without_passing_size(self):
         """Test creating volume without specifying size should fail"""
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
+        v_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
@@ -82,7 +86,9 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('8cce995e-0a83-479a-b94d-e1e40b8a09d1')
     def test_create_volume_with_size_zero(self):
         """Test creating volume with size=0 should fail"""
-        v_name = data_utils.rand_name(self.__class__.__name__ + '-Volume')
+        v_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Volume')
         metadata = {'Type': 'work'}
         self.assertRaises(lib_exc.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
@@ -97,9 +103,11 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('62972737-124b-4513-b6cf-2f019f178494')
     def test_delete_invalid_volume_id(self):
         """Test deleting volume with an invalid volume id should fail"""
-        self.assertRaises(lib_exc.NotFound,
-                          self.client.delete_volume,
-                          data_utils.rand_name('invalid'))
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.client.delete_volume,
+            data_utils.rand_name(prefix=CONF.resource_name_prefix,
+                                 name='invalid'))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0d1417c5-4ae8-4c2c-adc5-5f0b864253e5')

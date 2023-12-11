@@ -133,7 +133,9 @@ class ServerActionsBase(base.BaseV2ComputeTest):
                               ['addresses'])
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
-        new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
+        new_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-server')
         password = 'rebuildPassw0rd'
         rebuilt_server = self.client.rebuild_server(
             server_id,
@@ -575,7 +577,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
             raise lib_exc.InvalidConfiguration(
                 'api_v2 must be True in [image-feature-enabled].')
 
-        backup1 = data_utils.rand_name('backup-1')
+        backup1 = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='backup-1')
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
                                          rotation=2,
@@ -603,7 +606,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
         waiters.wait_for_image_status(glance_client,
                                       image1_id, 'active')
 
-        backup2 = data_utils.rand_name('backup-2')
+        backup2 = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='backup-2')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
@@ -639,7 +643,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         # create the third one, due to the rotation is 2,
         # the first one will be deleted
-        backup3 = data_utils.rand_name('backup-3')
+        backup3 = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='backup-3')
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
         resp = self.client.create_backup(self.server_id,
                                          backup_type='daily',
@@ -796,7 +801,8 @@ class ServersAaction247Test(base.BaseV2ComputeTest):
     def test_create_backup(self):
         server = self.create_test_server(wait_until='ACTIVE')
 
-        backup1 = data_utils.rand_name('backup-1')
+        backup1 = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='backup-1')
         # Just check create_back to verify the schema with 2.47
         self.servers_client.create_backup(server['id'],
                                           backup_type='daily',
@@ -859,7 +865,9 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
 
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
-        new_name = data_utils.rand_name(self.__class__.__name__ + '-server')
+        new_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-server')
         password = 'rebuildPassw0rd'
         rebuilt_server = self.servers_client.rebuild_server(
             server['id'],

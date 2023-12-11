@@ -16,10 +16,12 @@
 from tempest.api.object_storage import base
 from tempest.common import utils
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
+CONF = config.CONF
 QUOTA_BYTES = 10
 QUOTA_COUNT = 3
 
@@ -55,7 +57,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
     @decorators.attr(type="smoke")
     def test_upload_valid_object(self):
         """Attempts to uploads an object smaller than the bytes quota."""
-        object_name = data_utils.rand_name(name="TestObject")
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name="TestObject")
         data = data_utils.arbitrary_string(QUOTA_BYTES)
 
         nbefore = self._get_bytes_used()
@@ -72,7 +75,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
     @decorators.attr(type="smoke")
     def test_upload_large_object(self):
         """Attempts to upload an object larger than the bytes quota."""
-        object_name = data_utils.rand_name(name="TestObject")
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name="TestObject")
         data = data_utils.arbitrary_string(QUOTA_BYTES + 1)
 
         nbefore = self._get_bytes_used()
@@ -90,7 +94,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
     def test_upload_too_many_objects(self):
         """Attempts to upload many objects that exceeds the count limit."""
         for _ in range(QUOTA_COUNT):
-            name = data_utils.rand_name(name="TestObject")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name="TestObject")
             self.object_client.create_object(self.container_name, name, "")
             waiters.wait_for_object_create(self.object_client,
                                            self.container_name,

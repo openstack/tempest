@@ -42,11 +42,13 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
                                      domain_id=CONF.identity.default_domain_id)
 
         # Create a couple projects
-        project1_name = data_utils.rand_name(name=self.__class__.__name__)
+        project1_name = data_utils.rand_name(
+            name=self.__class__.__name__, prefix=CONF.resource_name_prefix)
         project1 = self.setup_test_project(
             name=project1_name, domain_id=CONF.identity.default_domain_id)
 
-        project2_name = data_utils.rand_name(name=self.__class__.__name__)
+        project2_name = data_utils.rand_name(
+            name=self.__class__.__name__, prefix=CONF.resource_name_prefix)
         project2 = self.setup_test_project(
             name=project2_name, domain_id=CONF.identity.default_domain_id)
         self.addCleanup(self.projects_client.delete_project, project2['id'])

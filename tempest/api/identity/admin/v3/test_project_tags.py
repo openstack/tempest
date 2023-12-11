@@ -40,7 +40,7 @@ class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
         project = self.setup_test_project()
 
         # Create a tag for testing.
-        tag = data_utils.rand_name('tag')
+        tag = data_utils.rand_name('tag', prefix=CONF.resource_name_prefix)
         # NOTE(felipemonteiro): The response body for create is empty.
         self.project_tags_client.update_project_tag(project['id'], tag)
 
@@ -49,7 +49,8 @@ class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
             project['id'], tag)
 
         # Verify that updating the project tags works.
-        tags_to_update = [data_utils.rand_name('tag') for _ in range(3)]
+        tags_to_update = [data_utils.rand_name(
+            'tag', prefix=CONF.resource_name_prefix) for _ in range(3)]
         updated_tags = self.project_tags_client.update_all_project_tags(
             project['id'], tags_to_update)['tags']
         self.assertEqual(sorted(tags_to_update), sorted(updated_tags))

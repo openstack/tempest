@@ -36,7 +36,9 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
     def test_volume_crud_with_volume_type_and_extra_specs(self):
         """Test create/update/get/delete volume with volume_type"""
         volume_types = list()
-        vol_name = data_utils.rand_name(self.__class__.__name__ + '-volume')
+        vol_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-volume')
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -82,8 +84,12 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('4e955c3b-49db-4515-9590-0c99f8e471ad')
     def test_volume_type_create_get_delete(self):
         """Test create/get/delete volume type"""
-        name = data_utils.rand_name(self.__class__.__name__ + '-volume-type')
-        description = data_utils.rand_name("volume-type-description")
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-volume-type')
+        description = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="volume-type-description")
         proto = CONF.volume.storage_protocol
         vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -183,8 +189,12 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
         volume_type = self.create_volume_type()
 
         # New volume type details
-        name = data_utils.rand_name("volume-type")
-        description = data_utils.rand_name("volume-type-description")
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="volume-type")
+        description = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="volume-type-description")
         is_public = not volume_type['is_public']
 
         # Update volume type details

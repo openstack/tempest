@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class KeyPairsV210TestJSON(base.BaseKeypairTest):
@@ -33,7 +36,8 @@ class KeyPairsV210TestJSON(base.BaseKeypairTest):
     def _create_and_check_keypairs(self, user_id):
         key_list = list()
         for _ in range(2):
-            k_name = data_utils.rand_name('keypair')
+            k_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix, name='keypair')
             keypair = self.create_keypair(k_name,
                                           keypair_type='ssh',
                                           user_id=user_id,

@@ -15,9 +15,12 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class AllowedAddressPairTestJSON(base.BaseNetworkTest):
@@ -60,7 +63,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
                                   'mac_address': self.mac_address}]
         body = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             allowed_address_pairs=allowed_address_pairs)
         port_id = body['port']['id']
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
@@ -80,7 +84,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         # Create a port without allowed address pair
         body = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         port_id = body['port']['id']
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         port_id)
@@ -126,7 +131,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         """Update allowed address pair port with multiple ip and mac"""
         resp = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         newportid = resp['port']['id']
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         newportid)

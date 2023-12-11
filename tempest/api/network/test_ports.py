@@ -21,10 +21,13 @@ import testtools
 from tempest.api.network import base_security_groups as sec_base
 from tempest.common import custom_matchers
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
+
+CONF = config.CONF
 
 
 class PortsTestJSON(sec_base.BaseSecGroupTest):
@@ -59,7 +62,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _create_network(self, network_name=None, **kwargs):
         network_name = network_name or data_utils.rand_name(
-            self.__class__.__name__)
+            self.__class__.__name__, prefix=CONF.resource_name_prefix)
         network = self.networks_client.create_network(
             name=network_name, **kwargs)['network']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -74,7 +77,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Verify port creation
         body = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         port = body['port']
         # Schedule port deletion with verification upon test completion
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
@@ -131,7 +135,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                             **allocation_pools)
         body = self.ports_client.create_port(
             network_id=net_id,
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         body['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -190,14 +195,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create two ports
         port_1 = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         port_1['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, port_1['port']['id'])
         port_2 = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         port_2['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -251,7 +258,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         fixed_ips = [{'subnet_id': subnet['id'], 'ip_address': ip_address_1}]
         port_1 = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             fixed_ips=fixed_ips)
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         port_1['port']['id'])
@@ -260,7 +268,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         fixed_ips = [{'subnet_id': subnet['id'], 'ip_address': ip_address_2}]
         port_2 = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__),
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             fixed_ips=fixed_ips)
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         port_2['port']['id'])
@@ -319,7 +328,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                         self.routers_client.delete_router, router['id'])
         port = self.ports_client.create_port(
             network_id=network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         # Add router interface to port created above
         self.routers_client.add_router_interface(router['id'],
                                                  port_id=port['port']['id'])
@@ -393,14 +403,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             security_groups_list.append(group_create_body['security_group']
                                         ['id'])
         # Create a port
-        sec_grp_name = data_utils.rand_name('secgroup')
+        sec_grp_name = data_utils.rand_name(
+            name='secgroup', prefix=CONF.resource_name_prefix)
         security_group = sec_grps_client.create_security_group(
             name=sec_grp_name)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.security_groups_client.delete_security_group,
                         security_group['security_group']['id'])
         post_body = {
-            "name": data_utils.rand_name(self.__class__.__name__),
+            "name": data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             "security_groups": [security_group['security_group']['id']],
             "network_id": self.network['id'],
             "admin_state_up": True,
@@ -416,7 +428,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         subnet_2 = self.create_subnet(self.network)
         fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
         update_body = {
-            "name": data_utils.rand_name(self.__class__.__name__),
+            "name": data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix),
             "admin_state_up": False,
             "fixed_ips": fixed_ip_2,
             "security_groups": security_groups_list}
@@ -446,7 +459,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         the port's fixed ips.
         """
         self._update_port_with_security_groups(
-            [data_utils.rand_name('secgroup')])
+            [data_utils.rand_name('secgroup',
+                                  prefix=CONF.resource_name_prefix)])
 
     @decorators.idempotent_id('edf6766d-3d40-4621-bc6e-2521a44c257d')
     @testtools.skipUnless(
@@ -460,8 +474,10 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         the port's fixed ips.
         """
         self._update_port_with_security_groups(
-            [data_utils.rand_name('secgroup'),
-             data_utils.rand_name('secgroup')])
+            [data_utils.rand_name('secgroup',
+                                  prefix=CONF.resource_name_prefix),
+             data_utils.rand_name('secgroup',
+                                  prefix=CONF.resource_name_prefix)])
 
     @decorators.idempotent_id('13e95171-6cbd-489c-9d7c-3f9c58215c18')
     def test_create_show_delete_port_user_defined_mac(self):
@@ -469,7 +485,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # Create a port for a legal mac
         body = self.ports_client.create_port(
             network_id=self.network['id'],
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         old_port = body['port']
         free_mac_address = old_port['mac_address']
         self.ports_client.delete_port(old_port['id'])
@@ -477,7 +494,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         body = self.ports_client.create_port(
             network_id=self.network['id'],
             mac_address=free_mac_address,
-            name=data_utils.rand_name(self.__class__.__name__))
+            name=data_utils.rand_name(
+                self.__class__.__name__, prefix=CONF.resource_name_prefix))
         self.addCleanup(self.ports_client.wait_for_resource_deletion,
                         body['port']['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,

@@ -60,7 +60,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         """Test creating a server with already existing name is allowed"""
         # TODO(sdague): clear out try, we do cleanup one layer up
         server_name = data_utils.rand_name(
-            self.__class__.__name__ + '-server')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-server')
         server = self.create_test_server(name=server_name,
                                          wait_until='ACTIVE')
         id1 = server['id']
@@ -79,7 +80,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('f9e15296-d7f9-4e62-b53f-a04e89160833')
     def test_create_specify_keypair(self):
         """Test creating server with keypair"""
-        key_name = data_utils.rand_name('key')
+        key_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='key')
         self.keypairs_client.create_keypair(name=key_name)
         self.addCleanup(self.keypairs_client.delete_keypair, key_name)
         self.keypairs_client.list_keypairs()
@@ -91,7 +93,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     def _update_server_name(self, server_id, status, prefix_name='server'):
         # The server name should be changed to the provided value
-        new_name = data_utils.rand_name(prefix_name)
+        new_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name=prefix_name)
 
         # Update the server with a new name
         self.client.update_server(server_id,
@@ -159,7 +162,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         will return 400(Bad Request) if we attempt to send a name which has
         4 byte utf-8 character.
         """
-        utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
+        utf8_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=b'\xe2\x82\xa1'.decode('utf-8'))
         self.create_test_server(name=utf8_name, wait_until='ACTIVE')
 
 

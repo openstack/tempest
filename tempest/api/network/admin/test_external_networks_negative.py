@@ -54,6 +54,8 @@ class ExternalNetworksAdminNegativeTestJSON(base.BaseAdminNetworkTest):
         # create a port which will internally create an instance-ip
         self.assertRaises(lib_exc.Conflict,
                           self.admin_ports_client.create_port,
-                          name=data_utils.rand_name(self.__class__.__name__),
+                          name=data_utils.rand_name(
+                              self.__class__.__name__,
+                              prefix=CONF.resource_name_prefix),
                           network_id=CONF.network.public_network_id,
                           fixed_ips=fixed_ips)

@@ -53,7 +53,8 @@ class ImportImagesTest(base.BaseV2ImageTest):
     def _create_image(self, disk_format=None, container_format=None):
         # Create image
         uuid = '00000000-1111-2222-3333-444455556666'
-        image_name = data_utils.rand_name('image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         container_format = container_format or CONF.image.container_formats[0]
         disk_format = disk_format or CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
@@ -345,7 +346,8 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
 
     def _create_and_stage_image(self, all_stores=False):
         """Create Image & stage image file for glance-direct import method."""
-        image_name = data_utils.rand_name('test-image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test-image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
@@ -416,7 +418,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         """
 
         uuid = '00000000-1111-2222-3333-444455556666'
-        image_name = data_utils.rand_name('image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
@@ -464,7 +467,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     def test_delete_image(self):
         """Test deleting an image by image_id"""
         # Create image
-        image_name = data_utils.rand_name('image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
@@ -485,7 +489,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     def test_update_image(self):
         """Test updating an image by image_id"""
         # Create image
-        image_name = data_utils.rand_name('image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
@@ -495,7 +500,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual('queued', image['status'])
 
         # Update Image
-        new_image_name = data_utils.rand_name('new-image')
+        new_image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='new-image')
         self.client.update_image(image['id'], [
             dict(replace='/name', value=new_image_name)])
 
@@ -509,7 +515,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     def test_deactivate_reactivate_image(self):
         """Test deactivating and reactivating an image"""
         # Create image
-        image_name = data_utils.rand_name('image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         image = self.create_image(name=image_name,
                                   container_format='bare',
                                   disk_format='raw',
@@ -568,7 +575,9 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         """
         size = random.randint(1024, 4096)
         image_file = io.BytesIO(data_utils.random_bytes(size))
-        tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
+        prefix = CONF.resource_name_prefix
+        tags = [data_utils.rand_name(prefix=prefix, name='tag'),
+                data_utils.rand_name(prefix=prefix, name='tag')]
         image = cls.create_image(container_format=container_format,
                                  disk_format=disk_format,
                                  visibility='private',

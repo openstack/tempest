@@ -67,7 +67,8 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
             self.key)
 
         # create object
-        self.object_name = data_utils.rand_name(name='ObjectTemp')
+        self.object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='ObjectTemp')
         content = data_utils.arbitrary_string(size=len(self.object_name),
                                               base_text=self.object_name)
         self.object_client.create_object(self.container_name,

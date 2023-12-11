@@ -11,9 +11,12 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
@@ -68,7 +71,8 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
         namespace = self.create_namespace()
         self._create_namespace_tags(namespace)
         # Create a tag
-        tag_name = data_utils.rand_name('tag_name')
+        tag_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='tag_name')
         self.namespace_tags_client.create_namespace_tag(
             namespace=namespace['namespace'], tag_name=tag_name)
 
@@ -76,7 +80,8 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
             namespace['namespace'], tag_name)
         self.assertEqual(tag_name, body['name'])
         # Update tag definition
-        update_tag_definition = data_utils.rand_name('update-tag')
+        update_tag_definition = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='update-tag')
         body = self.namespace_tags_client.update_namespace_tag(
             namespace['namespace'], tag_name=tag_name,
             name=update_tag_definition)

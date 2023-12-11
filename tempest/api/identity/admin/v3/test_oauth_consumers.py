@@ -14,10 +14,13 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions
+
+CONF = config.CONF
 
 
 class OAUTHConsumersV3Test(base.BaseIdentityV3AdminTest):
@@ -28,7 +31,8 @@ class OAUTHConsumersV3Test(base.BaseIdentityV3AdminTest):
 
     def _create_consumer(self):
         """Creates a consumer with a random description."""
-        description = data_utils.rand_name('test_create_consumer')
+        description = data_utils.rand_name(
+            name='test_create_consumer', prefix=CONF.resource_name_prefix)
         consumer = self.oauth_consumers_client.create_consumer(
             description)['consumer']
         # cleans up created consumers after tests
@@ -70,7 +74,8 @@ class OAUTHConsumersV3Test(base.BaseIdentityV3AdminTest):
         # create a new consumer to update
         consumer = self._create_consumer()
         # create new description
-        new_description = data_utils.rand_name('test_update_consumer')
+        new_description = data_utils.rand_name(
+            name='test_update_consumer', prefix=CONF.resource_name_prefix)
         # update consumer
         self.oauth_consumers_client.update_consumer(consumer['id'],
                                                     new_description)

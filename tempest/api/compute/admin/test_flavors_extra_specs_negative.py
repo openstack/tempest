@@ -15,9 +15,12 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -30,7 +33,8 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_setup()
 
-        flavor_name = data_utils.rand_name('test_flavor')
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test_flavor')
         ram = 512
         vcpus = 1
         disk = 10

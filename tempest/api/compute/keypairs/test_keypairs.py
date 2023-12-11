@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class KeyPairsV2TestJSON(base.BaseKeypairTest):
@@ -54,7 +57,8 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('6c1d3123-4519-4742-9194-622cb1714b7d')
     def test_keypair_create_delete(self):
         """Test create/delete keypair"""
-        k_name = data_utils.rand_name('keypair')
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='keypair')
         keypair = self.create_keypair(k_name)
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
@@ -64,7 +68,8 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('a4233d5d-52d8-47cc-9a25-e1864527e3df')
     def test_get_keypair_detail(self):
         """Test getting keypair detail by keypair name"""
-        k_name = data_utils.rand_name('keypair')
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='keypair')
         self.create_keypair(k_name)
         keypair_detail = self.keypairs_client.show_keypair(k_name)['keypair']
         self.assertEqual(keypair_detail['name'], k_name,
@@ -74,7 +79,8 @@ class KeyPairsV2TestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('39c90c6a-304a-49dd-95ec-2366129def05')
     def test_keypair_create_with_pub_key(self):
         """Test creating keypair with a given public key"""
-        k_name = data_utils.rand_name('keypair')
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='keypair')
         pub_key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCs"
                    "Ne3/1ILNCqFyfYWDeTKLD6jEXC2OQHLmietMWW+/vd"
                    "aZq7KZEwO0jhglaFjU1mpqq4Gz5RX156sCTNM9vRbw"

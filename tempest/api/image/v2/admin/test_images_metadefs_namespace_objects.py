@@ -11,16 +11,21 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace objects basic functionality"""
 
     def _create_namespace_object(self, namespace):
-        object_name = data_utils.rand_name(self.__class__.__name__ + '-object')
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-object')
         namespace_object = self.namespace_objects_client.\
             create_namespace_object(namespace['namespace'], name=object_name)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -36,7 +41,8 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
         # Create a namespace object
         body = self._create_namespace_object(namespace)
         # Update a namespace object
-        up_object_name = data_utils.rand_name('update-object')
+        up_object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='update-object')
         body = self.namespace_objects_client.update_namespace_object(
             namespace['namespace'], body['name'],
             name=up_object_name)

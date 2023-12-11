@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ProjectsNegativeTestJSON(base.BaseIdentityV3AdminTest):
@@ -54,7 +57,8 @@ class ProjectsNegativeStaticTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('874c3e84-d174-4348-a16b-8c01f599561b')
     def test_project_create_duplicate(self):
         """Project names should be unique"""
-        project_name = data_utils.rand_name('project-dup')
+        project_name = data_utils.rand_name(
+            name='project-dup', prefix=CONF.resource_name_prefix)
         self.setup_test_project(name=project_name)
 
         self.assertRaises(lib_exc.Conflict,
@@ -64,7 +68,8 @@ class ProjectsNegativeStaticTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('8fba9de2-3e1f-4e77-812a-60cb68f8df13')
     def test_create_project_by_unauthorized_user(self):
         """Non-admin user should not be authorized to create a project"""
-        project_name = data_utils.rand_name('project')
+        project_name = data_utils.rand_name(
+            name='project', prefix=CONF.resource_name_prefix)
         self.assertRaises(
             lib_exc.Forbidden, self.non_admin_projects_client.create_project,
             project_name)

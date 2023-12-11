@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ServicesTestJSON(base.BaseIdentityV2AdminTest):
@@ -34,9 +37,12 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         """Test verifies the identity service create/get/delete via v2 API"""
         # GET Service
         # Creating a Service
-        name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
-        description = data_utils.rand_name('description')
+        name = data_utils.rand_name(
+            name='service', prefix=CONF.resource_name_prefix)
+        s_type = data_utils.rand_name(
+            name='type', prefix=CONF.resource_name_prefix)
+        description = data_utils.rand_name(
+            name='description', prefix=CONF.resource_name_prefix)
         service_data = self.services_client.create_service(
             name=name, type=s_type,
             description=description)['OS-KSADM:service']
@@ -70,8 +76,10 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
 
         Create a service only with name and type.
         """
-        name = data_utils.rand_name('service')
-        s_type = data_utils.rand_name('type')
+        name = data_utils.rand_name(
+            name='service', prefix=CONF.resource_name_prefix)
+        s_type = data_utils.rand_name(
+            name='type', prefix=CONF.resource_name_prefix)
         service = self.services_client.create_service(
             name=name, type=s_type)['OS-KSADM:service']
         self.assertIn('id', service)
@@ -87,9 +95,12 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         """Test Create/List/Verify/Delete of identity service via v2 API"""
         services = []
         for _ in range(3):
-            name = data_utils.rand_name('service')
-            s_type = data_utils.rand_name('type')
-            description = data_utils.rand_name('description')
+            name = data_utils.rand_name(
+                name='service', prefix=CONF.resource_name_prefix)
+            s_type = data_utils.rand_name(
+                name='type', prefix=CONF.resource_name_prefix)
+            description = data_utils.rand_name(
+                name='description', prefix=CONF.resource_name_prefix)
 
             service = self.services_client.create_service(
                 name=name, type=s_type,

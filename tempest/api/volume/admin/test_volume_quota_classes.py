@@ -21,9 +21,11 @@ from testtools import matchers
 from tempest.api.volume import base
 from tempest.common import identity
 from tempest.common import tempest_fixtures as fixtures
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes', 'backups',
               'backup_gigabytes', 'per_volume_gigabytes']
@@ -96,8 +98,11 @@ class VolumeQuotaClassesTest(base.BaseVolumeAdminTest):
                         matchers.ContainsAll(update_kwargs.items()))
 
         # Verify a new project's default quotas.
-        project_name = data_utils.rand_name('quota_class_tenant')
-        description = data_utils.rand_name('desc_')
+        project_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name='quota_class_tenant')
+        description = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='desc_')
         project_id = identity.identity_utils(self.os_admin).create_project(
             name=project_name, description=description)['id']
         self.addCleanup(identity.identity_utils(self.os_admin).delete_project,

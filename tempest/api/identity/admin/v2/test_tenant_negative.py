@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
@@ -77,7 +80,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('af16f44b-a849-46cb-9f13-a751c388f739')
     def test_tenant_create_duplicate(self):
         """Test tenant names should be unique via v2 API"""
-        tenant_name = data_utils.rand_name(name='tenant')
+        tenant_name = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         self.setup_test_tenant(name=tenant_name)
         self.assertRaises(lib_exc.Conflict, self.tenants_client.create_tenant,
                           name=tenant_name)
@@ -89,7 +93,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
 
         Non-admin user should not be authorized to create a tenant via v2 API.
         """
-        tenant_name = data_utils.rand_name(name='tenant')
+        tenant_name = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.Forbidden,
                           self.non_admin_tenants_client.create_tenant,
                           name=tenant_name)
@@ -98,7 +103,8 @@ class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('a3ee9d7e-6920-4dd5-9321-d4b2b7f0a638')
     def test_create_tenant_request_without_token(self):
         """Test creating tenant without a token via v2 API is not allowed"""
-        tenant_name = data_utils.rand_name(name='tenant')
+        tenant_name = data_utils.rand_name(
+            name='tenant', prefix=CONF.resource_name_prefix)
         token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(lib_exc.Unauthorized,

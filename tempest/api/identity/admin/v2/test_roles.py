@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class RolesTestJSON(base.BaseIdentityV2AdminTest):
@@ -26,7 +29,8 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         super(RolesTestJSON, cls).resource_setup()
         cls.roles = list()
         for _ in range(5):
-            role_name = data_utils.rand_name(name='role')
+            role_name = data_utils.rand_name(
+                name='role', prefix=CONF.resource_name_prefix)
             role = cls.roles_client.create_role(name=role_name)['role']
             cls.addClassResourceCleanup(
                 test_utils.call_and_ignore_notfound_exc,
@@ -57,7 +61,8 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('c62d909d-6c21-48c0-ae40-0a0760e6db5e')
     def test_role_create_delete(self):
         """Role should be created, verified, and deleted."""
-        role_name = data_utils.rand_name(name='role-test')
+        role_name = data_utils.rand_name(
+            name='role-test', prefix=CONF.resource_name_prefix)
         body = self.roles_client.create_role(name=role_name)['role']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.roles_client.delete_role, body['id'])

@@ -52,7 +52,8 @@ class TagsTest(base.BaseNetworkTest):
     @decorators.idempotent_id('ee76bfaf-ac94-4d74-9ecc-4bbd4c583cb1')
     def test_create_list_show_update_delete_tags(self):
         """Validate that creating a tag on a network resource works"""
-        tag_name = data_utils.rand_name(self.__class__.__name__ + '-Tag')
+        tag_name = data_utils.rand_name(
+            self.__class__.__name__ + '-Tag', prefix=CONF.resource_name_prefix)
         self.tags_client.create_tag('networks', self.network['id'], tag_name)
         self.addCleanup(self.tags_client.delete_all_tags, 'networks',
                         self.network['id'])
@@ -66,7 +67,8 @@ class TagsTest(base.BaseNetworkTest):
 
         # Generate 3 new tag names.
         replace_tags = [data_utils.rand_name(
-            self.__class__.__name__ + '-Tag') for _ in range(3)]
+            self.__class__.__name__ + '-Tag',
+            prefix=CONF.resource_name_prefix) for _ in range(3)]
 
         # Replace the current tag with the 3 new tags and validate that the
         # network resource has the 3 new tags.
@@ -132,7 +134,8 @@ class TagsExtTest(base.BaseNetworkTest):
         cls.port = cls.create_port(cls.network)
         cls.router = cls.create_router()
 
-        subnetpool_name = data_utils.rand_name(cls.__name__ + '-Subnetpool')
+        subnetpool_name = data_utils.rand_name(
+            cls.__name__ + '-Subnetpool', prefix=CONF.resource_name_prefix)
         prefix = CONF.network.default_network
         cls.subnetpool = cls.subnetpools_client.create_subnetpool(
             name=subnetpool_name, prefixes=prefix)['subnetpool']
@@ -145,7 +148,9 @@ class TagsExtTest(base.BaseNetworkTest):
         tag_names = []
 
         for resource in self.SUPPORTED_RESOURCES:
-            tag_name = data_utils.rand_name(self.__class__.__name__ + '-Tag')
+            tag_name = data_utils.rand_name(
+                self.__class__.__name__ + '-Tag',
+                prefix=CONF.resource_name_prefix)
             tag_names.append(tag_name)
             resource_object = getattr(self, resource[:-1])
 
@@ -188,7 +193,8 @@ class TagsExtTest(base.BaseNetworkTest):
         for resource in self.SUPPORTED_RESOURCES:
             # Generate 3 new tag names.
             replace_tags = [data_utils.rand_name(
-                self.__class__.__name__ + '-Tag') for _ in range(3)]
+                self.__class__.__name__ + '-Tag',
+                prefix=CONF.resource_name_prefix) for _ in range(3)]
 
             # Replace the current tag with the 3 new tags and validate that the
             # current resource has the 3 new tags.

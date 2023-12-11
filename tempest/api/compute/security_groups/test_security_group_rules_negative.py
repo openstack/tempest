@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.compute.security_groups import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
@@ -59,7 +62,8 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         with parent group id which is not integer.
         """
         # Adding rules to the non int Security Group id
-        parent_group_id = data_utils.rand_name('non_int_id')
+        parent_group_id = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='non_int_id')
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
@@ -105,7 +109,8 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
-        ip_protocol = data_utils.rand_name('999')
+        ip_protocol = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='999')
         from_port = 22
         to_port = 22
 

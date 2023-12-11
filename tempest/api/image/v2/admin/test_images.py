@@ -63,7 +63,9 @@ class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
     @decorators.idempotent_id('f6ab4aa0-035e-4664-9f2d-c57c6df50605')
     def test_list_public_image(self):
         """Test create image as admin and list public image as none admin"""
-        name = data_utils.rand_name(self.__class__.__name__ + '-Image')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-Image')
         image = self.admin_client.create_image(
             name=name,
             container_format='bare',
@@ -107,7 +109,8 @@ class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
             raise self.skipException('Either copy-image import method or '
                                      'multistore is not available')
         uuid = data_utils.rand_uuid()
-        image_name = data_utils.rand_name('copy-image')
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='copy-image')
         container_format = CONF.image.container_formats[0]
         disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,

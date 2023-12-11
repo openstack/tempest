@@ -56,8 +56,12 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         super(ListImageFiltersTestJSON, cls).resource_setup()
 
         def _create_image():
+            image_name_kwargs = {
+                'prefix': CONF.resource_name_prefix,
+                'name': cls.__name__ + '-image'
+            }
             params = {
-                'name': data_utils.rand_name(cls.__name__ + '-image'),
+                'name': data_utils.rand_name(**image_name_kwargs),
                 'container_format': 'bare',
                 'disk_format': 'raw',
                 'visibility': 'private'

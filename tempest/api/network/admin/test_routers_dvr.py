@@ -17,9 +17,12 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class RoutersTestDVR(base.BaseAdminNetworkTest):
@@ -41,7 +44,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
     @classmethod
     def resource_setup(cls):
         super(RoutersTestDVR, cls).resource_setup()
-        name = data_utils.rand_name('pretest-check')
+        name = data_utils.rand_name(
+            name='pretest-check', prefix=CONF.resource_name_prefix)
         router = cls.admin_routers_client.create_router(name=name)
         cls.admin_routers_client.delete_router(router['router']['id'])
         if 'distributed' not in router['router']:
@@ -60,7 +64,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         The router is created and the "distributed" attribute is
         set to True
         """
-        name = data_utils.rand_name('router')
+        name = data_utils.rand_name(
+            name='router', prefix=CONF.resource_name_prefix)
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=True)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -81,7 +86,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         set to False, thus making it a "Centralized Virtual Router"
         as opposed to a "Distributed Virtual Router"
         """
-        name = data_utils.rand_name('router')
+        name = data_utils.rand_name(
+            name='router', prefix=CONF.resource_name_prefix)
         router = self.admin_routers_client.create_router(name=name,
                                                          distributed=False)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
@@ -105,7 +111,8 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         set to False. Once the router is updated, the distributed
         attribute will be set to True
         """
-        name = data_utils.rand_name('router')
+        name = data_utils.rand_name(
+            name='router', prefix=CONF.resource_name_prefix)
         project_id = self.routers_client.project_id
         # router needs to be in admin state down in order to be upgraded to DVR
         # l3ha routers are not upgradable to dvr, make it explicitly non ha

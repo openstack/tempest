@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
@@ -28,7 +31,8 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def resource_setup(cls):
         super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
-        flavor_name = data_utils.rand_name('test_flavor')
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='test_flavor')
         ram = 512
         vcpus = 1
         disk = 10
@@ -139,7 +143,9 @@ class FlavorMetadataValidation(base.BaseV2ComputeAdminTest):
     @decorators.idempotent_id('d3114f03-b0f2-4dc7-be11-70c0abc178b3')
     def test_flavor_update_with_custom_namespace(self):
         """Test flavor creation with a custom namespace, key and value"""
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        flavor_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.flavor_name_prefix)
         flavor_id = self.create_flavor(ram=self.ram,
                                        vcpus=self.vcpus,
                                        disk=self.disk,

@@ -15,8 +15,11 @@
 
 from tempest.api.compute import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
@@ -57,9 +60,11 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         # List of all security groups created
         security_group_list = []
         # Create two security groups for a non-admin tenant
+        prefix = CONF.resource_name_prefix
         for _ in range(2):
-            name = data_utils.rand_name('securitygroup')
-            description = data_utils.rand_name('description')
+            name = data_utils.rand_name(prefix=prefix, name='securitygroup')
+            description = data_utils.rand_name(
+                prefix=prefix, name='description')
             securitygroup = self.client.create_security_group(
                 name=name, description=description)['security_group']
             self.addCleanup(self._delete_security_group,
@@ -69,8 +74,9 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         client_tenant_id = securitygroup['tenant_id']
         # Create two security groups for admin tenant
         for _ in range(2):
-            name = data_utils.rand_name('securitygroup')
-            description = data_utils.rand_name('description')
+            name = data_utils.rand_name(prefix=prefix, name='securitygroup')
+            description = data_utils.rand_name(
+                prefix=prefix, name='description')
             adm_securitygroup = self.adm_client.create_security_group(
                 name=name, description=description)['security_group']
             self.addCleanup(self._delete_security_group,

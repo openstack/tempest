@@ -223,7 +223,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             `compute.create_test_server` call.
         """
         if 'name' not in kwargs:
-            kwargs['name'] = data_utils.rand_name(cls.__name__ + "-server")
+            kwargs['name'] = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=cls.__name__ + "-server")
 
         request_version = api_version_request.APIVersionRequest(
             cls.request_microversion)
@@ -260,10 +262,13 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     @classmethod
     def create_security_group(cls, name=None, description=None):
+        prefix = CONF.resource_name_prefix
         if name is None:
-            name = data_utils.rand_name(cls.__name__ + "-securitygroup")
+            name = data_utils.rand_name(
+                prefix=prefix, name=cls.__name__ + "-securitygroup")
         if description is None:
-            description = data_utils.rand_name('description')
+            description = data_utils.rand_name(
+                prefix=prefix, name='description')
         body = cls.security_groups_client.create_security_group(
             name=name, description=description)['security_group']
         cls.addClassResourceCleanup(
@@ -276,7 +281,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     @classmethod
     def create_test_server_group(cls, name="", policy=None):
         if not name:
-            name = data_utils.rand_name(cls.__name__ + "-Server-Group")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=cls.__name__ + "-Server-Group")
         if cls.is_requested_microversion_compatible('2.63'):
             policy = policy or ['affinity']
             if not isinstance(policy, list):
@@ -324,8 +331,11 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         If compute microversion >= 2.36, the returned image response will
         be from the image service API rather than the compute image proxy API.
         """
-        name = kwargs.pop('name',
-                          data_utils.rand_name(cls.__name__ + "-image"))
+        name = kwargs.pop(
+            'name',
+            data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=cls.__name__ + "-image"))
         wait_until = kwargs.pop('wait_until', None)
         wait_for_server = kwargs.pop('wait_for_server', True)
 
@@ -501,7 +511,9 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         if 'size' not in kwargs:
             kwargs['size'] = CONF.volume.volume_size
         if 'display_name' not in kwargs:
-            vol_name = data_utils.rand_name(cls.__name__ + '-volume')
+            vol_name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=cls.__name__ + '-volume')
             kwargs['display_name'] = vol_name
         if image_ref is not None:
             kwargs['imageRef'] = image_ref
@@ -595,7 +607,8 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def create_volume_snapshot(self, volume_id, name=None, description=None,
                                metadata=None, force=False):
         name = name or data_utils.rand_name(
-            self.__class__.__name__ + '-snapshot')
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-snapshot')
         snapshot = self.snapshots_client.create_snapshot(
             volume_id=volume_id,
             force=force,
@@ -652,7 +665,9 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     def create_flavor(self, ram, vcpus, disk, name=None,
                       is_public='True', **kwargs):
         if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + "-flavor")
+            name = data_utils.rand_name(
+                prefix=CONF.resource_name_prefix,
+                name=self.__class__.__name__ + "-flavor")
         id = kwargs.pop('id', data_utils.rand_int_id(start=1000))
         client = self.admin_flavors_client
         flavor = client.create_flavor(

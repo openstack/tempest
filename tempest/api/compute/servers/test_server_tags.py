@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ServerTagsTestJSON(base.BaseV2ComputeTest):
@@ -51,7 +54,8 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
         self.assertEmpty(fetched_tags)
 
         # Add server tag to the server.
-        assigned_tag = data_utils.rand_name('tag')
+        assigned_tag = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='tag')
         self._update_server_tags(self.server['id'], assigned_tag)
 
         # Check that added tag exists.
@@ -67,11 +71,16 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     def test_update_all_tags(self):
         """Test updating all server tags"""
         # Add server tags to the server.
-        tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
+        kwargs = {
+            'prefix': CONF.resource_name_prefix,
+            'name': 'tag'
+        }
+        tags = [data_utils.rand_name(**kwargs), data_utils.rand_name(**kwargs)]
         self._update_server_tags(self.server['id'], tags)
 
         # Replace tags with new tags and check that they are present.
-        new_tags = [data_utils.rand_name('tag'), data_utils.rand_name('tag')]
+        new_tags = [data_utils.rand_name(**kwargs),
+                    data_utils.rand_name(**kwargs)]
         replaced_tags = self.client.update_all_tags(
             self.server['id'], new_tags)['tags']
         self.assertCountEqual(new_tags, replaced_tags)
@@ -83,9 +92,13 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('a63b2a74-e918-4b7c-bcab-10c855f3a57e')
     def test_delete_all_tags(self):
         """Test deleting all server tags"""
+        kwargs = {
+            'prefix': CONF.resource_name_prefix,
+            'name': 'tag'
+        }
         # Add server tags to the server.
-        assigned_tags = [data_utils.rand_name('tag'),
-                         data_utils.rand_name('tag')]
+        assigned_tags = [data_utils.rand_name(**kwargs),
+                         data_utils.rand_name(**kwargs)]
         self._update_server_tags(self.server['id'], assigned_tags)
 
         # Delete tags from the server and check that they were deleted.
@@ -97,7 +110,8 @@ class ServerTagsTestJSON(base.BaseV2ComputeTest):
     def test_check_tag_existence(self):
         """Test checking server tag existence"""
         # Add server tag to the server.
-        assigned_tag = data_utils.rand_name('tag')
+        assigned_tag = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='tag')
         self._update_server_tags(self.server['id'], assigned_tag)
 
         # Check that added tag exists. Throws a 404 if not found, else a 204,

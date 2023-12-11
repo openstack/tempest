@@ -66,7 +66,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             MIN_RAM = 'min_ram'
 
         # Create a new image
-        name = data_utils.rand_name('image')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='image')
         meta = {'image_type': 'test'}
         image = self.create_image_from_server(self.server_id, name=name,
                                               metadata=meta,
@@ -104,6 +105,8 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         # We use a string with 3 byte utf-8 character due to nova/glance which
         # will return 400(Bad Request) if we attempt to send a name which has
         # 4 byte utf-8 character.
-        utf8_name = data_utils.rand_name(b'\xe2\x82\xa1'.decode('utf-8'))
+        utf8_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=b'\xe2\x82\xa1'.decode('utf-8'))
         self.create_image_from_server(self.server_id, name=utf8_name,
                                       wait_until='ACTIVE')

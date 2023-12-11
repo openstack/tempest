@@ -187,8 +187,9 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     def test_image_defined_boot_from_volume(self):
         # create an instance from image-backed volume
         volume_origin = self.create_volume_from_image()
-        name = data_utils.rand_name(self.__class__.__name__ +
-                                    '-volume-backed-server')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-volume-backed-server')
         instance1 = self.boot_instance_from_resource(
             source_id=volume_origin['id'],
             source_type='volume',
@@ -205,8 +206,9 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         # about the volume snapshot. The compute service will use this to
         # create a volume from the volume snapshot and use that as the root
         # disk for the server.
-        name = data_utils.rand_name(self.__class__.__name__ +
-                                    '-image-snapshot-server')
+        name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=self.__class__.__name__ + '-image-snapshot-server')
         instance2 = self.create_server(image_id=image['id'], name=name,
                                        wait_until='SSHABLE')
 

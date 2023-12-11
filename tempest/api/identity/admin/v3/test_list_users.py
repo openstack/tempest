@@ -45,14 +45,15 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @classmethod
     def resource_setup(cls):
         super(UsersV3TestJSON, cls).resource_setup()
-        alt_user = data_utils.rand_name('test_user')
+        prefix = CONF.resource_name_prefix
+        alt_user = data_utils.rand_name(name='test_user', prefix=prefix)
         alt_password = data_utils.rand_password()
         cls.alt_email = alt_user + '@testmail.tm'
         # Create a domain
         cls.domain = cls.create_domain()
         # Create user with Domain
         cls.users = list()
-        u1_name = data_utils.rand_name('test_user')
+        u1_name = data_utils.rand_name(name='test_user', prefix=prefix)
         cls.domain_enabled_user = cls.users_client.create_user(
             name=u1_name, password=alt_password,
             email=cls.alt_email, domain_id=cls.domain['id'])['user']
@@ -60,7 +61,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                     cls.domain_enabled_user['id'])
         cls.users.append(cls.domain_enabled_user)
         # Create default not enabled user
-        u2_name = data_utils.rand_name('test_user')
+        u2_name = data_utils.rand_name(name='test_user', prefix=prefix)
         cls.non_domain_enabled_user = cls.users_client.create_user(
             name=u2_name, password=alt_password,
             email=cls.alt_email, enabled=False)['user']

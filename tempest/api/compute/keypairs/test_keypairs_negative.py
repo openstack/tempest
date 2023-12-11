@@ -15,9 +15,12 @@
 #    under the License.
 
 from tempest.api.compute.keypairs import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
@@ -35,7 +38,9 @@ class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('7cc32e47-4c42-489d-9623-c5e2cb5a2fa5')
     def test_keypair_delete_nonexistent_key(self):
         """Test non-existent key deletion should throw a proper error"""
-        k_name = data_utils.rand_name("keypair-non-existent")
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="keypair-non-existent")
         self.assertRaises(lib_exc.NotFound,
                           self.keypairs_client.delete_keypair,
                           k_name)
@@ -60,7 +65,8 @@ class KeyPairsNegativeTestJSON(base.BaseKeypairTest):
     @decorators.idempotent_id('0359a7f1-f002-4682-8073-0c91e4011b7c')
     def test_create_keypair_with_duplicate_name(self):
         """Test keypairs with duplicate names should not be created"""
-        k_name = data_utils.rand_name('keypair')
+        k_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='keypair')
         self.keypairs_client.create_keypair(name=k_name)
         # Now try the same keyname to create another key
         self.assertRaises(lib_exc.Conflict, self.create_keypair,

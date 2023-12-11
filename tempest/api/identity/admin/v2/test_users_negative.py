@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
@@ -25,7 +28,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def resource_setup(cls):
         super(UsersNegativeTestJSON, cls).resource_setup()
-        cls.alt_user = data_utils.rand_name('test_user')
+        cls.alt_user = data_utils.rand_name(
+            'test_user', prefix=CONF.resource_name_prefix)
         cls.alt_password = data_utils.rand_password()
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
@@ -106,7 +110,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user_with_enabled_non_bool(self):
         """Creating a user with invalid enabled para via v2 API should fail"""
         tenant = self.setup_test_tenant()
-        name = data_utils.rand_name('test_user')
+        name = data_utils.rand_name(
+            'test_user', prefix=CONF.resource_name_prefix)
         self.assertRaises(lib_exc.BadRequest, self.users_client.create_user,
                           name=name, password=self.alt_password,
                           tenantId=tenant['id'],
@@ -116,7 +121,8 @@ class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     @decorators.idempotent_id('3d07e294-27a0-4144-b780-a2a1bf6fee19')
     def test_update_user_for_non_existent_user(self):
         """Updating a non-existent user via v2 API should fail"""
-        user_name = data_utils.rand_name('user')
+        user_name = data_utils.rand_name(
+            'user', prefix=CONF.resource_name_prefix)
         non_existent_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound, self.users_client.update_user,
                           non_existent_id, name=user_name)

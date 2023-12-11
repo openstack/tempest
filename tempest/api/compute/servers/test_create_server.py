@@ -53,7 +53,9 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
-        cls.name = data_utils.rand_name(cls.__name__ + '-server')
+        cls.name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-server')
         cls.password = data_utils.rand_password()
         disk_config = cls.disk_config
         server_initial = cls.create_test_server(

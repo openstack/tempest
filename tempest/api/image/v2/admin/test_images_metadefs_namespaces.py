@@ -14,10 +14,13 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
@@ -30,7 +33,8 @@ class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
         body = self.resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']
         name = [{'name': resource_name}]
-        namespace_name = data_utils.rand_name('namespace')
+        namespace_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='namespace')
         # create the metadef namespace
         body = self.namespaces_client.create_namespace(
             namespace=namespace_name,

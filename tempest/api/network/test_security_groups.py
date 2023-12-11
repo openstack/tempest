@@ -15,9 +15,12 @@
 
 from tempest.api.network import base_security_groups as base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class SecGroupTest(base.BaseSecGroupTest):
@@ -91,7 +94,8 @@ class SecGroupTest(base.BaseSecGroupTest):
             secgroup_list.append(secgroup['id'])
         self.assertIn(group_create_body['security_group']['id'], secgroup_list)
         # Update the security group
-        new_name = data_utils.rand_name('security-')
+        new_name = data_utils.rand_name(
+            'security-', prefix=CONF.resource_name_prefix)
         new_description = data_utils.rand_name('security-description')
         update_body = self.security_groups_client.update_security_group(
             group_create_body['security_group']['id'],

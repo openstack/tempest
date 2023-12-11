@@ -50,7 +50,8 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
     def test_create_list_show_update_delete_subnetpools(self):
         """Test create/list/show/update/delete of subnet pools"""
-        subnetpool_name = data_utils.rand_name('subnetpools')
+        subnetpool_name = data_utils.rand_name(
+            name='subnetpools', prefix=CONF.resource_name_prefix)
         # create subnet pool
         prefix = CONF.network.default_network
         body = self.subnetpools_client.create_subnetpool(name=subnetpool_name,
@@ -64,7 +65,8 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
         body = self.subnetpools_client.show_subnetpool(subnetpool_id)
         self.assertEqual(subnetpool_name, body["subnetpool"]["name"])
         # update the subnet pool
-        subnetpool_name = data_utils.rand_name('subnetpools_update')
+        subnetpool_name = data_utils.rand_name(
+            name='subnetpools_update', prefix=CONF.resource_name_prefix)
         body = self.subnetpools_client.update_subnetpool(subnetpool_id,
                                                          name=subnetpool_name)
         self.assertEqual(subnetpool_name, body["subnetpool"]["name"])

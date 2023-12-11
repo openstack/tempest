@@ -14,10 +14,13 @@
 #    under the License.
 
 from tempest.api.identity import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
@@ -150,7 +153,8 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
         domain, _ = self._create_domain_and_config(self.custom_config)
 
         # Check that updating configuration groups work.
-        new_driver = data_utils.rand_name('driver')
+        new_driver = data_utils.rand_name(
+            name='driver', prefix=CONF.resource_name_prefix)
         new_limit = data_utils.rand_int_id(0, 100)
         new_group_config = {'identity': {'driver': new_driver,
                                          'list_limit': new_limit}}
@@ -162,7 +166,8 @@ class DomainConfigurationTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_limit, updated_config['identity']['list_limit'])
 
         # Check that updating individual configuration group options work.
-        new_driver = data_utils.rand_name('driver')
+        new_driver = data_utils.rand_name(
+            name='driver', prefix=CONF.resource_name_prefix)
 
         updated_config = self.client.update_domain_group_option_config(
             domain['id'], 'identity', 'driver', driver=new_driver)['config']

@@ -19,9 +19,12 @@ from urllib import parse as urlparse
 
 from tempest.api.object_storage import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+CONF = config.CONF
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
@@ -34,7 +37,8 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
     def resource_setup(cls):
         super(ObjectFormPostNegativeTest, cls).resource_setup()
         cls.container_name = cls.create_container()
-        cls.object_name = data_utils.rand_name(name='ObjectTemp')
+        cls.object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name='ObjectTemp')
 
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}

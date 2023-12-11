@@ -48,17 +48,23 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         else:
             cls.fixed_network_name = None
         network_kwargs = fixed_network.set_networks_kwarg(network)
-        cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
+        cls.s1_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-instance')
         cls.s1 = cls.create_test_server(name=cls.s1_name, **network_kwargs)
 
-        cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
+        cls.s2_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-instance')
         # If image_ref_alt is "" or None then we still want to boot a server
         # but we rely on `testtools.skipUnless` decorator to actually skip
         # the irrelevant tests.
         cls.s2 = cls.create_test_server(
             name=cls.s2_name, image_id=cls.image_ref_alt or cls.image_ref)
 
-        cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
+        cls.s3_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name=cls.__name__ + '-instance')
         cls.s3 = cls.create_test_server(name=cls.s3_name,
                                         flavor=cls.flavor_ref_alt,
                                         wait_until='ACTIVE')
