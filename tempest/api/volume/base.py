@@ -202,7 +202,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
                 cont = data_utils.rand_name(
                     prefix=CONF.resource_name_prefix,
                     name=cont_name)
-                kwargs['container'] = cont
+                kwargs['container'] = cont.lower()
 
             self.addCleanup(object_storage.delete_containers,
                             kwargs['container'], container_client,

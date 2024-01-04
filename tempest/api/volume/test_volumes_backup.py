@@ -82,7 +82,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         if CONF.volume.backup_driver == "swift":
             kwargs["container"] = data_utils.rand_name(
                 prefix=CONF.resource_name_prefix,
-                name=self.__class__.__name__ + '-Backup-container')
+                name=self.__class__.__name__ + '-backup-container').lower()
         backup = self.create_backup(volume_id=volume['id'], **kwargs)
         self.assertEqual(kwargs["name"], backup['name'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
