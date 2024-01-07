@@ -75,7 +75,6 @@ NON_ACTIVE_LIST = [
     'x/networking-l2gw-tempest-plugin'
     'x/novajoin-tempest-plugin'
     'x/ranger-tempest-plugin'
-    'x/tap-as-a-service-tempest-plugin'
     'x/trio2o'
     # No changes are merging in this
     # https://review.opendev.org/q/project:x%252Fnetworking-fortinet
