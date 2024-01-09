@@ -146,6 +146,36 @@ class TestImagesClient(base.BaseServiceTest):
         ]
     }
 
+    FAKE_DELETE_IMAGE_FROM_STORE = {
+        "id": "e485aab9-0907-4973-921c-bb6da8a8fcf8",
+        "name": u"\u2740(*\xb4\u25e2`*)\u2740",
+        "status": "active",
+        "visibility": "public",
+        "size": 2254249,
+        "checksum": "2cec138d7dae2aa59038ef8c9aec2390",
+        "tags": [
+            "fedora",
+            "beefy"
+        ],
+        "created_at": "2012-08-10T19:23:50Z",
+        "updated_at": "2012-08-12T11:11:33Z",
+        "self": "/v2/images/da3b75d9-3f4a-40e7-8a2c-bfab23927dea",
+        "file": "/v2/images/da3b75d9-3f4a-40e7-8a2c-bfab23927"
+                "dea/file",
+        "schema": "/v2/schemas/image",
+        "owner": None,
+        "min_ram": None,
+        "min_disk": None,
+        "disk_format": None,
+        "virtual_size": None,
+        "container_format": None,
+        "os_hash_algo": "sha512",
+        "os_hash_value": "ef7d1ed957ffafefb324d50ebc6685ed03d0e645d",
+        "os_hidden": False,
+        "protected": False,
+        "stores": ["store-1", "store-2"],
+    }
+
     FAKE_TAG_NAME = "fake tag"
 
     def setUp(self):
@@ -294,3 +324,12 @@ class TestImagesClient(base.BaseServiceTest):
             self.FAKE_SHOW_IMAGE_TASKS,
             True,
             image_id="e485aab9-0907-4973-921c-bb6da8a8fcf8")
+
+    def test_delete_image_from_store(self):
+        self.check_service_client_function(
+            self.client.delete_image_from_store,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            image_id=self.FAKE_DELETE_IMAGE_FROM_STORE["id"],
+            store_name=self.FAKE_DELETE_IMAGE_FROM_STORE["stores"][0],
+            status=204)

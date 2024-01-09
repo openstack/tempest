@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import io
 import time
 
 from tempest import config
@@ -94,6 +95,36 @@ class BaseV2ImageTest(BaseImageTest):
         self.addCleanup(self.namespaces_client.delete_namespace,
                         namespace_name)
         return namespace
+
+    def create_and_stage_image(self, all_stores=False):
+        """Create Image & stage image file for glance-direct import method."""
+        image_name = data_utils.rand_name('test-image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private')
+        self.assertEqual('queued', image['status'])
+
+        self.client.stage_image_file(
+            image['id'],
+            io.BytesIO(data_utils.random_bytes()))
+        # Check image status is 'uploading'
+        body = self.client.show_image(image['id'])
+        self.assertEqual(image['id'], body['id'])
+        self.assertEqual('uploading', body['status'])
+
+        if all_stores:
+            stores_list = ','.join([store['id']
+                                    for store in self.available_stores
+                                    if store.get('read-only') != 'true'])
+        else:
+            stores = [store['id'] for store in self.available_stores
+                      if store.get('read-only') != 'true']
+            stores_list = stores[::max(1, len(stores) - 1)]
+
+        return body, stores_list
 
     @classmethod
     def get_available_stores(cls):

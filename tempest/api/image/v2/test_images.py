@@ -344,37 +344,6 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
                 'configured %s' % (cls.available_import_methods,
                                    cls.available_stores))
 
-    def _create_and_stage_image(self, all_stores=False):
-        """Create Image & stage image file for glance-direct import method."""
-        image_name = data_utils.rand_name(
-            prefix=CONF.resource_name_prefix, name='test-image')
-        container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
-        image = self.create_image(name=image_name,
-                                  container_format=container_format,
-                                  disk_format=disk_format,
-                                  visibility='private')
-        self.assertEqual('queued', image['status'])
-
-        self.client.stage_image_file(
-            image['id'],
-            io.BytesIO(data_utils.random_bytes()))
-        # Check image status is 'uploading'
-        body = self.client.show_image(image['id'])
-        self.assertEqual(image['id'], body['id'])
-        self.assertEqual('uploading', body['status'])
-
-        if all_stores:
-            stores_list = ','.join([store['id']
-                                    for store in self.available_stores
-                                    if store.get('read-only') != 'true'])
-        else:
-            stores = [store['id'] for store in self.available_stores
-                      if store.get('read-only') != 'true']
-            stores_list = stores[::max(1, len(stores) - 1)]
-
-        return body, stores_list
-
     @decorators.idempotent_id('bf04ff00-3182-47cb-833a-f1c6767b47fd')
     def test_glance_direct_import_image_to_all_stores(self):
         """Test image is imported in all available stores
@@ -382,7 +351,7 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
         Create image, import image to all available stores using glance-direct
         import method and verify that import succeeded.
         """
-        image, stores = self._create_and_stage_image(all_stores=True)
+        image, stores = self.create_and_stage_image(all_stores=True)
 
         self.client.image_import(
             image['id'], method='glance-direct', all_stores=True)
@@ -397,7 +366,7 @@ class MultiStoresImportImagesTest(base.BaseV2ImageTest):
         Create image, import image to specified store(s) using glance-direct
         import method and verify that import succeeded.
         """
-        image, stores = self._create_and_stage_image()
+        image, stores = self.create_and_stage_image()
         self.client.image_import(image['id'], method='glance-direct',
                                  stores=stores)
 

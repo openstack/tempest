@@ -311,6 +311,36 @@ def wait_for_image_copied_to_stores(client, image_id):
     raise lib_exc.TimeoutException(message)
 
 
+def wait_for_image_deleted_from_store(client, image, available_stores,
+                                      image_store_deleted):
+    """Waits for an image to be deleted from specific store.
+
+    API will not allow deletion of the last location for an image.
+    This return image if image deleted from store.
+    """
+
+    # Check if image have last store location
+    if len(available_stores) == 1:
+        exc_cls = lib_exc.OtherRestClientException
+        message = ('Delete from last store location not allowed'
+                   % (image, image_store_deleted))
+        raise exc_cls(message)
+    start = int(time.time())
+    while int(time.time()) - start < client.build_timeout:
+        image = client.show_image(image['id'])
+        image_stores = image['stores'].split(",")
+        if image_store_deleted not in image_stores:
+            return
+        time.sleep(client.build_interval)
+    message = ('Failed to delete %s from requested store location: %s '
+               'within the required time: (%s s)' %
+               (image, image_store_deleted, client.build_timeout))
+    caller = test_utils.find_test_caller()
+    if caller:
+        message = '(%s) %s' % (caller, message)
+    raise exc_cls(message)
+
+
 def wait_for_volume_resource_status(client, resource_id, status,
                                     server_id=None, servers_client=None):
     """Waits for a volume resource to reach a given status.

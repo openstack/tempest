@@ -292,3 +292,15 @@ class ImagesClient(rest_client.RestClient):
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
+
+    def delete_image_from_store(self, image_id, store_name):
+        """Delete image from store
+
+        For a full list of available parameters,
+        please refer to the official API reference:
+        https://docs.openstack.org/api-ref/image/v2/#delete-image-from-store
+        """
+        url = 'stores/%s/%s' % (store_name, image_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
+        return rest_client.ResponseBody(resp)
