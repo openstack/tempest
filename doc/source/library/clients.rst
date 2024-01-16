@@ -6,11 +6,11 @@ Service Clients Usage
 Tests make requests against APIs using service clients. Service clients are
 specializations of the ``RestClient`` class. The service clients that cover the
 APIs exposed by a service should be grouped in a service clients module.
-A service clients module is python module where all service clients are
+A service clients module is a Python module where all service clients are
 defined. If major API versions are available, submodules should be defined,
 one for each version.
 
-The ``ClientsFactory`` class helps initializing all clients of a specific
+The ``ClientsFactory`` class helps to initialize all clients of a specific
 service client module from a set of shared parameters.
 
 The ``ServiceClients`` class provides a convenient way to get access to all

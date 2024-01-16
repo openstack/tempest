@@ -14,8 +14,9 @@ with Tempest.
 Communication
 ~~~~~~~~~~~~~
 * IRC channel ``#openstack-qa`` at OFTC
-* Mailing list (prefix subjects with ``[qa]`` for faster responses)
-  http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-discuss
+* `Mailing list <https://lists.openstack.org/mailman3/lists/openstack-discuss.lists.openstack.org/>`_
+  (prefix subjects with ``[qa]`` for faster responses)
+
 
 Contacting the Core Team
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,25 +27,29 @@ New Feature Planning
 ~~~~~~~~~~~~~~~~~~~~
 If you want to propose a new feature please read `Feature Proposal Process`_
 Tempest features are tracked on `Launchpad BP <https://blueprints.launchpad.net/tempest>`_.
+It also helps to bring the feature up during the next PTG and contact
+`the current PTL of QA project <https://governance.openstack.org/tc/reference/projects/>`_.
+Information about PTG is always posted on `the Mailing list
+<https://lists.openstack.org/mailman3/lists/openstack-discuss.lists.openstack.org/>`_.
 
 Task Tracking
 ~~~~~~~~~~~~~
 We track our tasks in `Launchpad <https://bugs.launchpad.net/tempest>`_.
 
-If you're looking for some smaller, easier work item to pick up and get started
+If you're looking for some smaller, easier work items to pick up and get started
 on, search for the 'low-hanging-fruit' tag.
 
 Reporting a Bug
 ~~~~~~~~~~~~~~~
-You found an issue and want to make sure we are aware of it? You can do so on
-`Launchpad <https://bugs.launchpad.net/tempest/+filebug>`__.
+Have you found an issue and want to make sure we are aware of it? You can do so
+on `Launchpad <https://bugs.launchpad.net/tempest/+filebug>`__.
 More info about Launchpad usage can be found on `OpenStack docs page
 <https://docs.openstack.org/contributors/common/task-tracking.html#launchpad>`_
 
 Getting Your Patch Merged
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-All changes proposed to the Tempest require single ``Code-Review +2`` votes from
-Tempest core reviewers by giving ``Workflow +1`` vote. More detailed guidelines
+All changes proposed to the Tempest require a single ``Code-Review +2`` vote
+from a Tempest core followed by a ``Workflow +1`` vote. More detailed guidelines
 for reviewers are available at :doc:`../REVIEWING`.
 
 Project Team Lead Duties

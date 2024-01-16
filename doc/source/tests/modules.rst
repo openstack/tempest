@@ -19,3 +19,10 @@ OpenStack Services API Tests
    network/modules
    object_storage/modules
    volume/modules
+
+Serial Tests
+------------
+.. toctree::
+   :maxdepth: 2
+
+   serial_tests/modules

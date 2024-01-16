@@ -4,12 +4,12 @@ Credential Providers
 ====================
 
 These library interfaces are used to deal with allocating credentials on demand
-either dynamically by calling keystone to allocate new credentials, or from
+either dynamically by calling Keystone to allocate new credentials, or from
 a list of preprovisioned credentials. These 2 modules are implementations of
 the same abstract credential providers class and can be used interchangeably.
 However, each implementation has some additional parameters that are used to
 influence the behavior of the modules. The API reference at the bottom of this
-doc shows the interface definitions for both modules, however that may be a bit
+doc shows the interface definitions for both modules, however, that may be a bit
 opaque. You can see some examples of how to leverage this interface below.
 
 Initialization Example
@@ -30,7 +30,7 @@ on config::
       # If a test requires a new account to work, it can have it via forcing
       # dynamic credentials. A new account will be produced only for that test.
       # In case admin credentials are not available for the account creation,
-      # the test should be skipped else it would fail.
+      # the test should be skipped else it will fail.
       identity_version = identity_version or CONF.identity.auth_version
       if CONF.auth.use_dynamic_credentials or force_tenant_isolation:
           admin_creds = get_configured_admin_credentials(
@@ -81,12 +81,12 @@ Dealing with Credentials
 Once you have a credential provider object created the access patterns for
 allocating and removing credentials are the same across both the dynamic
 and preprovisioned credentials. These are defined in the abstract
-CredentialProvider class. At a high level the credentials provider enables
-you to get 3 basic types of credentials at once (per object): a primary, alt,
+CredentialProvider class. At a high level, the credentials provider enables
+you to get 3 basic types of credentials at once (per object): primary, alt,
 and admin. You're also able to allocate a credential by role. These credentials
-are tracked by the provider object and delete must manually be called otherwise
-the created resources will not be deleted (or returned to the pool in the case
-of preprovisioned creds)
+are tracked by the provider object and delete must be called manually,
+otherwise, the created resources will not be deleted (or returned to the pool
+in the case of preprovisioned creds).
 
 Examples
 ''''''''
