@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated ``[compute-feature-enabled] rdp_console`` config option has
+    been removed.
