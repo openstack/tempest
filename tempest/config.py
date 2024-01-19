@@ -501,18 +501,6 @@ ComputeFeaturesGroup = [
                 default=False,
                 help="Does the test environment use block devices for live "
                      "migration"),
-    cfg.BoolOpt('block_migrate_cinder_iscsi',
-                default=False,
-                help="Does the test environment support block migration with "
-                "Cinder iSCSI volumes. Note: libvirt >= 1.2.17 is required "
-                "to support this if using the libvirt compute driver.",
-                deprecated_for_removal=True,
-                deprecated_reason='This option duplicates the more generic '
-                                  '[compute-feature-enabled]/block_migration '
-                                  '_for_live_migration now that '
-                                  'MIN_LIBVIRT_VERSION is >= 1.2.17 on all '
-                                  'branches from stable/rocky and will be '
-                                  'removed in a future release.'),
     cfg.BoolOpt('can_migrate_between_any_hosts',
                 default=True,
                 help="Does the test environment support migrating between "
