@@ -175,9 +175,6 @@ class LiveMigrationTest(LiveMigrationTestBase):
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
                       'Block Live migration not available')
-    @testtools.skipIf(not CONF.compute_feature_enabled.
-                      block_migrate_cinder_iscsi,
-                      'Block Live migration not configured for iSCSI')
     @utils.services('volume')
     def test_live_block_migration_with_attached_volume(self):
         """Test the live-migration of an instance with an attached volume.
