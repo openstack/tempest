@@ -263,23 +263,11 @@ IdentityFeatureGroup = [
                 default=False,
                 help='Does the environment have the security compliance '
                      'settings enabled?'),
-    cfg.BoolOpt('project_tags',
-                default=True,
-                help='Is the project tags identity v3 API available?',
-                deprecated_for_removal=True,
-                deprecated_reason='Project tags API is a default feature '
-                                  'since Queens'),
-    cfg.BoolOpt('application_credentials',
-                default=True,
-                help='Does the environment have application credentials '
-                     'enabled?',
-                deprecated_for_removal=True,
-                deprecated_reason='Application credentials is a default '
-                                  'feature since Queens'),
-    # Access rules for application credentials is a default feature in Train.
-    # This config option can removed once Stein is EOL.
     cfg.BoolOpt('access_rules',
-                default=False,
+                default=True,
+                deprecated_for_removal=True,
+                deprecated_reason='Access rules for application credentials '
+                                  'is a default feature since Train',
                 help='Does the environment have access rules enabled?'),
     cfg.BoolOpt('immutable_user_source',
                 default=False,

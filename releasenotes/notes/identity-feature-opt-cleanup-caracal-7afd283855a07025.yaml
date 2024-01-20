@@ -1,0 +1,21 @@
+---
+upgrade:
+  - |
+    The following deprecated options in the ``[identity-feature-enabled]``
+    section have been removed. Project tags API and application credentials
+    API are now always tested if identity v3 API is available.
+
+    - ``project_tag``
+    - ``application_credentials``
+
+  - |
+    Default value of the ``[identity-feature-enabled] access_rule`` option has
+    been changed from ``False`` to ``True`` and now the access rule API is
+    always tested when identity API is available.
+
+deprecations:
+  - |
+    The Keystone access_rule is enabled by default since Train release and we
+    no longer need a separate config in Tempest to enable it. Therefore
+    the ``[identity-feature-enabled] access_rule`` option has been deprecated
+    and will be removed in a future release.
