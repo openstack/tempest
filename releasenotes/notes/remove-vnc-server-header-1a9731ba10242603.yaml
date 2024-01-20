@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated ``[compute-feature-enabled] vnc_server_header`` option has
+    been removed.
