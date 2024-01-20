@@ -207,15 +207,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
     @decorators.idempotent_id('7a1323b4-a6a2-497a-96cb-76c07b945c71')
-    def test_reset_network_inject_network_info(self):
-        """Test resetting and injecting network info of a server"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'The resetNetwork server action is not supported.')
-
-        # Reset Network of a Server
+    def test_inject_network_info(self):
+        """Test injecting network info of a server"""
+        # Create a server
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.reset_network(server['id'])
         # Inject the Network Info into Server
         self.client.inject_network_info(server['id'])
 

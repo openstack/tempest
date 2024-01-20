@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated ``[compute-feature-enabled] xenapi_apis`` option has been
+    removed.

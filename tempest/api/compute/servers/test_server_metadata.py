@@ -27,13 +27,6 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     create_default_network = True
 
     @classmethod
-    def skip_checks(cls):
-        super(ServerMetadataTestJSON, cls).skip_checks()
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise cls.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
-    @classmethod
     def setup_clients(cls):
         super(ServerMetadataTestJSON, cls).setup_clients()
         cls.client = cls.servers_client

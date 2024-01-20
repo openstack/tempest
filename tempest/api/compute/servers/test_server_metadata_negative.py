@@ -14,12 +14,9 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-
-CONF = config.CONF
 
 
 class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
@@ -91,10 +88,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
         Raise BadRequest if key in uri does not match the key passed in body.
         """
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         meta = {'testkey': 'testvalue'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata_item,
@@ -104,10 +97,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('0df38c2a-3d4e-4db5-98d8-d4d9fa843a12')
     def test_set_metadata_non_existent_server(self):
         """Test setting metadata for a non existent server should fail"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         non_existent_server_id = data_utils.rand_uuid()
         meta = {'meta1': 'data1'}
         self.assertRaises(lib_exc.NotFound,
@@ -119,10 +108,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('904b13dc-0ef2-4e4c-91cd-3b4a0f2f49d8')
     def test_update_metadata_non_existent_server(self):
         """Test updating metadata for a non existent server should fail"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         non_existent_server_id = data_utils.rand_uuid()
         meta = {'key1': 'value1', 'key2': 'value2'}
         self.assertRaises(lib_exc.NotFound,
@@ -134,10 +119,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('a452f38c-05c2-4b47-bd44-a4f0bf5a5e48')
     def test_update_metadata_with_blank_key(self):
         """Test updating server metadata to blank key should fail"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         meta = {'': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.update_server_metadata,
@@ -150,10 +131,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
         Should not be able to delete metadata item from a non-existent server.
         """
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         non_existent_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
                           self.client.delete_server_metadata_item,
@@ -168,10 +145,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
         A 403 Forbidden or 413 Overlimit (old behaviour) exception
         will be raised while exceeding metadata items limit for project.
         """
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         quota_set = self.quotas_client.show_quota_set(
             self.tenant_id)['quota_set']
         quota_metadata = quota_set['metadata_items']
@@ -196,10 +169,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('96100343-7fa9-40d8-80fa-d29ef588ce1c')
     def test_set_server_metadata_blank_key(self):
         """Test setting server metadata with blank key should fail"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         meta = {'': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,
@@ -209,10 +178,6 @@ class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('64a91aee-9723-4863-be44-4c9d9f1e7d0e')
     def test_set_server_metadata_missing_metadata(self):
         """Test setting server metadata without metadata field should fail"""
-        if not CONF.compute_feature_enabled.xenapi_apis:
-            raise self.skipException(
-                'Metadata is read-only on non-Xen-based deployments.')
-
         meta = {'meta1': 'data1'}
         self.assertRaises(lib_exc.BadRequest,
                           self.client.set_server_metadata,

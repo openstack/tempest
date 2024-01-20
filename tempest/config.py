@@ -618,18 +618,6 @@ ComputeFeaturesGroup = [
                 help='Does the test environment support attaching a volume to '
                      'more than one instance? This depends on hypervisor and '
                      'volume backend/type and compute API version 2.60.'),
-    cfg.BoolOpt('xenapi_apis',
-                default=False,
-                help='Does the test environment support the XenAPI-specific '
-                     'APIs: os-agents, writeable server metadata and the '
-                     'resetNetwork server action? '
-                     'These were removed in Victoria alongside the XenAPI '
-                     'virt driver.',
-                deprecated_for_removal=True,
-                deprecated_reason="On Nova side, XenAPI virt driver and the "
-                                  "APIs that only worked with that driver "
-                                  "have been removed and there's nothing to "
-                                  "test after Ussuri."),
     cfg.BoolOpt('ide_bus',
                 default=True,
                 help='Does the test environment support attaching devices '
