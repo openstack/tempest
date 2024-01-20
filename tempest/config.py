@@ -128,12 +128,18 @@ IdentityGroup = [
                     'TLS (https) server certificate.'),
     cfg.URIOpt('uri',
                schemes=['http', 'https'],
+               deprecated_for_removal=True,
+               deprecated_reason='The identity v2 API tests were removed '
+                                 'and this option has no effect',
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.URIOpt('uri_v3',
                schemes=['http', 'https'],
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('auth_version',
                default='v3',
+               deprecated_for_removal=True,
+               deprecated_reason='Identity v2 API was removed and v3 is '
+                                 'the only available identity API version now',
                help="Identity API version to be used for authentication "
                     "for API tests."),
     cfg.StrOpt('region',
@@ -146,12 +152,16 @@ IdentityGroup = [
                default='adminURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
+               deprecated_for_removal=True,
+               deprecated_reason='This option has no effect',
                help="The admin endpoint type to use for OpenStack Identity "
                     "(Keystone) API v2"),
     cfg.StrOpt('v2_public_endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
+               deprecated_for_removal=True,
+               deprecated_reason='This option has no effect',
                help="The public endpoint type to use for OpenStack Identity "
                     "(Keystone) API v2"),
     cfg.StrOpt('v3_endpoint_type',
@@ -234,19 +244,22 @@ IdentityFeatureGroup = [
                      'impersonation enabled'),
     cfg.BoolOpt('api_v2',
                 default=False,
-                help='Is the v2 identity API enabled',
                 deprecated_for_removal=True,
-                deprecated_reason='The identity v2.0 API was removed in the '
-                                  'Queens release. Tests that exercise the '
-                                  'v2.0 API will be removed from tempest in '
-                                  'the v22.0.0 release. They are kept only to '
-                                  'test stable branches.'),
+                deprecated_reason='The identity v2 API tests were removed '
+                                  'and this option has no effect',
+                help='Is the v2 identity API enabled'),
     cfg.BoolOpt('api_v2_admin',
                 default=True,
-                help="Is the v2 identity admin API available? This setting "
-                     "only applies if api_v2 is set to True."),
+                deprecated_for_removal=True,
+                deprecated_reason='The identity v2 API tests were removed '
+                                  'and this option has no effect',
+                help="Is the v2 identity admin API available?"),
     cfg.BoolOpt('api_v3',
                 default=True,
+                deprecated_for_removal=True,
+                deprecated_reason='Identity v2 API was removed and v3 is '
+                                  'the only available identity API version '
+                                  'now',
                 help='Is the v3 identity API enabled'),
     cfg.ListOpt('api_extensions',
                 default=['all'],

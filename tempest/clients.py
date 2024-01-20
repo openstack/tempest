@@ -173,30 +173,6 @@ class Manager(clients.ServiceClients):
             self.placement.ResourceProvidersClient()
 
     def _set_identity_clients(self):
-        # Clients below use the admin endpoint type of Keystone API v2
-        params_v2_admin = {
-            'endpoint_type': CONF.identity.v2_admin_endpoint_type}
-        self.endpoints_client = self.identity_v2.EndpointsClient(
-            **params_v2_admin)
-        self.identity_client = self.identity_v2.IdentityClient(
-            **params_v2_admin)
-        self.tenants_client = self.identity_v2.TenantsClient(
-            **params_v2_admin)
-        self.roles_client = self.identity_v2.RolesClient(**params_v2_admin)
-        self.users_client = self.identity_v2.UsersClient(**params_v2_admin)
-        self.identity_services_client = self.identity_v2.ServicesClient(
-            **params_v2_admin)
-
-        # Clients below use the public endpoint type of Keystone API v2
-        params_v2_public = {
-            'endpoint_type': CONF.identity.v2_public_endpoint_type}
-        self.identity_public_client = self.identity_v2.IdentityClient(
-            **params_v2_public)
-        self.tenants_public_client = self.identity_v2.TenantsClient(
-            **params_v2_public)
-        self.users_public_client = self.identity_v2.UsersClient(
-            **params_v2_public)
-
         # Clients below use the endpoint type of Keystone API v3, which is set
         # in endpoint_type
         params_v3 = {'endpoint_type': CONF.identity.v3_endpoint_type}
@@ -241,16 +217,6 @@ class Manager(clients.ServiceClients):
         self.identity_limits_client = \
             self.identity_v3.LimitsClient(**params_v3)
 
-        # Token clients do not use the catalog. They only need default_params.
-        # They read auth_url, so they should only be set if the corresponding
-        # API version is marked as enabled
-        if CONF.identity_feature_enabled.api_v2:
-            if CONF.identity.uri:
-                self.token_client = self.identity_v2.TokenClient(
-                    auth_url=CONF.identity.uri)
-            else:
-                msg = 'Identity v2 API enabled, but no identity.uri set'
-                raise lib_exc.InvalidConfiguration(msg)
         if CONF.identity_feature_enabled.api_v3:
             if CONF.identity.uri_v3:
                 self.token_v3_client = self.identity_v3.V3TokenClient(
