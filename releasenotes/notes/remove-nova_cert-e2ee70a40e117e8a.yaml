@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The deprecated ``[compute-feature-enabled] nova_cert`` option has been
+    removed. The nova-cert service was removed from nova in 16.0.0 release.
+    Tests of compute root certificates API have also been removed.
