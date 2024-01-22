@@ -888,10 +888,11 @@ ValidationGroup = [
                 help='Enable/disable security group rules.'),
     cfg.StrOpt('connect_method',
                default='floating',
-               choices=['fixed', 'floating'],
-               help='Default IP type used for validation: '
-                    '-fixed: uses the first IP belonging to the fixed network '
-                    '-floating: creates and uses a floating IP'),
+               choices=[('fixed',
+                         'uses the first IP belonging to the fixed network'),
+                        ('floating',
+                         'creates and uses a floating IP')],
+               help='Default IP type used for validation'),
     cfg.StrOpt('auth_method',
                default='keypair',
                choices=['keypair'],
