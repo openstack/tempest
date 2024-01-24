@@ -37,7 +37,7 @@ class TestCredentialsFactory(base.TestCase):
                          fake_config.FakePrivate)
 
     def test_get_dynamic_provider_params_creds_v2(self):
-        expected_uri = 'EXPECTED_V2_URI'
+        expected_uri = 'http://v2.identy.example.com'
         cfg.CONF.set_default('uri', expected_uri, group='identity')
         admin_creds = fake_credentials.FakeCredentials()
         params = cf.get_dynamic_provider_params('v2', admin_creds=admin_creds)
@@ -48,7 +48,7 @@ class TestCredentialsFactory(base.TestCase):
             self.assertEqual(expected_params[key], params[key])
 
     def test_get_dynamic_provider_params_creds_v3(self):
-        expected_uri = 'EXPECTED_V3_URI'
+        expected_uri = 'http://v3.identy.example.com'
         cfg.CONF.set_default('uri_v3', expected_uri, group='identity')
         admin_creds = fake_credentials.FakeCredentials()
         params = cf.get_dynamic_provider_params('v3', admin_creds=admin_creds)
@@ -76,14 +76,14 @@ class TestCredentialsFactory(base.TestCase):
                 fill_in=True, identity_version=expected_identity_version)
 
     def test_get_preprov_provider_params_creds_v2(self):
-        expected_uri = 'EXPECTED_V2_URI'
+        expected_uri = 'http://v2.identy.example.com'
         cfg.CONF.set_default('uri', expected_uri, group='identity')
         params = cf.get_preprov_provider_params('v2')
         self.assertIn('identity_uri', params)
         self.assertEqual(expected_uri, params['identity_uri'])
 
     def test_get_preprov_provider_params_creds_v3(self):
-        expected_uri = 'EXPECTED_V3_URI'
+        expected_uri = 'http://v3.identy.example.com'
         cfg.CONF.set_default('uri_v3', expected_uri, group='identity')
         params = cf.get_preprov_provider_params('v3')
         self.assertIn('identity_uri', params)
@@ -237,7 +237,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v2(self, mock_auth_get_credentials):
-        expected_uri = 'V2_URI'
+        expected_uri = 'http://v2.identity.example.com'
         expected_result = 'my_creds'
         mock_auth_get_credentials.return_value = expected_result
         cfg.CONF.set_default('uri', expected_uri, 'identity')
@@ -252,7 +252,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_no_domain(self, mock_auth_get_credentials):
-        expected_uri = 'V3_URI'
+        expected_uri = 'https://v3.identity.exmaple.com'
         expected_result = 'my_creds'
         expected_domain = 'my_domain'
         mock_auth_get_credentials.return_value = expected_result
@@ -272,7 +272,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_domain(self, mock_auth_get_credentials):
-        expected_uri = 'V3_URI'
+        expected_uri = 'https://v3.identity.exmaple.com'
         expected_result = 'my_creds'
         expected_domain = 'my_domain'
         mock_auth_get_credentials.return_value = expected_result
@@ -291,7 +291,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_system(self, mock_auth_get_credentials):
-        expected_uri = 'V3_URI'
+        expected_uri = 'https://v3.identity.exmaple.com'
         expected_result = 'my_creds'
         mock_auth_get_credentials.return_value = expected_result
         cfg.CONF.set_default('uri_v3', expected_uri, 'identity')
