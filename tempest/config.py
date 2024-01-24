@@ -546,13 +546,6 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Does the test environment support creating snapshot '
                      'images of running instances?'),
-    cfg.BoolOpt('nova_cert',
-                default=False,
-                help='Does the test environment have the nova cert running?',
-                deprecated_for_removal=True,
-                deprecated_reason="On Nova side, the nova-cert service is "
-                                  "deprecated and the service will be removed "
-                                  "as early as Ocata."),
     cfg.BoolOpt('personality',
                 default=False,
                 help='Does the test environment support server personality'),
