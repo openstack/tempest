@@ -59,14 +59,14 @@ class RemoteClient(remote_client.RemoteClient):
         output = self.exec_command(command)
         selected = []
         pos = None
-        for l in output.splitlines():
-            if pos is None and l.find("TYPE") > 0:
-                pos = l.find("TYPE")
+        for line in output.splitlines():
+            if pos is None and line.find("TYPE") > 0:
+                pos = line.find("TYPE")
                 # Show header line too
-                selected.append(l)
+                selected.append(line)
             # lsblk lists disk type in a column right-aligned with TYPE
-            elif pos is not None and pos > 0 and l[pos:pos + 4] == "disk":
-                selected.append(l)
+            elif pos is not None and pos > 0 and line[pos:pos + 4] == "disk":
+                selected.append(line)
 
         if selected:
             return "\n".join(selected)
@@ -121,9 +121,9 @@ class RemoteClient(remote_client.RemoteClient):
     def _get_dns_servers(self):
         cmd = 'cat /etc/resolv.conf'
         resolve_file = self.exec_command(cmd).strip().split('\n')
-        entries = (l.split() for l in resolve_file)
-        dns_servers = [l[1] for l in entries
-                       if len(l) and l[0] == 'nameserver']
+        entries = (line.split() for line in resolve_file)
+        dns_servers = [line[1] for line in entries
+                       if len(line) and line[0] == 'nameserver']
         return dns_servers
 
     def get_dns_servers(self, timeout=5):

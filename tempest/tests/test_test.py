@@ -303,7 +303,7 @@ class TestTempestBaseTestClass(base.TestCase):
         # [0]: test, err, details [1] -> exc_info
         # Type, Exception, traceback [1] -> MultipleException
         found_exc = log[0][1][1]
-        self.assertTrue(isinstance(found_exc, testtools.MultipleExceptions))
+        self.assertIsInstance(found_exc, testtools.MultipleExceptions)
         self.assertEqual(2, len(found_exc.args))
         # Each arg is exc_info - match messages and order
         self.assertIn('mock3 resource', str(found_exc.args[0][1]))
@@ -332,7 +332,7 @@ class TestTempestBaseTestClass(base.TestCase):
         # [0]: test, err, details [1] -> exc_info
         # Type, Exception, traceback [1] -> RuntimeError
         found_exc = log[0][1][1]
-        self.assertTrue(isinstance(found_exc, RuntimeError))
+        self.assertIsInstance(found_exc, RuntimeError)
         self.assertIn(BadResourceCleanup.__name__, str(found_exc))
 
     def test_super_skip_checks_not_invoked(self):

@@ -51,25 +51,34 @@ class HackingTestCase(base.TestCase):
 
     def test_no_setup_teardown_class_for_tests(self):
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def setUpClass(cls):", './tempest/tests/fake_test.py'))
+            "  def setUpClass(cls):", './tempest/tests/fake_test.py', False))
         self.assertIsNone(checks.no_setup_teardown_class_for_tests(
-            "  def setUpClass(cls): # noqa", './tempest/tests/fake_test.py'))
+            "  def setUpClass(cls):", './tempest/tests/fake_test.py',
+            True))
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def setUpClass(cls):", './tempest/api/fake_test.py'))
+            "  def setUpClass(cls):", './tempest/api/fake_test.py',
+            False))
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def setUpClass(cls):", './tempest/scenario/fake_test.py'))
+            "  def setUpClass(cls):", './tempest/scenario/fake_test.py',
+            False))
         self.assertFalse(checks.no_setup_teardown_class_for_tests(
-            "  def setUpClass(cls):", './tempest/test.py'))
+            "  def setUpClass(cls):", './tempest/test.py',
+            False))
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def tearDownClass(cls):", './tempest/tests/fake_test.py'))
+            "  def tearDownClass(cls):", './tempest/tests/fake_test.py',
+            False))
         self.assertIsNone(checks.no_setup_teardown_class_for_tests(
-            "  def tearDownClass(cls): # noqa", './tempest/tests/fake_test.py'))
+            "  def tearDownClass(cls):", './tempest/tests/fake_test.py',
+            True))
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def tearDownClass(cls):", './tempest/api/fake_test.py'))
+            "  def tearDownClass(cls):", './tempest/api/fake_test.py',
+            False))
         self.assertTrue(checks.no_setup_teardown_class_for_tests(
-            "  def tearDownClass(cls):", './tempest/scenario/fake_test.py'))
+            "  def tearDownClass(cls):", './tempest/scenario/fake_test.py',
+            False))
         self.assertFalse(checks.no_setup_teardown_class_for_tests(
-            "  def tearDownClass(cls):", './tempest/test.py'))
+            "  def tearDownClass(cls):", './tempest/test.py',
+            False))
 
     def test_import_no_clients_in_api_and_scenario_tests(self):
         for client in checks.PYTHON_CLIENTS:
@@ -198,22 +207,26 @@ class HackingTestCase(base.TestCase):
             # arbitrarily many decorators. These insert decorators above the
             # @decorators.attr(type=['negative']) decorator.
             for decorator in other_decorators:
-                self.assertIsNone(check(" %s" % decorator, filename))
+                self.assertFalse(
+                    list(check(" %s" % decorator, filename)))
         if with_negative_decorator:
-            self.assertIsNone(
-                check("@decorators.attr(type=['negative'])", filename))
+            self.assertFalse(
+                list(check("@decorators.attr(type=['negative'])", filename)))
         if with_other_decorators:
             # Include multiple decorators to verify that this check works with
             # arbitrarily many decorators. These insert decorators between
             # the test and the @decorators.attr(type=['negative']) decorator.
             for decorator in other_decorators:
-                self.assertIsNone(check(" %s" % decorator, filename))
-        final_result = check(" def test_some_negative_case", filename)
+                self.assertFalse(
+                    list(check(" %s" % decorator, filename)))
+        final_result = list(check(" def test_some_negative_case", filename))
         if expected_success:
-            self.assertIsNone(final_result)
+            self.assertFalse(final_result)
         else:
-            self.assertIsInstance(final_result, tuple)
-            self.assertFalse(final_result[0])
+            self.assertEqual(1, len(final_result))
+            self.assertIsInstance(final_result[0], tuple)
+            self.assertEqual(0, final_result[0][0])
+            self.assertTrue(final_result[0][1])
 
     def test_no_negatve_test_attribute_applied_to_negative_test(self):
         # Check negative filename, negative decorator passes
