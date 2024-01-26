@@ -322,13 +322,6 @@ class BaseIdentityV3AdminTest(BaseIdentityV3Test):
 class BaseApplicationCredentialsV3Test(BaseIdentityV3Test):
 
     @classmethod
-    def skip_checks(cls):
-        super(BaseApplicationCredentialsV3Test, cls).skip_checks()
-        if not CONF.identity_feature_enabled.application_credentials:
-            raise cls.skipException("Application credentials are not available"
-                                    " in this environment")
-
-    @classmethod
     def resource_setup(cls):
         super(BaseApplicationCredentialsV3Test, cls).resource_setup()
         cls.user_id = cls.os_primary.credentials.user_id

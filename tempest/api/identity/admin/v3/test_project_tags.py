@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.identity import base
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -33,8 +31,6 @@ class IdentityV3ProjectTagsTest(base.BaseIdentityV3AdminTest):
     force_tenant_isolation = False
 
     @decorators.idempotent_id('7c123aac-999d-416a-a0fb-84b915ab10de')
-    @testtools.skipUnless(CONF.identity_feature_enabled.project_tags,
-                          'Project tags not available.')
     def test_list_update_delete_project_tags(self):
         """Test listing, updating and deleting of project tags"""
         project = self.setup_test_project()
