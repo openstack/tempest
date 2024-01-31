@@ -14,6 +14,7 @@ and should be able to run solely from the Tempest tree.
 
 Why are these tests in Tempest?
 -------------------------------
+
 These tests exist to make sure that the mechanisms that we use inside of
 Tempest are valid and remain functional. They are only here for self
 validation of Tempest.
@@ -21,6 +22,7 @@ validation of Tempest.
 
 Scope of these tests
 --------------------
+
 Unit tests should not require an external service to be running or any extra
 configuration to run. Any state that is required for a test should either be
 mocked out or created in a temporary test directory. (see test_wrappers.py for

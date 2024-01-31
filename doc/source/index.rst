@@ -83,6 +83,7 @@ Development
    :maxdepth: 2
 
    HACKING
+   serial_tests
    REVIEWING
    microversion_testing
    test_removal

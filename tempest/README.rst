@@ -8,7 +8,7 @@ OpenStack core projects, being used to validate OpenStack cloud
 implementations for both correctness, as well as a burn in tool for
 OpenStack clouds.
 
-As such Tempest tests come in many flavors, each with their own rules
+As such Tempest tests come in many flavors, each with its own rules
 and guidelines. Below is the overview of the Tempest repository structure
 to make this clear.
 
@@ -17,6 +17,7 @@ to make this clear.
    tempest/
       api/ - API tests
       scenario/ - complex scenario tests
+      serial_tests/ - tests that run always in the serial mode
       tests/ - unit tests for Tempest internals
 
 Each of these directories contains different types of tests. What
@@ -41,11 +42,18 @@ frameworks.
 ---------------------------
 
 Scenario tests are complex "through path" tests for OpenStack
-functionality. They are typically a series of steps where complicated
+functionality. They are typically a series of steps where a complicated
 state requiring multiple services is set up exercised, and torn down.
 
 Scenario tests should not use the existing Python clients for OpenStack,
 but should instead use the Tempest implementations of clients.
+
+
+:ref:`serial_tests_guide`
+--------------------------------
+
+Tests within this category will always be executed serially from the rest of
+the test cases.
 
 
 :ref:`unit_tests_field_guide`

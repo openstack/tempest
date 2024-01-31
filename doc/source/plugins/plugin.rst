@@ -80,30 +80,30 @@ Standalone Plugin vs In-repo Plugin
 
 Since all that's required for a plugin to be detected by Tempest is a valid
 setuptools entry point in the proper namespace there is no difference from the
-Tempest perspective on either creating a separate python package to
-house the plugin or adding the code to an existing python project. However,
+Tempest perspective on either creating a separate Python package to
+house the plugin or adding the code to an existing Python project. However,
 there are tradeoffs to consider when deciding which approach to take when
 creating a new plugin.
 
-If you create a separate python project for your plugin this makes a lot of
+If you create a separate Python project for your plugin this makes a lot of
 things much easier. Firstly it makes packaging and versioning much simpler, you
 can easily decouple the requirements for the plugin from the requirements for
 the other project. It lets you version the plugin independently and maintain a
 single version of the test code across project release boundaries (see the
 `Branchless Tempest Spec`_ for more details on this). It also greatly
 simplifies the install time story for external users. Instead of having to
-install the right version of a project in the same python namespace as Tempest
+install the right version of a project in the same Python namespace as Tempest
 they simply need to pip install the plugin in that namespace. It also means
 that users don't have to worry about inadvertently installing a Tempest plugin
 when they install another package.
 
 .. _Branchless Tempest Spec: https://specs.openstack.org/openstack/qa-specs/specs/tempest/implemented/branchless-tempest.html
 
-The sole advantage to integrating a plugin into an existing python project is
+The sole advantage of integrating a plugin into an existing Python project is
 that it enables you to land code changes at the same time you land test changes
 in the plugin. This reduces some of the burden on contributors by not having
-to land 2 changes to add a new API feature and then test it and doing it as a
-single combined commit.
+to land 2 changes to add a new API feature and then test it, and do it as a
+single combined commit instead.
 
 
 Plugin Class
@@ -122,7 +122,7 @@ you would do something like the following:
   class MyPlugin(plugins.TempestPlugin):
 
 Then you need to ensure you locally define all of the mandatory methods in the
-abstract class, you can refer to the api doc below for a reference of what that
+abstract class, you can refer to the API doc below for a reference of what that
 entails.
 
 Abstract Plugin Class
@@ -135,7 +135,7 @@ Plugin Structure
 ================
 While there are no hard and fast rules for the structure of a plugin, there are
 basically no constraints on what the plugin looks like as long as the 2 steps
-above are done. However,  there are some recommended patterns to follow to make
+above are done. However, there are some recommended patterns to follow to make
 it easy for people to contribute and work with your plugin. For example, if you
 create a directory structure with something like::
 
@@ -214,7 +214,7 @@ Example implementation of ``get_service_clients``:
 Parameters:
 
 * **name**: Name of the attribute used to access the ``ClientsFactory`` from
-  the ``ServiceClients`` instance. See example below.
+  the ``ServiceClients`` instance. See the example below.
 * **service_version**: Tempest enforces a single implementation for each
   service client. Available service clients are held in a ``ClientsRegistry``
   singleton, and registered with ``service_version``, which means that
@@ -229,7 +229,7 @@ Example usage of the service clients in tests:
 
 .. code-block:: python
 
-   # my_creds is instance of tempest.lib.auth.Credentials
+   # my_creds is an instance of tempest.lib.auth.Credentials
    # identity_uri is v2 or v3 depending on the configuration
    from tempest.lib.services import clients
 
@@ -241,13 +241,13 @@ Automatic configuration and registration of service clients imposes some extra
 constraints on the structure of the configuration options exposed by the
 plugin.
 
-First ``service_version`` should be in the format `service_config[.version]`.
+Firstly, ``service_version`` should be in the format `service_config[.version]`.
 The `.version` part is optional, and should only be used if there are multiple
 versions of the same API available. The `service_config` must match the name of
 a configuration options group defined by the plugin. Different versions of one
 API must share the same configuration group.
 
-Second the configuration options group `service_config` must contain the
+Secondly, the configuration options group `service_config` must contain the
 following options:
 
 * `catalog_type`: corresponds to `service` in the catalog
@@ -257,10 +257,10 @@ The following options will be honoured if defined, but they are not mandatory,
 as they do not necessarily apply to all service clients.
 
 * `region`: default to identity.region
-* `build_timeout` : default to compute.build_timeout
+* `build_timeout`: default to compute.build_timeout
 * `build_interval`: default to compute.build_interval
 
-Third the service client classes should inherit from ``RestClient``, should
+Thirdly, the service client classes should inherit from ``RestClient``, should
 accept generic keyword arguments, and should pass those arguments to the
 ``__init__`` method of ``RestClient``. Extra arguments can be added. For
 instance:
@@ -276,7 +276,7 @@ instance:
            self.my_arg = my_arg
            self.my_args2 = my_arg
 
-Finally the service client should be structured in a python module, so that all
+Finally, the service client should be structured in a Python module, so that all
 service client classes are importable from it. Each major API version should
 have its own module.
 
@@ -299,7 +299,7 @@ The content of __init__.py module should be:
    __all__ = ['API1Client', 'API2Client']
 
 The following folder and module structure is recommended for multiple major
-API version::
+API versions::
 
     plugin_dir/
       services/
@@ -325,14 +325,14 @@ Using Plugins
 =============
 
 Tempest will automatically discover any installed plugins when it is run. So by
-just installing the python packages which contain your plugin you'll be using
+just installing the Python packages, which contain your plugin, you'll be using
 them with Tempest, nothing else is really required.
 
-However, you should take care when installing plugins. By their very nature
+However, you should take care when installing plugins. By their very nature,
 there are no guarantees when running Tempest with plugins enabled about the
 quality of the plugin. Additionally, while there is no limitation on running
 with multiple plugins, it's worth noting that poorly written plugins might not
-properly isolate their tests which could cause unexpected cross interactions
+properly isolate their tests which could cause unexpected cross-interactions
 between plugins.
 
 Notes for using plugins with virtualenvs
