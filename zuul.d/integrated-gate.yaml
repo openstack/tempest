@@ -8,6 +8,7 @@
       Integration test that runs all tests.
       Former name for this job was:
         * legacy-periodic-tempest-dsvm-all-master
+    timeout: 10800
     vars:
       tox_envlist: all
       tempest_test_regex: tempest
