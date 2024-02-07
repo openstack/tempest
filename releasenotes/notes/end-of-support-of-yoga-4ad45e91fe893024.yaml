@@ -1,0 +1,12 @@
+---
+prelude: >
+    This is an intermediate release during the 2024.1 development cycle to
+    mark the end of support for Yoga release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * 2023.2
+    * 2023.1
+    * Zed
+
+    Current development of Tempest is for OpenStack 2024.1 development
+    cycle.

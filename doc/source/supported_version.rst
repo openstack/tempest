@@ -12,7 +12,6 @@ Tempest master supports the below OpenStack Releases:
 * 2023.2
 * 2023.1
 * Zed
-* Yoga
 
 For older OpenStack Release:
 

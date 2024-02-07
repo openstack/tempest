@@ -18,12 +18,6 @@
     override-checkout: stable/zed
 
 - job:
-    name: tempest-full-yoga
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/yoga
-
-- job:
     name: tempest-full-2023-2-extra-tests
     parent: tempest-extra-tests
     nodeset: openstack-single-node-jammy
@@ -40,12 +34,6 @@
     parent: tempest-extra-tests
     nodeset: openstack-single-node-focal
     override-checkout: stable/zed
-
-- job:
-    name: tempest-full-yoga-extra-tests
-    parent: tempest-extra-tests
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/yoga
 
 - job:
     name: tempest-slow-2023-2
@@ -70,12 +58,6 @@
     parent: tempest-slow-py3
     nodeset: openstack-two-node-focal
     override-checkout: stable/zed
-
-- job:
-    name: tempest-slow-yoga
-    parent: tempest-slow-py3
-    nodeset: openstack-two-node-focal
-    override-checkout: stable/yoga
 
 - job:
     name: tempest-full-py3
