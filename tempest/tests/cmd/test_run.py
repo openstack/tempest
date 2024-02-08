@@ -225,6 +225,11 @@ class TestRunReturnCode(base.TestCase):
                             '%s=%s' % (self.exclude_list, path),
                             '--regex', 'fail'], 1)
 
+    def test_tempest_run_with_slowest(self):
+        out, err = self.assertRunExit(['tempest', 'run', '--regex', 'passing',
+                                       '--slowest'], 0)
+        self.assertRegex(str(out), r'Test id\s+Runtime \(s\)')
+
 
 class TestOldArgRunReturnCode(TestRunReturnCode):
     """A class for testing deprecated but still supported args.
@@ -363,6 +368,7 @@ class TestTakeAction(base.TestCase):
         parsed_args.state = None
         parsed_args.list_tests = False
         parsed_args.config_file = path
+        parsed_args.slowest = False
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -393,6 +399,7 @@ class TestTakeAction(base.TestCase):
         parsed_args.state = None
         parsed_args.list_tests = False
         parsed_args.config_file = path
+        parsed_args.slowest = False
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -409,6 +416,7 @@ class TestTakeAction(base.TestCase):
         parsed_args.state = None
         parsed_args.list_tests = False
         parsed_args.config_file = ''
+        parsed_args.slowest = False
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -441,6 +449,7 @@ class TestTakeAction(base.TestCase):
         parsed_args.state = True
         parsed_args.list_tests = False
         parsed_args.config_file = ''
+        parsed_args.slowest = False
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
@@ -460,6 +469,7 @@ class TestTakeAction(base.TestCase):
         parsed_args.state = True
         parsed_args.list_tests = False
         parsed_args.config_file = path
+        parsed_args.slowest = False
 
         with mock.patch('stestr.commands.run_command') as m:
             m.return_value = 0
