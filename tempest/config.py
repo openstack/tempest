@@ -126,9 +126,11 @@ IdentityGroup = [
                default=None,
                help='Specify a CA bundle file to use in verifying a '
                     'TLS (https) server certificate.'),
-    cfg.StrOpt('uri',
+    cfg.URIOpt('uri',
+               schemes=['http', 'https'],
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
-    cfg.StrOpt('uri_v3',
+    cfg.URIOpt('uri_v3',
+               schemes=['http', 'https'],
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('auth_version',
                default='v3',
@@ -835,8 +837,9 @@ dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
 DashboardGroup = [
-    cfg.StrOpt('dashboard_url',
+    cfg.URIOpt('dashboard_url',
                default='http://localhost/',
+               schemes=['http', 'https'],
                help="Where the dashboard can be found"),
     cfg.BoolOpt('disable_ssl_certificate_validation',
                 default=False,
