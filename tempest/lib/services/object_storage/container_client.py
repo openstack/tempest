@@ -15,7 +15,6 @@
 
 from urllib import parse as urllib
 
-import debtcollector.moves
 from defusedxml import ElementTree as etree
 from oslo_serialization import jsonutils as json
 
@@ -85,11 +84,6 @@ class ContainerClient(rest_client.RestClient):
         self.expected_success(204, resp.status)
         return resp, body
 
-    update_container_metadata = debtcollector.moves.moved_function(
-        create_update_or_delete_container_metadata,
-        'update_container_metadata', __name__,
-        version='Queens', removal_version='Rocky')
-
     def list_container_metadata(self, container_name):
         """List all container metadata."""
         url = str(container_name)
@@ -126,7 +120,3 @@ class ContainerClient(rest_client.RestClient):
 
         self.expected_success([200, 204], resp.status)
         return resp, body
-
-    list_container_contents = debtcollector.moves.moved_function(
-        list_container_objects, 'list_container_contents', __name__,
-        version='Queens', removal_version='Rocky')

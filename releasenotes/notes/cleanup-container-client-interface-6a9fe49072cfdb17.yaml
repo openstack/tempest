@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    The following deprecated alias methods of the ``ContainerClient`` class
+    has been removed.
+
+    - ``update_container_metadata``, replaced by ``create_update_or_delete_container_metadata``
+    - ``list_container_contents``, replaced by ``list_container_objects``
