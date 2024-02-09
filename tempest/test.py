@@ -26,7 +26,6 @@ import testtools
 
 from tempest import clients
 from tempest.common import credentials_factory as credentials
-from tempest.common import utils
 from tempest import config
 from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import fixed_network
@@ -44,20 +43,6 @@ attr = debtcollector.moves.moved_function(
     decorators.attr, 'attr', __name__,
     version='Pike', removal_version='?')
 
-
-services = debtcollector.moves.moved_function(
-    utils.services, 'services', __name__,
-    version='Pike', removal_version='?')
-
-
-requires_ext = debtcollector.moves.moved_function(
-    utils.requires_ext, 'requires_ext', __name__,
-    version='Pike', removal_version='?')
-
-
-is_extension_enabled = debtcollector.moves.moved_function(
-    utils.is_extension_enabled, 'is_extension_enabled', __name__,
-    version='Pike', removal_version='?')
 
 at_exit_set = set()
 

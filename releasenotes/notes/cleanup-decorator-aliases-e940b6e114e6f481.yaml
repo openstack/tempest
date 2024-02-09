@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The following decorators are no longer available in the ``tempest.test``
+    module. Use the ``tempest.common.utils`` module instead.
+
+    - ``services``
+    - ``requires_ext``
+    - ``is_extension_enabled``
