@@ -374,12 +374,13 @@ class CLIClient(object):
         :param merge_stderr:  if True the stderr buffer is merged into stdout
         :type merge_stderr: boolean
         """
-        creds = ('--os-username %s --os-project-name %s --os-password %s '
+        creds = ('--os-username %s --os-password %s '
                  '--os-auth-url %s' %
                  (self.username,
-                  self.tenant_name,
                   self.password,
                   self.uri))
+        if self.tenant_name is not None:
+            creds += ' --os-project-name %s' % self.tenant_name
         if self.identity_api_version:
             if cmd not in self.CLIENTS_WITHOUT_IDENTITY_VERSION:
                 creds += ' --os-identity-api-version %s' % (
