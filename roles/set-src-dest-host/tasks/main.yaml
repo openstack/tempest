@@ -1,0 +1,29 @@
+- name: Find out hostnames
+  set_fact:
+      devstack_hostnames: "{{ devstack_hostnames|default([]) + [hostvars[zj_item]['ansible_hostname'] | default('unknown')] }}"
+  loop: "{{ query('inventory_hostnames', 'all,!localhost') }}"
+  loop_control:
+    loop_var: zj_item
+  ignore_errors: yes  # noqa ignore-errors
+
+- name: Found hostnames
+  debug:
+    msg: |
+      # Available hosts
+      {{ devstack_hostnames }}
+
+- name: Set migration_source_host in tempest.conf
+  become: true
+  community.general.ini_file:
+    path: "{{ devstack_base_dir }}/tempest/etc/tempest.conf"
+    section: compute
+    option: migration_source_host
+    value: "{{ devstack_hostnames[0] }}"
+
+- name: Set migration_dest_host in tempest.conf
+  become: true
+  community.general.ini_file:
+    path: "{{ devstack_base_dir }}/tempest/etc/tempest.conf"
+    section: compute
+    option: migration_dest_host
+    value: "{{ devstack_hostnames[1] }}"
