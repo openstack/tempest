@@ -65,7 +65,6 @@
     # This job version is to use the 'full' tox env which
     # is available for stable/ussuri to stable/wallaby also.
     branches:
-      - stable/ussuri
       - stable/victoria
       - stable/wallaby
     description: |
@@ -88,79 +87,6 @@
       devstack_services:
         # Enbale horizon so that we can run horizon test.
         horizon: true
-
-- job:
-    name: tempest-full-py3
-    parent: devstack-tempest
-    # This job version is with swift disabled on py3
-    # as swift was not ready on py3 until stable/train.
-    branches:
-      - stable/stein
-      - stable/train
-    description: |
-      Base integration test with Neutron networking, swift disabled, and py3.
-      Former names for this job where:
-        * legacy-tempest-dsvm-py35
-        * gate-tempest-dsvm-py35
-    required-projects:
-      - openstack/horizon
-    vars:
-      tox_envlist: full
-      devstack_localrc:
-        USE_PYTHON3: true
-        FORCE_CONFIG_DRIVE: true
-        ENABLE_VOLUME_MULTIATTACH: true
-        GLANCE_USE_IMPORT_WORKFLOW: True
-      devstack_plugins:
-        neutron: https://opendev.org/openstack/neutron
-      devstack_local_conf:
-        post-config:
-          "/$NEUTRON_CORE_PLUGIN_CONF":
-            ovs:
-              bridge_mappings: public:br-ex
-              resource_provider_bandwidths: br-ex:1000000:1000000
-        test-config:
-          $TEMPEST_CONFIG:
-            network-feature-enabled:
-              qos_placement_physnet: public
-      devstack_services:
-        # Enbale horizon so that we can run horizon test.
-        horizon: true
-        s-account: false
-        s-container: false
-        s-object: false
-        s-proxy: false
-        # without Swift, c-bak cannot run (in the Gate at least)
-        # NOTE(mriedem): Disable the cinder-backup service from
-        # tempest-full-py3 since tempest-full-py3 is in the integrated-gate-py3
-        # project template but the backup tests do not really involve other
-        # services so they should be run in some more cinder-specific job,
-        # especially because the tests fail at a high rate (see bugs 1483434,
-        # 1813217, 1745168)
-        c-bak: false
-        neutron-placement: true
-        neutron-qos: true
-
-- job:
-    name: tempest-multinode-full-py3
-    parent: tempest-multinode-full
-    nodeset: openstack-two-node-bionic
-    # This job runs on Bionic.
-    branches:
-      - stable/stein
-      - stable/train
-      - stable/ussuri
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: true
-      devstack_plugins:
-        neutron: https://opendev.org/openstack/neutron
-      devstack_services:
-        neutron-trunk: true
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: true
 
 - job:
     name: tempest-multinode-full-py3
@@ -205,54 +131,11 @@
           USE_PYTHON3: False
 
 - job:
-    name: tempest-multinode-full
-    parent: tempest-multinode-full-base
-    nodeset: openstack-two-node-bionic
-    # This job runs on Bionic and on python2. This is for stable/stein and stable/train.
-    # This job is prepared to make sure all stable branches from stable/stein till stable/train
-    # will keep running on bionic. This can be removed once stable/train is EOL.
-    branches:
-      - stable/stein
-      - stable/train
-      - stable/ussuri
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
-
-- job:
-    name: tempest-slow-py3
-    parent: tempest-slow
-    # This job version is with swift disabled on py3
-    # as swift was not ready on py3 until stable/train.
-    branches:
-      - stable/stein
-      - stable/train
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: true
-      devstack_services:
-        s-account: false
-        s-container: false
-        s-object: false
-        s-proxy: false
-        # without Swift, c-bak cannot run (in the Gate at least)
-        c-bak: false
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: true
-
-- job:
     name: tempest-slow-py3
     parent: tempest-slow
     # This job version is to use the 'slow-serial' tox env for
     # the stable/ussuri to stable/wallaby testing.
     branches:
-      - stable/ussuri
       - stable/victoria
       - stable/wallaby
     vars:
