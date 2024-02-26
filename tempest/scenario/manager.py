@@ -441,7 +441,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 'container': container}
         args.update(kwargs)
         backup = self.backups_client.create_backup(volume_id=volume_id,
-                                                   **kwargs)['backup']
+                                                   **args)['backup']
         self.addCleanup(self.backups_client.delete_backup, backup['id'])
         waiters.wait_for_volume_resource_status(self.backups_client,
                                                 backup['id'], 'available')
