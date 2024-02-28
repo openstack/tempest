@@ -264,6 +264,7 @@
       # requests to services and can cause more oom issues. To avoid the
       # oom issue, setting the concurrency to 4 in this job.
       tempest_concurrency: 4
+      tempest_set_src_dest_host: true
       devstack_localrc:
         USE_PYTHON3: true
       devstack_plugins:

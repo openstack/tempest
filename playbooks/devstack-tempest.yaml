@@ -20,6 +20,11 @@
       include_role:
         name: acl-devstack-files
 
+    - name: Set source and destination host
+      include_role:
+        name: set-src-dest-host
+      when: tempest_set_src_dest_host is defined and tempest_set_src_dest_host | bool
+
     - name: Run tempest cleanup init-saved-state
       include_role:
         name: tempest-cleanup
