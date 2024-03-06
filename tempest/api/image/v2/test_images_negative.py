@@ -58,7 +58,10 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_delete_deleted_image(self):
         """Get and delete the deleted image"""
         # create and delete image
-        image = self.client.create_image(name='test',
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="test")
+        image = self.client.create_image(name=image_name,
                                          container_format='bare',
                                          disk_format='raw')
         self.client.delete_image(image['id'])
@@ -111,7 +114,10 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     @decorators.idempotent_id('ab980a34-8410-40eb-872b-f264752f46e5')
     def test_delete_protected_image(self):
         """Create a protected image"""
-        image = self.create_image(protected=True)
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="test")
+        image = self.create_image(name=image_name, protected=True)
         self.addCleanup(self.client.update_image, image['id'],
                         [dict(replace="/protected", value=False)])
 
@@ -132,7 +138,10 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         if not CONF.image_feature_enabled.os_glance_reserved:
             raise self.skipException('os_glance_reserved is not enabled')
 
-        image = self.create_image(name='test',
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="test")
+        image = self.create_image(name=image_name,
                                   container_format='bare',
                                   disk_format='raw')
         self.assertRaises(lib_exc.Forbidden,
@@ -152,9 +161,12 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         if not CONF.image_feature_enabled.os_glance_reserved:
             raise self.skipException('os_glance_reserved is not enabled')
 
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="test")
         self.assertRaises(lib_exc.Forbidden,
                           self.create_image,
-                          name='test',
+                          name=image_name,
                           container_format='bare',
                           disk_format='raw',
                           os_glance_foo='bar')
@@ -195,7 +207,10 @@ class ImportImagesNegativeTest(base.BaseV2ImageTest):
         if 'web-download' not in self.available_import_methods:
             raise self.skipException('Server does not support '
                                      'web-download import method')
-        image = self.client.create_image(name='test',
+        image_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix,
+            name="test")
+        image = self.client.create_image(name=image_name,
                                          container_format='bare',
                                          disk_format='raw')
         # Now try to get image details
