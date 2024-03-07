@@ -48,7 +48,7 @@
     # this job definition is only for stable/xena onwards
     # and separate job definition until stable/wallaby
     branches:
-      regex: ^stable/(victoria|wallaby)$
+      regex: ^.*/(victoria|wallaby)$
       negate: true
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
@@ -82,7 +82,7 @@
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
     branches:
-      regex: ^stable/(victoria|wallaby|xena)$
+      regex: ^.*/(victoria|wallaby|xena)$
       negate: true
     description: |
       Base integration test on CentOS 9 stream
@@ -143,7 +143,7 @@
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
     branches:
-      regex: ^stable/(victoria|wallaby|xena)$
+      regex: ^.*/(victoria|wallaby|xena)$
       negate: true
     description: |
       This job runs integration tests for compute. This is
@@ -230,7 +230,7 @@
     nodeset: openstack-two-node-jammy
     # This job runs on ubuntu Jammy and after stable/zed.
     branches:
-      regex: ^stable/(victoria|wallaby|xena|yoga|zed)$
+      regex: ^.*/(victoria|wallaby|xena|yoga|zed)$
       negate: true
     vars:
       # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
@@ -295,7 +295,7 @@
     # till stable/wallaby, this job definition is only for stable/xena
     # onwards and separate job definition until stable/wallaby
     branches:
-      regex: ^stable/(victoria|wallaby)$
+      regex: ^.*/(victoria|wallaby)$
       negate: true
     vars:
       tox_envlist: slow
@@ -428,7 +428,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -445,7 +445,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -481,14 +481,14 @@
         - tempest-integrated-compute
         # centos-8-stream is tested from wallaby -> yoga branches
         - tempest-integrated-compute-centos-8-stream:
-            branches: ^stable/(wallaby|xena|yoga).*$
+            branches: ^.*/(wallaby|xena|yoga)$
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -498,14 +498,14 @@
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     periodic-weekly:
       jobs:
         # centos-9-stream is tested from zed release onwards
         - tempest-integrated-compute-centos-9-stream:
             branches:
-              regex: ^stable/(victoria|wallaby|xena|yoga)$
+              regex: ^.*/(victoria|wallaby|xena|yoga)$
               negate: true
 
 - project-template:
@@ -537,7 +537,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -554,7 +554,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -586,7 +586,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -603,7 +603,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -628,7 +628,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -645,5 +645,5 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(victoria|wallaby)$
+              regex: ^.*/(victoria|wallaby)$
               negate: true
