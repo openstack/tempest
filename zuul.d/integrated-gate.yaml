@@ -30,32 +30,6 @@
       tox_envlist: ipv6-only
 
 - job:
-    name: tempest-full
-    parent: devstack-tempest
-    description: |
-      Base integration test with Neutron networking and py27.
-      This job is supposed to run until stable/train setup only.
-      If you are running it on stable/ussuri gate onwards for python2.7
-      coverage then you need to do override-checkout with any stable
-      branch less than or equal to stable/train.
-      Former names for this job where:
-        * legacy-tempest-dsvm-neutron-full
-        * gate-tempest-dsvm-neutron-full-ubuntu-xenial
-    vars:
-      tox_envlist: full
-      devstack_localrc:
-        ENABLE_FILE_INJECTION: true
-        ENABLE_VOLUME_MULTIATTACH: true
-        USE_PYTHON3: False
-      devstack_services:
-        # NOTE(mriedem): Disable the cinder-backup service from tempest-full
-        # since tempest-full is in the integrated-gate project template but
-        # the backup tests do not really involve other services so they should
-        # be run in some more cinder-specific job, especially because the
-        # tests fail at a high rate (see bugs 1483434, 1813217, 1745168)
-        c-bak: false
-
-- job:
     name: tempest-extra-tests
     parent: tempest-full-py3
     description: |
@@ -74,7 +48,7 @@
     # this job definition is only for stable/xena onwards
     # and separate job definition until stable/wallaby
     branches:
-      regex: ^stable/(stein|train|ussuri|victoria|wallaby)$
+      regex: ^stable/(victoria|wallaby)$
       negate: true
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
@@ -108,7 +82,7 @@
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
     branches:
-      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena)$
+      regex: ^stable/(victoria|wallaby|xena)$
       negate: true
     description: |
       Base integration test on CentOS 9 stream
@@ -169,7 +143,7 @@
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
     branches:
-      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena)$
+      regex: ^stable/(victoria|wallaby|xena)$
       negate: true
     description: |
       This job runs integration tests for compute. This is
@@ -256,7 +230,7 @@
     nodeset: openstack-two-node-jammy
     # This job runs on ubuntu Jammy and after stable/zed.
     branches:
-      regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena|yoga|zed)$
+      regex: ^stable/(victoria|wallaby|xena|yoga|zed)$
       negate: true
     vars:
       # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
@@ -321,7 +295,7 @@
     # till stable/wallaby, this job definition is only for stable/xena
     # onwards and separate job definition until stable/wallaby
     branches:
-      regex: ^stable/(stein|train|ussuri|victoria|wallaby)$
+      regex: ^stable/(victoria|wallaby)$
       negate: true
     vars:
       tox_envlist: slow
@@ -454,7 +428,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -471,7 +445,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -514,7 +488,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -524,14 +498,14 @@
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     periodic-weekly:
       jobs:
         # centos-9-stream is tested from zed release onwards
         - tempest-integrated-compute-centos-9-stream:
             branches:
-              regex: ^stable/(stein|train|ussuri|victoria|wallaby|xena|yoga)$
+              regex: ^stable/(victoria|wallaby|xena|yoga)$
               negate: true
 
 - project-template:
@@ -563,7 +537,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -580,7 +554,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -612,7 +586,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -629,7 +603,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
 
 - project-template:
@@ -654,7 +628,7 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
     gate:
       jobs:
@@ -671,5 +645,5 @@
         # described in https://review.opendev.org/872341
         - openstacksdk-functional-devstack:
             branches:
-              regex: ^stable/(ussuri|victoria|wallaby)$
+              regex: ^stable/(victoria|wallaby)$
               negate: true
