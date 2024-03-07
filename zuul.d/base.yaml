@@ -24,6 +24,8 @@
               min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
       test_results_stage_name: test_results
       zuul_copy_output:
+        '/var/log/openvswitch': logs
+        '/var/log/ovn': logs
         '{{ devstack_base_dir }}/tempest/etc/tempest.conf': logs
         '{{ devstack_base_dir }}/tempest/etc/accounts.yaml': logs
         '{{ devstack_base_dir }}/tempest/tempest.log': logs
