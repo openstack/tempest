@@ -44,9 +44,6 @@
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
-            # TODO(kopecmartin): non-voting until this is resolved:
-            # https://bugs.launchpad.net/tempest/+bug/2053026
-            voting: false
             irrelevant-files: &tempest-irrelevant-files-2
               - ^.*\.rst$
               - ^doc/.*$
