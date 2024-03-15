@@ -65,8 +65,8 @@
     # This job version is to use the 'full' tox env which
     # is available for stable/ussuri to stable/wallaby also.
     branches:
-      - stable/victoria
-      - stable/wallaby
+      - ^.*/victoria
+      - ^.*/wallaby
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
       and py3.
@@ -94,11 +94,11 @@
     nodeset: openstack-two-node-focal
     # This job runs on Focal and supposed to run until stable/zed.
     branches:
-      - stable/victoria
-      - stable/wallaby
-      - stable/xena
-      - unmaintained/yoga
-      - stable/zed
+      - ^.*/victoria
+      - ^.*/wallaby
+      - ^.*/xena
+      - ^.*/yoga
+      - ^.*/zed
     vars:
       devstack_localrc:
         USE_PYTHON3: true
@@ -117,11 +117,11 @@
     nodeset: openstack-two-node-focal
     # This job runs on Focal and on python2. This is for stable/victoria to stable/zed.
     branches:
-      - stable/victoria
-      - stable/wallaby
-      - stable/xena
-      - unmaintained/yoga
-      - stable/zed
+      - ^.*/victoria
+      - ^.*/wallaby
+      - ^.*/xena
+      - ^.*/yoga
+      - ^.*/zed
     vars:
       devstack_localrc:
         USE_PYTHON3: False
@@ -136,8 +136,8 @@
     # This job version is to use the 'slow-serial' tox env for
     # the stable/ussuri to stable/wallaby testing.
     branches:
-      - stable/victoria
-      - stable/wallaby
+      - ^.*/victoria
+      - ^.*/wallaby
     vars:
       tox_envlist: slow-serial
 
@@ -152,12 +152,9 @@
     # This job is not used after stable/xena and can be
     # removed once stable/xena is EOL.
     branches:
-      - stable/stein
-      - stable/train
-      - stable/ussuri
-      - stable/victoria
-      - stable/wallaby
-      - stable/xena
+      - ^.*/victoria
+      - ^.*/wallaby
+      - ^.*/xena
 
 - job:
     name: tempest-integrated-compute-centos-8-stream
@@ -166,9 +163,9 @@
     voting: false
     nodeset: devstack-single-node-centos-8-stream
     branches:
-      - stable/wallaby
-      - stable/xena
-      - unmaintained/yoga
+      - ^.*/wallaby
+      - ^.*/xena
+      - ^.*/yoga
     description: |
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
@@ -185,9 +182,9 @@
     # TODO(gmann): Make this job non voting until bug#1957941 if fixed.
     voting: false
     branches:
-      - stable/wallaby
-      - stable/xena
-      - unmaintained/yoga
+      - ^.*/wallaby
+      - ^.*/xena
+      - ^.*/yoga
     nodeset: devstack-single-node-centos-8-stream
     description: |
       Base integration test with Neutron networking and py36 running
