@@ -1,0 +1,4 @@
+---
+upgrade:
+  - |
+    The deprecated ``[network] dns_servers`` option has been removed.
