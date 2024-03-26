@@ -1071,7 +1071,10 @@ VolumeFeaturesGroup = [
                default=None,
                help='Volume types used for data volumes. Multiple volume '
                     'types can be assigned.'),
-
+    cfg.BoolOpt('enable-volume-image-dep-tests',
+                default=True,
+                help='Run tests for dependencies between images, volumes'
+                'and instance snapshots')
 ]
 
 
@@ -1176,7 +1179,7 @@ ScenarioGroup = [
                default='icmp',
                choices=('icmp', 'tcp', 'udp'),
                help='The protocol used in security groups tests to check '
-                    'connectivity.'),
+                    'connectivity.')
 ]
 
 

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add new config option 'enable-volume-image-dep-tests' in section
+    [volume-feature-enabled] which should be used in
+    image<->volume<->snapshot dependency tests.
