@@ -416,11 +416,12 @@
             voting: false
             branches:
               - stable/2023.1
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -434,11 +435,12 @@
       jobs:
         - grenade
         - tempest-integrated-networking
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -477,6 +479,8 @@
         # to make sure we do not run this job on older than 2023.2 gate.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2023.2
+              - ^.*/2024.1
               - master
         - tempest-integrated-compute
         # centos-8-stream is tested from wallaby -> yoga branches
@@ -494,6 +498,8 @@
       jobs:
         - grenade-skip-level-always:
             branches:
+              - ^.*/2023.2
+              - ^.*/2024.1
               - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
@@ -525,11 +531,12 @@
             voting: false
             branches:
               - stable/2023.1
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -543,11 +550,12 @@
       jobs:
         - grenade
         - tempest-integrated-placement
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -574,11 +582,12 @@
             voting: false
             branches:
               - stable/2023.1
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -591,11 +600,12 @@
     gate:
       jobs:
         - grenade
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -616,11 +626,12 @@
     check:
       jobs:
         - grenade
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -633,11 +644,12 @@
     gate:
       jobs:
         - grenade
-        # on master (SLURP 2024.1) grenade-skip-level which test stable/2023.1
-        # to stable/2024.1 upgrade is voting.
+        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
+        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
+        # SLURP release only.
         - grenade-skip-level:
             branches:
-              - master
+              - ^.*/2024.1
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
