@@ -1,0 +1,6 @@
+=====================
+v38.0.0 Release Notes
+=====================
+
+.. release-notes:: 38.0.0 Release Notes
+   :version: 38.0.0
