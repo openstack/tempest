@@ -67,10 +67,10 @@ class NetworkQoSPlacementTestBase(manager.NetworkScenarioTest):
         cls.networks_client = cls.os_admin.networks_client
         cls.subnets_client = cls.os_admin.subnets_client
         cls.ports_client = cls.os_primary.ports_client
-        cls.routers_client = cls.os_adm.routers_client
+        cls.routers_client = cls.os_admin.routers_client
         cls.qos_client = cls.os_admin.qos_client
         cls.qos_min_bw_client = cls.os_admin.qos_min_bw_client
-        cls.flavors_client = cls.os_adm.flavors_client
+        cls.flavors_client = cls.os_admin.flavors_client
         cls.servers_client = cls.os_primary.servers_client
 
     def _create_flavor_to_resize_to(self):
