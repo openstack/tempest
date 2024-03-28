@@ -31,17 +31,11 @@ from tempest.lib.common import api_microversion_fixture
 from tempest.lib.common import fixed_network
 from tempest.lib.common import profiler
 from tempest.lib.common import validation_resources as vr
-from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 
 LOG = logging.getLogger(__name__)
 
 CONF = config.CONF
-
-
-attr = debtcollector.moves.moved_function(
-    decorators.attr, 'attr', __name__,
-    version='Pike', removal_version='?')
 
 
 at_exit_set = set()
