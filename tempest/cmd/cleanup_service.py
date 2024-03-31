@@ -115,6 +115,16 @@ class BaseService(object):
         return [item for item in item_list
                 if item['tenant_id'] == self.tenant_id]
 
+    def _filter_by_prefix(self, item_list):
+        items = [item for item in item_list
+                 if item['name'].startswith(self.prefix)]
+        return items
+
+    def _filter_out_ids_from_saved(self, item_list, attr):
+        items = [item for item in item_list if item['id']
+                 not in self.saved_state_json[attr].keys()]
+        return items
+
     def list(self):
         pass
 
@@ -156,10 +166,11 @@ class SnapshotService(BaseService):
     def list(self):
         client = self.client
         snaps = client.list_snapshots()['snapshots']
-        if not self.is_save_state:
+        if self.prefix:
+            snaps = self._filter_by_prefix(snaps)
+        elif not self.is_save_state:
             # recreate list removing saved snapshots
-            snaps = [snap for snap in snaps if snap['id']
-                     not in self.saved_state_json['snapshots'].keys()]
+            snaps = self._filter_out_ids_from_saved(snaps, 'snapshots')
         LOG.debug("List count, %s Snapshots", len(snaps))
         return snaps
 
@@ -194,10 +205,11 @@ class ServerService(BaseService):
         client = self.client
         servers_body = client.list_servers()
         servers = servers_body['servers']
-        if not self.is_save_state:
+        if self.prefix:
+            servers = self._filter_by_prefix(servers)
+        elif not self.is_save_state:
             # recreate list removing saved servers
-            servers = [server for server in servers if server['id']
-                       not in self.saved_state_json['servers'].keys()]
+            servers = self._filter_out_ids_from_saved(servers, 'servers')
         LOG.debug("List count, %s Servers", len(servers))
         return servers
 
@@ -227,10 +239,11 @@ class ServerGroupService(ServerService):
     def list(self):
         client = self.server_groups_client
         sgs = client.list_server_groups()['server_groups']
-        if not self.is_save_state:
+        if self.prefix:
+            sgs = self._filter_by_prefix(sgs)
+        elif not self.is_save_state:
             # recreate list removing saved server_groups
-            sgs = [sg for sg in sgs if sg['id']
-                   not in self.saved_state_json['server_groups'].keys()]
+            sgs = self._filter_out_ids_from_saved(sgs, 'server_groups')
         LOG.debug("List count, %s Server Groups", len(sgs))
         return sgs
 
@@ -263,7 +276,9 @@ class KeyPairService(BaseService):
     def list(self):
         client = self.client
         keypairs = client.list_keypairs()['keypairs']
-        if not self.is_save_state:
+        if self.prefix:
+            keypairs = self._filter_by_prefix(keypairs)
+        elif not self.is_save_state:
             # recreate list removing saved keypairs
             keypairs = [keypair for keypair in keypairs
                         if keypair['keypair']['name']
@@ -302,10 +317,11 @@ class VolumeService(BaseService):
     def list(self):
         client = self.client
         vols = client.list_volumes()['volumes']
-        if not self.is_save_state:
+        if self.prefix:
+            vols = self._filter_by_prefix(vols)
+        elif not self.is_save_state:
             # recreate list removing saved volumes
-            vols = [vol for vol in vols if vol['id']
-                    not in self.saved_state_json['volumes'].keys()]
+            vols = self._filter_out_ids_from_saved(vols, 'volumes')
         LOG.debug("List count, %s Volumes", len(vols))
         return vols
 
@@ -336,6 +352,10 @@ class VolumeQuotaService(BaseService):
         self.client = manager.volume_quotas_client_latest
 
     def delete(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         client = self.client
         try:
             LOG.debug("Deleting Volume Quotas for project with id %s",
@@ -346,6 +366,10 @@ class VolumeQuotaService(BaseService):
                           self.project_id)
 
     def dry_run(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         quotas = self.client.show_quota_set(
             self.project_id, params={'usage': True})['quota_set']
         self.data['volume_quotas'] = quotas
@@ -358,6 +382,10 @@ class NovaQuotaService(BaseService):
         self.limits_client = manager.limits_client
 
     def delete(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         client = self.client
         try:
             LOG.debug("Deleting Nova Quotas for project with id %s",
@@ -368,6 +396,10 @@ class NovaQuotaService(BaseService):
                           self.project_id)
 
     def dry_run(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         client = self.limits_client
         quotas = client.show_limits()['limits']
         self.data['compute_quotas'] = quotas['absolute']
@@ -379,6 +411,10 @@ class NetworkQuotaService(BaseService):
         self.client = manager.network_quotas_client
 
     def delete(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         client = self.client
         try:
             LOG.debug("Deleting Network Quotas for project with id %s",
@@ -389,6 +425,10 @@ class NetworkQuotaService(BaseService):
                           self.project_id)
 
     def dry_run(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore do nothing
+            return
         resp = [quota for quota in self.client.list_quotas()['quotas']
                 if quota['project_id'] == self.project_id]
         self.data['network_quotas'] = resp
@@ -422,11 +462,13 @@ class NetworkService(BaseNetworkService):
         client = self.networks_client
         networks = client.list_networks(**self.tenant_filter)
         networks = networks['networks']
-
-        if not self.is_save_state:
-            # recreate list removing saved networks
-            networks = [network for network in networks if network['id']
-                        not in self.saved_state_json['networks'].keys()]
+        if self.prefix:
+            networks = self._filter_by_prefix(networks)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved networks
+                networks = self._filter_out_ids_from_saved(
+                    networks, 'networks')
         # filter out networks declared in tempest.conf
         if self.is_preserve:
             networks = [network for network in networks
@@ -458,14 +500,17 @@ class NetworkService(BaseNetworkService):
 class NetworkFloatingIpService(BaseNetworkService):
 
     def list(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore return empty list
+            return []
         client = self.floating_ips_client
         flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
 
         if not self.is_save_state:
             # recreate list removing saved flips
-            flips = [flip for flip in flips if flip['id']
-                     not in self.saved_state_json['floatingips'].keys()]
+            flips = self._filter_out_ids_from_saved(flips, 'floatingips')
         LOG.debug("List count, %s Network Floating IPs", len(flips))
         return flips
 
@@ -498,15 +543,15 @@ class NetworkRouterService(BaseNetworkService):
         client = self.routers_client
         routers = client.list_routers(**self.tenant_filter)
         routers = routers['routers']
-
-        if not self.is_save_state:
-            # recreate list removing saved routers
-            routers = [router for router in routers if router['id']
-                       not in self.saved_state_json['routers'].keys()]
+        if self.prefix:
+            routers = self._filter_by_prefix(routers)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved routers
+                routers = self._filter_out_ids_from_saved(routers, 'routers')
         if self.is_preserve:
             routers = [router for router in routers
                        if router['id'] != CONF_PUB_ROUTER]
-
         LOG.debug("List count, %s Routers", len(routers))
         return routers
 
@@ -547,15 +592,19 @@ class NetworkRouterService(BaseNetworkService):
 class NetworkMeteringLabelRuleService(NetworkService):
 
     def list(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore return empty list
+            return []
         client = self.metering_label_rules_client
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
 
         if not self.is_save_state:
-            saved_rules = self.saved_state_json['metering_label_rules'].keys()
+            rules = self._filter_out_ids_from_saved(
+                rules, 'metering_label_rules')
             # recreate list removing saved rules
-            rules = [rule for rule in rules if rule['id'] not in saved_rules]
         LOG.debug("List count, %s Metering Label Rules", len(rules))
         return rules
 
@@ -589,11 +638,12 @@ class NetworkMeteringLabelService(BaseNetworkService):
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
-
-        if not self.is_save_state:
+        if self.prefix:
+            labels = self._filter_by_prefix(labels)
+        elif not self.is_save_state:
             # recreate list removing saved labels
-            labels = [label for label in labels if label['id']
-                      not in self.saved_state_json['metering_labels'].keys()]
+            labels = self._filter_out_ids_from_saved(
+                labels, 'metering_labels')
         LOG.debug("List count, %s Metering Labels", len(labels))
         return labels
 
@@ -627,14 +677,14 @@ class NetworkPortService(BaseNetworkService):
                  client.list_ports(**self.tenant_filter)['ports']
                  if port["device_owner"] == "" or
                  port["device_owner"].startswith("compute:")]
-
-        if not self.is_save_state:
-            # recreate list removing saved ports
-            ports = [port for port in ports if port['id']
-                     not in self.saved_state_json['ports'].keys()]
+        if self.prefix:
+            ports = self._filter_by_prefix(ports)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved ports
+                ports = self._filter_out_ids_from_saved(ports, 'ports')
         if self.is_preserve:
             ports = self._filter_by_conf_networks(ports)
-
         LOG.debug("List count, %s Ports", len(ports))
         return ports
 
@@ -667,16 +717,18 @@ class NetworkSecGroupService(BaseNetworkService):
         secgroups = [secgroup for secgroup in
                      client.list_security_groups(**filter)['security_groups']
                      if secgroup['name'] != 'default']
-
-        if not self.is_save_state:
-            # recreate list removing saved security_groups
-            secgroups = [secgroup for secgroup in secgroups if secgroup['id']
-                         not in self.saved_state_json['security_groups'].keys()
-                         ]
+        if self.prefix:
+            secgroups = self._filter_by_prefix(secgroups)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved security_groups
+                secgroups = self._filter_out_ids_from_saved(
+                    secgroups, 'security_groups')
         if self.is_preserve:
-            secgroups = [secgroup for secgroup in secgroups
-                         if secgroup['security_group_rules'][0]['project_id']
-                         not in CONF_PROJECTS]
+            secgroups = [
+                secgroup for secgroup in secgroups
+                if secgroup['security_group_rules'][0]['project_id']
+                not in CONF_PROJECTS]
         LOG.debug("List count, %s security_groups", len(secgroups))
         return secgroups
 
@@ -708,10 +760,12 @@ class NetworkSubnetService(BaseNetworkService):
         client = self.subnets_client
         subnets = client.list_subnets(**self.tenant_filter)
         subnets = subnets['subnets']
-        if not self.is_save_state:
-            # recreate list removing saved subnets
-            subnets = [subnet for subnet in subnets if subnet['id']
-                       not in self.saved_state_json['subnets'].keys()]
+        if self.prefix:
+            subnets = self._filter_by_prefix(subnets)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved subnets
+                subnets = self._filter_out_ids_from_saved(subnets, 'subnets')
         if self.is_preserve:
             subnets = self._filter_by_conf_networks(subnets)
         LOG.debug("List count, %s Subnets", len(subnets))
@@ -743,10 +797,12 @@ class NetworkSubnetPoolsService(BaseNetworkService):
     def list(self):
         client = self.subnetpools_client
         pools = client.list_subnetpools(**self.tenant_filter)['subnetpools']
-        if not self.is_save_state:
-            # recreate list removing saved subnet pools
-            pools = [pool for pool in pools if pool['id']
-                     not in self.saved_state_json['subnetpools'].keys()]
+        if self.prefix:
+            pools = self._filter_by_prefix(pools)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved subnet pools
+                pools = self._filter_out_ids_from_saved(pools, 'subnetpools')
         if self.is_preserve:
             pools = [pool for pool in pools if pool['project_id']
                      not in CONF_PROJECTS]
@@ -782,11 +838,15 @@ class RegionService(BaseService):
         self.client = manager.regions_client
 
     def list(self):
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore return empty list
+            return []
         client = self.client
         regions = client.list_regions()
         if not self.is_save_state:
-            regions = [region for region in regions['regions'] if region['id']
-                       not in self.saved_state_json['regions'].keys()]
+            regions = self._filter_out_ids_from_saved(
+                regions['regions'], 'regions')
             LOG.debug("List count, %s Regions", len(regions))
             return regions
         else:
@@ -824,11 +884,12 @@ class FlavorService(BaseService):
     def list(self):
         client = self.client
         flavors = client.list_flavors({"is_public": None})['flavors']
-        if not self.is_save_state:
-            # recreate list removing saved flavors
-            flavors = [flavor for flavor in flavors if flavor['id']
-                       not in self.saved_state_json['flavors'].keys()]
-
+        if self.prefix:
+            flavors = self._filter_by_prefix(flavors)
+        else:
+            if not self.is_save_state:
+                # recreate list removing saved flavors
+                flavors = self._filter_out_ids_from_saved(flavors, 'flavors')
         if self.is_preserve:
             flavors = [flavor for flavor in flavors
                        if flavor['id'] not in CONF_FLAVORS]
@@ -871,10 +932,11 @@ class ImageService(BaseService):
             marker = urllib.parse_qs(parsed.query)['marker'][0]
             response = client.list_images(params={"marker": marker})
             images.extend(response['images'])
-
-        if not self.is_save_state:
-            images = [image for image in images if image['id']
-                      not in self.saved_state_json['images'].keys()]
+        if self.prefix:
+            images = self._filter_by_prefix(images)
+        else:
+            if not self.is_save_state:
+                images = self._filter_out_ids_from_saved(images, 'images')
         if self.is_preserve:
             images = [image for image in images
                       if image['id'] not in CONF_IMAGES]
@@ -910,19 +972,17 @@ class UserService(BaseService):
 
     def list(self):
         users = self.client.list_users()['users']
-
-        if not self.is_save_state:
-            users = [user for user in users if user['id']
-                     not in self.saved_state_json['users'].keys()]
-
+        if self.prefix:
+            users = self._filter_by_prefix(users)
+        else:
+            if not self.is_save_state:
+                users = self._filter_out_ids_from_saved(users, 'users')
         if self.is_preserve:
             users = [user for user in users if user['name']
                      not in CONF_USERS]
-
         elif not self.is_save_state:  # Never delete admin user
             users = [user for user in users if user['name'] !=
                      CONF.auth.admin_username]
-
         LOG.debug("List count, %s Users after reconcile", len(users))
         return users
 
@@ -955,13 +1015,14 @@ class RoleService(BaseService):
     def list(self):
         try:
             roles = self.client.list_roles()['roles']
-            # reconcile roles with saved state and never list admin role
-            if not self.is_save_state:
-                roles = [role for role in roles if
-                         (role['id'] not in
-                          self.saved_state_json['roles'].keys() and
-                          role['name'] != CONF.identity.admin_role)]
-                LOG.debug("List count, %s Roles after reconcile", len(roles))
+            if self.prefix:
+                roles = self._filter_by_prefix(roles)
+            elif not self.is_save_state:
+                # reconcile roles with saved state and never list admin role
+                roles = self._filter_out_ids_from_saved(roles, 'roles')
+                roles = [role for role in roles
+                         if role['name'] != CONF.identity.admin_role]
+            LOG.debug("List count, %s Roles after reconcile", len(roles))
             return roles
         except Exception:
             LOG.exception("Cannot retrieve Roles.")
@@ -995,18 +1056,17 @@ class ProjectService(BaseService):
 
     def list(self):
         projects = self.client.list_projects()['projects']
-        if not self.is_save_state:
-            project_ids = self.saved_state_json['projects']
-            projects = [project
-                        for project in projects
-                        if (project['id'] not in project_ids and
-                            project['name'] != CONF.auth.admin_project_name)]
-
+        if self.prefix:
+            projects = self._filter_by_prefix(projects)
+        else:
+            if not self.is_save_state:
+                projects = self._filter_out_ids_from_saved(
+                    projects, 'projects')
+                projects = [project for project in projects
+                            if project['name'] != CONF.auth.admin_project_name]
         if self.is_preserve:
-            projects = [project
-                        for project in projects
+            projects = [project for project in projects
                         if project['name'] not in CONF_PROJECTS]
-
         LOG.debug("List count, %s Projects after reconcile", len(projects))
         return projects
 
@@ -1039,10 +1099,10 @@ class DomainService(BaseService):
     def list(self):
         client = self.client
         domains = client.list_domains()['domains']
-        if not self.is_save_state:
-            domains = [domain for domain in domains if domain['id']
-                       not in self.saved_state_json['domains'].keys()]
-
+        if self.prefix:
+            domains = self._filter_by_prefix(domains)
+        elif not self.is_save_state:
+            domains = self._filter_out_ids_from_saved(domains, 'domains')
         LOG.debug("List count, %s Domains after reconcile", len(domains))
         return domains
 

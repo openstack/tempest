@@ -32,7 +32,8 @@
         init_saved_state: true
       when: (run_tempest_dry_cleanup is defined and run_tempest_dry_cleanup | bool) or
             (run_tempest_cleanup is defined and run_tempest_cleanup | bool) or
-            (run_tempest_fail_if_leaked_resources is defined and run_tempest_fail_if_leaked_resources | bool)
+            (run_tempest_fail_if_leaked_resources is defined and run_tempest_fail_if_leaked_resources | bool) or
+            (run_tempest_cleanup_prefix is defined and run_tempest_cleanup_prefix | bool)
 
     - name: Run Tempest version <= 26.0.0
       include_role:

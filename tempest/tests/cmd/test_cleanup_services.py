@@ -44,6 +44,7 @@ class TestBaseService(base.TestCase):
                   'saved_state_json': {'saved': 'data'},
                   'is_preserve': False,
                   'is_save_state': True,
+                  'prefix': 'tempest',
                   'tenant_id': 'project_id',
                   'got_exceptions': []}
         base = cleanup_service.BaseService(kwargs)
@@ -54,6 +55,7 @@ class TestBaseService(base.TestCase):
         self.assertTrue(base.is_save_state)
         self.assertEqual(base.tenant_filter['project_id'], kwargs['tenant_id'])
         self.assertEqual(base.got_exceptions, kwargs['got_exceptions'])
+        self.assertEqual(base.prefix, kwargs['prefix'])
 
     def test_not_implemented_ex(self):
         kwargs = {'data': {'data': 'test'},
@@ -61,6 +63,7 @@ class TestBaseService(base.TestCase):
                   'saved_state_json': {'saved': 'data'},
                   'is_preserve': False,
                   'is_save_state': False,
+                  'prefix': 'tempest',
                   'tenant_id': 'project_id',
                   'got_exceptions': []}
         base = self.TestException(kwargs)
@@ -188,7 +191,8 @@ class BaseCmdServiceTests(MockFunctionsBase):
     service_name = 'default'
 
     def _create_cmd_service(self, service_type, is_save_state=False,
-                            is_preserve=False, is_dry_run=False):
+                            is_preserve=False, is_dry_run=False,
+                            prefix=''):
         creds = fake_credentials.FakeKeystoneV3Credentials()
         os = clients.Manager(creds)
         return getattr(cleanup_service, service_type)(
@@ -196,6 +200,7 @@ class BaseCmdServiceTests(MockFunctionsBase):
             is_save_state=is_save_state,
             is_preserve=is_preserve,
             is_dry_run=is_dry_run,
+            prefix=prefix,
             project_id='b8e3ece07bb049138d224436756e3b57',
             data={},
             saved_state_json=self.saved_state

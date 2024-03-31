@@ -27,6 +27,15 @@
       command: tox -evenv-tempest -- tempest cleanup --debug
       args:
         chdir: "{{ devstack_base_dir }}/tempest"
+      when: not run_tempest_cleanup_prefix
+
+    - name: Run tempest cleanup with tempest prefix
+      become: yes
+      become_user: tempest
+      command: tox -evenv-tempest -- tempest cleanup --debug --prefix tempest
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"
+      when: run_tempest_cleanup_prefix
 
 - when:
     - run_tempest_fail_if_leaked_resources
