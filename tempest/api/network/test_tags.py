@@ -118,7 +118,7 @@ class TagsExtTest(base.BaseNetworkTest):
     @classmethod
     def skip_checks(cls):
         super(TagsExtTest, cls).skip_checks()
-        # Added condition to support backward compatiblity since
+        # Added condition to support backward compatibility since
         # tag-ext has been renamed to standard-attr-tag
         if not (utils.is_extension_enabled('tag-ext', 'network') or
                 utils.is_extension_enabled('standard-attr-tag', 'network')):

@@ -185,7 +185,7 @@ class ServersTestBootFromVolume(ServersTestJSON):
 
 
 class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
-    """Test creating server with FQDN hostname and verifying atrributes
+    """Test creating server with FQDN hostname and verifying attributes
 
     Starting Wallaby release, Nova sanitizes freeform characters in
     server hostname with dashes. This test verifies the same.

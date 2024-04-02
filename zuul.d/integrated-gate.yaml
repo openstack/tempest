@@ -24,7 +24,7 @@
     description: |
       Integration test of IPv6-only deployments. This job runs
       smoke and IPv6 relates tests only. Basic idea is to test
-      whether OpenStack Services listen on IPv6 addrress or not.
+      whether OpenStack Services listen on IPv6 address or not.
     timeout: 10800
     vars:
       tox_envlist: ipv6-only
@@ -73,7 +73,7 @@
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
-        # Enbale horizon so that we can run horizon test.
+        # Enable horizon so that we can run horizon test.
         horizon: true
 
 - job:
@@ -206,7 +206,7 @@
       tox_envlist: integrated-object-storage
       devstack_localrc:
         # NOTE(gmann): swift is not ready on python3 yet and devstack
-        # install it on python2.7 only. But settting the USE_PYTHON3
+        # install it on python2.7 only. But setting the USE_PYTHON3
         # for future once swift is ready on py3.
         USE_PYTHON3: true
 
@@ -374,7 +374,7 @@
       This job runs the Tempest tests with scope and new defaults enabled.
     vars:
       devstack_localrc:
-        # Enabeling the scope and new defaults for services.
+        # Enabaling the scope and new defaults for services.
         # NOTE: (gmann) We need to keep keystone scope check disable as
         # services (except ironic) does not support the system scope and
         # they need keystone to continue working with project scope. Until
@@ -475,7 +475,7 @@
         # (on SLURP as well as non SLURP release) so we are adding grenade-skip-level-always
         # job in integrated gate and we do not need to update skip level job
         # here until Nova change the decision.
-        # This is added from 2023.2 relese cycle onwards so we need to use branch variant
+        # This is added from 2023.2 release cycle onwards so we need to use branch variant
         # to make sure we do not run this job on older than 2023.2 gate.
         - grenade-skip-level-always:
             branches:

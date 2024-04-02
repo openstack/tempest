@@ -159,7 +159,7 @@ class ImagesClient(rest_client.RestClient):
         """
         url = 'images/%s/file' % image_id
 
-        # We are going to do chunked transfert, so split the input data
+        # We are going to do chunked transfer, so split the input data
         # info fixed-sized chunks.
         headers = {'Content-Type': 'application/octet-stream'}
         data = iter(functools.partial(data.read, CHUNKSIZE), b'')

@@ -64,7 +64,7 @@ class ContainerClient(rest_client.RestClient):
             delete_metadata=None,
             create_update_metadata_prefix='X-Container-Meta-',
             delete_metadata_prefix='X-Remove-Container-Meta-'):
-        """Creates, Updates or deletes an containter metadata entry.
+        """Creates, Updates or deletes an container metadata entry.
 
         Container Metadata can be created, updated or deleted based on
         metadata header or value. For detailed info, please refer to the

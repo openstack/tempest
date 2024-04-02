@@ -40,7 +40,7 @@ class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a6f9c2ab-e060-4b82-b23c-4532cb9390ff')
     def test_max_count_less_than_one(self):
-        """Test creating server with max_count < 1 shoudld fail"""
+        """Test creating server with max_count < 1 should fail"""
         invalid_max_count = 0
         self.assertRaises(lib_exc.BadRequest, self.create_test_server,
                           max_count=invalid_max_count)

@@ -646,7 +646,7 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         then be run.
 
         Cleanup functions are always called during the test class tearDown
-        fixture, even if an exception occured during setUp or tearDown.
+        fixture, even if an exception occurred during setUp or tearDown.
         """
         cls._class_cleanups.append((fn, arguments, keywordArguments))
 

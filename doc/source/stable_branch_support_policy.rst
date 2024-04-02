@@ -23,7 +23,7 @@ branches. When this happens the expectation for those branches is to either
 switch to running Tempest from a tag with support for the branch, or exclude
 a newly introduced test (if that is the cause of the issue). Tempest will not
 be creating stable branches to support *Extended Maintenance* phase branches, as
-the burden is on the *Extended Maintenance* phase branche maintainers, not the Tempest
+the burden is on the *Extended Maintenance* phase branch maintainers, not the Tempest
 project, to support that branch.
 
 .. _Extended Maintenance policy: https://governance.openstack.org/tc/resolutions/20180301-stable-branch-eol.html

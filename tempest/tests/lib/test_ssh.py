@@ -162,7 +162,7 @@ class TestSshClient(base.TestCase):
 
         client = ssh.Client('localhost', 'root', timeout=timeout)
         # We need to mock LOG here because LOG.info() calls time.time()
-        # in order to preprend a timestamp.
+        # in order to prepend a timestamp.
         with mock.patch.object(ssh, 'LOG'):
             self.assertRaises(exceptions.SSHTimeout,
                               client._get_ssh_connection)

@@ -236,7 +236,7 @@ show_volume_summary = {
     }
 }
 
-# TODO(zhufl): This is under discussion, so will be merged in a seperate patch.
+# TODO(zhufl): This is under discussion, so will be merged in a separate patch.
 # https://bugs.launchpad.net/cinder/+bug/1880566
 # upload_volume = {
 #     'status_code': [202],

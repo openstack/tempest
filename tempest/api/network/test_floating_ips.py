@@ -129,7 +129,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(updated_floating_ip['fixed_ip_address'])
         self.assertIsNone(updated_floating_ip['router_id'])
 
-        # Explicity test deletion of floating IP
+        # Explicitly test deletion of floating IP
         self.floating_ips_client.delete_floatingip(created_floating_ip['id'])
 
     @decorators.idempotent_id('e1f6bffd-442f-4668-b30e-df13f2705e77')

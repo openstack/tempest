@@ -54,7 +54,7 @@ class BaseServiceTest(base.TestCase):
                  ``assert_called_once_with(foo='bar')`` is called.
                * If mock_args='foo' then ``assert_called_once_with('foo')``
                  is called.
-        :param resp_as_string: Whether response body is retruned as string.
+        :param resp_as_string: Whether response body is returned as string.
                This is for service client methods which return ResponseBodyData
                object.
         :param kwargs: kwargs that are passed to function.

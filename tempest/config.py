@@ -1177,7 +1177,7 @@ ScenarioGroup = [
     cfg.StrOpt('dhcp_client',
                default='udhcpc',
                choices=["udhcpc", "dhclient", "dhcpcd", ""],
-               help='DHCP client used by images to renew DCHP lease. '
+               help='DHCP client used by images to renew DHCP lease. '
                     'If left empty, update operation will be skipped. '
                     'Supported clients: "udhcpc", "dhclient", "dhcpcd"'),
     cfg.StrOpt('protocol',

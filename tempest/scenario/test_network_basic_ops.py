@@ -179,8 +179,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _check_public_network_connectivity(
             self, should_connect=True, msg=None,
             should_check_floating_ip_status=True, mtu=None):
-        """Verifies connectivty to a VM via public network and floating IP
-
+        """Verifies connectivity to a VM via public network and floating IP
         and verifies floating IP has resource status is correct.
 
         :param should_connect: bool. determines if connectivity check is

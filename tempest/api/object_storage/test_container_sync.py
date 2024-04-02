@@ -142,7 +142,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         """Test container synchronization"""
         def make_headers(cont, cont_client):
             # tell first container to synchronize to a second
-            # use rsplit with a maxsplit of 1 to ensure ipv6 adresses are
+            # use rsplit with a maxsplit of 1 to ensure ipv6 addresses are
             # handled properly as well
             client_proxy_ip = urlparse.urlparse(
                 cont_client.base_url).netloc.rsplit(':', 1)[0]

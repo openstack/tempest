@@ -137,7 +137,7 @@ class TestStampPattern(manager.ScenarioTest):
 
         # Make sure the machine ssh-able before attaching the volume
         # Just a live machine is responding
-        # for device attache/detach as expected
+        # for device attach/detach as expected
         linux_client = self.get_remote_client(
             ip_for_snapshot, private_key=keypair['private_key'],
             server=server_from_snapshot)

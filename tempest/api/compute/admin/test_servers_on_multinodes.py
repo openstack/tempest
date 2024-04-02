@@ -24,7 +24,7 @@ CONF = config.CONF
 
 
 class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
-    """Test creating servers on mutiple nodes with scheduler_hints."""
+    """Test creating servers on multiple nodes with scheduler_hints."""
     @classmethod
     def resource_setup(cls):
         super(ServersOnMultiNodesTest, cls).resource_setup()

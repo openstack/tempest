@@ -424,7 +424,7 @@ def create_websocket(url):
 
 class _WebSocket(object):
     def __init__(self, client_socket, url):
-        """Contructor for the WebSocket wrapper to the socket."""
+        """Constructor for the WebSocket wrapper to the socket."""
         self._socket = client_socket
         # cached stream for early frames.
         self.cached_stream = b''
