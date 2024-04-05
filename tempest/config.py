@@ -1078,7 +1078,11 @@ VolumeFeaturesGroup = [
                 default=True,
                 help='Does the cloud support extending the size of a volume '
                      'which has snapshot? Some drivers do not support this '
-                     'operation.')
+                     'operation.'),
+    cfg.StrOpt('volume_types_for_data_volume',
+               default=None,
+               help='Volume types used for data volumes. Multiple volume '
+                    'types can be assigned.'),
 
 ]
 
