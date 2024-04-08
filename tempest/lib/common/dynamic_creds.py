@@ -51,7 +51,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     :param str identity_admin_role: The role name to use for admin
     :param list extra_roles: A list of strings for extra roles that should
                              be assigned to all created users
-    :param bool neutron_available: Whether we are running in an environemnt
+    :param bool neutron_available: Whether we are running in an environment
                                    with neutron
     :param bool create_networks: Whether dynamic project networks should be
                                  created or not
@@ -453,7 +453,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # NOTE(gmann): For 'domain' and 'system' scoped token, there is no
             # project_id so we are skipping the network creation for both
             # scope.
-            # We need to create nework resource once per project.
+            # We need to create network resource once per project.
             if (not project_id and (not scope or scope == 'project')):
                 if (self.neutron_available and self.create_networks):
                     network, subnet, router = self._create_network_resources(

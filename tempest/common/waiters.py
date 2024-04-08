@@ -606,7 +606,7 @@ def wait_for_server_floating_ip(servers_client, server, floating_ip,
     floating IPs.
     :param server: The server JSON dict on which to wait.
     :param floating_ip: The floating IP JSON dict on which to wait.
-    :param wait_for_disassociate: Boolean indiating whether to wait for
+    :param wait_for_disassociate: Boolean indicating whether to wait for
     disassociation instead of association.
     """
 

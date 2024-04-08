@@ -71,7 +71,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(snapshot_name, image['name'])
         except lib_exceptions.TimeoutException as ex:
             # If timeout is reached, we don't need to check state,
-            # since, it wouldn't be a 'SAVING' state atleast and apart from
+            # since, it wouldn't be a 'SAVING' state at least and apart from
             # it, this testcase doesn't have scope for other state transition
             # Hence, skip the test.
             raise self.skipException("This test is skipped because " + str(ex))

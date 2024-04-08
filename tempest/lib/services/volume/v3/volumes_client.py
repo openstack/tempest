@@ -86,7 +86,7 @@ class VolumesClient(base_client.BaseClient):
     def migrate_volume(self, volume_id, **kwargs):
         """Migrate a volume to a new backend
 
-        For a full list of available parameters please refer to the offical
+        For a full list of available parameters please refer to the official
         API reference:
 
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#migrate-a-volume
@@ -173,7 +173,7 @@ class VolumesClient(base_client.BaseClient):
         resp, body = self.post(url, post_body)
         body = json.loads(body)
         # TODO(zhufl): This is under discussion, so will be merged
-        # in a seperate patch.
+        # in a separate patch.
         # https://bugs.launchpad.net/cinder/+bug/1880566
         # self.validate_response(schema.upload_volume, resp, body)
         self.expected_success(202, resp.status)

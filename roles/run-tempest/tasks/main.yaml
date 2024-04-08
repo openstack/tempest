@@ -80,7 +80,7 @@
 
 - name: Tempest 26.1.0 workaround to fallback exclude-list to blacklist
   # NOTE(gmann): stable/train|ussuri|victoria use Tempest 26.1.0 and with
-  # stestr 2.5.1/3.0.1 (beacause of upper constraints of stestr 2.5.1/3.0.1
+  # stestr 2.5.1/3.0.1 (because of upper constraints of stestr 2.5.1/3.0.1
   # in stable/train|ussuri|victoria) which does not have new args exclude-list
   # so let's fallback to old arg if new arg is passed.
   set_fact:
@@ -109,7 +109,7 @@
 
 - name: Tempest 26.1.0 workaround to fallback exclude-regex to black-regex
   # NOTE(gmann): stable/train|ussuri|victoria use Tempest 26.1.0 and with stestr
-  # 2.5.1/3.0.1 (beacause of upper constraints of stestr 2.5.1/3.0.1 in
+  # 2.5.1/3.0.1 (because of upper constraints of stestr 2.5.1/3.0.1 in
   # stable/train|ussuri|victoria) which does not have new args exclude-list so
   # let's fallback to old arg if new arg is passed.
   set_fact:

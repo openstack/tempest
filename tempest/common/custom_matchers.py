@@ -53,7 +53,7 @@ class ExistsAllResponseHeaders(object):
         # Check common headers for all HTTP methods.
         #
         # Please note that for 1xx and 204 responses Content-Length presence
-        # is not checked intensionally. According to RFC 7230 a server MUST
+        # is not checked intentionally. According to RFC 7230 a server MUST
         # NOT send the header in such responses. Thus, clients should not
         # depend on this header. However, the standard does not require them
         # to validate the server's behavior. We leverage that to not refuse

@@ -108,7 +108,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         # both cases, with and without that "active" attribute, we need to
         # removes that field from the allowed_address_pairs which are returned
         # by the Neutron server.
-        # We could make expected results of those tests to be dependend on the
+        # We could make expected results of those tests to be dependent on the
         # available Neutron's API extensions but in that case existing tests
         # may fail randomly as all tests are always using same IP addresses
         # thus allowed_address_pair may be active=True or active=False.

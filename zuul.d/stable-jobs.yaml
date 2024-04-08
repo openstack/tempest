@@ -103,7 +103,7 @@
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
-        # Enbale horizon so that we can run horizon test.
+        # Enable horizon so that we can run horizon test.
         horizon: true
 
 - job:

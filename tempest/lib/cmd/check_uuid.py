@@ -266,7 +266,7 @@ class TestChecker(object):
                   "groups! This is not valid according to the PEP8 "
                   "style guide. " % source_path)
 
-        # Divide grouped_imports into groupes based on PEP8 style guide
+        # Divide grouped_imports into groups based on PEP8 style guide
         pep8_groups = {}
         package_name = self.package.__name__.split(".")[0]
         for key in grouped_imports:

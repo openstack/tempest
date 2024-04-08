@@ -58,7 +58,7 @@ class TempestPlugin(object, metaclass=abc.ABCMeta):
                 help="Whether or not my service is available")
 
             # Note: as long as the group is listed in get_opt_lists,
-            # it will be possible to access its optins in the plugin code
+            # it will be possible to access its options in the plugin code
             # via ("-" in the group name are replaces with "_"):
             #     CONF.my_service.<option_name>
             my_service_group = cfg.OptGroup(name="my-service",

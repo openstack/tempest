@@ -410,7 +410,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         :param validatable: whether to the server needs to be
             validatable. When True, validation resources are acquired via
             the `get_class_validation_resources` helper.
-        :param kwargs: extra paramaters are passed through to the
+        :param kwargs: extra parameters are passed through to the
             `create_test_server` call.
         :return: the UUID of the created server.
         """

@@ -234,7 +234,7 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         and virtio as the rescue disk.
         """
         # This test just check detach fail and does not
-        # perfom the detach operation but in cleanup from
+        # perform the detach operation but in cleanup from
         # self.attach_volume() it will try to detach the server
         # after unrescue the server. Due to that we need to make
         # server SSHable before it try to detach, more details are

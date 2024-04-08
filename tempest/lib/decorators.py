@@ -198,7 +198,7 @@ class cleanup_order:
     There are functions created as classmethod and the cleanup
     was managed by the class with addClassResourceCleanup,
     In case the function called from a class level (resource_setup) its ok
-    But when it is called from testcase level there is no reson to delete the
+    But when it is called from testcase level there is no reason to delete the
     resource when class tears down.
 
     The testcase results will not reflect the resources cleanup because test

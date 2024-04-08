@@ -252,7 +252,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_no_domain(self, mock_auth_get_credentials):
-        expected_uri = 'https://v3.identity.exmaple.com'
+        expected_uri = 'https://v3.identity.example.com'
         expected_result = 'my_creds'
         expected_domain = 'my_domain'
         mock_auth_get_credentials.return_value = expected_result
@@ -272,7 +272,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_domain(self, mock_auth_get_credentials):
-        expected_uri = 'https://v3.identity.exmaple.com'
+        expected_uri = 'https://v3.identity.example.com'
         expected_result = 'my_creds'
         expected_domain = 'my_domain'
         mock_auth_get_credentials.return_value = expected_result
@@ -291,7 +291,7 @@ class TestCredentialsFactory(base.TestCase):
 
     @mock.patch('tempest.lib.auth.get_credentials')
     def test_get_credentials_v3_system(self, mock_auth_get_credentials):
-        expected_uri = 'https://v3.identity.exmaple.com'
+        expected_uri = 'https://v3.identity.example.com'
         expected_result = 'my_creds'
         mock_auth_get_credentials.return_value = expected_result
         cfg.CONF.set_default('uri_v3', expected_uri, 'identity')
