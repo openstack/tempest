@@ -20,6 +20,7 @@ from tempest.common import utils
 from tempest.common.utils import net_downtime
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common import api_version_request
 from tempest.lib import decorators
 from tempest.scenario import manager
 
@@ -193,8 +194,11 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         # check if microversion is less than 2.25 because of
         # disk_over_commit is depracted since compute api version 2.25
         # if min_microversion is None, it runs on version < 2.25
+        min_v = api_version_request.APIVersionRequest(
+            CONF.compute.min_microversion)
+        api_v = api_version_request.APIVersionRequest('2.25')
         if not migration and (CONF.compute.min_microversion is None or
-                              CONF.compute.min_microversion < '2.25'):
+                              min_v < api_v):
             migration_kwargs['disk_over_commit'] = False
 
         if dest_host:
