@@ -690,13 +690,12 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('import_image',
                 default=False,
                 help="Is image import feature enabled"),
-    # NOTE(danms): Starting mid-Wallaby glance began enforcing the
-    # previously-informal requirement that os_glance_* properties are
-    # reserved for internal use. Thus, we can only run these checks
-    # if we know we are on a new enough glance.
     cfg.BoolOpt('os_glance_reserved',
-                default=False,
-                help="Should we check that os_glance namespace is reserved"),
+                default=True,
+                help="Should we check that os_glance namespace is reserved",
+                deprecated_for_removal=True,
+                deprecated_reason='os_glance namespace is always reserved '
+                                  'since Wallaby'),
     cfg.BoolOpt('manage_locations',
                 default=False,
                 help=('Is show_multiple_locations enabled in glance. '
