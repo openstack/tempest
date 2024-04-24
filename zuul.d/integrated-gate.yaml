@@ -374,15 +374,7 @@
       This job runs the Tempest tests with scope and new defaults enabled.
     vars:
       devstack_localrc:
-        # Enabaling the scope and new defaults for services.
-        # NOTE: (gmann) We need to keep keystone scope check disable as
-        # services (except ironic) does not support the system scope and
-        # they need keystone to continue working with project scope. Until
-        # Keystone policies are changed to work for both system as well as
-        # for project scoped, we need to keep scope check disable for
-        # keystone.
-        # Nova, Glance, and Neutron have enabled the new defaults and scope
-        # by default in devstack.
+        KEYSTONE_ENFORCE_SCOPE: true
         CINDER_ENFORCE_SCOPE: true
         PLACEMENT_ENFORCE_SCOPE: true
 
