@@ -1,0 +1,12 @@
+---
+upgrade:
+  - |
+    Default value of the ``[image-feature-enabled] image_import`` has been
+    changed from ``False`` to ``True``, and now the image import feature is
+    tested by default.
+
+deprecations:
+  - |
+    The ``[image-feature-enabled] image_import`` option has been deprecated.
+    The image import feature works in both standalone mode and WSGI mode since
+    Victoria and the image import feature can be always tested.
