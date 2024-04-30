@@ -25,11 +25,11 @@
     target_branch: "{{ zuul.override_checkout }}"
   when: zuul.override_checkout is defined
 
-- name: Use stable branch upper-constraints till stable/wallaby
+- name: Use stable branch upper-constraints till Wallaby
   set_fact:
     # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
-  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein", "stable/train", "stable/ussuri", "stable/victoria", "stable/wallaby"]
+  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein", "stable/train", "stable/ussuri", "unmaintained/victoria", "unmaintained/wallaby"]
 
 - name: Use Configured upper-constraints for non-master Tempest
   set_fact:
@@ -87,7 +87,7 @@
     exclude_list_option: "--blacklist-file={{ tempest_test_exclude_list|quote }}"
   when:
     - tempest_test_exclude_list is defined
-    - target_branch in ["stable/train", "stable/ussuri", "stable/victoria"]
+    - target_branch in ["stable/train", "stable/ussuri", "unmaintained/victoria"]
 
 # TODO(kopecmartin) remove this after all consumers of the role have switched
 # to tempest_exclude_regex option, until then it's kept here for the backward
@@ -105,7 +105,7 @@
   when:
     - tempest_black_regex is not defined
     - tempest_exclude_regex is defined
-    - target_branch not in ["stable/train", "stable/ussuri", "stable/victoria"]
+    - target_branch not in ["stable/train", "stable/ussuri", "unmaintained/victoria"]
 
 - name: Tempest 26.1.0 workaround to fallback exclude-regex to black-regex
   # NOTE(gmann): stable/train|ussuri|victoria use Tempest 26.1.0 and with stestr
@@ -117,7 +117,7 @@
   when:
     - tempest_black_regex is not defined
     - tempest_exclude_regex is defined
-    - target_branch in ["stable/train", "stable/ussuri", "stable/victoria"]
+    - target_branch in ["stable/train", "stable/ussuri", "unmaintained/victoria"]
 
 - name: Run Tempest
   command: tox -e {{tox_envlist}} {{tox_extra_args}} -- \

@@ -81,7 +81,7 @@ variable (through the `register` statement).
 .. zuul:rolevar:: stable_constraints_file
    :default: ''
 
-   Upper constraints file to be used for stable branch till stable/victoria.
+   Upper constraints file to be used for stable branch till Wallaby
 
 .. zuul:rolevar:: tempest_tox_environment
    :default: ''
