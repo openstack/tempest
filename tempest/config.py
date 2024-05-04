@@ -930,8 +930,8 @@ ValidationGroup = [
                     "connect_method=floating."),
     cfg.StrOpt('ssh_key_type',
                default='ecdsa',
-               help='Type of key to use for ssh connections. '
-                    'Valid types are rsa, ecdsa'),
+               choices=['ecdsa', 'rsa'],
+               help='Type of key to use for ssh connections.'),
     cfg.FloatOpt('allowed_network_downtime',
                  default=5.0,
                  help="Allowed VM network connection downtime during live "
