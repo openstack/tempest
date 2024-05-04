@@ -647,7 +647,7 @@ ImageGroup = [
     cfg.BoolOpt('image_caching_enabled',
                 default=False,
                 help=("Flag to enable if caching is enabled by image "
-                      "service, operator should set this parameter to True"
+                      "service, operator should set this parameter to True "
                       "if 'image_cache_dir' is set in glance-api.conf")),
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
