@@ -29,12 +29,7 @@ def get_service_list():
         'compute': CONF.service_available.nova,
         'image': CONF.service_available.glance,
         'volume': CONF.service_available.cinder,
-        # NOTE(masayukig): We have two network services which are neutron and
-        # nova-network. And we have no way to know whether nova-network is
-        # available or not. After the pending removal of nova-network from
-        # nova, we can treat the network/neutron case in the same manner as
-        # the other services.
-        'network': True,
+        'network': CONF.service_available.neutron,
         # NOTE(masayukig): Tempest tests always require the identity service.
         # So we should set this True here.
         'identity': True,

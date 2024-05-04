@@ -1196,7 +1196,7 @@ ServiceAvailableGroup = [
                 default=True,
                 help="Whether or not cinder is expected to be available"),
     cfg.BoolOpt('neutron',
-                default=False,
+                default=True,
                 help="Whether or not neutron is expected to be available"),
     cfg.BoolOpt('glance',
                 default=True,
