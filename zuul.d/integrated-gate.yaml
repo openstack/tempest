@@ -228,7 +228,7 @@
     name: tempest-multinode-full-py3
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-jammy
-    # This job runs on ubuntu Jammy and after stable/zed.
+    # This job runs on ubuntu Jammy and after unmaintained/zed.
     branches:
       regex: ^.*/(victoria|wallaby|xena|yoga|zed)$
       negate: true

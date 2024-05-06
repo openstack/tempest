@@ -18,12 +18,6 @@
     override-checkout: stable/2023.1
 
 - job:
-    name: tempest-full-zed
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/zed
-
-- job:
     name: tempest-full-2024-1-extra-tests
     parent: tempest-extra-tests
     nodeset: openstack-single-node-jammy
@@ -42,12 +36,6 @@
     override-checkout: stable/2023.1
 
 - job:
-    name: tempest-full-zed-extra-tests
-    parent: tempest-extra-tests
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/zed
-
-- job:
     name: tempest-slow-2024-1
     parent: tempest-slow-py3
     nodeset: openstack-two-node-jammy
@@ -64,18 +52,6 @@
     parent: tempest-slow-py3
     nodeset: openstack-two-node-jammy
     override-checkout: stable/2023.1
-
-- job:
-    name: tempest-full-enforce-scope-new-defaults-zed
-    parent: tempest-full-enforce-scope-new-defaults
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/zed
-
-- job:
-    name: tempest-slow-zed
-    parent: tempest-slow-py3
-    nodeset: openstack-two-node-focal
-    override-checkout: stable/zed
 
 - job:
     name: tempest-full-py3
@@ -110,7 +86,7 @@
     name: tempest-multinode-full-py3
     parent: tempest-multinode-full
     nodeset: openstack-two-node-focal
-    # This job runs on Focal and supposed to run until stable/zed.
+    # This job runs on Focal and supposed to run until unmaintained/zed.
     branches:
       - ^.*/victoria
       - ^.*/wallaby
@@ -133,7 +109,7 @@
     name: tempest-multinode-full
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-focal
-    # This job runs on Focal and on python2. This is for stable/victoria to stable/zed.
+    # This job runs on Focal and on python2. This is for unmaintained/victoria to unmaintained/zed.
     branches:
       - ^.*/victoria
       - ^.*/wallaby
