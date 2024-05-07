@@ -465,6 +465,73 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
         self._boot_from_multiattach_volume()
 
     @utils.services('image')
+    @decorators.idempotent_id('07eb6686-571c-45f0-9d96-446b120f1121')
+    def test_boot_with_multiattach_volume_direct_lun(self, boot=False):
+        image = self.images_client.show_image(CONF.compute.image_ref)
+        if image.get('hw_scsi_model') != 'virtio-scsi':
+            # NOTE(danms): Technically we don't need this to be virtio-scsi,
+            # but cirros (and other) test images won't see the device unless
+            # they have lsilogic drivers (which is the default). So use this
+            # as sort of the indication that the test should be enabled.
+            self.skip('hw_scsi_model=virtio-scsi not set on image')
+        if not CONF.validation.run_validation:
+            self.skip('validation is required for this test')
+
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
+
+        volume = self._create_multiattach_volume(bootable=boot)
+        # Create an image-backed instance with the multi-attach volume as a
+        # block device with device_type=lun
+        bdm = [{'source_type': 'image',
+                'destination_type': 'local',
+                'uuid': CONF.compute.image_ref,
+                'boot_index': 0},
+               {'uuid': volume['id'],
+                'source_type': 'volume',
+                'destination_type': 'volume',
+                'device_type': 'lun',
+                'disk_bus': 'scsi'}]
+
+        if boot:
+            # If we're booting from it, we don't need the local-from-image
+            # disk, but we need the volume to have a boot_index
+            bdm.pop(0)
+            bdm[0]['boot_index'] = 0
+
+        server = self.create_test_server(
+            validatable=True,
+            validation_resources=validation_resources,
+            block_device_mapping_v2=bdm, wait_until='SSHABLE')
+
+        # Assert the volume is attached to the server.
+        attachments = self.servers_client.list_volume_attachments(
+            server['id'])['volumeAttachments']
+        self.assertEqual(1, len(attachments))
+        self.assertEqual(volume['id'], attachments[0]['volumeId'])
+
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(server, validation_resources),
+            self.image_ssh_user,
+            self.image_ssh_password,
+            validation_resources['keypair']['private_key'],
+            server=server,
+            servers_client=self.servers_client)
+
+        # Assert the volume appears as a SCSI device
+        command = 'lsblk -S'
+        blks = linux_client.exec_command(command).strip()
+        self.assertIn('\nsda ', blks)
+
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+
+    @utils.services('image')
+    @decorators.idempotent_id('bfe61d6e-767a-4f93-9de8-054355536475')
+    def test_boot_from_multiattach_volume_direct_lun(self, boot=False):
+        self.test_boot_with_multiattach_volume_direct_lun(boot=True)
+
+    @utils.services('image')
     @decorators.idempotent_id('885ac48a-2d7a-40c5-ae8b-1993882d724c')
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting is not available.')
