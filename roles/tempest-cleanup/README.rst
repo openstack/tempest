@@ -47,6 +47,15 @@ saved_state.json file.
    only resources with names that match the prefix. This option can be used
    together with dry_run.
 
+.. zuul:rolevar:: run_tempest_cleanup_resource_list
+   :default: false
+
+   When true, tempest cleanup will be called with '--resource-list' to delete
+   only resources listed in ./resource_list.json that is created if
+   record_resources config option in the default section of tempest.conf file
+   is enabled (set to True). The resource_list.json contains all resources
+   created by Tempest during a Tempest run.
+
 Role usage
 ----------
 
