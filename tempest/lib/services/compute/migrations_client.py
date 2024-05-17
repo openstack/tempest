@@ -21,6 +21,8 @@ from tempest.lib.api_schema.response.compute.v2_23 import migrations \
     as schemav223
 from tempest.lib.api_schema.response.compute.v2_59 import migrations \
     as schemav259
+from tempest.lib.api_schema.response.compute.v2_80 import migrations \
+    as schemav280
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -29,7 +31,8 @@ class MigrationsClient(base_compute_client.BaseComputeClient):
     schema_versions_info = [
         {'min': None, 'max': '2.22', 'schema': schema},
         {'min': '2.23', 'max': '2.58', 'schema': schemav223},
-        {'min': '2.59', 'max': None, 'schema': schemav259}]
+        {'min': '2.59', 'max': '2.79', 'schema': schemav259},
+        {'min': '2.80', 'max': None, 'schema': schemav280}]
 
     def list_migrations(self, **params):
         """List all migrations.

@@ -43,6 +43,7 @@ from tempest.lib.api_schema.response.compute.v2_73 import servers as schemav273
 from tempest.lib.api_schema.response.compute.v2_75 import servers as schemav275
 from tempest.lib.api_schema.response.compute.v2_79 import servers as schemav279
 from tempest.lib.api_schema.response.compute.v2_8 import servers as schemav28
+from tempest.lib.api_schema.response.compute.v2_89 import servers as schemav289
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
@@ -73,7 +74,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.71', 'max': '2.72', 'schema': schemav271},
         {'min': '2.73', 'max': '2.74', 'schema': schemav273},
         {'min': '2.75', 'max': '2.78', 'schema': schemav275},
-        {'min': '2.79', 'max': None, 'schema': schemav279}]
+        {'min': '2.79', 'max': '2.88', 'schema': schemav279},
+        {'min': '2.89', 'max': None, 'schema': schemav289}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
@@ -896,7 +898,11 @@ class ServersClient(base_compute_client.BaseComputeClient):
         API reference:
         https://docs.openstack.org/api-ref/compute/#evacuate-server-evacuate-action
         """
-        if self.enable_instance_password:
+        api_version = self.get_headers().get(self.api_microversion_header_name)
+
+        if not api_version and self.enable_instance_password:
+            evacuate_schema = schema.evacuate_server_with_admin_pass
+        elif api_version < '2.14':
             evacuate_schema = schema.evacuate_server_with_admin_pass
         else:
             evacuate_schema = schema.evacuate_server
