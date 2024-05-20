@@ -182,6 +182,9 @@ class RemoteClient(remote_client.RemoteClient):
     def umount(self, mount_path='/mnt'):
         self.exec_command('sudo umount %s' % mount_path)
 
+    def mkdir(self, dir_path):
+        self.exec_command('sudo mkdir -p %s' % dir_path)
+
     def make_fs(self, dev_name, fs='ext4'):
         cmd_mkfs = 'sudo mkfs -t %s /dev/%s' % (fs, dev_name)
         try:
