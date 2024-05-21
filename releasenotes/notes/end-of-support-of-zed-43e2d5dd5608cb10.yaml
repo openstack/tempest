@@ -1,0 +1,12 @@
+---
+prelude: >
+    This is an intermediate release during the 2024.2 development cycle to
+    mark the end of support for Zed release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * 2024.1
+    * 2023.2
+    * 2023.1
+
+    Current development of Tempest is for OpenStack 2024.2 development
+    cycle.
