@@ -27,7 +27,9 @@
       command: tox -evenv-tempest -- tempest cleanup --debug
       args:
         chdir: "{{ devstack_base_dir }}/tempest"
-      when: not run_tempest_cleanup_prefix
+      when:
+        - not run_tempest_cleanup_prefix
+        - run_tempest_cleanup_resource_list is not defined or not run_tempest_cleanup_resource_list
 
     - name: Run tempest cleanup with tempest prefix
       become: yes
@@ -36,6 +38,18 @@
       args:
         chdir: "{{ devstack_base_dir }}/tempest"
       when: run_tempest_cleanup_prefix
+
+    - name: Cat resource_list.json
+      command: cat "{{ devstack_base_dir }}/tempest/resource_list.json"
+      when: run_tempest_cleanup_resource_list
+
+    - name: Run tempest cleanup with tempest resource list
+      become: yes
+      become_user: tempest
+      command: tox -evenv-tempest -- tempest cleanup --debug --resource-list
+      args:
+        chdir: "{{ devstack_base_dir }}/tempest"
+      when: run_tempest_cleanup_resource_list
 
 - when:
     - run_tempest_fail_if_leaked_resources

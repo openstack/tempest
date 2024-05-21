@@ -17,6 +17,13 @@
         # TODO(gmann): Enable File injection tests once nova bug is fixed
         # https://bugs.launchpad.net/nova/+bug/1882421
         #   ENABLE_FILE_INJECTION: true
+      run_tempest_cleanup: true
+      run_tempest_cleanup_resource_list: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            DEFAULT:
+              record_resources: true
 
 - job:
     name: tempest-ipv6-only
@@ -37,6 +44,14 @@
       tools/tempest-extra-tests-list.txt.
     vars:
       tox_envlist: extra-tests
+      run_tempest_cleanup: true
+      run_tempest_cleanup_resource_list: true
+      run_tempest_dry_cleanup: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            DEFAULT:
+              record_resources: true
 
 - job:
     name: tempest-full-py3
