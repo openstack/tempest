@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 from unittest import mock
 
 from tempest.cmd import cleanup
@@ -20,12 +21,30 @@ from tempest.tests import base
 
 class TestTempestCleanup(base.TestCase):
 
-    def test_load_json(self):
+    def test_load_json_saved_state(self):
         # instantiate "empty" TempestCleanup
         c = cleanup.TempestCleanup(None, None, 'test')
         test_saved_json = 'tempest/tests/cmd/test_saved_state_json.json'
+        with open(test_saved_json, 'r') as f:
+            test_saved_json_content = json.load(f)
         # test if the file is loaded without any issues/exceptions
-        c._load_json(test_saved_json)
+        c.options = mock.Mock()
+        c.options.init_saved_state = True
+        c._load_saved_state(test_saved_json)
+        self.assertEqual(c.json_data, test_saved_json_content)
+
+    def test_load_json_resource_list(self):
+        # instantiate "empty" TempestCleanup
+        c = cleanup.TempestCleanup(None, None, 'test')
+        test_resource_list = 'tempest/tests/cmd/test_resource_list.json'
+        with open(test_resource_list, 'r') as f:
+            test_resource_list_content = json.load(f)
+        # test if the file is loaded without any issues/exceptions
+        c.options = mock.Mock()
+        c.options.init_saved_state = False
+        c.options.resource_list = True
+        c._load_resource_list(test_resource_list)
+        self.assertEqual(c.resource_data, test_resource_list_content)
 
     @mock.patch('tempest.cmd.cleanup.TempestCleanup.init')
     @mock.patch('tempest.cmd.cleanup.TempestCleanup._cleanup')

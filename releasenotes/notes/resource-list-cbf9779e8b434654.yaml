@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    A new interface ``--resource-list`` has been introduced in the
+    ``tempest cleanup`` command to remove the resources created by
+    Tempest. A new config option in the default section, ``record_resources``,
+    is added to allow the recording of all resources created by Tempest.
+    A list of these resources will be saved in ``resource_list.json`` file,
+    which will be appended in case of multiple Tempest runs. This file
+    is intended to be used with the ``tempest cleanup`` command if it is
+    used with the newly added option ``--resource-list``.

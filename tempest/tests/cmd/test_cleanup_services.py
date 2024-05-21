@@ -41,8 +41,10 @@ class TestBaseService(base.TestCase):
     def test_base_service_init(self):
         kwargs = {'data': {'data': 'test'},
                   'is_dry_run': False,
+                  'resource_list_json': {'resp': 'data'},
                   'saved_state_json': {'saved': 'data'},
                   'is_preserve': False,
+                  'is_resource_list': False,
                   'is_save_state': True,
                   'prefix': 'tempest',
                   'tenant_id': 'project_id',
@@ -50,8 +52,10 @@ class TestBaseService(base.TestCase):
         base = cleanup_service.BaseService(kwargs)
         self.assertEqual(base.data, kwargs['data'])
         self.assertFalse(base.is_dry_run)
+        self.assertEqual(base.resource_list_json, kwargs['resource_list_json'])
         self.assertEqual(base.saved_state_json, kwargs['saved_state_json'])
         self.assertFalse(base.is_preserve)
+        self.assertFalse(base.is_resource_list)
         self.assertTrue(base.is_save_state)
         self.assertEqual(base.tenant_filter['project_id'], kwargs['tenant_id'])
         self.assertEqual(base.got_exceptions, kwargs['got_exceptions'])
@@ -60,8 +64,10 @@ class TestBaseService(base.TestCase):
     def test_not_implemented_ex(self):
         kwargs = {'data': {'data': 'test'},
                   'is_dry_run': False,
+                  'resource_list_json': {'resp': 'data'},
                   'saved_state_json': {'saved': 'data'},
                   'is_preserve': False,
+                  'is_resource_list': False,
                   'is_save_state': False,
                   'prefix': 'tempest',
                   'tenant_id': 'project_id',
@@ -181,10 +187,20 @@ class BaseCmdServiceTests(MockFunctionsBase):
         "subnetpools": {'8acf64c1-43fc': 'saved-subnet-pool'},
         "regions": {'RegionOne': {}}
     }
+
+    resource_list = {
+        "keypairs": {'saved-key-pair': ""}
+    }
+
     # Mocked methods
     get_method = 'tempest.lib.common.rest_client.RestClient.get'
     delete_method = 'tempest.lib.common.rest_client.RestClient.delete'
     log_method = 'tempest.cmd.cleanup_service.LOG.exception'
+    filter_saved_state = 'tempest.cmd.cleanup_service.' \
+                         'BaseService._filter_out_ids_from_saved'
+    filter_resource_list = 'tempest.cmd.cleanup_service.' \
+                           'BaseService._filter_by_resource_list'
+    filter_prefix = 'tempest.cmd.cleanup_service.BaseService._filter_by_prefix'
     # Override parameters
     service_class = 'BaseService'
     response = None
@@ -192,17 +208,19 @@ class BaseCmdServiceTests(MockFunctionsBase):
 
     def _create_cmd_service(self, service_type, is_save_state=False,
                             is_preserve=False, is_dry_run=False,
-                            prefix=''):
+                            prefix='', is_resource_list=False):
         creds = fake_credentials.FakeKeystoneV3Credentials()
         os = clients.Manager(creds)
         return getattr(cleanup_service, service_type)(
             os,
+            is_resource_list=is_resource_list,
             is_save_state=is_save_state,
             is_preserve=is_preserve,
             is_dry_run=is_dry_run,
             prefix=prefix,
             project_id='b8e3ece07bb049138d224436756e3b57',
             data={},
+            resource_list_json=self.resource_list,
             saved_state_json=self.saved_state
             )
 
@@ -266,6 +284,38 @@ class BaseCmdServiceTests(MockFunctionsBase):
             self.assertNotIn(rsp['id'], self.conf_values.values())
             self.assertNotIn(rsp['name'], self.conf_values.values())
 
+    def _test_prefix_opt_precedence(self, delete_mock):
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True, prefix='tempest')
+        _, fixtures = self.run_function_with_mocks(
+            serv.run,
+            delete_mock
+        )
+
+        # Check that prefix was used for filtering
+        fixtures[2].mock.assert_called_once()
+
+        # Check that neither saved_state.json nor resource list was
+        # used for filtering
+        fixtures[0].mock.assert_not_called()
+        fixtures[1].mock.assert_not_called()
+
+    def _test_resource_list_opt_precedence(self, delete_mock):
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True)
+        _, fixtures = self.run_function_with_mocks(
+            serv.run,
+            delete_mock
+        )
+
+        # Check that resource list was used for filtering
+        fixtures[1].mock.assert_called_once()
+
+        # Check that neither saved_state.json nor prefix was
+        # used for filtering
+        fixtures[0].mock.assert_not_called()
+        fixtures[2].mock.assert_not_called()
+
 
 class TestSnapshotService(BaseCmdServiceTests):
 
@@ -319,6 +369,24 @@ class TestSnapshotService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestServerService(BaseCmdServiceTests):
@@ -378,6 +446,24 @@ class TestServerService(BaseCmdServiceTests):
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestServerGroupService(BaseCmdServiceTests):
 
@@ -428,6 +514,26 @@ class TestServerGroupService(BaseCmdServiceTests):
         self._test_saved_state_true([(self.get_method, self.response, 200),
                                      (self.validate_response, 'validate', None)
                                      ])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.validate_response, 'validate', None),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.validate_response, 'validate', None),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestKeyPairService(BaseCmdServiceTests):
@@ -493,6 +599,33 @@ class TestKeyPairService(BaseCmdServiceTests):
             (self.validate_response, 'validate', None)
         ])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.validate_response, 'validate', None),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.validate_response, 'validate', None),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True)
+
+        _, fixtures = self.run_function_with_mocks(
+            serv.delete,
+            delete_mock
+        )
+
+        # Check that prefix was not used for filtering
+        fixtures[0].mock.assert_not_called()
+
 
 class TestVolumeService(BaseCmdServiceTests):
 
@@ -541,6 +674,24 @@ class TestVolumeService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestVolumeQuotaService(BaseCmdServiceTests):
@@ -761,6 +912,24 @@ class TestNetworkService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestNetworkFloatingIpService(BaseCmdServiceTests):
 
@@ -822,6 +991,34 @@ class TestNetworkFloatingIpService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True, prefix='tempest')
+        _, fixtures = self.run_function_with_mocks(
+            serv.run,
+            delete_mock
+        )
+
+        # cleanup returns []
+        fixtures[0].mock.assert_not_called()
+        fixtures[1].mock.assert_not_called()
+        fixtures[2].mock.assert_not_called()
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestNetworkRouterService(BaseCmdServiceTests):
@@ -937,6 +1134,24 @@ class TestNetworkRouterService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestNetworkMeteringLabelRuleService(BaseCmdServiceTests):
 
@@ -977,6 +1192,34 @@ class TestNetworkMeteringLabelRuleService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True, prefix='tempest')
+        _, fixtures = self.run_function_with_mocks(
+            serv.run,
+            delete_mock
+        )
+
+        # cleanup returns []
+        fixtures[0].mock.assert_not_called()
+        fixtures[1].mock.assert_not_called()
+        fixtures[2].mock.assert_not_called()
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestNetworkMeteringLabelService(BaseCmdServiceTests):
@@ -1019,6 +1262,24 @@ class TestNetworkMeteringLabelService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestNetworkPortService(BaseCmdServiceTests):
@@ -1118,6 +1379,24 @@ class TestNetworkPortService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestNetworkSecGroupService(BaseCmdServiceTests):
 
@@ -1196,6 +1475,24 @@ class TestNetworkSecGroupService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestNetworkSubnetService(BaseCmdServiceTests):
 
@@ -1272,6 +1569,24 @@ class TestNetworkSubnetService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestNetworkSubnetPoolsService(BaseCmdServiceTests):
 
@@ -1340,6 +1655,24 @@ class TestNetworkSubnetPoolsService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 # begin global services
 class TestRegionService(BaseCmdServiceTests):
@@ -1391,6 +1724,34 @@ class TestRegionService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        serv = self._create_cmd_service(
+            self.service_class, is_resource_list=True, prefix='tempest')
+        _, fixtures = self.run_function_with_mocks(
+            serv.run,
+            delete_mock
+        )
+
+        # cleanup returns []
+        fixtures[0].mock.assert_not_called()
+        fixtures[1].mock.assert_not_called()
+        fixtures[2].mock.assert_not_called()
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestDomainService(BaseCmdServiceTests):
@@ -1444,6 +1805,26 @@ class TestDomainService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None),
+                       (self.mock_update, 'update', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None),
+                       (self.mock_update, 'update', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestProjectsService(BaseCmdServiceTests):
@@ -1517,6 +1898,24 @@ class TestProjectsService(BaseCmdServiceTests):
                 "parent_id": None
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestImagesService(BaseCmdServiceTests):
@@ -1597,6 +1996,24 @@ class TestImagesService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestFlavorService(BaseCmdServiceTests):
 
@@ -1670,6 +2087,24 @@ class TestFlavorService(BaseCmdServiceTests):
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
 
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
+
 
 class TestRoleService(BaseCmdServiceTests):
 
@@ -1715,6 +2150,24 @@ class TestRoleService(BaseCmdServiceTests):
 
     def test_save_state(self):
         self._test_saved_state_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestUserService(BaseCmdServiceTests):
@@ -1782,3 +2235,21 @@ class TestUserService(BaseCmdServiceTests):
                 "password_expires_at": "1893-11-06T15:32:17.000000",
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
+
+    def test_prefix_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_prefix_opt_precedence(delete_mock)
+
+    def test_resource_list_opt_precedence(self):
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
+                       (self.get_method, self.response, 200),
+                       (self.delete_method, 'error', None),
+                       (self.log_method, 'exception', None)]
+        self._test_resource_list_opt_precedence(delete_mock)

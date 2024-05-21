@@ -120,6 +120,13 @@ class BaseService(object):
                  if item['name'].startswith(self.prefix)]
         return items
 
+    def _filter_by_resource_list(self, item_list, attr):
+        if attr not in self.resource_list_json:
+            return []
+        items = [item for item in item_list if item['id']
+                 in self.resource_list_json[attr].keys()]
+        return items
+
     def _filter_out_ids_from_saved(self, item_list, attr):
         items = [item for item in item_list if item['id']
                  not in self.saved_state_json[attr].keys()]
@@ -166,8 +173,11 @@ class SnapshotService(BaseService):
     def list(self):
         client = self.client
         snaps = client.list_snapshots()['snapshots']
+
         if self.prefix:
             snaps = self._filter_by_prefix(snaps)
+        elif self.is_resource_list:
+            snaps = self._filter_by_resource_list(snaps, 'snapshots')
         elif not self.is_save_state:
             # recreate list removing saved snapshots
             snaps = self._filter_out_ids_from_saved(snaps, 'snapshots')
@@ -205,8 +215,11 @@ class ServerService(BaseService):
         client = self.client
         servers_body = client.list_servers()
         servers = servers_body['servers']
+
         if self.prefix:
             servers = self._filter_by_prefix(servers)
+        elif self.is_resource_list:
+            servers = self._filter_by_resource_list(servers, 'servers')
         elif not self.is_save_state:
             # recreate list removing saved servers
             servers = self._filter_out_ids_from_saved(servers, 'servers')
@@ -238,9 +251,12 @@ class ServerGroupService(ServerService):
 
     def list(self):
         client = self.server_groups_client
-        sgs = client.list_server_groups()['server_groups']
+        sgs = client.list_server_groups(all_projects=True)['server_groups']
+
         if self.prefix:
             sgs = self._filter_by_prefix(sgs)
+        elif self.is_resource_list:
+            sgs = self._filter_by_resource_list(sgs, 'server_groups')
         elif not self.is_save_state:
             # recreate list removing saved server_groups
             sgs = self._filter_out_ids_from_saved(sgs, 'server_groups')
@@ -276,8 +292,13 @@ class KeyPairService(BaseService):
     def list(self):
         client = self.client
         keypairs = client.list_keypairs()['keypairs']
+
         if self.prefix:
             keypairs = self._filter_by_prefix(keypairs)
+        elif self.is_resource_list:
+            keypairs = [keypair for keypair in keypairs
+                        if keypair['keypair']['name']
+                        in self.resource_list_json['keypairs'].keys()]
         elif not self.is_save_state:
             # recreate list removing saved keypairs
             keypairs = [keypair for keypair in keypairs
@@ -317,8 +338,11 @@ class VolumeService(BaseService):
     def list(self):
         client = self.client
         vols = client.list_volumes()['volumes']
+
         if self.prefix:
             vols = self._filter_by_prefix(vols)
+        elif self.is_resource_list:
+            vols = self._filter_by_resource_list(vols, 'volumes')
         elif not self.is_save_state:
             # recreate list removing saved volumes
             vols = self._filter_out_ids_from_saved(vols, 'volumes')
@@ -462,8 +486,11 @@ class NetworkService(BaseNetworkService):
         client = self.networks_client
         networks = client.list_networks(**self.tenant_filter)
         networks = networks['networks']
+
         if self.prefix:
             networks = self._filter_by_prefix(networks)
+        elif self.is_resource_list:
+            networks = self._filter_by_resource_list(networks, 'networks')
         else:
             if not self.is_save_state:
                 # recreate list removing saved networks
@@ -500,15 +527,17 @@ class NetworkService(BaseNetworkService):
 class NetworkFloatingIpService(BaseNetworkService):
 
     def list(self):
-        if self.prefix:
-            # this means we're cleaning resources based on a certain prefix,
-            # this resource doesn't have a name, therefore return empty list
-            return []
         client = self.floating_ips_client
         flips = client.list_floatingips(**self.tenant_filter)
         flips = flips['floatingips']
 
-        if not self.is_save_state:
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore return empty list
+            return []
+        elif self.is_resource_list:
+            flips = self._filter_by_resource_list(flips, 'floatingips')
+        elif not self.is_save_state:
             # recreate list removing saved flips
             flips = self._filter_out_ids_from_saved(flips, 'floatingips')
         LOG.debug("List count, %s Network Floating IPs", len(flips))
@@ -543,8 +572,11 @@ class NetworkRouterService(BaseNetworkService):
         client = self.routers_client
         routers = client.list_routers(**self.tenant_filter)
         routers = routers['routers']
+
         if self.prefix:
             routers = self._filter_by_prefix(routers)
+        elif self.is_resource_list:
+            routers = self._filter_by_resource_list(routers, 'routers')
         else:
             if not self.is_save_state:
                 # recreate list removing saved routers
@@ -592,16 +624,19 @@ class NetworkRouterService(BaseNetworkService):
 class NetworkMeteringLabelRuleService(NetworkService):
 
     def list(self):
-        if self.prefix:
-            # this means we're cleaning resources based on a certain prefix,
-            # this resource doesn't have a name, therefore return empty list
-            return []
         client = self.metering_label_rules_client
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
         rules = self._filter_by_tenant_id(rules)
 
-        if not self.is_save_state:
+        if self.prefix:
+            # this means we're cleaning resources based on a certain prefix,
+            # this resource doesn't have a name, therefore return empty list
+            return []
+        elif self.is_resource_list:
+            rules = self._filter_by_resource_list(
+                rules, 'metering_label_rules')
+        elif not self.is_save_state:
             rules = self._filter_out_ids_from_saved(
                 rules, 'metering_label_rules')
             # recreate list removing saved rules
@@ -638,8 +673,12 @@ class NetworkMeteringLabelService(BaseNetworkService):
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
         labels = self._filter_by_tenant_id(labels)
+
         if self.prefix:
             labels = self._filter_by_prefix(labels)
+        elif self.is_resource_list:
+            labels = self._filter_by_resource_list(
+                labels, 'metering_labels')
         elif not self.is_save_state:
             # recreate list removing saved labels
             labels = self._filter_out_ids_from_saved(
@@ -677,8 +716,11 @@ class NetworkPortService(BaseNetworkService):
                  client.list_ports(**self.tenant_filter)['ports']
                  if port["device_owner"] == "" or
                  port["device_owner"].startswith("compute:")]
+
         if self.prefix:
             ports = self._filter_by_prefix(ports)
+        elif self.is_resource_list:
+            ports = self._filter_by_resource_list(ports, 'ports')
         else:
             if not self.is_save_state:
                 # recreate list removing saved ports
@@ -717,8 +759,12 @@ class NetworkSecGroupService(BaseNetworkService):
         secgroups = [secgroup for secgroup in
                      client.list_security_groups(**filter)['security_groups']
                      if secgroup['name'] != 'default']
+
         if self.prefix:
             secgroups = self._filter_by_prefix(secgroups)
+        elif self.is_resource_list:
+            secgroups = self._filter_by_resource_list(
+                secgroups, 'security_groups')
         else:
             if not self.is_save_state:
                 # recreate list removing saved security_groups
@@ -760,8 +806,11 @@ class NetworkSubnetService(BaseNetworkService):
         client = self.subnets_client
         subnets = client.list_subnets(**self.tenant_filter)
         subnets = subnets['subnets']
+
         if self.prefix:
             subnets = self._filter_by_prefix(subnets)
+        elif self.is_resource_list:
+            subnets = self._filter_by_resource_list(subnets, 'subnets')
         else:
             if not self.is_save_state:
                 # recreate list removing saved subnets
@@ -797,8 +846,11 @@ class NetworkSubnetPoolsService(BaseNetworkService):
     def list(self):
         client = self.subnetpools_client
         pools = client.list_subnetpools(**self.tenant_filter)['subnetpools']
+
         if self.prefix:
             pools = self._filter_by_prefix(pools)
+        elif self.is_resource_list:
+            pools = self._filter_by_resource_list(pools, 'subnetpools')
         else:
             if not self.is_save_state:
                 # recreate list removing saved subnet pools
@@ -838,13 +890,18 @@ class RegionService(BaseService):
         self.client = manager.regions_client
 
     def list(self):
+        client = self.client
+        regions = client.list_regions()
+
         if self.prefix:
             # this means we're cleaning resources based on a certain prefix,
             # this resource doesn't have a name, therefore return empty list
             return []
-        client = self.client
-        regions = client.list_regions()
-        if not self.is_save_state:
+        elif self.is_resource_list:
+            regions = self._filter_by_resource_list(
+                regions['regions'], 'regions')
+            return regions
+        elif not self.is_save_state:
             regions = self._filter_out_ids_from_saved(
                 regions['regions'], 'regions')
             LOG.debug("List count, %s Regions", len(regions))
@@ -884,8 +941,11 @@ class FlavorService(BaseService):
     def list(self):
         client = self.client
         flavors = client.list_flavors({"is_public": None})['flavors']
+
         if self.prefix:
             flavors = self._filter_by_prefix(flavors)
+        elif self.is_resource_list:
+            flavors = self._filter_by_resource_list(flavors, 'flavors')
         else:
             if not self.is_save_state:
                 # recreate list removing saved flavors
@@ -932,8 +992,11 @@ class ImageService(BaseService):
             marker = urllib.parse_qs(parsed.query)['marker'][0]
             response = client.list_images(params={"marker": marker})
             images.extend(response['images'])
+
         if self.prefix:
             images = self._filter_by_prefix(images)
+        elif self.is_resource_list:
+            images = self._filter_by_resource_list(images, 'images')
         else:
             if not self.is_save_state:
                 images = self._filter_out_ids_from_saved(images, 'images')
@@ -974,6 +1037,8 @@ class UserService(BaseService):
         users = self.client.list_users()['users']
         if self.prefix:
             users = self._filter_by_prefix(users)
+        elif self.is_resource_list:
+            users = self._filter_by_resource_list(users, 'users')
         else:
             if not self.is_save_state:
                 users = self._filter_out_ids_from_saved(users, 'users')
@@ -1015,8 +1080,11 @@ class RoleService(BaseService):
     def list(self):
         try:
             roles = self.client.list_roles()['roles']
+
             if self.prefix:
                 roles = self._filter_by_prefix(roles)
+            elif self.is_resource_list:
+                roles = self._filter_by_resource_list(roles, 'roles')
             elif not self.is_save_state:
                 # reconcile roles with saved state and never list admin role
                 roles = self._filter_out_ids_from_saved(roles, 'roles')
@@ -1056,8 +1124,11 @@ class ProjectService(BaseService):
 
     def list(self):
         projects = self.client.list_projects()['projects']
+
         if self.prefix:
             projects = self._filter_by_prefix(projects)
+        elif self.is_resource_list:
+            projects = self._filter_by_resource_list(projects, 'projects')
         else:
             if not self.is_save_state:
                 projects = self._filter_out_ids_from_saved(
@@ -1099,8 +1170,11 @@ class DomainService(BaseService):
     def list(self):
         client = self.client
         domains = client.list_domains()['domains']
+
         if self.prefix:
             domains = self._filter_by_prefix(domains)
+        elif self.is_resource_list:
+            domains = self._filter_by_resource_list(domains, 'domains')
         elif not self.is_save_state:
             domains = self._filter_out_ids_from_saved(domains, 'domains')
         LOG.debug("List count, %s Domains after reconcile", len(domains))

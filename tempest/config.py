@@ -1309,6 +1309,15 @@ or
                     "to cleanup only the resources that match the prefix. "
                     "Make sure this prefix does not match with the resource "
                     "name you do not want Tempest cleanup CLI to delete."),
+    cfg.BoolOpt('record_resources',
+                default=False,
+                help="Allows to record all resources created by Tempest. "
+                     "These resources are stored in file resource_list.json, "
+                     "which can be later used for resource deletion by "
+                     "command tempest cleanup. The resource_list.json file "
+                     "will be appended in case of multiple Tempest runs, "
+                     "so the file will contain a list of resources created "
+                     "during all Tempest runs."),
 ]
 
 _opts = [

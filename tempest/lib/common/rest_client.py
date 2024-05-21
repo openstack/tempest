@@ -21,6 +21,7 @@ import time
 import urllib
 import urllib3
 
+from fasteners import process_lock
 import jsonschema
 from oslo_log import log as logging
 from oslo_log import versionutils
@@ -77,6 +78,17 @@ class RestClient(object):
 
     # The version of the API this client implements
     api_version = None
+
+    # Directory for storing read-write lock
+    lock_dir = None
+
+    # An interprocess lock used when the recording of all resources created by
+    # Tempest is allowed.
+    rec_rw_lock = None
+
+    # Variable mirrors value in config option 'record_resources' that allows
+    # the recording of all resources created by Tempest.
+    record_resources = False
 
     LOG = logging.getLogger(__name__)
 
@@ -297,7 +309,13 @@ class RestClient(object):
                  and the second the response body
         :rtype: tuple
         """
-        return self.request('POST', url, extra_headers, headers, body, chunked)
+        resp_header, resp_body = self.request(
+            'POST', url, extra_headers, headers, body, chunked)
+
+        if self.record_resources:
+            self.resource_record(resp_body)
+
+        return resp_header, resp_body
 
     def get(self, url, headers=None, extra_headers=False, chunked=False):
         """Send a HTTP GET request using keystone service catalog and auth
@@ -1005,6 +1023,66 @@ class RestClient(object):
     def resource_type(self):
         """Returns the primary type of resource this client works with."""
         return 'resource'
+
+    def resource_update(self, data, res_type, res_dict):
+        """Updates resource_list.json file with current resource."""
+        if not isinstance(res_dict, dict):
+            return
+
+        if not res_type.endswith('s'):
+            res_type += 's'
+
+        if res_type not in data:
+            data[res_type] = {}
+
+        if 'uuid' in res_dict:
+            data[res_type].update(
+                {res_dict.get('uuid'): res_dict.get('name')})
+        elif 'id' in res_dict:
+            data[res_type].update(
+                {res_dict.get('id'): res_dict.get('name')})
+        elif 'name' in res_dict:
+            data[res_type].update({res_dict.get('name'): ""})
+
+        self.rec_rw_lock.acquire_write_lock()
+        with open("resource_list.json", 'w+') as f:
+            f.write(json.dumps(data, indent=2, separators=(',', ': ')))
+        self.rec_rw_lock.release_write_lock()
+
+    def resource_record(self, resp_dict):
+        """Records resources into resource_list.json file."""
+        if self.rec_rw_lock is None:
+            path = self.lock_dir
+            self.rec_rw_lock = (
+                process_lock.InterProcessReaderWriterLock(path)
+            )
+
+        self.rec_rw_lock.acquire_read_lock()
+        try:
+            with open('resource_list.json', 'rb') as f:
+                data = json.load(f)
+        except IOError:
+            data = {}
+        self.rec_rw_lock.release_read_lock()
+
+        try:
+            resp_dict = json.loads(resp_dict.decode('utf-8'))
+        except (AttributeError, TypeError, ValueError):
+            return
+
+        # check if response has any keys
+        if not resp_dict.keys():
+            return
+
+        resource_type = list(resp_dict.keys())[0]
+
+        resource_dict = resp_dict[resource_type]
+
+        if isinstance(resource_dict, list):
+            for resource in resource_dict:
+                self.resource_update(data, resource_type, resource)
+        else:
+            self.resource_update(data, resource_type, resource_dict)
 
     @classmethod
     def validate_response(cls, schema, resp, body):
