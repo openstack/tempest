@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    Default value of the ``[service_available] neutron`` option has been
+    updated from ``False`` to ``True``.
+
+  - |
+    All tests which require network features are now skipped when
+    the ``[service_available] neutron`` option is set to ``False``
