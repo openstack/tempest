@@ -22,6 +22,8 @@
           $TEMPEST_CONFIG:
             compute:
               min_compute_nodes: "{{ groups['compute'] | default(['controller']) | length }}"
+            service-clients:
+              http_timeout: 90
       test_results_stage_name: test_results
       zuul_copy_output:
         '/var/log/openvswitch': logs
