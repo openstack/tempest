@@ -1229,16 +1229,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # dev_name to mount_path.
         target_dir = '/tmp'
         if dev_name is not None:
+            mount_path = os.path.join(mount_path, dev_name)
             ssh_client.make_fs(dev_name, fs=fs)
-            ssh_client.exec_command('sudo mount /dev/%s %s' % (dev_name,
-                                                               mount_path))
+            ssh_client.mkdir(mount_path)
+            ssh_client.mount(dev_name, mount_path)
             target_dir = mount_path
+
         cmd_timestamp = 'sudo sh -c "date > %s/timestamp; sync"' % target_dir
         ssh_client.exec_command(cmd_timestamp)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
                                             % target_dir)
         if dev_name is not None:
-            ssh_client.exec_command('sudo umount %s' % mount_path)
+            ssh_client.umount(mount_path)
         return timestamp
 
     def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
@@ -1266,12 +1268,14 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # dev_name to mount_path.
         target_dir = '/tmp'
         if dev_name is not None:
+            mount_path = os.path.join(mount_path, dev_name)
+            ssh_client.mkdir(mount_path)
             ssh_client.mount(dev_name, mount_path)
             target_dir = mount_path
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
                                             % target_dir)
         if dev_name is not None:
-            ssh_client.exec_command('sudo umount %s' % mount_path)
+            ssh_client.umount(mount_path)
         return timestamp
 
     def get_server_ip(self, server, **kwargs):
