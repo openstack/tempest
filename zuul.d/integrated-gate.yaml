@@ -65,6 +65,10 @@
     branches:
       regex: ^.*/(victoria|wallaby)$
       negate: true
+    # NOTE(sean-k-mooney): this job and its descendants frequently times out
+    # run on rax-* providers with a timeout of 2 hours. temporary increase
+    # the timeout to 2.5 hours.
+    timeout: 9000
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
       and py3.
@@ -78,6 +82,8 @@
       # end up 6 in upstream CI. Higher concurrency means high parallel
       # requests to services and can cause more oom issues. To avoid the
       # oom issue, setting the concurrency to 4 in this job.
+      # NOTE(sean-k-mooney): now that we use zswap we should be able to
+      # increase the concurrency to 6.
       tempest_concurrency: 4
       tox_envlist: integrated-full
       devstack_localrc:
@@ -133,11 +139,18 @@
       This job runs integration tests for compute. This is
       subset of 'tempest-full-py3' job and run Nova, Neutron, Cinder (except backup tests)
       and Glance related tests. This is meant to be run on Nova gate only.
+    # NOTE(sean-k-mooney): this job and its descendants frequently times out
+    # when run on rax-* providers, recent optimizations have reduced the
+    # runtime of the job but it still times out. temporary increase the
+    # timeout to 2.5 hours.
+    timeout: 9000
     vars:
       # NOTE(gmann): Default concurrency is higher (number of cpu -2) which
       # end up 6 in upstream CI. Higher concurrency means high parallel
       # requests to services and can cause more oom issues. To avoid the
       # oom issue, setting the concurrency to 4 in this job.
+      # NOTE(sean-k-mooney): now that we use zswap we should be able to
+      # increase the concurrency to 6.
       tempest_concurrency: 4
       tox_envlist: integrated-compute
       tempest_exclude_regex: ""
