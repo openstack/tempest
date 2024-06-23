@@ -204,3 +204,40 @@ class TestResourceProvidersClient(base.BaseServiceTest):
 
     def test_show_resource_provider_usages_with_with_bytes_body(self):
         self._test_list_resource_provider_inventories(bytes_body=True)
+
+    FAKE_ALL_RESOURCE_PROVIDER_TRAITS = {
+        "resource_provider_generation": 0,
+        "traits": [
+            "CUSTOM_HW_FPGA_CLASS1",
+            "CUSTOM_HW_FPGA_CLASS2"
+        ]
+    }
+    FAKE_NEW_RESOURCE_PROVIDER_TRAITS = {
+        "resource_provider_generation": 1,
+        "traits": [
+            "CUSTOM_HW_FPGA_CLASS1",
+            "CUSTOM_HW_FPGA_CLASS2"
+        ]
+    }
+
+    def test_list_resource_provider_traits(self):
+        self.check_service_client_function(
+            self.client.list_resource_provider_traits,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ALL_RESOURCE_PROVIDER_TRAITS,
+            rp_uuid=self.FAKE_RESOURCE_PROVIDER_UUID)
+
+    def test_update_resource_provider_traits(self):
+        self.check_service_client_function(
+            self.client.update_resource_provider_traits,
+            'tempest.lib.common.rest_client.RestClient.put',
+            self.FAKE_NEW_RESOURCE_PROVIDER_TRAITS,
+            rp_uuid=self.FAKE_RESOURCE_PROVIDER_UUID,
+            **self.FAKE_NEW_RESOURCE_PROVIDER_TRAITS)
+
+    def test_delete_resource_provider_traits(self):
+        self.check_service_client_function(
+            self.client.delete_resource_provider_traits,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            self.FAKE_ALL_RESOURCE_PROVIDER_TRAITS, status=204,
+            rp_uuid=self.FAKE_RESOURCE_PROVIDER_UUID)

@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Adds API calls for traits in ResourceProvidersClient.

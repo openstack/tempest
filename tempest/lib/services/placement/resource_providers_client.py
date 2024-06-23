@@ -121,3 +121,29 @@ class ResourceProvidersClient(base_placement_client.BasePlacementClient):
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp, body)
+
+    def list_resource_provider_traits(self, rp_uuid, **kwargs):
+        """https://docs.openstack.org/api-ref/placement/#resource-provider-traits
+        """
+        url = f"/resource_providers/{rp_uuid}/traits"
+        if kwargs:
+            url += '?%s' % urllib.urlencode(kwargs)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def update_resource_provider_traits(self, rp_uuid, **kwargs):
+        url = f"/resource_providers/{rp_uuid}/traits"
+        data = json.dumps(kwargs)
+        resp, body = self.put(url, data)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def delete_resource_provider_traits(self, rp_uuid):
+        url = f"/resource_providers/{rp_uuid}/traits"
+        resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
