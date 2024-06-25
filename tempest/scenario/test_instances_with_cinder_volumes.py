@@ -181,21 +181,24 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
                 server=server
             )
 
+            server_name = server['name'].split('-')[-1]
+
             # run write test on all volumes
             for volume in attached_volumes:
 
-                # get the mount path
-                dev_name = volume['attachments'][0]['device'][5:]
-
                 # dev name volume['attachments'][0]['device'][5:] is like
                 # /dev/vdb, we need to remove /dev/ -> first 5 chars
+                dev_name = volume['attachments'][0]['device'][5:]
+
+                mount_path = f"/mnt/{server_name}"
+
                 timestamp_before = self.create_timestamp(
                     ssh_ip, private_key=keypair['private_key'], server=server,
-                    dev_name=dev_name,
+                    dev_name=dev_name, mount_path=mount_path,
                 )
                 timestamp_after = self.get_timestamp(
                     ssh_ip, private_key=keypair['private_key'], server=server,
-                    dev_name=dev_name,
+                    dev_name=dev_name, mount_path=mount_path,
                 )
                 self.assertEqual(timestamp_before, timestamp_after)
 
