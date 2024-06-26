@@ -56,9 +56,10 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
                 "not enabled" % (cls.__name__))
             raise cls.skipException(skip_msg)
 
-    def _create_instance_snapshot(self):
+    def _create_instance_snapshot(self, bfv=False):
         """Create instance from image and then snapshot the instance."""
         # Create image and store data to image
+        source = 'volume' if bfv else 'image'
         image_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix,
             name='image-dependency-test')
@@ -71,12 +72,20 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
         self.client.store_image_file(image['id'], image_file)
         waiters.wait_for_image_status(
             self.client, image['id'], 'active')
-        # Create instance
-        instance = self.create_test_server(
-            name='instance-depend-image',
-            image_id=image['id'],
-            wait_until='ACTIVE')
-        LOG.info("Instance from image is created %s", instance)
+        if bfv:
+            # Create instance
+            instance = self.create_test_server(
+                name='instance-depend-image',
+                image_id=image['id'],
+                volume_backed=True,
+                wait_until='ACTIVE')
+        else:
+            # Create instance
+            instance = self.create_test_server(
+                name='instance-depend-image',
+                image_id=image['id'],
+                wait_until='ACTIVE')
+        LOG.info("Instance from %s is created %s", source, instance)
         instance_observed = \
             self.servers_client.show_server(instance['id'])['server']
         # Create instance snapshot
@@ -95,6 +104,29 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
 
         """
         base_image_id, snapshot_image_id = self._create_instance_snapshot()
+        self.client.delete_image(base_image_id)
+        self.client.wait_for_resource_deletion(base_image_id)
+        images_list = self.client.list_images()['images']
+        fetched_images_id = [img['id'] for img in images_list]
+        self.assertNotIn(base_image_id, fetched_images_id)
+        self.assertIn(snapshot_image_id, fetched_images_id)
+
+    @utils.services('compute', 'volume')
+    @decorators.idempotent_id('f0c8a35d-8f8f-443c-8bcb-85a9c0f87d19')
+    def test_image_volume_server_snapshot_dependency(self):
+        """Test with image > volume > instance > snapshot dependency.
+
+        We are going to perform the following steps in the test:
+        * Create image
+        * Create a bootable volume from Image
+        * Launch an instance from the bootable volume
+        * Take snapshot of the instance -- which creates the volume snapshot
+        * Delete the image.
+
+        This will test the dependency chain of image -> volume -> snapshot.
+        """
+        base_image_id, snapshot_image_id = self._create_instance_snapshot(
+            bfv=True)
         self.client.delete_image(base_image_id)
         self.client.wait_for_resource_deletion(base_image_id)
         images_list = self.client.list_images()['images']
