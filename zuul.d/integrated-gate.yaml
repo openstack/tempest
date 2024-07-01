@@ -358,18 +358,6 @@
         TEMPEST_VOLUME_TYPE: volumev2
 
 - job:
-    name: tempest-centos8-stream-fips
-    parent: devstack-tempest
-    description: |
-      Integration testing for a FIPS enabled Centos 8 system
-    nodeset: devstack-single-node-centos-8-stream
-    vars:
-      tox_envlist: full
-      configure_swap_size: 4096
-      nslookup_target: 'opendev.org'
-      enable_fips: True
-
-- job:
     name: tempest-centos9-stream-fips
     parent: devstack-tempest
     description: |
@@ -503,9 +491,6 @@
               - ^.*/2024.1
               - master
         - tempest-integrated-compute
-        # centos-8-stream is tested from wallaby -> yoga branches
-        - tempest-integrated-compute-centos-8-stream:
-            branches: ^.*/(wallaby|xena|yoga)$
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
