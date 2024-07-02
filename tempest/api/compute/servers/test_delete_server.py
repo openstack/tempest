@@ -99,11 +99,14 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
     def test_delete_server_while_in_verify_resize_state(self):
         """Test deleting a server while it's VM state is VERIFY_RESIZE"""
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.resize_server(server['id'], self.flavor_ref_alt)
-        waiters.wait_for_server_status(self.client, server['id'],
-                                       'VERIFY_RESIZE')
-        self.client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.client, server['id'])
+        body = self.client.resize_server(server['id'], self.flavor_ref_alt)
+        request_id = body.response['x-openstack-request-id']
+        waiters.wait_for_server_status(
+            self.client, server['id'], 'VERIFY_RESIZE', request_id=request_id)
+        body = self.client.delete_server(server['id'])
+        request_id = body.response['x-openstack-request-id']
+        waiters.wait_for_server_termination(
+            self.client, server['id'], request_id=request_id)
 
     @decorators.idempotent_id('d0f3f0d6-d9b6-4a32-8da4-23015dcab23c')
     @utils.services('volume')

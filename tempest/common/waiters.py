@@ -103,7 +103,8 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
         old_task_state = task_state
 
 
-def wait_for_server_termination(client, server_id, ignore_error=False):
+def wait_for_server_termination(client, server_id, ignore_error=False,
+                                request_id=None):
     """Waits for server to reach termination."""
     try:
         body = client.show_server(server_id)['server']
@@ -126,9 +127,13 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
         if server_status == 'ERROR' and not ignore_error:
-            raise lib_exc.DeleteErrorException(
-                "Server %s failed to delete and is in ERROR status" %
-                server_id)
+            details = ("Server %s failed to delete and is in ERROR status." %
+                       server_id)
+            if 'fault' in body:
+                details += ' Fault: %s.' % body['fault']
+            if request_id:
+                details += ' Server delete request ID: %s.' % request_id
+            raise lib_exc.DeleteErrorException(details, server_id=server_id)
 
         if server_status == 'SOFT_DELETED':
             # Soft-deleted instances need to be forcibly deleted to
