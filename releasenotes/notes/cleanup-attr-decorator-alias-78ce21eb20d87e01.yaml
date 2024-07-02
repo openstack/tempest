@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The ``attr`` decorator is no longer available in the ``tempest.test``
+    module. Use the ``tempest.lib.decorators`` module instead.
