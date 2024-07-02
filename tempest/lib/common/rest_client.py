@@ -46,6 +46,8 @@ HTTP_REDIRECTION = (300, 301, 302, 303, 304, 305, 306, 307)
 JSONSCHEMA_VALIDATOR = jsonschema_validator.JSONSCHEMA_VALIDATOR
 FORMAT_CHECKER = jsonschema_validator.FORMAT_CHECKER
 
+RESOURCE_LIST_JSON = "resource_list.json"
+
 
 class RestClient(object):
     """Unified OpenStack RestClient class
@@ -1045,7 +1047,7 @@ class RestClient(object):
             data[res_type].update({res_dict.get('name'): ""})
 
         self.rec_rw_lock.acquire_write_lock()
-        with open("resource_list.json", 'w+') as f:
+        with open(RESOURCE_LIST_JSON, 'w+') as f:
             f.write(json.dumps(data, indent=2, separators=(',', ': ')))
         self.rec_rw_lock.release_write_lock()
 
@@ -1059,7 +1061,7 @@ class RestClient(object):
 
         self.rec_rw_lock.acquire_read_lock()
         try:
-            with open('resource_list.json', 'rb') as f:
+            with open(RESOURCE_LIST_JSON, 'rb') as f:
                 data = json.load(f)
         except IOError:
             data = {}

@@ -14,6 +14,7 @@
 
 import copy
 from unittest import mock
+from unittest.mock import patch
 
 import fixtures
 import jsonschema
@@ -755,103 +756,124 @@ class TestRecordResources(BaseRestClientTestClass):
     def setUp(self):
         self.fake_http = fake_http.fake_httplib2()
         super(TestRecordResources, self).setUp()
-
-    def _cleanup_test_resource_record(self):
-        # clear resource_list.json file
-        with open('resource_list.json', 'w') as f:
-            f.write('{}')
+        self.rest_client.rec_rw_lock = mock.MagicMock()
 
     def test_post_record_resources(self):
-        self.rest_client.record_resources = True
-        __, return_dict = self.rest_client.post(self.url, {}, {})
-        self.assertEqual({}, return_dict['headers'])
-        self.assertEqual({}, return_dict['body'])
-
-    def test_resource_record_no_top_key(self):
-        test_body_no_key = b'{}'
-        self.rest_client.resource_record(test_body_no_key)
+        with patch('builtins.open', mock.mock_open(read_data=b'{}')):
+            self.rest_client.record_resources = True
+            __, return_dict = self.rest_client.post(self.url, {}, {})
+            self.assertEqual({}, return_dict['headers'])
+            self.assertEqual({}, return_dict['body'])
 
     def test_resource_record_dict(self):
-        test_dict_body = b'{"project": {"id": "test-id", "name": ""}}\n'
-        self.rest_client.resource_record(test_dict_body)
+        mock_resource_list_1 = mock.mock_open(read_data=b'{}')
+        mock_resource_list_2 = mock.mock_open(
+            read_data=b'{"projects": {"test-id": ""}}')
 
-        with open('resource_list.json', 'r') as f:
-            content = f.read()
-            resource_list_content = json.loads(content)
+        with patch('builtins.open') as mock_open_func:
+            mock_open_func.side_effect = [
+                mock_resource_list_1.return_value,
+                mock_resource_list_2.return_value
+            ]
 
-        test_resource_list = {
-            "projects": {"test-id": ""}
-        }
-        self.assertEqual(resource_list_content, test_resource_list)
+            test_dict_body = b'{"project": {"id": "test-id", "name": ""}}\n'
+            self.rest_client.resource_record(test_dict_body)
 
-        # cleanup
-        self._cleanup_test_resource_record()
+            content = mock_resource_list_2().read()
+            resource_list_2 = json.loads(content)
+            test_resource_list_2 = {
+                "projects": {"test-id": ""}
+            }
+            self.assertEqual(resource_list_2, test_resource_list_2)
 
     def test_resource_record_list(self):
-        test_list_body = '''{
-            "user": [
-                {
-                    "id": "test-uuid",
-                    "name": "test-name"
-                },
-                {
-                    "id": "test-uuid2",
-                    "name": "test-name2"
-                }
+        mock_content_2 = b'{"users": {"test-uuid": "test-name"}}'
+        mock_content_3 = (
+            b'{"users": {"test-uuid": "test-name",'
+            b'"test-uuid2": "test-name2"}}'
+        )
+
+        mock_resource_list_1 = mock.mock_open(read_data=b'{}')
+        mock_resource_list_2 = mock.mock_open(read_data=mock_content_2)
+        mock_resource_list_3 = mock.mock_open(read_data=mock_content_3)
+
+        with patch('builtins.open') as mock_open_func:
+            mock_open_func.side_effect = [
+                mock_resource_list_1.return_value,
+                mock_resource_list_2.return_value,
+                mock_resource_list_3.return_value
             ]
-        }'''
-        test_list_body = test_list_body.encode('utf-8')
-        self.rest_client.resource_record(test_list_body)
 
-        with open('resource_list.json', 'r') as f:
-            content = f.read()
-            resource_list_content = json.loads(content)
+            test_list_body = '''{
+                "user": [
+                    {
+                        "id": "test-uuid",
+                        "name": "test-name"
+                    },
+                    {
+                        "id": "test-uuid2",
+                        "name": "test-name2"
+                    }
+                ]
+            }'''
+            test_list_body = test_list_body.encode('utf-8')
+            self.rest_client.resource_record(test_list_body)
 
-        test_resource_list = {
-            "users": {
-                "test-uuid": "test-name",
-                "test-uuid2": "test-name2"
+            content_2 = mock_resource_list_2().read()
+            resource_list_2 = json.loads(content_2)
+
+            test_resource_list_2 = {
+                "users": {
+                    "test-uuid": "test-name"
+                }
             }
-        }
-        self.assertEqual(resource_list_content, test_resource_list)
+            self.assertEqual(resource_list_2, test_resource_list_2)
 
-        # cleanup
-        self._cleanup_test_resource_record()
+            content_3 = mock_resource_list_3().read()
+            resource_list_3 = json.loads(content_3)
+
+            test_resource_list_3 = {
+                "users": {
+                    "test-uuid": "test-name",
+                    "test-uuid2": "test-name2"
+                }
+            }
+            self.assertEqual(resource_list_3, test_resource_list_3)
 
     def test_resource_update_id(self):
         data = {}
         res_dict = {'id': 'test-uuid', 'name': 'test-name'}
 
-        self.rest_client.rec_rw_lock = mock.MagicMock()
-        self.rest_client.resource_update(data, 'user', res_dict)
-        result = {'users': {'test-uuid': 'test-name'}}
-        self.assertEqual(data, result)
+        with patch('builtins.open', mock.mock_open(read_data=b'{}')):
+            self.rest_client.resource_update(data, 'user', res_dict)
+            result = {'users': {'test-uuid': 'test-name'}}
+            self.assertEqual(data, result)
 
     def test_resource_update_name(self):
         data = {'keypairs': {}}
         res_dict = {'name': 'test-keypair'}
 
-        self.rest_client.rec_rw_lock = mock.MagicMock()
-        self.rest_client.resource_update(data, 'keypair', res_dict)
-        result = {'keypairs': {'test-keypair': ""}}
-        self.assertEqual(data, result)
+        with patch('builtins.open', mock.mock_open(read_data=b'{}')):
+            self.rest_client.resource_update(data, 'keypair', res_dict)
+            result = {'keypairs': {'test-keypair': ""}}
+            self.assertEqual(data, result)
 
     def test_resource_update_no_id(self):
         data = {}
         res_dict = {'type': 'test', 'description': 'example'}
 
-        self.rest_client.rec_rw_lock = mock.MagicMock()
-        self.rest_client.resource_update(data, 'projects', res_dict)
-        result = {'projects': {}}
-        self.assertEqual(data, result)
+        with patch('builtins.open', mock.mock_open(read_data=b'{}')):
+            self.rest_client.resource_update(data, 'projects', res_dict)
+            result = {'projects': {}}
+            self.assertEqual(data, result)
 
     def test_resource_update_not_dict(self):
         data = {}
         res_dict = 'test-string'
 
-        self.rest_client.rec_rw_lock = mock.MagicMock()
-        self.rest_client.resource_update(data, 'user', res_dict)
-        self.assertEqual(data, {})
+        with patch('builtins.open', mock.mock_open(read_data=b'{}')):
+            self.rest_client.resource_update(data, 'user', res_dict)
+            self.assertEqual(data, {})
 
 
 class TestResponseBody(base.TestCase):
