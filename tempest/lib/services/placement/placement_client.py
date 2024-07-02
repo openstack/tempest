@@ -49,3 +49,39 @@ class PlacementClient(base_placement_client.BasePlacementClient):
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return rest_client.ResponseBody(resp, body)
+
+    def list_traits(self, **params):
+        """API ref https://docs.openstack.org/api-ref/placement/#traits
+        """
+        url = "/traits"
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_trait(self, name, **params):
+        url = "/traits"
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+            resp, body = self.get(url)
+            body = json.loads(body)
+            self.expected_success(200, resp.status)
+            return rest_client.ResponseBody(resp, body)
+        url = f"{url}/{name}"
+        resp, _ = self.get(url)
+        self.expected_success(204, resp.status)
+        return resp.status
+
+    def create_trait(self, name, **params):
+        url = f"/traits/{name}"
+        json_body = json.dumps(params)
+        resp, _ = self.put(url, body=json_body)
+        return resp.status
+
+    def delete_trait(self, name):
+        url = f"/traits/{name}"
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
+        return resp.status

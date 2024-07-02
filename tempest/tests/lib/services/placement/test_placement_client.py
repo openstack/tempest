@@ -87,3 +87,77 @@ class TestPlacementClient(base.BaseServiceTest):
 
     def test_list_allocations_with_bytes_body(self):
         self._test_list_allocations(bytes_body=True)
+
+    FAKE_ALL_TRAITS = {
+        "traits": [
+            "CUSTOM_HW_FPGA_CLASS1",
+            "CUSTOM_HW_FPGA_CLASS2",
+            "CUSTOM_HW_FPGA_CLASS3"
+        ]
+    }
+
+    FAKE_ASSOCIATED_TRAITS = {
+        "traits": [
+            "CUSTOM_HW_FPGA_CLASS1",
+            "CUSTOM_HW_FPGA_CLASS2"
+        ]
+    }
+
+    def test_list_traits(self):
+        self.check_service_client_function(
+            self.client.list_traits,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ALL_TRAITS)
+
+        self.check_service_client_function(
+            self.client.list_traits,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ASSOCIATED_TRAITS,
+            **{
+                "associated": "true"
+            })
+
+        self.check_service_client_function(
+            self.client.list_traits,
+            'tempest.lib.common.rest_client.RestClient.get',
+            self.FAKE_ALL_TRAITS,
+            **{
+                "associated": "true",
+                "name": "startswith:CUSTOM_HW_FPGPA"
+            })
+
+    def test_show_traits(self):
+        self.check_service_client_function(
+            self.client.show_trait,
+            'tempest.lib.common.rest_client.RestClient.get',
+            204, status=204,
+            name="CUSTOM_HW_FPGA_CLASS1")
+
+        self.check_service_client_function(
+            self.client.show_trait,
+            'tempest.lib.common.rest_client.RestClient.get',
+            404, status=404,
+            # trait with this name does not exists
+            name="CUSTOM_HW_FPGA_CLASS4")
+
+    def test_create_traits(self):
+        self.check_service_client_function(
+            self.client.create_trait,
+            'tempest.lib.common.rest_client.RestClient.put',
+            204, status=204,
+            # try to create trait with existing name
+            name="CUSTOM_HW_FPGA_CLASS1")
+
+        self.check_service_client_function(
+            self.client.create_trait,
+            'tempest.lib.common.rest_client.RestClient.put',
+            201, status=201,
+            # create new trait
+            name="CUSTOM_HW_FPGA_CLASS4")
+
+    def test_delete_traits(self):
+        self.check_service_client_function(
+            self.client.delete_trait,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            204, status=204,
+            name="CUSTOM_HW_FPGA_CLASS1")
