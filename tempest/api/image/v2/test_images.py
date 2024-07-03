@@ -76,7 +76,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
                                      '%s import method' % method)
 
     def _stage_and_check(self):
-        image = self._create_image()
+        image = self._create_image(disk_format='raw')
         # Stage image data
         file_content = data_utils.random_bytes()
         image_file = io.BytesIO(file_content)

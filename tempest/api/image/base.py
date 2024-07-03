@@ -100,10 +100,9 @@ class BaseV2ImageTest(BaseImageTest):
         """Create Image & stage image file for glance-direct import method."""
         image_name = data_utils.rand_name('test-image')
         container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
         image = self.create_image(name=image_name,
                                   container_format=container_format,
-                                  disk_format=disk_format,
+                                  disk_format='raw',
                                   visibility='private')
         self.assertEqual('queued', image['status'])
 
