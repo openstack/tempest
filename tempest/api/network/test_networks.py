@@ -389,17 +389,20 @@ class NetworksTest(BaseNetworkTestResources):
         # belong to other tests and their state may have changed during this
         # test
         body = self.subnets_client.list_subnets(network_id=public_network_id)
+        extensions = [
+            ext['alias'] for ext in
+            self.network_extensions_client.list_extensions()['extensions']]
+        is_sen_ext = 'subnet-external-network' in extensions
 
         # check subnet visibility of external_network
-        if external_network['shared']:
-            self.assertNotEmpty(body['subnets'], "Subnets should be visible "
-                                                 "for shared public network %s"
-                                % public_network_id)
+        if external_network['shared'] or is_sen_ext:
+            self.assertNotEmpty(body['subnets'],
+                                'Subnets should be visible for shared or '
+                                'external networks %s' % public_network_id)
         else:
-            self.assertEmpty(body['subnets'], "Subnets should not be visible "
-                                              "for non-shared public "
-                                              "network %s"
-                             % public_network_id)
+            self.assertEmpty(body['subnets'],
+                             'Subnets should not be visible for non-shared or'
+                             'non-external networks %s' % public_network_id)
 
     @decorators.idempotent_id('c72c1c0c-2193-4aca-ccc4-b1442640bbbb')
     @utils.requires_ext(extension="standard-attr-description",
