@@ -131,7 +131,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('queued', body['status'])
         # import image from web to backend
-        image_uri = CONF.image.http_image
+        image_uri = CONF.image.http_qcow2_image
         self.client.image_import(image['id'], method='web-download',
                                  import_params={'uri': image_uri})
         waiters.wait_for_image_imported_to_stores(self.client, image['id'])
