@@ -641,6 +641,11 @@ ImageGroup = [
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
                help='http accessible image'),
+    cfg.StrOpt('http_qcow2_image',
+               default='http://download.cirros-cloud.net/0.6.2/'
+               'cirros-0.6.2-x86_64-disk.img',
+               help='http qcow2 accessible image which will be used '
+                    'for image conversion if enabled.'),
     cfg.IntOpt('build_timeout',
                default=300,
                help="Timeout in seconds to wait for an image to "
