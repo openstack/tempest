@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Added a new config option in the `image` section, `http_qcow2_image`,
+    which will use `qcow2` format image to download from the external
+    source specified and use it for image conversion in glance tests. By
+    default it will download
+    `http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img`
