@@ -638,8 +638,8 @@ ImageGroup = [
                       "service, operator should set this parameter to True "
                       "if 'image_cache_dir' is set in glance-api.conf")),
     cfg.StrOpt('http_image',
-               default='http://download.cirros-cloud.net/0.3.1/'
-               'cirros-0.3.1-x86_64-uec.tar.gz',
+               default='http://download.cirros-cloud.net/0.6.2/'
+               'cirros-0.6.2-x86_64-uec.tar.gz',
                help='http accessible image'),
     cfg.StrOpt('http_qcow2_image',
                default='http://download.cirros-cloud.net/0.6.2/'

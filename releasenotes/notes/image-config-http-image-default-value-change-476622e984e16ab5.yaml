@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Changed the default value of 'http_image' config option in the
+    'image' group to 'http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-uec.tar.gz'
+    from 'http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz' as former
+    image is very old and we should always use latest one.
