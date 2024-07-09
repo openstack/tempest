@@ -1,0 +1,23 @@
+---
+upgrade:
+  - |
+    Tests for identity v2 API have been removed.
+
+deprecations:
+  - |
+    The following options have been formally deprecated. These options were
+    used to test identity v2 API which was removed during Queens cycle.
+    The tests for identity v2 API were removed from tempest and these options
+    have no effect.
+
+    - ``[identity] uri``
+    - ``[identity] v2_admin_endpoint_type``
+    - ``[identity] v2_public_endpoint_type``
+    - ``[identity-feature-enabled] api_v2_admin``
+
+  - |
+    The following options have been deprecated because only identity v3 API
+    is used.
+
+    - ``[identity] auth_version``
+    - ``[identity-feature-enabled] api_v3``
