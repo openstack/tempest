@@ -605,6 +605,14 @@ class ServerActionsTestOtherB(ServerActionsBase):
         self.addCleanup(_clean_oldest_backup, image1_id)
         waiters.wait_for_image_status(glance_client,
                                       image1_id, 'active')
+        # This is required due to ceph issue:
+        # https://bugs.launchpad.net/glance/+bug/2045769.
+        # New location APIs are async so we need to wait for the location
+        # import task to complete.
+        # This should work with old location API since we don't fail if there
+        # are no tasks for the image
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image1_id, 'success')
 
         backup2 = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='backup-2')
@@ -621,6 +629,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
         self.addCleanup(glance_client.delete_image, image2_id)
         waiters.wait_for_image_status(glance_client,
                                       image2_id, 'active')
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image2_id, 'success')
 
         # verify they have been created
         properties = {
@@ -655,6 +665,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
             image3_id = resp['image_id']
         else:
             image3_id = data_utils.parse_image_id(resp.response['location'])
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image3_id, 'success')
         self.addCleanup(glance_client.delete_image, image3_id)
         # the first back up should be deleted
         waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
