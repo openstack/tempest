@@ -668,11 +668,11 @@ ImageGroup = [
                help="Time in seconds between image operation status "
                     "checks."),
     cfg.ListOpt('container_formats',
-                default=['ami', 'ari', 'aki', 'bare', 'ovf', 'ova'],
+                default=['bare', 'ami', 'ari', 'aki', 'ovf', 'ova'],
                 help="A list of image's container formats "
                      "users can specify."),
     cfg.ListOpt('disk_formats',
-                default=['ami', 'ari', 'aki', 'vhd', 'vmdk', 'raw', 'qcow2',
+                default=['qcow2', 'raw', 'ami', 'ari', 'aki', 'vhd', 'vmdk',
                          'vdi', 'iso', 'vhdx'],
                 help="A list of image's disk formats "
                      "users can specify.")
