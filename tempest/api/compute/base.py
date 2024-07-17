@@ -538,6 +538,37 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                                                     volume['id'], 'available')
         return volume
 
+    @classmethod
+    def verify_metadata_from_api(self, server, ssh_client, verify_method):
+        md_url = 'http://169.254.169.254/openstack/latest/meta_data.json'
+        LOG.info('Attempting to verify tagged devices in server %s via '
+                 'the metadata service: %s', server['id'], md_url)
+
+        def get_and_verify_metadata():
+            try:
+                ssh_client.exec_command('curl -V')
+            except exceptions.SSHExecCommandFailed:
+                if not CONF.compute_feature_enabled.config_drive:
+                    raise self.skipException('curl not found in guest '
+                                             'and config drive is '
+                                             'disabled')
+                LOG.warning('curl was not found in the guest, device '
+                            'tagging metadata was not checked in the '
+                            'metadata API')
+                return True
+            cmd = 'curl %s' % md_url
+            md_json = ssh_client.exec_command(cmd)
+            return verify_method(md_json)
+        # NOTE(gmann) Keep refreshing the metadata info until the metadata
+        # cache is refreshed. For safer side, we will go with wait loop of
+        # build_interval till build_timeout. verify_method() above will return
+        # True if all metadata verification is done as expected.
+        if not test_utils.call_until_true(get_and_verify_metadata,
+                                          CONF.compute.build_timeout,
+                                          CONF.compute.build_interval):
+            raise lib_exc.TimeoutException('Timeout while verifying '
+                                           'metadata on server.')
+
     def _detach_volume(self, server, volume):
         """Helper method to detach a volume.
 

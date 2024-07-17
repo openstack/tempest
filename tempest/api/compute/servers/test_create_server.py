@@ -16,6 +16,8 @@
 import netaddr
 import testtools
 
+from oslo_serialization import jsonutils as json
+
 from tempest.api.compute import base
 from tempest.common import utils
 from tempest.common.utils.linux import remote_client
@@ -235,3 +237,76 @@ class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
             servers_client=self.client)
         hostname = linux_client.exec_command("hostname").rstrip()
         self.assertEqual('guest-instance-1-domain-com', hostname)
+
+
+class ServersV294TestFqdnHostnames(base.BaseV2ComputeTest):
+    """Test creating server with FQDN hostname and verifying attributes
+
+    Starting Antelope release, Nova allows to set hostname as an FQDN
+    type and allows free form characters in hostname using --hostname
+    parameter with API above 2.94 .
+
+    This is to create server with --hostname having FQDN type value having
+    more than 64 characters
+    """
+
+    min_microversion = '2.94'
+
+    @classmethod
+    def setup_credentials(cls):
+        cls.prepare_instance_network()
+        super(ServersV294TestFqdnHostnames, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersV294TestFqdnHostnames, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServersV294TestFqdnHostnames, cls).resource_setup()
+        cls.validation_resources = cls.get_class_validation_resources(
+            cls.os_primary)
+        cls.accessIPv4 = '1.1.1.1'
+        cls.name = 'guest-instance-1'
+        cls.password = data_utils.rand_password()
+        cls.hostname = 'x' * 52 + '-guest-test.domaintest.com'
+        cls.test_server = cls.create_test_server(
+            validatable=True,
+            validation_resources=cls.validation_resources,
+            wait_until='ACTIVE',
+            name=cls.name,
+            accessIPv4=cls.accessIPv4,
+            adminPass=cls.password,
+            hostname=cls.hostname)
+        cls.server = cls.client.show_server(cls.test_server['id'])['server']
+
+    def verify_metadata_hostname(self, md_json):
+        md_dict = json.loads(md_json)
+        dhcp_domain = CONF.compute_feature_enabled.dhcp_domain
+        if md_dict['hostname'] == f"{self.hostname}{dhcp_domain}":
+            return True
+        else:
+            return False
+
+    @decorators.idempotent_id('e7b05488-f9d5-4fce-91b3-e82216c52017')
+    @testtools.skipUnless(CONF.validation.run_validation,
+                          'Instance validation tests are disabled.')
+    def test_verify_hostname_allows_fqdn(self):
+        """Test to verify --hostname allows FQDN type name scheme
+
+        Verify the hostname has FQDN value and Freeform characters
+        in the hostname are allowed
+        """
+        self.assertEqual(
+            self.hostname, self.server['OS-EXT-SRV-ATTR:hostname'])
+        # Verify that metadata API has correct hostname inside guest
+        linux_client = remote_client.RemoteClient(
+            self.get_server_ip(self.test_server, self.validation_resources),
+            self.ssh_user,
+            self.password,
+            self.validation_resources['keypair']['private_key'],
+            server=self.test_server,
+            servers_client=self.client)
+        self.verify_metadata_from_api(
+            self.test_server, linux_client, self.verify_metadata_hostname)
