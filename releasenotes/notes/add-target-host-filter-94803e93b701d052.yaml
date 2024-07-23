@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add a new config option `[compute]/target_hosts_to_avoid` which will
+    filter out any hypervisor candidates with a hostname that matches the
+    provided pattern when determining target hosts for migration.

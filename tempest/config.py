@@ -418,7 +418,11 @@ ComputeGroup = [
                help="Specify destination host for live-migration and cold"
                     " migration. If option is not set tests will use host"
                     " automatically."),
-
+    cfg.StrOpt('target_hosts_to_avoid',
+               default='-ironic',
+               help="When aggregating available hypervisors for testing,"
+               " avoid migrating to and booting any test VM on hosts with"
+               " a name that matches the provided pattern"),
 ]
 
 placement_group = cfg.OptGroup(name='placement',

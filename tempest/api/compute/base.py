@@ -720,7 +720,7 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
             binary='nova-compute')['services']
         hosts = []
         for svc in svcs:
-            if svc['host'].endswith('-ironic'):
+            if CONF.compute.target_hosts_to_avoid in svc['host']:
                 continue
             if svc['state'] == 'up' and svc['status'] == 'enabled':
                 if CONF.compute.compute_volume_common_az:

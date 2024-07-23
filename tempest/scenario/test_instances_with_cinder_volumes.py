@@ -80,7 +80,7 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
                 for host in zone['hosts']:
                     if 'nova-compute' in zone['hosts'][host] and \
                         zone['hosts'][host]['nova-compute']['available'] and \
-                        not host.endswith('-ironic'):
+                        CONF.compute.target_hosts_to_avoid not in host:
                         hosts.append({'zone': zone['zoneName'],
                                       'host_name': host})
 
