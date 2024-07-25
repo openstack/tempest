@@ -610,21 +610,14 @@ class TestKeyPairService(BaseCmdServiceTests):
         self._test_prefix_opt_precedence(delete_mock)
 
     def test_resource_list_opt_precedence(self):
-        delete_mock = [(self.filter_prefix, [], None),
+        delete_mock = [(self.filter_saved_state, [], None),
+                       (self.filter_resource_list, [], None),
+                       (self.filter_prefix, [], None),
                        (self.get_method, self.response, 200),
                        (self.validate_response, 'validate', None),
                        (self.delete_method, 'error', None),
                        (self.log_method, 'exception', None)]
-        serv = self._create_cmd_service(
-            self.service_class, is_resource_list=True)
-
-        _, fixtures = self.run_function_with_mocks(
-            serv.delete,
-            delete_mock
-        )
-
-        # Check that prefix was not used for filtering
-        fixtures[0].mock.assert_not_called()
+        self._test_resource_list_opt_precedence(delete_mock)
 
 
 class TestVolumeService(BaseCmdServiceTests):

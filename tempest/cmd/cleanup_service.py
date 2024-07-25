@@ -115,21 +115,32 @@ class BaseService(object):
         return [item for item in item_list
                 if item['tenant_id'] == self.tenant_id]
 
-    def _filter_by_prefix(self, item_list):
-        items = [item for item in item_list
-                 if item['name'].startswith(self.prefix)]
+    def _filter_by_prefix(self, item_list, top_key=None):
+        items = []
+        for item in item_list:
+            name = item[top_key]['name'] if top_key else item['name']
+            if name.startswith(self.prefix):
+                items.append(item)
         return items
 
     def _filter_by_resource_list(self, item_list, attr):
         if attr not in self.resource_list_json:
             return []
-        items = [item for item in item_list if item['id']
-                 in self.resource_list_json[attr].keys()]
+        items = []
+        for item in item_list:
+            item_id = (item['keypair']['name'] if attr == 'keypairs'
+                       else item['id'])
+            if item_id in self.resource_list_json[attr].keys():
+                items.append(item)
         return items
 
     def _filter_out_ids_from_saved(self, item_list, attr):
-        items = [item for item in item_list if item['id']
-                 not in self.saved_state_json[attr].keys()]
+        items = []
+        for item in item_list:
+            item_id = (item['keypair']['name'] if attr == 'keypairs'
+                       else item['id'])
+            if item_id not in self.saved_state_json[attr].keys():
+                items.append(item)
         return items
 
     def list(self):
@@ -294,16 +305,11 @@ class KeyPairService(BaseService):
         keypairs = client.list_keypairs()['keypairs']
 
         if self.prefix:
-            keypairs = self._filter_by_prefix(keypairs)
+            keypairs = self._filter_by_prefix(keypairs, 'keypair')
         elif self.is_resource_list:
-            keypairs = [keypair for keypair in keypairs
-                        if keypair['keypair']['name']
-                        in self.resource_list_json['keypairs'].keys()]
+            keypairs = self._filter_by_resource_list(keypairs, 'keypairs')
         elif not self.is_save_state:
-            # recreate list removing saved keypairs
-            keypairs = [keypair for keypair in keypairs
-                        if keypair['keypair']['name']
-                        not in self.saved_state_json['keypairs'].keys()]
+            keypairs = self._filter_out_ids_from_saved(keypairs, 'keypairs')
         LOG.debug("List count, %s Keypairs", len(keypairs))
         return keypairs
 
