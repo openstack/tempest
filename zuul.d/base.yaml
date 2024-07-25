@@ -12,6 +12,10 @@
     timeout: 7200
     roles: &base_roles
       - zuul: opendev.org/openstack/devstack
+    failure-output:
+      # This matches stestr/tempest output when a test fails
+      # {1} tempest.api.test_blah [5.743446s] ... FAILED
+      - '\{\d+\} (.*?) \[[\d\.]+s\] \.\.\. FAILED'
     vars: &base_vars
       devstack_localrc:
         IMAGE_URLS: http://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img, http://download.cirros-cloud.net/0.6.1/cirros-0.6.1-x86_64-disk.img
