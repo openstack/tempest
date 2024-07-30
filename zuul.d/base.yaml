@@ -64,6 +64,10 @@
     required-projects: *base_required-projects
     timeout: 7200
     roles: *base_roles
+    failure-output:
+      # This matches stestr/tempest output when a test fails
+      # {1} tempest.api.test_blah [5.743446s] ... FAILED
+      - '\{\d+\} (.*?) \[[\d\.]+s\] \.\.\. FAILED'
     vars: *base_vars
     run: playbooks/devstack-tempest-ipv6.yaml
     post-run: playbooks/post-tempest.yaml
