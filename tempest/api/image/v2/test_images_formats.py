@@ -18,6 +18,7 @@ import testscenarios
 import yaml
 
 from tempest.api.image import base
+from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -59,7 +60,13 @@ class ImagesFormatTest(base.BaseV2ImageTest):
                 pass
         return super().tearDown()
 
-    def _test_image(self, image_def, override_format=None):
+    @classmethod
+    def resource_setup(cls):
+        super().resource_setup()
+        cls.available_import_methods = cls.client.info_import()[
+            'import-methods']['value']
+
+    def _test_image(self, image_def, override_format=None, asimport=False):
         image_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix,
             name=image_def['name'])
@@ -70,7 +77,12 @@ class ImagesFormatTest(base.BaseV2ImageTest):
         self.images.append(image)
         image_fn = os.path.join(self._image_base, image_def['filename'])
         with open(image_fn, 'rb') as f:
-            self.client.store_image_file(image['id'], f)
+            if asimport:
+                self.client.stage_image_file(image['id'], f)
+                self.client.image_import(image['id'], method='glance-direct')
+            else:
+                self.client.store_image_file(image['id'], f)
+        return image
 
     @decorators.idempotent_id('a245fcbe-63ce-4dc1-a1d0-c16d76d9e6df')
     def test_accept_usable_formats(self):
@@ -86,3 +98,46 @@ class ImagesFormatTest(base.BaseV2ImageTest):
         else:
             self.skipTest(
                 'Glance does not currently reject unusable images on upload')
+
+    @decorators.idempotent_id('7c7c2f16-2e97-4dce-8cb4-bc10be031c85')
+    def test_accept_reject_formats_import(self):
+        """Make sure glance rejects invalid images during conversion."""
+        if 'glance-direct' not in self.available_import_methods:
+            self.skipTest('Import via glance-direct is not available')
+        if not CONF.image_feature_enabled.image_conversion:
+            self.skipTest('Import image_conversion not enabled')
+
+        glance_noconvert = [
+            # Glance does not support conversion from iso/udf, so these
+            # will always fail, even though they are marked as usable.
+            'iso',
+            'udf',
+            # Glance does not support vmdk-sparse-with-footer with the
+            # in-tree format_inspector
+            'vmdk-sparse-with-footer',
+            ]
+        # Any images glance does not support in *conversion* for some
+        # reason will fail, even though the manifest marks them as usable.
+        expect_fail = any(x in self.imgdef['name']
+                          for x in glance_noconvert)
+
+        if (self.imgdef['format'] in CONF.image.disk_formats and
+                self.imgdef['usable'] and not expect_fail):
+            # Usable images should end up in active state
+            image = self._test_image(self.imgdef, asimport=True)
+            waiters.wait_for_image_status(self.client, image['id'],
+                                          'active')
+        else:
+            # FIXME(danms): Make this better, but gpt will fail before
+            # the import even starts until glance has it in its API
+            # schema as a valid value. Other formats expected to fail
+            # do so during import and return to queued state.
+            if self.imgdef['format'] not in CONF.image.disk_formats:
+                self.assertRaises(lib_exc.BadRequest,
+                                  self._test_image,
+                                  self.imgdef, asimport=True)
+            else:
+                image = self._test_image(self.imgdef, asimport=True)
+                waiters.wait_for_image_status(self.client, image['id'],
+                                              'queued')
+                self.client.delete_image(image['id'])

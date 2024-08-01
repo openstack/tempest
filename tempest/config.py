@@ -721,6 +721,9 @@ ImageFeaturesGroup = [
                 help=('Is show_multiple_locations enabled in glance. '
                       'Note that at least one http store must be enabled as '
                       'well, because we use that location scheme to test.')),
+    cfg.BoolOpt('image_conversion',
+                default=False,
+                help=('Is image_conversion enabled in glance.')),
 ]
 
 network_group = cfg.OptGroup(name='network',
