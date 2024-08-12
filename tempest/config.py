@@ -684,7 +684,11 @@ ImageGroup = [
                 default=['qcow2', 'raw', 'ami', 'ari', 'aki', 'vhd', 'vmdk',
                          'vdi', 'iso', 'vhdx'],
                 help="A list of image's disk formats "
-                     "users can specify.")
+                     "users can specify."),
+    cfg.StrOpt('images_manifest_file',
+               default=None,
+               help="A path to a manifest.yml generated using the "
+                    "os-test-images project"),
 ]
 
 image_feature_group = cfg.OptGroup(name='image-feature-enabled',
