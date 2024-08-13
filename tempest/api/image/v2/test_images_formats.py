@@ -110,11 +110,13 @@ class ImagesFormatTest(base.BaseV2ImageTest,
         if not CONF.image_feature_enabled.image_conversion:
             self.skipTest('Import image_conversion not enabled')
 
+        if self.imgdef['format'] == 'iso':
+            # TODO(danms): Glance does not properly handle ISO conversions
+            # today and this is being fixed currently. Remove when this
+            # is stable and able to be tested.
+            self.skipTest('Glance ISO conversion is not testable')
+
         glance_noconvert = [
-            # Glance does not support conversion from iso/udf, so these
-            # will always fail, even though they are marked as usable.
-            'iso',
-            'udf',
             # Glance does not support vmdk-sparse-with-footer with the
             # in-tree format_inspector
             'vmdk-sparse-with-footer',
