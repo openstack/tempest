@@ -110,12 +110,6 @@ class ImagesFormatTest(base.BaseV2ImageTest,
         if not CONF.image_feature_enabled.image_conversion:
             self.skipTest('Import image_conversion not enabled')
 
-        if self.imgdef['format'] == 'iso':
-            # TODO(danms): Glance does not properly handle ISO conversions
-            # today and this is being fixed currently. Remove when this
-            # is stable and able to be tested.
-            self.skipTest('Glance ISO conversion is not testable')
-
         glance_noconvert = [
             # Glance does not support vmdk-sparse-with-footer with the
             # in-tree format_inspector
@@ -146,6 +140,12 @@ class ImagesFormatTest(base.BaseV2ImageTest,
                 waiters.wait_for_image_status(self.client, image['id'],
                                               'queued')
                 self.client.delete_image(image['id'])
+
+        if self.imgdef['format'] == 'iso':
+            # NOTE(danms): Glance has a special case to not convert ISO images
+            # because they are special and must remain as ISOs in order to be
+            # properly used for CD-based rescue and boot.
+            self.assertEqual('iso', image['disk_format'])
 
     def _create_server_with_image_def(self, image_def, **overrides):
         image_def = dict(image_def, **overrides)
