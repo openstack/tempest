@@ -14,7 +14,10 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -70,7 +73,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         hosts = [host for host in hosts if (
             host['service'] == 'compute' and
-            not host['host_name'].endswith('-ironic'))]
+            CONF.compute.target_hosts_to_avoid not in host['host_name'])]
         self.assertNotEmpty(hosts)
 
         for host in hosts:
