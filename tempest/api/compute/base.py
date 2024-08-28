@@ -547,7 +547,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         def get_and_verify_metadata():
             try:
                 ssh_client.exec_command('curl -V')
-            except exceptions.SSHExecCommandFailed:
+            except lib_exc.SSHExecCommandFailed:
                 if not CONF.compute_feature_enabled.config_drive:
                     raise self.skipException('curl not found in guest '
                                              'and config drive is '
