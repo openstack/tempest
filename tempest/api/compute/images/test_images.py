@@ -90,6 +90,14 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
                                               wait_for_server=False)
+        # This is required due to ceph issue:
+        # https://bugs.launchpad.net/glance/+bug/2045769.
+        # New location APIs are async so we need to wait for the location
+        # import task to complete.
+        # This should work with old location API since we don't fail if there
+        # are no tasks for the image
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image['id'], 'success')
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
 
@@ -110,6 +118,14 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
                                               wait_for_server=False)
+        # This is required due to ceph issue:
+        # https://bugs.launchpad.net/glance/+bug/2045769.
+        # New location APIs are async so we need to wait for the location
+        # import task to complete.
+        # This should work with old location API since we don't fail if there
+        # are no tasks for the image
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image['id'], 'success')
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
 
@@ -130,6 +146,14 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                                               name=snapshot_name,
                                               wait_until='ACTIVE',
                                               wait_for_server=False)
+        # This is required due to ceph issue:
+        # https://bugs.launchpad.net/glance/+bug/2045769.
+        # New location APIs are async so we need to wait for the location
+        # import task to complete.
+        # This should work with old location API since we don't fail if there
+        # are no tasks for the image
+        waiters.wait_for_image_tasks_status(self.images_client,
+                                            image['id'], 'success')
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
 
