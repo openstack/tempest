@@ -177,8 +177,8 @@ class BaseV2ImageTest(BaseImageTest):
         # If we added the location directly, the image goes straight
         # to active and no hashing is done
         self.assertEqual('active', image['status'])
-        self.assertIsNone(None, image['os_hash_algo'])
-        self.assertIsNone(None, image['os_hash_value'])
+        self.assertIsNone(image['os_hash_algo'])
+        self.assertIsNone(image['os_hash_value'])
 
         return image
 
@@ -201,8 +201,8 @@ class BaseV2ImageTest(BaseImageTest):
 
         # The image should still be active and still have no hashes
         self.assertEqual('active', image['status'])
-        self.assertIsNone(None, image['os_hash_algo'])
-        self.assertIsNone(None, image['os_hash_value'])
+        self.assertIsNone(image['os_hash_algo'])
+        self.assertIsNone(image['os_hash_value'])
 
         # The direct_url should still match the first location
         if 'direct_url' in image:
