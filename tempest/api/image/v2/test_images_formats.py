@@ -110,22 +110,25 @@ class ImagesFormatTest(base.BaseV2ImageTest,
         if not CONF.image_feature_enabled.image_conversion:
             self.skipTest('Import image_conversion not enabled')
 
-        glance_noconvert = [
-            # Glance does not support vmdk-sparse-with-footer with the
-            # in-tree format_inspector
-            'vmdk-sparse-with-footer',
-            ]
-        # Any images glance does not support in *conversion* for some
-        # reason will fail, even though the manifest marks them as usable.
-        expect_fail = any(x in self.imgdef['name']
-                          for x in glance_noconvert)
+        # VMDK with footer was not supported by earlier service versions,
+        # so we need to tolerate it passing and failing (skip for the latter).
+        # See this for more info:
+        # https://bugs.launchpad.net/glance/+bug/2073262
+        is_broken = 'footer' in self.imgdef['name']
 
         if (self.imgdef['format'] in CONF.image.disk_formats and
-                self.imgdef['usable'] and not expect_fail):
+                self.imgdef['usable']):
             # Usable images should end up in active state
             image = self._test_image(self.imgdef, asimport=True)
-            waiters.wait_for_image_status(self.client, image['id'],
-                                          'active')
+            try:
+                waiters.wait_for_image_status(self.client, image['id'],
+                                              'active')
+            except lib_exc.TimeoutException:
+                if is_broken:
+                    self.skipTest(
+                        'Older glance did not support vmdk-with-footer')
+                else:
+                    raise
         else:
             # FIXME(danms): Make this better, but gpt will fail before
             # the import even starts until glance has it in its API
@@ -164,7 +167,9 @@ class ImagesFormatTest(base.BaseV2ImageTest,
             self.skipTest(
                 'Format %s not allowed by config' % self.imgdef['format'])
 
-        # VMDK with footer is not supported by anyone yet until fixed:
+        # VMDK with footer was not supported by earlier service versions,
+        # so we need to tolerate it passing and failing (skip for the latter).
+        # See this for more info:
         # https://bugs.launchpad.net/glance/+bug/2073262
         is_broken = 'footer' in self.imgdef['name']
 
