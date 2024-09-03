@@ -1,0 +1,5 @@
+---
+prelude: >
+    This is an intermediate release during the 2024.2 Dalmatian development
+    cycle to make new functionality available to plugins and other consumers.
+
