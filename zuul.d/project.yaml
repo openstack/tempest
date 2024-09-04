@@ -122,7 +122,6 @@
             voting: false
             irrelevant-files: *tempest-irrelevant-files
         - ironic-tempest-bios-ipmi-direct-tinyipa:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
         - openstack-tox-bashate:
             irrelevant-files: *tempest-irrelevant-files-2
@@ -156,7 +155,6 @@
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
         - ironic-tempest-bios-ipmi-direct-tinyipa:
-            voting: false
             irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
