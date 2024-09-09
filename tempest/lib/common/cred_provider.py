@@ -76,6 +76,10 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
         return
 
     @abc.abstractmethod
+    def get_domain_manager_creds(self):
+        return
+
+    @abc.abstractmethod
     def get_domain_member_creds(self):
         return
 
@@ -89,6 +93,10 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_project_alt_admin_creds(self):
+        return
+
+    @abc.abstractmethod
+    def get_project_manager_creds(self):
         return
 
     @abc.abstractmethod

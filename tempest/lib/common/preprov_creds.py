@@ -353,6 +353,13 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         self._creds['domain_admin'] = domain_admin
         return domain_admin
 
+    def get_domain_manager_creds(self):
+        if self._creds.get('domain_manager'):
+            return self._creds.get('domain_manager')
+        domain_manager = self._get_creds(['manager'], scope='domain')
+        self._creds['domain_manager'] = domain_manager
+        return domain_manager
+
     def get_domain_member_creds(self):
         if self._creds.get('domain_member'):
             return self._creds.get('domain_member')
@@ -377,6 +384,13 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     def get_project_alt_admin_creds(self):
         # TODO(gmann): Implement alt admin hash.
         return
+
+    def get_project_manager_creds(self):
+        if self._creds.get('project_manager'):
+            return self._creds.get('project_manager')
+        project_manager = self._get_creds(['manager'], scope='project')
+        self._creds['project_manager'] = project_manager
+        return project_manager
 
     def get_project_member_creds(self):
         if self._creds.get('project_member'):

@@ -104,6 +104,14 @@ class TestDynamicCredentialProvider(base.TestCase):
                           (200, {'tenant': {'id': id, 'name': name}}))))
         return tenant_fix
 
+    def _mock_domain_create(self, id, name):
+        domain_fix = self.useFixture(fixtures.MockPatchObject(
+            self.domains_client.DomainsClient,
+            'create_domain',
+            return_value=(rest_client.ResponseBody
+                          (200, {'domain': {'id': id, 'name': name}}))))
+        return domain_fix
+
     def _mock_list_roles(self, id, name):
         roles_fix = self.useFixture(fixtures.MockPatchObject(
             self.roles_client.RolesClient,
@@ -143,7 +151,8 @@ class TestDynamicCredentialProvider(base.TestCase):
                               {'id': '1', 'name': 'FakeRole'},
                               {'id': '2', 'name': 'member'},
                               {'id': '3', 'name': 'reader'},
-                              {'id': '4', 'name': 'admin'}]}))))
+                              {'id': '4', 'name': 'manager'},
+                              {'id': '5', 'name': 'admin'}]}))))
         return roles_fix
 
     def _mock_list_ec2_credentials(self, user_id, tenant_id):
@@ -999,6 +1008,7 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
     roles_client = v3_roles_client
     tenants_client = v3_projects_client
     users_client = v3_users_client
+    domains_client = domains_client
     token_client_class = token_client.V3TokenClient
     fake_response = fake_identity._fake_v3_response
     tenants_client_class = tenants_client.ProjectsClient
@@ -1263,3 +1273,47 @@ class TestDynamicCredentialProviderV3(TestDynamicCredentialProvider):
                 "member role already exists, ignoring conflict.")
         creds.creds_client.assign_user_role.assert_called_once_with(
             mock.ANY, mock.ANY, 'member')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_project_manager_creds(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_roles('1234', 'manager')
+        self._mock_user_create('1234', 'fake_manager_user')
+        self._mock_tenant_create('1234', 'fake_manager_tenant')
+
+        user_mock = mock.patch.object(self.roles_client.RolesClient,
+                                      'create_user_role_on_project')
+        user_mock.start()
+        self.addCleanup(user_mock.stop)
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_project') as user_mock:
+            manager_creds = creds.get_project_manager_creds()
+        user_mock.assert_has_calls([
+            mock.call('1234', '1234', '1234')])
+        self.assertEqual(manager_creds.username, 'fake_manager_user')
+        self.assertEqual(manager_creds.tenant_name, 'fake_manager_tenant')
+        # Verify IDs
+        self.assertEqual(manager_creds.tenant_id, '1234')
+        self.assertEqual(manager_creds.user_id, '1234')
+
+    @mock.patch('tempest.lib.common.rest_client.RestClient')
+    def test_domain_manager_creds(self, MockRestClient):
+        creds = dynamic_creds.DynamicCredentialProvider(**self.fixed_params)
+        self._mock_list_roles('1234', 'manager')
+        self._mock_user_create('1234', 'fake_manager_user')
+        self._mock_domain_create('1234', 'fake_manager_domain')
+
+        user_mock = mock.patch.object(self.roles_client.RolesClient,
+                                      'create_user_role_on_domain')
+        user_mock.start()
+        self.addCleanup(user_mock.stop)
+        with mock.patch.object(self.roles_client.RolesClient,
+                               'create_user_role_on_domain') as user_mock:
+            manager_creds = creds.get_domain_manager_creds()
+        user_mock.assert_has_calls([
+            mock.call('1234', '1234', '1234')])
+        self.assertEqual(manager_creds.username, 'fake_manager_user')
+        self.assertEqual(manager_creds.domain_name, 'fake_manager_domain')
+        # Verify IDs
+        self.assertEqual(manager_creds.domain_id, '1234')
+        self.assertEqual(manager_creds.user_id, '1234')

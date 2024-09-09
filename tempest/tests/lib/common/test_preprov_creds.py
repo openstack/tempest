@@ -77,7 +77,13 @@ class TestPreProvisionedCredentials(base.TestCase):
             {'username': 'test_admin2', 'project_name': 'test_tenant12',
              'password': 'p', 'roles': [admin_role]},
             {'username': 'test_admin3', 'project_name': 'test_tenant13',
-             'password': 'p', 'types': ['admin']}]
+             'password': 'p', 'types': ['admin']},
+            {'username': 'test_project_manager1',
+             'project_name': 'test_tenant14', 'password': 'p',
+             'roles': ['manager']},
+            {'username': 'test_project_manager2',
+             'tenant_name': 'test_tenant15', 'password': 'p',
+             'roles': ['manager']}]
 
     def setUp(self):
         super(TestPreProvisionedCredentials, self).setUp()
@@ -319,7 +325,7 @@ class TestPreProvisionedCredentials(base.TestCase):
         calls = get_free_hash_mock.mock.mock_calls
         self.assertEqual(len(calls), 1)
         args = calls[0][1][0]
-        self.assertEqual(len(args), 10)
+        self.assertEqual(len(args), 12)
         for i in admin_hashes:
             self.assertNotIn(i, args)
 
@@ -431,6 +437,26 @@ class TestPreProvisionedCredentials(base.TestCase):
             # Get one more
             test_accounts_class.get_admin_creds()
 
+    def test_get_project_manager_creds(self):
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        p_manager_creds = test_accounts_class.get_project_manager_creds()
+        self.assertNotIn('test_admin', p_manager_creds.username)
+        self.assertNotIn('test_user', p_manager_creds.username)
+        self.assertIn('test_project_manager', p_manager_creds.username)
+
+    def test_get_project_manager_creds_none_available(self):
+        admin_accounts = [x for x in self.test_accounts if 'test_admin'
+                          in x['username']]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=admin_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        with testtools.ExpectedException(lib_exc.InvalidCredentials):
+            # Get one more
+            test_accounts_class.get_project_manager_creds()
+
 
 class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
 
@@ -480,4 +506,29 @@ class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
             {'username': 'test_admin2', 'project_name': 'test_project12',
              'domain_name': 'domain', 'password': 'p', 'roles': [admin_role]},
             {'username': 'test_admin3', 'project_name': 'test_tenant13',
-             'domain_name': 'domain', 'password': 'p', 'types': ['admin']}]
+             'domain_name': 'domain', 'password': 'p', 'types': ['admin']},
+            {'username': 'test_project_manager1',
+             'project_name': 'test_project14', 'domain_name': 'domain',
+             'password': 'p', 'roles': ['manager']},
+            {'username': 'test_domain_manager1',
+             'domain_name': 'domain', 'password': 'p', 'roles': ['manager']}]
+
+    def test_get_domain_manager_creds(self):
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        d_manager_creds = test_accounts_class.get_domain_manager_creds()
+        self.assertNotIn('test_admin', d_manager_creds.username)
+        self.assertNotIn('test_user', d_manager_creds.username)
+        self.assertIn('test_domain_manager', d_manager_creds.username)
+
+    def test_get_domain_manager_creds_none_available(self):
+        admin_accounts = [x for x in self.test_accounts if 'test_admin'
+                          in x['username']]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=admin_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        with testtools.ExpectedException(lib_exc.InvalidCredentials):
+            # Get one more
+            test_accounts_class.get_domain_manager_creds()

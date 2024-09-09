@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add support for project manager and domain manager personas by adding
+    ``get_project_manager_creds`` and ``get_domain_manager_creds`` to
+    the ``DynamicCredentialProvider`` and ``PreProvisionedCredentialProvider``
+    classes of the common library.
