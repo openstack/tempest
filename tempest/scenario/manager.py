@@ -1098,8 +1098,6 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         if ip_addr and not kwargs.get('fixed_ips'):
             kwargs['fixed_ips'] = 'ip_address=%s' % ip_addr
-        ports = self.os_admin.ports_client.list_ports(
-            device_id=server['id'], **kwargs)['ports']
 
         # A port can have more than one IP address in some cases.
         # If the network is dual-stack (IPv4 + IPv6), this port is associated
@@ -1114,6 +1112,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
             return (port['status'] == 'ACTIVE' or
                     port.get('binding:vnic_type') == 'baremetal')
 
+        # Wait for all compute ports to be ACTIVE.
+        # This will raise a TimeoutException if that does not happen.
+        client = self.os_admin.ports_client
+        try:
+            ports = waiters.wait_for_server_ports_active(
+                client=client, server_id=server['id'],
+                is_active=_is_active, **kwargs)
+        except lib_exc.TimeoutException:
+            LOG.error("Server ports failed transitioning to ACTIVE for "
+                      "server: %s", server)
+            raise
+
         port_map = [(p["id"], fxip["ip_address"])
                     for p in ports
                     for fxip in p["fixed_ips"]
@@ -1121,7 +1131,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         _is_active(p))]
         inactive = [p for p in ports if p['status'] != 'ACTIVE']
         if inactive:
-            LOG.warning("Instance has ports that are not ACTIVE: %s", inactive)
+            # This should just be Ironic ports, see _is_active() above
+            LOG.debug("Instance has ports that are not ACTIVE: %s", inactive)
 
         self.assertNotEmpty(port_map,
                             "No IPv4 addresses found in: %s" % ports)

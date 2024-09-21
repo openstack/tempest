@@ -672,6 +672,28 @@ def wait_for_port_status(client, port_id, status):
     raise lib_exc.TimeoutException
 
 
+def wait_for_server_ports_active(client, server_id, is_active, **kwargs):
+    """Wait for all server ports to reach active status
+    :param client: The network client to use when querying the port's status
+    :param server_id: The uuid of the server's ports we need to verify.
+    :param is_active: A function to call to the check port active status.
+    :param kwargs: Additional arguments, if any, to pass to list_ports()
+    """
+    start_time = time.time()
+    while (time.time() - start_time <= client.build_timeout):
+        ports = client.list_ports(device_id=server_id, **kwargs)['ports']
+        if all(is_active(port) for port in ports):
+            LOG.debug("Server ID %s ports are all ACTIVE %s: ",
+                      server_id, ports)
+            return ports
+        LOG.warning("Server ID %s has ports that are not ACTIVE, waiting "
+                    "for state to change on all: %s", server_id, ports)
+        time.sleep(client.build_interval)
+    LOG.error("Server ID %s ports have failed to transition to ACTIVE, "
+              "timing out: %s", server_id, ports)
+    raise lib_exc.TimeoutException
+
+
 def wait_for_ssh(ssh_client, timeout=30):
     """Waits for SSH connection to become usable"""
     start_time = int(time.time())

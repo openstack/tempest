@@ -884,6 +884,58 @@ class TestPortCreationWaiter(base.TestCase):
                           waiters.wait_for_port_status, mock_client,
                           fake_port_id, fake_status)
 
+    def test_wait_for_server_ports_active(self):
+        """Test that the waiter replies with the ports before the timeout"""
+
+        def is_active(port):
+            return port['status'] == 'ACTIVE'
+
+        def client_response(device_id):
+            """Mock client response, replies with partial status after one
+            call and final status after 2 calls
+            """
+            if mock_client.call_count >= 2:
+                return mock_ports_active
+            else:
+                mock_client.call_count += 1
+                if mock_client.call_count > 1:
+                    return mock_ports_half_active
+                return mock_ports
+
+        mock_ports = {'ports': [{'id': '1234', 'status': 'DOWN'},
+                                {'id': '5678', 'status': 'DOWN'}]}
+        mock_ports_half_active = {'ports': [{'id': '1234', 'status': 'ACTIVE'},
+                                            {'id': '5678', 'status': 'DOWN'}]}
+        mock_ports_active = {'ports': [{'id': '1234', 'status': 'ACTIVE'},
+                                       {'id': '5678', 'status': 'ACTIVE'}]}
+        mock_client = mock.Mock(
+            spec=ports_client.PortsClient,
+            build_timeout=30, build_interval=1,
+            list_ports=client_response)
+        fake_server_id = "9876"
+        self.assertEqual(mock_ports_active['ports'],
+                         waiters.wait_for_server_ports_active(
+                             mock_client, fake_server_id, is_active))
+
+    def test_wait_for_server_ports_active_timeout(self):
+        """Negative test - checking that a timeout
+        presented by a small 'fake_timeout' and a static status of
+        'DOWN' in the mock will raise a timeout exception
+        """
+
+        def is_active(port):
+            return port['status'] == 'ACTIVE'
+
+        mock_ports = {'ports': [{'id': '1234', 'status': "DOWN"}]}
+        mock_client = mock.Mock(
+            spec=ports_client.PortsClient,
+            build_timeout=2, build_interval=1,
+            list_ports=lambda device_id: mock_ports)
+        fake_server_id = "9876"
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_server_ports_active,
+                          mock_client, fake_server_id, is_active)
+
 
 class TestServerFloatingIPWaiters(base.TestCase):
 
