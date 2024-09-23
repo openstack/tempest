@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Adding a new config options `[scenario]/target_dir` which allows
+    users to specify the location where timestamps files will be
+    written to. The default value is /tmp that, however, cannot be
+    expected to persist across reboots of an instance.

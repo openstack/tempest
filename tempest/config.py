@@ -1217,7 +1217,10 @@ ScenarioGroup = [
                default='icmp',
                choices=('icmp', 'tcp', 'udp'),
                help='The protocol used in security groups tests to check '
-                    'connectivity.')
+                    'connectivity.'),
+    cfg.StrOpt('target_dir',
+               default='/tmp',
+               help='Directory in which to write the timestamp file.'),
 ]
 
 

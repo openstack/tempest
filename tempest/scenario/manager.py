@@ -1238,7 +1238,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Default the directory in which to write the timestamp file to /tmp
         # and only use the mount_path as the target directory if we mounted
         # dev_name to mount_path.
-        target_dir = '/tmp'
+        target_dir = CONF.scenario.target_dir
         if dev_name is not None:
             mount_path = os.path.join(mount_path, dev_name)
             ssh_client.make_fs(dev_name, fs=fs)
@@ -1277,7 +1277,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # Default the directory from which to read the timestamp file to /tmp
         # and only use the mount_path as the target directory if we mounted
         # dev_name to mount_path.
-        target_dir = '/tmp'
+        target_dir = CONF.scenario.target_dir
         if dev_name is not None:
             mount_path = os.path.join(mount_path, dev_name)
             ssh_client.mkdir(mount_path)
