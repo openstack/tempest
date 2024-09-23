@@ -78,8 +78,9 @@ class VolumesDeleteCascade(base.BaseVolumeTest):
         self._assert_cascade_delete(volume['id'])
 
     @decorators.idempotent_id('59a77ede-609b-4ee8-9f68-fc3c6ffe97b5')
-    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
-                      'Skip because of Bug#1677525')
+    @testtools.skipUnless(
+        CONF.volume_feature_enabled.enable_volume_image_dep_tests,
+        'Volume dependency tests disabled')
     def test_volume_from_snapshot_cascade_delete(self):
         """Test deleting a volume with associated volume-associated snapshot
 

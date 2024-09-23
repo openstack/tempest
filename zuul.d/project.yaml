@@ -103,9 +103,7 @@
         - tempest-full-enforce-scope-new-defaults:
             irrelevant-files: *tempest-irrelevant-files
         - devstack-plugin-ceph-tempest-py3:
-            # TODO(kopecmartin): make it voting once the below bug is fixed
-            # https://bugs.launchpad.net/devstack-plugin-ceph/+bug/1975648
-            voting: false
+            timeout: 9000
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
