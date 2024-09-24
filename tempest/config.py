@@ -978,7 +978,7 @@ VolumeGroup = [
                help='Timeout in seconds to wait for a volume to become '
                     'available.'),
     cfg.StrOpt('catalog_type',
-               default='volumev3',
+               default='block-storage',
                help="Catalog type of the Volume Service"),
     cfg.StrOpt('region',
                default='',
