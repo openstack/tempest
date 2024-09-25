@@ -430,6 +430,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -449,6 +454,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -489,6 +499,7 @@
             branches:
               - ^.*/2023.2
               - ^.*/2024.1
+              - ^.*/2024.2
               - master
         - tempest-integrated-compute
         # Do not run it on ussuri until below issue is fixed
@@ -505,6 +516,7 @@
             branches:
               - ^.*/2023.2
               - ^.*/2024.1
+              - ^.*/2024.2
               - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
@@ -542,6 +554,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -561,6 +578,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
@@ -593,6 +615,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -611,6 +638,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -637,6 +669,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -655,6 +692,11 @@
         - grenade-skip-level:
             branches:
               - ^.*/2024.1
+        # on current master 2025.1(SLURP) grenade-skip-level-always is voting
+        # which test stable/2024.1 to 2025.1 upgrade.
+        - grenade-skip-level-always:
+            branches:
+              - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
