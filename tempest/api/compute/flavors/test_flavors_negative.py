@@ -47,7 +47,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
             'name': data_utils.rand_name(
                 prefix=CONF.resource_name_prefix, name='image'),
             'container_format': CONF.image.container_formats[0],
-            'disk_format': CONF.image.disk_formats[0],
+            'disk_format': 'raw',
             'min_ram': min_img_ram,
             'visibility': 'private'
         }

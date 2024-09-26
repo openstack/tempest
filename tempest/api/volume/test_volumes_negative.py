@@ -45,7 +45,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         image = self.images_client.create_image(
             name=image_name,
             container_format=CONF.image.container_formats[0],
-            disk_format=CONF.image.disk_formats[0],
+            disk_format='raw',
             visibility='private',
             min_disk=CONF.volume.volume_size + CONF.volume.volume_size_extend)
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
