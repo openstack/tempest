@@ -17,6 +17,7 @@ import copy
 import datetime
 
 import fixtures
+from oslo_utils import timeutils
 import testtools
 
 from tempest.lib import auth
@@ -509,15 +510,15 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         self._test_base_url_helper(expected, filters, ('token', auth_data))
 
     def test_token_not_expired(self):
-        expiry_data = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        expiry_data = timeutils.utcnow() + datetime.timedelta(days=1)
         self._verify_expiry(expiry_data=expiry_data, should_be_expired=False)
 
     def test_token_expired(self):
-        expiry_data = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        expiry_data = timeutils.utcnow() - datetime.timedelta(hours=1)
         self._verify_expiry(expiry_data=expiry_data, should_be_expired=True)
 
     def test_token_not_expired_to_be_renewed(self):
-        expiry_data = (datetime.datetime.utcnow() +
+        expiry_data = (timeutils.utcnow() +
                        self.auth_provider.token_expiry_threshold / 2)
         self._verify_expiry(expiry_data=expiry_data, should_be_expired=True)
 

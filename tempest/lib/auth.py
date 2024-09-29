@@ -21,6 +21,7 @@ import re
 from urllib import parse as urlparse
 
 from oslo_log import log as logging
+from oslo_utils import timeutils
 
 from tempest.lib import exceptions
 from tempest.lib.services.identity.v2 import token_client as json_v2id
@@ -419,8 +420,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     def is_expired(self, auth_data):
         _, access = auth_data
         expiry = self._parse_expiry_time(access['token']['expires'])
-        return (expiry - self.token_expiry_threshold <=
-                datetime.datetime.utcnow())
+        return (expiry - self.token_expiry_threshold <= timeutils.utcnow())
 
 
 class KeystoneV3AuthProvider(KeystoneAuthProvider):
@@ -595,8 +595,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     def is_expired(self, auth_data):
         _, access = auth_data
         expiry = self._parse_expiry_time(access['expires_at'])
-        return (expiry - self.token_expiry_threshold <=
-                datetime.datetime.utcnow())
+        return (expiry - self.token_expiry_threshold <= timeutils.utcnow())
 
 
 def is_identity_version_supported(identity_version):
