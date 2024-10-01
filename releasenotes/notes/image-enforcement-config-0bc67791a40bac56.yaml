@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add a new config option
+    `[image_feature_enabled]/image_format_enforcement` which tells tempest
+    that glance will do image format inspection and enforcement on upload. This
+    will disable tests that require glance to accept a bad image in order to
+    test another service (i.e. nova).

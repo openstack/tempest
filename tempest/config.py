@@ -728,6 +728,11 @@ ImageFeaturesGroup = [
     cfg.BoolOpt('image_conversion',
                 default=False,
                 help=('Is image_conversion enabled in glance.')),
+    cfg.BoolOpt('image_format_enforcement',
+                default=True,
+                help=('Indicates that image format is enforced by glance, '
+                      'such that we should not expect to be able to upload '
+                      'bad images for testing other services.')),
 ]
 
 network_group = cfg.OptGroup(name='network',
