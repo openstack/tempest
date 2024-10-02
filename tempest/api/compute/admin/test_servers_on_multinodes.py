@@ -150,6 +150,15 @@ class UnshelveToHostMultiNodesTest(base.BaseV2ComputeAdminTest):
         compute.shelve_server(self.servers_client, server['id'],
                               force_shelve_offload=True)
 
+        # Work around https://bugs.launchpad.net/nova/+bug/2045785
+        # This can be removed when ^ is fixed.
+        def _check_server_host_is_none():
+            server_details = self.os_admin.servers_client.show_server(
+                server['id'])
+            self.assertIsNone(server_details['server']['OS-EXT-SRV-ATTR:host'])
+
+        self.wait_for(_check_server_host_is_none)
+
         self.os_admin.servers_client.unshelve_server(
             server['id'],
             body={'unshelve': {'host': host}}
