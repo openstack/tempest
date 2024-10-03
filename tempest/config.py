@@ -964,6 +964,12 @@ ValidationGroup = [
                       "migration, in seconds. "
                       "When the measured downtime exceeds this value, an "
                       "exception is raised."),
+    cfg.FloatOpt('allowed_metadata_downtime',
+                 default=6.0,
+                 help="Allowed VM metadata connection downtime during live "
+                      "migration, in seconds. "
+                      "When the measured downtime exceeds this value, an "
+                      "exception is raised."),
 ]
 
 volume_group = cfg.OptGroup(name='volume',

@@ -17,6 +17,7 @@ import testtools
 
 from oslo_log import log
 from tempest.common import utils
+from tempest.common.utils.linux import remote_client
 from tempest.common.utils import net_downtime
 from tempest.common import waiters
 from tempest import config
@@ -189,6 +190,12 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             floating_ip['floating_ip_address'])
         self.useFixture(downtime_meter)
 
+        metadata_downtime_meter = net_downtime.MetadataDowntimeMeter(
+            remote_client.RemoteClient(floating_ip['floating_ip_address'],
+                                       CONF.validation.image_ssh_user,
+                                       pkey=keypair['private_key']))
+        self.useFixture(metadata_downtime_meter)
+
         migration_kwargs = {'host': None, 'block_migration': block_migration}
 
         # check if microversion is less than 2.25 because of
@@ -229,6 +236,18 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             downtime, allowed_downtime,
             "Downtime of {} seconds is higher than expected '{}'".format(
                 downtime, allowed_downtime))
+
+        metadata_downtime_results = metadata_downtime_meter.get_results()
+        self.assertGreater(metadata_downtime_results['successes'], 0)
+        LOG.debug("Metadata Downtime seconds measured = %r",
+                  metadata_downtime_results['downtime'])
+        allowed_metadata_downtime = CONF.validation.allowed_metadata_downtime
+        metadata_downtime_failed = \
+            metadata_downtime_results['downtime']['FAILED']
+        self.assertLessEqual(
+            metadata_downtime_failed, allowed_metadata_downtime,
+            "Metadata downtime: {} seconds is higher than expected: {}".format(
+                metadata_downtime_failed, allowed_metadata_downtime))
 
     def _test_server_connectivity_cold_migration_revert(self, source_host=None,
                                                         dest_host=None):
