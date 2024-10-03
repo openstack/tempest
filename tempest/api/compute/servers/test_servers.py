@@ -263,3 +263,22 @@ class ServerShowV263Test(base.BaseV2ComputeTest):
         servers = self.servers_client.list_servers(
             detail=True, **params)['servers']
         self.assertNotEmpty(servers)
+
+
+class ServersListShow296Test(base.BaseV2ComputeTest):
+    """Test compute server with microversion >= than 2.96
+
+    This test tests the Server APIs response schema for 2.96 microversion.
+    No specific assert or behaviour verification is needed.
+    """
+
+    min_microversion = '2.96'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('4eee1ffe-9e00-4c99-a431-0d3e0f323a8f')
+    def test_list_show_server_296(self):
+        server = self.create_test_server()
+        # Checking list API response schema.
+        self.servers_client.list_servers(detail=True)
+        # Checking show API response schema
+        self.servers_client.show_server(server['id'])

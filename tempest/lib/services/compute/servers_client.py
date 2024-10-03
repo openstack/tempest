@@ -45,6 +45,7 @@ from tempest.lib.api_schema.response.compute.v2_79 import servers as schemav279
 from tempest.lib.api_schema.response.compute.v2_8 import servers as schemav28
 from tempest.lib.api_schema.response.compute.v2_89 import servers as schemav289
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
+from tempest.lib.api_schema.response.compute.v2_96 import servers as schemav296
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -75,7 +76,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.73', 'max': '2.74', 'schema': schemav273},
         {'min': '2.75', 'max': '2.78', 'schema': schemav275},
         {'min': '2.79', 'max': '2.88', 'schema': schemav279},
-        {'min': '2.89', 'max': None, 'schema': schemav289}]
+        {'min': '2.89', 'max': '2.95', 'schema': schemav289},
+        {'min': '2.96', 'max': None, 'schema': schemav296}]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
