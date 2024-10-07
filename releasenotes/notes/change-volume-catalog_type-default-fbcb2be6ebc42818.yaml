@@ -1,0 +1,6 @@
+---
+upgrade:
+  - |
+    The default for ``[volume] catalog_type``, which is used to determine the
+    service type to use to idenify the block storage service in the service
+    catalog, has changed from ``volumev3`` to ``block-storage``.

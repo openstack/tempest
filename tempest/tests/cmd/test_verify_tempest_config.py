@@ -498,7 +498,7 @@ class TestDiscovery(base.TestCase):
                 return ('token',
                         {'serviceCatalog': [{'type': 'compute'},
                                             {'type': 'image'},
-                                            {'type': 'volumev3'},
+                                            {'type': 'block-storage'},
                                             {'type': 'network'},
                                             {'type': 'object-store'}]})
 
