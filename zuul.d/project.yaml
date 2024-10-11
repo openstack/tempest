@@ -27,6 +27,14 @@
               - ^.gitignore$
               - ^.gitreview$
               - ^.mailmap$
+        # NOTE(gmann): Running jobs on Jammy as per the additional testing
+        # for 2025.2 cycle and testing these in check pipeline only is enough.
+        - tempest-full-ubuntu-jammy:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-multinode-full-ubuntu-jammy:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-extra-tests-ubuntu-jammy:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:

@@ -76,7 +76,7 @@
     parent: tox
     description: |
       Run tempest plugin sanity check script using tox.
-    nodeset: ubuntu-jammy
+    nodeset: ubuntu-noble
     vars:
       tox_envlist: plugin-sanity-check
     timeout: 5000

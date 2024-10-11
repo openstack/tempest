@@ -90,6 +90,26 @@
 - job:
     name: tempest-multinode-full-py3
     parent: tempest-multinode-full
+    nodeset: openstack-two-node-jammy
+    # This job runs on Jammy and supposed to run until 2024.2.
+    branches:
+      - ^.*/2023.1
+      - ^.*/2023.2
+      - ^.*/2024.1
+      - ^.*/2024.2
+    vars:
+      devstack_plugins:
+        neutron: https://opendev.org/openstack/neutron
+      devstack_services:
+        neutron-trunk: true
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: true
+
+- job:
+    name: tempest-multinode-full-py3
+    parent: tempest-multinode-full
     nodeset: openstack-two-node-focal
     # This job runs on Focal and supposed to run until unmaintained/zed.
     branches:
