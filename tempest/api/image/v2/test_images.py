@@ -56,7 +56,14 @@ class ImportImagesTest(base.BaseV2ImageTest):
         image_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='image')
         container_format = container_format or CONF.image.container_formats[0]
-        disk_format = disk_format or CONF.image.disk_formats[0]
+        disk_format = disk_format or 'raw'
+        if disk_format not in CONF.image.disk_formats:
+            # If the test asked for some disk format that is not available,
+            # consider that a programming error. Tests with specific
+            # requirements should be checking to see if it is available and
+            # skipping themselves instead of this helper doing it.
+            raise RuntimeError('Test requires unavailable disk_format %s, '
+                               'but did not skip' % disk_format)
         image = self.create_image(name=image_name,
                                   container_format=container_format,
                                   disk_format=disk_format,
@@ -390,7 +397,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         image_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='image')
         container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
+        disk_format = 'raw'
         image = self.create_image(name=image_name,
                                   container_format=container_format,
                                   disk_format=disk_format,
@@ -754,7 +761,7 @@ class ListSharedImagesTest(base.BaseV2ImageTest):
         # Create an image to be shared using default visibility
         image_file = io.BytesIO(data_utils.random_bytes(2048))
         container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
+        disk_format = 'raw'
         image = self.create_image(container_format=container_format,
                                   disk_format=disk_format)
         self.client.store_image_file(image['id'], data=image_file)

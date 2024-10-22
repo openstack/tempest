@@ -112,7 +112,7 @@ class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
         image_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='copy-image')
         container_format = CONF.image.container_formats[0]
-        disk_format = CONF.image.disk_formats[0]
+        disk_format = 'raw'
         image = self.create_image(name=image_name,
                                   container_format=container_format,
                                   disk_format=disk_format,
