@@ -132,7 +132,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         """
         self._require_import_method('web-download')
 
-        image = self._create_image()
+        image = self._create_image(disk_format='qcow2')
         # Now try to get image details
         body = self.client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
