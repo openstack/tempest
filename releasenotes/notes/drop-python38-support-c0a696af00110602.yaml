@@ -1,0 +1,8 @@
+---
+prelude: >
+    Tempest dropped the Python 3.8 support.
+upgrade:
+  - |
+    Python 3.8 support has been dropped. Last release of Tempest
+    to support python 3.8 is Temepst 41.0.0. The minimum version
+    of Python now supported by Tempest is Python 3.9.
