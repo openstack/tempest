@@ -1,0 +1,12 @@
+---
+prelude: >
+    This is an intermediate release during the 2025.1 development cycle to
+    mark the end of support for 2023.1 release in Tempest.
+    After this release, Tempest will support below OpenStack Releases:
+
+    * 2024.2
+    * 2024.1
+    * 2023.2
+
+    Current development of Tempest is for OpenStack 2025.1 development
+    cycle.
