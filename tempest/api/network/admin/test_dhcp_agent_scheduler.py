@@ -48,12 +48,13 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('f164801e-1dd8-4b8b-b5d3-cc3ac77cfaa5')
     def test_dhcp_port_status_active(self):
-        ports = self.admin_ports_client.list_ports(
+        dhcp_ports = self.admin_ports_client.list_ports(
+            device_owner='network:dhcp',
             network_id=self.network['id'])['ports']
-        for port in ports:
+        for dhcp_port in dhcp_ports:
             waiters.wait_for_port_status(
                 client=self.admin_ports_client,
-                port_id=port['id'],
+                port_id=dhcp_port['id'],
                 status='ACTIVE')
 
     @decorators.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
