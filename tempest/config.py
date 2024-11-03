@@ -1110,6 +1110,7 @@ VolumeFeaturesGroup = [
                help='Volume types used for data volumes. Multiple volume '
                     'types can be assigned.'),
     cfg.BoolOpt('enable_volume_image_dep_tests',
+                deprecated_name='volume_image_dep_tests',
                 default=True,
                 help='Run tests for dependencies between images, volumes'
                 'and instance snapshots')
