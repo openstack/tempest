@@ -166,6 +166,12 @@ class ImagesFormatTest(base.BaseV2ImageTest,
             # a properly-formatted image for it, so skip it.
             self.skipTest(
                 'Format %s not allowed by config' % self.imgdef['format'])
+        if CONF.image_feature_enabled.image_format_enforcement:
+            # If glance rejects bad images during upload, we cannot get them
+            # registered so that we can test nova.
+            self.skipTest(
+                'Unable to test compute image formats if glance does not '
+                'allow them to be uploaded')
 
         # VMDK with footer was not supported by earlier service versions,
         # so we need to tolerate it passing and failing (skip for the latter).
@@ -191,6 +197,12 @@ class ImagesFormatTest(base.BaseV2ImageTest,
     @decorators.idempotent_id('ffe21610-e801-4992-9b81-e2d646e2e2e9')
     def test_compute_rejects_format_mismatch(self):
         """Make sure compute rejects any image with a format mismatch."""
+        if CONF.image_feature_enabled.image_format_enforcement:
+            # If glance rejects bad images during upload, we cannot get them
+            # registered so that we can test nova.
+            self.skipTest(
+                'Unable to test compute image formats if glance does not '
+                'allow them to be uploaded')
         # Lying about the disk_format should always fail
         override_fmt = (
             self.imgdef['format'] in ('raw', 'gpt') and 'qcow2' or 'raw')

@@ -536,6 +536,15 @@ class ListUserImagesTest(base.BaseV2ImageTest):
                      for container_fmt in container_fmts
                      for disk_fmt in disk_fmts]
 
+        # NOTE(danms): This tests depends on being able to lie about image
+        # content. We can probably improve this in some way, but without a
+        # valid sample of each image format in each container format, there is
+        # no easy solution.
+        if CONF.image_feature_enabled.image_format_enforcement:
+            raise cls.skipException(
+                'Image format enforcement prevents testing with '
+                'bogus image data')
+
         for (container_fmt, disk_fmt) in all_pairs[:6]:
             LOG.debug("Creating an image "
                       "(Container format: %s, Disk format: %s).",

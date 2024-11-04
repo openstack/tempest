@@ -330,6 +330,7 @@
       devstack_localrc:
         CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1,lvm:lvmdriver-2
         ENABLE_VOLUME_MULTIATTACH: true
+        GLANCE_ENFORCE_IMAGE_FORMAT: false
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
