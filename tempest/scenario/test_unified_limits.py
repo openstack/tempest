@@ -32,6 +32,13 @@ class ImageQuotaTest(manager.ScenarioTest):
     credentials = ['primary', 'system_admin']
 
     @classmethod
+    def skip_checks(cls):
+        super(ImageQuotaTest, cls).skip_checks()
+        if not CONF.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @classmethod
     def resource_setup(cls):
         super(ImageQuotaTest, cls).resource_setup()
 
