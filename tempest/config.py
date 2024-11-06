@@ -1354,9 +1354,9 @@ DefaultGroup = [
 
 The best use case is investigating used resources of one test.
 A test can be run as follows:
- $ stestr run --pdb TEST_ID
+$ stestr run --pdb TEST_ID
 or
- $ python -m testtools.run TEST_ID"""),
+$ python -m testtools.run TEST_ID"""),
     cfg.StrOpt('resource_name_prefix',
                default='tempest',
                help="Define the prefix name for the resources created by "
