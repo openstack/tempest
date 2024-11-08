@@ -94,6 +94,11 @@ class NotFound(ClientRestClientException):
     message = "Object not found"
 
 
+class NotAcceptable(ClientRestClientException):
+    status_code = 406
+    message = "Not Acceptable"
+
+
 class Conflict(ClientRestClientException):
     status_code = 409
     message = "Conflict with state of target resource"

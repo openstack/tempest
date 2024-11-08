@@ -881,6 +881,11 @@ class RestClient(object):
                 resp_body = self._parse_resp(resp_body)
             raise exceptions.Gone(resp_body, resp=resp)
 
+        if resp.status == 406:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+            raise exceptions.NotAcceptable(resp_body, resp=resp)
+
         if resp.status == 409:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
