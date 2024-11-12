@@ -316,6 +316,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
             _, servers = compute.create_test_server(
                 self.os_primary, tenant_network=network,
                 validatable=True,
+                wait_until='ACTIVE',
                 validation_resources=validation_resources)
             return servers[0]
 
