@@ -57,10 +57,11 @@
     name: tempest-full-py3
     parent: devstack-tempest
     # This job version is to use the 'full' tox env which
-    # is available for stable/ussuri to stable/wallaby also.
+    # is available for unmaintained/victoria to unmaintained/xena also.
     branches:
       - ^.*/victoria
       - ^.*/wallaby
+      - ^.*/xena
     description: |
       Base integration test with Neutron networking, horizon, swift enable,
       and py3.
@@ -71,6 +72,10 @@
       - openstack/horizon
     vars:
       tox_envlist: full
+      tempest_exclude_regex: "\
+          (DHCPAgentSchedulersTestJSON)|\
+          (AttachVolumeMultiAttachTest)|\
+          (UpdateMultiattachVolumeNegativeTest)"
       devstack_localrc:
         USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
@@ -109,11 +114,30 @@
     name: tempest-multinode-full
     parent: tempest-multinode-full-base
     nodeset: openstack-two-node-focal
-    # This job runs on Focal and on python2. This is for unmaintained/victoria to unmaintained/zed.
+    # This job runs on Focal and on python2. This is for unmaintained/victoria to unmaintained/xena.
     branches:
       - ^.*/victoria
       - ^.*/wallaby
       - ^.*/xena
+    vars:
+      tox_envlist: full
+      tempest_exclude_regex: "\
+          (DHCPAgentSchedulersTestJSON)|\
+          (AttachVolumeMultiAttachTest)|\
+          (UpdateMultiattachVolumeNegativeTest)"
+      devstack_localrc:
+        USE_PYTHON3: False
+    group-vars:
+      subnode:
+        devstack_localrc:
+          USE_PYTHON3: False
+
+- job:
+    name: tempest-multinode-full
+    parent: tempest-multinode-full-base
+    nodeset: openstack-two-node-focal
+    # This job runs on Focal and on python2. This is for unmaintained/yoga to unmaintained/zed.
+    branches:
       - ^.*/yoga
       - ^.*/zed
     vars:
