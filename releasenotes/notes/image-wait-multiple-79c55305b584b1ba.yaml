@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    The wait_for_image_status() waiter now allows a list of status values
+    instead of just a string, and returns the state the image was in when we
+    stopped waiting.

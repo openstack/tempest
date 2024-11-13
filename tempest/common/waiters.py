@@ -154,12 +154,20 @@ def wait_for_server_termination(client, server_id, ignore_error=False,
 
 
 def wait_for_image_status(client, image_id, status):
-    """Waits for an image to reach a given status.
+    """Waits for an image to reach a given status (or list of them).
 
     The client should have a show_image(image_id) method to get the image.
     The client should also have build_interval and build_timeout attributes.
+
+    status can be either a string or a list of strings that constitute a
+    terminal state that we will return.
     """
     show_image = client.show_image
+
+    if isinstance(status, str):
+        terminal_status = [status]
+    else:
+        terminal_status = status
 
     current_status = 'An unknown status'
     start = int(time.time())
@@ -171,8 +179,8 @@ def wait_for_image_status(client, image_id, status):
             image = image['image']
 
         current_status = image['status']
-        if current_status == status:
-            return
+        if current_status in terminal_status:
+            return current_status
         if current_status.lower() == 'killed':
             raise exceptions.ImageKilledException(image_id=image_id,
                                                   status=status)
@@ -184,7 +192,7 @@ def wait_for_image_status(client, image_id, status):
     message = ('Image %(image_id)s failed to reach %(status)s state '
                '(current state %(current_status)s) within the required '
                'time (%(timeout)s s).' % {'image_id': image_id,
-                                          'status': status,
+                                          'status': ','.join(terminal_status),
                                           'current_status': current_status,
                                           'timeout': client.build_timeout})
     caller = test_utils.find_test_caller()
