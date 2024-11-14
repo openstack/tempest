@@ -22,6 +22,12 @@
 #
 # The value of domain_[id|name] is used for project_domain_[id|name] if not
 # specified and user_domain_[id|name] if not specified.
+#
+# When specifying domain-scoped accounts, domain_[id|name] must be present
+# and project_[id|name] must be absent.
+#
+# When specifying system-scoped accounts, value of system can be anything
+# (for now), and neither project_[id|name] nor domain_[id|name] must be present
 
 - username: 'user_1'
   tenant_name: 'test_tenant_1'
@@ -39,6 +45,22 @@
     - 'fun_role'
     - 'not_an_admin'
     - 'an_admin'
+
+# To specify a domain-scoped admin
+- username: 'user_3'
+  user_domain_name: 'test_domain'
+  password: 'test_password'
+  domain_name: 'test_domain'
+  roles:
+  - 'admin'
+
+# To specify a system-scoped admin
+- username: 'user_4'
+  user_domain_name: 'test_domain'
+  password: 'test_password'
+  system: 'all'
+  roles:
+  - 'admin'
 
 # To specify a user has a role specified in the config file you can use the
 # type field to specify it, valid values are admin, operator, and reseller_admin
