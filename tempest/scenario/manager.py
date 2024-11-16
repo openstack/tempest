@@ -851,7 +851,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                     kernel_img_path = os.path.join(extract_dir, fname)
                 elif re.search(r'(.*-initrd.*|ari-.*/image$)', fname):
                     ramdisk_img_path = os.path.join(extract_dir, fname)
-                elif re.search(f'(.*\\.img$|ami-.*/image$)', fname):
+                elif re.search(r'(.*\\.img$|ami-.*/image$)', fname):
                     img_path = os.path.join(extract_dir, fname)
             # Create the kernel image.
             kparams = {
@@ -1561,8 +1561,8 @@ class NetworkScenarioTest(ScenarioTest):
             floating_ip = (self.floating_ips_client.
                            show_floatingip(floatingip_id)['floatingip'])
             if status == floating_ip['status']:
-                LOG.info("FloatingIP: {fp} is at status: {st}"
-                         .format(fp=floating_ip, st=status))
+                LOG.info("FloatingIP: %s is at status: %s",
+                         floating_ip, status)
             return status == floating_ip['status']
 
         if not test_utils.call_until_true(refresh,

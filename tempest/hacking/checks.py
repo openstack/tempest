@@ -16,7 +16,6 @@ import os
 import re
 
 from hacking import core
-import pycodestyle
 
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
@@ -40,22 +39,22 @@ _HAVE_NEGATIVE_DECORATOR = False
 
 
 @core.flake8ext
-def import_no_clients_in_api_and_scenario_tests(physical_line, filename):
+def import_no_clients_in_api_and_scenario_tests(logical_line, filename):
     """Check for client imports from tempest/api & tempest/scenario tests
 
     T102: Cannot import OpenStack python clients
     """
 
     if "tempest/api" in filename or "tempest/scenario" in filename:
-        res = PYTHON_CLIENT_RE.match(physical_line)
+        res = PYTHON_CLIENT_RE.match(logical_line)
         if res:
-            return (physical_line.find(res.group(1)),
+            return (logical_line.find(res.group(1)),
                     ("T102: python clients import not allowed"
                      " in tempest/api/* or tempest/scenario/* tests"))
 
 
 @core.flake8ext
-def scenario_tests_need_service_tags(physical_line, filename,
+def scenario_tests_need_service_tags(logical_line, filename,
                                      previous_logical):
     """Check that scenario tests have service tags
 
@@ -63,28 +62,28 @@ def scenario_tests_need_service_tags(physical_line, filename,
     """
 
     if 'tempest/scenario/' in filename and '/test_' in filename:
-        if TEST_DEFINITION.match(physical_line):
+        if TEST_DEFINITION.match(logical_line):
             if not SCENARIO_DECORATOR.match(previous_logical):
-                return (physical_line.find('def'),
+                return (logical_line.find('def'),
                         "T104: Scenario tests require a service decorator")
 
 
 @core.flake8ext
-def no_setup_teardown_class_for_tests(physical_line, filename):
+def no_setup_teardown_class_for_tests(logical_line, filename, noqa):
 
-    if pycodestyle.noqa(physical_line):
+    if noqa:
         return
 
     if 'tempest/test.py' in filename or 'tempest/lib/' in filename:
         return
 
-    if SETUP_TEARDOWN_CLASS_DEFINITION.match(physical_line):
-        return (physical_line.find('def'),
+    if SETUP_TEARDOWN_CLASS_DEFINITION.match(logical_line):
+        return (logical_line.find('def'),
                 "T105: (setUp|tearDown)Class can not be used in tests")
 
 
 @core.flake8ext
-def service_tags_not_in_module_path(physical_line, filename):
+def service_tags_not_in_module_path(logical_line, filename):
     """Check that a service tag isn't in the module path
 
     A service tag should only be added if the service name isn't already in
@@ -96,14 +95,14 @@ def service_tags_not_in_module_path(physical_line, filename):
     # created for services like heat which would cause false negatives for
     # those tests, so just exclude the scenario tests.
     if 'tempest/scenario' not in filename:
-        matches = SCENARIO_DECORATOR.match(physical_line)
+        matches = SCENARIO_DECORATOR.match(logical_line)
         if matches:
             services = matches.group(1).split(',')
             for service in services:
                 service_name = service.strip().strip("'")
                 modulepath = os.path.split(filename)[0]
                 if service_name in modulepath:
-                    return (physical_line.find(service_name),
+                    return (logical_line.find(service_name),
                             "T107: service tag should not be in path")
 
 
@@ -140,28 +139,27 @@ def no_testtools_skip_decorator(logical_line):
                "decorators.skip_because from tempest.lib")
 
 
-def _common_service_clients_check(logical_line, physical_line, filename):
+def _common_service_clients_check(logical_line, filename, noqa):
+    if noqa:
+        return False
+
     if not re.match('tempest/(lib/)?services/.*', filename):
         return False
 
-    if not METHOD.match(physical_line):
-        return False
-
-    if pycodestyle.noqa(physical_line):
+    if not METHOD.match(logical_line):
         return False
 
     return True
 
 
 @core.flake8ext
-def get_resources_on_service_clients(physical_line, logical_line, filename,
-                                     line_number, lines):
+def get_resources_on_service_clients(logical_line, filename,
+                                     line_number, lines, noqa):
     """Check that service client names of GET should be consistent
 
     T110
     """
-    if not _common_service_clients_check(logical_line, physical_line,
-                                         filename):
+    if not _common_service_clients_check(logical_line, filename, noqa):
         return
 
     for line in lines[line_number:]:
@@ -182,14 +180,13 @@ def get_resources_on_service_clients(physical_line, logical_line, filename,
 
 
 @core.flake8ext
-def delete_resources_on_service_clients(physical_line, logical_line, filename,
-                                        line_number, lines):
+def delete_resources_on_service_clients(logical_line, filename,
+                                        line_number, lines, noqa):
     """Check that service client names of DELETE should be consistent
 
     T111
     """
-    if not _common_service_clients_check(logical_line, physical_line,
-                                         filename):
+    if not _common_service_clients_check(logical_line, filename, noqa):
         return
 
     for line in lines[line_number:]:
@@ -262,7 +259,7 @@ def dont_use_config_in_tempest_lib(logical_line, filename):
             'oslo_config' in logical_line):
         msg = ('T114: tempest.lib can not have any dependency on tempest '
                'config.')
-        yield(0, msg)
+        yield (0, msg)
 
 
 @core.flake8ext
@@ -281,7 +278,7 @@ def dont_put_admin_tests_on_nonadmin_path(logical_line,
 
     if not re.match(r'.\/tempest\/api\/.*\/admin\/.*', filename):
         msg = 'T115: All admin tests should exist under admin path.'
-        yield(0, msg)
+        yield (0, msg)
 
 
 @core.flake8ext
@@ -293,11 +290,11 @@ def unsupported_exception_attribute_PY3(logical_line):
     result = EX_ATTRIBUTE.search(logical_line)
     msg = ("[T116] Unsupported 'message' Exception attribute in PY3")
     if result:
-        yield(0, msg)
+        yield (0, msg)
 
 
 @core.flake8ext
-def negative_test_attribute_always_applied_to_negative_tests(physical_line,
+def negative_test_attribute_always_applied_to_negative_tests(logical_line,
                                                              filename):
     """Check ``@decorators.attr(type=['negative'])`` applied to negative tests.
 
@@ -307,13 +304,13 @@ def negative_test_attribute_always_applied_to_negative_tests(physical_line,
 
     if re.match(r'.\/tempest\/api\/.*_negative.*', filename):
 
-        if NEGATIVE_TEST_DECORATOR.match(physical_line):
+        if NEGATIVE_TEST_DECORATOR.match(logical_line):
             _HAVE_NEGATIVE_DECORATOR = True
             return
 
-        if TEST_DEFINITION.match(physical_line):
+        if TEST_DEFINITION.match(logical_line):
             if not _HAVE_NEGATIVE_DECORATOR:
-                return (
+                yield (
                     0, "T117: Must apply `@decorators.attr(type=['negative'])`"
                        " to all negative API tests"
                 )

@@ -128,7 +128,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         for g in user_groups:
             if 'membership_expires_at' in g:
                 self.assertIsNone(g['membership_expires_at'])
-                del(g['membership_expires_at'])
+                del g['membership_expires_at']
         self.assertEqual(sorted(groups, key=lambda k: k['name']),
                          sorted(user_groups, key=lambda k: k['name']))
         self.assertEqual(2, len(user_groups))

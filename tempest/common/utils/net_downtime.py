@@ -50,10 +50,10 @@ done
 
 
 class NetDowntimeMeter(fixtures.Fixture):
-    def __init__(self, dest_ip, interval='0.2'):
+    def __init__(self, dest_ip, interval=0.2):
         self.dest_ip = dest_ip
         # Note: for intervals lower than 0.2 ping requires root privileges
-        self.interval = interval
+        self.interval = float(interval)
         self.ping_process = None
 
     def _setUp(self):
@@ -61,18 +61,18 @@ class NetDowntimeMeter(fixtures.Fixture):
 
     def start_background_pinger(self):
         cmd = ['ping', '-q', '-s1']
-        cmd.append('-i{}'.format(self.interval))
+        cmd.append('-i%g' % self.interval)
         cmd.append(self.dest_ip)
-        LOG.debug("Starting background pinger to '{}' with interval {}".format(
-            self.dest_ip, self.interval))
+        LOG.debug("Starting background pinger to '%s' with interval %g",
+                  self.dest_ip, self.interval)
         self.ping_process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.addCleanup(self.cleanup)
 
     def cleanup(self):
         if self.ping_process and self.ping_process.poll() is None:
-            LOG.debug('Terminating background pinger with pid {}'.format(
-                self.ping_process.pid))
+            LOG.debug('Terminating background pinger with pid %d',
+                      self.ping_process.pid)
             self.ping_process.terminate()
         self.ping_process = None
 
@@ -83,7 +83,7 @@ class NetDowntimeMeter(fixtures.Fixture):
         output = self.ping_process.stderr.readline().strip().decode('utf-8')
         if output and len(output.split()[0].split('/')) == 2:
             succ, total = output.split()[0].split('/')
-            return (int(total) - int(succ)) * float(self.interval)
+            return (int(total) - int(succ)) * self.interval
         else:
             LOG.warning('Unexpected output obtained from the pinger: %s',
                         output)
@@ -115,8 +115,9 @@ class MetadataDowntimeMeter(fixtures.Fixture):
         chmod_cmd = 'chmod +x {}'.format(self.script_path)
         self.ssh_client.exec_command(';'.join((echo_cmd, chmod_cmd)))
         LOG.debug('script created: %s', self.script_path)
-        LOG.debug(self.ssh_client.exec_command(
-            'cat {}'.format(self.script_path)))
+        output = self.ssh_client.exec_command(
+            'cat {}'.format(self.script_path))
+        LOG.debug('script content: %s', output)
 
     def run_metadata_script(self):
         self.ssh_client.exec_command('{} > {} &'.format(self.script_path,
