@@ -60,6 +60,14 @@ class ClosingProxyHttp(urllib3.ProxyManager):
             retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingProxyHttp, self).request(method, url, retries=retry,
                                                   *args, **new_kwargs)
+
+        # Clearing the pool is necessary to free memory that holds certificates
+        # loaded by the HTTPConnection class in urllib3. This line can be
+        # removed once we require a newer version of urllib3 (e.g., 2.2.3) that
+        # does not retain certificates in memory for each HTTPConnection
+        # managed by the PoolManager.
+        self.clear()
+
         if not kwargs.get('preload_content', True):
             # This means we asked urllib3 for streaming content, so we
             # need to return the raw response and not read any data yet
@@ -114,6 +122,14 @@ class ClosingHttp(urllib3.poolmanager.PoolManager):
             retry = urllib3.util.Retry(redirect=False)
         r = super(ClosingHttp, self).request(method, url, retries=retry,
                                              *args, **new_kwargs)
+
+        # Clearing the pool is necessary to free memory that holds certificates
+        # loaded by the HTTPConnection class in urllib3. This line can be
+        # removed once we require a newer version of urllib3 (e.g., 2.2.3) that
+        # does not retain certificates in memory for each HTTPConnection
+        # managed by the PoolManager.
+        self.clear()
+
         if not kwargs.get('preload_content', True):
             # This means we asked urllib3 for streaming content, so we
             # need to return the raw response and not read any data yet
