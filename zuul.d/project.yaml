@@ -43,10 +43,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
-        # TODO(gmann): make it non voting once failure is fixed in plugin
-        # https://zuul.opendev.org/t/openstack/build/2c2ed82bd12948b98d9ea7e2ebe625a8
         - tempest-tox-plugin-sanity-check:
-            voting: false
             irrelevant-files: &tempest-irrelevant-files-2
               - ^.*\.rst$
               - ^doc/.*$
