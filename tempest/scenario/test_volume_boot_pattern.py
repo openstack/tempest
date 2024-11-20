@@ -11,7 +11,6 @@
 #    under the License.
 
 from oslo_log import log as logging
-from oslo_serialization import jsonutils as json
 import testtools
 
 from tempest.common import utils
@@ -245,8 +244,7 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         bdms = image.get('block_device_mapping')
         if not bdms:
             bdms = image['properties']['block_device_mapping']
-        bdms = json.loads(bdms)
-        snapshot_id = bdms[0]['snapshot_id']
+        snapshot_id = self.get_snapshot_id(bdms)
         self._delete_snapshot(snapshot_id)
 
         # Now, delete the first server which will also delete the first
