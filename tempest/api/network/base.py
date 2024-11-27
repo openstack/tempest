@@ -15,6 +15,8 @@
 
 import netaddr
 
+from tempest.common import utils as common_utils
+from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
 from tempest.lib.common.utils import data_utils
@@ -225,6 +227,18 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 cls.routers_client.remove_router_interface, router['id'],
                 subnet_id=i['fixed_ips'][0]['subnet_id'])
         cls.routers_client.delete_router(router['id'])
+
+    def remove_router_interface(self, router_id, port_id, subnet_id=None):
+        # NOTE: with DVR and without a VM port, it is not possible to know
+        # what agent will host the router interface thus won't be bound.
+        if not common_utils.is_extension_enabled('dvr', 'network'):
+            waiters.wait_for_port_status(client=self.ports_client,
+                                         port_id=port_id, status='ACTIVE')
+        if subnet_id:
+            kwargs = {'subnet_id': subnet_id}
+        else:
+            kwargs = {'port_id': port_id}
+        self.routers_client.remove_router_interface(router_id, **kwargs)
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
