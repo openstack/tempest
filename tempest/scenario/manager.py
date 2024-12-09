@@ -1199,14 +1199,15 @@ class ScenarioTest(tempest.test.BaseTestCase):
         except (KeyError, IndexError):
             return None
 
-    def associate_floating_ip(self, floating_ip, server):
+    def associate_floating_ip(self, floating_ip, server, ip_addr=None,
+                              **kwargs):
         """Associate floating ip to server
 
         This wrapper utility attaches the floating_ip for
         the respective port_id of server
         """
-        port_id, _ = self.get_server_port_id_and_ip4(server)
-        kwargs = dict(port_id=port_id)
+        port_id, _ = self.get_server_port_id_and_ip4(server, ip_addr=ip_addr)
+        kwargs.update({"port_id": port_id})
         floating_ip = self.floating_ips_client.update_floatingip(
             floating_ip['id'], **kwargs)['floatingip']
         self.assertEqual(port_id, floating_ip['port_id'])
