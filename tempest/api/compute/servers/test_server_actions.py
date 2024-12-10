@@ -127,7 +127,7 @@ class ServerActionsBase(base.BaseV2ComputeTest):
             self.assertGreater(new_boot_time, boot_time,
                                '%s > %s' % (new_boot_time, boot_time))
 
-    def _test_rebuild_server(self, server_id):
+    def _test_rebuild_server(self, server_id, **kwargs):
         # Get the IPs the server has before rebuilding it
         original_addresses = (self.client.show_server(server_id)['server']
                               ['addresses'])
@@ -166,11 +166,17 @@ class ServerActionsBase(base.BaseV2ComputeTest):
             # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
             #   ~/.ssh/ (if allowed).
             # 4.Plain username/password auth, if a password was given.
+
+            if 'validation_resources' in kwargs:
+                validation_resources = kwargs['validation_resources']
+            else:
+                validation_resources = self.validation_resources
+
             linux_client = remote_client.RemoteClient(
-                self.get_server_ip(rebuilt_server, self.validation_resources),
+                self.get_server_ip(rebuilt_server, validation_resources),
                 self.ssh_alt_user,
                 password,
-                self.validation_resources['keypair']['private_key'],
+                validation_resources['keypair']['private_key'],
                 server=rebuilt_server,
                 servers_client=self.client)
             linux_client.validate_authentication()
@@ -267,9 +273,13 @@ class ServerActionsTestJSON(ServerActionsBase):
         The server should be rebuilt using the provided image and data.
         """
         tenant_network = self.get_tenant_network()
+        validation_resources = self.get_test_validation_resources(
+            self.os_primary)
         _, servers = compute.create_test_server(
             self.os_primary,
-            wait_until='ACTIVE',
+            wait_until='SSHABLE',
+            validatable=True,
+            validation_resources=validation_resources,
             tenant_network=tenant_network)
         server = servers[0]
 
@@ -277,7 +287,9 @@ class ServerActionsTestJSON(ServerActionsBase):
                         self.client, server['id'])
         self.addCleanup(self.client.delete_server, server['id'])
 
-        self._test_rebuild_server(server_id=server['id'])
+        self._test_rebuild_server(
+            server_id=server['id'],
+            validation_resources=validation_resources)
 
     @decorators.idempotent_id('1499262a-9328-4eda-9068-db1ac57498d2')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
@@ -465,7 +477,9 @@ class ServerActionsTestOtherA(ServerActionsBase):
         self.attach_volume(server, volume)
 
         # run general rebuild test
-        self._test_rebuild_server(server_id=server['id'])
+        self._test_rebuild_server(
+            server_id=server['id'],
+            validation_resources=validation_resources)
 
         # make sure the volume is attached to the instance after rebuild
         vol_after_rebuild = self.volumes_client.show_volume(volume['id'])
