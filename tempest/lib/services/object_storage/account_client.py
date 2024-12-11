@@ -39,11 +39,13 @@ class AccountClient(rest_client.RestClient):
         headers = {}
         if create_update_metadata:
             for key in create_update_metadata:
-                metadata_header_name = create_update_metadata_prefix + key
+                metadata_header_name = create_update_metadata_prefix + \
+                    key.replace('_', '-')
                 headers[metadata_header_name] = create_update_metadata[key]
         if delete_metadata:
             for key in delete_metadata:
-                headers[delete_metadata_prefix + key] = delete_metadata[key]
+                headers[delete_metadata_prefix + key.replace(
+                    '_', '-')] = delete_metadata[key]
 
         resp, body = self.post('', headers=headers, body=None)
         self.expected_success([200, 204], resp.status)
