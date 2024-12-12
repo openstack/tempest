@@ -106,6 +106,7 @@ class TestEncryptionTypesClient(base.BaseServiceTest):
             'tempest.lib.common.rest_client.RestClient.delete',
             {},
             volume_type_id="cbc36478b0bd8e67e89",
+            encryption_id="test_id",
             status=202)
 
     def test_update_encryption_type_with_str_body(self):
@@ -119,4 +120,5 @@ class TestEncryptionTypesClient(base.BaseServiceTest):
             self.client.update_encryption_type,
             'tempest.lib.common.rest_client.RestClient.put',
             self.FAKE_UPDATE_ENCRYPTION_TYPE,
-            bytes_body, volume_type_id="cbc36478b0bd8e67e89")
+            bytes_body, volume_type_id="cbc36478b0bd8e67e89",
+            encryption_id="test_id")

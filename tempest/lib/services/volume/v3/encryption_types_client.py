@@ -69,21 +69,21 @@ class EncryptionTypesClient(rest_client.RestClient):
         self.validate_response(schema.create_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def delete_encryption_type(self, volume_type_id):
+    def delete_encryption_type(self, volume_type_id, encryption_id):
         """Delete the encryption type for the specified volume-type."""
         resp, body = self.delete(
-            "/types/%s/encryption/provider" % volume_type_id)
+            "/types/%s/encryption/%s" % (volume_type_id, encryption_id))
         self.validate_response(schema.delete_encryption_type, resp, body)
         return rest_client.ResponseBody(resp, body)
 
-    def update_encryption_type(self, volume_type_id, **kwargs):
+    def update_encryption_type(self, volume_type_id, encryption_id, **kwargs):
         """Update an encryption type for an existing volume type.
 
         For a full list of available parameters, please refer to the official
         API reference:
         https://docs.openstack.org/api-ref/block-storage/v3/index.html#update-an-encryption-type
         """
-        url = "/types/%s/encryption/provider" % volume_type_id
+        url = "/types/%s/encryption/%s" % (volume_type_id, encryption_id)
         put_body = json.dumps({'encryption': kwargs})
         resp, body = self.put(url, put_body)
         body = json.loads(body)

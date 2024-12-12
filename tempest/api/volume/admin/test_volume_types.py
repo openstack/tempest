@@ -143,6 +143,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
 
         # Get encryption type
         encrypt_type_id = encryption_type['volume_type_id']
+        encryption_id = encryption_type['encryption_id']
         fetched_encryption_type = (
             self.admin_encryption_types_client.show_encryption_type(
                 encrypt_type_id))
@@ -157,7 +158,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
                          'cipher': 'aes-xts-plain64',
                          'control_location': 'back-end'}
         self.admin_encryption_types_client.update_encryption_type(
-            encrypt_type_id, **update_kwargs)
+            encrypt_type_id, encryption_id, **update_kwargs)
         updated_encryption_type = (
             self.admin_encryption_types_client.show_encryption_type(
                 encrypt_type_id))
@@ -174,7 +175,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
 
         # Delete encryption type
         self.admin_encryption_types_client.delete_encryption_type(
-            encrypt_type_id)
+            encrypt_type_id, encryption_id)
         self.admin_encryption_types_client.wait_for_resource_deletion(
             encrypt_type_id)
         deleted_encryption_type = (
