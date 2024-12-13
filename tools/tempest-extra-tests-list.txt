@@ -16,5 +16,10 @@ tempest.api.volume.admin
 tempest.api.image.admin
 tempest.api.network.admin
 
+# This also run cinder-tempest-plugin tests so that we can avoid any
+# breaking change to plugins (cinder-tempest-plugins uses most of the
+# Tempest interface) but we can add more plugins tests here if needed.
+cinder_tempest_plugin
+
 # All negative tests
 negative
