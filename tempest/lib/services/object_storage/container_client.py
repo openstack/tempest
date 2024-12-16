@@ -41,7 +41,12 @@ class ContainerClient(rest_client.RestClient):
         """
         url = str(container_name)
 
-        resp, body = self.put(url, body=None, headers=headers)
+        new_headers = {}
+        for key in headers:
+            new_key = key.replace('_', '-')
+            new_headers[new_key] = headers[key]
+
+        resp, body = self.put(url, body=None, headers=new_headers)
         self.expected_success([201, 202, 204], resp.status)
         return resp, body
 
