@@ -1122,7 +1122,7 @@ VolumeFeaturesGroup = [
                     'types can be assigned.'),
     cfg.BoolOpt('enable_volume_image_dep_tests',
                 default=True,
-                help='Run tests for dependencies between images, volumes'
+                help='Run tests for dependencies between images, volumes '
                 'and instance snapshots')
 ]
 
