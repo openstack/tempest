@@ -42,11 +42,18 @@
     description: |
       This job runs the extra tests mentioned in
       tools/tempest-extra-tests-list.txt.
+    # NOTE(gmann): We need c-t-p as this job run c-t-p tests also.
+    required-projects:
+      - opendev.org/openstack/cinder-tempest-plugin
     vars:
       tox_envlist: extra-tests
+      tempest_plugins:
+        - cinder-tempest-plugin
       run_tempest_cleanup: true
       run_tempest_cleanup_resource_list: true
       run_tempest_dry_cleanup: true
+      devstack_localrc:
+        CINDER_ENFORCE_SCOPE: true
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
