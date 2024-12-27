@@ -45,15 +45,6 @@ class ServerActionsBase(base.BaseV2ComputeTest):
         try:
             self.validation_resources = self.get_class_validation_resources(
                 self.os_primary)
-            # _test_rebuild_server test compares ip address attached to the
-            # server before and after the rebuild, in order to avoid
-            # a situation when a newly created server doesn't have a floating
-            # ip attached at the beginning of the test_rebuild_server let's
-            # make sure right here the floating ip is attached
-            waiters.wait_for_server_floating_ip(
-                self.client,
-                self.client.show_server(self.server_id)['server'],
-                self.validation_resources['floating_ip'])
             waiters.wait_for_server_status(self.client,
                                            self.server_id, 'ACTIVE')
         except lib_exc.NotFound:
@@ -282,6 +273,15 @@ class ServerActionsTestJSON(ServerActionsBase):
             validation_resources=validation_resources,
             tenant_network=tenant_network)
         server = servers[0]
+        # _test_rebuild_server test compares ip address attached to the
+        # server before and after the rebuild, in order to avoid
+        # a situation when a newly created server doesn't have a floating
+        # ip attached at the beginning of the test_rebuild_server let's
+        # make sure right here the floating ip is attached
+        waiters.wait_for_server_floating_ip(
+            self.client,
+            server,
+            validation_resources['floating_ip'])
 
         self.addCleanup(waiters.wait_for_server_termination,
                         self.client, server['id'])
