@@ -77,8 +77,9 @@ class RoutersNegativeTest(base.BaseNetworkTest):
         subnet02 = self.create_subnet(network02)
         interface = self.routers_client.add_router_interface(
             self.router['id'], subnet_id=subnet01['id'])
-        self.addCleanup(self.routers_client.remove_router_interface,
-                        self.router['id'], subnet_id=subnet01['id'])
+        self.addCleanup(self.remove_router_interface,
+                        self.router['id'], interface['port_id'],
+                        subnet_id=subnet01['id'])
         self.assertEqual(subnet01['id'], interface['subnet_id'])
         self.assertRaises(lib_exc.BadRequest,
                           self.routers_client.add_router_interface,
@@ -89,10 +90,11 @@ class RoutersNegativeTest(base.BaseNetworkTest):
     @decorators.idempotent_id('04df80f9-224d-47f5-837a-bf23e33d1c20')
     def test_router_remove_interface_in_use_returns_409(self):
         """Test removing in-use interface from router"""
-        self.routers_client.add_router_interface(self.router['id'],
-                                                 subnet_id=self.subnet['id'])
-        self.addCleanup(self.routers_client.remove_router_interface,
-                        self.router['id'], subnet_id=self.subnet['id'])
+        interface = self.routers_client.add_router_interface(
+            self.router['id'], subnet_id=self.subnet['id'])
+        self.addCleanup(self.remove_router_interface,
+                        self.router['id'], interface['port_id'],
+                        subnet_id=self.subnet['id'])
         self.assertRaises(lib_exc.Conflict,
                           self.routers_client.delete_router,
                           self.router['id'])

@@ -18,7 +18,6 @@ import testtools
 
 from tempest.api.network import base
 from tempest.common import utils
-from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
@@ -33,21 +32,10 @@ class RoutersTest(base.BaseNetworkTest):
     def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
         interface = self.routers_client.add_router_interface(
             router_id, subnet_id=subnet_id)
-        self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        router_id, subnet_id, interface['port_id'])
+        self.addCleanup(self.remove_router_interface,
+                        router_id, interface['port_id'], subnet_id=subnet_id)
         self.assertEqual(subnet_id, interface['subnet_id'])
         return interface
-
-    def _remove_router_interface_with_subnet_id(self, router_id, subnet_id,
-                                                port_id):
-        # NOTE: with DVR and without a VM port, it is not possible to know
-        # what agent will host the router interface thus won't be bound.
-        if not utils.is_extension_enabled('dvr', 'network'):
-            waiters.wait_for_port_status(client=self.ports_client,
-                                         port_id=port_id, status='ACTIVE')
-        body = self.routers_client.remove_router_interface(router_id,
-                                                           subnet_id=subnet_id)
-        self.assertEqual(subnet_id, body['subnet_id'])
 
     @classmethod
     def skip_checks(cls):
@@ -113,8 +101,9 @@ class RoutersTest(base.BaseNetworkTest):
         # Add router interface with subnet id
         interface = self.routers_client.add_router_interface(
             router['id'], subnet_id=subnet['id'])
-        self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        router['id'], subnet['id'], interface['port_id'])
+        self.addCleanup(self.remove_router_interface,
+                        router['id'], interface['port_id'],
+                        subnet_id=subnet['id'])
         self.assertIn('subnet_id', interface.keys())
         self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details
@@ -192,8 +181,9 @@ class RoutersTest(base.BaseNetworkTest):
             # Add router interface with subnet id
             interface = self.create_router_interface(router['id'],
                                                      subnet['id'])
-            self.addCleanup(self._remove_router_interface_with_subnet_id,
-                            router['id'], subnet['id'], interface['port_id'])
+            self.addCleanup(self.remove_router_interface,
+                            router['id'], interface['port_id'],
+                            subnet_id=subnet['id'])
             cidr = netaddr.IPNetwork(subnet['cidr'])
             next_hop = str(cidr[2])
             destination = str(subnet['cidr'])
