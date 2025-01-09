@@ -93,21 +93,33 @@ class TestServerVolumeAttachmentScenario(BaseAttachmentTest):
         self.addCleanup(self.nova_volume_detach, server, volume)
         att_id = volume['attachments'][0]['attachment_id']
 
+        # The following exceptions are needs to be catched.
+        # Forbidden: This will be thrown when the environment applies
+        # short-term mitigation described at OSSN-0092.
+        # Conflict: This will be thrown when the environment applies fixes
+        # for OSSA-2023-003.
+        # Unauthorized: This will be thrown when OSSA-2023-003 and
+        # service_token_roles_required = true.
+
         # Test user call to detach volume is rejected
-        self.assertRaises((exceptions.Forbidden, exceptions.Conflict),
+        self.assertRaises((exceptions.Forbidden,
+                           exceptions.Conflict,
+                           exceptions.Unauthorized),
                           self.volumes_client.detach_volume, volume['id'])
 
         # Test user call to terminate connection is rejected
-        self.assertRaises((exceptions.Forbidden, exceptions.Conflict),
+        self.assertRaises((exceptions.Forbidden,
+                           exceptions.Conflict,
+                           exceptions.Unauthorized),
                           self.volumes_client.terminate_connection,
                           volume['id'], connector={})
 
         # Test faking of service token on call to detach, force detach,
         # terminate_connection
         for valid_token in (True, False):
-            valid_exceptions = [exceptions.Forbidden, exceptions.Conflict]
-            if not valid_token:
-                valid_exceptions.append(exceptions.Unauthorized)
+            valid_exceptions = [exceptions.Forbidden,
+                                exceptions.Conflict,
+                                exceptions.Unauthorized]
             self.assertRaises(
                 tuple(valid_exceptions),
                 self._call_with_fake_service_token,
@@ -138,16 +150,18 @@ class TestServerVolumeAttachmentScenario(BaseAttachmentTest):
 
         # Test user call to force detach volume is rejected
         self.assertRaises(
-            (exceptions.Forbidden, exceptions.Conflict),
+            (exceptions.Forbidden,
+             exceptions.Conflict,
+             exceptions.Unauthorized),
             self.admin_volume_client.force_detach_volume,
             volume['id'], connector=None,
             attachment_id=att_id)
 
         # Test trying to override detach with force and service token
         for valid_token in (True, False):
-            valid_exceptions = [exceptions.Forbidden, exceptions.Conflict]
-            if not valid_token:
-                valid_exceptions.append(exceptions.Unauthorized)
+            valid_exceptions = [exceptions.Forbidden,
+                                exceptions.Conflict,
+                                exceptions.Unauthorized]
             self.assertRaises(
                 tuple(valid_exceptions),
                 self._call_with_fake_service_token,
@@ -191,9 +205,8 @@ class TestServerVolumeAttachScenarioOldVersion(BaseAttachmentTest):
 
         for valid_token in (True, False):
             valid_exceptions = [exceptions.Forbidden,
-                                exceptions.Conflict]
-            if not valid_token:
-                valid_exceptions.append(exceptions.Unauthorized)
+                                exceptions.Conflict,
+                                exceptions.Unauthorized]
             self.assertRaises(
                 tuple(valid_exceptions),
                 self._call_with_fake_service_token,
@@ -203,6 +216,8 @@ class TestServerVolumeAttachScenarioOldVersion(BaseAttachmentTest):
                 att_id)
 
         self.assertRaises(
-            (exceptions.Forbidden, exceptions.Conflict),
+            (exceptions.Forbidden,
+             exceptions.Conflict,
+             exceptions.Unauthorized),
             self.attachments_client.delete_attachment,
             att_id)
