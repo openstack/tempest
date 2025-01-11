@@ -90,14 +90,18 @@ class ImagesFormatTest(base.BaseV2ImageTest,
     @decorators.idempotent_id('a245fcbe-63ce-4dc1-a1d0-c16d76d9e6df')
     def test_accept_usable_formats(self):
         if self.imgdef['usable']:
-            if self.imgdef['format'] in CONF.image.disk_formats:
-                # These are expected to work
+            try:
                 self._test_image(self.imgdef)
-            else:
-                # If this is not configured to be supported, we should get
-                # a BadRequest from glance
-                self.assertRaises(lib_exc.BadRequest,
-                                  self._test_image, self.imgdef)
+            except lib_exc.BadRequest:
+                format = self.imgdef['format']
+                if format == 'gpt' and format not in CONF.image.disk_formats:
+                    # If we don't have gpt defined, we don't expect this to
+                    # work because glance has not been updated for GPT
+                    # FIXME(danms): Remove this once glance support for GPT is
+                    # landed on master
+                    self.skipTest('GPT not configured and glance is too '
+                                  'old to support it')
+                raise
         else:
             self.skipTest(
                 'Glance does not currently reject unusable images on upload')
@@ -134,15 +138,23 @@ class ImagesFormatTest(base.BaseV2ImageTest,
             # the import even starts until glance has it in its API
             # schema as a valid value. Other formats expected to fail
             # do so during import and return to queued state.
-            if self.imgdef['format'] not in CONF.image.disk_formats:
-                self.assertRaises(lib_exc.BadRequest,
-                                  self._test_image,
-                                  self.imgdef, asimport=True)
-            else:
+            try:
                 image = self._test_image(self.imgdef, asimport=True)
                 waiters.wait_for_image_status(self.client, image['id'],
-                                              'queued')
+                                              ['queued', 'active'])
                 self.client.delete_image(image['id'])
+            except lib_exc.BadRequest:
+                format = self.imgdef['format']
+                if format == 'gpt' and format not in CONF.image.disk_formats:
+                    # If we don't have gpt defined, we don't expect this to
+                    # work because glance has not been updated for GPT
+                    # FIXME(danms): Remove this once glance support for GPT is
+                    # landed on master
+                    self.skipTest('GPT not configured and glance is too '
+                                  'old to support it')
+                elif format in CONF.image.disk_formats:
+                    # This is in our config so it's supposed to work, fail
+                    raise
 
         if self.imgdef['format'] == 'iso':
             # NOTE(danms): Glance has a special case to not convert ISO images
