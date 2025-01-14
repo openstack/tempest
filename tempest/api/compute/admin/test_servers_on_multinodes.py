@@ -110,6 +110,8 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
 
         Creates two servers in an anti-affinity server group and
         asserts the servers are in the group and on different hosts.
+
+        Uses the /servers multi-create API.
         """
         hosts = self._create_servers_with_group('anti-affinity')
         hostnames = list(hosts.values())
@@ -126,6 +128,8 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
 
         Creates two servers in an affinity server group and
         asserts the servers are in the group and on same host.
+
+        Uses the /servers multi-create API.
         """
         hosts = self._create_servers_with_group('affinity')
         hostnames = list(hosts.values())
