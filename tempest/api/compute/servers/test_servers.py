@@ -309,3 +309,30 @@ class ServersListShow298Test(base.BaseV2ComputeTest):
         self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
+
+
+class ServersListShow2100Test(base.BaseV2ComputeTest):
+    """Test compute server with microversion >= than 2.100
+
+    This test tests the Server APIs response schema for 2.100 microversion.
+    No specific assert or behaviour verification is needed.
+    """
+
+    min_microversion = '2.100'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('2c3a8270-e6f7-4400-af0f-db003c117e48')
+    def test_list_show_rebuild_update_server_2100(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        # Checking list API response schema.
+        self.servers_client.list_servers(detail=True)
+        # Checking show API response schema
+        self.servers_client.show_server(server['id'])
+        # Checking update API response schema
+        self.servers_client.update_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+        # Check rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')

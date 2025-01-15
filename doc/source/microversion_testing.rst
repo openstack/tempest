@@ -462,6 +462,10 @@ Microversion tests implemented in Tempest
 
   .. _2.98: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#microversion-2-98
 
+  * `2.100`_
+
+  .. _2.100: https://docs.openstack.org/nova/latest/reference/api-microversion-history.html#microversion-2-100
+
 * Volume
 
   * `3.3`_

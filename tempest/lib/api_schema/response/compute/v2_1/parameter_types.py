@@ -127,3 +127,16 @@ uuid_or_null = {
         {'type': 'null'}
     ]
 }
+
+server_id = {
+    'type': 'string', 'format': 'uuid'
+}
+
+name = {
+    # NOTE: Nova v2.1 API contains some 'name' parameters such
+    # as server, flavor, aggregate and so on. They are
+    # stored in the DB and Nova specific parameters.
+    # This definition is used for all their parameters.
+    'type': 'string', 'minLength': 1, 'maxLength': 255,
+    'format': 'name'
+}
