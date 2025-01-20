@@ -12,6 +12,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import time
+
 from oslo_log import log as logging
 
 from tempest.common import utils
@@ -52,10 +54,11 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
                available compute nodes, up to CONF.compute.min_compute_nodes.
                Total number of volumes is equal to
                compute nodes * len(volume_types_for_data_volume)
-            6. Attach volumes to the instances
-            7. Assign floating IP to all instances
-            8. Configure security group for ssh access to all instances
-            9. Confirm ssh access to all instances
+            6. Assign floating IP to all instances
+            7. Configure security group for ssh access to all instances
+            8. Confirm ssh access to all instances
+            9. Attach volumes to the instances; fixup device mapping if
+               required
             10. Run write test to all volumes through ssh connection per
                 instance
             11. Clean up the sources, an instance, volumes, keypair and image
@@ -143,8 +146,6 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
         start = 0
         end = len(volume_types)
         for server in servers:
-            attached_volumes = []
-
             # wait for server to become active
             waiters.wait_for_server_status(self.servers_client,
                                            server['id'], 'ACTIVE')
@@ -170,26 +171,18 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
             )
 
             # attach volumes to the instances
+            attached_volumes = []
             for volume in created_volumes[start:end]:
-
-                # wait for volume to become available
-                waiters.wait_for_volume_resource_status(
-                    self.volumes_client, volume['id'], 'available')
-
-                attached_volume = self.nova_volume_attach(server, volume)
-                attached_volumes.append(attached_volume)
+                attached_volume, actual_dev = self._attach_fixup(
+                    server, volume)
+                attached_volumes.append((attached_volume, actual_dev))
                 LOG.debug("Attached volume %s to server %s",
                           attached_volume['id'], server['id'])
 
             server_name = server['name'].split('-')[-1]
 
             # run write test on all volumes
-            for volume in attached_volumes:
-
-                # dev name volume['attachments'][0]['device'][5:] is like
-                # /dev/vdb, we need to remove /dev/ -> first 5 chars
-                dev_name = volume['attachments'][0]['device'][5:]
-
+            for volume, dev_name in attached_volumes:
                 mount_path = f"/mnt/{server_name}"
 
                 timestamp_before = self.create_timestamp(
@@ -216,3 +209,49 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
 
             start += len(volume_types)
             end += len(volume_types)
+
+    def _attach_fixup(self, server, volume):
+        """Attach a volume to the server and update the device key with the
+        device actually created inside the guest.
+        """
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume['id'], 'available')
+
+        list_blks = "lsblk --nodeps --noheadings --output NAME"
+
+        blks_before = set(self.linux_client.exec_command(
+            list_blks).strip().splitlines())
+
+        attached_volume = self.nova_volume_attach(server, volume)
+        # dev name volume['attachments'][0]['device'][5:] is like
+        # /dev/vdb, we need to remove /dev/ -> first 5 chars
+        dev_name = attached_volume['attachments'][0]['device'][5:]
+
+        retry = 0
+        actual_dev = None
+        blks_now = set()
+        while retry < 4 and not actual_dev:
+            try:
+                blks_now = set(self.linux_client.exec_command(
+                    list_blks).strip().splitlines())
+                for blk_dev in (blks_now - blks_before):
+                    serial = self.linux_client.exec_command(
+                        f"cat /sys/block/{blk_dev}/serial")
+                    if serial == volume['id'][:len(serial)]:
+                        actual_dev = blk_dev
+                        break
+            except exceptions.SSHExecCommandFailed:
+                retry += 1
+                time.sleep(2 ** retry)
+
+        if not actual_dev and len(blks_now - blks_before):
+            LOG.warning("Detected new devices in guest but could not match any"
+                        f" of them with the volume {volume['id']}")
+
+        if actual_dev and dev_name != actual_dev:
+            LOG.info(
+                f"OpenStack mapping {volume['id']} to device {dev_name}" +
+                f" is actually {actual_dev} inside the guest")
+            dev_name = actual_dev
+
+        return attached_volume, dev_name
