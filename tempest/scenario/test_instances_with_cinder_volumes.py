@@ -149,18 +149,6 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
             waiters.wait_for_server_status(self.servers_client,
                                            server['id'], 'ACTIVE')
 
-            # attach volumes to the instances
-            for volume in created_volumes[start:end]:
-
-                # wait for volume to become available
-                waiters.wait_for_volume_resource_status(
-                    self.volumes_client, volume['id'], 'available')
-
-                attached_volume = self.nova_volume_attach(server, volume)
-                attached_volumes.append(attached_volume)
-                LOG.debug("Attached volume %s to server %s",
-                          attached_volume['id'], server['id'])
-
             # assign floating ip
             floating_ip = None
             if (CONF.network_feature_enabled.floating_ips and
@@ -180,6 +168,18 @@ class TestInstancesWithCinderVolumes(manager.ScenarioTest):
                 ssh_ip, private_key=keypair['private_key'],
                 server=server
             )
+
+            # attach volumes to the instances
+            for volume in created_volumes[start:end]:
+
+                # wait for volume to become available
+                waiters.wait_for_volume_resource_status(
+                    self.volumes_client, volume['id'], 'available')
+
+                attached_volume = self.nova_volume_attach(server, volume)
+                attached_volumes.append(attached_volume)
+                LOG.debug("Attached volume %s to server %s",
+                          attached_volume['id'], server['id'])
 
             server_name = server['name'].split('-')[-1]
 
