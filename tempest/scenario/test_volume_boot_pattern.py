@@ -36,6 +36,11 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         if not CONF.service_available.cinder:
             raise cls.skipException("Cinder is not available")
 
+    @classmethod
+    def setup_clients(cls):
+        super(TestVolumeBootPattern, cls).setup_clients()
+        cls.servers_client = cls.os_primary.servers_client
+
     def _delete_server(self, server):
         self.servers_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client, server['id'])
@@ -132,6 +137,37 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
                                         private_key=keypair['private_key'],
                                         server=server_from_snapshot)
         self.assertEqual(timestamp, timestamp3)
+
+    @decorators.idempotent_id('e3f4f2fc-5c6a-4be6-9c54-aedfc0954da7')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
+    @utils.services('compute', 'volume', 'image')
+    def test_bootable_volume_snapshot_stop_start_instance(self):
+        # Step 1: Create a bootable volume from an image
+        volume = self.create_volume_from_image()
+
+        # Step 2: Boot an instance from the created volume
+        instance = self.boot_instance_from_resource(
+            source_id=volume['id'],
+            source_type='volume',
+            wait_until='SSHABLE'
+        )
+
+        # Step 3: Stop the instance
+        self.servers_client.stop_server(instance['id'])
+        waiters.wait_for_server_status(self.servers_client, instance['id'],
+                                       'SHUTOFF')
+
+        # Step 4: Create a snapshot of the bootable volume
+        self.create_volume_snapshot(volume['id'], force=True)
+
+        # Step 5: Start the instance and verify it returns to ACTIVE state
+        self.servers_client.start_server(instance['id'])
+        waiters.wait_for_server_status(self.servers_client, instance['id'],
+                                       'ACTIVE')
+
+        # Step 6: Verify console log
+        self.log_console_output([instance])
 
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
     @decorators.attr(type='slow')
