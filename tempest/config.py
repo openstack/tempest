@@ -540,12 +540,8 @@ ComputeFeaturesGroup = [
                      'be same as nova.conf: vnc.enabled'),
     cfg.BoolOpt('spice_console',
                 default=False,
-                help='Enable Spice console. This configuration value should '
-                     'be same as nova.conf: spice.enabled',
-                deprecated_for_removal=True,
-                deprecated_reason="This config option is not being used "
-                                  "in Tempest, we can add it back when "
-                                  "adding the test cases."),
+                help='Enable SPICE console. This configuration value should '
+                     'be same as nova.conf: spice.enabled'),
     cfg.BoolOpt('serial_console',
                 default=False,
                 help='Enable serial console. This configuration value '

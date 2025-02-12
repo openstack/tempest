@@ -46,6 +46,7 @@ from tempest.lib.api_schema.response.compute.v2_8 import servers as schemav28
 from tempest.lib.api_schema.response.compute.v2_89 import servers as schemav289
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.api_schema.response.compute.v2_96 import servers as schemav296
+from tempest.lib.api_schema.response.compute.v2_98 import servers as schemav298
 from tempest.lib.common import rest_client
 from tempest.lib.services.compute import base_compute_client
 
@@ -77,7 +78,9 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.75', 'max': '2.78', 'schema': schemav275},
         {'min': '2.79', 'max': '2.88', 'schema': schemav279},
         {'min': '2.89', 'max': '2.95', 'schema': schemav289},
-        {'min': '2.96', 'max': None, 'schema': schemav296}]
+        {'min': '2.96', 'max': '2.97', 'schema': schemav296},
+        {'min': '2.98', 'max': None, 'schema': schemav298},
+    ]
 
     def __init__(self, auth_provider, service, region,
                  enable_instance_password=True, **kwargs):
@@ -678,6 +681,19 @@ class ServersClient(base_compute_client.BaseComputeClient):
         body = json.loads(body)
         schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.get_remote_consoles, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def get_console_auth_token_details(self, token):
+        """Turn a console auth token into hypervisor connection details.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#show-console-connection-information
+        """
+        resp, body = self.get('/os-console-auth-tokens/%s' % token)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.console_auth_tokens, resp, body)
         return rest_client.ResponseBody(resp, body)
 
     def rescue_server(self, server_id, **kwargs):

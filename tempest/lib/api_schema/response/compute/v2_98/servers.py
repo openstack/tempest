@@ -1,5 +1,3 @@
-# Copyright 2016 IBM Corp.
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -14,12 +12,12 @@
 
 import copy
 
-from tempest.lib.api_schema.response.compute.v2_3 import servers
+from tempest.lib.api_schema.response.compute.v2_96 import servers
 
 # NOTE: Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
-# ****** Schemas unchanged since microversion 2.3 ******
+# ****** Schemas unchanged since microversion 2.96 ******
 list_servers = copy.deepcopy(servers.list_servers)
 get_server = copy.deepcopy(servers.get_server)
 list_servers_detail = copy.deepcopy(servers.list_servers_detail)
@@ -34,8 +32,25 @@ list_volume_attachments = copy.deepcopy(servers.list_volume_attachments)
 show_instance_action = copy.deepcopy(servers.show_instance_action)
 create_backup = copy.deepcopy(servers.create_backup)
 
-# NOTE: The consolidated remote console API got introduced with v2.6
-# with bp/consolidate-console-api. See Nova commit 578bafeda
+console_auth_tokens = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'console': {
+                'type': 'object',
+                'properties': {
+                    'instance_uuid': {'type': 'string'},
+                    'host': {'type': 'string'},
+                    'port': {'type': 'integer'},
+                    'tls_port': {'type': ['integer', 'null']},
+                    'internal_access_path': {'type': ['string', 'null']}
+                }
+            }
+        }
+    }
+}
+
 get_remote_consoles = {
     'status_code': [200],
     'response_body': {
@@ -46,7 +61,7 @@ get_remote_consoles = {
                 'properties': {
                     'protocol': {'enum': ['vnc', 'rdp', 'serial', 'spice']},
                     'type': {'enum': ['novnc', 'xvpvnc', 'rdp-html5',
-                                      'spice-html5',
+                                      'spice-html5', 'spice-direct',
                                       'serial']},
                     'url': {
                         'type': 'string',
