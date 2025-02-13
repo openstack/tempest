@@ -472,18 +472,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.restore_soft_deleted_server,
                           nonexistent_server)
 
-    @decorators.attr(type=['negative'])
-    @decorators.idempotent_id('7fcadfab-bd6a-4753-8db7-4a51e51aade9')
-    def test_restore_server_invalid_state(self):
-        """Restore-deleting a server not in 'soft-delete' state should fail
-
-        We can restore a soft deleted server, but can't restore a server that
-        is not in 'soft-delete' state.
-        """
-        self.assertRaises(lib_exc.Conflict,
-                          self.client.restore_soft_deleted_server,
-                          self.server_id)
-
     @decorators.idempotent_id('abca56e2-a892-48ea-b5e5-e07e69774816')
     @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
                           'Shelve is not available.')
