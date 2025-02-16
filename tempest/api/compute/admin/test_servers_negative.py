@@ -65,6 +65,18 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.s1_id,
                           flavor_ref['id'])
 
+    @decorators.attr(type=['negative'])
+    @decorators.idempotent_id('7fcadfab-bd6a-4753-8db7-4a51e51aade9')
+    def test_restore_server_invalid_state(self):
+        """Restore-deleting a server not in 'soft-delete' state should fail
+
+        We can restore a soft deleted server, but can't restore a server that
+        is not in 'soft-delete' state.
+        """
+        self.assertRaises(lib_exc.Conflict,
+                          self.client.restore_soft_deleted_server,
+                          self.s1_id)
+
     @decorators.idempotent_id('7368a427-2f26-4ad9-9ba9-911a0ec2b0db')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
