@@ -71,7 +71,7 @@ class ServersAffinityTest(base.BaseV2ComputeAdminTest):
         body, servers = compute.create_test_server(
             self.os_primary, networks='none', **kwargs)
         for server in servers:
-            self.addCleanup(self.servers_client.delete_server, server['id'])
+            self.addCleanup(self.delete_server, server['id'])
         return body
 
     def _create_server_group(self, **kwargs):
