@@ -28,7 +28,7 @@ class SpiceDirectConsoleTestJSON(base.BaseV2ComputeAdminTest):
 
     create_default_network = True
 
-    min_microversion = '2.98'
+    min_microversion = '2.99'
     max_microversion = 'latest'
 
     # SPICE client protocol constants
