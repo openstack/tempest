@@ -38,6 +38,17 @@ list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update(
         {'pinned_availability_zone': {'type': ['string', 'null']}})
 
+rebuild_server = copy.deepcopy(servers289.rebuild_server)
+rebuild_server['response_body']['properties']['server'][
+    'properties'].update(
+        {'pinned_availability_zone': {'type': ['string', 'null']}})
+
+rebuild_server_with_admin_pass = copy.deepcopy(
+    servers289.rebuild_server_with_admin_pass)
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update(
+        {'pinned_availability_zone': {'type': ['string', 'null']}})
+
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We
 # need to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
@@ -45,9 +56,6 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 attach_volume = copy.deepcopy(servers289.attach_volume)
 show_volume_attachment = copy.deepcopy(servers289.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers289.list_volume_attachments)
-rebuild_server = copy.deepcopy(servers289.rebuild_server)
-rebuild_server_with_admin_pass = copy.deepcopy(
-    servers289.rebuild_server_with_admin_pass)
 update_server = copy.deepcopy(servers289.update_server)
 list_servers = copy.deepcopy(servers289.list_servers)
 show_server_diagnostics = copy.deepcopy(servers289.show_server_diagnostics)

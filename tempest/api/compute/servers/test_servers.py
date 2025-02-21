@@ -277,8 +277,31 @@ class ServersListShow296Test(base.BaseV2ComputeTest):
 
     @decorators.idempotent_id('4eee1ffe-9e00-4c99-a431-0d3e0f323a8f')
     def test_list_show_server_296(self):
-        server = self.create_test_server()
+        server = self.create_test_server(wait_until='ACTIVE')
         # Checking list API response schema.
         self.servers_client.list_servers(detail=True)
         # Checking show API response schema
         self.servers_client.show_server(server['id'])
+        # Check rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+
+class ServersListShow298Test(base.BaseV2ComputeTest):
+    """Test compute server with microversion >= 2.98"""
+
+    min_microversion = '2.98'
+    max_microversion = 'latest'
+
+    @decorators.idempotent_id('3981e496-3bf7-4015-b807-63ffee7c520c')
+    def test_list_show_rebuild_server_298(self):
+        server = self.create_test_server(wait_until='ACTIVE')
+        # Check list details API response schema
+        self.servers_client.list_servers(detail=True)
+        # Check show API response schema
+        self.servers_client.show_server(server['id'])
+        # Check rebuild API response schema
+        self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
