@@ -26,28 +26,45 @@ from tempest.lib.api_schema.response.compute.v2_89 import servers as servers289
 #
 # - GET /servers/detail
 # - GET /servers/{server_id}
+# - PUT /servers/{server_id}
+# - POST /servers/{server_id}/action (rebuild)
 ###########################################################################
 
 get_server = copy.deepcopy(servers289.get_server)
 get_server['response_body']['properties']['server'][
     'properties'].update(
         {'pinned_availability_zone': {'type': ['string', 'null']}})
+get_server['response_body']['properties']['server'][
+    'required'].append('pinned_availability_zone')
 
 list_servers_detail = copy.deepcopy(servers289.list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update(
         {'pinned_availability_zone': {'type': ['string', 'null']}})
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'required'].append('pinned_availability_zone')
+
+update_server = copy.deepcopy(servers289.update_server)
+update_server['response_body']['properties']['server'][
+    'properties'].update(
+        {'pinned_availability_zone': {'type': ['string', 'null']}})
+update_server['response_body']['properties']['server'][
+    'required'].append('pinned_availability_zone')
 
 rebuild_server = copy.deepcopy(servers289.rebuild_server)
 rebuild_server['response_body']['properties']['server'][
     'properties'].update(
         {'pinned_availability_zone': {'type': ['string', 'null']}})
+rebuild_server['response_body']['properties']['server'][
+    'required'].append('pinned_availability_zone')
 
 rebuild_server_with_admin_pass = copy.deepcopy(
     servers289.rebuild_server_with_admin_pass)
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update(
         {'pinned_availability_zone': {'type': ['string', 'null']}})
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('pinned_availability_zone')
 
 # NOTE(zhufl): Below are the unchanged schema in this microversion. We
 # need to keep this schema in this file to have the generic way to select the
@@ -56,7 +73,6 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 attach_volume = copy.deepcopy(servers289.attach_volume)
 show_volume_attachment = copy.deepcopy(servers289.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers289.list_volume_attachments)
-update_server = copy.deepcopy(servers289.update_server)
 list_servers = copy.deepcopy(servers289.list_servers)
 show_server_diagnostics = copy.deepcopy(servers289.show_server_diagnostics)
 get_remote_consoles = copy.deepcopy(servers289.get_remote_consoles)

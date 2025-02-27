@@ -24,6 +24,7 @@ from tempest.lib.api_schema.response.compute.v2_96 import servers as servers296
 #
 # - GET /servers/detail
 # - GET /servers/{server_id}
+# - PUT /servers/{server_id}
 # - POST /servers/{server_id}/action (rebuild)
 #
 ###########################################################################
@@ -50,6 +51,10 @@ list_servers_detail['response_body']['properties']['servers']['items'][
     'properties']['image']['oneOf'][0]['properties'].update(
         {'properties': image_properties})
 
+update_server = copy.deepcopy(servers296.update_server)
+update_server['response_body']['properties']['server']['properties'][
+    'image']['oneOf'][0]['properties'].update({'properties': image_properties})
+
 rebuild_server = copy.deepcopy(servers296.rebuild_server)
 rebuild_server['response_body']['properties']['server']['properties'][
     'image']['oneOf'][0]['properties'].update({'properties': image_properties})
@@ -67,7 +72,6 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
 attach_volume = copy.deepcopy(servers296.attach_volume)
 show_volume_attachment = copy.deepcopy(servers296.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers296.list_volume_attachments)
-update_server = copy.deepcopy(servers296.update_server)
 list_servers = copy.deepcopy(servers296.list_servers)
 show_server_diagnostics = copy.deepcopy(servers296.show_server_diagnostics)
 get_remote_consoles = copy.deepcopy(servers296.get_remote_consoles)
