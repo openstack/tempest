@@ -23,7 +23,8 @@ class TestTempestCleanup(base.TestCase):
 
     def test_load_json_saved_state(self):
         # instantiate "empty" TempestCleanup
-        c = cleanup.TempestCleanup(None, None, 'test')
+        app = mock.Mock()
+        c = cleanup.TempestCleanup(app, None, 'test')
         test_saved_json = 'tempest/tests/cmd/test_saved_state_json.json'
         with open(test_saved_json, 'r') as f:
             test_saved_json_content = json.load(f)
@@ -35,7 +36,8 @@ class TestTempestCleanup(base.TestCase):
 
     def test_load_json_resource_list(self):
         # instantiate "empty" TempestCleanup
-        c = cleanup.TempestCleanup(None, None, 'test')
+        app = mock.Mock()
+        c = cleanup.TempestCleanup(app, None, 'test')
         test_resource_list = 'tempest/tests/cmd/test_resource_list.json'
         with open(test_resource_list, 'r') as f:
             test_resource_list_content = json.load(f)
@@ -49,7 +51,8 @@ class TestTempestCleanup(base.TestCase):
     @mock.patch('tempest.cmd.cleanup.TempestCleanup.init')
     @mock.patch('tempest.cmd.cleanup.TempestCleanup._cleanup')
     def test_take_action_got_exception(self, mock_cleanup, mock_init):
-        c = cleanup.TempestCleanup(None, None, 'test')
+        app = mock.Mock()
+        c = cleanup.TempestCleanup(app, None, 'test')
         c.GOT_EXCEPTIONS.append('exception')
         mock_cleanup.return_value = True
         mock_init.return_value = True
