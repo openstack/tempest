@@ -324,3 +324,72 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
     def test_boot_server_from_encrypted_volume_luksv2(self):
         """LUKs v2 decrypts volume through os-brick."""
         self._do_test_boot_server_from_encrypted_volume_luks('luks2')
+
+
+class TestVolumeBootPatternV346(manager.EncryptionScenarioTest):
+
+    volume_min_microversion = '3.46'
+    volume_max_microversion = 'latest'
+
+    @decorators.idempotent_id('77889046-1a75-4f14-9b3a-fbbfdd8e5093')
+    @decorators.attr(type='slow')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
+    @utils.services('compute', 'volume', 'image')
+    def test_instance_boot_after_snapshot_deletion(self):
+        """Test instance bootability after deleting snapshots.
+
+        This test ensures volumes created from instance snapshots
+        are bootable with volume API microversion >= 3.46.
+
+        Steps:
+        1. Create a bootable volume1 from an image.
+        2. Launch an instance1 from the created volume.
+        3. Create image1 - a snapshot1 of the instance1.
+        4. Create a volume2 from the image1.
+        5. Boot an instance2 from the volume2 to verify it's bootable.
+        6. Delete image1 - the first instance1 snapshot1.
+        7. Create image2 - a snapshot2 of the instance1.
+        8. Create a volume3 from the image2.
+        9. Boot instance3 from the new volume3 to verify it's bootable.
+        """
+
+        # Step 1: Create a bootable volume1 from an image
+        volume1 = self.create_volume_from_image()
+
+        # Step 2: Launch instance1 from volume1
+        instance1 = self.boot_instance_from_resource(
+            source_id=volume1['id'],
+            source_type='volume',
+            wait_until='SSHABLE'
+        )
+
+        # Step 3: Create image1 – a snapshot of the instance1
+        image1 = self.create_server_snapshot(instance1)
+
+        # Step 4: Create volume2 from image1
+        volume2 = self.create_volume_from_image(image_id=image1['id'])
+
+        # Step 5: Launch instance2 from volume2
+        self.boot_instance_from_resource(
+            source_id=volume2['id'],
+            source_type='volume',
+            wait_until='SSHABLE'
+        )
+
+        # Step 6: Delete image1
+        self.image_client.delete_image(image1['id'])
+        self.image_client.wait_for_resource_deletion(image1['id'])
+
+        # Step 7: Create image2 – a snapshot of the instance1
+        image2 = self.create_server_snapshot(instance1)
+
+        # Step 8: Create volume3 from image2
+        volume3 = self.create_volume_from_image(image_id=image2['id'])
+
+        # Step 9: Launch instance from volume3
+        self.boot_instance_from_resource(
+            source_id=volume3['id'],
+            source_type='volume',
+            wait_until='SSHABLE'
+        )
