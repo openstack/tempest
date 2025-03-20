@@ -1,0 +1,6 @@
+=====================
+v42.0.0 Release Notes
+=====================
+
+.. release-notes:: 42.0.0 Release Notes
+   :version: 42.0.0
