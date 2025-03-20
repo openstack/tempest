@@ -9,6 +9,7 @@ Compatible OpenStack Releases
 
 Tempest master supports the below OpenStack Releases:
 
+* 2025.1
 * 2024.2
 * 2024.1
 * 2023.2
