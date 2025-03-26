@@ -1,0 +1,8 @@
+---
+upgrade:
+  - |
+    The default value for ``[volume] disk_format``, which specifies the
+    disk format of the image in a copy a volume to image operation,
+    is changed from ``raw`` to ``[raw, qcow2]`` for which the type of
+    the config option also needed to change from ``string`` type to
+    ``list`` type i.e. it accepts multiple values now.

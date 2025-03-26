@@ -109,29 +109,37 @@ class VolumesActionsTest(base.BaseVolumeTest):
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance images_client and from Cinder via tearDownClass.
-        image_name = data_utils.rand_name(self.__class__.__name__ + '-Image',
-                                          prefix=CONF.resource_name_prefix)
-        body = self.volumes_client.upload_volume(
-            self.volume['id'], image_name=image_name,
-            disk_format=CONF.volume.disk_format)['os-volume_upload_image']
-        image_id = body["image_id"]
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.images_client.delete_image,
-                        image_id)
-        waiters.wait_for_image_status(self.images_client, image_id, 'active')
-        # This is required for the optimized upload volume path.
-        # New location APIs are async so we need to wait for the location
-        # import task to complete.
-        # This should work with old location API since we don't fail if there
-        # are no tasks for the image
-        waiters.wait_for_image_tasks_status(self.images_client,
-                                            image_id, 'success')
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                self.volume['id'], 'available')
+        # NOTE: This looks really strange to loop through the disk formats
+        # but similar implementation is done in test_volume_bootable test.
+        # Also there is no trace of ddt usage in tempest so this looks like
+        # the only way.
+        for disk_format in CONF.volume.disk_format:
+            image_name = data_utils.rand_name(
+                self.__class__.__name__ + '-Image',
+                prefix=CONF.resource_name_prefix)
+            body = self.volumes_client.upload_volume(
+                self.volume['id'], image_name=image_name,
+                disk_format=disk_format)['os-volume_upload_image']
+            image_id = body["image_id"]
+            self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                            self.images_client.delete_image,
+                            image_id)
+            waiters.wait_for_image_status(self.images_client, image_id,
+                                          'active')
+            # This is required for the optimized upload volume path.
+            # New location APIs are async so we need to wait for the location
+            # import task to complete.
+            # This should work with old location API since we don't fail if
+            # there are no tasks for the image
+            waiters.wait_for_image_tasks_status(self.images_client,
+                                                image_id, 'success')
+            waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                    self.volume['id'],
+                                                    'available')
 
-        image_info = self.images_client.show_image(image_id)
-        self.assertEqual(image_name, image_info['name'])
-        self.assertEqual(CONF.volume.disk_format, image_info['disk_format'])
+            image_info = self.images_client.show_image(image_id)
+            self.assertEqual(image_name, image_info['name'])
+            self.assertEqual(disk_format, image_info['disk_format'])
 
     @decorators.idempotent_id('92c4ef64-51b2-40c0-9f7e-4749fbaaba33')
     def test_reserve_unreserve_volume(self):
