@@ -110,8 +110,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-enforce-scope-new-defaults:
             irrelevant-files: *tempest-irrelevant-files
-        - devstack-plugin-ceph-tempest-py3:
-            timeout: 9000
+        - nova-ceph-multistore:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
@@ -156,8 +155,8 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-enforce-scope-new-defaults:
             irrelevant-files: *tempest-irrelevant-files
-        #- devstack-plugin-ceph-tempest-py3:
-        #    irrelevant-files: *tempest-irrelevant-files
+        - nova-ceph-multistore:
+            irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
         - ironic-tempest-bios-ipmi-direct-tinyipa:
@@ -173,8 +172,6 @@
     experimental:
       jobs:
         - nova-multi-cell
-        - nova-ceph-multistore:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-with-latest-microversion
         - tempest-stestr-master
         - tempest-cinder-v2-api:
