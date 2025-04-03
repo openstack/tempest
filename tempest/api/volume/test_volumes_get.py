@@ -18,7 +18,6 @@ from testtools import matchers
 
 from tempest.api.volume import base
 from tempest.common import utils
-from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -38,10 +37,7 @@ class VolumesGetTest(base.BaseVolumeTest):
         # Create a volume
         kwargs['name'] = v_name
         kwargs['metadata'] = metadata
-        volume = self.volumes_client.create_volume(**kwargs)['volume']
-        self.addCleanup(self.delete_volume, self.volumes_client, volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
+        volume = self.create_volume(wait_until='available', **kwargs)
         self.assertEqual(volume['name'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
@@ -103,11 +99,7 @@ class VolumesGetTest(base.BaseVolumeTest):
         params = {'description': new_v_desc,
                   'availability_zone': volume['availability_zone'],
                   'size': CONF.volume.volume_size}
-        new_volume = self.volumes_client.create_volume(**params)['volume']
-        self.addCleanup(self.delete_volume, self.volumes_client,
-                        new_volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                new_volume['id'], 'available')
+        new_volume = self.create_volume(wait_until='available', **params)
 
         params = {'name': volume['name'],
                   'description': volume['description']}
