@@ -157,12 +157,14 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate = self._create_test_aggregate()
 
-        self.client.add_host(aggregate['id'], host=self.hosts[0])
+        hosts = [host for host in self.hosts if (
+            host not in CONF.compute.target_hosts_to_avoid)]
+        self.client.add_host(aggregate['id'], host=hosts[0])
         self.addCleanup(self.client.remove_host, aggregate['id'],
-                        host=self.hosts[0])
+                        host=hosts[0])
 
         self.assertRaises(lib_exc.Conflict, self.client.add_host,
-                          aggregate['id'], host=self.hosts[0])
+                          aggregate['id'], host=hosts[0])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7a53af20-137a-4e44-a4ae-e19260e626d9')
@@ -171,13 +173,15 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate = self._create_test_aggregate()
 
-        self.client.add_host(aggregate['id'], host=self.hosts[0])
+        hosts = [host for host in self.hosts if (
+            host not in CONF.compute.target_hosts_to_avoid)]
+        self.client.add_host(aggregate['id'], host=hosts[0])
         self.addCleanup(self.client.remove_host, aggregate['id'],
-                        host=self.hosts[0])
+                        host=hosts[0])
 
         self.assertRaises(lib_exc.Forbidden,
                           self.aggregates_client.remove_host,
-                          aggregate['id'], host=self.hosts[0])
+                          aggregate['id'], host=hosts[0])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('95d6a6fa-8da9-4426-84d0-eec0329f2e4d')
