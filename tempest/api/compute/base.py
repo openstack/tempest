@@ -18,6 +18,7 @@ import time
 from oslo_log import log as logging
 
 from tempest.common import compute
+from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -732,3 +733,12 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
         for target_host in hosts:
             if source_host != target_host:
                 return target_host
+
+    def get_ssh_client(self, server, validation_resources, admin_pass):
+        return remote_client.RemoteClient(
+            self.get_server_ip(server, validation_resources),
+            self.ssh_user,
+            admin_pass,
+            validation_resources['keypair']['private_key'],
+            server=server,
+            servers_client=self.client)

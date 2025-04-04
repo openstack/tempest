@@ -244,3 +244,9 @@ class RemoteClient(remote_client.RemoteClient):
         """Wrapper for tcp connectivity checks."""
         kwargs.pop('nic', None)
         return self.nc_host(host, **kwargs)
+
+    def get_swap_devs(self):
+        cmd = 'blkid'
+        data = self.exec_command(cmd)
+        devs = [dev for dev in data.splitlines() if 'TYPE="swap"' in dev]
+        return devs
