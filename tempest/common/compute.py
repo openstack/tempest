@@ -255,6 +255,9 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         if CONF.compute.compute_volume_common_az:
             params.setdefault('availability_zone',
                               CONF.compute.compute_volume_common_az)
+        if CONF.volume.volume_type:
+            params.setdefault('volume_type',
+                              CONF.volume.volume_type)
         volume = volumes_client.create_volume(**params)
         try:
             waiters.wait_for_volume_resource_status(volumes_client,
