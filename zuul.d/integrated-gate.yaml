@@ -347,27 +347,6 @@
         devstack_localrc:
           ENABLE_VOLUME_MULTIATTACH: true
 
-# TODO(gmann): As per the 2025.1 testing runtime, we need to run at least
-# one job set on Jammy. These jammy job can be removed in the next
-# cycle(2025.2).
-- job:
-    name: tempest-full-ubuntu-jammy
-    description: This is tempest-full python3 job on Ubuntu Jammy(22.04)
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-jammy
-
-- job:
-    name: tempest-multinode-full-ubuntu-jammy
-    description: This is tempest-multinode-full-py3 python3 job on Ubuntu Jammy(22.04)
-    parent: tempest-multinode-full-py3
-    nodeset: openstack-two-node-jammy
-
-- job:
-    name: tempest-extra-tests-ubuntu-jammy
-    description: This is tempest-extra-tests python3 job on Ubuntu Jammy(22.04)
-    parent: tempest-extra-tests
-    nodeset: openstack-single-node-jammy
-
 - job:
     name: tempest-cinder-v2-api
     parent: devstack-tempest
