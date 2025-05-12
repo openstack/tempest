@@ -252,6 +252,7 @@ class TestDynamicCredentialProvider(base.TestCase):
             reader_func = creds.get_project_alt_reader_creds
         else:
             admin_func = creds.get_project_admin_creds
+            manager_func = creds.get_project_manager_creds
             member_func = creds.get_project_member_creds
             reader_func = creds.get_project_reader_creds
         self._mock_assign_user_role()
@@ -285,6 +286,15 @@ class TestDynamicCredentialProvider(base.TestCase):
         # created project.
         self._request_and_check_second_creds(
             creds, admin_func, member_creds, show_mock, sm_count=2)
+
+        # Now request for the project manager creds which should not create new
+        # project instead should use the project_id of member_creds already
+        # created project.
+        # TODO(gmaan): test test_alt_creds also once alt project
+        # manager is available.
+        if not test_alt_creds:
+            self._request_and_check_second_creds(
+                creds, manager_func, member_creds, show_mock, sm_count=3)
 
     def test_creds_within_same_project(self):
         self._creds_within_same_project()

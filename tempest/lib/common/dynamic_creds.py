@@ -384,8 +384,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                                                        subnet_id=subnet_id)
 
     def _get_project_id(self, credential_type, scope):
-        same_creds = [['admin'], ['member'], ['reader']]
-        same_alt_creds = [['alt_admin'], ['alt_member'], ['alt_reader']]
+        same_creds = [['admin'], ['manager'], ['member'], ['reader']]
+        same_alt_creds = [['alt_admin'], ['alt_manager'],
+                          ['alt_member'], ['alt_reader']]
         search_in = []
         if credential_type in same_creds:
             search_in = same_creds
