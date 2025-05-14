@@ -158,6 +158,7 @@
         - nova-multi-cell
         - tempest-with-latest-microversion
         - tempest-stestr-master
+        - tempest-full-rocky
         - tempest-cinder-v2-api:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
@@ -204,4 +205,5 @@
         - tempest-full-py3-ipv6
         - tempest-centos9-stream-fips
         - tempest-full-centos-9-stream
+        - tempest-full-rocky
         - tempest-full-test-account-no-admin-py3

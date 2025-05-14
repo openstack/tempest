@@ -121,6 +121,19 @@
       tox_envlist: full
 
 - job:
+    name: tempest-full-rocky
+    parent: tempest-full-py3
+    nodeset: devstack-single-node-rockylinux-9
+    description: |
+      Tempest integration test on Rocky Linux
+    vars:
+      configure_swap_size: 4096
+      tox_envlist: full
+      devstack_localrc:
+        # TODO(ykarel) Remove this when moving to rocky10
+        PYTHON3_VERSION: 3.11
+
+- job:
     name: tempest-integrated-networking
     parent: devstack-tempest
     description: |
