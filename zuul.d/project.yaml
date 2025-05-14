@@ -157,6 +157,7 @@
       jobs:
         - nova-multi-cell
         - tempest-with-latest-microversion
+        - tempest-full-oslo-master
         - tempest-stestr-master
         - tempest-cinder-v2-api:
             irrelevant-files: *tempest-irrelevant-files

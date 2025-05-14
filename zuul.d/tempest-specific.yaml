@@ -30,8 +30,15 @@
       - opendev.org/openstack/oslo.utils
       - opendev.org/openstack/oslo.versionedobjects
       - opendev.org/openstack/oslo.vmware
+      # this is a workaround for a packaging bug in ubuntu
+      # remove when https://bugs.launchpad.net/nova/+bug/2109592
+      # is resolved and oslo config is not a dep of the novnc deb
+      # via the defunct python3-novnc package.
+      - novnc/novnc
     vars:
       tox_envlist: full
+      devstack_localrc:
+         NOVNC_FROM_PACKAGE: false
 
 - job:
     name: tempest-full-parallel
