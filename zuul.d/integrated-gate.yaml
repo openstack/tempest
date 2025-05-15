@@ -115,6 +115,9 @@
     description: |
       Base integration test on CentOS 9 stream
     vars:
+      devstack_localrc:
+        # TODO(ykarel) Remove this when moving to 10-stream
+        PYTHON3_VERSION: 3.11
       # Required until bug/1949606 is resolved when using libvirt and QEMU
       # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
       configure_swap_size: 4096
@@ -186,6 +189,9 @@
       and Glance related tests. This is meant to be run on Nova gate only.
       This version of the job also uses CentOS 9 stream.
     vars:
+      devstack_localrc:
+        # TODO(ykarel) Remove this when moving to 10-stream
+        PYTHON3_VERSION: 3.11
       # Required until bug/1949606 is resolved when using libvirt and QEMU
       # >=5.0.0 with a [libvirt]virt_type of qemu (TCG).
       configure_swap_size: 4096
@@ -369,6 +375,9 @@
     timeout: 10800
     nodeset: devstack-single-node-centos-9-stream
     vars:
+      devstack_localrc:
+        # TODO(ykarel) Remove this when moving to 10-stream
+        PYTHON3_VERSION: 3.11
       tox_envlist: full
       configure_swap_size: 4096
       nslookup_target: 'opendev.org'
