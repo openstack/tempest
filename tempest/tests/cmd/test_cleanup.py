@@ -56,8 +56,10 @@ class TestTempestCleanup(base.TestCase):
         c.GOT_EXCEPTIONS.append('exception')
         mock_cleanup.return_value = True
         mock_init.return_value = True
+        parsed_args = mock.Mock()
+        parsed_args.config_file = []
         try:
-            c.take_action(mock.Mock())
+            c.take_action(parsed_args)
         except Exception as exc:
             self.assertEqual(str(exc), '[\'exception\']')
             return

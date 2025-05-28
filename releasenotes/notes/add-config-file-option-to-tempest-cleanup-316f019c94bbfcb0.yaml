@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    A new argument ``--config-file`` has been added to the
+    ``tempest cleanup`` CLI to allow specifying a config file.
+    Without this argument, it will use the default configuration file.

@@ -124,6 +124,7 @@ Runtime Arguments
     complicated logic.
 
 """
+import os
 import sys
 import traceback
 
@@ -148,7 +149,17 @@ class TempestCleanup(command.Command):
 
     GOT_EXCEPTIONS = []
 
+    def _set_conf(self, config_file=None):
+        if config_file:
+            if os.path.exists(os.path.abspath(config_file)):
+                CONF.set_config_path(os.path.abspath(config_file))
+            else:
+                raise FileNotFoundError(
+                    "Config file: %s doesn't exist" % config_file)
+
     def take_action(self, parsed_args):
+        if parsed_args.config_file:
+            self._set_conf(parsed_args.config_file)
         try:
             self.init(parsed_args)
             if not parsed_args.init_saved_state:
@@ -339,6 +350,8 @@ class TempestCleanup(command.Command):
                             "state - all resources present at that moment. "
                             "This option will be ignored if passed with "
                             "--prefix.")
+        parser.add_argument('--config-file', default=None, dest='config_file',
+                            help='Configuration file to cleanup tempest with')
         return parser
 
     def get_description(self):
