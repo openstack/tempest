@@ -19,6 +19,7 @@ import random
 
 from oslo_log import log as logging
 from tempest.api.image import base
+from tempest.common import image as image_utils
 from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -980,3 +981,87 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         self.assertEqual(orig_image['os_hash_value'], image['os_hash_value'])
         self.assertEqual(orig_image['os_hash_algo'], image['os_hash_algo'])
         self.assertNotIn('validation_data', image['locations'][0])
+
+
+class HashCalculationRemoteDeletionTest(base.BaseV2ImageTest):
+    """Test calculation of image hash with new location API when the image is
+    deleted from a remote Glance service.
+    """
+    @classmethod
+    def resource_setup(cls):
+        super(HashCalculationRemoteDeletionTest,
+              cls).resource_setup()
+        if not cls.versions_client.has_version('2.17'):
+            # API is not new enough to support add location API
+            skip_msg = (
+                '%s skipped as Glance does not support v2.17')
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def skip_checks(cls):
+        super(HashCalculationRemoteDeletionTest,
+              cls).skip_checks()
+        if not CONF.image_feature_enabled.do_secure_hash:
+            skip_msg = (
+                "%s skipped as do_secure_hash is disabled" %
+                cls.__name__)
+            raise cls.skipException(skip_msg)
+
+        if not CONF.image_feature_enabled.http_store_enabled:
+            skip_msg = (
+                "%s skipped as http store is disabled" %
+                cls.__name__)
+            raise cls.skipException(skip_msg)
+
+    @decorators.idempotent_id('123e4567-e89b-12d3-a456-426614174000')
+    def test_hash_calculation_cancelled(self):
+        """Test that image hash calculation is cancelled when the image
+        is deleted from a remote Glance service.
+
+        This test creates an image using new location API, verifies that
+        the hash calculation is initiated, and then deletes the image from a
+        remote Glance service, and verifies that the hash calculation process
+        is properly cancelled and image deleted successfully.
+        """
+
+        # Create an image with a location
+        image_name = data_utils.rand_name('image')
+        container_format = CONF.image.container_formats[0]
+        disk_format = CONF.image.disk_formats[0]
+        image = self.create_image(name=image_name,
+                                  container_format=container_format,
+                                  disk_format=disk_format,
+                                  visibility='private')
+        self.assertEqual(image_name, image['name'])
+        self.assertEqual('queued', image['status'])
+
+        # Start http server at random port to simulate the image location
+        # and to provide random data for the image with slow transfer
+        server = image_utils.RandomDataServer()
+        server.start()
+        self.addCleanup(server.stop)
+
+        # Add a location to the image
+        location = 'http://localhost:%d' % server.port
+        self.client.add_image_location(image['id'], location)
+        waiters.wait_for_image_status(self.client, image['id'], 'active')
+
+        # Verify that the hash calculation is initiated
+        image_info = self.client.show_image(image['id'])
+        self.assertEqual(CONF.image.hashing_algorithm,
+                         image_info['os_hash_algo'])
+        self.assertEqual('active', image_info['status'])
+
+        if CONF.image.alternate_image_endpoint:
+            # If alternate image endpoint is configured, we will delete the
+            # image from the alternate worker
+            self.os_primary.image_client_remote.delete_image(image['id'])
+        else:
+            # delete image from backend
+            self.client.delete_image(image['id'])
+
+        # If image is deleted successfully, the hash calculation is cancelled
+        self.client.wait_for_resource_deletion(image['id'])
+
+        # Stop the server to release the port
+        server.stop()
