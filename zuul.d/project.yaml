@@ -39,7 +39,7 @@
         # those in respective stable branch gate.
         - tempest-full-2025-1:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-2023-2:
+        - tempest-full-2024-1:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
@@ -187,15 +187,12 @@
         - tempest-full-2025-1
         - tempest-full-2024-2
         - tempest-full-2024-1
-        - tempest-full-2023-2
         - tempest-slow-2025-1
         - tempest-slow-2024-2
         - tempest-slow-2024-1
-        - tempest-slow-2023-2
         - tempest-full-2025-1-extra-tests
         - tempest-full-2024-2-extra-tests
         - tempest-full-2024-1-extra-tests
-        - tempest-full-2023-2-extra-tests
     periodic:
       jobs:
         - tempest-all
