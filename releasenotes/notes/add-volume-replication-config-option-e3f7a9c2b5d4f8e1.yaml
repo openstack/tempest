@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new config option ``replication`` in the ``volume-feature-enabled``
+    section is added. This boolean option (default: False) allows toggling
+    of Cinder volume replication-related test execution. When enabled, it
+    indicates that the deployment supports volume replication features and
+    replication tests should be executed.
