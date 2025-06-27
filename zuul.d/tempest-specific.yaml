@@ -68,7 +68,6 @@
       run_tempest_cleanup: true
       run_tempest_cleanup_prefix: true
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
       devstack_services:
         s-account: false

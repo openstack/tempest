@@ -77,7 +77,6 @@
           (AttachVolumeMultiAttachTest)|\
           (UpdateMultiattachVolumeNegativeTest)"
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
         GLANCE_USE_IMPORT_WORKFLOW: True
@@ -102,10 +101,6 @@
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
         neutron-trunk: true
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: true
 
 - job:
     name: tempest-multinode-full-py3
@@ -119,16 +114,10 @@
       - ^.*/yoga
       - ^.*/zed
     vars:
-      devstack_localrc:
-        USE_PYTHON3: true
       devstack_plugins:
         neutron: https://opendev.org/openstack/neutron
       devstack_services:
         neutron-trunk: true
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: true
 
 - job:
     name: tempest-multinode-full
@@ -145,12 +134,6 @@
           (DHCPAgentSchedulersTestJSON)|\
           (AttachVolumeMultiAttachTest)|\
           (UpdateMultiattachVolumeNegativeTest)"
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
 
 - job:
     name: tempest-multinode-full
@@ -160,13 +143,6 @@
     branches:
       - ^.*/yoga
       - ^.*/zed
-    vars:
-      devstack_localrc:
-        USE_PYTHON3: False
-    group-vars:
-      subnode:
-        devstack_localrc:
-          USE_PYTHON3: False
 
 - job:
     name: tempest-slow-py3

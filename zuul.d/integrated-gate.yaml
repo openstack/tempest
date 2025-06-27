@@ -94,7 +94,6 @@
       tempest_concurrency: 4
       tox_envlist: integrated-full
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
         GLANCE_USE_IMPORT_WORKFLOW: True
@@ -146,7 +145,6 @@
     vars:
       tox_envlist: integrated-network
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
       devstack_services:
         s-account: false
@@ -178,7 +176,6 @@
       tox_envlist: integrated-compute
       tempest_exclude_regex: ""
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
       devstack_services:
@@ -224,7 +221,6 @@
       tempest_concurrency: 4
       tox_envlist: integrated-placement
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
       devstack_services:
@@ -244,7 +240,6 @@
     vars:
       tox_envlist: integrated-storage
       devstack_localrc:
-        USE_PYTHON3: true
         FORCE_CONFIG_DRIVE: true
         ENABLE_VOLUME_MULTIATTACH: true
         GLANCE_USE_IMPORT_WORKFLOW: True
@@ -258,11 +253,6 @@
       related tests. This is meant to be run on Swift gate only.
     vars:
       tox_envlist: integrated-object-storage
-      devstack_localrc:
-        # NOTE(gmann): swift is not ready on python3 yet and devstack
-        # install it on python2.7 only. But setting the USE_PYTHON3
-        # for future once swift is ready on py3.
-        USE_PYTHON3: true
 
 - job:
     name: tempest-with-latest-microversion
