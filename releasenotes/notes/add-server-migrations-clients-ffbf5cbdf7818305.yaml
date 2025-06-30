@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add the server live migration list and force complete service
+    clients.

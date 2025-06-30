@@ -43,6 +43,7 @@ from tempest.lib.api_schema.response.compute.v2_73 import servers as schemav273
 from tempest.lib.api_schema.response.compute.v2_75 import servers as schemav275
 from tempest.lib.api_schema.response.compute.v2_79 import servers as schemav279
 from tempest.lib.api_schema.response.compute.v2_8 import servers as schemav28
+from tempest.lib.api_schema.response.compute.v2_80 import servers as schemav280
 from tempest.lib.api_schema.response.compute.v2_89 import servers as schemav289
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.api_schema.response.compute.v2_96 import servers as schemav296
@@ -79,7 +80,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.71', 'max': '2.72', 'schema': schemav271},
         {'min': '2.73', 'max': '2.74', 'schema': schemav273},
         {'min': '2.75', 'max': '2.78', 'schema': schemav275},
-        {'min': '2.79', 'max': '2.88', 'schema': schemav279},
+        {'min': '2.79', 'max': '2.79', 'schema': schemav279},
+        {'min': '2.80', 'max': '2.88', 'schema': schemav280},
         {'min': '2.89', 'max': '2.95', 'schema': schemav289},
         {'min': '2.96', 'max': '2.97', 'schema': schemav296},
         {'min': '2.98', 'max': '2.98', 'schema': schemav298},
@@ -548,6 +550,35 @@ class ServersClient(base_compute_client.BaseComputeClient):
         https://docs.openstack.org/api-ref/compute/#live-migrate-server-os-migratelive-action
         """
         return self.action(server_id, 'os-migrateLive', **kwargs)
+
+    def list_in_progress_live_migration(self, server_id, **kwargs):
+        """This should be called with administrator privileges.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#id318
+        """
+        resp, body = self.get('servers/%s/migrations' % server_id)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.list_live_migrations, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def force_complete_live_migration(self, server_id, migration_id, **kwargs):
+        """Force complete a in-progress live migration.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#force-migration-complete-action-force-complete-action
+        """
+        post_body = json.dumps({"force_complete": 'null'})
+        resp, body = self.post('servers/%s/migrations/%s/action' %
+                               (server_id, migration_id),
+                               post_body)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.server_actions_common_schema, resp, body)
+        return rest_client.ResponseBody(resp, body)
 
     def migrate_server(self, server_id, **kwargs):
         """Migrate a server to a new host.
