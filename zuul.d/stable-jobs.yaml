@@ -36,6 +36,24 @@
     override-checkout: stable/2024.1
 
 - job:
+    name: tempest-multinode-2025-1
+    parent: tempest-multinode-full-py3
+    nodeset: openstack-two-node-noble
+    override-checkout: stable/2025.1
+
+- job:
+    name: tempest-multinode-2024-2
+    parent: tempest-multinode-full-py3
+    nodeset: openstack-two-node-jammy
+    override-checkout: stable/2024.2
+
+- job:
+    name: tempest-multinode-2024-1
+    parent: tempest-multinode-full-py3
+    nodeset: openstack-two-node-jammy
+    override-checkout: stable/2024.1
+
+- job:
     name: tempest-slow-2025-1
     parent: tempest-slow-py3
     nodeset: openstack-two-node-noble
