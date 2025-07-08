@@ -51,6 +51,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
                           self.server['id'], nonexistent_volume,
                           volumeId=volume['id'])
 
+    @decorators.skip_because(bug='2112187')
     @decorators.related_bug('1629110', status_code=400)
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7dcac15a-b107-46d3-a5f6-cb863f4e454a')
@@ -71,7 +72,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
         self.attach_volume(self.server, volume)
 
         nonexistent_volume = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.BadRequest,
+        self.assertRaises(lib_exc.Conflict,
                           self.admin_servers_client.update_attached_volume,
                           self.server['id'], volume['id'],
                           volumeId=nonexistent_volume)
@@ -104,6 +105,7 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7576d497-b7c6-44bd-9cc5-c5b4e50fec71')
     @utils.services('volume')
+    @decorators.skip_because(bug='2112187')
     def test_multiattach_rw_volume_update_failure(self):
         """Test swapping volume attached to multi-servers with read-write mode
 

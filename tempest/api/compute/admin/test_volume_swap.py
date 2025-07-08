@@ -80,6 +80,7 @@ class TestVolumeSwap(TestVolumeSwapBase):
     # to swap volumes directly; swap volume is primarily only for volume
     # live migration and retype callbacks from the volume service, and is slow
     # so it's marked as such.
+    @decorators.skip_because(bug='2112187')
     @decorators.attr(type='slow')
     @decorators.idempotent_id('1769f00d-a693-4d67-a631-6a3496773813')
     def test_volume_swap(self):
@@ -92,10 +93,7 @@ class TestVolumeSwap(TestVolumeSwapBase):
         3. Boot an instance "instance1" with non-admin.
         4. Attach "volume1" to "instance1" with non-admin.
         5. Swap volume from "volume1" to "volume2" as admin.
-        6. Check the swap volume is successful and "volume2"
-           is attached to "instance1" and "volume1" is in available state.
-        7. Swap volume from "volume2" to "volume1" as admin.
-        8. Check the swap volume is successful and "volume1"
+        6. Check the swap volume is rejected and "volume1"
            is attached to "instance1" and "volume2" is in available state.
         """
         # Create two volumes.
@@ -118,34 +116,19 @@ class TestVolumeSwap(TestVolumeSwapBase):
         # Attach "volume1" to server
         self.attach_volume(server, volume1)
         # Swap volume from "volume1" to "volume2"
-        self.admin_servers_client.update_attached_volume(
+        self.assertRaises(
+            lib_exc.Conflict, self.admin_servers_client.update_attached_volume,
             server['id'], volume1['id'], volumeId=volume2['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume1['id'], 'available')
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume2['id'], 'in-use')
-        self.wait_for_server_volume_swap(server['id'], volume1['id'],
-                                         volume2['id'])
-        # Verify "volume2" is attached to the server
-        vol_attachments = self.servers_client.list_volume_attachments(
-            server['id'])['volumeAttachments']
-        self.assertEqual(1, len(vol_attachments))
-        self.assertIn(volume2['id'], vol_attachments[0]['volumeId'])
-
-        # Swap volume from "volume2" to "volume1"
-        self.admin_servers_client.update_attached_volume(
-            server['id'], volume2['id'], volumeId=volume1['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume2['id'], 'available')
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume1['id'], 'in-use')
-        self.wait_for_server_volume_swap(server['id'], volume2['id'],
-                                         volume1['id'])
         # Verify "volume1" is attached to the server
         vol_attachments = self.servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(1, len(vol_attachments))
         self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume1['id'], 'in-use')
+        # verify "volume2" is still available
+        waiters.wait_for_volume_resource_status(
+            self.volumes_client, volume2['id'], 'available')
 
 
 class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
