@@ -15,6 +15,7 @@
 from tempest.api.object_storage import base
 from tempest.common import utils
 from tempest import config
+from tempest.lib.common import api_version_request
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
@@ -45,19 +46,37 @@ class AccountQuotasTest(base.BaseObjectTest):
 
     def setUp(self):
         super(AccountQuotasTest, self).setUp()
+        self._set_quota()
 
+    def _set_quota(self, quota_bytes=20, quota_count=5):
         # Set the reselleradmin auth in headers for next account_client
         # request
         self.account_client.auth_provider.set_alt_auth_data(
             request_part='headers',
             auth_data=self.reselleradmin_auth_data
         )
-        # Set a quota of 20 bytes on the user's account before each test
-        self.set_quota = 20
-        headers = {"X-Account-Meta-Quota-Bytes": self.set_quota}
+
+        self.quota_bytes = quota_bytes
+        self.quota_count = quota_count
+
+        headers = {
+            "X-Account-Meta-Quota-Bytes": str(self.quota_bytes),
+            "X-Account-Quota-Count": str(self.quota_count)
+        }
 
         self.os_roles_operator.account_client.request(
             "POST", url="", headers=headers, body="")
+
+    def _get_version(self):
+        swift_version = "latest"
+
+        if CONF.object_storage_feature_enabled.discoverability:
+            body = self.capabilities_client.list_capabilities()
+            _version = body.get('swift', {}).get('version', "latest")
+            swift_version = ".".join(_version.split('.')[:2])
+
+        self.swift_version = api_version_request.APIVersionRequest(
+            swift_version)
 
     def tearDown(self):
         # Set the reselleradmin auth in headers for next account_client
@@ -67,7 +86,10 @@ class AccountQuotasTest(base.BaseObjectTest):
             auth_data=self.reselleradmin_auth_data
         )
         # remove the quota from the container
-        headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
+        headers = {
+            "X-Remove-Account-Meta-Quota-Bytes": "x",
+            "X-Remove-Account-Quota-Count": "x"
+        }
 
         self.os_roles_operator.account_client.request(
             "POST", url="", headers=headers, body="")
@@ -98,7 +120,7 @@ class AccountQuotasTest(base.BaseObjectTest):
         """Test uploading an oversized object raises an OverLimit exception"""
         object_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name="TestObject")
-        data = data_utils.arbitrary_string(self.set_quota + 1)
+        data = data_utils.arbitrary_string(self.quota_bytes + 1)
 
         nbefore = self._get_bytes_used()
 
@@ -160,6 +182,30 @@ class AccountQuotasTest(base.BaseObjectTest):
         )
         self.assertHeaders(resp, 'Object', 'PUT')
 
+    @decorators.idempotent_id('b1e73f75-6905-4021-9d0b-796cd42ce279')
+    @utils.requires_ext(extension='account_quotas', service='object')
+    def test_upload_too_many_objects(self):
+        """Test that uploading objects is blocked when the account object
+        count quota is exceeded.
+
+        Skipped if Swift version < 2.34 as the feature is not supported.
+        """
+        self._get_version()
+
+        if self.swift_version < api_version_request.APIVersionRequest('2.34'):
+            raise self.skipException(
+                'Account object count quota not supported')
+
+        self._set_quota(quota_count=0)
+
+        # Try uploading one more object to exceed the quota
+        self.assertRaises(lib_exc.OverLimit,
+                          self.object_client.create_object,
+                          self.container_name, "OverQuotaObject", "")
+
+        nafter = self._get_object_count()
+        self.assertEqual(0, nafter)
+
     @decorators.attr(type=["smoke"])
     @decorators.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @utils.requires_ext(extension='account_quotas', service='object')
@@ -190,6 +236,10 @@ class AccountQuotasTest(base.BaseObjectTest):
     def _get_account_metadata(self):
         resp, _ = self.account_client.list_account_metadata()
         return resp
+
+    def _get_object_count(self):
+        resp = self._get_account_metadata()
+        return int(resp["x-account-object-count"])
 
     def _get_bytes_used(self):
         resp = self._get_account_metadata()
