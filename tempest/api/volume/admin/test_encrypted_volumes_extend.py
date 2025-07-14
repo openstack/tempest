@@ -34,6 +34,7 @@ class EncryptedVolumesExtendAttachedTest(extend.BaseVolumesExtendAttachedTest,
             raise cls.skipException(
                 "Attached encrypted volume extend is disabled.")
 
+    @decorators.skip_because(bug="2116852")
     @decorators.idempotent_id('e93243ec-7c37-4b5b-a099-ebf052c13216')
     def test_extend_attached_encrypted_volume_luksv1(self):
         """LUKs v1 decrypts and extends through libvirt."""
