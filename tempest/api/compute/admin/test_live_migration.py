@@ -34,6 +34,7 @@ LOG = logging.getLogger(__name__)
 class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
     """Test live migration operations supported by admin user"""
 
+    credentials = ['primary', 'admin', 'project_manager']
     create_default_network = True
 
     @classmethod
@@ -51,13 +52,15 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
     @classmethod
     def setup_clients(cls):
         super(LiveMigrationTestBase, cls).setup_clients()
-        cls.admin_migration_client = cls.os_admin.migrations_client
+        cls.migration_client = cls.os_admin.migrations_client
         cls.networks_client = cls.os_primary.networks_client
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
         cls.trunks_client = cls.os_primary.trunks_client
+        cls.mgr_server_client = cls.admin_servers_client
 
-    def _migrate_server_to(self, server_id, dest_host, volume_backed=False):
+    def _migrate_server_to(self, server_id, dest_host, volume_backed=False,
+                           use_manager_client=False):
         kwargs = dict()
         block_migration = getattr(self, 'block_migration', None)
         if self.block_migration is None:
@@ -66,7 +69,13 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
             block_migration = (CONF.compute_feature_enabled.
                                block_migration_for_live_migration and
                                not volume_backed)
-        self.admin_servers_client.live_migrate_server(
+        if use_manager_client:
+            self.mgr_server_client = self.os_project_manager.servers_client
+            LOG.info("Using project manager for live migrating server: %s, "
+                     "project manager user id: %s",
+                     server_id, self.mgr_server_client.user_id)
+
+        self.mgr_server_client.live_migrate_server(
             server_id, host=dest_host, block_migration=block_migration,
             **kwargs)
 
@@ -74,11 +83,20 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
                       volume_backed=False):
         # If target_host is None, check whether source host is different with
         # the new host after migration.
+        use_manager_client = False
         if target_host is None:
             source_host = self.get_host_for_server(server_id)
-        self._migrate_server_to(server_id, target_host, volume_backed)
+            # NOTE(gmaan): If new policy is enforced and and manager role
+            # is present in nova then use manager user to live migrate.
+            if (CONF.enforce_scope.nova and 'manager' in
+                CONF.compute_feature_enabled.nova_policy_roles):
+                use_manager_client = True
+
+        self._migrate_server_to(server_id, target_host, volume_backed,
+                                use_manager_client)
         waiters.wait_for_server_status(self.servers_client, server_id, state)
-        migration_list = (self.admin_migration_client.list_migrations()
+
+        migration_list = (self.os_admin.migrations_client.list_migrations()
                           ['migrations'])
 
         msg = ("Live Migration failed. Migrations list for Instance "
@@ -98,6 +116,9 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 class LiveMigrationTest(LiveMigrationTestBase):
     max_microversion = '2.24'
     block_migration = None
+    # If test case want to request the destination host to Nova
+    # otherwise Nova scheduler will pick one.
+    request_host = True
 
     @classmethod
     def setup_credentials(cls):
@@ -119,11 +140,12 @@ class LiveMigrationTest(LiveMigrationTestBase):
         server_id = self.create_test_server(wait_until="ACTIVE",
                                             volume_backed=volume_backed)['id']
         source_host = self.get_host_for_server(server_id)
-        if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
+        if (self.request_host and
+            CONF.compute_feature_enabled.can_migrate_between_any_hosts):
+            destination_host = self.get_host_other_than(server_id)
+        else:
             # not to specify a host so that the scheduler will pick one
             destination_host = None
-        else:
-            destination_host = self.get_host_other_than(server_id)
 
         if state == 'PAUSED':
             self.admin_servers_client.pause_server(server_id)
@@ -381,3 +403,16 @@ class LiveAutoBlockMigrationV225Test(LiveMigrationTest):
     min_microversion = '2.25'
     max_microversion = 'latest'
     block_migration = 'auto'
+
+
+class LiveMigrationWithoutHostTest(LiveMigrationTest):
+    # Test live migrations without host and let Nova scheduler will pick one.
+    request_host = False
+
+    @classmethod
+    def skip_checks(cls):
+        super(LiveMigrationWithoutHostTest, cls).skip_checks()
+        if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
+            skip_msg = ("Existing live migration tests are configured to live "
+                        "migrate without requesting host.")
+            raise cls.skipException(skip_msg)
