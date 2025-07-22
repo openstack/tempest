@@ -124,7 +124,12 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @decorators.idempotent_id('4d6d178f-34f6-4bff-a01c-0a2f8fe909e4')
     def test_update_port_with_cidr_address_pair(self):
         """Update allowed address pair with cidr"""
-        self._update_port_with_address(str(self.cidr))
+        # NOTE(slaweq): We need to use the next IP subnet to the one which
+        # is configured in the tempest config as the self.cidr will include
+        # "distributed" port created by the ML2/OVN backend and adding this
+        # particular IP address to the allowed address pair is forbidden by
+        # the ML2/OVN backend.
+        self._update_port_with_address(str(self.cidr.next()))
 
     @decorators.idempotent_id('b3f20091-6cd5-472b-8487-3516137df933')
     def test_update_port_with_multiple_ip_mac_address_pair(self):
