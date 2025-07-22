@@ -17,6 +17,7 @@ from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -52,7 +53,8 @@ class AccountQuotasTest(base.BaseObjectTest):
             auth_data=self.reselleradmin_auth_data
         )
         # Set a quota of 20 bytes on the user's account before each test
-        headers = {"X-Account-Meta-Quota-Bytes": "20"}
+        self.set_quota = 20
+        headers = {"X-Account-Meta-Quota-Bytes": self.set_quota}
 
         self.os_roles_operator.account_client.request(
             "POST", url="", headers=headers, body="")
@@ -89,6 +91,24 @@ class AccountQuotasTest(base.BaseObjectTest):
 
         self.assertHeaders(resp, 'Object', 'PUT')
 
+    @decorators.attr(type="smoke")
+    @decorators.idempotent_id('93fd7776-ae41-4949-8d0c-21889804c1ca')
+    @utils.requires_ext(extension='account_quotas', service='object')
+    def test_overlimit_upload(self):
+        """Test uploading an oversized object raises an OverLimit exception"""
+        object_name = data_utils.rand_name(
+            prefix=CONF.resource_name_prefix, name="TestObject")
+        data = data_utils.arbitrary_string(self.set_quota + 1)
+
+        nbefore = self._get_bytes_used()
+
+        self.assertRaises(lib_exc.OverLimit,
+                          self.object_client.create_object,
+                          self.container_name, object_name, data)
+
+        nafter = self._get_bytes_used()
+        self.assertEqual(nbefore, nafter)
+
     @decorators.attr(type=["smoke"])
     @decorators.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @utils.requires_ext(extension='account_quotas', service='object')
@@ -115,3 +135,11 @@ class AccountQuotasTest(base.BaseObjectTest):
 
             self.assertEqual(resp["status"], "204")
             self.assertHeaders(resp, 'Account', 'POST')
+
+    def _get_account_metadata(self):
+        resp, _ = self.account_client.list_account_metadata()
+        return resp
+
+    def _get_bytes_used(self):
+        resp = self._get_account_metadata()
+        return int(resp["x-account-bytes-used"])
