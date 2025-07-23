@@ -109,6 +109,57 @@ class AccountQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
+    @decorators.idempotent_id('aab68903-cc9f-493a-b17e-b387db3e4e44')
+    @utils.requires_ext(extension='account_quotas', service='object')
+    def test_storage_policy_quota_limit(self):
+        """Verify quota limits are enforced per storage policy"""
+        policy_names = [p["name"] for p in self.policies]
+        if 'silver' not in policy_names:
+            raise self.skipException("Missing storage policy 'silver'")
+
+        policy_quota = 10
+        policy_quota_header = {
+            "X-Account-Quota-Bytes-Policy-silver": str(policy_quota)
+        }
+        self.account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.reselleradmin_auth_data
+        )
+        self.os_roles_operator.account_client.request(
+            "POST", url="", headers=policy_quota_header, body=""
+        )
+
+        # Create a new container using the "silver" storage policy
+        silver_container = data_utils.rand_name("silver-container")
+        headers = {'X-Storage-Policy': 'silver'}
+        self.container_client.create_container(
+            silver_container, **headers
+        )
+
+        # Try uploading an object larger than the quota
+        large_data = data_utils.arbitrary_string(size=policy_quota + 1)
+        object_name = data_utils.rand_name(name='large_object')
+        self.assertRaises(
+            lib_exc.OverLimit,
+            self.object_client.create_object,
+            silver_container,
+            object_name,
+            large_data
+            )
+
+        # Upload same large object to default container
+        default_container = data_utils.rand_name(
+            "default_container"
+        )
+        self.container_client.create_container(default_container)
+        default_object = data_utils.rand_name(name='default_object')
+        resp, _ = self.object_client.create_object(
+            default_container,
+            default_object,
+            large_data
+        )
+        self.assertHeaders(resp, 'Object', 'PUT')
+
     @decorators.attr(type=["smoke"])
     @decorators.idempotent_id('63f51f9f-5f1d-4fc6-b5be-d454d70949d6')
     @utils.requires_ext(extension='account_quotas', service='object')
