@@ -688,6 +688,11 @@ ImageGroup = [
                          'vdi', 'iso', 'vhdx'],
                 help="A list of image's disk formats "
                      "users can specify."),
+    cfg.StrOpt('hashing_algorithm',
+               default='sha512',
+               help=('Hashing algorithm used by glance to calculate image '
+                     'hashes. This configuration value should be same as '
+                     'glance-api.conf: hashing_algorithm config option.')),
     cfg.StrOpt('images_manifest_file',
                default=None,
                help="A path to a manifest.yml generated using the "
@@ -732,6 +737,17 @@ ImageFeaturesGroup = [
                 help=('Indicates that image format is enforced by glance, '
                       'such that we should not expect to be able to upload '
                       'bad images for testing other services.')),
+    cfg.BoolOpt('do_secure_hash',
+                default=True,
+                help=('Is do_secure_hash enabled in glance. '
+                      'This configuration value should be same as '
+                      'glance-api.conf: do_secure_hash config option.')),
+    cfg.BoolOpt('http_store_enabled',
+                default=False,
+                help=('Is http store is enabled in glance. '
+                      'http store needs to be mentioned either in '
+                      'glance-api.conf: stores or in enabled_backends '
+                      'configuration option.')),
 ]
 
 network_group = cfg.OptGroup(name='network',

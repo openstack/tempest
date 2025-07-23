@@ -304,3 +304,13 @@ class ImagesClient(rest_client.RestClient):
         resp, _ = self.delete(url)
         self.expected_success(204, resp.status)
         return rest_client.ResponseBody(resp)
+
+    def add_image_location(self, image_id, url, validation_data=None):
+        """Add location for specific Image."""
+        if not validation_data:
+            validation_data = {}
+        data = json.dumps({'url': url, 'validation_data': validation_data})
+        resp, _ = self.post('images/%s/locations' % (image_id),
+                            data)
+        self.expected_success(202, resp.status)
+        return rest_client.ResponseBody(resp)
