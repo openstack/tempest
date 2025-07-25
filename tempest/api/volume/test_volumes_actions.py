@@ -126,13 +126,6 @@ class VolumesActionsTest(base.BaseVolumeTest):
                             image_id)
             waiters.wait_for_image_status(self.images_client, image_id,
                                           'active')
-            # This is required for the optimized upload volume path.
-            # New location APIs are async so we need to wait for the location
-            # import task to complete.
-            # This should work with old location API since we don't fail if
-            # there are no tasks for the image
-            waiters.wait_for_image_tasks_status(self.images_client,
-                                                image_id, 'success')
             waiters.wait_for_volume_resource_status(self.volumes_client,
                                                     self.volume['id'],
                                                     'available')
