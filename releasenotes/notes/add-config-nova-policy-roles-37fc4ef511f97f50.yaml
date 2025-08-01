@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new config option ``nova_policy_roles`` is added in the
+    ``compute-feature-enabled`` section. This can be used to
+    configure the available roles that are used as default in
+    nova policy rules.
