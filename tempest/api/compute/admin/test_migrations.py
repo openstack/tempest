@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 import testtools
 
 from tempest.api.compute import base
@@ -22,15 +23,27 @@ from tempest.lib import decorators
 from tempest.lib import exceptions
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     """Test migration operations supported by admin user"""
 
+    credentials = ['primary', 'admin', 'project_manager']
+
     @classmethod
     def setup_clients(cls):
         super(MigrationsAdminTest, cls).setup_clients()
         cls.client = cls.os_admin.migrations_client
+        cls.mgr_server_client = cls.admin_servers_client
+        # NOTE(gmaan): If new policy is enforced and and manager role
+        # is present in nova then use manager user to live migrate.
+        if (CONF.enforce_scope.nova and 'manager' in
+            CONF.compute_feature_enabled.nova_policy_roles):
+            cls.mgr_server_client = cls.os_project_manager.servers_client
+            LOG.info("Using project manager for migrating servers, "
+                     "project manager user id: %s",
+                     cls.mgr_server_client.user_id)
 
     @decorators.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
@@ -143,7 +156,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
         src_host = self.get_host_for_server(server['id'])
 
-        self.admin_servers_client.migrate_server(server['id'])
+        self.mgr_server_client.migrate_server(server['id'])
 
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'VERIFY_RESIZE')
