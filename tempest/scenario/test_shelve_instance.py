@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 import testtools
 
 from tempest.common import compute
@@ -23,6 +24,7 @@ from tempest.lib import decorators
 from tempest.scenario import manager
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class TestShelveInstance(manager.ScenarioTest):
@@ -38,12 +40,18 @@ class TestShelveInstance(manager.ScenarioTest):
 
     """
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'project_manager']
 
     @classmethod
     def setup_clients(cls):
         super(TestShelveInstance, cls).setup_clients()
-        cls.admin_servers_client = cls.os_admin.servers_client
+        cls.mgr_servers_client = cls.os_admin.servers_client
+        if (CONF.enforce_scope.nova and 'manager' in
+            CONF.compute_feature_enabled.nova_policy_roles):
+            cls.mgr_servers_client = cls.os_project_manager.servers_client
+            LOG.info("Using project manager for migrating server, "
+                     "project manager user id: %s",
+                     cls.mgr_servers_client.user_id)
 
     @classmethod
     def skip_checks(cls):
@@ -62,7 +70,7 @@ class TestShelveInstance(manager.ScenarioTest):
     def _cold_migrate_server(self, server):
         src_host = self.get_host_for_server(server['id'])
 
-        self.admin_servers_client.migrate_server(server['id'])
+        self.mgr_servers_client.migrate_server(server['id'])
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'VERIFY_RESIZE')
         self.servers_client.confirm_resize_server(server['id'])

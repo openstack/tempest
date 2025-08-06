@@ -33,6 +33,8 @@ LOG = log.getLogger(__name__)
 class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     """Base class for defining methods used in tests."""
 
+    credentials = ['primary', 'admin', 'project_manager']
+
     @classmethod
     def skip_checks(cls):
         super(BaseTestNetworkAdvancedServerOps, cls).skip_checks()
@@ -47,7 +49,7 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
     @classmethod
     def setup_clients(cls):
         super(BaseTestNetworkAdvancedServerOps, cls).setup_clients()
-        cls.admin_servers_client = cls.os_admin.servers_client
+        cls.mgr_server_client = cls.os_admin.servers_client
         cls.sec_group_rules_client = \
             cls.os_primary.security_group_rules_client
         cls.sec_groups_client = cls.os_primary.security_groups_client
@@ -159,7 +161,13 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-        self.admin_servers_client.migrate_server(
+        if (not dest_host and CONF.enforce_scope.nova and 'manager' in
+            CONF.compute_feature_enabled.nova_policy_roles):
+            self.mgr_server_client = self.os_project_manager.servers_client
+            LOG.info("Using project manager for migrating server: %s, "
+                     "project manager user id: %s",
+                     server['id'], self.mgr_server_client.user_id)
+        self.mgr_server_client.migrate_server(
             server['id'], host=dest_host)
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'VERIFY_RESIZE')
@@ -210,8 +218,13 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
         if dest_host:
             migration_kwargs['host'] = dest_host
-
-        self.admin_servers_client.live_migrate_server(
+        elif (CONF.enforce_scope.nova and 'manager' in
+              CONF.compute_feature_enabled.nova_policy_roles):
+            self.mgr_server_client = self.os_project_manager.servers_client
+            LOG.info("Using project manager for migrating server: %s, "
+                     "project manager user id: %s",
+                     server['id'], self.mgr_server_client.user_id)
+        self.mgr_server_client.live_migrate_server(
             server['id'], **migration_kwargs)
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
@@ -260,7 +273,13 @@ class BaseTestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self._wait_server_status_and_check_network_connectivity(
             server, keypair, floating_ip)
 
-        self.admin_servers_client.migrate_server(
+        if (not dest_host and CONF.enforce_scope.nova and 'manager' in
+            CONF.compute_feature_enabled.nova_policy_roles):
+            self.mgr_server_client = self.os_project_manager.servers_client
+            LOG.info("Using project manager for migrating server: %s, "
+                     "project manager user id: %s",
+                     server['id'], self.mgr_server_client.user_id)
+        self.mgr_server_client.migrate_server(
             server['id'], host=dest_host)
         waiters.wait_for_server_status(self.servers_client, server['id'],
                                        'VERIFY_RESIZE')
@@ -415,7 +434,7 @@ class TestNetworkAdvancedServerMigrationWithHost(
         - Cold Migration with revert
         - Live Migration
     """
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'project_manager']
     compute_min_microversion = "2.74"
 
     @classmethod
@@ -441,7 +460,7 @@ class TestNetworkAdvancedServerMigrationWithHost(
         cls.keypairs_client = cls.os_admin.keypairs_client
         cls.floating_ips_client = cls.os_admin.floating_ips_client
         cls.servers_client = cls.os_admin.servers_client
-        cls.admin_servers_client = cls.os_admin.servers_client
+        cls.mgr_server_client = cls.os_admin.servers_client
 
     @decorators.idempotent_id('06e23934-79ae-11ee-b962-0242ac120002')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
