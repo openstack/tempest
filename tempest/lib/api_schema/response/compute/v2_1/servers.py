@@ -520,3 +520,49 @@ show_server_diagnostics = {
         'type': 'object'
     }
 }
+
+list_live_migrations = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'migrations': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'integer'},
+                        'status': {'type': ['string', 'null']},
+                        'server_uuid': {'type': ['string', 'null']},
+                        'source_node': {'type': ['string', 'null']},
+                        'source_compute': {'type': ['string', 'null']},
+                        'dest_node': {'type': ['string', 'null']},
+                        'dest_compute': {'type': ['string', 'null']},
+                        'dest_host': {'type': ['string', 'null']},
+                        'disk_processed_bytes': {'type': ['integer', 'null']},
+                        'disk_remaining_bytes': {'type': ['integer', 'null']},
+                        'disk_total_bytes': {'type': ['integer', 'null']},
+                        'memory_processed_bytes': {
+                            'type': ['integer', 'null']},
+                        'memory_remaining_bytes': {
+                            'type': ['integer', 'null']},
+                        'memory_total_bytes': {'type': ['integer', 'null']},
+                        'created_at': parameter_types.date_time,
+                        'updated_at': parameter_types.date_time_or_null
+                    },
+                    'additionalProperties': False,
+                    'required': [
+                        'id', 'status', 'instance_uuid', 'source_node',
+                        'source_compute', 'dest_node', 'dest_compute',
+                        'dest_host', 'disk_processed_bytes',
+                        'disk_remaining_bytes', 'disk_total_bytes',
+                        'memory_processed_bytes', 'memory_remaining_bytes',
+                        'memory_total_bytes', 'created_at', 'updated_at'
+                    ]
+                }
+            }
+        },
+        'additionalProperties': False,
+        'required': ['migrations']
+    }
+}

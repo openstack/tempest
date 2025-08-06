@@ -26,6 +26,7 @@ from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exceptions
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -416,3 +417,140 @@ class LiveMigrationWithoutHostTest(LiveMigrationTest):
             skip_msg = ("Existing live migration tests are configured to live "
                         "migrate without requesting host.")
             raise cls.skipException(skip_msg)
+
+
+class LiveMigrationManagerWorkflowTest(LiveMigrationTestBase):
+    # This test shows live migrations workflow for the project manager.
+    # NOTE(gmaan): microversion 2.80 adds project_id query param in list
+    # migration API which is what needed by project manager to request
+    # their project migration list.
+    min_microversion = '2.80'
+    block_migration = None
+    request_host = False
+
+    @classmethod
+    def skip_checks(cls):
+        super(LiveMigrationManagerWorkflowTest, cls).skip_checks()
+        # If RBAC new defaults (manager defaults) are not present then we have
+        # existing test cases tests the live migration scenarios.
+        if (not CONF.enforce_scope.nova or 'manager' not in
+            CONF.compute_feature_enabled.nova_policy_roles):
+            skip_msg = ("Nova RBAC new defaults are not enabled or manager "
+                        "role is not present so skipping the project manager "
+                        "specific test.")
+            raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(LiveMigrationManagerWorkflowTest, cls).setup_clients()
+        cls.mgr_server_client = cls.os_project_manager.servers_client
+        LOG.info("Using project manager for live migrating servers, "
+                 "project manager user id: %s",
+                 cls.mgr_server_client.user_id)
+
+    def _initiate_live_migration(self):
+        # Project member create the server.
+        server_id = self.create_test_server(wait_until="ACTIVE")['id']
+        source_host = self.get_host_for_server(server_id)
+        # Project manager does not know about host info so they will not
+        # specify a host to nova and let nova scheduler to pick one.
+        dest_host = None
+
+        LOG.info("Live migrate from source %s", source_host)
+        # Live migrate an instance to another host
+        self._migrate_server_to(
+            server_id, dest_host, use_manager_client=True)
+        # Try to list the in-progress live migation. This list can be empty
+        # if migration is already completed.
+        in_progress_migrations = (
+            self.mgr_server_client.list_in_progress_live_migration(
+                server_id)['migrations'])
+        LOG.info("in-progress live migrations: %s", in_progress_migrations)
+
+        in_progress_migration_uuid = None
+        for migration in in_progress_migrations:
+            if (migration['server_uuid'] == server_id):
+                in_progress_migration_uuid = migration['uuid']
+            # Project manager should not get any host related field.
+            self.assertIsNone(migration['dest_compute'])
+            self.assertIsNone(migration['dest_host'])
+            self.assertIsNone(migration['dest_node'])
+            self.assertIsNone(migration['source_compute'])
+            self.assertIsNone(migration['source_node'])
+
+        return server_id, source_host, in_progress_migration_uuid
+
+    @decorators.attr(type='multinode')
+    @decorators.idempotent_id('cc4e2431-4476-49b0-9a80-d7a2f638f091')
+    def test_live_migration_by_project_manager(self):
+        """Tests live migrations workflow for the project manager.
+
+        - Create server by project member.
+        - Project manager perform the below steps:
+
+          * Initiate the live migration.
+          * List the in-progress live migration. If migration is completed
+            then list might be empty but test does not fail for empty list.
+          * Assuming migration is in progress, force complete the live
+            migration. Test do not fail if migration is already completed
+            and force complete request raise error.
+          * Wait for server to be active.
+          * List migrations with project_id filter, means request only
+            their project migrations. This should return the migration
+            initiated by project manager.
+          * Check if server is migrated to the differnet host than source
+            host.
+        """
+        server_id, source_host, in_progress_migration_uuid = (
+            self._initiate_live_migration())
+        try:
+            # If we know that migration is in progress then try to force
+            # complete it but there is chance that migration might be
+            # completed before test send request to nova. In that case,
+            # test will not fail. It will skip the force complete and
+            # resume to the next step.
+            if in_progress_migration_uuid:
+                LOG.info("Starting force complete live migrations: %s",
+                         in_progress_migration_uuid)
+                self.mgr_server_client.force_complete_live_migration(
+                    server_id, in_progress_migration_uuid)
+                LOG.info("Finish force complete live migrations: %s",
+                         in_progress_migration_uuid)
+        except lib_exceptions.BadRequest:
+            # If migration is already completed then nova will raise
+            # HTTPBadRequest. In that case, log the info and execute the
+            # rest of the steps.
+            LOG.info("Server %s live migration %s is already completed. Due "
+                     "to that force completed live migration is not "
+                     "performed.", server_id, in_progress_migration_uuid)
+
+        waiters.wait_for_server_status(self.mgr_server_client,
+                                       server_id, 'ACTIVE')
+        # List migration with project_id as filter so that manager can
+        # get its own project migrations.
+        mgr_migration_client = self.os_project_manager.migrations_client
+        project_id = mgr_migration_client.project_id
+        migrations = (mgr_migration_client.list_migrations(
+            migration_type='live-migration',
+            project_id=project_id)['migrations'])
+        migration_uuid = None
+        LOG.info("Project %s migrations list: %s", project_id, migrations)
+        for migration in migrations:
+            if (migration['instance_uuid'] == server_id):
+                migration_uuid = migration['uuid']
+            # Check if project manager get other project migrations
+            self.assertEqual(project_id, migration['project_id'])
+            # Project manager should not get any host related field.
+            self.assertIsNone(migration['dest_compute'])
+            self.assertIsNone(migration['dest_host'])
+            self.assertIsNone(migration['dest_node'])
+            self.assertIsNone(migration['source_compute'])
+            self.assertIsNone(migration['source_node'])
+        self.assertIsNotNone(migration_uuid)
+        if in_progress_migration_uuid:
+            self.assertEqual(in_progress_migration_uuid, migration_uuid)
+        msg = ("Server %s Live Migration %s failed.",
+               server_id, migration_uuid)
+        # Check if server is migrated to the differnet host than source host.
+        self.assertNotEqual(source_host,
+                            self.get_host_for_server(server_id), msg)
