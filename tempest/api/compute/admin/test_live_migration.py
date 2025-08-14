@@ -27,6 +27,7 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exceptions
+from tempest.lib.services import clients
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -565,3 +566,245 @@ class LiveMigrationManagerWorkflowTest(LiveMigrationTestBase):
         # Check if server is migrated to the differnet host than source host.
         self.assertNotEqual(source_host,
                             self.get_host_for_server(server_id), msg)
+
+
+class LiveMigrationWithVTPMTest(LiveMigrationTestBase):
+    min_microversion = '2.25'
+    max_microversion = 'latest'
+    block_migration = 'auto'
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
+        skip_msgs = []
+        # The CONF.service_available.barbican config option comes from the
+        # barbican-tempest-plugin, so if it is present we can assume the
+        # secret_v1.SecretClient is also available.
+        if 'barbican' not in CONF.service_available:
+            skip_msgs.append('barbican-tempest-plugin is not installed')
+        elif not CONF.service_available.barbican:
+            skip_msgs.append('Barbican is not available')
+        if not CONF.compute_feature_enabled.vtpm_live_migration:
+            skip_msgs.append('vTPM live migration is not enabled')
+        if skip_msgs:
+            raise cls.skipException(
+                '%s skipped as ' % cls.__name__ + ' and '.join(skip_msgs))
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        if CONF.identity.auth_version == 'v3':
+            cls.auth_uri = CONF.identity.uri_v3
+        else:
+            cls.auth_uri = CONF.identity.uri
+        # Create a key-manager service API client for the non-admin user.
+        service_clients = clients.ServiceClients(cls.os_primary.credentials,
+                                                 cls.auth_uri)
+        cls.os_primary.secrets_client = service_clients.secret_v1.SecretClient(
+            service='key-manager')
+
+        # Create a key-manager service API client for the admin user.
+        service_clients = clients.ServiceClients(cls.os_admin.credentials,
+                                                 cls.auth_uri)
+        cls.os_admin.secrets_client = service_clients.secret_v1.SecretClient(
+            service='key-manager')
+
+    @classmethod
+    def resource_setup(cls):
+        super().resource_setup()
+        # Refer to the user_id of the non-admin user.
+        cls.non_admin_user_id = cls.os_primary.credentials.user_id
+
+    def _secret_check(self, server, secrets_client, expected_creator_id):
+        """Check that the secret status and ownership match what we expect"""
+
+        # We should be able to find the secret using the expected name format
+        name = 'vTPM secret for instance %s' % server['id']
+        secrets = secrets_client.list_secrets(name=name)['secrets']
+        self.assertEqual(
+            1, len(secrets), 'No secret with name "%s" was found' % name)
+        # The secret should be ACTIVE.
+        self.assertEqual('ACTIVE', secrets[0]['status'])
+        # The creator_id (secret owner) should match what we expect.
+        self.assertEqual(expected_creator_id, secrets[0]['creator_id'])
+        # To get the secret UUID, we have to extract it from the 'secret_ref'.
+        # Format example:
+        # http://192.168.56.11/key-manager/v1/secrets/3016223a-b41f-4769-b044-71ba2de1f2b6
+        secret_uuid = secrets[0]['secret_ref'][-36:]
+        # The decrypted secret payload is expected to be accessible.
+        payload = self._secret_get_payload(secret_uuid, secrets_client)
+        self.assertIsNotNone(payload)
+        # Return the secret UUID in case we want to use it.
+        return secret_uuid
+
+    def _secret_get_payload(self, secret_uuid, secrets_client):
+        """Get the secret decrypted payload for a given secret UUID.
+
+        We will use this to verify secret permissions.
+
+        By default API policy, admin who know the secret UUID of a secret owned
+        by a non-admin user are allowed to retrieve secret metadata (GET
+        /secrets/{secret_uuid}) but they are however *not* allowed to retrieve
+        the secret decrypted payload (GET /secrets/{secret_uuid}/payload).
+
+        We will expect admin to fail to retrieve the decrypted secret payload
+        of a non-admin user's secret.
+        """
+        return secrets_client.get_secret_payload(secret_uuid)
+
+    def _create_flavor(self, ram=64, vcpus=2, disk=1, extra_specs=None):
+        flavor = self.create_flavor(ram, vcpus, disk)
+        if extra_specs:
+            self.os_admin.flavors_client.set_flavor_extra_spec(
+                flavor['id'], **extra_specs)
+        return flavor
+
+    @decorators.idempotent_id('f26e8307-d865-4382-85f9-0b1c0a0ad80c')
+    def test_vtpm_live_migration_secret_security_host(self):
+        flavor_specs = {'hw:tpm_version': '1.2',
+                        'hw:tpm_model': 'tpm-tis',
+                        'hw:tpm_secret_security': 'host'}
+        vtpm_flavor = self._create_flavor(extra_specs=flavor_specs)
+
+        # Create server with vtpm device and secret security 'host'
+        server = self.create_test_server(flavor=vtpm_flavor['id'],
+                                         wait_until="ACTIVE")
+
+        # Check the vtpm secret before live migration
+        before_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        self._live_migrate(server['id'], None, 'ACTIVE')
+
+        # Check the vtpm secret again after live migration
+        after_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # The secret UUID should not have changed.
+        self.assertEqual(before_secret_uuid, after_secret_uuid)
+
+        # The admin user should not be able to access the user's secret in the
+        # key manager service.
+        ex = self.assertRaises(lib_exceptions.Forbidden,
+                               self._secret_get_payload, after_secret_uuid,
+                               self.os_admin.secrets_client)
+        self.assertIn('Secret payload retrieval attempt not allowed', str(ex))
+
+        self.delete_server(server['id'])
+
+    @decorators.idempotent_id('d2108f87-a8d7-4cc6-9b05-40258a28c8b4')
+    def test_vtpm_live_migration_opt_in_via_resize_host(self):
+        # Create a flavor with TPM (secret security should default to 'user')
+        flavor_specs = {'hw:tpm_version': '1.2',
+                        'hw:tpm_model': 'tpm-tis'}
+        vtpm_flavor_user = self._create_flavor(extra_specs=flavor_specs)
+
+        server = self.create_test_server(flavor=vtpm_flavor_user['id'],
+                                         wait_until="ACTIVE")
+
+        # We should not be able to live migrate.
+        ex = self.assertRaises(
+            lib_exceptions.BadRequest,
+            self._live_migrate, server['id'], None, 'ACTIVE')
+        self.assertIn(
+            "Operation 'live-migration' not supported for vTPM-enabled "
+            "instance", str(ex))
+
+        # Create a flavor with TPM and secret security 'host'
+        flavor_specs['hw:tpm_secret_security'] = 'host'
+        vtpm_flavor_host = self._create_flavor(extra_specs=flavor_specs)
+
+        # Check the vtpm secret before resize.
+        before_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # Resize to the new flavor and confirm it.
+        self.resize_server(server['id'], vtpm_flavor_host['id'])
+
+        # Check the vtpm secret again after resize.
+        after_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # The secret UUID should not have changed.
+        self.assertEqual(before_secret_uuid, after_secret_uuid)
+
+        # Now try to live migrate again. This should work now.
+        self._live_migrate(server['id'], None, 'ACTIVE')
+
+        # Check the vtpm secret again after live migration
+        after_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # The secret UUID should not have changed.
+        self.assertEqual(before_secret_uuid, after_secret_uuid)
+
+        # The admin user should not be able to access the user's secret in the
+        # key manager service.
+        ex = self.assertRaises(lib_exceptions.Forbidden,
+                               self._secret_get_payload, after_secret_uuid,
+                               self.os_admin.secrets_client)
+        self.assertIn('Secret payload retrieval attempt not allowed', str(ex))
+
+        self.delete_server(server['id'])
+
+    @decorators.idempotent_id('deca0ade-1dd7-44a2-b778-d38223b7070e')
+    def test_vtpm_live_migration_opt_in_via_resize_host_and_revert(self):
+        # Create a flavor with TPM (secret security should default to 'user')
+        flavor_specs = {'hw:tpm_version': '1.2',
+                        'hw:tpm_model': 'tpm-tis'}
+        vtpm_flavor_user = self._create_flavor(extra_specs=flavor_specs)
+
+        server = self.create_test_server(flavor=vtpm_flavor_user['id'],
+                                         wait_until="ACTIVE")
+
+        # We should not be able to live migrate.
+        ex = self.assertRaises(
+            lib_exceptions.BadRequest,
+            self._live_migrate, server['id'], None, 'ACTIVE')
+        self.assertIn(
+            "Operation 'live-migration' not supported for vTPM-enabled "
+            "instance", str(ex))
+
+        # Create a flavor with TPM and secret security 'host'
+        flavor_specs['hw:tpm_secret_security'] = 'host'
+        vtpm_flavor_host = self._create_flavor(extra_specs=flavor_specs)
+
+        # Check the vtpm secret before resize.
+        before_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # Resize to the new flavor and wait for VERIFY_RESIZE.
+        body = self.servers_client.resize_server(server['id'],
+                                                 vtpm_flavor_host['id'])
+        waiters.wait_for_server_status(
+            self.servers_client, server['id'], 'VERIFY_RESIZE',
+            request_id=body.response['x-openstack-request-id'])
+
+        # Check the vtpm secret again after resize.
+        after_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # The secret UUID should not have changed.
+        self.assertEqual(before_secret_uuid, after_secret_uuid)
+
+        # Revert the resize and expect the server to return to ACTIVE state.
+        self.servers_client.revert_resize_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        # Check the vtpm secret again after revert.
+        after_secret_uuid = self._secret_check(
+            server, self.os_primary.secrets_client, self.non_admin_user_id)
+
+        # The secret UUID should not have changed.
+        self.assertEqual(before_secret_uuid, after_secret_uuid)
+
+        # We should still not be able to live migrate.
+        ex = self.assertRaises(
+            lib_exceptions.BadRequest,
+            self._live_migrate, server['id'], None, 'ACTIVE')
+        self.assertIn(
+            "Operation 'live-migration' not supported for vTPM-enabled "
+            "instance", str(ex))
+
+        self.delete_server(server['id'])
