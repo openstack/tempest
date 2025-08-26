@@ -26,11 +26,6 @@ class VolumesAssistedSnapshotsTest(base.BaseV2ComputeAdminTest):
 
     create_default_network = True
 
-    # TODO(gmann): Remove the admin access to service user
-    # once nova change the default of this API to service
-    # role. To merge the nova changing the policy default
-    # we need to use token with admin as well as service
-    # role and later we can use only service token.
     credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
 
     @classmethod
@@ -39,6 +34,13 @@ class VolumesAssistedSnapshotsTest(base.BaseV2ComputeAdminTest):
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+            # NOTE(gmaan): If new policy is enforced and and service role
+            # is present in nova then use service user (no admin role) for
+            # assisted volume snapshots APIs.
+            if (CONF.enforce_scope.nova and 'service' in
+                CONF.compute_feature_enabled.nova_policy_roles):
+                cls.credentials = [
+                    'primary', 'admin', ['service_user', 'service']]
 
     @classmethod
     def setup_clients(cls):

@@ -19,11 +19,6 @@ from tempest.lib import decorators
 class ServerExternalEventsTest(base.BaseV2ComputeAdminTest):
     """Test server external events test"""
 
-    # TODO(gmann): Remove the admin access to service user
-    # once nova change the default of this API to service
-    # role. To merge the nova changing the policy default
-    # we need to use token with admin as well as service
-    # role and later we can use only service token.
     credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
 
     @decorators.idempotent_id('6bbf4723-61d2-4372-af55-7ba27f1c9ba6')

@@ -26,6 +26,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     """Negative tests of volume swapping"""
 
     create_default_network = True
+    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
 
     @classmethod
     def setup_credentials(cls):
@@ -39,6 +40,11 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesAdminNegativeTest, cls).setup_clients()
+        cls.service_client = cls.os_service_user.servers_client
+
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
     def test_update_attached_volume_with_nonexistent_volume_in_uri(self):
@@ -47,7 +53,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
         volume = self.create_volume()
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.admin_servers_client.update_attached_volume,
+                          self.service_client.update_attached_volume,
                           self.server['id'], nonexistent_volume,
                           volumeId=volume['id'])
 
@@ -73,7 +79,7 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
 
         nonexistent_volume = data_utils.rand_uuid()
         self.assertRaises(lib_exc.Conflict,
-                          self.admin_servers_client.update_attached_volume,
+                          self.service_servers_client.update_attached_volume,
                           self.server['id'], volume['id'],
                           volumeId=nonexistent_volume)
 
@@ -90,6 +96,7 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     volume_min_microversion = '3.27'
 
     create_default_network = True
+    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
 
     @classmethod
     def setup_credentials(cls):
@@ -101,6 +108,11 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         super(UpdateMultiattachVolumeNegativeTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.volume_multiattach:
             raise cls.skipException('Volume multi-attach is not available.')
+
+    @classmethod
+    def setup_clients(cls):
+        super(UpdateMultiattachVolumeNegativeTest, cls).setup_clients()
+        cls.service_client = cls.os_service_user.servers_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7576d497-b7c6-44bd-9cc5-c5b4e50fec71')
@@ -160,10 +172,10 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         # Assert that a BadRequest is raised when we attempt to update volume1
         # to volume2 on server1 or server2.
         self.assertRaises(lib_exc.BadRequest,
-                          self.admin_servers_client.update_attached_volume,
+                          self.service_client.update_attached_volume,
                           server1['id'], vol1['id'], volumeId=vol2['id'])
         self.assertRaises(lib_exc.BadRequest,
-                          self.admin_servers_client.update_attached_volume,
+                          self.service_client.update_attached_volume,
                           server2['id'], vol1['id'], volumeId=vol2['id'])
 
         # Fetch the volume 1 to check the current attachments.
