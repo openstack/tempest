@@ -1,0 +1,6 @@
+=====================
+v45.0.0 Release Notes
+=====================
+
+.. release-notes:: 45.0.0 Release Notes
+   :version: 45.0.0
