@@ -204,3 +204,44 @@ class VolumeRetypeWithoutMigrationTest(VolumeRetypeTest):
 
         # Retype the volume from snapshot
         self._retype_volume(src_vol, migration_policy='never')
+
+
+class VolumeRetypeMultiattachTest(VolumeRetypeTest):
+    """Test volume retype with/without multiattach"""
+
+    volume_min_microversion = '3.50'
+    volume_max_microversion = 'latest'
+
+    @classmethod
+    def resource_setup(cls):
+        super(VolumeRetypeMultiattachTest, cls).resource_setup()
+        extra_specs_src = {"multiattach": '<is> True'}
+        cls.src_vol_type = cls.create_volume_type()
+        cls.dst_vol_type = cls.create_volume_type(extra_specs=extra_specs_src)
+
+    def _verify_migration(self, source_vol, dest_vol):
+        self.assertEqual(dest_vol['status'], "available")
+        self.assertEqual(dest_vol['volume_type'], self.dst_vol_type['name'])
+        if "multiattach" in self.dst_vol_type['extra_specs'].keys():
+            self.assertEqual(dest_vol['multiattach'], True)
+        else:
+            self.assertEqual(dest_vol['multiattach'], False)
+
+    @decorators.idempotent_id('c0521465-ed82-4d03-961d-a68d673a5051')
+    def test_volume_retype_multiattach(self):
+        """Test volume retype with/without multiattach
+
+        1. Create dst_vol_type with "multiattach = '<is> True'"
+        2. Create src_vol_type without the "multiattach" property
+        3. Retype volume from src_vol_type (non-multiattach)
+           to dst_vol_type(multiattach) and vice versa
+        4. Verify successful retype.
+        """
+        # Retype from non-multiattach to multiattach
+        vol = self.create_volume(volume_type=self.src_vol_type['name'])
+        self._retype_volume(vol, migration_policy='never')
+
+        self.dst_vol_type = self.src_vol_type
+
+        # Retype from multiattach to non-multiattach
+        self._retype_volume(vol, migration_policy='never')
