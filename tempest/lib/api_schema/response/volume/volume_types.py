@@ -31,8 +31,7 @@ common_show_volume_type = {
         'qos_specs_id': {'type': ['string', 'null'], 'format': 'uuid'}
     },
     'additionalProperties': False,
-    'required': ['name', 'is_public', 'description', 'id',
-                 'os-volume-type-access:is_public']
+    'required': ['name', 'is_public', 'description', 'id']
 }
 
 show_volume_type = {
