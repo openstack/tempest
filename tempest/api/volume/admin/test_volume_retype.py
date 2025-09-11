@@ -213,6 +213,12 @@ class VolumeRetypeMultiattachTest(VolumeRetypeTest):
     volume_max_microversion = 'latest'
 
     @classmethod
+    def skip_checks(cls):
+        super(VolumeRetypeMultiattachTest, cls).skip_checks()
+        if not CONF.compute_feature_enabled.volume_multiattach:
+            raise cls.skipException('Volume multi-attach is not available.')
+
+    @classmethod
     def resource_setup(cls):
         super(VolumeRetypeMultiattachTest, cls).resource_setup()
         extra_specs_src = {"multiattach": '<is> True'}
