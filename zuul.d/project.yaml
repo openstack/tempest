@@ -37,7 +37,7 @@
         # if things are working in latest and oldest it will work in between
         # stable branches also. If anything is breaking we will be catching
         # those in respective stable branch gate.
-        - tempest-full-2025-1:
+        - tempest-full-2025-2:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-2024-1:
             irrelevant-files: *tempest-irrelevant-files
@@ -184,27 +184,35 @@
             irrelevant-files: *tempest-irrelevant-files
         # Run stable releases jobs except those are running in check
         # pipeline already
+        - tempest-full-2025-1
         - tempest-full-2024-2
+        - tempest-multinode-2025-2
         - tempest-multinode-2025-1
         - tempest-multinode-2024-2
         - tempest-multinode-2024-1
+        - tempest-slow-2025-2
         - tempest-slow-2025-1
         - tempest-slow-2024-2
         - tempest-slow-2024-1
+        - tempest-full-2025-2-extra-tests
         - tempest-full-2025-1-extra-tests
         - tempest-full-2024-2-extra-tests
         - tempest-full-2024-1-extra-tests
     periodic-stable:
       jobs:
+        - tempest-full-2025-2
         - tempest-full-2025-1
         - tempest-full-2024-2
         - tempest-full-2024-1
+        - tempest-multinode-2025-2
         - tempest-multinode-2025-1
         - tempest-multinode-2024-2
         - tempest-multinode-2024-1
+        - tempest-slow-2025-2
         - tempest-slow-2025-1
         - tempest-slow-2024-2
         - tempest-slow-2024-1
+        - tempest-full-2025-2-extra-tests
         - tempest-full-2025-1-extra-tests
         - tempest-full-2024-2-extra-tests
         - tempest-full-2024-1-extra-tests
