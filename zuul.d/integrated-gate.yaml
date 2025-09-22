@@ -452,6 +452,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-networking
@@ -479,6 +480,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         # Do not run it on ussuri until below issue is fixed
@@ -523,6 +525,7 @@
               - ^.*/2024.1
               - ^.*/2024.2
               - ^.*/2025.1
+              - ^.*/2025.2
               - master
         - tempest-integrated-compute
         # Do not run it on ussuri until below issue is fixed
@@ -541,6 +544,7 @@
               - ^.*/2024.1
               - ^.*/2024.2
               - ^.*/2025.1
+              - ^.*/2025.2
               - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
@@ -584,6 +588,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-placement
@@ -611,6 +616,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         # Do not run it on ussuri until below issue is fixed
@@ -651,6 +657,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-storage
@@ -677,6 +684,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-storage
@@ -711,6 +719,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-object-storage
@@ -737,6 +746,7 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
+              - ^.*/2025.2
               - ^.*/2025.1
               - master
         - tempest-integrated-object-storage
