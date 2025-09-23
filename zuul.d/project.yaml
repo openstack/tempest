@@ -113,8 +113,6 @@
         - neutron-ovs-tempest-dvr:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - interop-tempest-consistency:
-            irrelevant-files: *tempest-irrelevant-files
         - tempest-full-test-account-py3:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
