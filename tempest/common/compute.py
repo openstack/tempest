@@ -19,9 +19,11 @@ from ssl import SSLContext as sslc
 import struct
 import textwrap
 from urllib import parse as urlparse
+import urllib3
 
 from oslo_log import log as logging
 from oslo_utils import excutils
+import testtools
 
 from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
@@ -548,3 +550,122 @@ class _WebSocket(object):
             self.cached_stream = self.response[end_loc + 4:]
             # ensure response ends with '\r\n\r\n'.
             self.response = self.response[:end_loc + 4]
+
+
+class NoVNCValidateMixin(testtools.TestCase):
+    """Mixin methods to validate a novnc connection."""
+
+    def validate_novnc_html(self, vnc_url):
+        """Verify we can connect to novnc and get back the javascript."""
+
+        resp = urllib3.PoolManager().request('GET', vnc_url)
+        # Make sure that the GET request was accepted by the novncproxy
+        self.assertEqual(resp.status, 200, 'Got a Bad HTTP Response on the '
+                         'initial call: ' + str(resp.status))
+        # Do some basic validation to make sure it is an expected HTML document
+        resp_data = resp.data.decode()
+        # This is needed in the case of example: <html lang="en">
+        self.assertRegex(resp_data, '<html.*>',
+                         'Not a valid html document in the response.')
+        self.assertIn('</html>', resp_data,
+                      'Not a valid html document in the response.')
+        # Just try to make sure we got JavaScript back for noVNC, since we
+        # won't actually use it since not inside of a browser
+        self.assertIn('noVNC', resp_data,
+                      'Not a valid noVNC javascript html document.')
+        self.assertIn('<script', resp_data,
+                      'Not a valid noVNC javascript html document.')
+
+    def validate_rfb_negotiation(self):
+        """Verify we can connect to novnc and do the websocket connection."""
+        self.assertIsNotNone(self.websocket)
+        # Turn the Socket into a WebSocket to do the communication
+        data = self.websocket.receive_frame()
+        self.assertFalse(data is None or not data,
+                         'Token must be invalid because the connection '
+                         'closed.')
+        # Parse the RFB version from the data to make sure it is valid
+        # and belong to the known supported RFB versions.
+        version = float("%d.%d" % (int(data[4:7], base=10),
+                                   int(data[8:11], base=10)))
+        # Add the max RFB versions supported
+        supported_versions = [3.3, 3.8]
+        self.assertIn(version, supported_versions,
+                      'Bad RFB Version: ' + str(version))
+        # Send our RFB version to the server
+        self.websocket.send_frame(data)
+        # Get the sever authentication type and make sure None is supported
+        data = self.websocket.receive_frame()
+        self.assertIsNotNone(data, 'Expected authentication type None.')
+        data_length = len(data)
+        if version == 3.3:
+            # For RFB 3.3: in the security handshake, rather than a two-way
+            # negotiation, the server decides the security type and sends a
+            # single word(4 bytes).
+            self.assertEqual(
+                data_length, 4, 'Expected authentication type None.')
+            self.assertIn(1, [int(data[i]) for i in (0, 3)],
+                          'Expected authentication type None.')
+        else:
+            self.assertGreaterEqual(
+                len(data), 2, 'Expected authentication type None.')
+            self.assertIn(
+                1,
+                [int(data[i + 1]) for i in range(int(data[0]))],
+                'Expected authentication type None.')
+            # Send to the server that we only support authentication
+            # type None
+            self.websocket.send_frame(bytes((1,)))
+
+            # The server should send 4 bytes of 0's if security
+            # handshake succeeded
+            data = self.websocket.receive_frame()
+            self.assertEqual(
+                len(data), 4,
+                'Server did not think security was successful.')
+            self.assertEqual(
+                [int(i) for i in data], [0, 0, 0, 0],
+                'Server did not think security was successful.')
+
+        # Say to leave the desktop as shared as part of client initialization
+        self.websocket.send_frame(bytes((1,)))
+        # Get the server initialization packet back and make sure it is the
+        # right structure where bytes 20-24 is the name length and
+        # 24-N is the name
+        data = self.websocket.receive_frame()
+        data_length = len(data) if data is not None else 0
+        self.assertFalse(data_length <= 24 or
+                         data_length != (struct.unpack(">L",
+                                                       data[20:24])[0] + 24),
+                         'Server initialization was not the right format.')
+        # Since the rest of the data on the screen is arbitrary, we will
+        # close the socket and end our validation of the data at this point
+        # Assert that the latest check was false, meaning that the server
+        # initialization was the right format
+        self.assertFalse(data_length <= 24 or
+                         data_length != (struct.unpack(">L",
+                                                       data[20:24])[0] + 24))
+
+    def validate_websocket_upgrade(self):
+        """Verify that the websocket upgrade was successful.
+
+        Parses response and ensures that required response
+        fields are present and accurate.
+        (https://tools.ietf.org/html/rfc7231#section-6.2.2)
+        """
+
+        self.assertIsNotNone(self.websocket)
+        self.assertTrue(
+            self.websocket.response.startswith(b'HTTP/1.1 101 Switching '
+                                               b'Protocols'),
+            'Incorrect HTTP return status code: {}'.format(
+                str(self.websocket.response)
+            )
+        )
+        _required_header = 'upgrade: websocket'
+        _response = str(self.websocket.response).lower()
+        self.assertIn(
+            _required_header,
+            _response,
+            'Did not get the expected WebSocket HTTP Response.'
+        )
