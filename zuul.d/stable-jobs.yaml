@@ -1,4 +1,11 @@
 # NOTE(gmann): This file includes all stable release jobs definition.
+
+- job:
+    name: tempest-full-2025-2
+    parent: tempest-full-py3
+    nodeset: openstack-single-node-noble
+    override-checkout: stable/2025.2
+
 - job:
     name: tempest-full-2025-1
     parent: tempest-full-py3
@@ -16,6 +23,12 @@
     parent: tempest-full-py3
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2024.1
+
+- job:
+    name: tempest-full-2025-2-extra-tests
+    parent: tempest-extra-tests
+    nodeset: openstack-single-node-noble
+    override-checkout: stable/2025.2
 
 - job:
     name: tempest-full-2025-1-extra-tests
@@ -36,6 +49,12 @@
     override-checkout: stable/2024.1
 
 - job:
+    name: tempest-multinode-2025-2
+    parent: tempest-multinode-full-py3
+    nodeset: openstack-two-node-noble
+    override-checkout: stable/2025.2
+
+- job:
     name: tempest-multinode-2025-1
     parent: tempest-multinode-full-py3
     nodeset: openstack-two-node-noble
@@ -52,6 +71,12 @@
     parent: tempest-multinode-full-py3
     nodeset: openstack-two-node-jammy
     override-checkout: stable/2024.1
+
+- job:
+    name: tempest-slow-2025-2
+    parent: tempest-slow-py3
+    nodeset: openstack-two-node-noble
+    override-checkout: stable/2025.2
 
 - job:
     name: tempest-slow-2025-1
