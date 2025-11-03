@@ -25,11 +25,11 @@
     target_branch: "{{ zuul.override_checkout }}"
   when: zuul.override_checkout is defined
 
-- name: Use stable branch upper-constraints till 2023.1
+- name: Use stable branch upper-constraints till 2025.1
   set_fact:
     # TOX_CONSTRAINTS_FILE is new name, UPPER_CONSTRAINTS_FILE is old one, best to set both
     tempest_tox_environment: "{{ tempest_tox_environment | combine({'UPPER_CONSTRAINTS_FILE': stable_constraints_file}) | combine({'TOX_CONSTRAINTS_FILE': stable_constraints_file}) }}"
-  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein", "stable/train", "stable/ussuri", "stable/2023.1", "unmaintained/victoria", "unmaintained/wallaby", "unmaintained/xena", "unmaintained/yoga", "unmaintained/zed", "unmaintained/2023.1"]
+  when: target_branch in ["stable/ocata", "stable/pike", "stable/queens", "stable/rocky", "stable/stein", "stable/train", "stable/ussuri", "stable/2023.1", "unmaintained/victoria", "unmaintained/wallaby", "unmaintained/xena", "unmaintained/yoga", "unmaintained/zed", "unmaintained/2023.1", "unmaintained/2024.1", "stable/2024.2", "stable/2025.1"]
 
 - name: Use Configured upper-constraints for non-master Tempest
   set_fact:
