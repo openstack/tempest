@@ -1,0 +1,8 @@
+---
+prelude: >
+    Tempest dropped the support of python 3.9.
+upgrade:
+  - |
+    Python 3.9 support has been dropped. The last release of Tempest
+    to support python 3.9 is Temepst 45.0.0. The minimum version
+    of Python supported by Tempest is python 3.10.

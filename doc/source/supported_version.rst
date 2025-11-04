@@ -33,7 +33,6 @@ Supported Python Versions
 
 Tempest master supports the below python versions:
 
-* Python 3.9
 * Python 3.10
 * Python 3.11
 * Python 3.12
