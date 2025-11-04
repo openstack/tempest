@@ -11,6 +11,7 @@
         - openstack-tox-py310
         - openstack-tox-py311
         - openstack-tox-py312
+        - openstack-tox-py313
         - tempest-full-py3:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
@@ -125,6 +126,7 @@
         - openstack-tox-py310
         - openstack-tox-py311
         - openstack-tox-py312
+        - openstack-tox-py313
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
