@@ -1,5 +1,5 @@
 ---
-prelude: >
+prelude: |
     This release is to tag Tempest for OpenStack 2025.1 release.
     This release marks the start of 2025.1 release support in Tempest.
     After this release, Tempest will support below OpenStack Releases:
