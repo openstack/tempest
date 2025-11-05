@@ -282,6 +282,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
         """
         block_device_mapping_v2 = [{
             "boot_index": "0",
+            "delete_on_termination": "true",
             "source_type": "blank",
             "volume_size": CONF.volume.volume_size,
             "destination_type": "volume"}]
@@ -300,6 +301,7 @@ class ServerBootFromVolumeStableRescueTest(BaseServerStableDeviceRescueTest):
         """
         block_device_mapping_v2 = [{
             "boot_index": "0",
+            "delete_on_termination": "true",
             "source_type": "image",
             "volume_size": CONF.volume.volume_size,
             "uuid": CONF.compute.image_ref,
