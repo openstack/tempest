@@ -19,12 +19,6 @@
     override-checkout: stable/2024.2
 
 - job:
-    name: tempest-full-2024-1
-    parent: tempest-full-py3
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2024.1
-
-- job:
     name: tempest-full-2025-2-extra-tests
     parent: tempest-extra-tests
     nodeset: openstack-single-node-noble
@@ -41,12 +35,6 @@
     parent: tempest-extra-tests
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2024.2
-
-- job:
-    name: tempest-full-2024-1-extra-tests
-    parent: tempest-extra-tests
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2024.1
 
 - job:
     name: tempest-multinode-2025-2
@@ -67,12 +55,6 @@
     override-checkout: stable/2024.2
 
 - job:
-    name: tempest-multinode-2024-1
-    parent: tempest-multinode-full-py3
-    nodeset: openstack-two-node-jammy
-    override-checkout: stable/2024.1
-
-- job:
     name: tempest-slow-2025-2
     parent: tempest-slow-py3
     nodeset: openstack-two-node-noble
@@ -89,12 +71,6 @@
     parent: tempest-slow-py3
     nodeset: openstack-two-node-jammy
     override-checkout: stable/2024.2
-
-- job:
-    name: tempest-slow-2024-1
-    parent: tempest-slow-py3
-    nodeset: openstack-two-node-jammy
-    override-checkout: stable/2024.1
 
 - job:
     name: tempest-full-py3
