@@ -116,7 +116,7 @@
         - tempest-full-test-account-py3:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - ironic-tempest-bios-ipmi-direct-tinyipa:
+        - ironic-tempest-bios-ipmi-direct:
             irrelevant-files: *tempest-irrelevant-files
         - openstack-tox-bashate:
             irrelevant-files: *tempest-irrelevant-files-2
@@ -149,7 +149,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
-        - ironic-tempest-bios-ipmi-direct-tinyipa:
+        - ironic-tempest-bios-ipmi-direct:
             irrelevant-files: *tempest-irrelevant-files
     experimental:
       jobs:
