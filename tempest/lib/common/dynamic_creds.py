@@ -427,7 +427,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                 elif credential_type in [['admin'], ['alt_admin']]:
                     credentials = self._create_creds(
                         admin=True, scope=scope, project_id=project_id)
-                elif credential_type in [['alt_member'], ['alt_reader']]:
+                elif credential_type in [['alt_manager'], ['alt_member'],
+                                         ['alt_reader']]:
                     cred_type = credential_type[0][4:]
                     if isinstance(cred_type, str):
                         cred_type = [cred_type]
@@ -510,6 +511,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
 
     def get_project_manager_creds(self):
         return self.get_credentials(['manager'], scope='project')
+
+    def get_project_alt_manager_creds(self):
+        return self.get_credentials(['alt_manager'], scope='project')
 
     def get_project_member_creds(self):
         return self.get_credentials(['member'], scope='project')

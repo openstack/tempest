@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Add alt manager role to the dynamic credentials provider for project scope.

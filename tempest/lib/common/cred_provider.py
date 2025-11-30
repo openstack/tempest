@@ -100,6 +100,10 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
         return
 
     @abc.abstractmethod
+    def get_project_alt_manager_creds(self):
+        return
+
+    @abc.abstractmethod
     def get_project_member_creds(self):
         return
 
