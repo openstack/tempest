@@ -407,7 +407,7 @@ class TestTempestBaseTestClass(base.TestCase):
             def get_identity_version(cls):
                 return identity_version
 
-        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+        with testtools.ExpectedException(unittest.SkipTest):
             NeedAdmin().skip_checks()
         mock_iaa.assert_called_once_with('identity_version')
 
@@ -417,7 +417,7 @@ class TestTempestBaseTestClass(base.TestCase):
         class NeedV2(self.parent_test):
             identity_version = 'v2'
 
-        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+        with testtools.ExpectedException(unittest.SkipTest):
             NeedV2().skip_checks()
 
     def test_skip_checks_identity_v3_not_available(self):
@@ -426,7 +426,7 @@ class TestTempestBaseTestClass(base.TestCase):
         class NeedV3(self.parent_test):
             identity_version = 'v3'
 
-        with testtools.ExpectedException(testtools.testcase.TestSkipped):
+        with testtools.ExpectedException(unittest.SkipTest):
             NeedV3().skip_checks()
 
     def test_setup_credentials_all(self):
