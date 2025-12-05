@@ -58,7 +58,7 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
         cls.trunks_client = cls.os_primary.trunks_client
-        cls.mgr_server_client = cls.admin_servers_client
+        cls.server_client = cls.admin_servers_client
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False,
                            use_manager_client=False):
@@ -70,13 +70,19 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
             block_migration = (CONF.compute_feature_enabled.
                                block_migration_for_live_migration and
                                not volume_backed)
+        # Avoid changing self.server_client permanently because
+        # [compute_feature_enabled]live_migrate_back_and_forth might be
+        # set to True. If it is, the test will live migrate the server back to
+        # the source using the os-migrate-server:migrate_live:host API, which
+        # is not allowed for project manager by default policy.
+        server_client = self.server_client
         if use_manager_client:
-            self.mgr_server_client = self.os_project_manager.servers_client
+            server_client = self.os_project_manager.servers_client
             LOG.info("Using project manager for live migrating server: %s, "
                      "project manager user id: %s",
-                     server_id, self.mgr_server_client.user_id)
+                     server_id, server_client.user_id)
 
-        self.mgr_server_client.live_migrate_server(
+        server_client.live_migrate_server(
             server_id, host=dest_host, block_migration=block_migration,
             **kwargs)
 
