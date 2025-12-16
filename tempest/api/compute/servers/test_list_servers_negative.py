@@ -15,19 +15,28 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
+
+
+CONF = config.CONF
 
 
 class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     """Negative tests of listing servers"""
 
+    credentials = ['primary', 'project_reader']
     create_default_network = True
 
     @classmethod
     def setup_clients(cls):
         super(ListServersNegativeTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.servers_client
+        else:
+            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -49,7 +58,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_with_a_deleted_server(self):
         """Test that deleted servers do not show by default in list servers"""
         # List servers and verify server not returned
-        body = self.client.list_servers()
+        body = self.reader_client.list_servers()
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] == self.deleted_id]
@@ -59,7 +68,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('ff01387d-c7ad-47b4-ae9e-64fa214638fe')
     def test_list_servers_by_non_existing_image(self):
         """Test listing servers for a non existing image returns empty list"""
-        body = self.client.list_servers(image='non_existing_image')
+        body = self.reader_client.list_servers(image='non_existing_image')
         servers = body['servers']
         self.assertEmpty(servers)
 
@@ -67,7 +76,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('5913660b-223b-44d4-a651-a0fbfd44ca75')
     def test_list_servers_by_non_existing_flavor(self):
         """Test listing servers by non existing flavor returns empty list"""
-        body = self.client.list_servers(flavor='non_existing_flavor')
+        body = self.reader_client.list_servers(flavor='non_existing_flavor')
         servers = body['servers']
         self.assertEmpty(servers)
 
@@ -80,7 +89,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         list.
         """
 
-        body = self.client.list_servers(name='non_existing_server_name')
+        body = self.reader_client.list_servers(name='non_existing_server_name')
         servers = body['servers']
         self.assertEmpty(servers)
 
@@ -95,12 +104,14 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         """
 
         if self.is_requested_microversion_compatible('2.37'):
-            body = self.client.list_servers(status='non_existing_status')
+            body = self.reader_client.list_servers(
+                status='non_existing_status')
             servers = body['servers']
             self.assertEmpty(servers)
         else:
-            self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
-                              status='non_existing_status')
+            self.assertRaises(
+                lib_exc.BadRequest, self.reader_client.list_servers,
+                status='non_existing_status')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('d47c17fb-eebd-4287-8e95-f20a7e627b18')
@@ -112,24 +123,24 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         """
 
         # Gather the complete list of servers in the project for reference
-        full_list = self.client.list_servers()['servers']
+        full_list = self.reader_client.list_servers()['servers']
         # List servers by specifying a greater value for limit
         limit = len(full_list) + 100
-        body = self.client.list_servers(limit=limit)
+        body = self.reader_client.list_servers(limit=limit)
         self.assertEqual(len(full_list), len(body['servers']))
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('679bc053-5e70-4514-9800-3dfab1a380a6')
     def test_list_servers_by_limits_pass_string(self):
         """Test listing servers by non-integer limit should fail"""
-        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.reader_client.list_servers,
                           limit='testing')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('62610dd9-4713-4ee0-8beb-fd2c1aa7f950')
     def test_list_servers_by_limits_pass_negative_value(self):
         """Test listing servers by negative limit should fail"""
-        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.reader_client.list_servers,
                           limit=-1)
 
     @decorators.attr(type=['negative'])
@@ -137,7 +148,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_changes_since_invalid_date(self):
         """Test listing servers by invalid changes-since format should fail"""
         params = {'changes-since': '2011/01/01'}
-        self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
+        self.assertRaises(lib_exc.BadRequest, self.reader_client.list_servers,
                           **params)
 
     @decorators.attr(type=['negative'])
@@ -154,14 +165,14 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # {'status': 'ACTIVE'} along with changes-since as filter.
         changes_since = {'changes-since': '2051-01-01T12:34:00Z',
                          'status': 'ACTIVE'}
-        body = self.client.list_servers(**changes_since)
+        body = self.reader_client.list_servers(**changes_since)
         self.assertEmpty(body['servers'])
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('93055106-2d34-46fe-af68-d9ddbf7ee570')
     def test_list_servers_detail_server_is_deleted(self):
         """Test listing servers detail should not contain deleted server"""
-        body = self.client.list_servers(detail=True)
+        body = self.reader_client.list_servers(detail=True)
         servers = body['servers']
         actual = [srv for srv in servers
                   if srv['id'] == self.deleted_id]
