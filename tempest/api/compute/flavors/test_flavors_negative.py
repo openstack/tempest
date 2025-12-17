@@ -28,8 +28,6 @@ CONF = config.CONF
 
 class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
 
-    credentials = ['primary', 'project_reader']
-
     @classmethod
     def setup_clients(cls):
         super(FlavorsV2NegativeTest, cls).setup_clients()

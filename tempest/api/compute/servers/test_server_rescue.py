@@ -245,7 +245,8 @@ class ServerStableDeviceRescueTest(BaseServerStableDeviceRescueTest):
         server, rescue_image_id = self._create_server_and_rescue_image(
             hw_rescue_device='disk', hw_rescue_bus='virtio', validatable=True,
             validation_resources=validation_resources, wait_until="SSHABLE")
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
         self.attach_volume(server, volume)

@@ -24,8 +24,6 @@ CONF = config.CONF
 class FlavorsV2TestJSON(base.BaseV2ComputeTest):
     """Tests Flavors"""
 
-    credentials = ['primary', 'project_reader']
-
     @classmethod
     def setup_clients(cls):
         super(FlavorsV2TestJSON, cls).setup_clients()

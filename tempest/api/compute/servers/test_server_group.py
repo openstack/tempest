@@ -37,6 +37,10 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(ServerGroupTestJSON, cls).setup_clients()
         cls.client = cls.server_groups_client
+        if CONF.enforce_scope.nova:
+            cls.reader_sg_client = cls.os_project_reader.server_groups_client
+        else:
+            cls.reader_sg_client = cls.client
 
     @classmethod
     def _set_policy(cls, policy):
@@ -78,7 +82,8 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         # delete the test server-group
         self.client.delete_server_group(server_group['id'])
         # validation of server-group deletion
-        server_group_list = self.client.list_server_groups()['server_groups']
+        server_group_list = self.reader_sg_client.list_server_groups()[
+            'server_groups']
         self.assertNotIn(server_group, server_group_list)
 
     def _create_delete_server_group(self, policy):
@@ -118,14 +123,14 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('b3545034-dd78-48f0-bdc2-a4adfa6d0ead')
     def test_show_server_group(self):
         """Test getting the server-group detail"""
-        body = self.client.show_server_group(
+        body = self.reader_sg_client.show_server_group(
             self.created_server_group['id'])['server_group']
         self.assertEqual(self.created_server_group, body)
 
     @decorators.idempotent_id('d4874179-27b4-4d7d-80e4-6c560cdfe321')
     def test_list_server_groups(self):
         """Test listing the server-groups"""
-        body = self.client.list_server_groups()['server_groups']
+        body = self.reader_sg_client.list_server_groups()['server_groups']
         self.assertIn(self.created_server_group, body)
 
     @decorators.idempotent_id('ed20d3fb-9d1f-4329-b160-543fbd5d9811')
@@ -140,7 +145,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.delete_server, server['id'])
 
         # Check a server is in the group
-        server_group = (self.server_groups_client.show_server_group(
+        server_group = (self.reader_sg_client.show_server_group(
             self.created_server_group['id'])['server_group'])
         self.assertIn(server['id'], server_group['members'])
 
@@ -154,6 +159,14 @@ class ServerGroup264TestJSON(base.BaseV2ComputeTest):
     create_default_network = True
     min_microversion = '2.64'
 
+    @classmethod
+    def setup_clients(cls):
+        super(ServerGroup264TestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.server_groups_client
+        else:
+            cls.reader_client = cls.server_groups_client
+
     @decorators.idempotent_id('b52f09dd-2133-4037-9a5d-bdb260096a88')
     def test_create_get_server_group(self):
         # create, get the test server-group with given policy
@@ -162,5 +175,5 @@ class ServerGroup264TestJSON(base.BaseV2ComputeTest):
         self.addCleanup(
             self.server_groups_client.delete_server_group,
             server_group['id'])
-        self.server_groups_client.list_server_groups()
-        self.server_groups_client.show_server_group(server_group['id'])
+        self.reader_client.list_server_groups()
+        self.reader_client.show_server_group(server_group['id'])

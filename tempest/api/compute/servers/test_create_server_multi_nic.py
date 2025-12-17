@@ -48,8 +48,6 @@ def get_subnets(count=2):
 class ServersTestMultiNic(base.BaseV2ComputeTest):
     """Test multiple networks in servers"""
 
-    credentials = ['primary', 'project_reader']
-
     @classmethod
     def skip_checks(cls):
         super(ServersTestMultiNic, cls).skip_checks()
@@ -64,10 +62,6 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServersTestMultiNic, cls).setup_clients()
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.servers_client
         cls.networks_client = cls.os_primary.networks_client
         cls.subnets_client = cls.os_primary.subnets_client
 
@@ -112,8 +106,8 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
         # we're OK.
         self.addCleanup(self.delete_server, server_multi_nics['id'])
 
-        addresses = (self.reader_client.list_addresses(server_multi_nics['id'])
-                     ['addresses'])
+        addresses = (self.reader_servers_client.list_addresses(
+            server_multi_nics['id'])['addresses'])
 
         # We can't predict the ip addresses assigned to the server on networks.
         # So we check if the first address is in first network, similarly
@@ -147,8 +141,8 @@ class ServersTestMultiNic(base.BaseV2ComputeTest):
             networks=networks, wait_until='ACTIVE')
         self.addCleanup(self.delete_server, server_multi_nics['id'])
 
-        addresses = (self.reader_client.list_addresses(server_multi_nics['id'])
-                     ['addresses'])
+        addresses = (self.reader_servers_client.list_addresses(
+            server_multi_nics['id'])['addresses'])
 
         addr = [addresses[net1['network']['name']][0]['addr'],
                 addresses[net2['network']['name']][0]['addr'],

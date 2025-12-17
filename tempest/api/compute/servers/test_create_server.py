@@ -33,7 +33,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     This is to create server booted from image and with disk_config 'AUTO'
     """
-    credentials = ['primary', 'project_reader']
     disk_config = 'AUTO'
     volume_backed = False
 
@@ -45,11 +44,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServersTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -75,7 +69,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             disk_config=disk_config,
             adminPass=cls.password,
             volume_backed=cls.volume_backed)
-        cls.server = cls.reader_client.show_server(
+        cls.server = cls.reader_servers_client.show_server(
             server_initial['id'])['server']
 
     @decorators.attr(type='smoke')
@@ -100,7 +94,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('9a438d88-10c6-4bcd-8b5b-5b6e25e1346f')
     def test_list_servers(self):
         """The created server should be in the list of all servers"""
-        body = self.reader_client.list_servers()
+        body = self.reader_servers_client.list_servers()
         servers = body['servers']
         found = [i for i in servers if i['id'] == self.server['id']]
         self.assertNotEmpty(found)
@@ -108,7 +102,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('585e934c-448e-43c4-acbf-d06a9b899997')
     def test_list_servers_with_detail(self):
         """The created server should be in the detailed list of all servers"""
-        body = self.reader_client.list_servers(detail=True)
+        body = self.reader_servers_client.list_servers(detail=True)
         servers = body['servers']
         found = [i for i in servers if i['id'] == self.server['id']]
         self.assertNotEmpty(found)
@@ -131,7 +125,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.password,
             validation_resources['keypair']['private_key'],
             server=self.server,
-            servers_client=self.client)
+            servers_client=self.servers_client)
         output = linux_client.exec_command('grep -c ^processor /proc/cpuinfo')
         self.assertEqual(flavor['vcpus'], int(output))
 
@@ -148,7 +142,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
             self.password,
             validation_resources['keypair']['private_key'],
             server=self.server,
-            servers_client=self.client)
+            servers_client=self.servers_client)
         hostname = linux_client.exec_command("hostname").rstrip()
         msg = ('Failed while verifying servername equals hostname. Expected '
                'hostname "%s" but got "%s".' %
@@ -198,8 +192,6 @@ class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
     server hostname with dashes. This test verifies the same.
     """
 
-    credentials = ['primary', 'project_reader']
-
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
@@ -208,11 +200,6 @@ class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServersTestFqdnHostnames, cls).setup_clients()
-        cls.client = cls.servers_client
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.client
 
     @decorators.idempotent_id('622066d2-39fc-4c09-9eeb-35903c114a0a')
     @testtools.skipUnless(
@@ -245,7 +232,7 @@ class ServersTestFqdnHostnames(base.BaseV2ComputeTest):
             self.password,
             validation_resources['keypair']['private_key'],
             server=test_server,
-            servers_client=self.client)
+            servers_client=self.servers_client)
         hostname = linux_client.exec_command("hostname").rstrip()
         self.assertEqual('guest-instance-1-domain-com', hostname)
 
@@ -261,7 +248,6 @@ class ServersV294TestFqdnHostnames(base.BaseV2ComputeTest):
     more than 64 characters
     """
 
-    credentials = ['primary', 'project_reader']
     min_microversion = '2.94'
 
     @classmethod
@@ -272,11 +258,6 @@ class ServersV294TestFqdnHostnames(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServersV294TestFqdnHostnames, cls).setup_clients()
-        cls.client = cls.servers_client
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -295,7 +276,7 @@ class ServersV294TestFqdnHostnames(base.BaseV2ComputeTest):
             accessIPv4=cls.accessIPv4,
             adminPass=cls.password,
             hostname=cls.hostname)
-        cls.server = cls.reader_client.show_server(
+        cls.server = cls.reader_servers_client.show_server(
             cls.test_server['id'])['server']
 
     def verify_metadata_hostname(self, md_json):
@@ -324,6 +305,6 @@ class ServersV294TestFqdnHostnames(base.BaseV2ComputeTest):
             self.password,
             self.validation_resources['keypair']['private_key'],
             server=self.test_server,
-            servers_client=self.client)
+            servers_client=self.servers_client)
         self.verify_metadata_from_api(
             self.test_server, linux_client, self.verify_metadata_hostname)

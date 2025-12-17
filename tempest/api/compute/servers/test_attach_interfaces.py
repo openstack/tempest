@@ -60,6 +60,13 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
         super(AttachInterfacesTestBase, cls).setup_clients()
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
+        if CONF.enforce_scope.nova:
+            cls.reader_interfaces_client = (
+                cls.os_project_reader.interfaces_client)
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+        else:
+            cls.reader_interfaces_client = cls.interfaces_client
+            cls.reader_ports_client = cls.ports_client
 
     def _wait_for_validation(self, server, validation_resources):
         linux_client = remote_client.RemoteClient(
@@ -81,7 +88,8 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
             wait_until='ACTIVE')
         # NOTE(mgoddard): Get detailed server to ensure addresses are present
         # in fixed IP case.
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
         # NOTE(artom) self.create_test_server adds cleanups, but this is
         # apparently not enough? Add cleanup here.
         self.addCleanup(self.delete_server, server['id'])
@@ -90,7 +98,7 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
             fip = set([validation_resources['floating_ip']['ip']])
         except KeyError:
             fip = ()
-        ifs = (self.interfaces_client.list_interfaces(server['id'])
+        ifs = (self.reader_interfaces_client.list_interfaces(server['id'])
                ['interfaceAttachments'])
         body = waiters.wait_for_interface_status(
             self.interfaces_client, server['id'], ifs[0]['port_id'], 'ACTIVE')
@@ -107,7 +115,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         :param port_id: The id of the port being detached.
         :returns: The final port dict from the show_port response.
         """
-        port = self.ports_client.show_port(port_id)['port']
+        port = self.reader_ports_client.show_port(port_id)['port']
         device_id = port['device_id']
         start = int(time.time())
 
@@ -115,7 +123,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         # None, but it's not contractual so handle Falsey either way.
         while device_id:
             time.sleep(self.build_interval)
-            port = self.ports_client.show_port(port_id)['port']
+            port = self.reader_ports_client.show_port(port_id)['port']
             device_id = port['device_id']
 
             timed_out = int(time.time()) - start >= self.build_timeout
@@ -205,13 +213,13 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
         self.interfaces_client.delete_interface(server['id'], iface['port_id'])
-        _ifs = (self.interfaces_client.list_interfaces(server['id'])
+        _ifs = (self.reader_interfaces_client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         start = int(time.time())
 
         while len(ifs) == len(_ifs):
             time.sleep(self.build_interval)
-            _ifs = (self.interfaces_client.list_interfaces(server['id'])
+            _ifs = (self.reader_interfaces_client.list_interfaces(server['id'])
                     ['interfaceAttachments'])
             timed_out = int(time.time()) - start >= self.build_timeout
             if len(ifs) == len(_ifs) and timed_out:
@@ -254,7 +262,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         iface = self._test_create_interface_by_port_id(server, ifs)
         ifs.append(iface)
 
-        _ifs = (self.interfaces_client.list_interfaces(server['id'])
+        _ifs = (self.reader_interfaces_client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         self._compare_iface_list(ifs, _ifs)
 
@@ -284,7 +292,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         iface = self._test_create_interface_by_fixed_ips(server, ifs)
         ifs.append(iface)
 
-        _ifs = (self.interfaces_client.list_interfaces(server['id'])
+        _ifs = (self.reader_interfaces_client.list_interfaces(server['id'])
                 ['interfaceAttachments'])
         self._compare_iface_list(ifs, _ifs)
 
@@ -340,7 +348,8 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
         for server in servers:
             # NOTE(mgoddard): Get detailed server to ensure addresses are
             # present in fixed IP case.
-            server = self.servers_client.show_server(server['id'])['server']
+            server = self.reader_servers_client.show_server(server['id'])[
+                'server']
             compute.wait_for_ssh_or_ping(server, self.os_primary, network,
                                          True, validation_resources,
                                          'SSHABLE', True)
@@ -419,7 +428,7 @@ class AttachInterfacesUnderV243Test(AttachInterfacesTestBase):
                 'Timed out while waiting for IP count to increase.')
 
         # Remove the fixed IP that we just added.
-        server_detail = self.os_primary.servers_client.show_server(
+        server_detail = self.reader_servers_client.show_server(
             server['id'])['server']
         # Get the Fixed IP from server.
         fixed_ip = None
@@ -467,4 +476,4 @@ class AttachInterfacesV270Test(AttachInterfacesTestBase):
             # just to check the response schema
             self.interfaces_client.show_interface(
                 server['id'], iface['port_id'])
-            self.interfaces_client.list_interfaces(server['id'])
+            self.reader_interfaces_client.list_interfaces(server['id'])

@@ -45,7 +45,7 @@ class ServerActionsBase(base.BaseV2ComputeTest):
         try:
             self.validation_resources = self.get_class_validation_resources(
                 self.os_primary)
-            waiters.wait_for_server_status(self.client,
+            waiters.wait_for_server_status(self.servers_client,
                                            self.server_id, 'ACTIVE')
         except lib_exc.NotFound:
             # The server was deleted by previous test, create a new one
@@ -78,7 +78,6 @@ class ServerActionsBase(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerActionsBase, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -89,14 +88,15 @@ class ServerActionsBase(base.BaseV2ComputeTest):
     def _test_reboot_server(self, reboot_type):
         if CONF.validation.run_validation:
             # Get the time the server was last rebooted,
-            server = self.client.show_server(self.server_id)['server']
+            server = self.reader_servers_client.show_server(
+                self.server_id)['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, self.validation_resources),
                 self.ssh_user,
                 self.password,
                 self.validation_resources['keypair']['private_key'],
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             boot_time = linux_client.get_boot_time()
 
             # NOTE: This sync is for avoiding the loss of pub key data
@@ -113,22 +113,23 @@ class ServerActionsBase(base.BaseV2ComputeTest):
                 self.password,
                 self.validation_resources['keypair']['private_key'],
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time,
                                '%s > %s' % (new_boot_time, boot_time))
 
     def _test_rebuild_server(self, server_id, **kwargs):
         # Get the IPs the server has before rebuilding it
-        original_addresses = (self.client.show_server(server_id)['server']
-                              ['addresses'])
+        original_addresses = (
+            self.reader_servers_client.show_server(server_id)['server']
+            ['addresses'])
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix,
             name=self.__class__.__name__ + '-server')
         password = 'rebuildPassw0rd'
-        rebuilt_server = self.client.rebuild_server(
+        rebuilt_server = self.servers_client.rebuild_server(
             server_id,
             self.image_ref_alt,
             name=new_name,
@@ -142,9 +143,10 @@ class ServerActionsBase(base.BaseV2ComputeTest):
         self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
 
         # Verify the server properties after the rebuild completes
-        waiters.wait_for_server_status(self.client,
+        waiters.wait_for_server_status(self.servers_client,
                                        rebuilt_server['id'], 'ACTIVE')
-        server = self.client.show_server(rebuilt_server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            rebuilt_server['id'])['server']
         rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
@@ -169,7 +171,7 @@ class ServerActionsBase(base.BaseV2ComputeTest):
                 password,
                 validation_resources['keypair']['private_key'],
                 server=rebuilt_server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             linux_client.validate_authentication()
 
     def _test_resize_server_confirm(self, server_id, stop=False):
@@ -177,31 +179,31 @@ class ServerActionsBase(base.BaseV2ComputeTest):
         # the provided flavor
 
         if stop:
-            self.client.stop_server(server_id)
-            waiters.wait_for_server_status(self.client, server_id,
+            self.servers_client.stop_server(server_id)
+            waiters.wait_for_server_status(self.servers_client, server_id,
                                            'SHUTOFF')
 
-        self.client.resize_server(server_id, self.flavor_ref_alt)
+        self.servers_client.resize_server(server_id, self.flavor_ref_alt)
         # NOTE(jlk): Explicitly delete the server to get a new one for later
         # tests. Avoids resize down race issues.
         self.addCleanup(self.delete_server, server_id)
-        waiters.wait_for_server_status(self.client, server_id,
+        waiters.wait_for_server_status(self.servers_client, server_id,
                                        'VERIFY_RESIZE')
 
-        self.client.confirm_resize_server(server_id)
+        self.servers_client.confirm_resize_server(server_id)
         expected_status = 'SHUTOFF' if stop else 'ACTIVE'
-        waiters.wait_for_server_status(self.client, server_id,
+        waiters.wait_for_server_status(self.servers_client, server_id,
                                        expected_status)
 
-        server = self.client.show_server(server_id)['server']
+        server = self.reader_servers_client.show_server(server_id)['server']
         self.assert_flavor_equal(self.flavor_ref_alt, server['flavor'])
 
         if stop:
             # NOTE(mriedem): tearDown requires the server to be started.
-            self.client.start_server(server_id)
+            self.servers_client.start_server(server_id)
 
     def _get_output(self, server_id):
-        output = self.client.get_console_output(
+        output = self.servers_client.get_console_output(
             server_id, length=3)['output']
         self.assertTrue(output, "Console output was empty.")
         lines = len(output.split('\n'))
@@ -234,18 +236,21 @@ class ServerActionsTestJSON(ServerActionsBase):
         self.addCleanup(self.delete_server, newserver['id'])
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
-        self.client.change_password(newserver['id'], adminPass=new_password)
-        waiters.wait_for_server_status(self.client, newserver['id'], 'ACTIVE')
+        self.servers_client.change_password(newserver['id'],
+                                            adminPass=new_password)
+        waiters.wait_for_server_status(self.servers_client, newserver['id'],
+                                       'ACTIVE')
 
         if CONF.validation.run_validation:
             # Verify that the user can authenticate with the new password
-            server = self.client.show_server(newserver['id'])['server']
+            server = self.reader_servers_client.show_server(
+                newserver['id'])['server']
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, self.validation_resources),
                 self.ssh_user,
                 new_password,
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             linux_client.validate_authentication()
 
     @decorators.attr(type='smoke')
@@ -279,13 +284,13 @@ class ServerActionsTestJSON(ServerActionsBase):
         # ip attached at the beginning of the test_rebuild_server let's
         # make sure right here the floating ip is attached
         waiters.wait_for_server_floating_ip(
-            self.client,
+            self.servers_client,
             server,
             validation_resources['floating_ip'])
 
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.client, server['id'])
-        self.addCleanup(self.client.delete_server, server['id'])
+                        self.servers_client, server['id'])
+        self.addCleanup(self.servers_client.delete_server, server['id'])
 
         self._test_rebuild_server(
             server_id=server['id'],
@@ -308,17 +313,19 @@ class ServerActionsTestJSON(ServerActionsBase):
         values after a resize is reverted.
         """
 
-        self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        self.servers_client.resize_server(self.server_id, self.flavor_ref_alt)
         # NOTE(zhufl): Explicitly delete the server to get a new one for later
         # tests. Avoids resize down race issues.
         self.addCleanup(self.delete_server, self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id,
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
                                        'VERIFY_RESIZE')
 
-        self.client.revert_resize_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.servers_client.revert_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
-        server = self.client.show_server(self.server_id)['server']
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         self.assert_flavor_equal(self.flavor_ref, server['flavor'])
 
     @decorators.idempotent_id('4b8867e6-fffa-4d54-b1d1-6fdda57be2f3')
@@ -344,29 +351,34 @@ class ServerActionsTestJSON(ServerActionsBase):
                           'Pause is not available.')
     def test_pause_unpause_server(self):
         """Test pausing and unpausing server"""
-        self.client.pause_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'PAUSED')
-        self.client.unpause_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.servers_client.pause_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'PAUSED')
+        self.servers_client.unpause_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
     @decorators.idempotent_id('0d8ee21e-b749-462d-83da-b85b41c86c7f')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     def test_suspend_resume_server(self):
         """Test suspending and resuming server"""
-        self.client.suspend_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id,
+        self.servers_client.suspend_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
                                        'SUSPENDED')
-        self.client.resume_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.servers_client.resume_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
     @decorators.idempotent_id('af8eafd4-38a7-4a4b-bdbc-75145a580560')
     def test_stop_start_server(self):
         """Test stopping and starting server"""
-        self.client.stop_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.servers_client.stop_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'SHUTOFF')
+        self.servers_client.start_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
     @decorators.idempotent_id('80a8094c-211e-440a-ab88-9e59d556c7ee')
     def test_lock_unlock_server(self):
@@ -377,18 +389,21 @@ class ServerActionsTestJSON(ServerActionsBase):
         Then unlock the server, now the server can be stopped and started.
         """
         # Lock the server,try server stop(exceptions throw),unlock it and retry
-        self.client.lock_server(self.server_id)
-        self.addCleanup(self.client.unlock_server, self.server_id)
-        server = self.client.show_server(self.server_id)['server']
+        self.servers_client.lock_server(self.server_id)
+        self.addCleanup(self.servers_client.unlock_server, self.server_id)
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
         self.assertRaises(lib_exc.Conflict,
-                          self.client.stop_server, self.server_id)
-        self.client.unlock_server(self.server_id)
-        self.client.stop_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'SHUTOFF')
-        self.client.start_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+                          self.servers_client.stop_server, self.server_id)
+        self.servers_client.unlock_server(self.server_id)
+        self.servers_client.stop_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'SHUTOFF')
+        self.servers_client.start_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
 
 
 class ServerActionsTestOtherA(ServerActionsBase):
@@ -398,11 +413,11 @@ class ServerActionsTestOtherA(ServerActionsBase):
         server = self.create_test_server(wait_until='ACTIVE')
 
         # Remove all Security group
-        self.client.remove_security_group(
+        self.servers_client.remove_security_group(
             server['id'], name=server['security_groups'][0]['name'])
 
         # Verify all Security group
-        server = self.client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
         self.assertNotIn('security_groups', server)
 
     @decorators.idempotent_id('30449a88-5aff-4f9b-9866-6ee9b17f906d')
@@ -420,16 +435,17 @@ class ServerActionsTestOtherA(ServerActionsBase):
         server = servers[0]
 
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.client, server['id'])
-        self.addCleanup(self.client.delete_server, server['id'])
-        server = self.client.show_server(server['id'])['server']
+                        self.servers_client, server['id'])
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        server = self.reader_servers_client.show_server(server['id'])['server']
         old_image = server['image']['id']
         new_image = (self.image_ref_alt
                      if old_image == self.image_ref else self.image_ref)
-        self.client.stop_server(server['id'])
-        waiters.wait_for_server_status(self.client, server['id'], 'SHUTOFF')
-        rebuilt_server = (self.client.rebuild_server(server['id'], new_image)
-                          ['server'])
+        self.servers_client.stop_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'SHUTOFF')
+        rebuilt_server = (self.servers_client.rebuild_server(
+            server['id'], new_image)['server'])
 
         # Verify the properties in the initial response are correct
         self.assertEqual(server['id'], rebuilt_server['id'])
@@ -438,9 +454,10 @@ class ServerActionsTestOtherA(ServerActionsBase):
         self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
 
         # Verify the server properties after the rebuild completes
-        waiters.wait_for_server_status(self.client,
+        waiters.wait_for_server_status(self.servers_client,
                                        rebuilt_server['id'], 'SHUTOFF')
-        server = self.client.show_server(rebuilt_server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            rebuilt_server['id'])['server']
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
@@ -468,10 +485,10 @@ class ServerActionsTestOtherA(ServerActionsBase):
             wait_until='SSHABLE')
         server = servers[0]
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.client, server['id'])
-        self.addCleanup(self.client.delete_server, server['id'])
+                        self.servers_client, server['id'])
+        self.addCleanup(self.servers_client.delete_server, server['id'])
 
-        server = self.client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
         self.attach_volume(server, volume)
@@ -506,7 +523,7 @@ class ServerActionsTestOtherA(ServerActionsBase):
 
         # NOTE(mgoddard): Get detailed server to ensure addresses are present
         # in fixed IP case.
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
 
         self._test_resize_server_confirm(server['id'])
 
@@ -514,7 +531,7 @@ class ServerActionsTestOtherA(ServerActionsBase):
             # Now do something interactive with the guest like get its console
             # output; we don't actually care about the output,
             # just that it doesn't raise an error.
-            self.client.get_console_output(server['id'])
+            self.servers_client.get_console_output(server['id'])
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, self.validation_resources),
@@ -522,7 +539,7 @@ class ServerActionsTestOtherA(ServerActionsBase):
                 password=None,
                 pkey=self.validation_resources['keypair']['private_key'],
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             linux_client.validate_authentication()
 
 
@@ -550,21 +567,24 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         # Create a blank volume and attach it to the server created in setUp.
         volume = self.create_volume()
-        server = self.client.show_server(self.server_id)['server']
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         self.attach_volume(server, volume)
         # Now resize the server with the blank volume attached.
-        self.client.resize_server(self.server_id, self.flavor_ref_alt)
+        self.servers_client.resize_server(self.server_id, self.flavor_ref_alt)
         # Explicitly delete the server to get a new one for later
         # tests. Avoids resize down race issues.
         self.addCleanup(self.delete_server, self.server_id)
         waiters.wait_for_server_status(
-            self.client, self.server_id, 'VERIFY_RESIZE')
+            self.servers_client, self.server_id, 'VERIFY_RESIZE')
         # Now revert the resize which should move the instance and it's volume
         # attachment back to the original source compute host.
-        self.client.revert_resize_server(self.server_id)
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        self.servers_client.revert_resize_server(self.server_id)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
         # Make sure everything still looks OK.
-        server = self.client.show_server(self.server_id)['server']
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         self.assert_flavor_equal(self.flavor_ref, server['flavor'])
         attached_volumes = server['os-extended-volumes:volumes_attached']
         self.assertEqual(1, len(attached_volumes))
@@ -593,10 +613,10 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         backup1 = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='backup-1')
-        resp = self.client.create_backup(self.server_id,
-                                         backup_type='daily',
-                                         rotation=2,
-                                         name=backup1)
+        resp = self.servers_client.create_backup(self.server_id,
+                                                 backup_type='daily',
+                                                 rotation=2,
+                                                 name=backup1)
         oldest_backup_exist = True
 
         # the oldest one should be deleted automatically in this test
@@ -630,11 +650,12 @@ class ServerActionsTestOtherB(ServerActionsBase):
 
         backup2 = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='backup-2')
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-        resp = self.client.create_backup(self.server_id,
-                                         backup_type='daily',
-                                         rotation=2,
-                                         name=backup2)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
+        resp = self.servers_client.create_backup(self.server_id,
+                                                 backup_type='daily',
+                                                 rotation=2,
+                                                 name=backup2)
         if api_version_utils.compare_version_header_to_response(
                 "OpenStack-API-Version", "compute 2.45", resp.response, "lt"):
             image2_id = resp['image_id']
@@ -669,11 +690,12 @@ class ServerActionsTestOtherB(ServerActionsBase):
         # the first one will be deleted
         backup3 = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='backup-3')
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
-        resp = self.client.create_backup(self.server_id,
-                                         backup_type='daily',
-                                         rotation=2,
-                                         name=backup3)
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
+        resp = self.servers_client.create_backup(self.server_id,
+                                                 backup_type='daily',
+                                                 rotation=2,
+                                                 name=backup3)
         if api_version_utils.compare_version_header_to_response(
                 "OpenStack-API-Version", "compute 2.45", resp.response, "lt"):
             image3_id = resp['image_id']
@@ -683,7 +705,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
                                             image3_id, 'success')
         self.addCleanup(glance_client.delete_image, image3_id)
         # the first back up should be deleted
-        waiters.wait_for_server_status(self.client, self.server_id, 'ACTIVE')
+        waiters.wait_for_server_status(self.servers_client, self.server_id,
+                                       'ACTIVE')
         glance_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
         image_list = glance_client.list_images(params)['images']
@@ -707,7 +730,8 @@ class ServerActionsTestOtherB(ServerActionsBase):
         server = self.create_test_server(wait_until='ACTIVE')
 
         def _check_full_length_console_log():
-            output = self.client.get_console_output(server['id'])['output']
+            output = self.servers_client.get_console_output(server['id'])[
+                'output']
             self.assertTrue(output, "Console output was empty.")
             lines = len(output.split('\n'))
 
@@ -735,8 +759,9 @@ class ServerActionsTestOtherB(ServerActionsBase):
         server = self.create_test_server(wait_until='ACTIVE')
         temp_server_id = server['id']
 
-        self.client.stop_server(temp_server_id)
-        waiters.wait_for_server_status(self.client, temp_server_id, 'SHUTOFF')
+        self.servers_client.stop_server(temp_server_id)
+        waiters.wait_for_server_status(self.servers_client, temp_server_id,
+                                       'SHUTOFF')
         self.wait_for(self._get_output, temp_server_id)
 
     @decorators.idempotent_id('77eba8e0-036e-4635-944b-f7a8f3b78dc9')
@@ -750,19 +775,20 @@ class ServerActionsTestOtherB(ServerActionsBase):
         else:
             raise lib_exc.InvalidConfiguration(
                 'api_v2 must be True in [image-feature-enabled].')
-        compute.shelve_server(self.client, self.server_id,
+        compute.shelve_server(self.servers_client, self.server_id,
                               force_shelve_offload=True)
 
-        server = self.client.show_server(self.server_id)['server']
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}
         images = glance_client.list_images(params)['images']
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
-        body = self.client.unshelve_server(self.server_id)
+        body = self.servers_client.unshelve_server(self.server_id)
         waiters.wait_for_server_status(
-            self.client,
+            self.servers_client,
             self.server_id,
             "ACTIVE",
             request_id=body.response["x-openstack-request-id"],
@@ -778,10 +804,11 @@ class ServerActionsTestOtherB(ServerActionsBase):
     def test_shelve_paused_server(self):
         """Test shelving a paused server"""
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.pause_server(server['id'])
-        waiters.wait_for_server_status(self.client, server['id'], 'PAUSED')
+        self.servers_client.pause_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client, server['id'],
+                                       'PAUSED')
         # Check if Shelve operation is successful on paused server.
-        compute.shelve_server(self.client, server['id'],
+        compute.shelve_server(self.servers_client, server['id'],
                               force_shelve_offload=True)
 
     @decorators.idempotent_id('c6bc11bf-592e-4015-9319-1c98dc64daf5')
@@ -793,10 +820,10 @@ class ServerActionsTestOtherB(ServerActionsBase):
         The returned vnc console url should be in valid format.
         """
         if self.is_requested_microversion_compatible('2.5'):
-            body = self.client.get_vnc_console(
+            body = self.servers_client.get_vnc_console(
                 self.server_id, type='novnc')['console']
         else:
-            body = self.client.get_remote_console(
+            body = self.servers_client.get_remote_console(
                 self.server_id, console_type='novnc',
                 protocol='vnc')['remote_console']
         self.assertEqual('novnc', body['type'])
@@ -853,6 +880,10 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         super(ServerActionsV293TestJSON, cls).setup_credentials()
 
     @classmethod
+    def setup_clients(cls):
+        super(ServerActionsV293TestJSON, cls).setup_clients()
+
+    @classmethod
     def resource_setup(cls):
         super(ServerActionsV293TestJSON, cls).resource_setup()
         cls.server_id = cls.recreate_server(None, volume_backed=True,
@@ -863,7 +894,8 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         """Test rebuilding a volume backed server"""
         self.validation_resources = self.get_class_validation_resources(
             self.os_primary)
-        server = self.servers_client.show_server(self.server_id)['server']
+        server = self.reader_servers_client.show_server(
+            self.server_id)['server']
         volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
         volume_before_rebuild = self.volumes_client.show_volume(volume_id)
         image_before_rebuild = (
@@ -912,7 +944,7 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         # Verify the server properties after the rebuild completes
         waiters.wait_for_server_status(self.servers_client,
                                        rebuilt_server['id'], 'ACTIVE')
-        server = self.servers_client.show_server(
+        server = self.reader_servers_client.show_server(
             rebuilt_server['id'])['server']
         volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
         volume_after_rebuild = self.volumes_client.show_volume(volume_id)

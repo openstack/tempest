@@ -28,8 +28,6 @@ CONF = config.CONF
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     """Test listing servers filtered by specified attribute"""
 
-    credentials = ['primary', 'project_reader']
-
     @classmethod
     def setup_credentials(cls):
         cls.set_network_resources(network=True, subnet=True, dhcp=True)
@@ -38,11 +36,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ListServerFiltersTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -75,9 +68,9 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                         flavor=cls.flavor_ref_alt,
                                         wait_until='ACTIVE')
 
-        waiters.wait_for_server_status(cls.client, cls.s1['id'],
+        waiters.wait_for_server_status(cls.servers_client, cls.s1['id'],
                                        'ACTIVE')
-        waiters.wait_for_server_status(cls.client, cls.s2['id'],
+        waiters.wait_for_server_status(cls.servers_client, cls.s2['id'],
                                        'ACTIVE')
 
     @decorators.idempotent_id('05e8a8e7-9659-459a-989d-92c2f501f4ba')
@@ -86,7 +79,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_image(self):
         """Filter the list of servers by image"""
         params = {'image': self.image_ref}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -97,7 +90,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_flavor(self):
         """Filter the list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -108,7 +101,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_server_name(self):
         """Filter the list of servers by server name"""
         params = {'name': self.s1_name}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -119,7 +112,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_active_status(self):
         """Filter the list of servers by server active status"""
         params = {'status': 'active'}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -130,12 +123,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_filter_by_shutoff_status(self):
         """Filter the list of servers by server shutoff status"""
         params = {'status': 'shutoff'}
-        self.client.stop_server(self.s1['id'])
-        waiters.wait_for_server_status(self.client, self.s1['id'],
+        self.servers_client.stop_server(self.s1['id'])
+        waiters.wait_for_server_status(self.servers_client, self.s1['id'],
                                        'SHUTOFF')
-        body = self.reader_client.list_servers(**params)
-        self.client.start_server(self.s1['id'])
-        waiters.wait_for_server_status(self.client, self.s1['id'],
+        body = self.reader_servers_client.list_servers(**params)
+        self.servers_client.start_server(self.s1['id'])
+        waiters.wait_for_server_status(self.servers_client, self.s1['id'],
                                        'ACTIVE')
         servers = body['servers']
 
@@ -150,7 +143,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         Verify only the expected number of servers are returned (one server)
         """
         params = {'limit': 1}
-        servers = self.reader_client.list_servers(**params)
+        servers = self.reader_servers_client.list_servers(**params)
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @decorators.idempotent_id('b1495414-2d93-414c-8019-849afe8d319e')
@@ -160,7 +153,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         Verify only the expected number of servers are returned (no server)
         """
         params = {'limit': 0}
-        servers = self.reader_client.list_servers(**params)
+        servers = self.reader_servers_client.list_servers(**params)
         self.assertEmpty(servers['servers'])
 
     @decorators.idempotent_id('37791bbd-90c0-4de0-831e-5f38cba9c6b3')
@@ -170,8 +163,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         Verify only the expected number of servers are returned (all servers)
         """
         params = {'limit': 100000}
-        servers = self.reader_client.list_servers(**params)
-        all_servers = self.reader_client.list_servers()
+        servers = self.reader_servers_client.list_servers(**params)
+        all_servers = self.reader_servers_client.list_servers()
         self.assertEqual(len([x for x in all_servers['servers'] if 'id' in x]),
                          len([x for x in servers['servers'] if 'id' in x]))
 
@@ -181,7 +174,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_image(self):
         """"Filter the detailed list of servers by image"""
         params = {'image': self.image_ref}
-        body = self.reader_client.list_servers(detail=True, **params)
+        body = self.reader_servers_client.list_servers(detail=True, **params)
         servers = body['servers']
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -192,7 +185,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_flavor(self):
         """Filter the detailed list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
-        body = self.reader_client.list_servers(detail=True, **params)
+        body = self.reader_servers_client.list_servers(detail=True, **params)
         servers = body['servers']
 
         self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
@@ -203,7 +196,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_server_name(self):
         """Filter the detailed list of servers by server name"""
         params = {'name': self.s1_name}
-        body = self.reader_client.list_servers(detail=True, **params)
+        body = self.reader_servers_client.list_servers(detail=True, **params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -214,7 +207,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_detailed_filter_by_server_status(self):
         """Filter the detailed list of servers by server status"""
         params = {'status': 'active'}
-        body = self.reader_client.list_servers(detail=True, **params)
+        body = self.reader_servers_client.list_servers(detail=True, **params)
         servers = body['servers']
         test_ids = [s['id'] for s in (self.s1, self.s2, self.s3)]
 
@@ -229,7 +222,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         """Filter the list of servers by part of server name"""
         # List all servers that contains '-instance' in name
         params = {'name': '-instance'}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -240,7 +233,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         part_name = self.s1_name[6:-1]
 
         params = {'name': part_name}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -254,7 +247,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         regexes = [r'^.*\-instance\-[0-9]+$', r'^.*\-instance\-.*$']
         for regex in regexes:
             params = {'name': regex}
-            body = self.reader_client.list_servers(**params)
+            body = self.reader_servers_client.list_servers(**params)
             servers = body['servers']
 
             self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -265,7 +258,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         part_name = self.s1_name[-10:]
 
         params = {'name': part_name}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
@@ -285,22 +278,25 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # so here look for the longest server ip, and filter by that ip,
         # so as to ensure only one server is returned.
         ip_list = {}
-        self.s1 = self.reader_client.show_server(self.s1['id'])['server']
+        self.s1 = self.reader_servers_client.show_server(
+            self.s1['id'])['server']
         # Get first ip address in spite of v4 or v6
         ip_addr = self.s1['addresses'][self.fixed_network_name][0]['addr']
         ip_list[ip_addr] = self.s1['id']
 
-        self.s2 = self.reader_client.show_server(self.s2['id'])['server']
+        self.s2 = self.reader_servers_client.show_server(
+            self.s2['id'])['server']
         ip_addr = self.s2['addresses'][self.fixed_network_name][0]['addr']
         ip_list[ip_addr] = self.s2['id']
 
-        self.s3 = self.reader_client.show_server(self.s3['id'])['server']
+        self.s3 = self.reader_servers_client.show_server(
+            self.s3['id'])['server']
         ip_addr = self.s3['addresses'][self.fixed_network_name][0]['addr']
         ip_list[ip_addr] = self.s3['id']
 
         longest_ip = max([[len(ip), ip] for ip in ip_list])[1]
         params = {'ip': longest_ip}
-        body = self.reader_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(ip_list[longest_ip], map(lambda x: x['id'], servers))
@@ -317,7 +313,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # query addresses of the 3 servers
         addrs = []
         for s in [self.s1, self.s2, self.s3]:
-            s_show = self.reader_client.show_server(s['id'])['server']
+            s_show = self.reader_servers_client.show_server(s['id'])['server']
             addr_spec = s_show['addresses'][self.fixed_network_name][0]
             addrs.append(addr_spec['addr'])
         # find common part of the 3 ip addresses
@@ -335,8 +331,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         else:
             params = {'ip6': prefix}
         # capture all servers in case something goes wrong
-        all_servers = self.reader_client.list_servers(detail=True)
-        body = self.reader_client.list_servers(**params)
+        all_servers = self.reader_servers_client.list_servers(detail=True)
+        body = self.reader_servers_client.list_servers(**params)
         servers = body['servers']
 
         self.assertIn(self.s1_name, map(lambda x: x['name'], servers),
@@ -356,5 +352,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         Verify only the expected number of servers are returned (one server)
         """
         params = {'limit': 1}
-        servers = self.reader_client.list_servers(detail=True, **params)
+        servers = self.reader_servers_client.list_servers(detail=True,
+                                                          **params)
         self.assertEqual(1, len(servers['servers']))

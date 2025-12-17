@@ -15,13 +15,21 @@
 
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib import decorators
+
+
+CONF = config.CONF
 
 
 class ServerPasswordTestJSON(base.BaseV2ComputeTest):
     """Test server password"""
 
     create_default_network = True
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServerPasswordTestJSON, cls).setup_clients()
 
     @classmethod
     def resource_setup(cls):
@@ -31,7 +39,7 @@ class ServerPasswordTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('f83b582f-62a8-4f22-85b0-0dee50ff783a')
     def test_get_server_password(self):
         """Test getting password of a server"""
-        self.servers_client.show_password(self.server['id'])
+        self.reader_servers_client.show_password(self.server['id'])
 
     @decorators.idempotent_id('f8229e8b-b625-4493-800a-bde86ac611ea')
     def test_delete_server_password(self):

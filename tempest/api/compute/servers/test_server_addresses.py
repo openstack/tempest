@@ -14,7 +14,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib import decorators
+
+
+CONF = config.CONF
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
@@ -24,7 +28,6 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerAddressesTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -40,7 +43,8 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         All public and private addresses for a server should be returned.
         """
 
-        addresses = self.client.list_addresses(self.server['id'])['addresses']
+        addresses = self.reader_servers_client.list_addresses(
+            self.server['id'])['addresses']
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
@@ -57,14 +61,16 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
         the specified one.
         """
 
-        addresses = self.client.list_addresses(self.server['id'])['addresses']
+        addresses = self.reader_servers_client.list_addresses(
+            self.server['id'])['addresses']
 
         # Once again we don't know the environment's exact network config,
         # but the response for each individual network should be the same
         # as the partial result of the full address list
         id = self.server['id']
         for addr_type in addresses:
-            addr = self.client.list_addresses_by_network(id, addr_type)
+            addr = self.reader_servers_client.list_addresses_by_network(
+                id, addr_type)
 
             addr = addr[addr_type]
             for address in addresses[addr_type]:
