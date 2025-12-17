@@ -1,0 +1,9 @@
+---
+prelude: |
+    Tempest declares the following interface as a stable interface
+    to be used by the tempest plugins:
+
+    * tempest.common.compute
+    * tempest.common.identity
+    * tempest.common.image
+    * tempest.common.object_storage

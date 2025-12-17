@@ -29,6 +29,10 @@ others are not. A list of stable APIs available to plugins is provided below:
 * tempest.config
 * tempest.test_discover.plugins
 * tempest.common.credentials_factory
+* tempest.common.compute
+* tempest.common.identity
+* tempest.common.image
+* tempest.common.object_storage
 * tempest.clients
 * tempest.test
 * tempest.scenario.manager
