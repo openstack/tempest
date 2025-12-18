@@ -28,6 +28,16 @@ CONF = config.CONF
 
 class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsV2NegativeTest, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_client = cls.flavors_client
+
     @decorators.attr(type=['negative'])
     @utils.services('image')
     @decorators.idempotent_id('90f0d93a-91c1-450c-91e6-07d18172cefe')
@@ -38,7 +48,7 @@ class FlavorsV2NegativeTest(base.BaseV2ComputeTest):
         Try to create server with flavor of insufficient ram size from
         that image
         """
-        flavor = self.flavors_client.show_flavor(
+        flavor = self.reader_client.show_flavor(
             CONF.compute.flavor_ref)['flavor']
         min_img_ram = flavor['ram'] + 1
         size = random.randint(1024, 4096)
