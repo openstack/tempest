@@ -29,6 +29,19 @@ CONF = config.CONF
 class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
     """Test keystone trusts"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(TrustsV3TestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing trusts
+            cls.reader_trusts_client = (
+                cls.os_system_reader.trusts_client)
+        else:
+            # Use admin client by default
+            cls.reader_trusts_client = cls.trusts_client
+
     @classmethod
     def skip_checks(cls):
         super(TrustsV3TestJSON, cls).skip_checks()
@@ -293,7 +306,7 @@ class TrustsV3TestJSON(base.BaseIdentityV3AdminTest):
         original_scope = self.os_admin.auth_provider.scope
         set_scope(self.os_admin.auth_provider, 'project')
         self.addCleanup(set_scope, self.os_admin.auth_provider, original_scope)
-        trusts_get = self.trusts_client.list_trusts()['trusts']
+        trusts_get = self.reader_trusts_client.list_trusts()['trusts']
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]
         self.assertEqual(1, len(trusts))

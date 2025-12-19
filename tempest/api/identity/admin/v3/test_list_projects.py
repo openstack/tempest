@@ -26,13 +26,26 @@ CONF = config.CONF
 
 class BaseListProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseListProjectsTestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing projects
+            cls.reader_projects_client = (
+                cls.os_system_reader.projects_client)
+        else:
+            # Use admin client by default
+            cls.reader_projects_client = cls.projects_client
+
     def _list_projects_with_params(self, included, excluded, params, key):
         # Validate that projects in ``included`` belongs to the projects
         # returned that match ``params`` but not projects in ``excluded``
-        all_projects = self.projects_client.list_projects()['projects']
+        all_projects = self.reader_projects_client.list_projects()['projects']
         LOG.debug("Complete list of projects available in keystone: %s",
                   all_projects)
-        body = self.projects_client.list_projects(params)['projects']
+        body = self.reader_projects_client.list_projects(params)['projects']
         for p in included:
             self.assertIn(p[key], map(lambda x: x[key], body))
         for p in excluded:
@@ -75,7 +88,7 @@ class ListProjectsTestJSON(BaseListProjectsTestJSON):
     def test_list_projects_with_parent(self):
         """Test listing projects with parent"""
         params = {'parent_id': self.p3['parent_id']}
-        fetched_projects = self.projects_client.list_projects(
+        fetched_projects = self.reader_projects_client.list_projects(
             params)['projects']
         self.assertNotEmpty(fetched_projects)
         for project in fetched_projects:
@@ -111,10 +124,10 @@ class ListProjectsStaticTestJSON(BaseListProjectsTestJSON):
     @decorators.idempotent_id('1d830662-22ad-427c-8c3e-4ec854b0af44')
     def test_list_projects(self):
         """Test listing projects"""
-        list_projects = self.projects_client.list_projects()['projects']
+        list_projects = self.reader_projects_client.list_projects()['projects']
 
         for p in [self.p1, self.p2]:
-            show_project = self.projects_client.show_project(p['id'])[
+            show_project = self.reader_projects_client.show_project(p['id'])[
                 'project']
             self.assertIn(show_project, list_projects)
 

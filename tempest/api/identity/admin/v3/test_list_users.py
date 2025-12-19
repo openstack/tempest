@@ -24,12 +24,25 @@ CONF = config.CONF
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     """Test listing keystone users"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(UsersV3TestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing users
+            cls.reader_users_client = (
+                cls.os_system_reader.users_v3_client)
+        else:
+            # Use admin client by default
+            cls.reader_users_client = cls.users_client
+
     def _list_users_with_params(self, params, key, expected, not_expected):
         # Helper method to list users filtered with params and
         # assert the response based on expected and not_expected
         # expected: user expected in the list response
         # not_expected: user, which should not be present in list response
-        body = self.users_client.list_users(**params)['users']
+        body = self.reader_users_client.list_users(**params)['users']
         self.assertIn(expected[key], map(lambda x: x[key], body))
         self.assertNotIn(not_expected[key],
                          map(lambda x: x[key], body))
@@ -105,13 +118,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # of listing all users and listing all groups are not supported,
         # they need a domain filter to be specified
         if CONF.identity_feature_enabled.domain_specific_drivers:
-            body_enabled_user = self.users_client.list_users(
+            body_enabled_user = self.reader_users_client.list_users(
                 domain_id=self.domain_enabled_user['domain_id'])['users']
-            body_non_enabled_user = self.users_client.list_users(
+            body_non_enabled_user = self.reader_users_client.list_users(
                 domain_id=self.non_domain_enabled_user['domain_id'])['users']
             body = (body_enabled_user + body_non_enabled_user)
         else:
-            body = self.users_client.list_users()['users']
+            body = self.reader_users_client.list_users()['users']
 
         fetched_ids = [u['id'] for u in body]
         missing_users = [u['id'] for u in self.users
@@ -123,7 +136,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('b4baa3ae-ac00-4b4e-9e27-80deaad7771f')
     def test_get_user(self):
         """Get a user detail"""
-        user = self.users_client.show_user(self.users[0]['id'])['user']
+        user = self.reader_users_client.show_user(self.users[0]['id'])['user']
         self.assertEqual(self.users[0]['id'], user['id'])
         self.assertEqual(self.users[0]['name'], user['name'])
         self.assertEqual(self.alt_email, user['email'])

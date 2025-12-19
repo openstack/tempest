@@ -26,6 +26,27 @@ CONF = config.CONF
 class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     """Test identity domains"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(DomainsTestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing domains
+            cls.reader_domains_client = (
+                cls.os_system_reader.domains_client)
+            # Use system reader for showing users
+            cls.reader_users_client = (
+                cls.os_system_reader.users_v3_client)
+            # Use system reader for showing groups
+            cls.reader_groups_client = (
+                cls.os_system_reader.groups_client)
+        else:
+            # Use admin client by default
+            cls.reader_domains_client = cls.domains_client
+            cls.reader_users_client = cls.users_client
+            cls.reader_groups_client = cls.groups_client
+
     @classmethod
     def resource_setup(cls):
         super(DomainsTestJSON, cls).resource_setup()
@@ -41,7 +62,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         """Test listing domains"""
         fetched_ids = list()
         # List and Verify Domains
-        body = self.domains_client.list_domains()['domains']
+        body = self.reader_domains_client.list_domains()['domains']
         for d in body:
             fetched_ids.append(d['id'])
         missing_doms = [d for d in self.setup_domains
@@ -52,7 +73,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_domains_filter_by_name(self):
         """Test listing domains filtering by name"""
         params = {'name': self.setup_domains[0]['name']}
-        fetched_domains = self.domains_client.list_domains(
+        fetched_domains = self.reader_domains_client.list_domains(
             **params)['domains']
         # Verify the filtered list is correct, domain names are unique
         # so exactly one domain should be found with the provided name
@@ -64,7 +85,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_domains_filter_by_enabled(self):
         """Test listing domains filtering by enabled domains"""
         params = {'enabled': True}
-        fetched_domains = self.domains_client.list_domains(
+        fetched_domains = self.reader_domains_client.list_domains(
             **params)['domains']
         # Verify the filtered list is correct
         self.assertIn(self.setup_domains[0], fetched_domains)
@@ -108,14 +129,14 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_desc, updated_domain['description'])
         self.assertEqual(False, updated_domain['enabled'])
         # Show domain
-        fetched_domain = self.domains_client.show_domain(
+        fetched_domain = self.reader_domains_client.show_domain(
             domain['id'])['domain']
         self.assertEqual(new_name, fetched_domain['name'])
         self.assertEqual(new_desc, fetched_domain['description'])
         self.assertEqual(False, fetched_domain['enabled'])
         # Delete domain
         self.domains_client.delete_domain(domain['id'])
-        body = self.domains_client.list_domains()['domains']
+        body = self.reader_domains_client.list_domains()['domains']
         domains_list = [d['id'] for d in body]
         self.assertNotIn(domain['id'], domains_list)
 
@@ -130,11 +151,11 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.delete_domain(domain['id'])
         # Check the domain, its users and groups are gone
         self.assertRaises(exceptions.NotFound,
-                          self.domains_client.show_domain, domain['id'])
+                          self.reader_domains_client.show_domain, domain['id'])
         self.assertRaises(exceptions.NotFound,
-                          self.users_client.show_user, user['id'])
+                          self.reader_users_client.show_user, user['id'])
         self.assertRaises(exceptions.NotFound,
-                          self.groups_client.show_group, group['id'])
+                          self.reader_groups_client.show_group, group['id'])
 
     @decorators.idempotent_id('036df86e-bb5d-42c0-a7c2-66b9db3a6046')
     def test_create_domain_with_disabled_status(self):

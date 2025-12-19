@@ -29,6 +29,27 @@ CONF = config.CONF
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     """Test keystone users"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(UsersV3TestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing users
+            cls.reader_users_client = (
+                cls.os_system_reader.users_v3_client)
+            # Use system reader for showing roles
+            cls.reader_roles_client = (
+                cls.os_system_reader.roles_v3_client)
+            # Use system reader for showing projects
+            cls.reader_projects_client = (
+                cls.os_system_reader.projects_client)
+        else:
+            # Use admin client by default
+            cls.reader_users_client = cls.users_client
+            cls.reader_roles_client = cls.roles_client
+            cls.reader_projects_client = cls.projects_client
+
     @classmethod
     def skip_checks(cls):
         super(UsersV3TestJSON, cls).skip_checks()
@@ -67,7 +88,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
             self.assertEqual(update_kwargs[field], updated_user[field])
 
         # GET by id after updating
-        new_user_get = self.users_client.show_user(user['id'])['user']
+        new_user_get = self.reader_users_client.show_user(user['id'])['user']
         # Assert response body of GET after updation
         for field in update_kwargs:
             self.assertEqual(update_kwargs[field], new_user_get[field])
@@ -120,19 +141,20 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         # Creating Role
         role_body = self.setup_test_role()
 
-        user = self.users_client.show_user(user_body['id'])['user']
-        role = self.roles_client.show_role(role_body['id'])['role']
+        user = self.reader_users_client.show_user(user_body['id'])['user']
+        role = self.reader_roles_client.show_role(role_body['id'])['role']
         for _ in range(2):
             # Creating project so as to assign role
             project_body = self.setup_test_project()
-            project = self.projects_client.show_project(
+            project = self.reader_projects_client.show_project(
                 project_body['id'])['project']
             # Assigning roles to user on project
             self.roles_client.create_user_role_on_project(project['id'],
                                                           user['id'],
                                                           role['id'])
             assigned_project_ids.append(project['id'])
-        body = self.users_client.list_user_projects(user['id'])['projects']
+        body = self.reader_users_client.list_user_projects(user['id'])[
+            'projects']
         for i in body:
             fetched_project_ids.append(i['id'])
         # verifying the project ids in list
@@ -148,7 +170,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_get_user(self):
         """Test getting a user detail"""
         user = self.setup_test_user()
-        fetched_user = self.users_client.show_user(user['id'])['user']
+        fetched_user = self.reader_users_client.show_user(user['id'])['user']
         self.assertEqual(user['id'], fetched_user['id'])
 
     @testtools.skipUnless(CONF.identity_feature_enabled.security_compliance,

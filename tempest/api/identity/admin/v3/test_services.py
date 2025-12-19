@@ -25,11 +25,25 @@ CONF = config.CONF
 class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     """Test keystone services"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServicesTestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing services
+            cls.reader_services_client = (
+                cls.os_system_reader.identity_services_v3_client)
+        else:
+            # Use admin client by default
+            cls.reader_services_client = cls.services_client
+
     def _del_service(self, service_id):
         # Used for deleting the services created in this class
         self.services_client.delete_service(service_id)
         # Checking whether service is deleted successfully
-        self.assertRaises(lib_exc.NotFound, self.services_client.show_service,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_services_client.show_service,
                           service_id)
 
     @decorators.attr(type='smoke')
@@ -61,7 +75,8 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        fetched_service = self.services_client.show_service(s_id)['service']
+        fetched_service = self.reader_services_client.show_service(s_id)[
+            'service']
         resp3_desc = fetched_service['description']
 
         self.assertEqual(resp2_desc, resp3_desc)
@@ -100,14 +115,14 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
             service_types.append(serv_type)
 
         # List and Verify Services
-        services = self.services_client.list_services()['services']
+        services = self.reader_services_client.list_services()['services']
         fetched_ids = [service['id'] for service in services]
         found = [s for s in fetched_ids if s in service_ids]
         self.assertEqual(len(found), len(service_ids))
 
         # Check that filtering by service type works.
         for serv_type in service_types:
-            fetched_services = self.services_client.list_services(
+            fetched_services = self.reader_services_client.list_services(
                 type=serv_type)['services']
             self.assertEqual(1, len(fetched_services))
             self.assertEqual(serv_type, fetched_services[0]['type'])
