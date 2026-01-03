@@ -16,9 +16,12 @@
 import datetime
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as e
+
+CONF = config.CONF
 
 # Time that waits for until returning valid response
 # TODO(takmatsu): Ideally this value would come from configuration.
@@ -28,11 +31,18 @@ VALID_WAIT = 30
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
     """Test tenant usages"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(TenantUsagesTestJSON, cls).setup_clients()
         cls.adm_client = cls.os_admin.tenant_usages_client
         cls.client = cls.os_primary.tenant_usages_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = (
+                cls.os_project_reader.tenant_usages_client)
+        else:
+            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -87,6 +97,6 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_usage_tenant_with_non_admin_user(self):
         """Test getting usage for a specific tenant with non admin user"""
         tenant_usage = self.call_until_valid(
-            self.client.show_tenant_usage, VALID_WAIT,
+            self.reader_client.show_tenant_usage, VALID_WAIT,
             self.tenant_id, start=self.start, end=self.end)['tenant_usage']
         self.assertEqual(len(tenant_usage), 8)

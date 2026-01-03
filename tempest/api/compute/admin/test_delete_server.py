@@ -15,11 +15,16 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Test deletion of servers"""
+
+    credentials = ['primary', 'admin', 'project_reader']
 
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances".
@@ -36,7 +41,7 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until='ACTIVE')
         self.admin_client.reset_state(server['id'], state='error')
         # Verify server's state
-        server = self.non_admin_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
         self.assertEqual(server['status'], 'ERROR')
         self.non_admin_client.delete_server(server['id'])
         waiters.wait_for_server_termination(self.servers_client,

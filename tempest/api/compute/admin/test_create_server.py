@@ -29,6 +29,8 @@ CONF = config.CONF
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     """Test creating servers with specific flavor"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
@@ -38,6 +40,10 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(ServersWithSpecificFlavorTestJSON, cls).setup_clients()
         cls.client = cls.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
 
     @decorators.idempotent_id('b3c7bcfc-bb5b-4e22-b517-c7f686b802ca')
     @testtools.skipUnless(CONF.validation.run_validation,
@@ -46,7 +52,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                       "Aarch64 does not support ephemeral disk test")
     def test_verify_created_server_ephemeral_disk(self):
         """Verify that the ephemeral disk is created when creating server"""
-        flavor_base = self.flavors_client.show_flavor(
+        flavor_base = self.reader_flavors_client.show_flavor(
             self.flavor_ref)['flavor']
 
         def create_flavor_with_ephemeral(ephem_disk):
@@ -67,7 +73,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
             # create server which should have been contained in
             # self.flavor_ref.
             extra_spec_keys = \
-                self.admin_flavors_client.list_flavor_extra_specs(
+                self.reader_flavors_client.list_flavor_extra_specs(
                     self.flavor_ref)['extra_specs']
             if extra_spec_keys:
                 self.admin_flavors_client.set_flavor_extra_spec(
@@ -96,7 +102,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                         server_no_eph_disk['id'])
 
         # Get partition number of server without ephemeral disk.
-        server_no_eph_disk = self.client.show_server(
+        server_no_eph_disk = self.reader_servers_client.show_server(
             server_no_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(server_no_eph_disk,
@@ -124,7 +130,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                         self.servers_client.delete_server,
                         server_with_eph_disk['id'])
 
-        server_with_eph_disk = self.client.show_server(
+        server_with_eph_disk = self.reader_servers_client.show_server(
             server_with_eph_disk['id'])['server']
         linux_client = remote_client.RemoteClient(
             self.get_server_ip(server_with_eph_disk,

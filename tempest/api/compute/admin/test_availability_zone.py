@@ -14,21 +14,30 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class AZAdminV2TestJSON(base.BaseV2ComputeAdminTest):
     """Tests Availability Zone API List"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(AZAdminV2TestJSON, cls).setup_clients()
         cls.client = cls.availability_zone_admin_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.availability_zone_client
+        else:
+            cls.reader_client = cls.availability_zone_client
 
     @decorators.idempotent_id('d3431479-8a09-4f76-aa2d-26dc580cb27c')
     def test_get_availability_zone_list(self):
         """Test listing availability zones"""
-        availability_zone = self.client.list_availability_zones()
+        availability_zone = self.reader_client.list_availability_zones()
         self.assertNotEmpty(availability_zone['availabilityZoneInfo'])
 
     @decorators.idempotent_id('ef726c58-530f-44c2-968c-c7bed22d5b8c')

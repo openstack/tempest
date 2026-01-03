@@ -27,6 +27,8 @@ CONF = config.CONF
 class QuotasAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(QuotasAdminNegativeTestBase, cls).setup_clients()
@@ -34,6 +36,12 @@ class QuotasAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
         cls.adm_client = cls.os_admin.quotas_client
         cls.sg_client = cls.security_groups_client
         cls.sgr_client = cls.security_group_rules_client
+        if CONF.enforce_scope.nova:
+            cls.reader_quotas_client = cls.os_project_reader.quotas_client
+            cls.reader_limits_client = cls.os_project_reader.limits_client
+        else:
+            cls.reader_quotas_client = cls.client
+            cls.reader_limits_client = cls.limits_client
 
     @classmethod
     def resource_setup(cls):
@@ -43,8 +51,8 @@ class QuotasAdminNegativeTestBase(base.BaseV2ComputeAdminTest):
         cls.demo_tenant_id = cls.client.tenant_id
 
     def _update_quota(self, quota_item, quota_value):
-        quota_set = (self.adm_client.show_quota_set(self.demo_tenant_id)
-                     ['quota_set'])
+        quota_set = (self.reader_quotas_client.show_quota_set(
+            self.demo_tenant_id)['quota_set'])
         default_quota_value = quota_set[quota_item]
 
         self.adm_client.update_quota_set(self.demo_tenant_id,
@@ -112,8 +120,8 @@ class QuotasSecurityGroupAdminNegativeTest(QuotasAdminNegativeTestBase):
     def test_security_groups_exceed_limit(self):
         """Negative test: Creation Security Groups over limit should FAIL"""
         # Set the quota to number of used security groups
-        sg_quota = self.limits_client.show_limits()['limits']['absolute'][
-            'totalSecurityGroupsUsed']
+        sg_quota = (self.reader_limits_client.show_limits()['limits']
+                    ['absolute']['totalSecurityGroupsUsed'])
         self._update_quota('security_groups', sg_quota)
 
         # Check we cannot create anymore

@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
     """Test live migration operations supported by admin user"""
 
-    credentials = ['primary', 'admin', 'project_manager']
+    credentials = ['primary', 'admin', 'project_manager', 'project_reader']
     create_default_network = True
 
     @classmethod
@@ -59,6 +59,10 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
         cls.ports_client = cls.os_primary.ports_client
         cls.trunks_client = cls.os_primary.trunks_client
         cls.server_client = cls.admin_servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+        else:
+            cls.reader_ports_client = cls.ports_client
 
     def _migrate_server_to(self, server_id, dest_host, volume_backed=False,
                            use_manager_client=False):
@@ -101,7 +105,8 @@ class LiveMigrationTestBase(base.BaseV2ComputeAdminTest):
 
         self._migrate_server_to(server_id, target_host, volume_backed,
                                 use_manager_client)
-        waiters.wait_for_server_status(self.servers_client, server_id, state)
+        waiters.wait_for_server_status(
+            self.reader_servers_client, server_id, state)
 
         migration_list = (self.os_admin.migrations_client.list_migrations()
                           ['migrations'])
@@ -156,7 +161,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
 
         if state == 'PAUSED':
             self.admin_servers_client.pause_server(server_id)
-            waiters.wait_for_server_status(self.admin_servers_client,
+            waiters.wait_for_server_status(self.reader_servers_client,
                                            server_id, state)
 
         LOG.info("Live migrate from source %s to destination %s",
@@ -230,11 +235,11 @@ class LiveMigrationTest(LiveMigrationTestBase):
         # Attach the volume to the server
         self.attach_volume(server, volume, device='/dev/xvdb',
                            wait_for_detach=False)
-        server = self.admin_servers_client.show_server(server_id)['server']
+        server = self.reader_servers_client.show_server(server_id)['server']
         volume_id1 = server["os-extended-volumes:volumes_attached"][0]["id"]
         self._live_migrate(server_id, target_host, 'ACTIVE')
 
-        server = self.admin_servers_client.show_server(server_id)['server']
+        server = self.reader_servers_client.show_server(server_id)['server']
         volume_id2 = server["os-extended-volumes:volumes_attached"][0]["id"]
 
         self.assertEqual(volume_id1, volume_id2)
@@ -284,7 +289,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
         return trunk, parent, subport
 
     def _is_port_status_active(self, port_id):
-        port = self.ports_client.show_port(port_id)['port']
+        port = self.reader_ports_client.show_port(port_id)['port']
         return port['status'] == 'ACTIVE'
 
     @decorators.unstable_test(bug='2024160')
@@ -309,7 +314,7 @@ class LiveMigrationTest(LiveMigrationTestBase):
             test_utils.call_until_true(
                 self._is_port_status_active, CONF.validation.connect_timeout,
                 5, parent['id']))
-        subport = self.ports_client.show_port(subport['id'])['port']
+        subport = self.reader_ports_client.show_port(subport['id'])['port']
 
         if not CONF.compute_feature_enabled.can_migrate_between_any_hosts:
             # not to specify a host so that the scheduler will pick one
@@ -530,7 +535,7 @@ class LiveMigrationManagerWorkflowTest(LiveMigrationTestBase):
                      "to that force completed live migration is not "
                      "performed.", server_id, in_progress_migration_uuid)
 
-        waiters.wait_for_server_status(self.mgr_server_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server_id, 'ACTIVE')
         # List migration with project_id as filter so that manager can
         # get its own project migrations.

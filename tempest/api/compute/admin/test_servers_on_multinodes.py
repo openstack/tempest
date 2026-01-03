@@ -25,6 +25,18 @@ CONF = config.CONF
 
 class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
     """Test creating servers on multiple nodes with scheduler_hints."""
+
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersOnMultiNodesTest, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_server_groups_client = (
+                cls.os_project_reader.server_groups_client)
+        else:
+            cls.reader_server_groups_client = cls.server_groups_client
+
     @classmethod
     def resource_setup(cls):
         super(ServersOnMultiNodesTest, cls).resource_setup()
@@ -47,12 +59,12 @@ class ServersOnMultiNodesTest(base.BaseV2ComputeAdminTest):
             return_reservation_id=True)['reservation_id']
 
         # Get the servers using the reservation_id.
-        servers = self.servers_client.list_servers(
+        servers = self.reader_servers_client.list_servers(
             detail=True, reservation_id=reservation_id)['servers']
         self.assertEqual(2, len(servers))
 
         # Assert the servers are in the group.
-        server_group = self.server_groups_client.show_server_group(
+        server_group = self.reader_server_groups_client.show_server_group(
             group_id)['server_group']
         hosts = {}
         for server in servers:
@@ -142,6 +154,12 @@ class UnshelveToHostMultiNodesTest(base.BaseV2ComputeAdminTest):
     min_microversion = '2.91'
     max_microversion = 'latest'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(UnshelveToHostMultiNodesTest, cls).setup_clients()
+
     @classmethod
     def skip_checks(cls):
         super(UnshelveToHostMultiNodesTest, cls).skip_checks()
@@ -167,8 +185,8 @@ class UnshelveToHostMultiNodesTest(base.BaseV2ComputeAdminTest):
             server['id'],
             body={'unshelve': {'host': host}}
             )
-        waiters.wait_for_server_status(self.servers_client, server['id'],
-                                       'ACTIVE')
+        waiters.wait_for_server_status(
+            self.reader_servers_client, server['id'], 'ACTIVE')
 
     @decorators.attr(type='multinode')
     @decorators.idempotent_id('b5cc0889-50c2-46a0-b8ff-b5fb4c3a6e20')

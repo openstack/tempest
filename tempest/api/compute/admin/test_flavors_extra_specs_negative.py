@@ -29,6 +29,16 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     """
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsExtraSpecsNegativeTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
+
     @classmethod
     def resource_setup(cls):
         super(FlavorsExtraSpecsNegativeTestJSON, cls).resource_setup()
@@ -110,7 +120,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_flavor_get_nonexistent_key(self):
         """Getting non existence flavor extra spec key should fail"""
         self.assertRaises(lib_exc.NotFound,
-                          self.flavors_client.show_flavor_extra_spec,
+                          self.reader_flavors_client.show_flavor_extra_spec,
                           self.flavor['id'],
                           'hw:cpu_thread_policy')
 

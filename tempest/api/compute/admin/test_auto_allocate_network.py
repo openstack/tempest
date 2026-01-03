@@ -37,6 +37,8 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     calls to Neutron to automatically allocate the network topology.
     """
 
+    credentials = ['primary', 'project_reader']
+
     force_tenant_isolation = True
 
     min_microversion = '2.37'
@@ -65,6 +67,14 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         cls.routers_client = cls.os_primary.routers_client
         cls.subnets_client = cls.os_primary.subnets_client
         cls.ports_client = cls.os_primary.ports_client
+        if CONF.enforce_scope.nova:
+            cls.reader_networks_client = cls.os_project_reader.networks_client
+            cls.reader_routers_client = cls.os_project_reader.routers_client
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+        else:
+            cls.reader_networks_client = cls.networks_client
+            cls.reader_routers_client = cls.routers_client
+            cls.reader_ports_client = cls.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -74,14 +84,14 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         tenant_id = cls.networks_client.tenant_id
         # (1) Retrieve non-public network list owned by the tenant.
         search_opts = {'tenant_id': tenant_id, 'shared': False}
-        nets = cls.networks_client.list_networks(
+        nets = cls.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
             raise lib_excs.TempestException(
                 'Found tenant networks: %s' % nets)
         # (2) Retrieve shared network list.
         search_opts = {'shared': True}
-        nets = cls.networks_client.list_networks(
+        nets = cls.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
             raise cls.skipException('Found shared networks: %s' % nets)
@@ -93,7 +103,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # Find the auto-allocated router for the tenant.
         # This is a bit hacky since we don't have a great way to find the
         # auto-allocated router given the private tenant network we have.
-        routers = cls.routers_client.list_routers().get('routers', [])
+        routers = cls.reader_routers_client.list_routers().get('routers', [])
         if len(routers) > 1:
             # This indicates a race where nova is concurrently calling the
             # neutron auto-allocated-topology API for multiple server builds
@@ -109,7 +119,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # created. All such networks will be in the current tenant. Neutron
         # will cleanup duplicate resources automatically, so ignore 404s.
         search_opts = {'tenant_id': cls.networks_client.tenant_id}
-        networks = cls.networks_client.list_networks(
+        networks = cls.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
 
         for router in routers:
@@ -127,7 +137,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
 
         for network in networks:
             # Get and delete the ports for the given network.
-            ports = cls.ports_client.list_ports(
+            ports = cls.reader_ports_client.list_ports(
                 network_id=network['id']).get('ports', [])
             for port in ports:
                 test_utils.call_and_ignore_notfound_exc(
@@ -150,7 +160,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # create the server with no networking
         server = self.create_test_server(networks='none', wait_until='ACTIVE')
         # get the server ips
-        addresses = self.servers_client.list_addresses(
+        addresses = self.reader_servers_client.list_addresses(
             server['id'])['addresses']
         # assert that there is no networking
         self.assertEqual({}, addresses)
@@ -180,7 +190,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         server_nets = set()
         for server in servers:
             # get the server ips
-            addresses = self.servers_client.list_addresses(
+            addresses = self.reader_servers_client.list_addresses(
                 server['id'])['addresses']
             # assert that there is networking (should only be one)
             self.assertEqual(1, len(addresses))
@@ -196,7 +206,7 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         search_opts = {'tenant_id': self.networks_client.tenant_id,
                        'shared': False,
                        'admin_state_up': True}
-        nets = self.networks_client.list_networks(
+        nets = self.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
         self.assertEqual(1, len(nets))
         # verify the single private tenant network is the one that the servers

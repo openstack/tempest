@@ -31,6 +31,8 @@ class SpiceDirectConsoleTestJSON(base.BaseV2ComputeAdminTest):
     min_microversion = '2.99'
     max_microversion = 'latest'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     # SPICE client protocol constants
     magic = b'REDQ'
     major = 2
@@ -68,7 +70,7 @@ class SpiceDirectConsoleTestJSON(base.BaseV2ComputeAdminTest):
 
         # Request a spice-direct console and validate the result. Any user can
         # do this.
-        body = self.servers_client.get_remote_console(
+        body = self.reader_servers_client.get_remote_console(
             self.server['id'], console_type='spice-direct', protocol='spice')
 
         console_url = body['remote_console']['url']
@@ -90,7 +92,7 @@ class SpiceDirectConsoleTestJSON(base.BaseV2ComputeAdminTest):
         # admins can do this because its expected that the request is coming
         # from a proxy and we don't want to expose intimate hypervisor details
         # to all users.
-        body = self.admin_servers_client.get_console_auth_token_details(
+        body = self.reader_servers_client.get_console_auth_token_details(
             token)
 
         console = body['console']

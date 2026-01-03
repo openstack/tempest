@@ -28,11 +28,18 @@ CONF = config.CONF
 class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """Negative Tests of Servers API using admin privileges"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(ServersAdminNegativeTestJSON, cls).setup_clients()
         cls.client = cls.os_admin.servers_client
         cls.quotas_client = cls.os_admin.quotas_client
+        if CONF.enforce_scope.nova:
+            cls.reader_quotas_client = (
+                cls.os_project_reader.quotas_client)
+        else:
+            cls.reader_quotas_client = cls.quotas_client
 
     @classmethod
     def resource_setup(cls):
@@ -144,7 +151,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         server_id = server['id']
         # suspend the server.
         self.client.suspend_server(server_id)
-        waiters.wait_for_server_status(self.client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server_id, 'SUSPENDED')
         # migrate a suspended server should fail
         self.assertRaises(lib_exc.Conflict,

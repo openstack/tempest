@@ -26,7 +26,8 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     """Negative tests of volume swapping"""
 
     create_default_network = True
-    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
+    credentials = ['primary', 'admin', 'project_reader',
+                   ['service_user', 'admin', 'service']]
 
     @classmethod
     def setup_credentials(cls):
@@ -44,6 +45,14 @@ class VolumesAdminNegativeTest(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(VolumesAdminNegativeTest, cls).setup_clients()
         cls.service_client = cls.os_service_user.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+            cls.reader_attachments_client = (
+                cls.os_project_reader.attachments_client_latest)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
+            cls.reader_attachments_client = cls.attachments_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('309b5ecd-0585-4a7e-a36f-d2b2bf55259d')
@@ -96,7 +105,8 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     volume_min_microversion = '3.27'
 
     create_default_network = True
-    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
+    credentials = ['primary', 'admin', 'project_reader',
+                   ['service_user', 'admin', 'service']]
 
     @classmethod
     def setup_credentials(cls):
@@ -113,6 +123,14 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(UpdateMultiattachVolumeNegativeTest, cls).setup_clients()
         cls.service_client = cls.os_service_user.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+            cls.reader_attachments_client = (
+                cls.os_project_reader.attachments_client_latest)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
+            cls.reader_attachments_client = cls.attachments_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('7576d497-b7c6-44bd-9cc5-c5b4e50fec71')
@@ -157,7 +175,7 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         vol1_attachment2 = self.attach_volume(server2, vol1)
 
         # Assert that we now have two attachments.
-        vol1 = self.volumes_client.show_volume(vol1['id'])['volume']
+        vol1 = self.reader_volumes_client.show_volume(vol1['id'])['volume']
         self.assertEqual(2, len(vol1['attachments']))
 
         # By default both of these attachments should have an attach_mode of
@@ -165,7 +183,7 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         # the volume will be rejected.
         for volume_attachment in vol1['attachments']:
             attachment_id = volume_attachment['attachment_id']
-            attachment = self.attachments_client.show_attachment(
+            attachment = self.reader_attachments_client.show_attachment(
                 attachment_id)['attachment']
             self.assertEqual('rw', attachment['attach_mode'])
 
@@ -179,7 +197,7 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
                           server2['id'], vol1['id'], volumeId=vol2['id'])
 
         # Fetch the volume 1 to check the current attachments.
-        vol1 = self.volumes_client.show_volume(vol1['id'])['volume']
+        vol1 = self.reader_volumes_client.show_volume(vol1['id'])['volume']
         vol1_attachment_ids = [a['id'] for a in vol1['attachments']]
 
         # Assert that volume 1 is still attached to both server 1 and 2.
@@ -187,5 +205,5 @@ class UpdateMultiattachVolumeNegativeTest(base.BaseV2ComputeAdminTest):
         self.assertIn(vol1_attachment2['id'], vol1_attachment_ids)
 
         # Assert that volume 2 has no attachments.
-        vol2 = self.volumes_client.show_volume(vol2['id'])['volume']
+        vol2 = self.reader_volumes_client.show_volume(vol2['id'])['volume']
         self.assertEqual([], vol2['attachments'])

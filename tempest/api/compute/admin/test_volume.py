@@ -25,17 +25,38 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
     """Base class for the admin volume tests in this module."""
     create_default_network = True
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(BaseAttachSCSIVolumeTest, cls).skip_checks()
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+        if not CONF.service_available.glance:
+            skip_msg = ("%s skipped as Glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+        if not CONF.image_feature_enabled.api_v2:
+            skip_msg = ("%s skipped as Glance API v2 is not enabled" %
+                        cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def setup_credentials(cls):
         cls.prepare_instance_network()
         super(BaseAttachSCSIVolumeTest, cls).setup_credentials()
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseAttachSCSIVolumeTest, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+            cls.reader_image_client = (
+                cls.os_project_reader.image_client_v2)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
+            cls.reader_image_client = cls.images_client
 
     def _create_image_with_custom_property(self, **kwargs):
         """Wrapper utility that returns the custom image.
@@ -46,7 +67,7 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
 
         :param return image_id: The UUID of the newly created image.
         """
-        image = self.admin_image_client.show_image(CONF.compute.image_ref)
+        image = self.reader_image_client.show_image(CONF.compute.image_ref)
         # NOTE(danms): We need to stream this, so chunked=True means we get
         # back a urllib3.HTTPResponse and have to carefully pass it to
         # store_image_file() to upload it in pieces.
@@ -67,8 +88,9 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
         create_dict.update(kwargs)
         try:
             new_image = self.admin_image_client.create_image(**create_dict)
-            self.addCleanup(self.admin_image_client.wait_for_resource_deletion,
-                            new_image['id'])
+            self.addCleanup(
+                self.reader_image_client.wait_for_resource_deletion,
+                new_image['id'])
             self.addCleanup(
                 self.admin_image_client.delete_image, new_image['id'])
             self.admin_image_client.store_image_file(new_image['id'],
@@ -110,20 +132,21 @@ class AttachSCSIVolumeTestJSON(BaseAttachSCSIVolumeTest):
         # deleted otherwise image deletion can start before server is
         # deleted.
         self.addCleanup(waiters.wait_for_server_termination,
-                        self.servers_client, server['id'])
+                        self.reader_servers_client, server['id'])
         self.addCleanup(self.servers_client.delete_server, server['id'])
 
         volume = self.create_volume()
         attachment = self.attach_volume(server, volume)
         waiters.wait_for_volume_resource_status(
-            self.volumes_client, attachment['volumeId'], 'in-use')
-        volume_after_attach = self.servers_client.list_volume_attachments(
-            server['id'])['volumeAttachments']
+            self.reader_volumes_client, attachment['volumeId'], 'in-use')
+        volume_after_attach = (
+            self.reader_servers_client.list_volume_attachments(
+                server['id'])['volumeAttachments'])
         self.assertEqual(1, len(volume_after_attach),
                          "Failed to attach volume")
         self.servers_client.detach_volume(
             server['id'], attachment['volumeId'])
         waiters.wait_for_volume_resource_status(
-            self.volumes_client, attachment['volumeId'], 'available')
+            self.reader_volumes_client, attachment['volumeId'], 'available')
         waiters.wait_for_volume_attachment_remove_from_server(
-            self.servers_client, server['id'], attachment['volumeId'])
+            self.reader_servers_client, server['id'], attachment['volumeId'])

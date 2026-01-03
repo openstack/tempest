@@ -14,7 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
@@ -22,6 +25,16 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     Add and remove Flavor Access require admin privileges.
     """
+
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAccessTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
 
     @classmethod
     def resource_setup(cls):
@@ -64,7 +77,8 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(resp_body, add_body)
 
         # The flavor is present in list.
-        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
+        flavors = self.reader_flavors_client.list_flavors(
+            detail=True)['flavors']
         self.assertIn(flavor['id'], map(lambda x: x['id'], flavors))
 
         # Remove flavor access from a tenant.
@@ -73,5 +87,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(resp_body, remove_body)
 
         # The flavor is not present in list.
-        flavors = self.flavors_client.list_flavors(detail=True)['flavors']
+        flavors = self.reader_flavors_client.list_flavors(
+            detail=True)['flavors']
         self.assertNotIn(flavor['id'], map(lambda x: x['id'], flavors))
