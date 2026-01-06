@@ -190,8 +190,9 @@
     parent: tempest-integrated-compute
     nodeset: devstack-single-node-centos-9-stream
     # centos-9-stream is supported from yoga release onwards
+    # PYTHON3_VERSION override support missing before 2025.2
     branches:
-      regex: ^.*/(victoria|wallaby|xena)$
+      regex: ^.*/(victoria|wallaby|xena|yoga|zed|2023.1|2024.1|2024.2|2025.1)$
       negate: true
     description: |
       This job runs integration tests for compute. This is
@@ -373,6 +374,9 @@
 - job:
     name: tempest-centos9-stream-fips
     parent: devstack-tempest
+    branches:
+      regex: ^.*/(victoria|wallaby|xena|yoga|zed|2023.1|2024.1|2024.2|2025.1)$
+      negate: true
     description: |
       Integration testing for a FIPS enabled Centos 9 system
     timeout: 10800
