@@ -219,7 +219,13 @@ IdentityGroup = [
                     "identity-feature-enabled.security_compliance is set to "
                     "'True'. For more details, refer to keystone config "
                     "options "
-                    "keystone.conf:security_compliance.minimum_password_age.")
+                    "keystone.conf:security_compliance.minimum_password_age."),
+    cfg.BoolOpt('use_system_token',
+                default=False,
+                help="Keystone supports both system as well as project "
+                     "scoped token. This config option tells tempest to "
+                     "use the system scoped token for keystone identity "
+                     "tests.")
 ]
 
 service_clients_group = cfg.OptGroup(name='service-clients',

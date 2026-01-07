@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Added a new config option in the `identity` section, `use_system_token`,
+    which will tell Tempest to use system scope token to test the
+    keystone APIs. By default is disabled which means Tempest will use project
+    scoped token.
