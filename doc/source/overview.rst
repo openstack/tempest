@@ -9,16 +9,9 @@ cluster. Tempest has batteries of tests for OpenStack API validation,
 scenarios, and other specific tests useful in validating an OpenStack
 deployment.
 
-Team and repository tags
-------------------------
-
-.. image:: https://governance.openstack.org/tc/badges/tempest.svg
-    :target: https://governance.openstack.org/tc/reference/tags/index.html
-
-.. Change things from this point on
-
 Design Principles
 -----------------
+
 Tempest Design Principles that we strive to live by.
 
 - Tempest should be able to run against any OpenStack cloud, be it a
@@ -135,6 +128,7 @@ as it is simpler, and quicker to work with.
 
 Library
 -------
+
 Tempest exposes a library interface. This interface is a stable interface and
 should be backwards compatible (including backwards compatibility with the
 old tempest-lib package, with the exception of the import). If you plan to
@@ -148,6 +142,7 @@ For more details refer to the `library documentation
 
 Release Versioning
 ------------------
+
 `Tempest Release Notes <https://docs.openstack.org/releasenotes/tempest>`_
 shows what changes have been released on each version.
 
