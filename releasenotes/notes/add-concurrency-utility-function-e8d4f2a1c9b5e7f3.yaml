@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Add ``run_concurrent_tasks`` helper function in ``tempest.common.concurrency``
+    module to simplify writing concurrency tests for OpenStack services. This
+    utility uses multiprocessing to execute operations in parallel and collect
+    results in a shared list. It automatically handles process management,
+    exception collection, and cleanup. Tempest plugins can use this function
+    to test concurrent operations such as parallel volume creation, snapshot
+    creation, or server operations. The number of concurrent processes is
+    specified via the ``resource_count`` parameter, allowing plugins to pass
+    their service-specific configuration values (e.g.,
+    ``CONF.volume.concurrent_resource_count`` for cinder,
+    ``CONF.share.concurrent_resource_count`` for manila).
