@@ -34,7 +34,8 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         super(FloatingIPsNegativeTestJSON, cls).resource_setup()
 
         # Generating a nonexistent floatingIP id
-        body = cls.client.list_floating_ips()['floating_ips']
+        body = cls.reader_floating_ips_client.list_floating_ips()[
+            'floating_ips']
         floating_ip_ids = [floating_ip['id'] for floating_ip in body]
         while True:
             if CONF.service_available.neutron:

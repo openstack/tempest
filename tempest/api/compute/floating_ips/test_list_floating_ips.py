@@ -39,7 +39,8 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
     @decorators.idempotent_id('16db31c3-fb85-40c9-bbe2-8cf7b67ff99f')
     def test_list_floating_ips(self):
         """Test listing floating ips"""
-        body = self.client.list_floating_ips()['floating_ips']
+        body = self.reader_floating_ips_client.list_floating_ips()[
+            'floating_ips']
         floating_ips = body
         self.assertNotEmpty(floating_ips,
                             "Expected floating IPs. Got zero.")
@@ -58,7 +59,8 @@ class FloatingIPDetailsTestJSON(base.BaseFloatingIPsTest):
         floating_ip_instance_id = body['instance_id']
         floating_ip_ip = body['ip']
         floating_ip_fixed_ip = body['fixed_ip']
-        body = self.client.show_floating_ip(floating_ip_id)['floating_ip']
+        body = self.reader_floating_ips_client.show_floating_ip(
+            floating_ip_id)['floating_ip']
         # Comparing the details of floating IP
         self.assertEqual(floating_ip_instance_id,
                          body['instance_id'])

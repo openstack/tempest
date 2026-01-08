@@ -37,10 +37,11 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         floating_ip_id_allocated = body['id']
         self.addCleanup(self.client.delete_floating_ip,
                         floating_ip_id_allocated)
-        floating_ip_details = self.client.show_floating_ip(
+        floating_ip_details = self.reader_floating_ips_client.show_floating_ip(
             floating_ip_id_allocated)['floating_ip']
         # Checking if the details of allocated IP is in list of floating IP
-        body = self.client.list_floating_ips()['floating_ips']
+        body = self.reader_floating_ips_client.list_floating_ips()[
+            'floating_ips']
         self.assertIn(floating_ip_details, body)
 
     @decorators.idempotent_id('de45e989-b5ca-4a9b-916b-04a52e7bbb8b')
@@ -87,8 +88,8 @@ class FloatingIPsAssociationTestJSON(base.BaseFloatingIPsTest):
             self.server_id)
 
         # Check instance_id in the floating_ip body
-        body = (self.client.show_floating_ip(self.floating_ip_id)
-                ['floating_ip'])
+        body = (self.reader_floating_ips_client.show_floating_ip(
+                self.floating_ip_id)['floating_ip'])
         self.assertEqual(self.server_id, body['instance_id'])
 
         # Disassociation of floating IP that was associated in this method
