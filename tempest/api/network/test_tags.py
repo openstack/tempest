@@ -37,12 +37,22 @@ class TagsTest(base.BaseNetworkTest):
     tags on their networks. The extension supports networks only.
     """
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(TagsTest, cls).skip_checks()
         if not utils.is_extension_enabled('tag', 'network'):
             msg = "tag extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(TagsTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.tags_client
+        else:
+            cls.reader_client = cls.tags_client
 
     @classmethod
     def resource_setup(cls):
@@ -61,7 +71,7 @@ class TagsTest(base.BaseNetworkTest):
                                              tag_name)
 
         # Validate that listing tags on a network resource works.
-        retrieved_tags = self.tags_client.list_tags(
+        retrieved_tags = self.reader_client.list_tags(
             'networks', self.network['id'])['tags']
         self.assertEqual([tag_name], retrieved_tags)
 
@@ -115,6 +125,8 @@ class TagsExtTest(base.BaseNetworkTest):
     # the singular case for the corresponding class resource object.
     SUPPORTED_RESOURCES = ['subnets', 'ports', 'routers', 'subnetpools']
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(TagsExtTest, cls).skip_checks()
@@ -125,6 +137,14 @@ class TagsExtTest(base.BaseNetworkTest):
             msg = ("neither tag-ext nor standard-attr-tag extensions "
                    "are enabled.")
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(TagsExtTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.tags_client
+        else:
+            cls.reader_client = cls.tags_client
 
     @classmethod
     def resource_setup(cls):
@@ -169,7 +189,7 @@ class TagsExtTest(base.BaseNetworkTest):
         for i, resource in enumerate(self.SUPPORTED_RESOURCES):
             # Ensure that a tag was created for each resource.
             resource_object = getattr(self, resource[:-1])
-            retrieved_tags = self.tags_client.list_tags(
+            retrieved_tags = self.reader_client.list_tags(
                 resource, resource_object['id'])['tags']
             self.assertEqual(1, len(retrieved_tags))
             self.assertEqual(tag_names[i], retrieved_tags[0])
@@ -181,7 +201,7 @@ class TagsExtTest(base.BaseNetworkTest):
             # Delete the tag and ensure it was deleted.
             self.tags_client.delete_tag(
                 resource, resource_object['id'], tag_names[i])
-            retrieved_tags = self.tags_client.list_tags(
+            retrieved_tags = self.reader_client.list_tags(
                 resource, resource_object['id'])['tags']
             self.assertEmpty(retrieved_tags)
 

@@ -26,6 +26,21 @@ CONF = config.CONF
 class SecGroupTest(base.BaseSecGroupTest):
     """Test security groups"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(SecGroupTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_security_groups_client = (
+                cls.os_project_reader.security_groups_client)
+            cls.reader_security_group_rules_client = (
+                cls.os_project_reader.security_group_rules_client)
+        else:
+            cls.reader_security_groups_client = cls.security_groups_client
+            cls.reader_security_group_rules_client = (
+                cls.security_group_rules_client)
+
     @classmethod
     def skip_checks(cls):
         super(SecGroupTest, cls).skip_checks()
@@ -72,7 +87,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @decorators.idempotent_id('e30abd17-fef9-4739-8617-dc26da88e686')
     def test_list_security_groups(self):
         """Verify that default security group exist"""
-        body = self.security_groups_client.list_security_groups()
+        body = self.reader_security_groups_client.list_security_groups()
         security_groups = body['security_groups']
         found = None
         for n in security_groups:
@@ -88,7 +103,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         group_create_body, _ = self._create_security_group()
 
         # List security groups and verify if created group is there in response
-        list_body = self.security_groups_client.list_security_groups()
+        list_body = self.reader_security_groups_client.list_security_groups()
         secgroup_list = list()
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
@@ -106,7 +121,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertEqual(update_body['security_group']['description'],
                          new_description)
         # Show details of the updated security group
-        show_body = self.security_groups_client.show_security_group(
+        show_body = self.reader_security_groups_client.show_security_group(
             group_create_body['security_group']['id'])
         self.assertEqual(show_body['security_group']['name'], new_name)
         self.assertEqual(show_body['security_group']['description'],
@@ -136,7 +151,8 @@ class SecGroupTest(base.BaseSecGroupTest):
 
         # List rules and verify created rule is not in response
         rule_list_body = (
-            self.security_group_rules_client.list_security_group_rules())
+            self.reader_security_group_rules_client
+            .list_security_group_rules())
         rule_list = [rule['id']
                      for rule in rule_list_body['security_group_rules']]
         self.assertNotIn(rule_id, rule_list)
@@ -170,7 +186,8 @@ class SecGroupTest(base.BaseSecGroupTest):
 
             # List rules and verify created rule is in response
             rule_list_body = (
-                self.security_group_rules_client.list_security_group_rules())
+                self.reader_security_group_rules_client
+                .list_security_group_rules())
             rule_list = [rule['id']
                          for rule in rule_list_body['security_group_rules']]
             self.assertIn(rule_create_body['security_group_rule']['id'],

@@ -26,6 +26,16 @@ CONF = config.CONF
 class RoutersNegativeTest(base.BaseNetworkTest):
     """Negative tests of routers"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(RoutersNegativeTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.routers_client
+        else:
+            cls.reader_client = cls.routers_client
+
     @classmethod
     def skip_checks(cls):
         super(RoutersNegativeTest, cls).skip_checks()
@@ -105,7 +115,7 @@ class RoutersNegativeTest(base.BaseNetworkTest):
         """Test showing non existent router"""
         router = data_utils.rand_name(
             name='non_exist_router', prefix=CONF.resource_name_prefix)
-        self.assertRaises(lib_exc.NotFound, self.routers_client.show_router,
+        self.assertRaises(lib_exc.NotFound, self.reader_client.show_router,
                           router)
 
     @decorators.attr(type=['negative'])

@@ -26,12 +26,27 @@ CONF = config.CONF
 class NetworksNegativeTestJSON(base.BaseNetworkTest):
     """Negative tests of network"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksNegativeTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+            cls.reader_networks_client = cls.os_project_reader.networks_client
+        else:
+            cls.reader_ports_client = cls.ports_client
+            cls.reader_subnets_client = cls.subnets_client
+            cls.reader_networks_client = cls.networks_client
+
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('9293e937-824d-42d2-8d5b-e985ea67002a')
     def test_show_non_existent_network(self):
         """Test showing non existent network"""
         non_exist_id = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.networks_client.show_network,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_networks_client.show_network,
                           non_exist_id)
 
     @decorators.attr(type=['negative'])
@@ -39,7 +54,8 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
     def test_show_non_existent_subnet(self):
         """Test showing non existent subnet"""
         non_exist_id = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_subnets_client.show_subnet,
                           non_exist_id)
 
     @decorators.attr(type=['negative'])
@@ -47,7 +63,8 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
     def test_show_non_existent_port(self):
         """Test showing non existent port"""
         non_exist_id = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.ports_client.show_port,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_ports_client.show_port,
                           non_exist_id)
 
     @decorators.attr(type=['negative'])

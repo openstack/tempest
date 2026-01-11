@@ -12,11 +12,24 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ServiceProvidersTest(base.BaseNetworkTest):
     """Test network service providers"""
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServiceProvidersTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.service_providers_client
+        else:
+            cls.reader_client = cls.service_providers_client
 
     @classmethod
     def skip_checks(cls):
@@ -28,6 +41,6 @@ class ServiceProvidersTest(base.BaseNetworkTest):
     @decorators.idempotent_id('2cbbeea9-f010-40f6-8df5-4eaa0c918ea6')
     def test_service_providers_list(self):
         """Test listing network service providers"""
-        body = self.service_providers_client.list_service_providers()
+        body = self.reader_client.list_service_providers()
         self.assertIn('service_providers', body)
         self.assertIsInstance(body['service_providers'], list)

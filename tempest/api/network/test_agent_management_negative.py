@@ -14,15 +14,28 @@
 #    under the License.
 
 from tempest.api.network import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class AgentManagementNegativeTest(base.BaseNetworkTest):
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(AgentManagementNegativeTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.network_agents_client
+        else:
+            cls.reader_client = cls.agents_client
 
     @decorators.idempotent_id('e335be47-b9a1-46fd-be30-0874c0b751e6')
     @decorators.attr(type=['negative'])
     def test_list_agents_non_admin(self):
         """Validate that non-admin user cannot list agents."""
         # Listing agents requires admin_only permissions.
-        body = self.agents_client.list_agents()
+        body = self.reader_client.list_agents()
         self.assertEmpty(body["agents"])

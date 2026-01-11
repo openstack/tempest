@@ -41,6 +41,8 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         addressing in subnets with router
     """
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(NetworksTestDHCPv6, cls).skip_checks()
@@ -51,6 +53,18 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
             msg = "DHCPv6 attributes are not enabled."
         if msg:
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksTestDHCPv6, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+            cls.reader_routers_client = cls.os_project_reader.routers_client
+        else:
+            cls.reader_ports_client = cls.ports_client
+            cls.reader_subnets_client = cls.subnets_client
+            cls.reader_routers_client = cls.routers_client
 
     @classmethod
     def resource_setup(cls):
@@ -67,7 +81,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         del things_list[index]
 
     def _clean_network(self):
-        body = self.ports_client.list_ports()
+        body = self.reader_ports_client.list_ports()
         ports = body['ports']
         for port in ports:
             if (net_info.is_router_interface_port(port) and
@@ -78,13 +92,13 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                 if port['id'] in [p['id'] for p in self.ports]:
                     self.ports_client.delete_port(port['id'])
                     self._remove_from_list_by_index(self.ports, port)
-        body = self.subnets_client.list_subnets()
+        body = self.reader_subnets_client.list_subnets()
         subnets = body['subnets']
         for subnet in subnets:
             if subnet['id'] in [s['id'] for s in self.subnets]:
                 self.subnets_client.delete_subnet(subnet['id'])
                 self._remove_from_list_by_index(self.subnets, subnet)
-        body = self.routers_client.list_routers()
+        body = self.reader_routers_client.list_routers()
         routers = body['routers']
         for router in routers:
             if router['id'] in [r['id'] for r in self.routers]:
@@ -221,7 +235,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
                                                          subnet_slaac]]
                 self.ports_client.delete_port(port['id'])
                 self.ports.pop()
-                body = self.ports_client.list_ports()
+                body = self.reader_ports_client.list_ports()
                 ports_id_list = [i['id'] for i in body['ports']]
                 self.assertNotIn(port['id'], ports_id_list)
                 self._clean_network()
@@ -398,7 +412,7 @@ class NetworksTestDHCPv6(base.BaseNetworkTest):
         self.routers.append(router)
         port = self.create_router_interface(router['id'],
                                             subnet['id'])
-        body = self.ports_client.show_port(port['port_id'])
+        body = self.reader_ports_client.show_port(port['port_id'])
         return subnet, body['port']
 
     @decorators.idempotent_id('e98f65db-68f4-4330-9fea-abd8c5192d4d')

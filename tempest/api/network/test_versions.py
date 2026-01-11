@@ -13,10 +13,24 @@
 # under the License.
 
 from tempest.api.network import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class NetworksApiDiscovery(base.BaseNetworkTest):
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksApiDiscovery, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.network_versions_client
+        else:
+            cls.reader_client = cls.network_versions_client
+
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('cac8a836-c2e0-4304-b556-cd299c7281d1')
     def test_api_version_resources(self):
@@ -28,7 +42,7 @@ class NetworksApiDiscovery(base.BaseNetworkTest):
         schema.
         """
 
-        result = self.network_versions_client.list_versions()
+        result = self.reader_client.list_versions()
         expected_versions = ('v2.0',)
         expected_resources = ('id', 'links', 'status')
         received_list = result.values()
@@ -45,7 +59,7 @@ class NetworksApiDiscovery(base.BaseNetworkTest):
         """Test that GET /v2.0/ returns expected resources."""
         current_version = 'v2.0'
         expected_resources = ('subnet', 'network', 'port')
-        result = self.network_versions_client.show_version(current_version)
+        result = self.reader_client.show_version(current_version)
         actual_resources = [r['name'] for r in result['resources']]
         for resource in expected_resources:
             self.assertIn(resource, actual_resources)

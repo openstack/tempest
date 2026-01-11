@@ -26,6 +26,21 @@ CONF = config.CONF
 class NegativeSecGroupTest(base.BaseSecGroupTest):
     """Negative tests of security groups"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NegativeSecGroupTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_security_groups_client = (
+                cls.os_project_reader.security_groups_client)
+            cls.reader_security_group_rules_client = (
+                cls.os_project_reader.security_group_rules_client)
+        else:
+            cls.reader_security_groups_client = cls.security_groups_client
+            cls.reader_security_group_rules_client = (
+                cls.security_group_rules_client)
+
     @classmethod
     def skip_checks(cls):
         super(NegativeSecGroupTest, cls).skip_checks()
@@ -39,7 +54,8 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         """Test showing non existent security group"""
         non_exist_id = data_utils.rand_uuid()
         self.assertRaises(
-            lib_exc.NotFound, self.security_groups_client.show_security_group,
+            lib_exc.NotFound,
+            self.reader_security_groups_client.show_security_group,
             non_exist_id)
 
     @decorators.attr(type=['negative'])
@@ -49,7 +65,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         non_exist_id = data_utils.rand_uuid()
         self.assertRaises(
             lib_exc.NotFound,
-            self.security_group_rules_client.show_security_group_rule,
+            self.reader_security_group_rules_client.show_security_group_rule,
             non_exist_id)
 
     @decorators.attr(type=['negative'])

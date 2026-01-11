@@ -16,7 +16,10 @@
 
 from tempest.api.network import base
 from tempest.common import utils
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ExtensionsTestJSON(base.BaseNetworkTest):
@@ -28,6 +31,16 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     option is defined in the [network-feature-enabled] section of
     etc/tempest.conf.
     """
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ExtensionsTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.network_extensions_client
+        else:
+            cls.reader_client = cls.network_extensions_client
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('ef28c7e6-e646-4979-9d67-deb207bc5564')
@@ -42,14 +55,14 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
         expected_alias = [ext for ext in expected_alias if
                           utils.is_extension_enabled(ext, 'network')]
         actual_alias = list()
-        extensions = self.network_extensions_client.list_extensions()
+        extensions = self.reader_client.list_extensions()
         list_extensions = extensions['extensions']
         # Show and verify the details of the available extensions
         for ext in list_extensions:
             ext_name = ext['name']
             ext_alias = ext['alias']
             actual_alias.append(ext['alias'])
-            ext_details = self.network_extensions_client.show_extension(
+            ext_details = self.reader_client.show_extension(
                 ext_alias)
             ext_details = ext_details['extension']
 
