@@ -307,7 +307,18 @@ class AccountTest(base.BaseObjectTest):
         """Test listing account metadata for account without metadata"""
         resp, _ = self.account_client.list_account_metadata()
         self.assertHeaders(resp, 'Account', 'HEAD')
-        self.assertNotIn('x-account-meta-', str(resp))
+        # Filter out X-Account-Meta-Quota-Containers header which is
+        # returned by Ceph RadosGW (Squid release and later) as a
+        # system-generated header. This is a RadosGW extension not present
+        # in Swift.
+        # See: https://github.com/ceph/ceph/commit/55f196cb47c9a452fc718ba9a58be7f68bb7a54a  # noqa: E501
+        user_metadata_headers = [k for k in resp.keys()
+                                 if k.startswith('x-account-meta-') and
+                                 k.lower() !=
+                                 'x-account-meta-quota-containers']
+        self.assertEmpty(user_metadata_headers,
+                         'Found user-defined account metadata headers: %s' %
+                         user_metadata_headers)
 
     @decorators.idempotent_id('e2a08b5f-3115-4768-a3ee-d4287acd6c08')
     def test_update_account_metadata_with_create_metadata(self):
