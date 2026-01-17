@@ -1060,9 +1060,11 @@ VolumeGroup = [
                 help='Disk format to use when copying a volume to image'),
     cfg.IntOpt('volume_size',
                default=1,
+               min=1,
                help='Default size in GB for volumes created by volumes tests'),
     cfg.IntOpt('volume_size_extend',
                default=1,
+               min=1,
                help="Size in GB a volume is extended by - if a test "
                     "extends a volume, the size of the new volume will be "
                     "volume_size + volume_size_extend."),
