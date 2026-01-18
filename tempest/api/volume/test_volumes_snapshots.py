@@ -40,6 +40,21 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         super(VolumesSnapshotTestJSON, cls).resource_setup()
         cls.volume_origin = cls.create_volume()
 
+    def setUp(self):
+        super(VolumesSnapshotTestJSON, self).setUp()
+        # Check volume and make sure it is in available state before the next
+        # test uses it.
+        try:
+            vol = self.volumes_client.show_volume(
+                self.volume_origin['id'])['volume']
+            if vol['status'] != 'available':
+                waiters.wait_for_volume_resource_status(
+                    self.volumes_client,
+                    self.volume_origin['id'],
+                    'available')
+        except (lib_exc.NotFound, lib_exc.TimeoutException):
+            self.volume_origin = self.create_volume()
+
     @decorators.idempotent_id('8567b54c-4455-446d-a1cf-651ddeaa3ff2')
     @utils.services('compute')
     def test_snapshot_create_delete_with_volume_in_use(self):
