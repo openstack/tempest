@@ -24,6 +24,19 @@ CONF = config.CONF
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
     """Test keystone policies"""
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(PoliciesTestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing policies
+            cls.reader_policies_client = (
+                cls.os_system_reader.policies_client)
+        else:
+            # Use admin client by default
+            cls.reader_policies_client = cls.policies_client
+
     def _delete_policy(self, policy_id):
         self.policies_client.delete_policy(policy_id)
 
@@ -43,7 +56,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(self._delete_policy, policy['id'])
             policy_ids.append(policy['id'])
         # List and Verify Policies
-        body = self.policies_client.list_policies()['policies']
+        body = self.reader_policies_client.list_policies()['policies']
         for p in body:
             fetched_ids.append(p['id'])
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
@@ -70,7 +83,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
             policy['id'], type=update_type)['policy']
         self.assertIn('type', data)
         # Assertion for updated value with fetched value
-        fetched_policy = self.policies_client.show_policy(
+        fetched_policy = self.reader_policies_client.show_policy(
             policy['id'])['policy']
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)

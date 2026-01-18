@@ -32,6 +32,19 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     # pre-provisioned credentials provider.
     force_tenant_isolation = False
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(RolesV3TestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing roles
+            cls.reader_roles_client = (
+                cls.os_system_reader.roles_v3_client)
+        else:
+            # Use admin client by default
+            cls.reader_roles_client = cls.roles_client
+
     @classmethod
     def resource_setup(cls):
         super(RolesV3TestJSON, cls).resource_setup()
@@ -97,11 +110,11 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertIn('links', updated_role)
         self.assertNotEqual(r_name, updated_role['name'])
 
-        new_role = self.roles_client.show_role(role['id'])['role']
+        new_role = self.reader_roles_client.show_role(role['id'])['role']
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 
-        roles = self.roles_client.list_roles()['roles']
+        roles = self.reader_roles_client.list_roles()['roles']
         self.assertIn(role['id'], [r['id'] for r in roles])
 
     @decorators.idempotent_id('c6b80012-fe4a-498b-9ce8-eb391c05169f')
@@ -114,7 +127,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
                                                       self.user_body['id'],
                                                       self.role['id'])
 
-        roles = self.roles_client.list_user_roles_on_project(
+        roles = self.reader_roles_client.list_user_roles_on_project(
             self.project['id'], self.user_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -135,7 +148,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.create_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
 
-        roles = self.roles_client.list_user_roles_on_domain(
+        roles = self.reader_roles_client.list_user_roles_on_domain(
             self.domain['id'], self.user_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -155,7 +168,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.create_user_role_on_system(
             self.user_body['id'], self.role['id'])
 
-        roles = self.roles_client.list_user_roles_on_system(
+        roles = self.reader_roles_client.list_user_roles_on_system(
             self.user_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -177,7 +190,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.create_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
         # List group roles on project
-        roles = self.roles_client.list_group_roles_on_project(
+        roles = self.reader_roles_client.list_group_roles_on_project(
             self.project['id'], self.group_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -210,7 +223,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.create_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
 
-        roles = self.roles_client.list_group_roles_on_domain(
+        roles = self.reader_roles_client.list_group_roles_on_domain(
             self.domain['id'], self.group_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -227,7 +240,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.roles_client.create_group_role_on_system(
             self.group_body['id'], self.role['id'])
 
-        roles = self.roles_client.list_group_roles_on_system(
+        roles = self.reader_roles_client.list_group_roles_on_system(
             self.group_body['id'])['roles']
 
         self.assertEqual(1, len(roles))
@@ -243,7 +256,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_list_roles(self):
         """Test listing roles"""
         # Return a list of all roles
-        body = self.roles_client.list_roles()['roles']
+        body = self.reader_roles_client.list_roles()['roles']
         found = [role for role in body if role in self.roles]
         self.assertEqual(len(found), len(self.roles))
 
@@ -278,7 +291,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             prior_role_id, implies_role_id)
 
         # Show the inference rule and check its elements
-        resp_body = self.roles_client.show_role_inference_rule(
+        resp_body = self.reader_roles_client.show_role_inference_rule(
             prior_role_id, implies_role_id)
         self.assertIn('role_inference', resp_body)
         role_inference = resp_body['role_inference']
@@ -293,7 +306,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         # Check if the inference rule no longer exists
         self.assertRaises(
             lib_exc.NotFound,
-            self.roles_client.show_role_inference_rule,
+            self.reader_roles_client.show_role_inference_rule,
             prior_role_id,
             implies_role_id)
 
@@ -313,14 +326,14 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             self.roles[2]['id'], self.role['id'])
 
         # Listing inferences rules from "roles[2]" should only return "role"
-        rules = self.roles_client.list_role_inferences_rules(
+        rules = self.reader_roles_client.list_role_inferences_rules(
             self.roles[2]['id'])['role_inference']
         self.assertEqual(1, len(rules['implies']))
         self.assertEqual(self.role['id'], rules['implies'][0]['id'])
 
         # Listing inferences rules from "roles[0]" should return "roles[1]" and
         # "roles[2]" (only direct rules are listed)
-        rules = self.roles_client.list_role_inferences_rules(
+        rules = self.reader_roles_client.list_role_inferences_rules(
             self.roles[0]['id'])['role_inference']
         implies_ids = [role['id'] for role in rules['implies']]
         self.assertEqual(2, len(implies_ids))
@@ -384,13 +397,13 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             self.roles_client.delete_role,
             domain_role['id'])
 
-        domain_roles = self.roles_client.list_roles(
+        domain_roles = self.reader_roles_client.list_roles(
             domain_id=self.domain['id'])['roles']
         self.assertEqual(1, len(domain_roles))
         self.assertIn(domain_role, domain_roles)
 
         self.roles_client.delete_role(domain_role['id'])
-        domain_roles = self.roles_client.list_roles(
+        domain_roles = self.reader_roles_client.list_roles(
             domain_id=self.domain['id'])['roles']
         self.assertEmpty(domain_roles)
 
@@ -465,7 +478,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self._create_implied_role(
             self.roles[2]['id'], self.role['id'])
 
-        rules = self.roles_client.list_all_role_inference_rules()[
+        rules = self.reader_roles_client.list_all_role_inference_rules()[
             'role_inferences']
 
         # NOTE(jaosorior): With the work related to the define-default-roles

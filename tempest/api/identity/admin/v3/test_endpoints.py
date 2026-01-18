@@ -30,10 +30,21 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     # pre-provisioned credentials provider.
     force_tenant_isolation = False
 
+    credentials = ['primary', 'admin', 'system_reader']
+
     @classmethod
     def setup_clients(cls):
         super(EndPointsTestJSON, cls).setup_clients()
         cls.client = cls.endpoints_client
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing endpoints
+            cls.reader_client = cls.os_system_reader.endpoints_v3_client
+            # Use system reader for showing regions
+            cls.reader_regions_client = cls.os_system_reader.regions_client
+        else:
+            # Use admin client by default
+            cls.reader_client = cls.client
+            cls.reader_regions_client = cls.regions_client
 
     @classmethod
     def resource_setup(cls):
@@ -55,7 +66,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             endpoint = cls.client.create_endpoint(
                 service_id=cls.service_ids[i], interface=interfaces[i],
                 url=url, region=region_name, enabled=True)['endpoint']
-            region = cls.regions_client.show_region(region_name)['region']
+            region = cls.reader_regions_client.show_region(region_name)[
+                'region']
             cls.addClassResourceCleanup(
                 cls.regions_client.delete_region, region['id'])
             cls.addClassResourceCleanup(
@@ -81,7 +93,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     def test_list_endpoints(self):
         """Test listing keystone endpoints by filters"""
         # Get the list of all the endpoints.
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.reader_client.list_endpoints()['endpoints']
         fetched_endpoint_ids = [e['id'] for e in fetched_endpoints]
         # Check that all the created endpoints are present in
         # "fetched_endpoints".
@@ -93,9 +105,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(str(e) for e in missing_endpoints))
 
         # Check that filtering endpoints by service_id works.
-        fetched_endpoints_for_service = self.client.list_endpoints(
+        fetched_endpoints_for_service = self.reader_client.list_endpoints(
             service_id=self.service_ids[0])['endpoints']
-        fetched_endpoints_for_alt_service = self.client.list_endpoints(
+        fetched_endpoints_for_alt_service = self.reader_client.list_endpoints(
             service_id=self.service_ids[1])['endpoints']
 
         # Assert that both filters returned the correct result.
@@ -106,9 +118,9 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                               fetched_endpoints_for_alt_service[0]['id']]))
 
         # Check that filtering endpoints by interface works.
-        fetched_public_endpoints = self.client.list_endpoints(
+        fetched_public_endpoints = self.reader_client.list_endpoints(
             interface='public')['endpoints']
-        fetched_internal_endpoints = self.client.list_endpoints(
+        fetched_internal_endpoints = self.reader_client.list_endpoints(
             interface='internal')['endpoints']
 
         # Check that the expected endpoint_id is present per filter. [0] is
@@ -129,7 +141,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                                interface=interface,
                                                url=url, region=region_name,
                                                enabled=True)['endpoint']
-        region = self.regions_client.show_region(region_name)['region']
+        region = self.reader_regions_client.show_region(region_name)['region']
         self.addCleanup(self.regions_client.delete_region, region['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.client.delete_endpoint, endpoint['id'])
@@ -138,13 +150,13 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(url, endpoint['url'])
 
         # Checking if created endpoint is present in the list of endpoints
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.reader_client.list_endpoints()['endpoints']
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertIn(endpoint['id'], fetched_endpoints_id)
 
         # Show endpoint
         fetched_endpoint = (
-            self.client.show_endpoint(endpoint['id'])['endpoint'])
+            self.reader_client.show_endpoint(endpoint['id'])['endpoint'])
         # Asserting if the attributes of endpoint are the same
         self.assertEqual(self.service_ids[0], fetched_endpoint['service_id'])
         self.assertEqual(interface, fetched_endpoint['interface'])
@@ -156,7 +168,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.client.delete_endpoint(endpoint['id'])
 
         # Checking whether endpoint is deleted successfully
-        fetched_endpoints = self.client.list_endpoints()['endpoints']
+        fetched_endpoints = self.reader_client.list_endpoints()['endpoints']
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
@@ -187,7 +199,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                         interface=interface1,
                                         url=url1, region=region1_name,
                                         enabled=True)['endpoint'])
-        region1 = self.regions_client.show_region(region1_name)['region']
+        region1 = self.reader_regions_client.show_region(region1_name)[
+            'region']
         self.addCleanup(self.regions_client.delete_region, region1['id'])
 
         # Updating endpoint with new values
@@ -199,7 +212,8 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                                                interface=interface2,
                                                url=url2, region=region2_name,
                                                enabled=False)['endpoint']
-        region2 = self.regions_client.show_region(region2_name)['region']
+        region2 = self.reader_regions_client.show_region(region2_name)[
+            'region']
         self.addCleanup(self.regions_client.delete_region, region2['id'])
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 

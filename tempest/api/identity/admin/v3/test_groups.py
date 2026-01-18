@@ -30,6 +30,23 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     # pre-provisioned credentials provider.
     force_tenant_isolation = False
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(GroupsV3TestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing groups
+            cls.reader_groups_client = (
+                cls.os_system_reader.groups_client)
+            # Use system reader for listing user groups
+            cls.reader_users_client = (
+                cls.os_system_reader.users_v3_client)
+        else:
+            # Use admin client by default
+            cls.reader_groups_client = cls.groups_client
+            cls.reader_users_client = cls.users_client
+
     @classmethod
     def resource_setup(cls):
         super(GroupsV3TestJSON, cls).resource_setup()
@@ -60,7 +77,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(updated_group['description'], first_desc_update)
 
         # Verify that the updated values are reflected after performing show.
-        new_group = self.groups_client.show_group(group['id'])['group']
+        new_group = self.reader_groups_client.show_group(group['id'])['group']
         self.assertEqual(group['id'], new_group['id'])
         self.assertEqual(first_name_update, new_group['name'])
         self.assertEqual(first_desc_update, new_group['description'])
@@ -94,7 +111,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.groups_client.add_group_user(group['id'], user['id'])
 
         # list users in group
-        group_users = self.groups_client.list_group_users(group['id'])['users']
+        group_users = self.reader_groups_client.list_group_users(group['id'])[
+            'users']
         self.assertEqual(sorted(users, key=lambda k: k['name']),
                          sorted(group_users, key=lambda k: k['name']))
         # check and delete user in group
@@ -102,7 +120,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.groups_client.check_group_user_existence(
                 group['id'], user['id'])
             self.groups_client.delete_group_user(group['id'], user['id'])
-        group_users = self.groups_client.list_group_users(group['id'])['users']
+        group_users = self.reader_groups_client.list_group_users(group['id'])[
+            'users']
         self.assertEqual(len(group_users), 0)
 
     @decorators.idempotent_id('64573281-d26a-4a52-b899-503cb0f4e4ec')
@@ -121,7 +140,8 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             groups.append(group)
             self.groups_client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
-        user_groups = self.users_client.list_user_groups(user['id'])['groups']
+        user_groups = self.reader_users_client.list_user_groups(user['id'])[
+            'groups']
         # The `membership_expires_at` attribute is present when listing user
         # group memberships, and is not an attribute of the groups themselves.
         # Therefore we remove it from the comparison.
@@ -146,10 +166,10 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # of listing all users and listing all groups are not supported,
         # they need a domain filter to be specified
         if CONF.identity_feature_enabled.domain_specific_drivers:
-            body = self.groups_client.list_groups(
+            body = self.reader_groups_client.list_groups(
                 domain_id=self.domain['id'])['groups']
         else:
-            body = self.groups_client.list_groups()['groups']
+            body = self.reader_groups_client.list_groups()['groups']
         for g in body:
             fetched_ids.append(g['id'])
         missing_groups = [g for g in group_ids if g not in fetched_ids]

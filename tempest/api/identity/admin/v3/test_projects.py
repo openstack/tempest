@@ -30,6 +30,27 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     # pre-provisioned credentials provider.
     force_tenant_isolation = False
 
+    credentials = ['primary', 'admin', 'system_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ProjectsTestJSON, cls).setup_clients()
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing projects
+            cls.reader_projects_client = (
+                cls.os_system_reader.projects_client)
+            # Use system reader for listing/showing domains
+            cls.reader_domains_client = (
+                cls.os_system_reader.domains_client)
+            # Use system reader for showing users
+            cls.reader_users_client = (
+                cls.os_system_reader.users_v3_client)
+        else:
+            # Use admin client by default
+            cls.reader_projects_client = cls.projects_client
+            cls.reader_domains_client = cls.domains_client
+            cls.reader_users_client = cls.users_client
+
     @decorators.idempotent_id('0ecf465c-0dc4-4532-ab53-91ffeb74d12d')
     def test_project_create_with_description(self):
         """Test creating project with a description"""
@@ -40,7 +61,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         desc1 = project['description']
         self.assertEqual(desc1, project_desc, 'Description should have '
                          'been sent in response for create')
-        body = self.projects_client.show_project(project_id)['project']
+        body = self.reader_projects_client.show_project(project_id)['project']
         desc2 = body['description']
         self.assertEqual(desc2, project_desc, 'Description does not appear '
                          'to be set')
@@ -56,7 +77,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_id = project['id']
         self.assertEqual(project_name, project['name'])
         self.assertEqual(domain['id'], project['domain_id'])
-        body = self.projects_client.show_project(project_id)['project']
+        body = self.reader_projects_client.show_project(project_id)['project']
         self.assertEqual(project_name, body['name'])
         self.assertEqual(domain['id'], body['domain_id'])
 
@@ -97,15 +118,15 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
         # Check if the is_domain project is correctly returned by both
         # project and domain APIs
-        projects_list = self.projects_client.list_projects(
+        projects_list = self.reader_projects_client.list_projects(
             params={'is_domain': True})['projects']
         project_ids = [p['id'] for p in projects_list]
         self.assertIn(project['id'], project_ids)
 
         # The domains API return different attributes for the entity, so we
         # compare the entities IDs
-        domains_ids = [d['id'] for d in self.domains_client.list_domains()[
-            'domains']]
+        domains_list = self.reader_domains_client.list_domains()['domains']
+        domains_ids = [d['id'] for d in domains_list]
         self.assertIn(project['id'], domains_ids)
 
     @decorators.idempotent_id('1f66dc76-50cc-4741-a200-af984509e480')
@@ -115,7 +136,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project_id = project['id']
         self.assertTrue(project['enabled'],
                         'Enable should be True in response')
-        body = self.projects_client.show_project(project_id)['project']
+        body = self.reader_projects_client.show_project(project_id)['project']
         self.assertTrue(body['enabled'], 'Enable should be True in lookup')
 
     @decorators.idempotent_id('78f96a9c-e0e0-4ee6-a3ba-fbf6dfd03207')
@@ -124,7 +145,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project = self.setup_test_project(enabled=False)
         self.assertFalse(project['enabled'],
                          'Enable should be False in response')
-        body = self.projects_client.show_project(project['id'])['project']
+        body = self.reader_projects_client.show_project(project['id'])[
+            'project']
         self.assertFalse(body['enabled'],
                          'Enable should be False in lookup')
 
@@ -144,7 +166,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_name = body['name']
         self.assertNotEqual(resp1_name, resp2_name)
 
-        body = self.projects_client.show_project(project['id'])['project']
+        body = self.reader_projects_client.show_project(project['id'])[
+            'project']
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
@@ -166,7 +189,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_desc = body['description']
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        body = self.projects_client.show_project(project['id'])['project']
+        body = self.reader_projects_client.show_project(project['id'])[
+            'project']
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
@@ -187,7 +211,8 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp2_en = body['enabled']
         self.assertNotEqual(resp1_en, resp2_en)
 
-        body = self.projects_client.show_project(project['id'])['project']
+        body = self.reader_projects_client.show_project(project['id'])[
+            'project']
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
@@ -217,7 +242,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.users_client.delete_user, user['id'])
 
         # Get User To validate the user details
-        new_user_get = self.users_client.show_user(user['id'])['user']
+        new_user_get = self.reader_users_client.show_user(user['id'])['user']
         # Assert response body of GET
         self.assertEqual(u_name, new_user_get['name'])
         self.assertEqual(u_desc, new_user_get['description'])
@@ -238,9 +263,9 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         project = self.setup_test_project(tags=tags)
 
         # Show and list for the project
-        project_get = self.projects_client.show_project(
+        project_get = self.reader_projects_client.show_project(
             project['id'])['project']
-        _projects = self.projects_client.list_projects()['projects']
+        _projects = self.reader_projects_client.list_projects()['projects']
         project_list = next(x for x in _projects if x['id'] == project['id'])
 
         # Assert the expected fields exist. More fields than expected may

@@ -30,10 +30,18 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     # pre-provisioned credentials provider.
     force_tenant_isolation = False
 
+    credentials = ['primary', 'admin', 'system_reader']
+
     @classmethod
     def setup_clients(cls):
         super(RegionsTestJSON, cls).setup_clients()
         cls.client = cls.regions_client
+        if CONF.identity.use_system_token:
+            # Use system reader for listing/showing regions
+            cls.reader_client = cls.os_system_reader.regions_client
+        else:
+            # Use admin client by default
+            cls.reader_client = cls.client
 
     @classmethod
     def resource_setup(cls):
@@ -77,13 +85,13 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
         # Get the details of region
-        region = self.client.show_region(region['id'])['region']
+        region = self.reader_client.show_region(region['id'])['region']
         self.assertEqual(r_alt_description, region['description'])
         self.assertEqual(self.setup_regions[1]['id'],
                          region['parent_region_id'])
         # Delete the region
         self.client.delete_region(region['id'])
-        body = self.client.list_regions()['regions']
+        body = self.reader_client.list_regions()['regions']
         regions_list = [r['id'] for r in body]
         self.assertNotIn(region['id'], regions_list)
 
@@ -104,7 +112,7 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
     @decorators.idempotent_id('d180bf99-544a-445c-ad0d-0c0d27663796')
     def test_list_regions(self):
         """Test getting a list of regions"""
-        fetched_regions = self.client.list_regions()['regions']
+        fetched_regions = self.reader_client.list_regions()['regions']
         missing_regions =\
             [e for e in self.setup_regions if e not in fetched_regions]
         # Asserting List Regions response
@@ -124,7 +132,8 @@ class RegionsTestJSON(base.BaseIdentityV3AdminTest):
         self.addCleanup(self.client.delete_region, region['id'])
         # Get the list of regions filtering with the parent_region_id
         params = {'parent_region_id': self.setup_regions[0]['id']}
-        fetched_regions = self.client.list_regions(params=params)['regions']
+        fetched_regions = self.reader_client.list_regions(params=params)[
+            'regions']
         # Asserting list regions response
         self.assertIn(region, fetched_regions)
         for r in fetched_regions:
