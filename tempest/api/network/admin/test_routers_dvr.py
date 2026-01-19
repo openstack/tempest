@@ -27,6 +27,17 @@ CONF = config.CONF
 
 class RoutersTestDVR(base.BaseAdminNetworkTest):
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(RoutersTestDVR, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_routers_client = (
+                cls.os_project_reader.routers_client)
+        else:
+            cls.reader_routers_client = cls.routers_client
+
     @classmethod
     def skip_checks(cls):
         super(RoutersTestDVR, cls).skip_checks()
@@ -130,5 +141,5 @@ class RoutersTestDVR(base.BaseAdminNetworkTest):
         self.assertTrue(router['router']['distributed'])
         show_body = self.admin_routers_client.show_router(router_id)
         self.assertTrue(show_body['router']['distributed'])
-        show_body = self.routers_client.show_router(router_id)
+        show_body = self.reader_routers_client.show_router(router_id)
         self.assertNotIn('distributed', show_body['router'])
