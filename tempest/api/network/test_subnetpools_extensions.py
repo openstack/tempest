@@ -39,12 +39,22 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
 
     """
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(SubnetPoolsTestJSON, cls).skip_checks()
         if not utils.is_extension_enabled('subnet_allocation', 'network'):
             msg = "subnet_allocation extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(SubnetPoolsTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.subnetpools_client
+        else:
+            cls.reader_client = cls.subnetpools_client
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('62595970-ab1c-4b7f-8fcc-fddfe55e9811')
@@ -62,7 +72,7 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
                         subnetpool_id)
         self.assertEqual(subnetpool_name, body["subnetpool"]["name"])
         # get detail about subnet pool
-        body = self.subnetpools_client.show_subnetpool(subnetpool_id)
+        body = self.reader_client.show_subnetpool(subnetpool_id)
         self.assertEqual(subnetpool_name, body["subnetpool"]["name"])
         # update the subnet pool
         subnetpool_name = data_utils.rand_name(
@@ -73,5 +83,5 @@ class SubnetPoolsTestJSON(base.BaseNetworkTest):
         # delete subnet pool
         body = self.subnetpools_client.delete_subnetpool(subnetpool_id)
         self.assertRaises(lib_exc.NotFound,
-                          self.subnetpools_client.show_subnetpool,
+                          self.reader_client.show_subnetpool,
                           subnetpool_id)

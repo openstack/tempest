@@ -40,6 +40,16 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         port update
     """
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(PortsTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.ports_client
+        else:
+            cls.reader_client = cls.ports_client
+
     @classmethod
     def resource_setup(cls):
         super(PortsTestJSON, cls).resource_setup()
@@ -48,7 +58,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
 
     def _delete_port(self, port_id):
         self.ports_client.delete_port(port_id)
-        body = self.ports_client.list_ports()
+        body = self.reader_client.list_ports()
         ports_list = body['ports']
         self.assertFalse(port_id in [n['id'] for n in ports_list])
 
@@ -153,7 +163,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.idempotent_id('c9a685bd-e83f-499c-939f-9f7863ca259f')
     def test_show_port(self):
         """Verify the details of port"""
-        body = self.ports_client.show_port(self.port['id'])
+        body = self.reader_client.show_port(self.port['id'])
         port = body['port']
         self.assertIn('id', port)
         # NOTE(rfolco): created_at and updated_at may get inconsistent values
@@ -170,8 +180,8 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def test_show_port_fields(self):
         """Verify specific fields of a port"""
         fields = ['id', 'mac_address']
-        body = self.ports_client.show_port(self.port['id'],
-                                           fields=fields)
+        body = self.reader_client.show_port(self.port['id'],
+                                            fields=fields)
         port = body['port']
         self.assertEqual(sorted(port.keys()), sorted(fields))
         for field_name in fields:
@@ -181,7 +191,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     @decorators.idempotent_id('cf95b358-3e92-4a29-a148-52445e1ac50e')
     def test_list_ports(self):
         """Verify the port exists in the list of all ports"""
-        body = self.ports_client.list_ports()
+        body = self.reader_client.list_ports()
         ports = [port['id'] for port in body['ports']
                  if port['id'] == self.port['id']]
         self.assertNotEmpty(ports, "Created port not found in the list")
@@ -212,7 +222,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         # List ports filtered by fixed_ips
         port_1_fixed_ip = port_1['port']['fixed_ips'][0]['ip_address']
         fixed_ips = 'ip_address=' + port_1_fixed_ip
-        port_list = self.ports_client.list_ports(fixed_ips=fixed_ips)
+        port_list = self.reader_client.list_ports(fixed_ips=fixed_ips)
         # Check that we got the desired port
         ports = port_list['ports']
         project_ids = set([port['project_id'] for port in ports])
@@ -281,7 +291,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
             ips_filter = 'ip_address_substr=' + ip_address_1[:-1]
         else:
             ips_filter = 'ip_address_substr=' + ip_address_1
-        ports = self.ports_client.list_ports(fixed_ips=ips_filter)['ports']
+        ports = self.reader_client.list_ports(fixed_ips=ips_filter)['ports']
         # Check that we got the desired port
         port_ids = [port['id'] for port in ports]
         fixed_ips = [port['fixed_ips'] for port in ports]
@@ -302,7 +312,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         while substr not in ip_address_2:
             substr = substr[:-1]
         ips_filter = 'ip_address_substr=' + substr
-        ports = self.ports_client.list_ports(fixed_ips=ips_filter)['ports']
+        ports = self.reader_client.list_ports(fixed_ips=ips_filter)['ports']
         # Check that we got both port
         port_ids = [port['id'] for port in ports]
         fixed_ips = [port['fixed_ips'] for port in ports]
@@ -339,7 +349,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
                         self.routers_client.remove_router_interface,
                         router['id'], port_id=port['port']['id'])
         # List ports filtered by router_id
-        port_list = self.ports_client.list_ports(device_id=router['id'])
+        port_list = self.reader_client.list_ports(device_id=router['id'])
         ports = port_list['ports']
         self.assertEqual(len(ports), 1)
         self.assertEqual(ports[0]['id'], port['port']['id'])
@@ -349,7 +359,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
     def test_list_ports_fields(self):
         """Verify specific fields of ports"""
         fields = ['id', 'mac_address']
-        body = self.ports_client.list_ports(fields=fields)
+        body = self.reader_client.list_ports(fields=fields)
         ports = body['ports']
         self.assertNotEmpty(ports, "Port list returned is empty")
         # Asserting the fields returned are correct
@@ -501,7 +511,7 @@ class PortsTestJSON(sec_base.BaseSecGroupTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.ports_client.delete_port, body['port']['id'])
         port = body['port']
-        body = self.ports_client.show_port(port['id'])
+        body = self.reader_client.show_port(port['id'])
         show_port = body['port']
         self.assertEqual(free_mac_address,
                          show_port['mac_address'])

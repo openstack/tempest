@@ -42,6 +42,8 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         public_network_id which is the id for the external network present
     """
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(FloatingIPTestJSON, cls).skip_checks()
@@ -53,6 +55,14 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             raise cls.skipException(msg)
         if not CONF.network_feature_enabled.floating_ips:
             raise cls.skipException("Floating ips are not available")
+
+    @classmethod
+    def setup_clients(cls):
+        super(FloatingIPTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.floating_ips_client
+        else:
+            cls.reader_client = cls.floating_ips_client
 
     @classmethod
     def resource_setup(cls):
@@ -92,7 +102,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIn(created_floating_ip['fixed_ip_address'],
                       [ip['ip_address'] for ip in self.ports[0]['fixed_ips']])
         # Verifies the details of a floating_ip
-        floating_ip = self.floating_ips_client.show_floatingip(
+        floating_ip = self.reader_client.show_floatingip(
             created_floating_ip['id'])
         shown_floating_ip = floating_ip['floatingip']
         self.assertEqual(shown_floating_ip['id'], created_floating_ip['id'])
@@ -105,7 +115,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(shown_floating_ip['port_id'], self.ports[0]['id'])
 
         # Verify the floating ip exists in the list of all floating_ips
-        floating_ips = self.floating_ips_client.list_floatingips()
+        floating_ips = self.reader_client.list_floatingips()
         floatingip_id_list = list()
         for f in floating_ips['floatingips']:
             floatingip_id_list.append(f['id'])
@@ -162,7 +172,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         # Delete port
         self.ports_client.delete_port(created_port['id'])
         # Verifies the details of the floating_ip
-        floating_ip = self.floating_ips_client.show_floatingip(
+        floating_ip = self.reader_client.show_floatingip(
             created_floating_ip['id'])
         shown_floating_ip = floating_ip['floatingip']
         # Confirm the fields are back to None

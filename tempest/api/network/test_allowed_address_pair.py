@@ -39,6 +39,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
 
         api_extensions
     """
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -46,6 +47,14 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         if not utils.is_extension_enabled('allowed-address-pairs', 'network'):
             msg = "Allowed Address Pairs extension not enabled."
             raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(AllowedAddressPairTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_client = cls.os_project_reader.ports_client
+        else:
+            cls.reader_client = cls.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -73,7 +82,7 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
                         self.ports_client.delete_port, port_id)
 
         # Confirm port was created with allowed address pair attribute
-        body = self.ports_client.list_ports()
+        body = self.reader_client.list_ports()
         ports = body['ports']
         port = [p for p in ports if p['id'] == port_id]
         msg = 'Created port not found in list of ports returned by Neutron'

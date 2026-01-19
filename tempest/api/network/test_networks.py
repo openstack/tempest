@@ -155,6 +155,24 @@ class NetworksTest(BaseNetworkTestResources):
         project_network_v6_mask_bits is the equivalent for ipv6 subnets
     """
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_networks_client = cls.os_project_reader.networks_client
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+            cls.reader_network_extensions_client = (
+                cls.os_project_reader.network_extensions_client)
+        else:
+            cls.reader_networks_client = cls.networks_client
+            cls.reader_ports_client = cls.ports_client
+            cls.reader_subnets_client = cls.subnets_client
+            cls.reader_network_extensions_client = (
+                cls.network_extensions_client)
+
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('0e269138-0da6-4efc-a46d-578161e7b221')
     def test_create_update_delete_network_subnet(self):
@@ -185,7 +203,7 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('2bf13842-c93f-4a69-83ed-717d2ec3b44e')
     def test_show_network(self):
         """Verify the details of a network"""
-        body = self.networks_client.show_network(self.network['id'])
+        body = self.reader_networks_client.show_network(self.network['id'])
         network = body['network']
         for key in ['id', 'name']:
             self.assertEqual(network[key], self.network[key])
@@ -196,8 +214,8 @@ class NetworksTest(BaseNetworkTestResources):
         fields = ['id', 'name']
         if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
-        body = self.networks_client.show_network(self.network['id'],
-                                                 fields=fields)
+        body = self.reader_networks_client.show_network(self.network['id'],
+                                                        fields=fields)
         network = body['network']
         self.assertEqual(sorted(network.keys()), sorted(fields))
         for field_name in fields:
@@ -209,7 +227,7 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('f7ffdeda-e200-4a7a-bcbe-05716e86bf43')
     def test_list_networks(self):
         """Verify the network exists in the list of all networks"""
-        body = self.networks_client.list_networks()
+        body = self.reader_networks_client.list_networks()
         networks = [network['id'] for network in body['networks']
                     if network['id'] == self.network['id']]
         self.assertNotEmpty(networks, "Created network not found in the list")
@@ -220,7 +238,7 @@ class NetworksTest(BaseNetworkTestResources):
         fields = ['id', 'name']
         if utils.is_extension_enabled('net-mtu', 'network'):
             fields.append('mtu')
-        body = self.networks_client.list_networks(fields=fields)
+        body = self.reader_networks_client.list_networks(fields=fields)
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
         for network in networks:
@@ -230,7 +248,7 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('bd635d81-6030-4dd1-b3b9-31ba0cfdf6cc')
     def test_show_subnet(self):
         """Verify the details of a subnet"""
-        body = self.subnets_client.show_subnet(self.subnet['id'])
+        body = self.reader_subnets_client.show_subnet(self.subnet['id'])
         subnet = body['subnet']
         self.assertNotEmpty(subnet, "Subnet returned has no fields")
         for key in ['id', 'cidr']:
@@ -241,8 +259,8 @@ class NetworksTest(BaseNetworkTestResources):
     def test_show_subnet_fields(self):
         """Verify specific fields of a subnet"""
         fields = ['id', 'network_id']
-        body = self.subnets_client.show_subnet(self.subnet['id'],
-                                               fields=fields)
+        body = self.reader_subnets_client.show_subnet(self.subnet['id'],
+                                                      fields=fields)
         subnet = body['subnet']
         self.assertEqual(sorted(subnet.keys()), sorted(fields))
         for field_name in fields:
@@ -252,7 +270,7 @@ class NetworksTest(BaseNetworkTestResources):
     @decorators.idempotent_id('db68ba48-f4ea-49e9-81d1-e367f6d0b20a')
     def test_list_subnets(self):
         """Verify the subnet exists in the list of all subnets"""
-        body = self.subnets_client.list_subnets()
+        body = self.reader_subnets_client.list_subnets()
         subnets = [subnet['id'] for subnet in body['subnets']
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
@@ -261,7 +279,7 @@ class NetworksTest(BaseNetworkTestResources):
     def test_list_subnets_fields(self):
         """Verify specific fields of subnets"""
         fields = ['id', 'network_id']
-        body = self.subnets_client.list_subnets(fields=fields)
+        body = self.reader_subnets_client.list_subnets(fields=fields)
         subnets = body['subnets']
         self.assertNotEmpty(subnets, "Subnet list returned is empty")
         for subnet in subnets:
@@ -284,7 +302,8 @@ class NetworksTest(BaseNetworkTestResources):
         self.networks_client.delete_network(net_id)
 
         # Verify that the subnet got automatically deleted.
-        self.assertRaises(lib_exc.NotFound, self.subnets_client.show_subnet,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_subnets_client.show_subnet,
                           subnet_id)
 
     @decorators.idempotent_id('d2d596e2-8e76-47a9-ac51-d4648009f4d3')
@@ -373,7 +392,8 @@ class NetworksTest(BaseNetworkTestResources):
         public_network_id = CONF.network.public_network_id
 
         # find external network matching public_network_id
-        body = self.networks_client.list_networks(**{'router:external': True})
+        body = self.reader_networks_client.list_networks(
+            **{'router:external': True})
         external_network = next((network for network in body['networks']
                                  if network['id'] == public_network_id), None)
         self.assertIsNotNone(external_network, "Public network %s not found "
@@ -388,10 +408,12 @@ class NetworksTest(BaseNetworkTestResources):
         # only check the public network ID because the other networks may
         # belong to other tests and their state may have changed during this
         # test
-        body = self.subnets_client.list_subnets(network_id=public_network_id)
+        body = self.reader_subnets_client.list_subnets(
+            network_id=public_network_id)
         extensions = [
             ext['alias'] for ext in
-            self.network_extensions_client.list_extensions()['extensions']]
+            self.reader_network_extensions_client.list_extensions()[
+                'extensions']]
         is_sen_ext = 'subnet-external-network' in extensions
 
         # check subnet visibility of external_network
@@ -412,12 +434,14 @@ class NetworksTest(BaseNetworkTestResources):
         body = self.create_network(description='d1')
         self.assertEqual('d1', body['description'])
         net_id = body['id']
-        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        body = self.reader_networks_client.list_networks(
+            id=net_id)['networks'][0]
         self.assertEqual('d1', body['description'])
         body = self.networks_client.update_network(body['id'],
                                                    description='d2')
         self.assertEqual('d2', body['network']['description'])
-        body = self.networks_client.list_networks(id=net_id)['networks'][0]
+        body = self.reader_networks_client.list_networks(
+            id=net_id)['networks'][0]
         self.assertEqual('d2', body['description'])
 
 
@@ -439,11 +463,25 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         the block defined by project-network_cidr
     """
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(BulkNetworkOpsTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_networks_client = cls.os_project_reader.networks_client
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+        else:
+            cls.reader_networks_client = cls.networks_client
+            cls.reader_ports_client = cls.ports_client
+            cls.reader_subnets_client = cls.subnets_client
+
     def _delete_networks(self, created_networks):
         for n in created_networks:
             self.networks_client.delete_network(n['id'])
         # Asserting that the networks are not found in the list after deletion
-        body = self.networks_client.list_networks()
+        body = self.reader_networks_client.list_networks()
         networks_list = [network['id'] for network in body['networks']]
         for n in created_networks:
             self.assertNotIn(n['id'], networks_list)
@@ -452,7 +490,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         for n in created_subnets:
             self.subnets_client.delete_subnet(n['id'])
         # Asserting that the subnets are not found in the list after deletion
-        body = self.subnets_client.list_subnets()
+        body = self.reader_subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertNotIn(n['id'], subnets_list)
@@ -461,7 +499,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         for n in created_ports:
             self.ports_client.delete_port(n['id'])
         # Asserting that the ports are not found in the list after deletion
-        body = self.ports_client.list_ports()
+        body = self.reader_ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
@@ -480,7 +518,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         created_networks = body['networks']
         self.addCleanup(self._delete_networks, created_networks)
         # Asserting that the networks are found in the list after creation
-        body = self.networks_client.list_networks()
+        body = self.reader_networks_client.list_networks()
         networks_list = [network['id'] for network in body['networks']]
         for n in created_networks:
             self.assertIsNotNone(n['id'])
@@ -512,7 +550,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         created_subnets = body['subnets']
         self.addCleanup(self._delete_subnets, created_subnets)
         # Asserting that the subnets are found in the list after creation
-        body = self.subnets_client.list_subnets()
+        body = self.reader_subnets_client.list_subnets()
         subnets_list = [subnet['id'] for subnet in body['subnets']]
         for n in created_subnets:
             self.assertIsNotNone(n['id'])
@@ -541,7 +579,7 @@ class BulkNetworkOpsTest(base.BaseNetworkTest):
         created_ports = body['ports']
         self.addCleanup(self._delete_ports, created_ports)
         # Asserting that the ports are found in the list after creation
-        body = self.ports_client.list_ports()
+        body = self.reader_ports_client.list_ports()
         ports_list = [port['id'] for port in body['ports']]
         for n in created_ports:
             self.assertIsNotNone(n['id'])
@@ -554,6 +592,16 @@ class BulkNetworkOpsIpV6Test(BulkNetworkOpsTest):
 
 class NetworksIpV6Test(NetworksTest):
     _ip_version = 6
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksIpV6Test, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+        else:
+            cls.reader_subnets_client = cls.subnets_client
 
     @decorators.idempotent_id('e41a4888-65a6-418c-a095-f7c2ef4ad59a')
     def test_create_delete_subnet_with_gw(self):
@@ -600,7 +648,7 @@ class NetworksIpV6Test(NetworksTest):
         # Verifies Subnet GW is None in IPv4
         self.assertIsNone(subnet2['gateway_ip'])
         # Verifies all 2 subnets in the same network
-        body = self.subnets_client.list_subnets()
+        body = self.reader_subnets_client.list_subnets()
         subnets = [sub['id'] for sub in body['subnets']
                    if sub['network_id'] == network['id']]
         test_subnet_ids = [sub['id'] for sub in (subnet1, subnet2)]
@@ -612,6 +660,16 @@ class NetworksIpV6Test(NetworksTest):
 class NetworksIpV6TestAttrs(BaseNetworkTestResources):
 
     _ip_version = 6
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(NetworksIpV6TestAttrs, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_subnets_client = cls.os_project_reader.subnets_client
+        else:
+            cls.reader_subnets_client = cls.subnets_client
 
     @classmethod
     def skip_checks(cls):
@@ -651,7 +709,7 @@ class NetworksIpV6TestAttrs(BaseNetworkTestResources):
         port = self.create_port(slaac_network)
         self.assertIsNotNone(port['fixed_ips'][0]['ip_address'])
         self.subnets_client.delete_subnet(subnet_slaac['id'])
-        subnets = self.subnets_client.list_subnets()
+        subnets = self.reader_subnets_client.list_subnets()
         subnet_ids = [subnet['id'] for subnet in subnets['subnets']]
         self.assertNotIn(subnet_slaac['id'], subnet_ids,
                          "Subnet wasn't deleted")
