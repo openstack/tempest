@@ -25,7 +25,6 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerAddressesNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -36,13 +35,13 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('02c3f645-2d2e-4417-8525-68c0407d001b')
     def test_list_server_addresses_invalid_server_id(self):
         """List addresses request should fail if server id not in system"""
-        self.assertRaises(lib_exc.NotFound, self.client.list_addresses,
-                          '999')
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_servers_client.list_addresses, '999')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('a2ab5144-78c0-4942-a0ed-cc8edccfd9ba')
     def test_list_server_addresses_by_network_neg(self):
         """List addresses by network should fail if network name not valid"""
         self.assertRaises(lib_exc.NotFound,
-                          self.client.list_addresses_by_network,
+                          self.reader_servers_client.list_addresses_by_network,
                           self.server['id'], 'invalid')

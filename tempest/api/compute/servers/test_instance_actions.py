@@ -15,7 +15,11 @@
 
 from tempest.api.compute import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
+
+
+CONF = config.CONF
 
 
 class InstanceActionsTestJSON(base.BaseV2ComputeTest):
@@ -26,7 +30,6 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(InstanceActionsTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -39,8 +42,8 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
         """Test listing actions of the provided server"""
         self.reboot_server(self.server['id'], type='HARD')
 
-        body = (self.client.list_instance_actions(self.server['id'])
-                ['instanceActions'])
+        body = (self.reader_servers_client.list_instance_actions(
+            self.server['id'])['instanceActions'])
         self.assertEqual(len(body), 2, str(body))
         self.assertEqual(sorted([i['action'] for i in body]),
                          ['create', 'reboot'])
@@ -48,7 +51,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
     @decorators.idempotent_id('aacc71ca-1d70-4aa5-bbf6-0ff71470e43c')
     def test_get_instance_action(self):
         """Test getting the action details of the provided server"""
-        body = self.client.show_instance_action(
+        body = self.reader_servers_client.show_instance_action(
             self.server['id'], self.request_id)['instanceAction']
         self.assertEqual(self.server['id'], body['instance_uuid'])
         self.assertEqual('create', body['action'])
@@ -65,7 +68,6 @@ class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(InstanceActionsV221TestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @decorators.idempotent_id('0a0f85d4-10fa-41f6-bf80-a54fb4aa2ae1')
     def test_get_list_deleted_instance_actions(self):
@@ -75,9 +77,9 @@ class InstanceActionsV221TestJSON(base.BaseV2ComputeTest):
         actions should contain 'create' and 'delete'.
         """
         server = self.create_test_server(wait_until='ACTIVE')
-        self.client.delete_server(server['id'])
-        waiters.wait_for_server_termination(self.client, server['id'])
-        body = (self.client.list_instance_actions(server['id'])
+        self.servers_client.delete_server(server['id'])
+        waiters.wait_for_server_termination(self.servers_client, server['id'])
+        body = (self.reader_servers_client.list_instance_actions(server['id'])
                 ['instanceActions'])
         self.assertEqual(len(body), 2, str(body))
         self.assertEqual(sorted([i['action'] for i in body]),

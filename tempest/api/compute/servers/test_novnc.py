@@ -51,7 +51,6 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest,
     @classmethod
     def setup_clients(cls):
         super(NoVNCConsoleTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -65,12 +64,12 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest,
     def test_novnc(self):
         """Test accessing novnc console of server"""
         if self.use_get_remote_console:
-            body = self.client.get_remote_console(
+            body = self.servers_client.get_remote_console(
                 self.server['id'], console_type='novnc',
                 protocol='vnc')['remote_console']
         else:
-            body = self.client.get_vnc_console(self.server['id'],
-                                               type='novnc')['console']
+            body = self.servers_client.get_vnc_console(self.server['id'],
+                                                       type='novnc')['console']
         self.assertEqual('novnc', body['type'])
         # Do the initial HTTP Request to novncproxy to get the NoVNC JavaScript
         self.validate_novnc_html(body['url'])
@@ -89,12 +88,12 @@ class NoVNCConsoleTestJSON(base.BaseV2ComputeTest,
         the novnc proxy should reject the connection and closed it.
         """
         if self.use_get_remote_console:
-            body = self.client.get_remote_console(
+            body = self.servers_client.get_remote_console(
                 self.server['id'], console_type='novnc',
                 protocol='vnc')['remote_console']
         else:
-            body = self.client.get_vnc_console(self.server['id'],
-                                               type='novnc')['console']
+            body = self.servers_client.get_vnc_console(self.server['id'],
+                                                       type='novnc')['console']
         self.assertEqual('novnc', body['type'])
         # Do the WebSockify HTTP Request to novncproxy with a bad token
         parts = urlparse.urlparse(body['url'])

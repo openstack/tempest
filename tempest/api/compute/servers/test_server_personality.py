@@ -45,7 +45,10 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerPersonalityTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_limits_client = cls.os_project_reader.limits_client
+        else:
+            cls.reader_limits_client = cls.limits_client
 
     # NOTE(mriedem): Marked as slow because personality (file injection) is
     # deprecated in nova so we don't care as much about running this all the
@@ -70,14 +73,15 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.servers_client.delete_server,
                         created_server['id'])
-        server = self.client.show_server(created_server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            created_server['id'])['server']
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, validation_resources),
                 self.ssh_user, password,
                 validation_resources['keypair']['private_key'],
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             self.assertEqual(file_contents,
                              linux_client.exec_command(
                                  'sudo cat %s' % file_path))
@@ -102,10 +106,10 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         file_contents = 'Test server rebuild.'
         personality = [{'path': 'rebuild.txt',
                         'contents': base64.encode_as_text(file_contents)}]
-        rebuilt_server = self.client.rebuild_server(server_id,
-                                                    self.image_ref_alt,
-                                                    personality=personality)
-        waiters.wait_for_server_status(self.client, server_id, 'ACTIVE')
+        rebuilt_server = self.servers_client.rebuild_server(
+            server_id, self.image_ref_alt, personality=personality)
+        waiters.wait_for_server_status(self.servers_client, server_id,
+                                       'ACTIVE')
         self.assertEqual(self.image_ref_alt,
                          rebuilt_server['server']['image']['id'])
 
@@ -118,7 +122,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         """
         file_contents = 'This is a test file.'
         personality = []
-        limits = self.limits_client.show_limits()['limits']
+        limits = self.reader_limits_client.show_limits()['limits']
         max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
@@ -144,7 +148,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         files is injected into the server during creation.
         """
         file_contents = 'This is a test file.'
-        limits = self.limits_client.show_limits()['limits']
+        limits = self.reader_limits_client.show_limits()['limits']
         max_file_limit = limits['absolute']['maxPersonality']
         if max_file_limit == -1:
             raise self.skipException("No limit for personality files")
@@ -168,14 +172,15 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.servers_client.delete_server,
                         created_server['id'])
-        server = self.client.show_server(created_server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            created_server['id'])['server']
         if CONF.validation.run_validation:
             linux_client = remote_client.RemoteClient(
                 self.get_server_ip(server, validation_resources),
                 self.ssh_user, password,
                 validation_resources['keypair']['private_key'],
                 server=server,
-                servers_client=self.client)
+                servers_client=self.servers_client)
             for i in person:
                 self.assertEqual(base64.decode_as_text(i['contents']),
                                  linux_client.exec_command(

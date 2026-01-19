@@ -256,7 +256,8 @@ class TaggedBootDevicesTest(DeviceTaggingBase):
 
         self.addCleanup(self.delete_server, server['id'])
 
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
         ssh_client = remote_client.RemoteClient(
             self.get_server_ip(server, validation_resources),
             CONF.validation.image_ssh_user,
@@ -388,7 +389,8 @@ class TaggedAttachmentsTest(DeviceTaggingBase):
 
         # NOTE(mgoddard): Get detailed server to ensure addresses are present
         # in fixed IP case.
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
 
         # Attach tagged nic and volume
         interface = self.interfaces_client.create_interface(

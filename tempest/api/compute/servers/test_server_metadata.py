@@ -29,7 +29,6 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServerMetadataTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -39,7 +38,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     def setUp(self):
         super(ServerMetadataTestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
-        self.client.set_server_metadata(self.server['id'], meta)
+        self.servers_client.set_server_metadata(self.server['id'], meta)
 
     @decorators.idempotent_id('479da087-92b3-4dcf-aeb3-fd293b2d14ce')
     def test_list_server_metadata(self):
@@ -47,8 +46,9 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
 
         All metadata key/value pairs for a server should be returned.
         """
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
 
         # Verify the expected metadata items are in the list
         expected = {'key1': 'value1', 'key2': 'value2'}
@@ -62,12 +62,14 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         """
         # Create a new set of metadata for the server
         req_metadata = {'meta2': 'data2', 'meta3': 'data3'}
-        self.client.set_server_metadata(self.server['id'], req_metadata)
+        self.servers_client.set_server_metadata(self.server['id'],
+                                                req_metadata)
 
         # Verify the expected values are correct, and that the
         # previous values have been removed
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
         self.assertEqual(resp_metadata, req_metadata)
 
     @decorators.idempotent_id('344d981e-0c33-4997-8a5d-6c1d803e4134')
@@ -77,11 +79,12 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         The server's metadata values should be updated to the provided values.
         """
         meta = {'key1': 'alt1', 'key3': 'value3'}
-        self.client.update_server_metadata(self.server['id'], meta)
+        self.servers_client.update_server_metadata(self.server['id'], meta)
 
         # Verify the values have been updated to the proper values
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
         expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
         self.assertEqual(expected, resp_metadata)
 
@@ -93,17 +96,18 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         body is passed.
         """
         meta = {}
-        self.client.update_server_metadata(self.server['id'], meta)
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        self.servers_client.update_server_metadata(self.server['id'], meta)
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
     @decorators.idempotent_id('3043c57d-7e0e-49a6-9a96-ad569c265e6a')
     def test_get_server_metadata_item(self):
         """Test getting specific server metadata item"""
-        meta = self.client.show_server_metadata_item(self.server['id'],
-                                                     'key2')['meta']
+        meta = self.reader_servers_client.show_server_metadata_item(
+            self.server['id'], 'key2')['meta']
         self.assertEqual('value2', meta['key2'])
 
     @decorators.idempotent_id('58c02d4f-5c67-40be-8744-d3fa5982eb1c')
@@ -115,11 +119,13 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
 
         # Update the metadata value.
         meta = {'nova': 'alt'}
-        self.client.set_server_metadata_item(self.server['id'], 'nova', meta)
+        self.servers_client.set_server_metadata_item(self.server['id'],
+                                                     'nova', meta)
 
         # Verify the meta item's value has been updated
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
         expected = {'key1': 'value1', 'key2': 'value2', 'nova': 'alt'}
         self.assertEqual(expected, resp_metadata)
 
@@ -129,10 +135,12 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
 
         The metadata value/key pair should be deleted from the server.
         """
-        self.client.delete_server_metadata_item(self.server['id'], 'key1')
+        self.servers_client.delete_server_metadata_item(self.server['id'],
+                                                        'key1')
 
         # Verify the metadata item has been removed
-        resp_metadata = (self.client.list_server_metadata(self.server['id'])
-                         ['metadata'])
+        resp_metadata = (
+            self.reader_servers_client.list_server_metadata(self.server['id'])
+            ['metadata'])
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)

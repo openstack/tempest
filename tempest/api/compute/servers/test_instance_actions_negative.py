@@ -27,7 +27,6 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(InstanceActionsNegativeTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
 
     @classmethod
     def resource_setup(cls):
@@ -40,12 +39,13 @@ class InstanceActionsNegativeTestJSON(base.BaseV2ComputeTest):
         """Test listing actions for non existent instance should fail"""
         non_existent_server_id = data_utils.rand_uuid()
         self.assertRaises(lib_exc.NotFound,
-                          self.client.list_instance_actions,
+                          self.reader_servers_client.list_instance_actions,
                           non_existent_server_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('0269f40a-6f18-456c-b336-c03623c897f1')
     def test_get_instance_action_invalid_request(self):
         """Test getting instance action with invalid request_id should fail"""
-        self.assertRaises(lib_exc.NotFound, self.client.show_instance_action,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_servers_client.show_instance_action,
                           self.server['id'], '999')

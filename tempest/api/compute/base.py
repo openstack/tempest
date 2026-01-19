@@ -44,7 +44,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 
     # TODO(andreaf) We should care also for the alt_manager here
     # but only once client lazy load in the manager is done
-    credentials = ['primary']
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -78,6 +78,10 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
     def setup_clients(cls):
         super(BaseV2ComputeTest, cls).setup_clients()
         cls.servers_client = cls.os_primary.servers_client
+        if CONF.enforce_scope.nova and hasattr(cls, 'os_project_reader'):
+            cls.reader_servers_client = cls.os_project_reader.servers_client
+        else:
+            cls.reader_servers_client = cls.servers_client
         cls.server_groups_client = cls.os_primary.server_groups_client
         cls.flavors_client = cls.os_primary.flavors_client
         cls.compute_images_client = cls.os_primary.compute_images_client
@@ -680,7 +684,7 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     """Base test case class for Compute Admin API tests."""
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'project_reader']
 
     @classmethod
     def setup_clients(cls):
