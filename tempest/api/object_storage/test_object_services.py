@@ -13,12 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import hashlib
 import random
 import re
 import time
 import zlib
 
-from oslo_utils.secretutils import md5
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest import config
@@ -158,7 +158,7 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='TestObject')
         data = data_utils.random_bytes()
-        create_md5 = md5(data, usedforsecurity=False).hexdigest()
+        create_md5 = hashlib.md5(data, usedforsecurity=False).hexdigest()
         metadata = {'Etag': create_md5}
         resp, _ = self.object_client.create_object(
             self.container_name,
@@ -661,7 +661,7 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='TestObject')
         data = data_utils.random_bytes(10)
-        create_md5 = md5(data, usedforsecurity=False).hexdigest()
+        create_md5 = hashlib.md5(data, usedforsecurity=False).hexdigest()
         create_metadata = {'Etag': create_md5}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -703,7 +703,7 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix, name='TestObject')
         data = data_utils.random_bytes()
-        create_md5 = md5(data, usedforsecurity=False).hexdigest()
+        create_md5 = hashlib.md5(data, usedforsecurity=False).hexdigest()
         create_metadata = {'Etag': create_md5}
         self.object_client.create_object(self.container_name,
                                          object_name,
@@ -711,7 +711,7 @@ class ObjectTest(base.BaseObjectTest):
                                          metadata=create_metadata)
 
         list_data = data_utils.random_bytes()
-        list_md5 = md5(list_data, usedforsecurity=False).hexdigest()
+        list_md5 = hashlib.md5(list_data, usedforsecurity=False).hexdigest()
         list_metadata = {'If-None-Match': list_md5}
         resp, body = self.object_client.get_object(
             self.container_name,
@@ -1011,7 +1011,7 @@ class ObjectTest(base.BaseObjectTest):
         """
         object_name, data = self.create_object(self.container_name)
         # local copy is identical, no download
-        object_md5 = md5(data, usedforsecurity=False).hexdigest()
+        object_md5 = hashlib.md5(data, usedforsecurity=False).hexdigest()
         headers = {'If-None-Match': object_md5}
         url = "%s/%s" % (self.container_name, object_name)
         resp, _ = self.object_client.get(url, headers=headers)
@@ -1026,7 +1026,8 @@ class ObjectTest(base.BaseObjectTest):
 
         # local copy is different, download
         local_data = "something different"
-        other_md5 = md5(local_data.encode(), usedforsecurity=False).hexdigest()
+        other_md5 = hashlib.md5(
+            local_data.encode(), usedforsecurity=False).hexdigest()
         headers = {'If-None-Match': other_md5}
         resp, _ = self.object_client.get(url, headers=headers)
         self.assertHeaders(resp, 'Object', 'GET')

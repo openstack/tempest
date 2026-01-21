@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+import hashlib
 import io
 import select
 import socket
@@ -21,7 +21,6 @@ import time
 import warnings
 
 from oslo_log import log as logging
-from oslo_utils.secretutils import md5
 
 from tempest.lib import exceptions
 
@@ -43,7 +42,7 @@ def get_fingerprint(self):
     TODO(alee) Remove this when paramiko is patched.
     See https://github.com/paramiko/paramiko/pull/1928
     """
-    return md5(self.asbytes(), usedforsecurity=False).digest()
+    return hashlib.md5(self.asbytes(), usedforsecurity=False).digest()
 
 
 paramiko.pkey.PKey.get_fingerprint = get_fingerprint

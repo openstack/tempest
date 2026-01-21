@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import hashlib
 import os
 
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
-from oslo_utils.secretutils import md5
 import yaml
 
 from tempest.lib import auth
@@ -134,7 +134,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                 scope = 'domain'
             elif 'system' in account:
                 scope = 'system'
-            temp_hash = md5(usedforsecurity=False)
+            temp_hash = hashlib.md5(usedforsecurity=False)
             account_for_hash = dict((k, v) for (k, v) in account.items()
                                     if k in cls.HASH_CRED_FIELDS)
             temp_hash.update(str(account_for_hash).encode('utf-8'))
