@@ -34,7 +34,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
     # Set this to True in subclasses to create a default network. See
     # https://bugs.launchpad.net/tempest/+bug/1844568
     create_default_network = False
-    credentials = ['primary']
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -73,6 +73,11 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
         cls.object_client = cls.os_primary.object_client
         cls.backups_client = cls.os_primary.backups_client_latest
         cls.volumes_client = cls.os_primary.volumes_client_latest
+        if CONF.enforce_scope.cinder and hasattr(cls, 'os_project_reader'):
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
         cls.messages_client = cls.os_primary.volume_messages_client_latest
         cls.versions_client = cls.os_primary.volume_versions_client_latest
         cls.groups_client = cls.os_primary.groups_client_latest
@@ -310,7 +315,7 @@ class BaseVolumeTest(api_version_utils.BaseMicroversionTest,
 class BaseVolumeAdminTest(BaseVolumeTest):
     """Base test case class for all Volume Admin API tests."""
 
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'project_reader']
 
     @classmethod
     def setup_clients(cls):

@@ -28,10 +28,21 @@ LOG = logging.getLogger(__name__)
 class ExtensionsTestJSON(base.BaseVolumeTest):
     """Test volume extensions"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ExtensionsTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_volumes_extension_client = (
+                cls.os_project_reader.volumes_extension_client_latest)
+        else:
+            cls.reader_volumes_extension_client = cls.volumes_extension_client
+
     @decorators.idempotent_id('94607eb0-43a5-47ca-82aa-736b41bd2e2c')
     def test_list_extensions(self):
         """Test listing volume extensions"""
-        extensions = (self.volumes_extension_client.list_extensions()
+        extensions = (self.reader_volumes_extension_client.list_extensions()
                       ['extensions'])
         if not CONF.volume_feature_enabled.api_extensions:
             raise self.skipException('There are not any extensions configured')

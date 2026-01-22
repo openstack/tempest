@@ -79,7 +79,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def resource_setup(cls):
         super(VolumesListTestJSON, cls).resource_setup()
 
-        existing_volumes = cls.volumes_client.list_volumes()['volumes']
+        existing_volumes = cls.reader_volumes_client.list_volumes()['volumes']
         cls.volume_id_list = [vol['id'] for vol in existing_volumes]
 
         # Create 3 test volumes
@@ -87,7 +87,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         cls.metadata = {'Type': 'work'}
         for _ in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            volume = cls.volumes_client.show_volume(volume['id'])['volume']
+            volume = cls.reader_volumes_client.show_volume(
+                volume['id'])['volume']
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
         cls._remove_volatile_fields(cls.volume_list)
@@ -96,10 +97,11 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         """list or list_details with given params and validates result"""
         if with_detail:
             fetched_vol_list = \
-                self.volumes_client.list_volumes(detail=True,
-                                                 params=params)['volumes']
+                self.reader_volumes_client.list_volumes(
+                    detail=True,
+                    params=params)['volumes']
         else:
-            fetched_vol_list = self.volumes_client.list_volumes(
+            fetched_vol_list = self.reader_volumes_client.list_volumes(
                 params=params)['volumes']
 
         # Validating params of fetched volumes
@@ -121,7 +123,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volume_list(self):
         """Test getting a list of volumes"""
         # Fetch all volumes
-        fetched_list = self.volumes_client.list_volumes()['volumes']
+        fetched_list = self.reader_volumes_client.list_volumes()['volumes']
         self._assert_volumes_in(fetched_list, self.volume_list,
                                 fields=self.VOLUME_FIELDS)
 
@@ -129,7 +131,8 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volume_list_with_details(self):
         """Test getting a list of detailed volumes"""
         # Fetch all Volumes
-        fetched_list = self.volumes_client.list_volumes(detail=True)['volumes']
+        fetched_list = self.reader_volumes_client.list_volumes(
+            detail=True)['volumes']
         self._assert_volumes_in(fetched_list, self.volume_list)
 
     @decorators.idempotent_id('a28e8da4-0b56-472f-87a8-0f4d3f819c02')
@@ -137,7 +140,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         """Test getting a list of volumes filtered by volume name"""
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'name': volume['name']}
-        fetched_vol = self.volumes_client.list_volumes(
+        fetched_vol = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
         self.assertEqual(fetched_vol[0]['name'], volume['name'])
@@ -147,7 +150,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         """Test getting a list of detailed volumes filtered by volume name"""
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'name': volume['name']}
-        fetched_vol = self.volumes_client.list_volumes(
+        fetched_vol = self.reader_volumes_client.list_volumes(
             detail=True, params=params)['volumes']
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
         self.assertEqual(fetched_vol[0]['name'], volume['name'])
@@ -156,7 +159,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volumes_list_by_status(self):
         """Test getting a list of volumes filtered by volume status"""
         params = {'status': 'available'}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
         self._assert_volumes_in(fetched_list, self.volume_list,
@@ -166,7 +169,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volumes_list_details_by_status(self):
         """Test getting a list of detailed volumes filtered by status"""
         params = {'status': 'available'}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual('available', volume['status'])
@@ -180,7 +183,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         in volume_list are not a bootable volume.
         """
         params = {'bootable': 'false'}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
         self._assert_volumes_in(fetched_list, self.volume_list,
@@ -190,7 +193,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
     def test_volumes_list_details_by_bootable(self):
         """Test getting a list of detailed volumes filtered by bootable"""
         params = {'bootable': 'false'}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual('false', volume['bootable'])
@@ -202,7 +205,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self._list_by_param_value_and_assert(params)
         self._assert_volumes_in(fetched_list, self.volume_list,
@@ -214,7 +217,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
-        fetched_list = self.volumes_client.list_volumes(
+        fetched_list = self.reader_volumes_client.list_volumes(
             detail=True, params=params)['volumes']
         for volume in fetched_list:
             self.assertEqual(zone, volume['availability_zone'])
@@ -260,7 +263,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
                       'sort_dir': sort_dir,
                       'sort_key': sort_key
                       }
-            fetched_volume = self.volumes_client.list_volumes(
+            fetched_volume = self.reader_volumes_client.list_volumes(
                 detail=True, params=params)['volumes']
             self.assertEqual(limit, len(fetched_volume),
                              "The count of volumes is %s, expected:%s " %
@@ -418,7 +421,7 @@ class VolumesListTestJSON(base.BaseVolumeTest):
         params = {'marker': marker, 'sort': 'id:asc'}
 
         # Running volume list using marker parameter
-        vol_with_marker = self.volumes_client.list_volumes(
+        vol_with_marker = self.reader_volumes_client.list_volumes(
             detail=True, params=params)['volumes']
 
         expected_volumes_id = {

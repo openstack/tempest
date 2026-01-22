@@ -29,12 +29,22 @@ class VolumesBackupsTest(base.BaseVolumeTest):
     """Test volumes backup"""
 
     create_default_network = True
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
         super(VolumesBackupsTest, cls).skip_checks()
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesBackupsTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_backups_client = (
+                cls.os_project_reader.backups_client_latest)
+        else:
+            cls.reader_backups_client = cls.backups_client
 
     def restore_backup(self, backup_id):
         # Restore a backup
@@ -89,20 +99,21 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                                 volume['id'], 'available')
 
         # Get a given backup
-        backup = self.backups_client.show_backup(backup['id'])['backup']
+        backup = self.reader_backups_client.show_backup(backup['id'])['backup']
         self.assertEqual(kwargs["name"], backup['name'])
         self.assertEqual(kwargs["description"], backup['description'])
         if CONF.volume.backup_driver == "swift":
             self.assertEqual(kwargs["container"], backup['container'])
 
         # Get all backups with detail
-        backups = self.backups_client.list_backups(detail=True)['backups']
+        backups = self.reader_backups_client.list_backups(
+            detail=True)['backups']
         self.assertIn((backup['name'], backup['id']),
                       [(m['name'], m['id']) for m in backups])
 
         restored_volume = self.restore_backup(backup['id'])
 
-        restored_volume_metadata = self.volumes_client.show_volume(
+        restored_volume_metadata = self.reader_volumes_client.show_volume(
             restored_volume['volume_id'])['volume']['metadata']
 
         # Verify the backup has been restored successfully
@@ -154,7 +165,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         img_uuid = CONF.compute.image_ref
         volume = self.create_volume(imageRef=img_uuid)
 
-        volume_details = self.volumes_client.show_volume(
+        volume_details = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         self.assertTrue(volume_details['bootable'])
 
@@ -167,7 +178,7 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         restored_volume_id = self.restore_backup(backup['id'])['volume_id']
 
         # Verify the restored backup volume is bootable
-        restored_volume_info = self.volumes_client.show_volume(
+        restored_volume_info = self.reader_volumes_client.show_volume(
             restored_volume_id)['volume']
 
         self.assertTrue(restored_volume_info['bootable'])
@@ -190,7 +201,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
         backup1 = self.create_backup(volume['id'], force=True)
 
         # Validate backup details
-        backup_info = self.backups_client.show_backup(backup1['id'])['backup']
+        backup_info = self.reader_backups_client.show_backup(
+            backup1['id'])['backup']
         self.assertEqual(False, backup_info['has_dependent_backups'])
         self.assertEqual(False, backup_info['is_incremental'])
 
@@ -201,7 +213,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
                                                 backup2['id'], 'available')
 
         # Validate incremental backup details
-        backup2_info = self.backups_client.show_backup(backup2['id'])['backup']
+        backup2_info = self.reader_backups_client.show_backup(
+            backup2['id'])['backup']
         self.assertEqual(True, backup2_info['is_incremental'])
         self.assertEqual(False, backup2_info['has_dependent_backups'])
 
@@ -214,7 +227,8 @@ class VolumesBackupsTest(base.BaseVolumeTest):
             volume_id=volume['id'], incremental=True, force=True)
 
         # Validate incremental backup details
-        backup3_info = self.backups_client.show_backup(backup3['id'])['backup']
+        backup3_info = self.reader_backups_client.show_backup(
+            backup3['id'])['backup']
         self.assertEqual(True, backup3_info['is_incremental'])
         self.assertEqual(False, backup3_info['has_dependent_backups'])
 
@@ -224,6 +238,16 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
 
     volume_min_microversion = '3.9'
     volume_max_microversion = 'latest'
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesBackupsV39Test, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_backups_client = (
+                cls.os_project_reader.backups_client_latest)
+        else:
+            cls.reader_backups_client = cls.backups_client
 
     @classmethod
     def skip_checks(cls):
@@ -255,7 +279,7 @@ class VolumesBackupsV39Test(base.BaseVolumeTest):
         self.assertEqual(update_kwargs['name'], update_backup['name'])
 
         # Assert response body for show_backup method
-        retrieved_backup = self.backups_client.show_backup(
+        retrieved_backup = self.reader_backups_client.show_backup(
             backup['id'])['backup']
         for key in update_kwargs:
             self.assertEqual(update_kwargs[key], retrieved_backup[key])

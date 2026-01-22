@@ -20,11 +20,22 @@ CONF = config.CONF
 class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
     """Test listing volume snapshots"""
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(VolumesSnapshotListTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesSnapshotListTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
 
     @classmethod
     def resource_setup(cls):
@@ -39,7 +50,7 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
     def _list_by_param_values_and_assert(self, with_detail=False, **params):
         """list or list_details with given params and validates result."""
 
-        fetched_snap_list = self.snapshots_client.list_snapshots(
+        fetched_snap_list = self.reader_snapshots_client.list_snapshots(
             detail=with_detail, **params)['snapshots']
 
         # Validating params of fetched snapshots
@@ -53,7 +64,7 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         """list snapshots by limit param"""
 
         # Get snapshots list using limit parameter
-        fetched_snap_list = self.snapshots_client.list_snapshots(
+        fetched_snap_list = self.reader_snapshots_client.list_snapshots(
             limit=limit)['snapshots']
         # Validating filtered snapshots length equals to expected_elements
         self.assertEqual(expected_elements, len(fetched_snap_list))
@@ -105,7 +116,7 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         If listing snapshots with limit greater than the count of all
         snapshots, then all snapshots are returned.
         """
-        snap_list = self.snapshots_client.list_snapshots()['snapshots']
+        snap_list = self.reader_snapshots_client.list_snapshots()['snapshots']
         self._list_snapshots_by_param_limit(limit=100000,
                                             expected_elements=len(snap_list))
 
@@ -115,7 +126,7 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         self._list_snapshots_by_param_limit(limit=0, expected_elements=0)
 
     def _list_snapshots_param_sort(self, sort_key, sort_dir):
-        snap_list = self.snapshots_client.list_snapshots(
+        snap_list = self.reader_snapshots_client.list_snapshots(
             sort_key=sort_key, sort_dir=sort_dir)['snapshots']
         self.assertNotEmpty(snap_list)
         if sort_key == 'display_name':
@@ -167,12 +178,13 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
 
         The list of snapshots should end before the provided marker
         """
-        snap_list = self.snapshots_client.list_snapshots()['snapshots']
+        snap_list = self.reader_snapshots_client.list_snapshots()['snapshots']
         # list_snapshots will take the reverse order as they are created.
         snapshot_id_list = [snap['id'] for snap in snap_list][::-1]
 
         params = {'marker': snapshot_id_list[1]}
-        snap_list = self.snapshots_client.list_snapshots(**params)['snapshots']
+        snap_list = self.reader_snapshots_client.list_snapshots(
+            **params)['snapshots']
         fetched_list_id = [snap['id'] for snap in snap_list]
         # Verify the list of snapshots ends before the provided
         # marker(second snapshot), therefore only the first snapshot
@@ -189,7 +201,8 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
         (The items in the all snapshots list start from position 0.)
         """
         params = {'offset': 2, 'limit': 3}
-        snap_list = self.snapshots_client.list_snapshots(**params)['snapshots']
+        snap_list = self.reader_snapshots_client.list_snapshots(
+            **params)['snapshots']
         # Verify the list of snapshots skip offset=2 from the first element
         # (total 3 elements), therefore only one snapshot should display
         self.assertEqual(1, len(snap_list))

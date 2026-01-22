@@ -15,14 +15,18 @@
 
 from tempest.api.volume import base
 from tempest.common import waiters
+from tempest import config
 from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
+
+
+CONF = config.CONF
 
 
 class VolumesTransfersTest(base.BaseVolumeTest):
     """Test volume transfer"""
 
-    credentials = ['primary', 'alt', 'admin']
+    credentials = ['primary', 'alt', 'admin', 'project_reader']
 
     @classmethod
     def setup_clients(cls):
@@ -32,6 +36,11 @@ class VolumesTransfersTest(base.BaseVolumeTest):
         cls.alt_client = cls.os_alt.volume_transfers_client_latest
         cls.alt_volumes_client = cls.os_alt.volumes_client_latest
         cls.adm_volumes_client = cls.os_admin.volumes_client_latest
+        if CONF.enforce_scope.cinder:
+            cls.reader_transfers_client = (
+                cls.os_project_reader.volume_transfers_client_latest)
+        else:
+            cls.reader_transfers_client = cls.client
 
     @decorators.idempotent_id('4d75b645-a478-48b1-97c8-503f64242f1a')
     def test_create_get_list_accept_volume_transfer(self):
@@ -54,12 +63,14 @@ class VolumesTransfersTest(base.BaseVolumeTest):
             self.volumes_client, volume['id'], 'awaiting-transfer')
 
         # Get a volume transfer
-        body = self.client.show_volume_transfer(transfer_id)['transfer']
+        body = self.reader_transfers_client.show_volume_transfer(transfer_id)[
+            'transfer']
         self.assertEqual(volume['id'], body['volume_id'])
 
         # List volume transfers, the result should be greater than
         # or equal to 1
-        body = self.client.list_volume_transfers()['transfers']
+        body = self.reader_transfers_client.list_volume_transfers()[
+            'transfers']
         self.assertNotEmpty(body)
 
         # Accept a volume transfer by alt_tenant
@@ -94,7 +105,8 @@ class VolumesTransfersTest(base.BaseVolumeTest):
 
         # List all volume transfers with details, check the detail-specific
         # elements, and look for the created transfer.
-        transfers = self.client.list_volume_transfers(detail=True)['transfers']
+        transfers = self.reader_transfers_client.list_volume_transfers(
+            detail=True)['transfers']
         self.assertNotEmpty(transfers)
         volume_list = [transfer['volume_id'] for transfer in transfers]
         self.assertIn(volume['id'], volume_list,

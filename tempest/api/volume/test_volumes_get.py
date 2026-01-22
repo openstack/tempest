@@ -28,6 +28,16 @@ CONF = config.CONF
 class VolumesGetTest(base.BaseVolumeTest):
     """Test getting volume info"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesGetTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_images_client = cls.os_project_reader.image_client_v2
+        else:
+            cls.reader_images_client = cls.images_client
+
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         v_name = data_utils.rand_name(
@@ -43,7 +53,7 @@ class VolumesGetTest(base.BaseVolumeTest):
                          "to the requested name")
 
         # Get Volume information
-        fetched_volume = self.volumes_client.show_volume(
+        fetched_volume = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(v_name,
                          fetched_volume['name'],
@@ -80,7 +90,7 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(new_v_name, update_volume['name'])
         self.assertEqual(new_desc, update_volume['description'])
         # Assert response body for show_volume method
-        updated_volume = self.volumes_client.show_volume(
+        updated_volume = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(volume['id'], updated_volume['id'])
         self.assertEqual(new_v_name, updated_volume['name'])
@@ -121,7 +131,7 @@ class VolumesGetTest(base.BaseVolumeTest):
     @utils.services('image')
     def test_volume_create_get_update_delete_from_image(self):
         """Test Create/Get/Update/Delete of a volume created from image"""
-        image = self.images_client.show_image(CONF.compute.image_ref)
+        image = self.reader_images_client.show_image(CONF.compute.image_ref)
         min_disk = image['min_disk']
         disk_size = max(min_disk, CONF.volume.volume_size)
         self._volume_create_get_update_delete(
@@ -147,4 +157,4 @@ class VolumesSummaryTest(base.BaseVolumeTest):
     def test_show_volume_summary(self):
         """Test showing volume summary"""
         # check response schema
-        self.volumes_client.show_volume_summary()
+        self.reader_volumes_client.show_volume_summary()

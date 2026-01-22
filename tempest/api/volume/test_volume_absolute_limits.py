@@ -28,6 +28,16 @@ class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa: T115
 
     # avoid existing volumes of pre-defined tenant
     force_tenant_isolation = True
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(AbsoluteLimitsTests, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_volume_limits_client = (
+                cls.os_project_reader.volume_limits_client_latest)
+        else:
+            cls.reader_volume_limits_client = cls.volume_limits_client
 
     @classmethod
     def resource_setup(cls):
@@ -46,7 +56,7 @@ class AbsoluteLimitsTests(base.BaseVolumeAdminTest):  # noqa: T115
     def test_get_volume_absolute_limits(self):
         """Test getting volume absolute limits"""
         absolute_limits = \
-            self.volume_limits_client.show_limits(
+            self.reader_volume_limits_client.show_limits(
             )['limits']['absolute']
 
         # verify volume limits and defaults per tenants

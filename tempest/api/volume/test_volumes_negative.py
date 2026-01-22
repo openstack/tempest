@@ -30,6 +30,16 @@ CONF = config.CONF
 class VolumesNegativeTest(base.BaseVolumeTest):
     """Negative tests of volumes"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesNegativeTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_images_client = cls.os_project_reader.image_client_v2
+        else:
+            cls.reader_images_client = cls.images_client
+
     @classmethod
     def resource_setup(cls):
         super(VolumesNegativeTest, cls).resource_setup()
@@ -62,7 +72,8 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @decorators.idempotent_id('f131c586-9448-44a4-a8b0-54ca838aa43e')
     def test_volume_get_nonexistent_volume_id(self):
         """Test getting non existent volume should fail"""
-        self.assertRaises(lib_exc.NotFound, self.volumes_client.show_volume,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_volumes_client.show_volume,
                           data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
@@ -153,7 +164,8 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_get_invalid_volume_id(self):
         """Test getting volume with invalid volume id should fail"""
         self.assertRaises(
-            lib_exc.NotFound, self.volumes_client.show_volume,
+            lib_exc.NotFound,
+            self.reader_volumes_client.show_volume,
             data_utils.rand_name(
                 prefix=CONF.resource_name_prefix, name='invalid'))
 
@@ -162,7 +174,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_get_volume_without_passing_volume_id(self):
         """Test getting volume with empty volume id should fail"""
         self.assertRaises(lib_exc.NotFound,
-                          self.volumes_client.show_volume, '')
+                          self.reader_volumes_client.show_volume, '')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('1f035827-7c32-4019-9240-b4ec2dbd9dfd')
@@ -281,7 +293,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
             prefix=CONF.resource_name_prefix,
             name=self.__class__.__name__ + '-Volume')
         params = {'name': v_name}
-        fetched_volume = self.volumes_client.list_volumes(
+        fetched_volume = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self.assertEmpty(fetched_volume)
 
@@ -297,7 +309,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
             name=self.__class__.__name__ + '-Volume')
         params = {'name': v_name}
         fetched_volume = \
-            self.volumes_client.list_volumes(
+            self.reader_volumes_client.list_volumes(
                 detail=True, params=params)['volumes']
         self.assertEmpty(fetched_volume)
 
@@ -306,7 +318,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_list_volumes_with_invalid_status(self):
         """Test listing volumes with invalid status should get nothing"""
         params = {'status': 'null'}
-        fetched_volume = self.volumes_client.list_volumes(
+        fetched_volume = self.reader_volumes_client.list_volumes(
             params=params)['volumes']
         self.assertEmpty(fetched_volume)
 
@@ -319,8 +331,8 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         """
         params = {'status': 'null'}
         fetched_volume = \
-            self.volumes_client.list_volumes(detail=True,
-                                             params=params)['volumes']
+            self.reader_volumes_client.list_volumes(detail=True,
+                                                    params=params)['volumes']
         self.assertEmpty(fetched_volume)
 
     @decorators.attr(type=['negative'])
@@ -352,7 +364,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.images_client.reactivate_image, image['id'])
 
-        body = self.images_client.show_image(image['id'])
+        body = self.reader_images_client.show_image(image['id'])
         self.assertEqual("deactivated", body['status'])
         # Try creating a volume from deactivated image
         self.assertRaises(lib_exc.BadRequest,
