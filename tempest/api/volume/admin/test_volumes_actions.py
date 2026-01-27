@@ -93,7 +93,7 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
         self.addCleanup(waiters.wait_for_volume_resource_status,
                         self.volumes_client, volume_id, 'available')
         self.addCleanup(self.volumes_client.detach_volume, volume_id)
-        attachment = self.volumes_client.show_volume(
+        attachment = self.reader_volumes_client.show_volume(
             volume_id)['volume']['attachments'][0]
 
         # Reset volume's status to error
@@ -109,5 +109,5 @@ class VolumesActionsTest(base.BaseVolumeAdminTest):
             attachment_id=attachment['attachment_id'])
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume_id, 'available')
-        vol_info = self.volumes_client.show_volume(volume_id)['volume']
+        vol_info = self.reader_volumes_client.show_volume(volume_id)['volume']
         self.assertEmpty(vol_info['attachments'])

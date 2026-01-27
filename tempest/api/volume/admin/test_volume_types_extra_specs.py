@@ -94,5 +94,5 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
             self.volume_type['id'], spec_key)
         self.assertRaises(
             lib_exc.NotFound,
-            self.admin_volume_types_client.show_volume_type_extra_specs,
+            self.reader_volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], spec_key)

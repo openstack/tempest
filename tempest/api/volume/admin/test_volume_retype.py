@@ -35,7 +35,7 @@ class VolumeRetypeTest(base.BaseVolumeAdminTest):
 
         # This list should return 2 volumes until the copy and cleanup
         # process is finished.
-        fetched_list = self.admin_volume_client.list_volumes(
+        fetched_list = self.reader_volume_client.list_volumes(
             params={'all_tenants': True,
                     'name': vol['name']})['volumes']
 

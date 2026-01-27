@@ -94,7 +94,7 @@ class SnapshotsActionsTest(base.BaseVolumeAdminTest):
         self.snapshots_client.update_snapshot_status(self.snapshot['id'],
                                                      status=status,
                                                      progress=progress)
-        snapshot_get = self.admin_snapshots_client.show_snapshot(
+        snapshot_get = self.reader_snapshots_client.show_snapshot(
             self.snapshot['id'])['snapshot']
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])

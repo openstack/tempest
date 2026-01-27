@@ -128,7 +128,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         self._test_backend_name_distinction(self.volume_id_list_with_prefix)
 
     def _get_volume_host(self, volume_id):
-        return self.admin_volume_client.show_volume(
+        return self.reader_volume_client.show_volume(
             volume_id)['volume']['os-vol-host-attr:host']
 
     def _test_backend_name_reporting_by_volume_id(self, volume_id):
@@ -136,7 +136,8 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        volume = self.admin_volume_client.show_volume(volume_id)['volume']
+        volume = self.reader_volume_client.show_volume(volume_id)[
+            'volume']
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %

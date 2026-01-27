@@ -26,11 +26,22 @@ CONF = config.CONF
 
 class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(BaseGroupSnapshotsTest, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseGroupSnapshotsTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
 
     def _create_group_snapshot(self, **kwargs):
         if 'name' not in kwargs:
@@ -49,8 +60,8 @@ class BaseGroupSnapshotsTest(base.BaseVolumeAdminTest):
 
     def _delete_group_snapshot(self, group_snapshot):
         self.group_snapshots_client.delete_group_snapshot(group_snapshot['id'])
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
-        snapshots = self.snapshots_client.list_snapshots(
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
+        snapshots = self.reader_snapshots_client.list_snapshots(
             detail=True)['snapshots']
         for vol in vols:
             for snap in snapshots:
@@ -67,6 +78,19 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
     volume_min_microversion = '3.14'
     volume_max_microversion = 'latest'
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(GroupSnapshotsTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+            cls.reader_group_snapshots_client = (
+                cls.os_project_reader.group_snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
+            cls.reader_group_snapshots_client = cls.group_snapshots_client
 
     @decorators.idempotent_id('1298e537-f1f0-47a3-a1dd-8adec8168897')
     def test_group_snapshot_create_show_list_delete(self):
@@ -108,7 +132,7 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
                                                    name='group_snapshot')
         group_snapshot = self._create_group_snapshot(
             group_id=grp['id'], name=group_snapshot_name)
-        snapshots = self.snapshots_client.list_snapshots(
+        snapshots = self.reader_snapshots_client.list_snapshots(
             detail=True)['snapshots']
         for snap in snapshots:
             if vol['id'] == snap['volume_id']:
@@ -117,14 +141,16 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
         self.assertEqual(group_snapshot_name, group_snapshot['name'])
 
         # Get a given group snapshot
-        group_snapshot = self.group_snapshots_client.show_group_snapshot(
-            group_snapshot['id'])['group_snapshot']
+        group_snapshot = (
+            self.reader_group_snapshots_client.show_group_snapshot(
+                group_snapshot['id'])['group_snapshot'])
         self.assertEqual(group_snapshot_name, group_snapshot['name'])
 
         # Get all group snapshots with details, check some detail-specific
         # elements, and look for the created group snapshot
-        group_snapshots = self.group_snapshots_client.list_group_snapshots(
-            detail=True)['group_snapshots']
+        group_snapshots = (
+            self.reader_group_snapshots_client.list_group_snapshots(
+                detail=True)['group_snapshots'])
         for grp_snapshot in group_snapshots:
             self.assertIn('created_at', grp_snapshot)
             self.assertIn('group_id', grp_snapshot)
@@ -133,8 +159,9 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
 
         # Delete group snapshot
         self._delete_group_snapshot(group_snapshot)
-        group_snapshots = self.group_snapshots_client.list_group_snapshots()[
-            'group_snapshots']
+        group_snapshots = (
+            self.reader_group_snapshots_client.list_group_snapshots()[
+                'group_snapshots'])
         self.assertNotIn((group_snapshot['name'], group_snapshot['id']),
                          [(m['name'], m['id']) for m in group_snapshots])
 
@@ -179,7 +206,7 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
         group_snapshot = self._create_group_snapshot(
             group_id=grp['id'], name=group_snapshot_name)
         self.assertEqual(group_snapshot_name, group_snapshot['name'])
-        snapshots = self.snapshots_client.list_snapshots(
+        snapshots = self.reader_snapshots_client.list_snapshots(
             detail=True)['snapshots']
         for snap in snapshots:
             if vol['id'] == snap['volume_id']:
@@ -192,7 +219,7 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
             group_snapshot_id=group_snapshot['id'], name=grp_name2)['group']
         self.addCleanup(self.delete_group, grp2['id'])
         self.assertEqual(grp_name2, grp2['name'])
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         for vol in vols:
             if vol['group_id'] == grp2['id']:
                 waiters.wait_for_volume_resource_status(
@@ -256,13 +283,13 @@ class GroupSnapshotsTest(BaseGroupSnapshotsTest):
                 self.groups_client, grp['id'], 'available')
 
         # Verify the created volumes are associated with consistency group
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         grp_vols = [v for v in vols if v['group_id'] == grp['id']]
         self.assertEqual(2, len(grp_vols))
 
         # Create a snapshot group
         group_snapshot = self._create_group_snapshot(group_id=grp['id'])
-        snapshots = self.snapshots_client.list_snapshots(
+        snapshots = self.reader_snapshots_client.list_snapshots(
             detail=True)['snapshots']
 
         for snap in snapshots:
@@ -279,6 +306,16 @@ class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
 
     volume_min_microversion = '3.19'
     volume_max_microversion = 'latest'
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(GroupSnapshotsV319Test, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
 
     @decorators.idempotent_id('3b42c9b9-c984-4444-816e-ca2e1ed30b40')
     def test_reset_group_snapshot_status(self):
@@ -306,7 +343,7 @@ class GroupSnapshotsV319Test(BaseGroupSnapshotsTest):
 
         # Create group snapshot
         group_snapshot = self._create_group_snapshot(group_id=group['id'])
-        snapshots = self.snapshots_client.list_snapshots(
+        snapshots = self.reader_snapshots_client.list_snapshots(
             detail=True)['snapshots']
         for snap in snapshots:
             if volume['id'] == snap['volume_id']:

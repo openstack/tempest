@@ -27,6 +27,16 @@ class GroupsTest(base.BaseVolumeAdminTest):
 
     volume_min_microversion = '3.13'
     volume_max_microversion = 'latest'
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(GroupsTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_groups_client = (
+                cls.os_project_reader.groups_client_latest)
+        else:
+            cls.reader_groups_client = cls.groups_client
 
     @decorators.idempotent_id('4b111d28-b73d-4908-9bd2-03dc2992e4d4')
     def test_group_create_show_list_delete(self):
@@ -66,16 +76,16 @@ class GroupsTest(base.BaseVolumeAdminTest):
         vol1_id = vol1['id']
 
         # Get a given group
-        grp1 = self.groups_client.show_group(grp1['id'])['group']
+        grp1 = self.reader_groups_client.show_group(grp1['id'])['group']
         self.assertEqual(grp1_name, grp1['name'])
         self.assertEqual(grp1_id, grp1['id'])
 
-        grp2 = self.groups_client.show_group(grp2['id'])['group']
+        grp2 = self.reader_groups_client.show_group(grp2['id'])['group']
         self.assertEqual(grp2_name, grp2['name'])
         self.assertEqual(grp2_id, grp2['id'])
 
         # Get all groups with detail
-        grps = self.groups_client.list_groups(detail=True)['groups']
+        grps = self.reader_groups_client.list_groups(detail=True)['groups']
         for grp_id in [grp1_id, grp2_id]:
             filtered_grps = [g for g in grps if g['id'] == grp_id]
             self.assertEqual(1, len(filtered_grps))
@@ -84,7 +94,7 @@ class GroupsTest(base.BaseVolumeAdminTest):
             self.assertEqual(group_type['id'],
                              filtered_grps[0]['group_type'])
 
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         filtered_vols = [v for v in vols if v['id'] in [vol1_id]]
         self.assertEqual(1, len(filtered_vols))
         for vol in filtered_vols:
@@ -95,7 +105,7 @@ class GroupsTest(base.BaseVolumeAdminTest):
         self.delete_group(grp1_id)
         # grp2 is empty so delete_volumes flag can be set to False
         self.delete_group(grp2_id, delete_volumes=False)
-        grps = self.groups_client.list_groups(detail=True)['groups']
+        grps = self.reader_groups_client.list_groups(detail=True)['groups']
         self.assertEmpty(grps)
 
     @decorators.idempotent_id('4a8a6fd2-8b3b-4641-8f54-6a6f99320006')
@@ -140,12 +150,12 @@ class GroupsTest(base.BaseVolumeAdminTest):
             self.groups_client, grp['id'], 'available')
 
         # Get the updated Group
-        grp = self.groups_client.show_group(grp['id'])['group']
+        grp = self.reader_groups_client.show_group(grp['id'])['group']
         self.assertEqual(new_grp_name, grp['name'])
         self.assertEqual(new_desc, grp['description'])
 
         # Get volumes in the group
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         grp_vols = [v for v in vols if v['group_id'] == grp['id']]
         self.assertEqual(1, len(grp_vols))
 
@@ -158,7 +168,7 @@ class GroupsTest(base.BaseVolumeAdminTest):
             self.groups_client, grp['id'], 'available')
 
         # Get volumes in the group
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         grp_vols = [v for v in vols if v['group_id'] == grp['id']]
         self.assertEqual(2, len(grp_vols))
 
@@ -199,7 +209,7 @@ class GroupsV314Test(base.BaseVolumeAdminTest):
             source_group_id=grp['id'], name=grp_name2)['group']
         self.addCleanup(self.delete_group, grp2['id'])
         self.assertEqual(grp_name2, grp2['name'])
-        vols = self.volumes_client.list_volumes(detail=True)['volumes']
+        vols = self.reader_volumes_client.list_volumes(detail=True)['volumes']
         for vol in vols:
             if vol['group_id'] == grp2['id']:
                 waiters.wait_for_volume_resource_status(

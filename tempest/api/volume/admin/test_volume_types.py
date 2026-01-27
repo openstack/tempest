@@ -28,8 +28,9 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
     @decorators.idempotent_id('9d9b28e3-1b2e-4483-a2cc-24aa0ea1de54')
     def test_volume_type_list(self):
         """Test listing volume types"""
-        body = \
-            self.admin_volume_types_client.list_volume_types()['volume_types']
+        body = (
+            self.reader_volume_types_client.list_volume_types()
+            ['volume_types'])
         self.assertIsInstance(body, list)
 
     @decorators.idempotent_id('c03cc62c-f4e9-4623-91ec-64ce2f9c1260')
@@ -68,7 +69,7 @@ class VolumeTypesTest(base.BaseVolumeAdminTest):
                                                 volume['id'], 'available')
 
         # Get volume details and Verify
-        fetched_volume = self.volumes_client.show_volume(
+        fetched_volume = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(volume_types[1]['name'],
                          fetched_volume['volume_type'],

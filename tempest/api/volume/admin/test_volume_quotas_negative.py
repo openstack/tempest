@@ -39,7 +39,7 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeAdminTest):
         # to restore the quotas to their original values after the tests
         # from this class are done. This is needed just in case Tempest is
         # configured to use pre-provisioned projects/user accounts.
-        original_quota_set = (cls.admin_quotas_client.show_quota_set(
+        original_quota_set = (cls.reader_quotas_client.show_quota_set(
             cls.demo_tenant_id)['quota_set'])
         cleanup_quota_set = dict(
             (k, v) for k, v in original_quota_set.items() if k in QUOTA_KEYS)
