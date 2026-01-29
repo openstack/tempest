@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     """Test migration operations supported by admin user"""
 
-    credentials = ['primary', 'admin', 'project_manager']
+    credentials = ['primary', 'admin', 'project_manager', 'project_reader']
 
     @classmethod
     def setup_clients(cls):
@@ -44,6 +44,10 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
             LOG.info("Using project manager for migrating servers, "
                      "project manager user id: %s",
                      cls.mgr_server_client.user_id)
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
 
     @decorators.idempotent_id('75c0b83d-72a0-4cf8-a153-631e83e7d53f')
     def test_list_migrations(self):
@@ -84,7 +88,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         # First we have to create a flavor that we can delete so make a copy
         # of the normal flavor from which we'd create a server.
-        flavor = self.admin_flavors_client.show_flavor(
+        flavor = self.reader_flavors_client.show_flavor(
             self.flavor_ref)['flavor']
         flavor = self.admin_flavors_client.create_flavor(
             name=data_utils.rand_name(
@@ -100,7 +104,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         # because the environment may need some special extra specs to
         # create server which should have been contained in
         # self.flavor_ref.
-        extra_spec_keys = self.admin_flavors_client.list_flavor_extra_specs(
+        extra_spec_keys = self.reader_flavors_client.list_flavor_extra_specs(
             self.flavor_ref)['extra_specs']
         if extra_spec_keys:
             self.admin_flavors_client.set_flavor_extra_spec(
@@ -109,14 +113,15 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
         # Now boot a server with the copied flavor.
         server = self.create_test_server(
             wait_until='ACTIVE', flavor=flavor['id'])
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
 
         # If 'id' not in server['flavor'], we can only compare the flavor
         # details, so here we should save the to-be-deleted flavor's details,
         # for the flavor comparison after the server resizing.
         if not server['flavor'].get('id'):
             pre_flavor = {}
-            body = self.flavors_client.show_flavor(flavor['id'])['flavor']
+            body = (self.reader_flavors_client.show_flavor(flavor['id'])
+                    ['flavor'])
             for key in ['name', 'ram', 'vcpus', 'disk']:
                 pre_flavor[key] = body[key]
 
@@ -125,16 +130,16 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         # Now resize the server and wait for it to go into verify state.
         self.servers_client.resize_server(server['id'], self.flavor_ref_alt)
-        waiters.wait_for_server_status(self.servers_client, server['id'],
-                                       'VERIFY_RESIZE')
+        waiters.wait_for_server_status(self.reader_servers_client,
+                                       server['id'], 'VERIFY_RESIZE')
 
         # Now revert the resize, it should be OK even though the original
         # flavor used to boot the server was deleted.
         self.servers_client.revert_resize_server(server['id'])
-        waiters.wait_for_server_status(self.servers_client, server['id'],
-                                       'ACTIVE')
+        waiters.wait_for_server_status(self.reader_servers_client,
+                                       server['id'], 'ACTIVE')
 
-        server = self.servers_client.show_server(server['id'])['server']
+        server = self.reader_servers_client.show_server(server['id'])['server']
         if server['flavor'].get('id'):
             msg = ('server flavor is not same as flavor!')
             self.assertEqual(flavor['id'], server['flavor']['id'], msg)
@@ -158,7 +163,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
 
         self.mgr_server_client.migrate_server(server['id'])
 
-        waiters.wait_for_server_status(self.servers_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server['id'], 'VERIFY_RESIZE')
 
         if revert:
@@ -168,7 +173,7 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
             self.servers_client.confirm_resize_server(server['id'])
             assert_func = self.assertNotEqual
 
-        waiters.wait_for_server_status(self.servers_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server['id'], 'ACTIVE')
         dst_host = self.get_host_for_server(server['id'])
         assert_func(src_host, dst_host)

@@ -27,6 +27,16 @@ CONF = config.CONF
 class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests Flavors API Create and Delete that require admin privileges"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsAdminTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
+
     @classmethod
     def resource_setup(cls):
         super(FlavorsAdminTestJSON, cls).resource_setup()
@@ -92,7 +102,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                            rxtx_factor=self.rxtx)
 
         # Check if flavor is present in list
-        flavors_list = self.admin_flavors_client.list_flavors(
+        flavors_list = self.reader_flavors_client.list_flavors(
             detail=True)['flavors']
         self.assertIn(flavor_name, [f['name'] for f in flavors_list])
 
@@ -130,13 +140,15 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         verify_flavor_response_extension(flavor)
 
         # Verify flavor is retrieved
-        flavor = self.admin_flavors_client.show_flavor(new_flavor_id)['flavor']
+        flavor = self.reader_flavors_client.show_flavor(
+            new_flavor_id)['flavor']
         self.assertEqual(flavor['name'], flavor_name)
         verify_flavor_response_extension(flavor)
 
         # Check if flavor is present in list
         flavors_list = [
-            f for f in self.flavors_client.list_flavors(detail=True)['flavors']
+            f for f in self.reader_flavors_client.list_flavors(
+                detail=True)['flavors']
             if f['name'] == flavor_name
         ]
         self.assertNotEmpty(flavors_list)
@@ -160,7 +172,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                            disk=self.disk,
                            is_public="False")
         # Verify flavor is not retrieved
-        flavors_list = self.admin_flavors_client.list_flavors(
+        flavors_list = self.reader_flavors_client.list_flavors(
             detail=True)['flavors']
         self.assertNotIn(flavor_name, [f['name'] for f in flavors_list])
 
@@ -197,7 +209,8 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                            disk=self.disk,
                            is_public="True")
         # Verify flavor is retrieved with new user
-        flavors_list = self.flavors_client.list_flavors(detail=True)['flavors']
+        flavors_list = self.reader_flavors_client.list_flavors(detail=True)[
+            'flavors']
         self.assertIn(flavor_name, [f['name'] for f in flavors_list])
 
     @decorators.idempotent_id('fb9cbde6-3a0e-41f2-a983-bdb0a823c44e')

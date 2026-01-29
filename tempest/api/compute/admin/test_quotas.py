@@ -31,6 +31,8 @@ LOG = logging.getLogger(__name__)
 class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
     force_tenant_isolation = True
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     def setUp(self):
         # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
         self.useFixture(fixtures.LockFixture('compute_quotas'))
@@ -40,6 +42,10 @@ class QuotasAdminTestBase(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(QuotasAdminTestBase, cls).setup_clients()
         cls.adm_client = cls.os_admin.quotas_client
+        if CONF.enforce_scope.nova:
+            cls.reader_quotas_client = cls.os_project_reader.quotas_client
+        else:
+            cls.reader_quotas_client = cls.quotas_client
 
     def _get_updated_quotas(self):
         # Verify that GET shows the updated quota set of project
@@ -110,7 +116,7 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
     def test_get_default_quotas(self):
         """Test admin can get the default compute quota set for a project"""
         expected_quota_set = self.default_quota_set | set(['id'])
-        quota_set = self.adm_client.show_default_quota_set(
+        quota_set = self.reader_quotas_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
         for quota in expected_quota_set:
@@ -121,7 +127,7 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
                       'Legacy quota update not available with unified limits')
     def test_update_all_quota_resources_for_tenant(self):
         """Test admin can update all the compute quota limits for a project"""
-        default_quota_set = self.adm_client.show_default_quota_set(
+        default_quota_set = self.reader_quotas_client.show_default_quota_set(
             self.demo_tenant_id)['quota_set']
         new_quota_set = {'metadata_items': 256, 'ram': 10240,
                          'key_pairs': 200, 'instances': 20,
@@ -170,15 +176,16 @@ class QuotasAdminTestJSON(QuotasAdminTestBase):
         project_id = project['id']
         self.addCleanup(identity.identity_utils(self.os_admin).delete_project,
                         project_id)
-        quota_set_default = (self.adm_client.show_quota_set(project_id)
-                             ['quota_set'])
+        quota_set_default = (self.adm_client.show_quota_set(
+            project_id)['quota_set'])
         ram_default = quota_set_default['ram']
 
         self.adm_client.update_quota_set(project_id, ram='5120')
 
         self.adm_client.delete_quota_set(project_id)
 
-        quota_set_new = self.adm_client.show_quota_set(project_id)['quota_set']
+        quota_set_new = (self.adm_client.show_quota_set(
+            project_id)['quota_set'])
         self.assertEqual(ram_default, quota_set_new['ram'])
 
 
@@ -227,6 +234,8 @@ class QuotasAdminTestV257(QuotasAdminTestBase):
 class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     """Tests the os-quota-class-sets API to update default quotas."""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     def setUp(self):
         # All test cases in this class need to externally lock on doing
         # anything with default quota values.
@@ -237,6 +246,11 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def resource_setup(cls):
         super(QuotaClassesAdminTestJSON, cls).resource_setup()
         cls.adm_client = cls.os_admin.quota_classes_client
+        if CONF.enforce_scope.nova:
+            cls.reader_quota_classes_client = (
+                cls.os_project_reader.quota_classes_client)
+        else:
+            cls.reader_quota_classes_client = cls.adm_client
 
     def _restore_default_quotas(self, original_defaults):
         LOG.debug("restoring quota class defaults")
@@ -270,8 +284,8 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertThat(update_body.items(),
                         matchers.ContainsAll(body.items()))
         # check quota values are changed
-        show_body = self.adm_client.show_quota_class_set(
-            'default')['quota_class_set']
+        show_body = (self.adm_client.show_quota_class_set(
+            'default')['quota_class_set'])
         self.assertThat(show_body.items(),
                         matchers.ContainsAll(body.items()))
 

@@ -27,6 +27,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     create_default_network = True
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(ServersAdminTestJSON, cls).setup_clients()
@@ -48,7 +50,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         server = cls.create_test_server(name=cls.s2_name,
                                         wait_until='ACTIVE')
         cls.s2_id = server['id']
-        waiters.wait_for_server_status(cls.non_admin_client,
+        waiters.wait_for_server_status(cls.reader_servers_client,
                                        cls.s1_id, 'ACTIVE')
 
     @decorators.idempotent_id('06f960bb-15bb-48dc-873d-f96e89be7870')
@@ -56,11 +58,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         """Test filtering the list of servers by server error status"""
         params = {'status': 'error'}
         self.client.reset_state(self.s1_id, state='error')
-        body = self.non_admin_client.list_servers(**params)
+        body = self.reader_servers_client.list_servers(**params)
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
         # Verify server's state
-        server = self.client.show_server(self.s1_id)['server']
+        server = self.reader_servers_client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
         servers = body['servers']
         # Verify error server in list result
@@ -72,11 +74,13 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         """Test filtering the list of servers by invalid server status"""
         params = {'status': 'invalid_status'}
         if self.is_requested_microversion_compatible('2.37'):
-            body = self.client.list_servers(detail=True, **params)
+            body = self.reader_servers_client.list_servers(
+                detail=True, **params)
             servers = body['servers']
             self.assertEmpty(servers)
         else:
-            self.assertRaises(lib_exc.BadRequest, self.client.list_servers,
+            self.assertRaises(lib_exc.BadRequest,
+                              self.reader_servers_client.list_servers,
                               detail=True, **params)
 
     @decorators.idempotent_id('51717b38-bdc1-458b-b636-1cf82d99f62f')
@@ -154,7 +158,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         nonexistent_params = {'host': 'nonexistent_host',
                               'all_tenants': '1'}
-        nonexistent_body = self.client.list_servers(**nonexistent_params)
+        nonexistent_body = self.client.list_servers(
+            **nonexistent_params)
         nonexistent_servers = nonexistent_body['servers']
         self.assertNotIn(server['id'],
                          map(lambda x: x['id'], nonexistent_servers))
@@ -166,14 +171,14 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.reset_state(self.s1_id, state='error')
 
         # Verify server's state
-        server = self.client.show_server(self.s1_id)['server']
+        server = self.reader_servers_client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ERROR')
 
         # Reset server's state to 'active'
         self.client.reset_state(self.s1_id, state='active')
 
         # Verify server's state
-        server = self.client.show_server(self.s1_id)['server']
+        server = self.reader_servers_client.show_server(self.s1_id)['server']
         self.assertEqual(server['status'], 'ACTIVE')
 
     @decorators.idempotent_id('682cb127-e5bb-4f53-87ce-cb9003604442')
@@ -187,7 +192,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.reset_state(self.s1_id, state='error')
         rebuilt_server = self.non_admin_client.rebuild_server(
             self.s1_id, self.image_ref_alt)['server']
-        self.addCleanup(waiters.wait_for_server_status, self.non_admin_client,
+        self.addCleanup(waiters.wait_for_server_status,
+                        self.reader_servers_client,
                         self.s1_id, 'ACTIVE')
         self.addCleanup(self.non_admin_client.rebuild_server, self.s1_id,
                         self.image_ref)
@@ -197,11 +203,11 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
         self.assert_flavor_equal(self.flavor_ref, rebuilt_server['flavor'])
-        waiters.wait_for_server_status(self.non_admin_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        rebuilt_server['id'], 'ACTIVE',
                                        raise_on_error=False)
         # Verify the server properties after rebuilding
-        server = (self.non_admin_client.show_server(rebuilt_server['id'])
+        server = (self.reader_servers_client.show_server(rebuilt_server['id'])
                   ['server'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
@@ -235,20 +241,26 @@ class ServersAdmin275Test(base.BaseV2ComputeAdminTest):
 
     min_microversion = '2.75'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ServersAdmin275Test, cls).setup_clients()
+
     @decorators.idempotent_id('bf2b4a00-73a3-4d53-81fa-acbcd97d6339')
     def test_rebuild_update_server_275(self):
         server = self.create_test_server()
         # Checking update response schema.
         self.servers_client.update_server(server['id'])
-        waiters.wait_for_server_status(self.servers_client, server['id'],
-                                       'ACTIVE')
+        waiters.wait_for_server_status(
+            self.reader_servers_client, server['id'], 'ACTIVE')
         # Checking rebuild API response schema
         self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
-        waiters.wait_for_server_status(self.servers_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server['id'], 'ACTIVE')
         # Checking rebuild server with admin response schema.
         self.os_admin.servers_client.rebuild_server(
             server['id'], self.image_ref)
         self.addCleanup(waiters.wait_for_server_status,
-                        self.os_admin.servers_client,
+                        self.reader_servers_client,
                         server['id'], 'ACTIVE')

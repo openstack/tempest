@@ -13,8 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 from tempest.api.compute import base
+from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
@@ -23,8 +26,18 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
     min_microversion = '2.55'
     max_microversion = 'latest'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     # NOTE(gmann): This class tests the flavors APIs
     # response schema for the 2.55 microversion.
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsV255TestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
 
     @decorators.idempotent_id('61976b25-488d-41dc-9dcb-cb9693a7b075')
     def test_crud_flavor(self):
@@ -40,14 +53,14 @@ class FlavorsV255TestJSON(base.BaseV2ComputeAdminTest):
                                            disk=10,
                                            id=flavor_id)['id']
         # Checking show API response schema
-        self.flavors_client.show_flavor(new_flavor_id)
+        self.reader_flavors_client.show_flavor(new_flavor_id)
         # Checking update API response schema
         self.admin_flavors_client.update_flavor(new_flavor_id,
                                                 description='new')
         # Checking list details API response schema
-        self.flavors_client.list_flavors(detail=True)
+        self.reader_flavors_client.list_flavors(detail=True)
         # Checking list API response schema
-        self.flavors_client.list_flavors()
+        self.reader_flavors_client.list_flavors()
 
 
 class FlavorsV261TestJSON(FlavorsV255TestJSON):

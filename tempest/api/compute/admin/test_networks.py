@@ -28,15 +28,21 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
     """
     max_microversion = '2.35'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(NetworksTest, cls).setup_clients()
         cls.client = cls.os_admin.compute_networks_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = cls.os_project_reader.compute_networks_client
+        else:
+            cls.reader_client = cls.client
 
     @decorators.idempotent_id('d206d211-8912-486f-86e2-a9d090d1f416')
     def test_get_network(self):
         """Test getting network from nova side"""
-        networks = self.client.list_networks()['networks']
+        networks = self.reader_client.list_networks()['networks']
         if CONF.compute.fixed_network_name:
             configured_network = [x for x in networks if x['label'] ==
                                   CONF.compute.fixed_network_name]
@@ -51,14 +57,14 @@ class NetworksTest(base.BaseV2ComputeAdminTest):
             raise self.skipException(
                 "Environment has no known-for-sure existing network.")
         configured_network = configured_network[0]
-        network = (self.client.show_network(configured_network['id'])
+        network = (self.reader_client.show_network(configured_network['id'])
                    ['network'])
         self.assertEqual(configured_network['label'], network['label'])
 
     @decorators.idempotent_id('df3d1046-6fa5-4b2c-ad0c-cfa46a351cb9')
     def test_list_all_networks(self):
         """Test getting all networks from nova side"""
-        networks = self.client.list_networks()['networks']
+        networks = self.reader_client.list_networks()['networks']
         # Check the configured network is in the list
         if CONF.compute.fixed_network_name:
             configured_network = CONF.compute.fixed_network_name

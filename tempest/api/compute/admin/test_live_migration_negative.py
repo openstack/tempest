@@ -26,6 +26,12 @@ CONF = config.CONF
 class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
     """Negative tests of live migration"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(LiveMigrationNegativeTest, cls).setup_clients()
+
     @classmethod
     def skip_checks(cls):
         super(LiveMigrationNegativeTest, cls).skip_checks()
@@ -49,8 +55,8 @@ class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(lib_exc.BadRequest, self._migrate_server_to,
                           server['id'], target_host)
-        waiters.wait_for_server_status(self.servers_client, server['id'],
-                                       'ACTIVE')
+        waiters.wait_for_server_status(self.reader_servers_client,
+                                       server['id'], 'ACTIVE')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('6e2f94f5-2ee8-4830-bef5-5bc95bb0795b')
@@ -59,7 +65,7 @@ class LiveMigrationNegativeTest(base.BaseV2ComputeAdminTest):
         server = self.create_test_server(wait_until="ACTIVE")
 
         self.admin_servers_client.suspend_server(server['id'])
-        waiters.wait_for_server_status(self.servers_client,
+        waiters.wait_for_server_status(self.reader_servers_client,
                                        server['id'], 'SUSPENDED')
 
         destination_host = self.get_host_other_than(server['id'])

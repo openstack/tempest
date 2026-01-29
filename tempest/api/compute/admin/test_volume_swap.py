@@ -24,7 +24,8 @@ CONF = config.CONF
 class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
     create_default_network = True
 
-    credentials = ['primary', 'admin', ['service_user', 'admin', 'service']]
+    credentials = ['primary', 'admin', 'project_reader',
+                   ['service_user', 'admin', 'service']]
 
     @classmethod
     def setup_credentials(cls):
@@ -43,12 +44,18 @@ class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
     def setup_clients(cls):
         super(TestVolumeSwapBase, cls).setup_clients()
         cls.service_client = cls.os_service_user.servers_client
+        if CONF.enforce_scope.nova:
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
 
     def wait_for_server_volume_swap(self, server_id, old_volume_id,
                                     new_volume_id):
         """Waits for a server to swap the old volume to a new one."""
-        volume_attachments = self.servers_client.list_volume_attachments(
-            server_id)['volumeAttachments']
+        volume_attachments = (
+            self.reader_servers_client.list_volume_attachments(
+                server_id)['volumeAttachments'])
         attached_volume_ids = [attachment['volumeId']
                                for attachment in volume_attachments]
         start = int(time.time())
@@ -56,8 +63,9 @@ class TestVolumeSwapBase(base.BaseV2ComputeAdminTest):
         while (old_volume_id in attached_volume_ids) \
                 or (new_volume_id not in attached_volume_ids):
             time.sleep(self.servers_client.build_interval)
-            volume_attachments = self.servers_client.list_volume_attachments(
-                server_id)['volumeAttachments']
+            volume_attachments = (
+                self.reader_servers_client.list_volume_attachments(
+                    server_id)['volumeAttachments'])
             attached_volume_ids = [attachment['volumeId']
                                    for attachment in volume_attachments]
 
@@ -127,15 +135,15 @@ class TestVolumeSwap(TestVolumeSwapBase):
             lib_exc.Conflict, self.service_client.update_attached_volume,
             server['id'], volume1['id'], volumeId=volume2['id'])
         # Verify "volume1" is attached to the server
-        vol_attachments = self.servers_client.list_volume_attachments(
+        vol_attachments = self.reader_servers_client.list_volume_attachments(
             server['id'])['volumeAttachments']
         self.assertEqual(1, len(vol_attachments))
         self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])
         waiters.wait_for_volume_resource_status(
-            self.volumes_client, volume1['id'], 'in-use')
+            self.reader_volumes_client, volume1['id'], 'in-use')
         # verify "volume2" is still available
         waiters.wait_for_volume_resource_status(
-            self.volumes_client, volume2['id'], 'available')
+            self.reader_volumes_client, volume2['id'], 'available')
 
 
 class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
@@ -216,7 +224,7 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
             return_reservation_id=True,
         )['reservation_id']
         # Get the servers using the reservation_id.
-        servers = self.servers_client.list_servers(
+        servers = self.reader_servers_client.list_servers(
             reservation_id=reservation_id)['servers']
         self.assertEqual(2, len(servers))
         # Attach volume1 to server1
@@ -232,19 +240,19 @@ class TestMultiAttachVolumeSwap(TestVolumeSwapBase):
             server1['id'], volume1['id'], volumeId=volume2['id'])
 
         # volume1 remains in in-use and volume2 in available
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume1['id'], 'in-use')
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume2['id'], 'available')
+        waiters.wait_for_volume_resource_status(
+            self.reader_volumes_client, volume1['id'], 'in-use')
+        waiters.wait_for_volume_resource_status(
+            self.reader_volumes_client, volume2['id'], 'available')
 
         # Verify volume1 is attached to server1
-        vol_attachments = self.servers_client.list_volume_attachments(
+        vol_attachments = self.reader_servers_client.list_volume_attachments(
             server1['id'])['volumeAttachments']
         self.assertEqual(1, len(vol_attachments))
         self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])
 
         # Verify volume1 is still attached to server2
-        vol_attachments = self.servers_client.list_volume_attachments(
+        vol_attachments = self.reader_servers_client.list_volume_attachments(
             server2['id'])['volumeAttachments']
         self.assertEqual(1, len(vol_attachments))
         self.assertIn(volume1['id'], vol_attachments[0]['volumeId'])

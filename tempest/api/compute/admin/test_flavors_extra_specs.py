@@ -28,6 +28,16 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     GET Flavor Extra specs can be performed even by without admin privileges.
     """
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.nova:
+            cls.reader_flavors_client = cls.os_project_reader.flavors_client
+        else:
+            cls.reader_flavors_client = cls.flavors_client
+
     @classmethod
     def resource_setup(cls):
         super(FlavorsExtraSpecsTestJSON, cls).resource_setup()
@@ -69,7 +79,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             self.flavor['id'], **specs)['extra_specs']
         self.assertEqual(set_body, specs)
         # GET extra specs and verify
-        get_body = (self.admin_flavors_client.list_flavor_extra_specs(
+        get_body = (self.reader_flavors_client.list_flavor_extra_specs(
             self.flavor['id'])['extra_specs'])
         self.assertEqual(get_body, specs)
 
@@ -80,7 +90,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
         # GET extra specs and verify the value of the 'hw:cpu_policy'
         # is the same as before
-        get_body = self.admin_flavors_client.list_flavor_extra_specs(
+        get_body = self.reader_flavors_client.list_flavor_extra_specs(
             self.flavor['id'])['extra_specs']
         self.assertEqual(
             get_body, {'hw:numa_nodes': '2', 'hw:cpu_policy': 'shared'}
@@ -93,7 +103,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.admin_flavors_client.unset_flavor_extra_spec(
             self.flavor['id'], 'hw:cpu_policy'
         )
-        get_body = self.admin_flavors_client.list_flavor_extra_specs(
+        get_body = self.reader_flavors_client.list_flavor_extra_specs(
             self.flavor['id'])['extra_specs']
         self.assertEmpty(get_body)
 
@@ -103,7 +113,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         specs = {'hw:numa_nodes': '1', 'hw:cpu_policy': 'shared'}
         self.admin_flavors_client.set_flavor_extra_spec(self.flavor['id'],
                                                         **specs)
-        body = (self.flavors_client.list_flavor_extra_specs(
+        body = (self.reader_flavors_client.list_flavor_extra_specs(
             self.flavor['id'])['extra_specs'])
 
         for key in specs:
@@ -119,7 +129,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(body['hw:numa_nodes'], '1')
         self.assertIn('hw:cpu_policy', body)
 
-        body = self.flavors_client.show_flavor_extra_spec(
+        body = self.reader_flavors_client.show_flavor_extra_spec(
             self.flavor['id'], 'hw:numa_nodes')
         self.assertEqual(body['hw:numa_nodes'], '1')
         self.assertNotIn('hw:cpu_policy', body)

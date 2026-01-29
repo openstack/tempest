@@ -31,11 +31,18 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
     max_microversion = '2.35'
 
+    credentials = ['primary', 'admin', 'project_reader']
+
     @classmethod
     def setup_clients(cls):
         super(SecurityGroupsTestAdminJSON, cls).setup_clients()
         cls.adm_client = cls.os_admin.compute_security_groups_client
         cls.client = cls.security_groups_client
+        if CONF.enforce_scope.nova:
+            cls.reader_client = (
+                cls.os_project_reader.compute_security_groups_client)
+        else:
+            cls.reader_client = cls.client
 
     def _delete_security_group(self, securitygroup_id, admin=True):
         if admin:
@@ -93,8 +100,8 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
         # Fetch all security groups for non-admin user with 'all_tenants'
         # search filter
-        fetched_list = (self.client.list_security_groups(all_tenants='true')
-                        ['security_groups'])
+        fetched_list = (self.reader_client.list_security_groups(
+            all_tenants='true')['security_groups'])
         sec_group_id_list = [sg['id'] for sg in fetched_list]
         # Now check that 'all_tenants='true' filter for non-admin user only
         # provide the requested non-admin user's created security groups,
