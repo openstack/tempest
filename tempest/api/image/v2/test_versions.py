@@ -13,17 +13,31 @@
 # under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class VersionsTest(base.BaseV2ImageTest):
     """Test image versions"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VersionsTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_versions_client = (
+                cls.os_project_reader.image_versions_client)
+        else:
+            cls.reader_versions_client = cls.versions_client
+
     @decorators.idempotent_id('659ea30a-a17c-4317-832c-0f68ed23c31d')
     @decorators.attr(type='smoke')
     def test_list_versions(self):
         """Test listing image versions"""
-        versions = self.versions_client.list_versions()['versions']
+        versions = self.reader_versions_client.list_versions()['versions']
         expected_resources = ('id', 'links', 'status')
 
         for version in versions:

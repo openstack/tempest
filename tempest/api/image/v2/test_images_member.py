@@ -11,11 +11,27 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class ImagesMemberTest(base.BaseV2MemberImageTest):
     """Test image members"""
+
+    credentials = ['primary', 'alt', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ImagesMemberTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_image_member_client = (
+                cls.os_project_reader.image_member_client_v2)
+            cls.reader_schemas_client = cls.os_project_reader.schemas_client
+        else:
+            cls.reader_image_member_client = cls.image_member_client
+            cls.reader_schemas_client = cls.schemas_client
 
     @decorators.idempotent_id('5934c6ea-27dc-4d6e-9421-eeb5e045494a')
     def test_image_share_accept(self):
@@ -33,7 +49,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                          self.alt_tenant_id,
                                                          status='accepted')
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        body = self.image_member_client.list_image_members(image_id)
+        body = self.reader_image_member_client.list_image_members(image_id)
         members = body['members']
         self.assertEqual(len(members), 1, str(members))
         member = members[0]
@@ -71,7 +87,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
                                                          status='accepted')
 
         self.assertIn(image_id, self._list_image_ids_as_alt())
-        member = self.image_member_client.show_image_member(
+        member = self.reader_image_member_client.show_image_member(
             image_id, self.alt_tenant_id)
         self.assertEqual(self.alt_tenant_id, member['member_id'])
         self.assertEqual(image_id, member['image_id'])
@@ -95,11 +111,11 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
     @decorators.idempotent_id('634dcc3f-f6e2-4409-b8fd-354a0bb25d83')
     def test_get_image_member_schema(self):
         """Test getting image member schema"""
-        body = self.schemas_client.show_schema("member")
+        body = self.reader_schemas_client.show_schema("member")
         self.assertEqual("member", body['name'])
 
     @decorators.idempotent_id('6ae916ef-1052-4e11-8d36-b3ae14853cbb')
     def test_get_image_members_schema(self):
         """Test getting image members schema"""
-        body = self.schemas_client.show_schema("members")
+        body = self.reader_schemas_client.show_schema("members")
         self.assertEqual("members", body['name'])

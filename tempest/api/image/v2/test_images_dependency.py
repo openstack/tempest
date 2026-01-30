@@ -87,7 +87,7 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
                 wait_until='ACTIVE')
         LOG.info("Instance from %s is created %s", source, instance)
         instance_observed = \
-            self.servers_client.show_server(instance['id'])['server']
+            self.reader_servers_client.show_server(instance['id'])['server']
         # Create instance snapshot
         snapshot_instance = self.create_server_snapshot(
             server=instance_observed)
@@ -106,7 +106,7 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
         base_image_id, snapshot_image_id = self._create_instance_snapshot()
         self.client.delete_image(base_image_id)
         self.client.wait_for_resource_deletion(base_image_id)
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertNotIn(base_image_id, fetched_images_id)
         self.assertIn(snapshot_image_id, fetched_images_id)
@@ -129,7 +129,7 @@ class ImageDependencyTests(image_base.BaseV2ImageTest,
             bfv=True)
         self.client.delete_image(base_image_id)
         self.client.wait_for_resource_deletion(base_image_id)
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertNotIn(base_image_id, fetched_images_id)
         self.assertIn(snapshot_image_id, fetched_images_id)

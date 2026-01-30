@@ -28,7 +28,7 @@ BAD_REQUEST_RETRIES = 3
 class BaseImageTest(tempest.test.BaseTestCase):
     """Base test class for Image API tests."""
 
-    credentials = ['primary']
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -79,6 +79,10 @@ class BaseV2ImageTest(BaseImageTest):
     def setup_clients(cls):
         super(BaseV2ImageTest, cls).setup_clients()
         cls.client = cls.os_primary.image_client_v2
+        if CONF.enforce_scope.glance and hasattr(cls, 'os_project_reader'):
+            cls.reader_image_client = cls.os_project_reader.image_client_v2
+        else:
+            cls.reader_image_client = cls.client
         cls.schemas_client = cls.os_primary.schemas_client
         cls.versions_client = cls.os_primary.image_versions_client
 

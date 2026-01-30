@@ -90,7 +90,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         image_file = io.BytesIO(file_content)
         self.client.stage_image_file(image['id'], image_file)
         # Check image status is 'uploading'
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('uploading', body['status'])
         return image['id']
@@ -135,7 +135,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
 
         image = self._create_image(disk_format='qcow2')
         # Now try to get image details
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('queued', body['status'])
         # import image from web to backend
@@ -165,7 +165,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         ])
 
         # Make sure our properties stuck on the source image
-        src_image = self.client.show_image(src)
+        src_image = self.reader_image_client.show_image(src)
         self.assertEqual('5', src_image['hw_cpu_cores'])
         self.assertEqual('required', src_image['trait:STORAGE_DISK_SSD'])
         self.assertEqual('rhel', src_image['os_distro'])
@@ -181,7 +181,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
             {'add': '/hw_cpu_cores', 'value': '1'},
             {'add': '/os_distro', 'value': 'windows'},
         ])
-        dst_image = self.client.show_image(dst)
+        dst_image = self.reader_image_client.show_image(dst)
         self.assertEqual('1', dst_image['hw_cpu_cores'])
         self.assertEqual('windows', dst_image['os_distro'])
 
@@ -196,7 +196,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
 
         # Make sure the new image has all the keys imported from the
         # original image that we expect
-        dst_image = self.client.show_image(dst)
+        dst_image = self.reader_image_client.show_image(dst)
         self.assertEqual(src_image['disk_format'], dst_image['disk_format'])
         self.assertEqual(src_image['container_format'],
                          dst_image['container_format'])
@@ -235,7 +235,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
             {'add': '/hw_cpu_cores', 'value': '1'},
             {'add': '/os_distro', 'value': 'windows'},
         ])
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
         self.assertEqual('1', image['hw_cpu_cores'])
         self.assertEqual('windows', image['os_distro'])
 
@@ -253,7 +253,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
 
         # Make sure we reverted the image status to queued on failure, and that
         # our extra properties are still in place.
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
         self.assertEqual('queued', image['status'])
         self.assertEqual('1', image['hw_cpu_cores'])
         self.assertEqual('windows', image['os_distro'])
@@ -276,7 +276,7 @@ class ImportImagesTest(base.BaseV2ImageTest):
         waiters.wait_for_image_tasks_status(self.client, image_id, 'failure')
 
         # Make sure we reverted the image status to queued on failure
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
         self.assertEqual('queued', image['status'])
 
     @decorators.idempotent_id('e04761a1-22af-42c2-b8bc-a34a3f12b585')
@@ -424,7 +424,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.client.store_image_file(image['id'], image_file)
 
         # Now try to get image details
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual(image_name, body['name'])
         self.assertEqual(uuid, body['ramdisk_id'])
@@ -457,7 +457,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.client.wait_for_resource_deletion(image['id'])
 
         # Verifying deletion
-        images = self.client.list_images()['images']
+        images = self.reader_image_client.list_images()['images']
         images_id = [item['id'] for item in images]
         self.assertNotIn(image['id'], images_id)
 
@@ -484,7 +484,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Verifying updating
 
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual(new_image_name, body['name'])
 
@@ -506,7 +506,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Deactivate image
         self.client.deactivate_image(image['id'])
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual("deactivated", body['status'])
 
         # User unable to download deactivated image
@@ -515,7 +515,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Reactivate image
         self.client.reactivate_image(image['id'])
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual("active", body['status'])
 
         # User able to download image after reactivation
@@ -525,6 +525,16 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
 class ListUserImagesTest(base.BaseV2ImageTest):
     """Here we test the listing of image information"""
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ListUserImagesTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_schemas_client = cls.os_project_reader.schemas_client
+        else:
+            cls.reader_schemas_client = cls.schemas_client
 
     @classmethod
     def resource_setup(cls):
@@ -577,7 +587,8 @@ class ListUserImagesTest(base.BaseV2ImageTest):
     def _list_by_param_value_and_assert(self, params):
         """Perform list action with given params and validates result."""
         # Retrieve the list of images that meet the filter
-        images_list = self.client.list_images(params=params)['images']
+        images_list = self.reader_image_client.list_images(params=params)[
+            'images']
         # Validating params of fetched images
         msg = 'No images were found that met the filter criteria.'
         self.assertNotEmpty(images_list, msg)
@@ -593,7 +604,8 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         sorted by image size in either ascending or descending order.
         """
         # Retrieve the list of images that meet the filter
-        images_list = self.client.list_images(params=params)['images']
+        images_list = self.reader_image_client.list_images(params=params)[
+            'images']
         # Validate that the list was fetched sorted accordingly
         msg = 'No images were found that met the filter criteria.'
         self.assertNotEmpty(images_list, msg)
@@ -605,7 +617,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
     @decorators.idempotent_id('1e341d7a-90a9-494c-b143-2cdf2aeb6aee')
     def test_list_no_params(self):
         """Simple test to see all fixture images returned"""
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         image_list = [image['id'] for image in images_list]
 
         for image in self.created_images:
@@ -634,7 +646,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         """Test to get all images by size"""
         image_id = self.created_images[0]
         # Get image metadata
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
 
         params = {"size": image['size']}
         self._list_by_param_value_and_assert(params)
@@ -644,11 +656,12 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         """Test to get all images with min size and max size"""
         image_id = self.created_images[0]
         # Get image metadata
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
 
         size = image['size']
         params = {"size_min": size - 500, "size_max": size + 500}
-        images_list = self.client.list_images(params=params)['images']
+        images_list = self.reader_image_client.list_images(params=params)[
+            'images']
         image_size_list = map(lambda x: x['size'], images_list)
 
         for image_size in image_size_list:
@@ -667,7 +680,8 @@ class ListUserImagesTest(base.BaseV2ImageTest):
     def test_list_images_param_limit(self):
         """Test to get images by limit"""
         params = {"limit": 1}
-        images_list = self.client.list_images(params=params)['images']
+        images_list = self.reader_image_client.list_images(params=params)[
+            'images']
 
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
@@ -677,7 +691,7 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         """Test to get images by owner"""
         image_id = self.created_images[0]
         # Get image metadata
-        image = self.client.show_image(image_id)
+        image = self.reader_image_client.show_image(image_id)
 
         params = {"owner": image['owner']}
         self._list_by_param_value_and_assert(params)
@@ -692,7 +706,8 @@ class ListUserImagesTest(base.BaseV2ImageTest):
     def test_list_images_param_tag(self):
         """Test to get images matching a tag"""
         params = {'tag': self.test_data['tags'][0]}
-        images_list = self.client.list_images(params=params)['images']
+        images_list = self.reader_image_client.list_images(params=params)[
+            'images']
         # Validating properties of fetched images
         self.assertNotEmpty(images_list)
         for image in images_list:
@@ -719,14 +734,14 @@ class ListUserImagesTest(base.BaseV2ImageTest):
     def test_get_image_schema(self):
         """Test to get image schema"""
         schema = "image"
-        body = self.schemas_client.show_schema(schema)
+        body = self.reader_schemas_client.show_schema(schema)
         self.assertEqual("image", body['name'])
 
     @decorators.idempotent_id('25c8d7b2-df21-460f-87ac-93130bcdc684')
     def test_get_images_schema(self):
         """Test to get images schema"""
         schema = "images"
-        body = self.schemas_client.show_schema(schema)
+        body = self.reader_schemas_client.show_schema(schema)
         self.assertEqual("images", body['name'])
 
     @decorators.idempotent_id('d43f3efc-da4c-4af9-b636-868f0c6acedb')
@@ -736,20 +751,20 @@ class ListUserImagesTest(base.BaseV2ImageTest):
         self.addCleanup(self.client.wait_for_resource_deletion, image['id'])
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self.client.delete_image, image['id'])
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertNotIn(image['id'], fetched_images_id)
 
     @decorators.idempotent_id('fdb96b81-257b-42ac-978b-ddeefa3760e4')
     def test_list_update_hidden_image(self):
         image = self.create_image()
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertIn(image['id'], fetched_images_id)
 
         self.client.update_image(image['id'],
                                  [dict(replace='/os_hidden', value=True)])
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertNotIn(image['id'], fetched_images_id)
 
@@ -815,7 +830,7 @@ class ImageLocationsTest(base.BaseV2ImageTest):
         waiters.wait_for_image_status(self.client, image['id'], 'active')
 
         # Locations should now have one item
-        image = self.client.show_image(image['id'])
+        image = self.reader_image_client.show_image(image['id'])
         self.assertEqual(1, len(image['locations']),
                          'Expected one location in %r' % image['locations'])
 
@@ -863,7 +878,7 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
         # Make sure the locations haven't changed with the above failures,
         # but the metadata we updated should be changed.
-        image = self.client.show_image(image['id'])
+        image = self.reader_image_client.show_image(image['id'])
         self.assertEqual(2, len(image['locations']),
                          'Image should have two locations but has %i' % (
                          len(image['locations'])))
@@ -901,7 +916,7 @@ class ImageLocationsTest(base.BaseV2ImageTest):
                                               value=new_loc)])
 
         # Expect that all of our values ended up on the image
-        image = self.client.show_image(image['id'])
+        image = self.reader_image_client.show_image(image['id'])
         self.assertEqual(1, len(image['locations']))
         self.assertEqual('1' * 32, image['checksum'])
         self.assertEqual('deadbeef' * 16, image['os_hash_value'])
@@ -930,7 +945,7 @@ class ImageLocationsTest(base.BaseV2ImageTest):
                                               value=new_loc)])
 
         # Setting the same exact values on a new location should work
-        image = self.client.show_image(orig_image['id'])
+        image = self.reader_image_client.show_image(orig_image['id'])
         self.assertEqual(2, len(image['locations']))
         self.assertEqual(orig_image['checksum'], image['checksum'])
         self.assertEqual(orig_image['os_hash_value'], image['os_hash_value'])
@@ -975,7 +990,7 @@ class ImageLocationsTest(base.BaseV2ImageTest):
 
         # Make sure nothing has changed on our image after all the
         # above failures
-        image = self.client.show_image(orig_image['id'])
+        image = self.reader_image_client.show_image(orig_image['id'])
         self.assertEqual(1, len(image['locations']))
         self.assertEqual(orig_image['checksum'], image['checksum'])
         self.assertEqual(orig_image['os_hash_value'], image['os_hash_value'])
@@ -1047,7 +1062,7 @@ class HashCalculationRemoteDeletionTest(base.BaseV2ImageTest):
         waiters.wait_for_image_status(self.client, image['id'], 'active')
 
         # Verify that the hash calculation is initiated
-        image_info = self.client.show_image(image['id'])
+        image_info = self.reader_image_client.show_image(image['id'])
         self.assertEqual(CONF.image.hashing_algorithm,
                          image_info['os_hash_algo'])
         self.assertEqual('active', image_info['status'])

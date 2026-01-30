@@ -43,7 +43,8 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_non_existent_image(self):
         """Get the non-existent image"""
         non_existent_id = data_utils.rand_uuid()
-        self.assertRaises(lib_exc.NotFound, self.client.show_image,
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_image_client.show_image,
                           non_existent_id)
 
     @decorators.attr(type=['negative'])
@@ -51,7 +52,9 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_image_null_id(self):
         """Get image with image_id = NULL"""
         image_id = ""
-        self.assertRaises(lib_exc.NotFound, self.client.show_image, image_id)
+        self.assertRaises(lib_exc.NotFound,
+                          self.reader_image_client.show_image,
+                          image_id)
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e57fc127-7ba0-4693-92d7-1d8a05ebcba9')
@@ -69,7 +72,7 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
 
         # get the deleted image
         self.assertRaises(lib_exc.NotFound,
-                          self.client.show_image, image['id'])
+                          self.reader_image_client.show_image, image['id'])
 
         # delete the deleted image
         self.assertRaises(lib_exc.NotFound, self.client.delete_image,
@@ -214,7 +217,7 @@ class ImportImagesNegativeTest(base.BaseV2ImageTest):
                                          container_format='bare',
                                          disk_format='raw')
         # Now try to get image details
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('queued', body['status'])
         stores = self.get_available_stores()
@@ -241,7 +244,7 @@ class ImportImagesNegativeTest(base.BaseV2ImageTest):
         # loop.
         start_time = int(time.time())
         while int(time.time()) - start_time < self.client.build_timeout:
-            body = self.client.show_image(image['id'])
+            body = self.reader_image_client.show_image(image['id'])
             if body.get('os_glance_failed_import'):
                 # Store ended up in failed list, which is good
                 return

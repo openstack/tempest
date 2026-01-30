@@ -35,10 +35,10 @@ class ImagesTagsTest(base.BaseV2ImageTest):
 
         # Creating image tag and verify it.
         self.client.add_image_tag(image['id'], tag)
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertIn(tag, body['tags'])
 
         # Deleting image tag and verify it.
         self.client.delete_image_tag(image['id'], tag)
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertNotIn(tag, body['tags'])
