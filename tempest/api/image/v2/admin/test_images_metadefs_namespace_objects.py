@@ -22,6 +22,17 @@ CONF = config.CONF
 class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace objects basic functionality"""
 
+    credentials = ['admin', 'primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MetadataNamespaceObjectsTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_namespace_objects_client = (
+                cls.os_project_reader.namespace_objects_client)
+        else:
+            cls.reader_namespace_objects_client = cls.namespace_objects_client
+
     def _create_namespace_object(self, namespace):
         object_name = data_utils.rand_name(
             prefix=CONF.resource_name_prefix,
@@ -53,7 +64,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
         # List namespace objects and validate deletion
         namespace_objects = [
             namespace_object['name'] for namespace_object in
-            self.namespace_objects_client.list_namespace_objects(
+            self.reader_namespace_objects_client.list_namespace_objects(
                 namespace['namespace'])['objects']]
         self.assertNotIn(up_object_name, namespace_objects)
 
@@ -66,7 +77,7 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
         # List namespace objects
         namespace_objects = [
             namespace_object['name'] for namespace_object in
-            self.namespace_objects_client.list_namespace_objects(
+            self.reader_namespace_objects_client.list_namespace_objects(
                 namespace['namespace'])['objects']]
         self.assertIn(meta_namespace_object['name'], namespace_objects)
 
@@ -77,6 +88,6 @@ class MetadataNamespaceObjectsTest(base.BaseV2ImageAdminTest):
         namespace = self.create_namespace()
         namespace_object = self._create_namespace_object(namespace)
         # Show a namespace object
-        body = self.namespace_objects_client.show_namespace_object(
+        body = self.reader_namespace_objects_client.show_namespace_object(
             namespace['namespace'], namespace_object['name'])
         self.assertEqual(namespace_object['name'], body['name'])

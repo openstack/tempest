@@ -26,11 +26,25 @@ CONF = config.CONF
 class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition Namespaces basic functionality"""
 
+    credentials = ['admin', 'primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MetadataNamespacesTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_resource_types_client = (
+                cls.os_project_reader.resource_types_client)
+            cls.reader_namespaces_client = (
+                cls.os_project_reader.namespaces_client)
+        else:
+            cls.reader_resource_types_client = cls.resource_types_client
+            cls.reader_namespaces_client = cls.namespaces_client
+
     @decorators.idempotent_id('319b765e-7f3d-4b3d-8b37-3ca3876ee768')
     def test_basic_metadata_definition_namespaces(self):
         """Test operations of image metadata definition namespaces"""
         # get the available resource types and use one resource_type
-        body = self.resource_types_client.list_resource_types()
+        body = self.reader_resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']
         name = [{'name': resource_name}]
         namespace_name = data_utils.rand_name(
@@ -46,11 +60,11 @@ class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
                         self._cleanup_namespace, namespace_name)
         # list namespaces
-        bodys = self.namespaces_client.list_namespaces()['namespaces']
+        bodys = self.reader_namespaces_client.list_namespaces()['namespaces']
         body = [namespace['namespace'] for namespace in bodys]
         self.assertIn(namespace_name, body)
         # get namespace details
-        body = self.namespaces_client.show_namespace(namespace_name)
+        body = self.reader_namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
         self.assertEqual('public', body['visibility'])
         # unable to delete protected namespace
@@ -71,7 +85,7 @@ class MetadataNamespacesTest(base.BaseV2ImageAdminTest):
         self.namespaces_client.wait_for_resource_deletion(namespace_name)
 
     def _cleanup_namespace(self, namespace_name):
-        body = self.namespaces_client.show_namespace(namespace_name)
+        body = self.reader_namespaces_client.show_namespace(namespace_name)
         self.assertEqual(namespace_name, body['namespace'])
         body = self.namespaces_client.update_namespace(
             namespace=namespace_name,

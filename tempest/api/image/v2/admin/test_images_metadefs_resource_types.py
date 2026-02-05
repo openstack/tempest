@@ -14,17 +14,31 @@
 #    under the License.
 
 from tempest.api.image import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class MetadataResourceTypesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition resource types basic functionality"""
 
+    credentials = ['admin', 'primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MetadataResourceTypesTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_resource_types_client = (
+                cls.os_project_reader.resource_types_client)
+        else:
+            cls.reader_resource_types_client = cls.resource_types_client
+
     @decorators.idempotent_id('6f358a4e-5ef0-11e6-a795-080027d0d606')
     def test_basic_meta_def_resource_type_association(self):
         """Test image resource type associations"""
         # Get the available resource types and use one resource_type
-        body = self.resource_types_client.list_resource_types()
+        body = self.reader_resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']
         # Create a namespace
         namespace = self.create_namespace()
@@ -41,7 +55,7 @@ class MetadataResourceTypesTest(base.BaseV2ImageAdminTest):
         # List resource type associations and validate creation
         rs_type_associations = [
             rs_type_association['name'] for rs_type_association in
-            self.resource_types_client.list_resource_type_association(
+            self.reader_resource_types_client.list_resource_type_association(
                 namespace['namespace'])['resource_type_associations']]
         self.assertIn(resource_name, rs_type_associations)
         # Delete resource type association
@@ -50,6 +64,6 @@ class MetadataResourceTypesTest(base.BaseV2ImageAdminTest):
         # List resource type associations and validate deletion
         rs_type_associations = [
             rs_type_association['name'] for rs_type_association in
-            self.resource_types_client.list_resource_type_association(
+            self.reader_resource_types_client.list_resource_type_association(
                 namespace['namespace'])['resource_type_associations']]
         self.assertNotIn(resource_name, rs_type_associations)

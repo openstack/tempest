@@ -21,11 +21,26 @@ CONF = config.CONF
 class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
     """Test the Metadata definition namespace property basic functionality"""
 
+    credentials = ['admin', 'primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MetadataNamespacePropertiesTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_resource_types_client = (
+                cls.os_project_reader.resource_types_client)
+            cls.reader_namespace_properties_client = (
+                cls.os_project_reader.namespace_properties_client)
+        else:
+            cls.reader_resource_types_client = cls.resource_types_client
+            cls.reader_namespace_properties_client = (
+                cls.namespace_properties_client)
+
     @decorators.idempotent_id('b1a3765e-3a5d-4f6d-a3a7-3ca3476ae768')
     def test_basic_meta_def_namespace_property(self):
         """Test operations of image metadata definition namespace property"""
         # Get the available resource types and use one resource_type
-        body = self.resource_types_client.list_resource_types()
+        body = self.reader_resource_types_client.list_resource_types()
         resource_name = body['resource_types'][0]['name']
         enum = ["xen", "qemu", "kvm", "lxc", "uml", "vmware", "hyperv"]
         # Create a namespace
@@ -41,8 +56,9 @@ class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
             name=resource_name, type="string", enum=enum)
         self.assertEqual(property_title, body['title'])
         # Show namespace property
-        body = self.namespace_properties_client.show_namespace_properties(
-            namespace['namespace'], resource_name)
+        body = (
+            self.reader_namespace_properties_client.show_namespace_properties(
+                namespace['namespace'], resource_name))
         self.assertEqual(resource_name, body['name'])
         # Update namespace property
         update_property_title = data_utils.rand_name(
@@ -59,6 +75,6 @@ class MetadataNamespacePropertiesTest(base.BaseV2ImageAdminTest):
         # List namespace properties and validate deletion
         namespace_property = [
             namespace_property['title'] for namespace_property in
-            self.namespace_properties_client.list_namespace_properties(
+            self.reader_namespace_properties_client.list_namespace_properties(
                 namespace['namespace'])['properties']]
         self.assertNotIn(update_property_title, namespace_property)
