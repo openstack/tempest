@@ -79,6 +79,10 @@ NON_ACTIVE_LIST = [
     # No changes are merging in this
     # https://review.opendev.org/q/project:x%252Fnetworking-fortinet
     'x/networking-fortinet'
+    # It is broken and it use retired plugin 'patrol'. Last change done
+    # in this plugin was 7 years ago.
+    # https://opendev.org/airship/tempest-plugin
+    'airship/tempest-plugin'
 ]
 
 url = 'https://review.opendev.org/projects/'
