@@ -152,21 +152,36 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
             min_kbps=self.BANDWIDTH_2
         )
 
-    def _create_network_and_qos_policies(self, policy_method):
-        physnet_name = CONF.network_feature_enabled.qos_placement_physnet
-        base_segm = \
-            CONF.network_feature_enabled.provider_net_base_segmentation_id
-
-        self.prov_network, _, _ = self.setup_network_subnet_with_router(
-            networks_client=self.networks_client,
-            routers_client=self.routers_client,
-            subnets_client=self.subnets_client,
+    def _use_or_create_network_and_qos_policies(self, policy_method):
+        vlan_ext_nets = self.networks_client.list_networks(
             **{
-                'shared': True,
                 'provider:network_type': 'vlan',
-                'provider:physical_network': physnet_name,
-                'provider:segmentation_id': base_segm
-            })
+                'router:external': True}
+        )['networks']
+        if vlan_ext_nets:
+            self.prov_network = vlan_ext_nets[0]
+            if not self.prov_network['shared']:
+                self.prov_network = self.networks_client.update_network(
+                    self.prov_network['id'], shared=True)['network']
+                self.addClassResourceCleanup(
+                    self.networks_client.update_network,
+                    self.prov_network['id'],
+                    shared=False)
+        else:
+            physnet_name = CONF.network_feature_enabled.qos_placement_physnet
+            base_segm = \
+                CONF.network_feature_enabled.provider_net_base_segmentation_id
+
+            self.prov_network, _, _ = self.setup_network_subnet_with_router(
+                networks_client=self.networks_client,
+                routers_client=self.routers_client,
+                subnets_client=self.subnets_client,
+                **{
+                    'shared': True,
+                    'provider:network_type': 'vlan',
+                    'provider:physical_network': physnet_name,
+                    'provider:segmentation_id': base_segm
+                })
 
         policy_method()
 
@@ -261,7 +276,8 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         * Create port with invalid QoS policy, and try to boot VM with that,
         it should fail.
         """
-        self._create_network_and_qos_policies(self._create_qos_basic_policies)
+        self._use_or_create_network_and_qos_policies(
+            self._create_qos_basic_policies)
         server1, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
         self._assert_allocation_is_as_expected(server1['id'],
@@ -297,7 +313,8 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         * If the VM goes to ACTIVE state check that allocations are as
         expected.
         """
-        self._create_network_and_qos_policies(self._create_qos_basic_policies)
+        self._use_or_create_network_and_qos_policies(
+            self._create_qos_basic_policies)
         server, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
         self._assert_allocation_is_as_expected(server['id'],
@@ -335,7 +352,8 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         * If the VM goes to ACTIVE state check that allocations are as
         expected.
         """
-        self._create_network_and_qos_policies(self._create_qos_basic_policies)
+        self._use_or_create_network_and_qos_policies(
+            self._create_qos_basic_policies)
         server, valid_port = self._boot_vm_with_min_bw(
             qos_policy_id=self.qos_policy_valid['id'])
         self._assert_allocation_is_as_expected(server['id'],
@@ -378,7 +396,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         if not utils.is_network_feature_enabled('update_port_qos'):
             raise self.skipException("update_port_qos feature is not enabled")
 
-        self._create_network_and_qos_policies(
+        self._use_or_create_network_and_qos_policies(
             self._create_qos_policies_from_life)
 
         port = self.create_port(
@@ -432,7 +450,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         if not utils.is_network_feature_enabled('update_port_qos'):
             raise self.skipException("update_port_qos feature is not enabled")
 
-        self._create_network_and_qos_policies(
+        self._use_or_create_network_and_qos_policies(
             self._create_qos_policies_from_life)
 
         port = self.create_port(self.prov_network['id'])
@@ -457,7 +475,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         if not utils.is_network_feature_enabled('update_port_qos'):
             raise self.skipException("update_port_qos feature is not enabled")
 
-        self._create_network_and_qos_policies(
+        self._use_or_create_network_and_qos_policies(
             self._create_qos_policies_from_life)
 
         port = self.create_port(
@@ -479,7 +497,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         if not utils.is_network_feature_enabled('update_port_qos'):
             raise self.skipException("update_port_qos feature is not enabled")
 
-        self._create_network_and_qos_policies(
+        self._use_or_create_network_and_qos_policies(
             self._create_qos_policies_from_life)
 
         port1 = self.create_port(
@@ -506,7 +524,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
         if not utils.is_network_feature_enabled('update_port_qos'):
             raise self.skipException("update_port_qos feature is not enabled")
 
-        self._create_network_and_qos_policies(
+        self._use_or_create_network_and_qos_policies(
             self._create_qos_policies_from_life)
 
         port = self.create_port(
@@ -552,7 +570,7 @@ class MinBwAllocationPlacementTest(NetworkQoSPlacementTestBase):
                 direction=self.EGRESS_DIRECTION,
             )
 
-        self._create_network_and_qos_policies(create_policies)
+        self._use_or_create_network_and_qos_policies(create_policies)
 
         port = self.create_port(
             self.prov_network['id'],
