@@ -560,8 +560,17 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
                             'tagging metadata was not checked in the '
                             'metadata API')
                 return True
+
             cmd = 'curl %s' % md_url
-            md_json = ssh_client.exec_command(cmd)
+            try:
+                md_json = ssh_client.exec_command(cmd)
+            except lib_exc.SSHExecCommandFailed:
+                # NOTE(eolivare): We cannot guarantee that the metadata service
+                # is available right after the VM is ssh-able, because it could
+                # obtain authorized ssh keys from config_drive or it could use
+                # password. Hence, retries may be needed.
+                LOG.exception('metadata service not available yet')
+                return False
             return verify_method(md_json)
         # NOTE(gmann) Keep refreshing the metadata info until the metadata
         # cache is refreshed. For safer side, we will go with wait loop of
