@@ -440,29 +440,6 @@
       run on neutron gate only.
     check:
       jobs:
-        - grenade
-        # NOTE(gmann): These template are generic and used on stable branch
-        # as well as master testing. So grenade-skip-level on stable/2023.1
-        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
-        - grenade-skip-level:
-            voting: false
-            branches:
-              - stable/2023.1
-        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
-        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
-        # SLURP release only.
-        - grenade-skip-level:
-            branches:
-              - ^.*/2024.1
-        # on 2025.1(SLURP) grenade-skip-level-always is voting.
-        # which test stable/2024.1 to 2025.1 upgrade.
-        # As extra testing, we do run it voting on current master(even that is non SLURP).
-        # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
-        - grenade-skip-level-always:
-            branches:
-              - ^.*/2025.2
-              - ^.*/2025.1
-              - master
         - tempest-integrated-networking
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -474,23 +451,7 @@
               negate: true
     gate:
       jobs:
-        - grenade
         - tempest-integrated-networking
-        # on stable/2024.1(SLURP) grenade-skip-level is voting which test
-        # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
-        # SLURP release only.
-        - grenade-skip-level:
-            branches:
-              - ^.*/2024.1
-        # on 2025.1(SLURP) grenade-skip-level-always is voting.
-        # which test stable/2024.1 to 2025.1 upgrade.
-        # As extra testing, we do run it voting on current master(even that is non SLURP).
-        # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
-        - grenade-skip-level-always:
-            branches:
-              - ^.*/2025.2
-              - ^.*/2025.1
-              - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
         # and job is broken up to wallaby branch due to the issue
