@@ -41,8 +41,10 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_security_group_get_nonexistent_group(self):
         """Test getting non existent security group details should fail"""
         non_exist_id = self.generate_random_security_group_id()
-        self.assertRaises(lib_exc.NotFound, self.client.show_security_group,
-                          non_exist_id)
+        self.assertRaises(
+            lib_exc.NotFound,
+            self.reader_security_groups_client.show_security_group,
+            non_exist_id)
 
     @decorators.skip_because(bug="1161411",
                              condition=CONF.service_available.neutron)
@@ -111,7 +113,9 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def test_delete_the_default_security_group(self):
         """Test deleting "default" security group should fail"""
         default_security_group_id = None
-        body = self.client.list_security_groups()['security_groups']
+        body = (
+            self.reader_security_groups_client.list_security_groups()
+            ['security_groups'])
         for i in range(len(body)):
             if body[i]['name'] == 'default':
                 default_security_group_id = body[i]['id']
