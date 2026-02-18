@@ -27,6 +27,15 @@ class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
     create_default_network = True
 
     @classmethod
+    def setup_clients(cls):
+        super(BaseSecurityGroupsTest, cls).setup_clients()
+        if CONF.enforce_scope.nova and hasattr(cls, 'os_project_reader'):
+            cls.reader_security_groups_client = (
+                cls.os_project_reader.compute_security_groups_client)
+        else:
+            cls.reader_security_groups_client = cls.security_groups_client
+
+    @classmethod
     def skip_checks(cls):
         super(BaseSecurityGroupsTest, cls).skip_checks()
         if not utils.get_service_list()['network']:
