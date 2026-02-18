@@ -46,6 +46,7 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
         super(VolumesSnapshotsTestJSON, cls).setup_clients()
         cls.volumes_client = cls.volumes_extensions_client
         cls.snapshots_client = cls.snapshots_extensions_client
+        cls.reader_snapshots_client = cls.reader_snapshots_extensions_client
 
     @decorators.idempotent_id('cd4ec87d-7825-450d-8040-6e2068f2da8f')
     def test_volume_snapshot_create_get_list_delete(self):
@@ -72,10 +73,10 @@ class VolumesSnapshotsTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(delete_snapshot, snapshot['id'])
         self.assertEqual(volume['id'], snapshot['volumeId'])
         # Get snapshot
-        fetched_snapshot = self.snapshots_client.show_snapshot(
+        fetched_snapshot = self.reader_snapshots_client.show_snapshot(
             snapshot['id'])['snapshot']
         self.assertEqual(s_name, fetched_snapshot['displayName'])
         self.assertEqual(volume['id'], fetched_snapshot['volumeId'])
         # Fetch all snapshots
-        snapshots = self.snapshots_client.list_snapshots()['snapshots']
+        snapshots = self.reader_snapshots_client.list_snapshots()['snapshots']
         self.assertIn(snapshot['id'], map(lambda x: x['id'], snapshots))
