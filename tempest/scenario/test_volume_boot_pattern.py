@@ -169,6 +169,61 @@ class TestVolumeBootPattern(manager.EncryptionScenarioTest):
         # Step 6: Verify console log
         self.log_console_output([instance])
 
+    @decorators.idempotent_id('3c87bc15-cf6a-4dd6-8c23-4541b2cc3dbb')
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Cinder volume snapshots are disabled')
+    @utils.services('compute', 'volume', 'image')
+    def test_bootable_volume_last_snapshot_delete_while_stopped(self):
+        """Test bootable volume snapshot deletion while instance is stopped.
+
+        This test ensures that all volume snapshots can be deleted which
+        verifies that their backing files were handled correctly during
+        deletions.
+
+        This scenario is related to the Cinder NFS backend.
+
+        Steps:
+        1. Create a bootable volume from an image.
+        2. Launch an instance from the created volume.
+        3. Create three volume snapshots of the created volume.
+        4. Stop the instance.
+        5. Delete the latest snapshot and verify it succeeds.
+        6. Delete the next latest snapshot and verify it succeeds.
+        7. Delete the remaining snapshot and verify it succeeds.
+        """
+        # Step 1: Create a bootable volume from an image
+        volume = self.create_volume_from_image()
+
+        # Step 2: Boot an instance from the created volume
+        instance = self.boot_instance_from_resource(
+            source_id=volume['id'],
+            source_type='volume',
+            wait_until='SSHABLE'
+        )
+
+        # Step 3: Create three volume snapshots of the bootable volume.
+        # The force=True is needed in order to snapshot an attached volume.
+        snapshot1 = self.create_volume_snapshot(volume['id'], force=True)
+        snapshot2 = self.create_volume_snapshot(volume['id'], force=True)
+        snapshot3 = self.create_volume_snapshot(volume['id'], force=True)
+
+        # Step 4: Stop the instance
+        self.servers_client.stop_server(instance['id'])
+        waiters.wait_for_server_status(self.servers_client, instance['id'],
+                                       'SHUTOFF')
+
+        # Step 5: Delete the latest (newest) snapshot
+        self.snapshots_client.delete_snapshot(snapshot3['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot3['id'])
+
+        # Step 6: Delete the next latest (next newest) snapshot
+        self.snapshots_client.delete_snapshot(snapshot2['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot2['id'])
+
+        # Step 7: Delete the last remaining snapshot
+        self.snapshots_client.delete_snapshot(snapshot1['id'])
+        self.snapshots_client.wait_for_resource_deletion(snapshot1['id'])
+
     @decorators.idempotent_id('05795fb2-b2a7-4c9f-8fac-ff25aedb1489')
     @decorators.attr(type='slow')
     @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
