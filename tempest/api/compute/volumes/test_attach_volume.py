@@ -473,9 +473,9 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
             # but cirros (and other) test images won't see the device unless
             # they have lsilogic drivers (which is the default). So use this
             # as sort of the indication that the test should be enabled.
-            self.skip('hw_scsi_model=virtio-scsi not set on image')
+            self.skipTest('hw_scsi_model=virtio-scsi not set on image')
         if not CONF.validation.run_validation:
-            self.skip('validation is required for this test')
+            self.skipTest('validation is required for this test')
 
         validation_resources = self.get_test_validation_resources(
             self.os_primary)
