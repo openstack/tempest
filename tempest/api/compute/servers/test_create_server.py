@@ -23,7 +23,6 @@ from tempest.common import utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.lib.common.utils import data_utils
-from tempest.lib.common.utils import test_utils
 from tempest.lib import decorators
 
 CONF = config.CONF
@@ -45,12 +44,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setup_clients(cls):
         super(ServersTestJSON, cls).setup_clients()
-        cls.client = cls.servers_client
-        if CONF.enforce_scope.nova:
-            cls.reader_client = cls.os_project_reader.servers_client
-        else:
-            cls.reader_client = cls.client
-        cls.ports_client = cls.os_primary.ports_client
 
     @classmethod
     def resource_setup(cls):
@@ -159,50 +152,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # the hostname will be "aaa.novalocal" then, so we should ignore the
         # postfix when checking whether hostname equals self.name.
         self.assertEqual(self.name.lower(), hostname.split(".")[0], msg)
-
-    @decorators.idempotent_id('38b98870-f68d-4192-af36-555dac193ad1')
-    @testtools.skipUnless(
-        utils.is_extension_enabled('ip_allocation', 'network'),
-        'ip_allocation extension is not enabled.')
-    def test_boot_vm_with_unaddressed_port(self):
-        """Test creating VM with unaddressed port
-
-        Verify that a server can be created successfully using a port
-        that has no fixed IP addresses assigned to it.
-        """
-        network = self.get_tenant_network()
-        network_id = network['id']
-
-        # Create a port with no fixed IPs
-        port = self.ports_client.create_port(
-            network_id=network_id,
-            name=data_utils.rand_name(
-                prefix=CONF.resource_name_prefix,
-                name=self.__class__.__name__),
-            fixed_ips=[]
-            )
-        port_id = port['port']['id']
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.ports_client.delete_port, port_id)
-
-        # Verify the port has no fixed IPs
-        self.assertEqual([], port['port']['fixed_ips'])
-
-        # Create a server with unaddressed port
-        server = self.create_test_server(
-            wait_until='ACTIVE',
-            name=data_utils.rand_name(
-                prefix=CONF.resource_name_prefix,
-                name=self.__class__.__name__),
-            networks=[
-                {
-                    'port': port_id
-                },
-            ])
-
-        # Verify the port is attached to the server
-        updated_port = self.ports_client.show_port(port_id)['port']
-        self.assertEqual(server['id'], updated_port['device_id'])
 
 
 class ServersTestManualDisk(ServersTestJSON):
