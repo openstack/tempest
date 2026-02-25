@@ -83,7 +83,7 @@ of these would be::
           """
           super(TestExampleCase, cls).skip_checks()
           if not CONF.section.foo
-              cls.skip('A helpful message')
+              cls.skipTest('A helpful message')
 
       @classmethod
       def setup_credentials(cls):

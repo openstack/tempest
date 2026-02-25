@@ -196,8 +196,9 @@ class ImagesFormatTest(base.BaseV2ImageTest,
                 server = self._create_server_with_image_def(self.imgdef)
             except exceptions.BuildErrorException:
                 if is_broken:
-                    self.skip('Tolerating failed build with known-broken '
-                              'image format')
+                    self.skipTest(
+                        'Tolerating failed build with known-broken image '
+                        'format')
                 else:
                     raise
             self.delete_server(server['id'])
