@@ -197,3 +197,65 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.content)
         self.assertEqual(resp['content-disposition'], 'inline')
+
+    @decorators.idempotent_id('a4c34c55-1268-4efd-a9e3-17d8ef1e5b2c')
+    @utils.requires_ext(extension='tempurl', service='object')
+    def test_get_object_using_temp_url_with_prefix(self):
+        """Test TempURL access for objects using a prefix in the container.
+
+        Ensures that an object with a prefix in its name can be accessed
+        via a TempURL using the prefix parameter.
+        """
+
+        # Set TempURL key for container
+        tempurl_key = data_utils.rand_name("tempurlkey")
+        metadata = {'Temp-URL-Key': tempurl_key}
+        self.container_client.create_update_or_delete_container_metadata(
+            self.container_name,
+            create_update_metadata=metadata,
+        )
+
+        # Create object WITH prefix
+        prefix = "public"
+        object_name = f"{prefix}/tempurl_test.txt"
+        object_data = data_utils.arbitrary_string()
+        self.object_client.create_object(
+            self.container_name, object_name, object_data
+        )
+
+        # Compute prefix-based TempURL signature
+        expires = int(time.time()) + 300
+        account = self.account_client.base_url.rstrip("/").split("/")[-1]
+        path = f"/v1/{account}/{self.container_name}/{prefix}"
+        hmac_body = f"GET\n{expires}\nprefix:{path}"
+        hlib = getattr(
+            hashlib, CONF.object_storage_feature_enabled.tempurl_digest_hashlib
+        )
+        sig = hmac.new(
+            tempurl_key.encode(),
+            hmac_body.encode(),
+            hlib
+        ).hexdigest()
+
+        # Construct TempURL with prefix parameter
+        base_url = self.object_client.base_url.rstrip("/")
+        tempurl = (
+            f"{base_url}/{self.container_name}/{object_name}"
+            f"?temp_url_sig={sig}&temp_url_expires={expires}"
+            f"&temp_url_prefix={prefix}"
+        )
+
+        # Clear auth to mimic public TempURL access
+        self.object_client.auth_provider.set_alt_auth_data(
+            request_part='headers', auth_data=None
+        )
+
+        # Construct relative URL and request
+        relative_url = tempurl.replace(base_url + "/", "")
+        resp, body = self.object_client.request(
+            "GET", relative_url, headers={}
+        )
+
+        # Validate
+        self.assertEqual(200, resp.status)
+        self.assertEqual(object_data, body.decode())
