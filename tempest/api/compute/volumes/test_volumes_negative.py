@@ -41,6 +41,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(VolumesNegativeTest, cls).setup_clients()
         cls.client = cls.volumes_extensions_client
+        cls.reader_client = cls.reader_volumes_extensions_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('c03ea686-905b-41a2-8748-9635154b7c57')
@@ -48,7 +49,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
         """Test getting details of a non existent volume should fail"""
         # Creating a nonexistent volume id
         # Trying to GET a non existent volume
-        self.assertRaises(lib_exc.NotFound, self.client.show_volume,
+        self.assertRaises(lib_exc.NotFound, self.reader_client.show_volume,
                           data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
@@ -97,7 +98,7 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
     @decorators.idempotent_id('62bab09a-4c03-4617-8cca-8572bc94af9b')
     def test_get_volume_without_passing_volume_id(self):
         """Test getting volume details without volume id should fail"""
-        self.assertRaises(lib_exc.NotFound, self.client.show_volume, '')
+        self.assertRaises(lib_exc.NotFound, self.reader_client.show_volume, '')
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('62972737-124b-4513-b6cf-2f019f178494')

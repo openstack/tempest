@@ -43,6 +43,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(VolumesGetTestJSON, cls).setup_clients()
         cls.volumes_client = cls.volumes_extensions_client
+        cls.reader_volumes_client = cls.reader_volumes_extensions_client
 
     @decorators.idempotent_id('f10f25eb-9775-4d9d-9cbe-1cf54dae9d5f')
     def test_volume_create_get_delete(self):
@@ -59,7 +60,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                          "The created volume name is not equal "
                          "to the requested name")
         # GET Volume
-        fetched_volume = self.volumes_client.show_volume(
+        fetched_volume = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         # Verification of details of fetched Volume
         self.assertEqual(v_name,

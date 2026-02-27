@@ -42,6 +42,15 @@ class BaseAttachVolumeTest(base.BaseV2ComputeTest):
         cls.prepare_instance_network()
         super(BaseAttachVolumeTest, cls).setup_credentials()
 
+    @classmethod
+    def setup_clients(cls):
+        super(BaseAttachVolumeTest, cls).setup_clients()
+        if CONF.enforce_scope.nova and hasattr(cls, 'os_project_reader'):
+            cls.reader_volumes_client = (
+                cls.os_project_reader.volumes_client_latest)
+        else:
+            cls.reader_volumes_client = cls.volumes_client
+
     def _create_server(self):
         # Start a server and wait for it to become ready
         validation_resources = self.get_test_validation_resources(
@@ -356,7 +365,7 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
         more attachments or 'available' state if there are no more attachments.
         """
         # Count the number of attachments before starting the detach.
-        volume = self.volumes_client.show_volume(volume_id)['volume']
+        volume = self.reader_volumes_client.show_volume(volume_id)['volume']
         attachments = volume['attachments']
         wait_status = 'in-use' if len(attachments) > 1 else 'available'
         # Now detach the volume from the given server.
@@ -418,7 +427,7 @@ class AttachVolumeMultiAttachTest(BaseAttachVolumeTest):
 
         # List attachments from the volume and make sure the server uuids
         # are in that list.
-        vol_attachments = self.volumes_client.show_volume(
+        vol_attachments = self.reader_volumes_client.show_volume(
             volume['id'])['volume']['attachments']
         attached_server_ids = [attachment['server_id']
                                for attachment in vol_attachments]

@@ -99,6 +99,16 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             cls.os_primary.volumes_extensions_client
         cls.snapshots_extensions_client =\
             cls.os_primary.snapshots_extensions_client
+        if CONF.enforce_scope.nova and hasattr(cls, 'os_project_reader'):
+            cls.reader_volumes_extensions_client = (
+                cls.os_project_reader.volumes_extensions_client)
+            cls.reader_snapshots_extensions_client = (
+                cls.os_project_reader.snapshots_extensions_client)
+        else:
+            cls.reader_volumes_extensions_client = (
+                cls.volumes_extensions_client)
+            cls.reader_snapshots_extensions_client = (
+                cls.snapshots_extensions_client)
         cls.interfaces_client = cls.os_primary.interfaces_client
         cls.availability_zone_client = cls.os_primary.availability_zone_client
         cls.agents_client = cls.os_primary.agents_client

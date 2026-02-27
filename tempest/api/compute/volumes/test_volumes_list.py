@@ -45,6 +45,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(VolumesTestJSON, cls).setup_clients()
         cls.client = cls.volumes_extensions_client
+        cls.reader_client = cls.reader_volumes_extensions_client
 
     @classmethod
     def resource_setup(cls):
@@ -61,7 +62,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     def test_volume_list(self):
         """Test listing volumes should return all volumes"""
         # Fetch all Volumes
-        fetched_list = self.client.list_volumes()['volumes']
+        fetched_list = self.reader_client.list_volumes()['volumes']
         # Now check if all the Volumes created in setup are in fetched list
         missing_volumes = [
             v for v in self.volume_list if v not in fetched_list
@@ -76,7 +77,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     def test_volume_list_with_details(self):
         """Test listing volumes with detail should return all volumes"""
         # Fetch all Volumes
-        fetched_list = self.client.list_volumes(detail=True)['volumes']
+        fetched_list = self.reader_client.list_volumes(detail=True)['volumes']
         # Now check if all the Volumes created in setup are in fetched list
         missing_volumes = [
             v for v in self.volume_list if v not in fetched_list
@@ -95,7 +96,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         returned.
         """
         params = {'limit': 2}
-        fetched_vol_list = self.client.list_volumes(**params)['volumes']
+        fetched_vol_list = self.reader_client.list_volumes(**params)['volumes']
 
         self.assertEqual(len(fetched_vol_list), params['limit'],
                          "Failed to list volumes by limit set")
@@ -108,8 +109,8 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         detail should be returned.
         """
         params = {'limit': 2}
-        fetched_vol_list = self.client.list_volumes(detail=True,
-                                                    **params)['volumes']
+        fetched_vol_list = self.reader_client.list_volumes(detail=True,
+                                                           **params)['volumes']
 
         self.assertEqual(len(fetched_vol_list), params['limit'],
                          "Failed to list volume details by limit set")
@@ -123,9 +124,9 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         (The items in the all volumes list start from position 0.)
         """
         # get all volumes list
-        all_vol_list = self.client.list_volumes()['volumes']
+        all_vol_list = self.reader_client.list_volumes()['volumes']
         params = {'offset': 1, 'limit': 1}
-        fetched_vol_list = self.client.list_volumes(**params)['volumes']
+        fetched_vol_list = self.reader_client.list_volumes(**params)['volumes']
 
         # Validating length of the fetched volumes
         self.assertEqual(len(fetched_vol_list), params['limit'],
@@ -146,10 +147,10 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         (The items in the all volumes list start from position 0.)
         """
         # get all volumes list
-        all_vol_list = self.client.list_volumes(detail=True)['volumes']
+        all_vol_list = self.reader_client.list_volumes(detail=True)['volumes']
         params = {'offset': 1, 'limit': 1}
-        fetched_vol_list = self.client.list_volumes(detail=True,
-                                                    **params)['volumes']
+        fetched_vol_list = self.reader_client.list_volumes(detail=True,
+                                                           **params)['volumes']
 
         # Validating length of the fetched volumes
         self.assertEqual(len(fetched_vol_list), params['limit'],
