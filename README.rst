@@ -1,13 +1,8 @@
-========================
-Team and repository tags
-========================
-
-.. image:: https://governance.openstack.org/tc/badges/tempest.svg
-
-.. Change things from this point on
-
+==============================================
 Tempest - The OpenStack Integration Test Suite
 ==============================================
+
+.. image:: https://governance.openstack.org/tc/badges/tempest.svg
 
 This is a set of integration tests to be run against a live OpenStack
 cluster. Tempest has batteries of tests for OpenStack API validation,
