@@ -33,6 +33,9 @@ from tempest.tests import fake_config
 from tempest.tests.lib import fake_identity
 from tempest.tests.lib.services import registry_fixture
 
+# Store the real os.path.isfile before any test mocking replaces it
+original_isfile = os.path.isfile
+
 
 class TestPreProvisionedCredentials(base.TestCase):
 
@@ -53,9 +56,9 @@ class TestPreProvisionedCredentials(base.TestCase):
     def _fake_accounts(cls, admin_role):
         return [
             {'username': 'test_user1', 'tenant_name': 'test_tenant1',
-             'password': 'p'},
+             'password': 'p', 'roles': ['member']},
             {'username': 'test_user2', 'project_name': 'test_tenant2',
-             'password': 'p'},
+             'password': 'p', 'roles': ['member']},
             {'username': 'test_user3', 'tenant_name': 'test_tenant3',
              'password': 'p'},
             {'username': 'test_user4', 'project_name': 'test_tenant4',
@@ -457,6 +460,123 @@ class TestPreProvisionedCredentials(base.TestCase):
             # Get one more
             test_accounts_class.get_project_manager_creds()
 
+    def test_get_project_member_reader_creds_in_same_project(self):
+        # Verify that project_member and project_reader creds are allocated
+        # from the same project when both are available in the accounts file.
+        test_accounts = [
+            {'username': 'test_project_member1',
+             'project_name': 'test_project_shared1',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_project_member3',
+             'project_name': 'test_project_shared3',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_project_reader1',
+             'project_name': 'test_project_shared1',
+             'password': 'p', 'roles': ['reader']},
+        ]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        # Use a real temp dir and real os.path.isfile so the hash-file locking
+        # mechanism works correctly for multiple credential allocations.
+        tmp_dir = self.useFixture(fixtures.TempDir())
+        self.patchobject(os.path, 'isfile', original_isfile)
+        params = dict(self.fixed_params)
+        params['accounts_lock_dir'] = tmp_dir.path
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **params)
+        member_creds = test_accounts_class.get_project_member_creds()
+        reader_creds = test_accounts_class.get_project_reader_creds()
+        self.assertEqual(member_creds.project_name, reader_creds.project_name)
+
+    def test_get_match_hash_list_select_project_with_more_roles(self):
+        test_accounts = [
+            {'username': 'test_member_proj_1',
+             'project_name': 'project_1',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_member_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_reader_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['reader']},
+        ]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        hash_list = self._get_hash_list(test_accounts)
+        result = test_accounts_class._get_match_hash_list(
+            roles=['member'], scope='project')
+        self.assertEqual(2, len(result))
+        # First hash in selected one is from project_2 which has the member
+        # as well as reader role.
+        self.assertEqual(hash_list[1], result[0])
+        self.assertEqual(hash_list[0], result[1])
+
+    def test_get_match_hash_list_with_three_roles_in_project_account(self):
+        test_accounts = [
+            {'username': 'test_manager_proj_1',
+             'project_name': 'project_1',
+             'password': 'p', 'roles': ['manager']},
+            {'username': 'test_manager_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['manager']},
+            {'username': 'test_member_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_manager_proj_3',
+             'project_name': 'project_3',
+             'password': 'p', 'roles': ['manager']},
+            {'username': 'test_member_proj_3',
+             'project_name': 'project_3',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_reader_proj_3',
+             'project_name': 'project_3',
+             'password': 'p', 'roles': ['reader']},
+        ]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        hash_list = self._get_hash_list(test_accounts)
+        result = test_accounts_class._get_match_hash_list(
+            roles=['manager'], scope='project')
+        self.assertEqual(3, len(result))
+        # Hashes selection should be project_3 (with three roles),
+        # project_2 (with two roles), and then project_1 (with one role)
+        self.assertEqual(hash_list[3], result[0])
+        self.assertEqual(hash_list[1], result[1])
+        self.assertEqual(hash_list[0], result[2])
+
+    def test_get_match_hash_list_with_project_name(self):
+        test_accounts = [
+            {'username': 'test_member_proj_1',
+             'project_name': 'project_1',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_reader_proj_1',
+             'project_name': 'project_1',
+             'password': 'p', 'roles': ['reader']},
+            {'username': 'test_member_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['member']},
+            {'username': 'test_reader_proj_2',
+             'project_name': 'project_2',
+             'password': 'p', 'roles': ['reader']},
+        ]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **self.fixed_params)
+        hash_list = self._get_hash_list(test_accounts)
+        result = test_accounts_class._get_match_hash_list(
+            roles=['reader'], scope='project', project_name='project_1')
+        self.assertEqual(1, len(result))
+        self.assertIn(hash_list[1], result)
+
 
 class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
 
@@ -477,9 +597,9 @@ class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
     def _fake_accounts(cls, admin_role):
         return [
             {'username': 'test_user1', 'project_name': 'test_project1',
-             'domain_name': 'domain', 'password': 'p'},
+             'domain_name': 'domain', 'password': 'p', 'roles': ['member']},
             {'username': 'test_user2', 'project_name': 'test_project2',
-             'domain_name': 'domain', 'password': 'p'},
+             'domain_name': 'domain', 'password': 'p', 'roles': ['member']},
             {'username': 'test_user3', 'project_name': 'test_project3',
              'domain_name': 'domain', 'password': 'p'},
             {'username': 'test_user4', 'project_name': 'test_project4',
@@ -532,3 +652,27 @@ class TestPreProvisionedCredentialsV3(TestPreProvisionedCredentials):
         with testtools.ExpectedException(lib_exc.InvalidCredentials):
             # Get one more
             test_accounts_class.get_domain_manager_creds()
+
+    def test_domain_creds_not_constrained_by_project(self):
+        test_accounts = [
+            {'username': 'test_domain_manager1',
+             'domain_name': 'test_domain', 'password': 'p',
+             'roles': ['manager']},
+            {'username': 'test_domain_member1',
+             'domain_name': 'test_domain', 'password': 'p',
+             'roles': ['member']},
+        ]
+        self.useFixture(fixtures.MockPatch(
+            'tempest.lib.common.preprov_creds.read_accounts_yaml',
+            return_value=test_accounts))
+        tmp_dir = self.useFixture(fixtures.TempDir())
+        self.patchobject(os.path, 'isfile', original_isfile)
+        params = dict(self.fixed_params)
+        params['accounts_lock_dir'] = tmp_dir.path
+        test_accounts_class = preprov_creds.PreProvisionedCredentialProvider(
+            **params)
+        test_accounts_class.get_domain_manager_creds()
+        # get_domain_member_creds should pass as get_domain_manager_creds
+        # restrict the member creds to be in same project as manager creds
+        domain_member = test_accounts_class.get_domain_member_creds()
+        self.assertIn('test_domain_member', domain_member.username)

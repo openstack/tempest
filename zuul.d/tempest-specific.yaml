@@ -88,27 +88,8 @@
     timeout: 5000
 
 - job:
-    name: tempest-full-test-account-py3
-    parent: tempest-full-py3
-    description: |
-      This job runs the full set of tempest tests using pre-provisioned
-      credentials instead of dynamic credentials and py3.
-      Former names for this job were:
-        - legacy-tempest-dsvm-full-test-accounts
-        - legacy-tempest-dsvm-neutron-full-test-accounts
-        - legacy-tempest-dsvm-identity-v3-test-accounts
-    vars:
-      devstack_localrc:
-        TEMPEST_USE_TEST_ACCOUNTS: True
-        # FIXME(gmann): Nova and Glance have enabled the new defaults and scope
-        # by default in devstack and pre provisioned account code and testing
-        # needs to be move to new RBAC design testing. Until we do that, let's
-        # run these jobs with old defaults.
-        NOVA_ENFORCE_SCOPE: false
-        GLANCE_ENFORCE_SCOPE: false
-- job:
     name: tempest-full-test-account-no-admin-py3
-    parent: tempest-full-test-account-py3
+    parent: tempest-full-preprov-creds
     description: |
       This job runs the full set of tempest tests using pre-provisioned
       credentials and py3 without having an admin account.

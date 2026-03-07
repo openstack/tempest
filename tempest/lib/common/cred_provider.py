@@ -47,6 +47,26 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
             raise exceptions.InvalidIdentityVersion(
                 identity_version=self.identity_version)
 
+    def _get_project_id(self, credential_type, scope, return_name=False):
+        same_creds = [['admin'], ['manager'], ['member'], ['reader']]
+        same_alt_creds = [['alt_admin'], ['alt_manager'],
+                          ['alt_member'], ['alt_reader']]
+        search_in = []
+        if credential_type in same_creds:
+            search_in = same_creds
+        elif credential_type in same_alt_creds:
+            search_in = same_alt_creds
+        for cred in search_in:
+            found_cred = (self._creds.get("%s_%s" % (scope, str(cred))) or
+                          self._creds.get("%s_%s" % (scope, '_'.join(cred))))
+            if found_cred:
+                field = 'name' if return_name else 'id'
+                project_id = found_cred.get("%s_%s" % (scope, field))
+                LOG.debug("Reusing existing project %s from creds: %s ",
+                          project_id, found_cred)
+                return project_id
+        return None
+
     @abc.abstractmethod
     def get_primary_creds(self):
         return

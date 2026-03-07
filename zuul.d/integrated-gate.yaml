@@ -108,6 +108,16 @@
         horizon: false
 
 - job:
+    name: tempest-full-preprov-creds
+    parent: tempest-full-py3
+    description: |
+      This job runs the full set of tempest tests using pre-provisioned
+      credentials.
+    vars:
+      devstack_localrc:
+        TEMPEST_USE_TEST_ACCOUNTS: True
+
+- job:
     name: tempest-full-centos-9-stream
     parent: tempest-full-py3
     nodeset: devstack-single-node-centos-9-stream

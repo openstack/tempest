@@ -155,12 +155,16 @@ def generate_resources(cred_provider, admin):
     # Create the list of resources to be provisioned for each process
     # NOTE(andreaf) get_credentials expects a string for types or a list for
     # roles. Adding all required inputs to the spec list.
-    spec = ['primary', 'alt', 'project_reader']
+    spec = ['alt', 'project_manager', 'project_member', 'project_reader']
+    if cred_provider.identity_version == 'v3':
+        spec += ['system_member', 'system_reader']
     if CONF.service_available.swift:
         spec.append([CONF.object_storage.operator_role])
         spec.append([CONF.object_storage.reseller_admin_role])
     if admin:
         spec.append('admin')
+        if cred_provider.identity_version == 'v3':
+            spec.append('system_admin')
     resources = []
     for cred_type in spec:
         scope = None
@@ -175,6 +179,17 @@ def generate_resources(cred_provider, admin):
 
 def dump_accounts(resources, identity_version, account_file):
     accounts = []
+    # NOTE(gmaan): When accounts are created under same project (project
+    # manager, member, and reader), only the first account creation has the
+    # network resource and other accounts will not have it in the generated
+    # account file. To solve that, we need to build a project & network name
+    # map so that all accounts sharing a project get the network resource.
+    project_network_map = {}
+    for _, test_resource in resources:
+        proj = test_resource.project_name or test_resource.tenant_name
+        if proj and test_resource.network:
+            project_network_map.setdefault(proj, test_resource.network['name'])
+
     for resource in resources:
         cred_type, test_resource = resource
         account = {
@@ -182,8 +197,11 @@ def dump_accounts(resources, identity_version, account_file):
             'password': test_resource.password
         }
         if identity_version == 3:
-            account['project_name'] = test_resource.project_name
-            account['domain_name'] = test_resource.domain_name
+            if test_resource.system:
+                account['system'] = test_resource.system
+            else:
+                account['project_name'] = test_resource.project_name
+                account['domain_name'] = test_resource.domain_name
         else:
             account['project_name'] = test_resource.tenant_name
 
@@ -194,9 +212,13 @@ def dump_accounts(resources, identity_version, account_file):
         elif cred_type not in ['primary', 'alt']:
             account['roles'] = cred_type
 
+        net_name = None
         if test_resource.network:
-            account['resources'] = {}
-            account['resources']['network'] = test_resource.network['name']
+            net_name = test_resource.network['name']
+        elif test_resource.project_name:
+            net_name = project_network_map.get(test_resource.project_name)
+        if net_name:
+            account['resources'] = {'network': net_name}
         accounts.append(account)
     if os.path.exists(account_file):
         os.rename(account_file, '.'.join((account_file, 'bak')))

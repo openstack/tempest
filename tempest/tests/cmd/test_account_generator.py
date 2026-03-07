@@ -54,6 +54,9 @@ class MockHelpersMixin(object):
             self.cred_client + '.create_project',
             return_value=fake_resource))
         self.useFixture(fixtures.MockPatch(
+            self.cred_client + '.show_project',
+            return_value=fake_resource))
+        self.useFixture(fixtures.MockPatch(
             self.cred_client + '.assign_user_role'))
         self.useFixture(fixtures.MockPatch(
             self.cred_client + '._check_role_exists',
@@ -80,6 +83,8 @@ class MockHelpersMixin(object):
             return_value=fake_domain_list))
         self.useFixture(fixtures.MockPatch(
             self.cred_client + '.assign_user_role_on_domain'))
+        self.useFixture(fixtures.MockPatch(
+            self.cred_client + '.assign_user_role_on_system'))
 
 
 class TestAccountGeneratorV2(base.TestCase, MockHelpersMixin):
@@ -136,6 +141,10 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
     cred_client = 'tempest.lib.common.cred_client.V2CredsClient'
     dynamic_creds = ('tempest.lib.common.dynamic_creds.'
                      'DynamicCredentialProvider')
+    count_no_admin_no_swift = 4
+    count_admin_no_swift = 5
+    count_swift_admin = 7
+    count_swift_no_admin = 6
 
     def setUp(self):
         super(TestGenerateResourcesV2, self).setUp()
@@ -153,21 +162,17 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=False)
         resource_types = [k for k, _ in resources]
-        # No admin, no swift, expect three credentials only
-        self.assertEqual(3, len(resources))
-        # Ensure create_user was invoked three times (three distinct users)
-        self.assertEqual(3, self.user_create_fixture.mock.call_count)
-        self.assertIn('primary', resource_types)
+        self.assertEqual(self.count_no_admin_no_swift, len(resources))
+        self.assertEqual(self.count_no_admin_no_swift,
+                         self.user_create_fixture.mock.call_count)
+        self.assertIn(['manager'], resource_types)
+        self.assertIn(['member'], resource_types)
         self.assertIn('alt', resource_types)
         self.assertNotIn('admin', resource_types)
         self.assertIn(['reader'], resource_types)
         self.assertNotIn(['fake_operator'], resource_types)
         self.assertNotIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
-        for resource in resources:
-            self.assertIsNotNone(resource[1].network)
-            self.assertIsNotNone(resource[1].router)
-            self.assertIsNotNone(resource[1].subnet)
 
     def test_generate_resources_admin(self):
         cfg.CONF.set_default('swift', False, group='service_available')
@@ -178,21 +183,17 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=True)
         resource_types = [k for k, _ in resources]
-        # Admin, no swift, expect three credentials only
-        self.assertEqual(4, len(resources))
-        # Ensure create_user was invoked 4 times (4 distinct users)
-        self.assertEqual(4, self.user_create_fixture.mock.call_count)
-        self.assertIn('primary', resource_types)
+        self.assertEqual(self.count_admin_no_swift, len(resources))
+        self.assertEqual(self.count_admin_no_swift,
+                         self.user_create_fixture.mock.call_count)
+        self.assertIn(['manager'], resource_types)
+        self.assertIn(['member'], resource_types)
         self.assertIn('alt', resource_types)
         self.assertIn('admin', resource_types)
         self.assertIn(['reader'], resource_types)
         self.assertNotIn(['fake_operator'], resource_types)
         self.assertNotIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
-        for resource in resources:
-            self.assertIsNotNone(resource[1].network)
-            self.assertIsNotNone(resource[1].router)
-            self.assertIsNotNone(resource[1].subnet)
 
     def test_generate_resources_swift_admin(self):
         cfg.CONF.set_default('swift', True, group='service_available')
@@ -203,20 +204,16 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=True)
         resource_types = [k for k, _ in resources]
-        # all options on, expect six credentials
-        self.assertEqual(6, len(resources))
-        # Ensure create_user was invoked 6 times (6 distinct users)
-        self.assertEqual(6, self.user_create_fixture.mock.call_count)
-        self.assertIn('primary', resource_types)
+        self.assertEqual(self.count_swift_admin, len(resources))
+        self.assertEqual(self.count_swift_admin,
+                         self.user_create_fixture.mock.call_count)
+        self.assertIn(['manager'], resource_types)
+        self.assertIn(['member'], resource_types)
         self.assertIn('alt', resource_types)
         self.assertIn('admin', resource_types)
         self.assertIn(['reader'], resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
-        for resource in resources:
-            self.assertIsNotNone(resource[1].network)
-            self.assertIsNotNone(resource[1].router)
-            self.assertIsNotNone(resource[1].subnet)
 
     def test_generate_resources_swift_no_admin(self):
         cfg.CONF.set_default('swift', True, group='service_available')
@@ -227,27 +224,27 @@ class TestGenerateResourcesV2(base.TestCase, MockHelpersMixin):
         resources = account_generator.generate_resources(
             self.cred_provider, admin=False)
         resource_types = [k for k, _ in resources]
-        # No Admin, swift, expect five credentials only
-        self.assertEqual(5, len(resources))
-        # Ensure create_user was invoked 5 times (5 distinct users)
-        self.assertEqual(5, self.user_create_fixture.mock.call_count)
-        self.assertIn('primary', resource_types)
+        self.assertEqual(self.count_swift_no_admin, len(resources))
+        self.assertEqual(self.count_swift_no_admin,
+                         self.user_create_fixture.mock.call_count)
+        self.assertIn(['manager'], resource_types)
+        self.assertIn(['member'], resource_types)
         self.assertIn('alt', resource_types)
         self.assertNotIn('admin', resource_types)
         self.assertIn(['reader'], resource_types)
         self.assertIn(['fake_operator'], resource_types)
         self.assertIn(['fake_reseller'], resource_types)
         self.assertNotIn(['fake_owner'], resource_types)
-        for resource in resources:
-            self.assertIsNotNone(resource[1].network)
-            self.assertIsNotNone(resource[1].router)
-            self.assertIsNotNone(resource[1].subnet)
 
 
 class TestGenerateResourcesV3(TestGenerateResourcesV2):
 
     identity_version = 3
     cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
+    count_no_admin_no_swift = 6
+    count_admin_no_swift = 8
+    count_swift_admin = 10
+    count_swift_no_admin = 8
 
     def setUp(self):
         self.mock_domains()
@@ -261,6 +258,9 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
     dynamic_creds = ('tempest.lib.common.dynamic_creds.'
                      'DynamicCredentialProvider')
     domain_is_in = False
+    expected_accounts = 7
+    expected_roles = 5
+    expected_accounts_with_network = 7
 
     def setUp(self):
         super(TestDumpAccountsV2, self).setUp()
@@ -271,6 +271,24 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         cfg.CONF.set_default('swift', True, group='service_available')
         self.resources = account_generator.generate_resources(
             self.cred_provider, admin=True)
+
+    def _assert_accounts(self, accounts, handle, yaml_dump_mock):
+        _, f = yaml_dump_mock.call_args[0]
+        self.assertEqual(handle, f)
+        self.assertEqual(self.expected_accounts, len(accounts))
+        if self.domain_is_in:
+            self.assertIn('domain_name', accounts[0].keys())
+        else:
+            self.assertNotIn('domain_name', accounts[0].keys())
+        self.assertEqual(1, len([x for x in accounts if
+                                 x.get('types') == ['admin']]))
+        self.assertEqual(self.expected_roles,
+                         len([x for x in accounts if 'roles' in x]))
+        accounts_with_resources = [x for x in accounts if 'resources' in x]
+        self.assertEqual(self.expected_accounts_with_network,
+                         len(accounts_with_resources))
+        for account in accounts_with_resources:
+            self.assertIn('network', account.get('resources'))
 
     def test_dump_accounts(self):
         self.useFixture(fixtures.MockPatch('os.path.exists',
@@ -285,20 +303,8 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
                                                 self.opts.accounts)
         mocked_open.assert_called_once_with(self.opts.accounts, 'w')
         handle = mocked_open()
-        # Ordered args in [0], keyword args in [1]
-        accounts, f = yaml_dump_mock.call_args[0]
-        self.assertEqual(handle, f)
-        self.assertEqual(6, len(accounts))
-        if self.domain_is_in:
-            self.assertIn('domain_name', accounts[0].keys())
-        else:
-            self.assertNotIn('domain_name', accounts[0].keys())
-        self.assertEqual(1, len([x for x in accounts if
-                                 x.get('types') == ['admin']]))
-        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
-        for account in accounts:
-            self.assertIn('resources', account)
-            self.assertIn('network', account.get('resources'))
+        accounts, _ = yaml_dump_mock.call_args[0]
+        self._assert_accounts(accounts, handle, yaml_dump_mock)
 
     def test_dump_accounts_existing_file(self):
         self.useFixture(fixtures.MockPatch('os.path.exists',
@@ -316,20 +322,8 @@ class TestDumpAccountsV2(base.TestCase, MockHelpersMixin):
         rename_mock.assert_called_once_with(self.opts.accounts, backup_file)
         mocked_open.assert_called_once_with(self.opts.accounts, 'w')
         handle = mocked_open()
-        # Ordered args in [0], keyword args in [1]
-        accounts, f = yaml_dump_mock.call_args[0]
-        self.assertEqual(handle, f)
-        self.assertEqual(6, len(accounts))
-        if self.domain_is_in:
-            self.assertIn('domain_name', accounts[0].keys())
-        else:
-            self.assertNotIn('domain_name', accounts[0].keys())
-        self.assertEqual(1, len([x for x in accounts if
-                                 x.get('types') == ['admin']]))
-        self.assertEqual(3, len([x for x in accounts if 'roles' in x]))
-        for account in accounts:
-            self.assertIn('resources', account)
-            self.assertIn('network', account.get('resources'))
+        accounts, _ = yaml_dump_mock.call_args[0]
+        self._assert_accounts(accounts, handle, yaml_dump_mock)
 
 
 class TestDumpAccountsV3(TestDumpAccountsV2):
@@ -337,6 +331,9 @@ class TestDumpAccountsV3(TestDumpAccountsV2):
     identity_version = 3
     cred_client = 'tempest.lib.common.cred_client.V3CredsClient'
     domain_is_in = True
+    expected_accounts = 10
+    expected_roles = 8
+    expected_accounts_with_network = 7
 
     def setUp(self):
         self.mock_domains()

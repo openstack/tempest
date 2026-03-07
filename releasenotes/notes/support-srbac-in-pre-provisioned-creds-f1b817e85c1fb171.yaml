@@ -1,0 +1,22 @@
+---
+prelude: >
+    The pre-provisioned credentials supports the new SRBAC personas.
+features:
+  - |
+    Add support for SRBAC personas as well as system scope in the
+    ``tempest account-generator`` command as well as in pre
+    provisioned credentials. The below SRBAC personas are supported:
+
+    * ``system admin``
+    * ``system member``
+    * ``system reader``
+    * ``project manager``
+    * ``project member``
+    * ``project reader``
+fixes:
+  - |
+    Fixed a bug#2143564 in the pre-provisioned credentials provider where
+    ``project_member`` and ``project_reader`` were not guaranteed to be
+    allocated from the same project. The ``PreProvisionedCredentialProvider``
+    now stores accounts by project name and gets the accounts based on the
+    project name if they are requested from the same test class.

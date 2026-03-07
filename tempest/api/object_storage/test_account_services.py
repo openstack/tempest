@@ -156,6 +156,8 @@ class AccountTest(base.BaseObjectTest):
             self.assertEqual(len(container_list), limit)
 
     @decorators.idempotent_id('638f876d-6a43-482a-bbb3-0840bca101c6')
+    @testtools.skipIf(not CONF.auth.use_dynamic_credentials,
+                      'Skipped because of bug#2147232.')
     def test_list_containers_with_marker(self):
         """Test listing containers with marker parameter
 

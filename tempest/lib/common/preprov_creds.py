@@ -114,7 +114,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                       object_storage_operator_role=None,
                       object_storage_reseller_admin_role=None):
         hash_dict = {'roles': {}, 'creds': {}, 'networks': {},
-                     'scoped_roles': {}}
+                     'scoped_roles': {}, 'project_names': {}}
 
         # Loop over the accounts read from the yaml file
         for account in accounts:
@@ -128,7 +128,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                 types = account.pop('types')
             if 'resources' in account:
                 resources = account.pop('resources')
-            if 'project_name' in account:
+            if 'project_name' in account or 'tenant_name' in account:
                 scope = 'project'
             elif 'domain_name' in account:
                 scope = 'domain'
@@ -140,9 +140,17 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             temp_hash.update(str(account_for_hash).encode('utf-8'))
             temp_hash_key = temp_hash.hexdigest()
             hash_dict['creds'][temp_hash_key] = account
+            if 'project_name' in account or 'tenant_name' in account:
+                field = ('tenant_name' if 'tenant_name' in account else
+                         'project_name')
+                hash_dict['project_names'].setdefault(
+                    account[field], [])
+                hash_dict['project_names'][account[field]].append(
+                    temp_hash_key)
             for role in roles:
-                hash_dict = cls._append_role(role, temp_hash_key,
-                                             hash_dict)
+                if not scope or scope != 'system':
+                    hash_dict = cls._append_role(role, temp_hash_key,
+                                                 hash_dict)
                 if scope:
                     hash_dict = cls._append_scoped_role(
                         scope, role, temp_hash_key, hash_dict)
@@ -180,6 +188,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                         'Unknown resource type %s, ignoring this field',
                         resource
                     )
+        LOG.debug('Pre provisioned hash dict: %s', hash_dict)
         return hash_dict
 
     def is_multi_user(self):
@@ -218,7 +227,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                'the credentials for this allocation request' % ','.join(names))
         raise lib_exc.InvalidCredentials(msg)
 
-    def _get_match_hash_list(self, roles=None, scope=None):
+    def _get_match_hash_list(self, roles=None, scope=None, project_name=None):
         hashes = []
         if roles:
             # Loop over all the creds for each role in the subdict and generate
@@ -238,12 +247,27 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                             "No credentials with role: %s specified in the "
                             "accounts file" % role)
                 hashes.append(temp_hashes)
-            # Take the list of lists and do a boolean and between each list to
-            # find the creds which fall under all the specified roles
+            # Take the list of lists and do a boolean and between each
+            # list to find the creds which fall under all the specified
+            # roles
             temp_list = set(hashes[0])
             for hash_list in hashes[1:]:
                 temp_list = temp_list & set(hash_list)
             hashes = temp_list
+
+            if project_name:
+                p_hashes = self.hash_dict['project_names'].get(
+                    project_name, [])
+                if not p_hashes:
+                    raise lib_exc.InvalidCredentials(
+                        "No credentials with project_name: %s specified in "
+                        "the accounts file" % project_name)
+                hashes = set(hashes) & set(p_hashes)
+                if not hashes:
+                    raise lib_exc.InvalidCredentials(
+                        "No credentials with project_name: %s, scope %s, and "
+                        "role: %s specified in the accounts file" % (
+                            project_name, scope, role))
         else:
             hashes = self.hash_dict['creds'].keys()
         # NOTE(mtreinish): admin is a special case because of the increased
@@ -257,6 +281,34 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
             useable_hashes = [x for x in hashes if x not in admin_hashes]
         else:
             useable_hashes = hashes
+        # (gmaan): When a test requests its first credentials, prefer the
+        # project with the largest set of role accounts. This helps ensure
+        # that subsequent credential requests can be fulfilled from the same
+        # project.
+        if (scope == 'project' and not project_name and
+                roles in [['manager'], ['member'], ['reader'],
+                          ['alt_manager'], ['alt_member'], ['alt_reader']]):
+            if roles in [['manager'], ['member'], ['reader']]:
+                personas = ['manager', 'member', 'reader']
+            else:
+                personas = ['alt_manager', 'alt_member', 'alt_reader']
+            scoped_hashes = [
+                set(self.hash_dict['scoped_roles'].get(
+                    'project_%s' % persona, []))
+                for persona in personas
+            ]
+            scored = []
+            for hash in useable_hashes:
+                creds = self.hash_dict['creds'][hash]
+                proj = (creds.get('project_name') or
+                        creds.get('tenant_name'))
+                proj_hashes = set(
+                    self.hash_dict['project_names'].get(proj, []))
+                score = sum(1 for s in scoped_hashes if proj_hashes & s)
+                scored.append((score, hash))
+            scored.sort(reverse=True)
+            useable_hashes = [hash for _, hash in scored]
+        LOG.info('Pre provisioned useable hashes: %s', useable_hashes)
         return useable_hashes
 
     def _sanitize_creds(self, creds):
@@ -265,7 +317,12 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         return temp_creds
 
     def _get_creds(self, roles=None, scope=None):
-        useable_hashes = self._get_match_hash_list(roles, scope)
+        project_name = None
+        if scope == 'project' and roles in [['manager'], ['member'],
+                                            ['reader'], ['alt_manager'],
+                                            ['alt_member'], ['alt_reader']]:
+            project_name = self._get_project_id(roles, scope, return_name=True)
+        useable_hashes = self._get_match_hash_list(roles, scope, project_name)
         if not useable_hashes:
             msg = 'No users configured for type/roles %s' % roles
             raise lib_exc.InvalidCredentials(msg)
@@ -310,11 +367,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     # TODO(gmann): Remove this method in favor of get_project_member_creds()
     # after the deprecation phase.
     def get_primary_creds(self):
-        if self._creds.get('primary'):
-            return self._creds.get('primary')
-        net_creds = self._get_creds()
-        self._creds['primary'] = net_creds
-        return net_creds
+        return self.get_project_member_creds()
 
     # TODO(gmann): Replace this method with more appropriate name.
     # like get_project_alt_member_creds()
@@ -469,11 +522,25 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                                              identity_uri=self.identity_uri)
         networks_client = net_clients.network.NetworksClient()
         net_name = self.hash_dict['networks'].get(hash, None)
+        if not net_name:
+            # NOTE(gmaan): If no network is found for this hash, try to use
+            # the network from another account in the same project, since
+            # project manager/member/reader accounts share the same project
+            # network.
+            project = (creds_dict.get('project_name') or
+                       creds_dict.get('tenant_name'))
+            if project:
+                for project_hash in self.hash_dict['project_names'].get(
+                        project, []):
+                    if project_hash in self.hash_dict['networks']:
+                        net_name = self.hash_dict['networks'][project_hash]
+                        break
         try:
             network = fixed_network.get_network_from_name(
                 net_name, networks_client)
         except lib_exc.InvalidTestResource:
             network = {}
+        LOG.info('Network %s allocated for hash %s', network, hash)
         net_creds.set_resources(network=network)
         return net_creds
 

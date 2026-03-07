@@ -383,24 +383,6 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         self.routers_admin_client.add_router_interface(router_id,
                                                        subnet_id=subnet_id)
 
-    def _get_project_id(self, credential_type, scope):
-        same_creds = [['admin'], ['manager'], ['member'], ['reader']]
-        same_alt_creds = [['alt_admin'], ['alt_manager'],
-                          ['alt_member'], ['alt_reader']]
-        search_in = []
-        if credential_type in same_creds:
-            search_in = same_creds
-        elif credential_type in same_alt_creds:
-            search_in = same_alt_creds
-        for cred in search_in:
-            found_cred = self._creds.get("%s_%s" % (scope, str(cred)))
-            if found_cred:
-                project_id = found_cred.get("%s_%s" % (scope, 'id'))
-                LOG.debug("Reusing existing project %s from creds: %s ",
-                          project_id, found_cred)
-                return project_id
-        return None
-
     def get_credentials(self, credential_type, scope=None, by_role=False):
         cred_prefix = ''
         if by_role:

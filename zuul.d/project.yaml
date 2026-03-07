@@ -118,8 +118,7 @@
         - neutron-ovs-tempest-dvr:
             voting: false
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-test-account-py3:
-            voting: false
+        - tempest-full-preprov-creds:
             irrelevant-files: *tempest-irrelevant-files
         - ironic-tempest-bios-ipmi-autodetect:
             irrelevant-files: *tempest-irrelevant-files
@@ -137,6 +136,8 @@
         - neutron-ovs-grenade-multinode:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-py3:
+            irrelevant-files: *tempest-irrelevant-files
+        - tempest-full-preprov-creds:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
