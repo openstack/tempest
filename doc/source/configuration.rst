@@ -35,8 +35,8 @@ be usable.
 
 Tempest allows for configuring pre-provisioned test credentials as well.
 This can be done using the accounts.yaml file (see
-`Pre-Provisioned Credentials`_). This file is used to specify an arbitrary
-number of users available to run tests with.
+`Pre-Provisioned Credentials`_). This file specifies an arbitrary number
+of users that can be used to run tests.
 You can specify the location of the file in the ``auth`` section in the
 tempest.conf file. To see the specific format used in the file please refer to
 the ``accounts.yaml.sample`` file included in Tempest.
@@ -141,7 +141,7 @@ resources present.
 
 When the Keystone in the target cloud requires domain scoped tokens to
 perform admin actions, all pre-provisioned admin users must have a role
-assigned on the domain where test accounts a provisioned.
+assigned on the domain where test accounts are provisioned.
 The option ``admin_domain_scope`` is used to tell Tempest that domain scoped
 tokens shall be used. ``default_credentials_domain_name`` is the domain where
 test accounts are expected to be provisioned if no domain is specified.
