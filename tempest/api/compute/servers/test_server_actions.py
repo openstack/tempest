@@ -949,6 +949,10 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
             rebuilt_server['id'])['server']
         volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
         volume_after_rebuild = self.volumes_client.show_volume(volume_id)
+        self.assertEqual(
+            'in-use',
+            volume_after_rebuild['volume']['status'],
+            'Volume status after server rebuild has completed is wrong')
         image_after_rebuild = (
             volume_after_rebuild['volume']
             ['volume_image_metadata']['image_id'])
