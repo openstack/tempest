@@ -641,6 +641,9 @@ ComputeFeaturesGroup = [
                      'the available roles in Nova. For example, if manager '
                      'role is not present in the nova release then tempest '
                      'will use old defaults role token to call nova APIs'),
+    cfg.BoolOpt('vtpm_live_migration',
+                default=False,
+                help='Does the test environment support vTPM live migration?'),
 ]
 
 
