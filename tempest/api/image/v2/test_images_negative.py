@@ -218,12 +218,27 @@ class ImportImagesNegativeTest(base.BaseV2ImageTest):
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('queued', body['status'])
         stores = self.get_available_stores()
-        # import image from web to backend
         image_uri = 'http://does-not.exist/no/possible/way'
-        self.client.image_import(image['id'], method='web-download',
-                                 import_params={'uri': image_uri},
-                                 stores=[stores[0]['id']])
+        try:
+            self.client.image_import(
+                image['id'], method='web-download',
+                import_params={'uri': image_uri},
+                stores=[stores[0]['id']])
+        except lib_exc.BadRequest as e:
+            # Glance may reject the URI during synchronous validation
+            # (HTTP 400), e.g. import filtering / SSRF protections, instead of
+            # accepting the import and failing asynchronously.
+            err = str(e)
+            self.assertTrue(
+                'does-not.exist' in err or
+                'does not pass filtering' in err.lower(),
+                'Unexpected 400 body for bad web-download URI: %s' % e)
+            return
 
+        # Only reached when Glance accepts the import (202) and defers failure
+        # to the async web-download task (e.g. older servers without sync URI
+        # filtering). Stricter Glance returns 400 above and never hits this
+        # loop.
         start_time = int(time.time())
         while int(time.time()) - start_time < self.client.build_timeout:
             body = self.client.show_image(image['id'])
