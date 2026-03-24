@@ -765,6 +765,11 @@ ImageFeaturesGroup = [
                       'http store needs to be mentioned either in '
                       'glance-api.conf: stores or in enabled_backends '
                       'configuration option.')),
+    cfg.BoolOpt('store_weight_enabled',
+                default=False,
+                help=('Are store weights configured in glance. '
+                      'When enabled, multiple stores are expected to '
+                      'be configured with different weight values.')),
 ]
 
 network_group = cfg.OptGroup(name='network',

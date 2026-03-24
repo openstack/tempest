@@ -1065,3 +1065,105 @@ class HashCalculationRemoteDeletionTest(base.BaseV2ImageTest):
 
         # Stop the server to release the port
         server.stop()
+
+
+class StoreWeightTest(base.BaseV2ImageTest):
+    """Test that Glance returns image stores ordered by weight.
+
+    Imports an image to all configured stores and verifies the stores
+    field in the image response is sorted by weight (highest first).
+
+    Requires a multi-store setup with different weights configured
+    (e.g. via the tempest-glance-store-weight CI job).
+    """
+
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def skip_checks(cls):
+        super(StoreWeightTest, cls).skip_checks()
+        if not CONF.image_feature_enabled.store_weight_enabled:
+            raise cls.skipException(
+                '%s skipped as store weight is not configured'
+                % cls.__name__)
+        if not CONF.image_feature_enabled.import_image:
+            raise cls.skipException(
+                '%s skipped as image import is not available'
+                % cls.__name__)
+
+    @classmethod
+    def setup_clients(cls):
+        super(StoreWeightTest, cls).setup_clients()
+        if CONF.enforce_scope.glance and hasattr(cls, 'os_project_reader'):
+            cls.reader_image_client = cls.os_project_reader.image_client_v2
+        else:
+            cls.reader_image_client = cls.client
+
+    @classmethod
+    def resource_setup(cls):
+        super(StoreWeightTest, cls).resource_setup()
+        cls.available_stores = cls.get_available_stores()
+        if len(cls.available_stores) < 2:
+            raise cls.skipException(
+                '%s skipped as multiple stores are required but only '
+                '%d store(s) configured' % (
+                    cls.__name__, len(cls.available_stores)))
+
+        cls.available_import_methods = cls.client.info_import()[
+            'import-methods']['value']
+        if 'glance-direct' not in cls.available_import_methods:
+            raise cls.skipException(
+                'glance-direct import method not available')
+
+    @decorators.idempotent_id('c3d4e5f6-a7b8-9012-cdef-123456789012')
+    def test_store_weight_order(self):
+        """Test that stores in image response are ordered by weight.
+
+        Import an image to all available stores using glance-direct
+        and verify the stores field is returned sorted by weight
+        (highest weight first).
+        """
+        image, stores = self.create_and_stage_image(
+            all_stores=True, read_client=self.reader_image_client)
+
+        # Import to all stores
+        self.client.image_import(
+            image['id'], method='glance-direct', all_stores=True)
+
+        # NOTE: We use wait_for_image_status instead of
+        # wait_for_image_imported_to_stores because the latter
+        # sorts stores alphabetically for comparison, but Glance
+        # returns stores sorted by weight — causing a mismatch.
+        waiters.wait_for_image_status(
+            self.reader_image_client, image['id'], 'active')
+
+        # Verify stores are ordered by weight (highest first)
+        body = self.reader_image_client.show_image(image['id'])
+        self.assertEqual('active', body['status'])
+        self.assertIn('stores', body,
+                      'Image response should contain stores field')
+
+        image_stores = body['stores'].split(',')
+        expected_stores = set(stores) if isinstance(stores, list) else set(
+            stores.split(','))
+        self.assertEqual(expected_stores, set(image_stores),
+                         'Image should be in all writable stores')
+        self.assertGreater(len(image_stores), 1,
+                           'Expected image in multiple stores')
+
+        # Verify weight-based ordering using the store info API.
+        # The discovery API (GET /v2/info/stores) returns a 'weight'
+        # attribute for each store when store weights are configured.
+        stores_info = self.client.info_stores()['stores']
+        store_weights = {s['id']: s.get('weight', 0)
+                         for s in stores_info}
+
+        expected_order = sorted(
+            image_stores,
+            key=lambda s: store_weights.get(s, 0),
+            reverse=True)
+        self.assertEqual(
+            expected_order, image_stores,
+            'Stores should be sorted by weight (highest first). '
+            'Got: %s, Expected: %s, Weights: %s'
+            % (image_stores, expected_order, store_weights))
