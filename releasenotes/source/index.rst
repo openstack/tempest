@@ -6,6 +6,8 @@
    :maxdepth: 1
 
    unreleased
+   v46.2.0
+   v46.1.0
    v46.0.0
    v45.0.0
    v44.0.0
