@@ -99,7 +99,7 @@ class RestClient(object):
                  build_interval=1, build_timeout=60,
                  disable_ssl_certificate_validation=False, ca_certs=None,
                  trace_requests='', name=None, http_timeout=None,
-                 proxy_url=None, follow_redirects=True):
+                 proxy_url=None, follow_redirects=True, service_token=None):
         self.auth_provider = auth_provider
         self.service = service
         self.region = region
@@ -108,6 +108,7 @@ class RestClient(object):
         self.build_interval = build_interval
         self.build_timeout = build_timeout
         self.trace_requests = trace_requests
+        self.service_token = service_token
 
         self._skip_path = False
         self.general_header_lc = set(('cache-control', 'connection',
@@ -151,6 +152,8 @@ class RestClient(object):
             send_type = 'json'
         headers = {'Content-Type': 'application/%s' % send_type,
                    'Accept': 'application/%s' % accept_type}
+        if self.service_token:
+            headers['X-Service-Token'] = self.service_token
         headers.update(profiler.serialize_as_http_headers())
         return headers
 
@@ -472,6 +475,8 @@ class RestClient(object):
             req_headers['X-Auth-Token'] = '<omitted>'
         if 'X-Subject-Token' in req_headers:
             req_headers['X-Subject-Token'] = '<omitted>'
+        if 'X-Service-Token' in req_headers:
+            req_headers['X-Service-Token'] = '<omitted>'
         # A shallow copy is sufficient
         resp_log = resp.copy()
         if 'x-subject-token' in resp_log:
