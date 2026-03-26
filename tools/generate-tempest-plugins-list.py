@@ -83,6 +83,9 @@ NON_ACTIVE_LIST = [
     # in this plugin was 7 years ago.
     # https://opendev.org/airship/tempest-plugin
     'airship/tempest-plugin'
+    # It is broken by the below change:
+    # https://review.opendev.org/c/x/networking-cisco/+/969038
+    'x/networking-cisco'
 ]
 
 url = 'https://review.opendev.org/projects/'
