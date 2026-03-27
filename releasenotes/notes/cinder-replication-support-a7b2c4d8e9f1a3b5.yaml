@@ -1,0 +1,13 @@
+---
+features:
+  - |
+    Added support for the Cinder ``failover_host`` admin action in the
+    volume v3 services client. This API allows triggering a failover
+    operation on a Cinder backend host, which is essential for testing
+    volume replication and disaster recovery scenarios.
+  - |
+    Added a new waiter function ``wait_for_volume_replication_status()`` in
+    the ``tempest.common.waiters`` module. This waiter polls a volume until
+    it reaches the expected replication_status value, with configurable
+    timeout and interval. This is useful for validating replication state
+    transitions such as 'enabled', 'copying', 'active', and 'failed-over'.

@@ -86,3 +86,4 @@ disable_log_reason = copy.deepcopy(enable_service)
 
 freeze_host = {'status_code': [200]}
 thaw_host = {'status_code': [200]}
+failover_host = {'status_code': [202]}

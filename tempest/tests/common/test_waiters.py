@@ -644,6 +644,42 @@ class TestVolumeWaiters(base.TestCase):
         # Assert that show volume is only called once before we return
         show_volume.assert_called_once_with(uuids.volume_id)
 
+    def test_wait_for_volume_replication_status(self):
+        vol_replicating = {'volume': {'replication_status': 'copying'}}
+        vol_active = {'volume': {'replication_status': 'active'}}
+        show_volume = mock.MagicMock(side_effect=[
+            vol_replicating,
+            vol_replicating,
+            vol_active])
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=5,
+                           show_volume=show_volume)
+        self.patch('time.time', return_value=0.)
+        self.patch('time.sleep')
+        waiters.wait_for_volume_replication_status(
+            client, mock.sentinel.volume_id, 'active')
+        # Assert that show volume is called until the expected status is
+        # reached
+        show_volume.assert_has_calls([mock.call(mock.sentinel.volume_id),
+                                      mock.call(mock.sentinel.volume_id),
+                                      mock.call(mock.sentinel.volume_id)])
+
+    def test_wait_for_volume_replication_status_timeout(self):
+        vol_replicating = {'volume': {'replication_status': 'copying'}}
+        show_volume = mock.MagicMock(return_value=vol_replicating)
+        client = mock.Mock(spec=volumes_client.VolumesClient,
+                           resource_type="volume",
+                           build_interval=1,
+                           build_timeout=1,
+                           show_volume=show_volume)
+        self.patch('time.time', side_effect=[0., client.build_timeout + 1.])
+        self.patch('time.sleep')
+        self.assertRaises(lib_exc.TimeoutException,
+                          waiters.wait_for_volume_replication_status,
+                          client, mock.sentinel.volume_id, 'active')
+
     def test_wait_for_volume_attachment_remove_from_server(self):
         volume_attached = {
             "volumeAttachments": [{"volumeId": uuids.volume_id}]}

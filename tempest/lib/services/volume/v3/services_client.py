@@ -109,3 +109,15 @@ class ServicesClient(base_client.BaseClient):
         resp, body = self.put('os-services/thaw', put_body)
         self.validate_response(schema.thaw_host, resp, body)
         return rest_client.ResponseBody(resp)
+
+    def failover_host(self, **kwargs):
+        """Failover a Cinder Backend Host.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/block-storage/v3/#failover-a-cinder-backend-host
+        """
+        put_body = json.dumps(kwargs)
+        resp, body = self.put('os-services/failover_host', put_body)
+        self.validate_response(schema.failover_host, resp, body)
+        return rest_client.ResponseBody(resp)

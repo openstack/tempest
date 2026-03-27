@@ -173,6 +173,16 @@ class TestServicesClient(base.BaseServiceTest):
             bytes_body,
             **kwargs)
 
+    def _test_failover_host(self, bytes_body=False):
+        kwargs = {'host': 'host1@lvm', 'backend_id': 'backend2'}
+        self.check_service_client_function(
+            self.client.failover_host,
+            'tempest.lib.common.rest_client.RestClient.put',
+            {},
+            bytes_body,
+            status=202,
+            **kwargs)
+
     def test_list_services_with_str_body(self):
         self._test_list_services()
 
@@ -212,3 +222,9 @@ class TestServicesClient(base.BaseServiceTest):
 
     def test_thaw_host_with_bytes_body(self):
         self._test_thaw_host(bytes_body=True)
+
+    def test_failover_host_with_str_body(self):
+        self._test_failover_host()
+
+    def test_failover_host_with_bytes_body(self):
+        self._test_failover_host(bytes_body=True)

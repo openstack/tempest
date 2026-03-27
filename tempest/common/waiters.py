@@ -433,6 +433,29 @@ def wait_for_volume_attachment_remove(client, volume_id, attachment_id):
              'seconds', attachment_id, volume_id, time.time() - start)
 
 
+def wait_for_volume_replication_status(client, volume_id, expected_status):
+    """Waits for a volume to reach the expected replication_status."""
+    start = int(time.time())
+    volume = client.show_volume(volume_id)['volume']
+    current_status = volume['replication_status']
+
+    while current_status != expected_status:
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Timeout waiting for volume %s to reach '
+                       'replication_status "%s". Last known status: "%s" '
+                       '(waited %s seconds).' %
+                       (volume_id, expected_status, current_status,
+                        client.build_timeout))
+            raise lib_exc.TimeoutException(message)
+
+        time.sleep(client.build_interval)
+        volume = client.show_volume(volume_id)['volume']
+        current_status = volume['replication_status']
+
+    LOG.info('Volume %s reached replication_status "%s" after %f seconds',
+             volume_id, expected_status, time.time() - start)
+
+
 def wait_for_volume_attachment_remove_from_server(
         client, server_id, volume_id):
     """Waits for a volume to be removed from a given server.
