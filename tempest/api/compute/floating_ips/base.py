@@ -41,3 +41,8 @@ class BaseFloatingIPsTest(base.BaseV2ComputeTest):
     def setup_clients(cls):
         super(BaseFloatingIPsTest, cls).setup_clients()
         cls.client = cls.floating_ips_client
+        if CONF.enforce_scope.nova and hasattr(cls, 'os_project_reader'):
+            cls.reader_floating_ips_client = (
+                cls.os_project_reader.compute_floating_ips_client)
+        else:
+            cls.reader_floating_ips_client = cls.client

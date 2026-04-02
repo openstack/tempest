@@ -41,4 +41,5 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseFloatingIPsTest):
         else:
             non_exist_id = data_utils.rand_int_id(start=999)
         self.assertRaises(lib_exc.NotFound,
-                          self.client.show_floating_ip, non_exist_id)
+                          self.reader_floating_ips_client.show_floating_ip,
+                          non_exist_id)
