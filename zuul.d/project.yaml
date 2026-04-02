@@ -41,6 +41,11 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-full-2024-2:
             irrelevant-files: *tempest-irrelevant-files
+        # NOTE(gmaan): cinder-tempest-lvm-multibackend-2024-2
+        # is added to cover the stable release testing with tempest
+        # plugin.
+        - cinder-tempest-lvm-multibackend-2024-2:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-tox-plugin-sanity-check:
