@@ -13,6 +13,7 @@
 # under the License.
 
 from tempest.api.object_storage import base
+from tempest.common import object_storage
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -135,6 +136,10 @@ class AccountQuotasTest(base.BaseObjectTest):
         self.container_client.create_container(
             silver_container, **headers
         )
+        self.addCleanup(object_storage.delete_containers,
+                        [silver_container],
+                        self.container_client,
+                        self.object_client)
 
         # Try uploading an object larger than the quota
         large_data = data_utils.arbitrary_string(size=policy_quota + 1)
@@ -152,6 +157,10 @@ class AccountQuotasTest(base.BaseObjectTest):
             "default_container"
         )
         self.container_client.create_container(default_container)
+        self.addCleanup(object_storage.delete_containers,
+                        [default_container],
+                        self.container_client,
+                        self.object_client)
         default_object = data_utils.rand_name(name='default_object')
         resp, _ = self.object_client.create_object(
             default_container,
