@@ -24,6 +24,14 @@
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2024.2
 
+# NOTE(gmaan): Keep moving this job to oldest supported release so that we
+# can cover the tempest plugin testing on stable releases.
+- job:
+    name: cinder-tempest-lvm-multibackend-2024-2
+    parent: cinder-tempest-lvm-multibackend
+    nodeset: openstack-single-node-jammy
+    override-checkout: stable/2024.2
+
 - job:
     name: tempest-full-2026-1-extra-tests
     parent: tempest-extra-tests
