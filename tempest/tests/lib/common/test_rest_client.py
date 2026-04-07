@@ -241,6 +241,37 @@ class TestRestClientUpdateHeaders(BaseRestClientTestClass):
         )
 
 
+class TestRestClientServiceToken(BaseRestClientTestClass):
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRestClientServiceToken, self).setUp()
+
+    def test_get_headers_without_service_token(self):
+        headers = self.rest_client.get_headers()
+        self.assertNotIn('X-Service-Token', headers)
+
+    def test_service_token_is_set(self):
+        client = rest_client.RestClient(
+            fake_auth_provider.FakeAuthProvider(), None, None,
+            service_token='service-token')
+        self.assertEqual('service-token', client.service_token)
+        headers = client.get_headers()
+        self.assertIn('X-Service-Token', headers)
+        self.assertEqual('service-token', headers['X-Service-Token'])
+
+    def test_log_request_full_omits_service_token(self):
+        self.rest_client.service_token = 'secret-service-token'
+        req_headers = {
+            'X-Auth-Token': 'auth-token',
+            'X-Service-Token': 'service-token',
+        }
+        fake_resp = mock.MagicMock()
+        fake_resp.copy.return_value = {}
+        self.rest_client._log_request_full(fake_resp, req_headers=req_headers)
+        self.assertEqual('<omitted>', req_headers['X-Service-Token'])
+        self.assertEqual('<omitted>', req_headers['X-Auth-Token'])
+
+
 class TestRestClientParseRespJSON(BaseRestClientTestClass):
     TYPE = "json"
 

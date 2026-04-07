@@ -204,3 +204,17 @@ class TestClientWithMicroversionHeader(base.BaseServiceTest):
                                'raw_request') as mock_get:
             mock_get.side_effect = raw_request
             self.client.get('fake_url')
+
+
+class TestServiceToken(base.BaseServiceTest):
+
+    def setUp(self):
+        super(TestServiceToken, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = base_compute_client.BaseComputeClient(
+            fake_auth, 'compute', 'regionOne', service_token='service-token')
+
+    def test_service_token_is_set_in_headers(self):
+        headers = self.client.get_headers()
+        self.assertIn('X-Service-Token', headers)
+        self.assertEqual('service-token', headers['X-Service-Token'])

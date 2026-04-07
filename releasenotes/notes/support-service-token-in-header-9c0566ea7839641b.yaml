@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Tempest can send the ``X-Service-Token`` header in the API request to
+    services. A test case can generate and set the service token on service
+    clients which will be send in API ``X-Service-Token`` header.
