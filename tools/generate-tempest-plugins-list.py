@@ -30,22 +30,10 @@ import sys
 import urllib3
 from urllib3.util import retry
 
-# List of projects having tempest plugin stale or unmaintained for a long time
-# (6 months or more)
-# TODO(masayukig): Some of these can be removed from NON_ACTIVE_LIST in the
-# future when the patches are merged.
+# List of openstack projects having tempest plugin stale or unmaintained for
+# a long time(6 months or more)
 NON_ACTIVE_LIST = [
-    'x/gce-api',  # It looks gce-api doesn't support python3 yet
-    # https://bugs.launchpad.net/gce-api/+bug/1931094
-    'x/glare',  # To avoid sanity-job failure
-    'x/group-based-policy',
-    # https://bugs.launchpad.net/group-based-policy/+bug/1931091
-    'x/intel-nfv-ci-tests',  # To avoid sanity-job failure
     'openstack/networking-generic-switch',
-    # This is not a real tempest plugin,
-    # https://review.opendev.org/#/c/634846/
-    'x/networking-plumgrid',  # No longer contains tempest tests
-    'x/networking-spp',  # https://review.opendev.org/#/c/635098/
     # networking-spp is missing neutron-tempest-plugin as a dep plus
     # test-requirements.txt is nested in a openstack dir and sanity script
     # doesn't count with such scenario yet
@@ -53,39 +41,6 @@ NON_ACTIVE_LIST = [
     # As tests have been migrated to neutron-tempest-plugin:
     # https://review.opendev.org/#/c/637718/
     'openstack/neutron-vpnaas',
-    # As tests have been migrated to neutron-tempest-plugin:
-    # https://review.opendev.org/c/openstack/neutron-vpnaas/+/695834
-    'x/valet',  # valet is unmaintained now
-    # https://review.opendev.org/c/x/valet/+/638339
-    'x/kingbird',  # kingbird is unmaintained now
-    # https://bugs.launchpad.net/kingbird/+bug/1869722
-    'x/mogan',
-    # mogan is unmaintained now, remove from the list when this is merged:
-    # https://review.opendev.org/c/x/mogan/+/767718
-    'x/vmware-nsx-tempest-plugin'
-    # Failing since 2021-08-27
-    # https://zuul.opendev.org/t/openstack/build
-    # /45f6c8d3c62d4387a70b7b471ec687c8
-    # Below plugins failing for error in psycopg2 __init__
-    # ImportError: libpq.so.5: cannot open shared object
-    # file: No such file or directory
-    # https://zuul.opendev.org/t/openstack/build
-    # /b61a48196dfa476d83645aea4853e544/log/job-output.txt#271722
-    # Failing since 2021-09-08
-    'x/networking-l2gw-tempest-plugin'
-    'x/novajoin-tempest-plugin'
-    'x/ranger-tempest-plugin'
-    'x/trio2o'
-    # No changes are merging in this
-    # https://review.opendev.org/q/project:x%252Fnetworking-fortinet
-    'x/networking-fortinet'
-    # It is broken and it use retired plugin 'patrol'. Last change done
-    # in this plugin was 7 years ago.
-    # https://opendev.org/airship/tempest-plugin
-    'airship/tempest-plugin'
-    # It is broken by the below change:
-    # https://review.opendev.org/c/x/networking-cisco/+/969038
-    'x/networking-cisco'
 ]
 
 url = 'https://review.opendev.org/projects/'
@@ -132,26 +87,21 @@ r = http.request('GET', url, retries=retries)
 content = r.data.decode('utf-8')[4:]
 projects = sorted(json.loads(content))
 
-# Retrieve projects having no deployment tool repo (such as deb,
-# puppet, ansible, etc.), infra repos, ui or spec namespace as those
-# namespaces do not contains tempest plugins.
-projects_list = [i for i in projects if not (
-    i.startswith('openstack-dev/') or
-    i.startswith('openstack-infra/') or
-    i.startswith('openstack/ansible-') or
-    i.startswith('openstack/charm-') or
-    i.startswith('openstack/cookbook-openstack-') or
-    i.startswith('openstack/devstack-') or
-    i.startswith('openstack/fuel-') or
-    i.startswith('openstack/deb-') or
-    i.startswith('openstack/puppet-') or
-    i.startswith('openstack/openstack-ansible-') or
-    i.startswith('x/deb-') or
-    i.startswith('x/fuel-') or
-    i.startswith('x/python-') or
-    i.startswith('zuul/') or
-    i.endswith('-ui') or
-    i.endswith('-specs'))]
+# Retrieve openstack projects having no deployment tool repo (such
+# as deb, puppet, ansible, etc.), infra repos, ui or spec namespace
+# as those namespaces do not contains tempest plugins.
+projects_list = [i for i in projects if
+                 i.startswith('openstack/') and not (
+                     i.startswith('openstack/ansible-') or
+                     i.startswith('openstack/charm-') or
+                     i.startswith('openstack/cookbook-openstack-') or
+                     i.startswith('openstack/devstack-') or
+                     i.startswith('openstack/fuel-') or
+                     i.startswith('openstack/deb-') or
+                     i.startswith('openstack/puppet-') or
+                     i.startswith('openstack/openstack-ansible-') or
+                     i.endswith('-ui') or
+                     i.endswith('-specs'))]
 
 found_plugins = list(filter(has_tempest_plugin, projects_list))
 
