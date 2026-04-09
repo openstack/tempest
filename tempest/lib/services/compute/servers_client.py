@@ -767,6 +767,7 @@ class ServersClient(base_compute_client.BaseComputeClient):
         resp, body = self.get("servers/%s/os-instance-actions" %
                               server_id)
         body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
         self.validate_response(schema.list_instance_actions, resp, body)
         return rest_client.ResponseBody(resp, body)
 

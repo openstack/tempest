@@ -12,6 +12,7 @@
 import copy
 
 from tempest.lib.api_schema.response.compute.v2_1 import parameter_types
+from tempest.lib.api_schema.response.compute.v2_1 import servers as servers2_1
 from tempest.lib.api_schema.response.compute.v2_57 import servers as servers257
 
 # microversion 2.58 added updated_at to the response
@@ -20,6 +21,15 @@ show_instance_action['response_body']['properties']['instanceAction'][
     'properties']['updated_at'] = parameter_types.date_time
 show_instance_action['response_body']['properties']['instanceAction'][
     'required'].append('updated_at')
+
+# microversion 2.58 added updated_at and optionally links to the response
+list_instance_actions = copy.deepcopy(servers2_1.list_instance_actions)
+list_instance_actions['response_body']['properties']['instanceActions'][
+    'items']['properties']['updated_at'] = parameter_types.date_time
+list_instance_actions['response_body']['properties']['instanceActions'][
+    'items']['required'].append('updated_at')
+list_instance_actions['response_body']['properties'][
+    'links'] = parameter_types.links
 
 # Below are the unchanged schema in this microversion. We need
 # to keep this schema in this file to have the generic way to select the
