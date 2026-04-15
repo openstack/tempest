@@ -1,0 +1,121 @@
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import copy
+
+from tempest.lib.api_schema.response.compute.v2_96 import servers as servers296
+
+
+###########################################################################
+#
+# 2.97:
+#
+# Add support for share attachments to servers:
+# - POST /servers/{server_id}/shares (attach share)
+# - GET /servers/{server_id}/shares (list share attachments)
+# - GET /servers/{server_id}/shares/{share_id} (show share attachment)
+# - DELETE /servers/{server_id}/shares/{share_id} (detach share)
+#
+###########################################################################
+
+common_share_attachment_info = {
+    'type': 'object',
+    'properties': {
+        'share_id': {'type': 'string'},
+        'status': {'type': 'string'},
+        'tag': {'type': 'string'}
+    },
+    'additionalProperties': False,
+    'required': ['share_id', 'status', 'tag']
+}
+
+attach_share = {
+    'status_code': [201],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'share': common_share_attachment_info
+        },
+        'additionalProperties': False,
+        'required': ['share']
+    }
+}
+
+detach_share = {
+    'status_code': [200]
+}
+
+show_share_attachment = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'share': {
+                'type': 'object',
+                'properties': {
+                    'uuid': {'type': 'string'},
+                    'share_id': {'type': 'string'},
+                    'status': {'type': 'string'},
+                    'tag': {'type': 'string'},
+                    'export_location': {'type': 'string'}
+                },
+                'additionalProperties': False,
+                # uuid and export_location are optional (admin only)
+                'required': ['share_id', 'status', 'tag']
+            }
+        },
+        'additionalProperties': False,
+        'required': ['share']
+    }
+}
+
+list_share_attachments = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'shares': {
+                'type': 'array',
+                'items': common_share_attachment_info
+            }
+        },
+        'additionalProperties': False,
+        'required': ['shares']
+    }
+}
+
+# NOTE(zhufl): Below are the unchanged schema in this microversion. We
+# need to keep this schema in this file to have the generic way to select the
+# right schema based on self.schema_versions_info mapping in service client.
+# ****** Schemas unchanged since microversion 2.96***
+get_server = copy.deepcopy(servers296.get_server)
+list_servers_detail = copy.deepcopy(servers296.list_servers_detail)
+update_server = copy.deepcopy(servers296.update_server)
+rebuild_server = copy.deepcopy(servers296.rebuild_server)
+rebuild_server_with_admin_pass = copy.deepcopy(
+    servers296.rebuild_server_with_admin_pass)
+attach_volume = copy.deepcopy(servers296.attach_volume)
+show_volume_attachment = copy.deepcopy(servers296.show_volume_attachment)
+list_volume_attachments = copy.deepcopy(servers296.list_volume_attachments)
+list_servers = copy.deepcopy(servers296.list_servers)
+show_server_diagnostics = copy.deepcopy(servers296.show_server_diagnostics)
+get_remote_consoles = copy.deepcopy(servers296.get_remote_consoles)
+list_tags = copy.deepcopy(servers296.list_tags)
+update_all_tags = copy.deepcopy(servers296.update_all_tags)
+delete_all_tags = copy.deepcopy(servers296.delete_all_tags)
+check_tag_existence = copy.deepcopy(servers296.check_tag_existence)
+update_tag = copy.deepcopy(servers296.update_tag)
+delete_tag = copy.deepcopy(servers296.delete_tag)
+show_instance_action = copy.deepcopy(servers296.show_instance_action)
+list_instance_actions = copy.deepcopy(servers296.list_instance_actions)
+create_backup = copy.deepcopy(servers296.create_backup)
+list_live_migrations = copy.deepcopy(servers296.list_live_migrations)

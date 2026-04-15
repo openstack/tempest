@@ -48,6 +48,7 @@ from tempest.lib.api_schema.response.compute.v2_84 import servers as schemav284
 from tempest.lib.api_schema.response.compute.v2_89 import servers as schemav289
 from tempest.lib.api_schema.response.compute.v2_9 import servers as schemav29
 from tempest.lib.api_schema.response.compute.v2_96 import servers as schemav296
+from tempest.lib.api_schema.response.compute.v2_97 import servers as schemav297
 from tempest.lib.api_schema.response.compute.v2_98 import servers as schemav298
 from tempest.lib.api_schema.response.compute.v2_99 import servers as schemav299
 from tempest.lib.api_schema.response.compute.v2_100 import \
@@ -85,7 +86,8 @@ class ServersClient(base_compute_client.BaseComputeClient):
         {'min': '2.80', 'max': '2.83', 'schema': schemav280},
         {'min': '2.84', 'max': '2.88', 'schema': schemav284},
         {'min': '2.89', 'max': '2.95', 'schema': schemav289},
-        {'min': '2.96', 'max': '2.97', 'schema': schemav296},
+        {'min': '2.96', 'max': '2.96', 'schema': schemav296},
+        {'min': '2.97', 'max': '2.97', 'schema': schemav297},
         {'min': '2.98', 'max': '2.98', 'schema': schemav298},
         {'min': '2.99', 'max': '2.99', 'schema': schemav299},
         {'min': '2.100', 'max': None, 'schema': schemav2100},
@@ -967,3 +969,66 @@ class ServersClient(base_compute_client.BaseComputeClient):
         return self.action(server_id, 'evacuate',
                            evacuate_schema,
                            **kwargs)
+
+    def attach_share(self, server_id, **kwargs):
+        """Attach a share to a server.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#attach-a-share-to-an-instance
+
+        Available from microversion 2.97.
+        """
+        post_body = json.dumps({'share': kwargs})
+        resp, body = self.post('servers/%s/shares' % server_id,
+                               post_body)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.attach_share, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def detach_share(self, server_id, share_id):
+        """Detach a share from a server instance.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#detach-a-share-from-an-instance
+
+        Available from microversion 2.97.
+        """
+        resp, body = self.delete('servers/%s/shares/%s' %
+                                 (server_id, share_id))
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.detach_share, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def show_share_attachment(self, server_id, share_id):
+        """Return details about the given share attachment.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#show-a-detail-of-a-share-attachment
+
+        Available from microversion 2.97.
+        """
+        resp, body = self.get('servers/%s/shares/%s' % (
+            server_id, share_id))
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.show_share_attachment, resp, body)
+        return rest_client.ResponseBody(resp, body)
+
+    def list_share_attachments(self, server_id):
+        """Return the list of share attachments for a given instance.
+
+        For a full list of available parameters, please refer to the official
+        API reference:
+        https://docs.openstack.org/api-ref/compute/#list-share-attachments-for-an-instance
+
+        Available from microversion 2.97.
+        """
+        resp, body = self.get('servers/%s/shares' % server_id)
+        body = json.loads(body)
+        schema = self.get_schema(self.schema_versions_info)
+        self.validate_response(schema.list_share_attachments, resp, body)
+        return rest_client.ResponseBody(resp, body)
