@@ -735,11 +735,11 @@ class TestDynamicCredentialProvider(base.TestCase):
     @mock.patch('tempest.lib.common.rest_client.RestClient')
     def test_network_cleanup(self, MockRestClient):
         def side_effect(**args):
-            return {"security_groups": [{"tenant_id": args['tenant_id'],
+            return {"security_groups": [{"project_id": args['project_id'],
                                          "name": args['name'],
                                          "description": args['name'],
                                          "security_group_rules": [],
-                                         "id": "sg-%s" % args['tenant_id']}]}
+                                         "id": "sg-%s" % args['project_id']}]}
         creds = dynamic_creds.DynamicCredentialProvider(
             neutron_available=True,
             project_network_cidr='10.100.0.0/16', project_network_mask_bits=28,

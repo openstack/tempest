@@ -99,7 +99,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('32727cc3-abe2-4485-a16e-48f2d54c14f2')
     def test_create_list_show_floating_ip_with_tenant_id_by_admin(self):
-        """Verify if admin can create/list/show floating ip with tenant id"""
+        """Verify if admin can create/list/show floating ip with project id"""
         # Creates a floating IP
         body = self.admin_floating_ips_client.create_floatingip(
             floating_network_id=self.ext_net_id,

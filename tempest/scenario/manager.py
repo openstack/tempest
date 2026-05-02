@@ -688,7 +688,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         sg_rule = sec_group_rules_client.create_security_group_rule(**ruleset)
         sg_rule = sg_rule['security_group_rule']
 
-        self.assertEqual(secgroup['tenant_id'], sg_rule['tenant_id'])
+        self.assertEqual(secgroup['project_id'], sg_rule['project_id'])
         self.assertEqual(secgroup['id'], sg_rule['security_group_id'])
 
         return sg_rule
@@ -1170,7 +1170,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         floatingip_kwargs = {
             'floating_network_id': external_network_id,
             'port_id': port_id,
-            'tenant_id': server.get('project_id') or server['tenant_id'],
+            'project_id': server.get('project_id') or server['tenant_id'],
             'fixed_ip_address': ip4,
         }
         if CONF.network.subnet_id:
