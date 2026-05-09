@@ -161,7 +161,7 @@ class CredentialProvider(object, metaclass=abc.ABCMeta):
 
     def cleanup_default_secgroup(self, security_group_client, tenant):
         resp_body = security_group_client.list_security_groups(
-            tenant_id=tenant,
+            project_id=tenant,
             name="default")
         secgroups_to_delete = resp_body['security_groups']
         for secgroup in secgroups_to_delete:

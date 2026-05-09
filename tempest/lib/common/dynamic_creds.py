@@ -271,17 +271,17 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
         creds = self.creds_client.get_credentials(**cred_params)
         return cred_provider.TestResources(creds)
 
-    def _create_network_resources(self, tenant_id):
-        """The function creates network resources in the given tenant.
+    def _create_network_resources(self, project_id):
+        """The function creates network resources in the given project.
 
         The function checks if network_resources class member is empty,
         In case it is, it will create a network, a subnet and a router for
-        the tenant according to the given tenant id parameter.
+        the project according to the given project id parameter.
         Otherwise it will create a network resource according
         to the values from network_resources dict.
 
-        :param tenant_id: The tenant id to create resources for.
-        :type tenant_id: str
+        :param project_id: The project id to create resources for.
+        :type project_id: str
         :raises: InvalidConfiguration, Exception
         :returns: network resources(network,subnet,router)
         :rtype: tuple
@@ -307,15 +307,15 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.name, prefix=self.resource_prefix)
         if not self.network_resources or self.network_resources['network']:
             network_name = rand_name_root + "-network"
-            network = self._create_network(network_name, tenant_id)
+            network = self._create_network(network_name, project_id)
         try:
             if not self.network_resources or self.network_resources['subnet']:
                 subnet_name = rand_name_root + "-subnet"
-                subnet = self._create_subnet(subnet_name, tenant_id,
+                subnet = self._create_subnet(subnet_name, project_id,
                                              network['id'])
             if not self.network_resources or self.network_resources['router']:
                 router_name = rand_name_root + "-router"
-                router = self._create_router(router_name, tenant_id)
+                router = self._create_router(router_name, project_id)
                 self._add_router_interface(router['id'], subnet['id'])
         except Exception:
             try:
@@ -328,18 +328,18 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                                                  network['name'])
             except Exception as cleanup_exception:
                 msg = "There was an exception trying to setup network " \
-                      "resources for tenant %s, and this error happened " \
+                      "resources for project %s, and this error happened " \
                       "trying to clean them up: %s"
-                LOG.warning(msg, tenant_id, cleanup_exception)
+                LOG.warning(msg, project_id, cleanup_exception)
             raise
         return network, subnet, router
 
-    def _create_network(self, name, tenant_id):
+    def _create_network(self, name, project_id):
         resp_body = self.networks_admin_client.create_network(
-            name=name, tenant_id=tenant_id)
+            name=name, project_id=project_id)
         return resp_body['network']
 
-    def _create_subnet(self, subnet_name, tenant_id, network_id):
+    def _create_subnet(self, subnet_name, project_id, network_id):
         base_cidr = netaddr.IPNetwork(self.project_network_cidr)
         mask_bits = self.project_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
@@ -349,7 +349,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                         create_subnet(
                             network_id=network_id, cidr=str(subnet_cidr),
                             name=subnet_name,
-                            tenant_id=tenant_id,
+                            project_id=project_id,
                             enable_dhcp=self.network_resources['dhcp'],
                             ip_version=(ipaddress.ip_network(
                                 str(subnet_cidr)).version))
@@ -358,7 +358,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                         create_subnet(network_id=network_id,
                                       cidr=str(subnet_cidr),
                                       name=subnet_name,
-                                      tenant_id=tenant_id,
+                                      project_id=project_id,
                                       ip_version=(ipaddress.ip_network(
                                           str(subnet_cidr)).version))
                 break
@@ -370,9 +370,9 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             raise Exception(message)
         return resp_body['subnet']
 
-    def _create_router(self, router_name, tenant_id):
+    def _create_router(self, router_name, project_id):
         kwargs = {'name': router_name,
-                  'tenant_id': tenant_id}
+                  'project_id': project_id}
         if self.public_network_id:
             kwargs['external_gateway_info'] = dict(
                 network_id=self.public_network_id)
@@ -613,7 +613,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             # enabled, cleanup_default_secgroup will not raise error. But
             # here cannot use test_utils.is_extension_enabled for it will
             # cause "circular dependency". So here just use try...except to
-            # ensure tenant deletion without big changes.
+            # ensure project deletion without big changes.
             LOG.info("Deleting project and security group for project: %s",
                      project_id)
 
@@ -622,12 +622,12 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     self.cleanup_default_secgroup(
                         self.security_groups_admin_client, project_id)
             except lib_exc.NotFound:
-                LOG.warning("failed to cleanup tenant %s's secgroup",
+                LOG.warning("failed to cleanup project %s's secgroup",
                             project_id)
             try:
                 self.creds_client.delete_project(project_id)
             except lib_exc.NotFound:
-                LOG.warning("tenant with id: %s not found for delete",
+                LOG.warning("project with id: %s not found for delete",
                             project_id)
 
         self._creds = {}
