@@ -88,14 +88,13 @@
     timeout: 5000
 
 - job:
-    name: tempest-full-test-account-no-admin-py3
+    name: tempest-full-preprov-creds-no-admin
     parent: tempest-full-preprov-creds
     description: |
       This job runs the full set of tempest tests using pre-provisioned
-      credentials and py3 without having an admin account.
+      credentials without having an admin account.
       Former name for this job was:
         - legacy-tempest-dsvm-neutron-full-non-admin
-
     vars:
       devstack_localrc:
         TEMPEST_HAS_ADMIN: False
