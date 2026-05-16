@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added client support for Nova's share attachment feature. Features
+    include attach, detach, list and show share attachments for a
+    Nova VM.

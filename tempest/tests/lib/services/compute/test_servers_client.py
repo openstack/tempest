@@ -1059,3 +1059,96 @@ class TestServersClientMinV26(base.BaseServiceTest):
             console_type='serial',
             protocol='serial',
             )
+
+
+class TestServersClientMinV297(base.BaseServiceTest):
+
+    FAKE_SHARE_ATTACHMENT = {
+        "share_id": "b6c0975b-6c5d-4b5b-82fc-1d4bb63f6edc",
+        "status": "active",
+        "tag": "fake-tag"
+    }
+
+    FAKE_SHARE_ATTACHMENT_DETAIL = {
+        "uuid": "c7d1a86c-7d6e-4c6c-93gd-2e5cc74g7fde",
+        "share_id": "b6c0975b-6c5d-4b5b-82fc-1d4bb63f6edc",
+        "status": "active",
+        "tag": "fake-tag",
+        "export_location": "fake-export-location"
+    }
+
+    def setUp(self):
+        super(TestServersClientMinV297, self).setUp()
+        fake_auth = fake_auth_provider.FakeAuthProvider()
+        self.client = servers_client.ServersClient(fake_auth, 'compute',
+                                                   'regionOne')
+        base_compute_client.COMPUTE_MICROVERSION = '2.97'
+        self.server_id = "893c7791-f1df-4c3d-8383-3caae9656c62"
+
+    def tearDown(self):
+        super(TestServersClientMinV297, self).tearDown()
+        base_compute_client.COMPUTE_MICROVERSION = None
+
+    def test_attach_share_with_str_body(self):
+        self._test_attach_share()
+
+    def test_attach_share_with_bytes_body(self):
+        self._test_attach_share(bytes_body=True)
+
+    def _test_attach_share(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.attach_share,
+            'tempest.lib.common.rest_client.RestClient.post',
+            {'share': self.FAKE_SHARE_ATTACHMENT},
+            bytes_body,
+            status=201,
+            server_id=self.server_id
+            )
+
+    def test_detach_share_with_str_body(self):
+        self._test_detach_share()
+
+    def test_detach_share_with_bytes_body(self):
+        self._test_detach_share(bytes_body=True)
+
+    def _test_detach_share(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.detach_share,
+            'tempest.lib.common.rest_client.RestClient.delete',
+            {},
+            bytes_body,
+            status=200,
+            server_id=self.server_id,
+            share_id=self.FAKE_SHARE_ATTACHMENT['share_id']
+            )
+
+    def test_show_share_attachment_with_str_body(self):
+        self._test_show_share_attachment()
+
+    def test_show_share_attachment_with_bytes_body(self):
+        self._test_show_share_attachment(bytes_body=True)
+
+    def _test_show_share_attachment(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.show_share_attachment,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {'share': self.FAKE_SHARE_ATTACHMENT_DETAIL},
+            bytes_body,
+            server_id=self.server_id,
+            share_id=self.FAKE_SHARE_ATTACHMENT['share_id']
+            )
+
+    def test_list_share_attachments_with_str_body(self):
+        self._test_list_share_attachments()
+
+    def test_list_share_attachments_with_bytes_body(self):
+        self._test_list_share_attachments(bytes_body=True)
+
+    def _test_list_share_attachments(self, bytes_body=False):
+        self.check_service_client_function(
+            self.client.list_share_attachments,
+            'tempest.lib.common.rest_client.RestClient.get',
+            {'shares': [self.FAKE_SHARE_ATTACHMENT]},
+            bytes_body,
+            server_id=self.server_id
+            )
