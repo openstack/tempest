@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A new config option ``store_weight_enabled`` in the ``image-feature-enabled``
+    section is added. This boolean option (default: False) must be set to True
+    when Glance is configured with weighted multi-store backends so that the
+    store weight ordering API test runs. Jobs that do not configure store
+    weights should leave it disabled.

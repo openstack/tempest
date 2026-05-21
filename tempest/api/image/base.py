@@ -96,8 +96,14 @@ class BaseV2ImageTest(BaseImageTest):
                         namespace_name)
         return namespace
 
-    def create_and_stage_image(self, all_stores=False):
-        """Create Image & stage image file for glance-direct import method."""
+    def create_and_stage_image(self, all_stores=False, read_client=None):
+        """Create Image & stage image file for glance-direct import method.
+
+        :param read_client: Optional client with ``show_image`` used for the
+            read after staging (defaults to ``self.client``). Pass a reader
+            client when testing with ``enforce_scope.glance`` so GETs use a
+            reader token where policy requires it.
+        """
         image_name = data_utils.rand_name('test-image')
         container_format = CONF.image.container_formats[0]
         image = self.create_image(name=image_name,
@@ -110,7 +116,8 @@ class BaseV2ImageTest(BaseImageTest):
             image['id'],
             io.BytesIO(data_utils.random_bytes()))
         # Check image status is 'uploading'
-        body = self.client.show_image(image['id'])
+        show_client = read_client or self.client
+        body = show_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual('uploading', body['status'])
 
