@@ -153,12 +153,13 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
                        'flavor!' % key)
                 self.assertEqual(pre_flavor[key], server['flavor'][key], msg)
 
-    def _test_cold_migrate_server(self, revert=False):
+    def _test_cold_migrate_server(self, flavor_id=None, revert=False):
         if CONF.compute.min_compute_nodes < 2:
             msg = "Less than 2 compute nodes, skipping multinode tests."
             raise self.skipException(msg)
 
-        server = self.create_test_server(wait_until="ACTIVE")
+        server = self.create_test_server(
+            wait_until="ACTIVE", flavor=flavor_id)
         src_host = self.get_host_for_server(server['id'])
 
         self.mgr_server_client.migrate_server(server['id'])
@@ -193,3 +194,13 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     def test_revert_cold_migration(self):
         """Test cold migrating server and then revert the migration"""
         self._test_cold_migrate_server(revert=True)
+
+    @decorators.attr(type='multinode')
+    @decorators.idempotent_id('caa1aa8b-f4ef-4374-be0d-95f001c2ac2e')
+    @testtools.skipUnless(CONF.compute_feature_enabled.cold_migration,
+                          'Cold migration not available.')
+    def test_cold_migration_with_swap(self):
+        """Test cold migrating server with swap in flavor"""
+        flavor_id = self.create_flavor(
+            ram=1024, vcpus=1, disk=1, swap=1)['id']
+        self._test_cold_migrate_server(flavor_id=flavor_id)
