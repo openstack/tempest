@@ -1,3 +1,64 @@
 [build-system]
 requires = ["pbr>=6.1.1"]
 build-backend = "pbr.build"
+
+[project]
+name = "tempest"
+description = "OpenStack Integration Testing"
+authors = [
+    {name = "OpenStack", email = "openstack-discuss@lists.openstack.org"},
+]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = "Apache-2.0"
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.10"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[project.urls]
+Homepage = "https://docs.openstack.org/tempest/latest/"
+Repository = "https://opendev.org/openstack/tempest"
+Bugs = "https://bugs.launchpad.net/tempest"
+
+[project.entry-points."tempest.cm"]
+account-generator = "tempest.cmd.account_generator:TempestAccountGenerator"
+subunit-describe-calls = "tempest.cmd.subunit_describe_calls:TempestSubunitDescribeCalls"
+init = "tempest.cmd.init:TempestInit"
+cleanup = "tempest.cmd.cleanup:TempestCleanup"
+list-plugins = "tempest.cmd.list_plugins:TempestListPlugins"
+verify-config = "tempest.cmd.verify_tempest_config:TempestVerifyConfig"
+workspace_register = "tempest.cmd.workspace:TempestWorkspaceRegister"
+workspace_rename = "tempest.cmd.workspace:TempestWorkspaceRename"
+workspace_move = "tempest.cmd.workspace:TempestWorkspaceMove"
+workspace_remove = "tempest.cmd.workspace:TempestWorkspaceRemove"
+workspace_list = "tempest.cmd.workspace:TempestWorkspaceList"
+run = "tempest.cmd.run:TempestRun"
+
+[project.entry-points."oslo.config.opts"]
+"tempest.config" = "tempest.config:list_opts"
+
+[project.scripts]
+tempest = "tempest.cmd.main:main"
+skip-tracker = "tempest.lib.cmd.skip_tracker:main"
+check-uuid = "tempest.lib.cmd.check_uuid:run"
+subunit-describe-calls = "tempest.cmd.subunit_describe_calls:entry_point"
+
+[tool.setuptools.packages.find]
+include = ["tempest*"]
+
+[tool.setuptools.data-files]
+    "etc/tempest" = [
+        "etc/*",
+]
