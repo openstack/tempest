@@ -500,11 +500,8 @@
         # to make sure we do not run this job on older than 2023.2 gate.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2023.2
               - ^.*/2024.1
-              - ^.*/2024.2
               - ^.*/2025.1
-              - ^.*/2025.2
               - ^.*/2026.1
               - master
         - tempest-integrated-compute
@@ -520,11 +517,8 @@
       jobs:
         - grenade-skip-level-always:
             branches:
-              - ^.*/2023.2
               - ^.*/2024.1
-              - ^.*/2024.2
               - ^.*/2025.1
-              - ^.*/2025.2
               - ^.*/2026.1
               - master
         - tempest-integrated-compute
@@ -569,7 +563,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
@@ -598,7 +591,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
@@ -640,7 +632,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
@@ -668,7 +659,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
@@ -704,7 +694,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
@@ -732,7 +721,6 @@
         # but if project feel that is not required to run for non SLURP releases then they can opt to make it non-voting or remove it.
         - grenade-skip-level-always:
             branches:
-              - ^.*/2025.2
               - ^.*/2025.1
               - ^.*/2026.1
               - master
