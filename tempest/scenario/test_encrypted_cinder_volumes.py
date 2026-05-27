@@ -18,6 +18,7 @@ import testtools
 from tempest.common import utils
 from tempest.common import waiters
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.scenario import manager
 
@@ -103,3 +104,57 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         volume = self.volumes_client.show_volume(volume['id'])['volume']
 
         self.attach_detach_volume(server, volume)
+
+    @decorators.idempotent_id('d653af24-fa18-470d-b9bf-af287cefeba9')
+    @decorators.attr(type='slow')
+    @utils.services('compute', 'volume', 'image')
+    def test_encrypted_cinder_volumes_resize_revert(self):
+        """Test resize revert for a server with an attached encrypted volume.
+
+        During a resize revert, some cleanup occurs when moving the server back
+        from the destination compute host to the source compute host. This test
+        sanity checks that things work normally after that cleanup happens,
+        especially with regard to the key manager secrets.
+
+        Steps:
+
+        1. Create a LUKS encrypted volume
+        2. Create a server and attach the encrypted volume
+        3. Resize the server while the volume is attached
+        4. Revert the resize while the volume is attached
+        5. Detach the encrypted volume
+        """
+        volume = self.create_encrypted_volume('luks',
+                                              volume_type='luks',
+                                              wait_until=None)
+        server = self.launch_instance()
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        volume = self.volumes_client.show_volume(volume['id'])['volume']
+
+        attached_volume = self.nova_volume_attach(server, volume)
+
+        # Create a new flavor based on the default -- we just want to take the
+        # resize code path.
+        default_flavor = self.flavors_client.show_flavor(
+            CONF.compute.flavor_ref)['flavor']
+        flavor_name = data_utils.rand_name(prefix=CONF.resource_name_prefix)
+        new_flavor = self.os_admin.flavors_client.create_flavor(
+            name=flavor_name, vcpus=default_flavor['vcpus'],
+            ram=default_flavor['ram'], disk=default_flavor['disk'])['flavor']
+
+        # Resize the server to VERIFY_RESIZE state.
+        body = self.servers_client.resize_server(
+            server['id'], new_flavor['id'])
+        waiters.wait_for_server_status(
+            self.servers_client, server['id'], 'VERIFY_RESIZE',
+            request_id=body.response['x-openstack-request-id'])
+
+        # Revert the resize and expect the server to return to ACTIVE state.
+        self.servers_client.revert_resize_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        self.nova_volume_detach(server, attached_volume)
