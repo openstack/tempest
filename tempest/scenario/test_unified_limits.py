@@ -31,6 +31,13 @@ CONF = config.CONF
 class ImageQuotaTest(manager.ScenarioTest):
     credentials = ['primary', 'system_admin']
 
+    # Dynamic credentials (unique tenants) are created on a per-class basis, so
+    # we test different quota limits in separate test classes to prevent a
+    # quota limit update in one test class from affecting a test running in
+    # another test class in parallel.
+    # https://docs.openstack.org/tempest/latest/configuration.html#dynamic-credentials
+    force_tenant_isolation = True
+
     @classmethod
     def skip_checks(cls):
         super(ImageQuotaTest, cls).skip_checks()
