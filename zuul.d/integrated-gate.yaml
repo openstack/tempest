@@ -485,19 +485,10 @@
     # only from master(or the branch it was meant to run).
     check:
       jobs:
-        # NOTE(gmann): These template are generic and used on stable branch
-        # as well as master testing. So grenade-skip-level on stable/2023.1
-        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
-        - grenade-skip-level:
-            voting: false
-            branches:
-              - stable/2023.1
         # NOTE(gmann): Nova decided to run grenade skip level testing always
         # (on SLURP as well as non SLURP release) so we are adding grenade-skip-level-always
         # job in integrated gate and we do not need to update skip level job
         # here until Nova change the decision.
-        # This is added from 2023.2 release cycle onwards so we need to use branch variant
-        # to make sure we do not run this job on older than 2023.2 gate.
         - grenade-skip-level-always:
             branches:
               - ^.*/2024.1
@@ -543,14 +534,11 @@
       run on Placement gate only.
     check:
       jobs:
-        - grenade
-        # NOTE(gmann): These template are generic and used on stable branch
-        # as well as master testing. So grenade-skip-level on stable/2023.1
-        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
-        - grenade-skip-level:
-            voting: false
+        - grenade:
             branches:
-              - stable/2023.1
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
         # SLURP release only.
@@ -577,7 +565,11 @@
               negate: true
     gate:
       jobs:
-        - grenade
+        - grenade:
+            branches:
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         - tempest-integrated-placement
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
@@ -612,14 +604,11 @@
       run on Cinder and Glance gate only.
     check:
       jobs:
-        - grenade
-        # NOTE(gmann): These template are generic and used on stable branch
-        # as well as master testing. So grenade-skip-level on stable/2023.1
-        # which test stable/yoga to stable/2023.1 upgrade is non-voting.
-        - grenade-skip-level:
-            voting: false
+        - grenade:
             branches:
-              - stable/2023.1
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
         # SLURP release only.
@@ -646,7 +635,11 @@
               negate: true
     gate:
       jobs:
-        - grenade
+        - grenade:
+            branches:
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
         # SLURP release only.
@@ -681,7 +674,11 @@
       run on swift gate only.
     check:
       jobs:
-        - grenade
+        - grenade:
+            branches:
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
         # SLURP release only.
@@ -708,7 +705,11 @@
               negate: true
     gate:
       jobs:
-        - grenade
+        - grenade:
+            branches:
+              - ^.*/2025.2
+              - ^.*/2026.1
+              - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
         # SLURP release only.
