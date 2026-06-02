@@ -157,4 +157,8 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
 
+        # Wait for volume status to be "in-use" as well -- this may not
+        # necessarily be the case yet at the time the server returns to ACTIVE.
+        waiters.wait_for_volume_resource_status(self.volumes_client,
+                                                volume['id'], 'in-use')
         self.nova_volume_detach(server, attached_volume)
