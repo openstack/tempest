@@ -37,7 +37,6 @@ class TestQosClient(base.BaseServiceTest):
             "is_default": False,
             "project_id": "8d4c70a21fed4aeba121a1a429ba0d04",
             "revision_number": 1,
-            "tenant_id": "8d4c70a21fed4aeba121a1a429ba0d04",
             "created_at": "2018-04-03T21:26:39Z",
             "updated_at": "2018-04-03T21:26:39Z",
             "shared": False,

@@ -29,7 +29,6 @@ class TestSubnetsClient(base.BaseServiceTest):
             "network_id": "d32019d3-bc6e-4319-9c1d-6722fc136a22",
             "segment_id": None,
             "project_id": "4fd44f30292945e481c7b8a0c8908869",
-            "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
             "dns_nameservers": [],
             "allocation_pools": [
                 {
@@ -60,7 +59,6 @@ class TestSubnetsClient(base.BaseServiceTest):
             "network_id": "db193ab3-96e3-4cb3-8fc5-05f4296d0324",
             "segment_id": None,
             "project_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
-            "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
             "dns_nameservers": [],
             "allocation_pools": [
                 {
@@ -85,7 +83,6 @@ class TestSubnetsClient(base.BaseServiceTest):
                 "network_id": "db193ab3-96e3-4cb3-8fc5-05f4296d0324",
                 "segment_id": None,
                 "project_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
-                "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "dns_nameservers": [],
                 "allocation_pools": [
                     {
@@ -113,7 +110,6 @@ class TestSubnetsClient(base.BaseServiceTest):
                 "network_id": "d32019d3-bc6e-4319-9c1d-6722fc136a22",
                 "segment_id": None,
                 "project_id": "4fd44f30292945e481c7b8a0c8908869",
-                "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
                 "dns_nameservers": [],
                 "allocation_pools": [
                     {

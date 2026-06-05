@@ -100,20 +100,28 @@ class BaseService(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+        # TODO(haleyb): Since neutron is transitioning to only return
+        # the project_id key in all objects, this filter is only to
+        # support legacy branches by filtering by tenant_id. Used for
+        # Security Groups only.
         self.tenant_filter = {}
         if hasattr(self, 'tenant_id'):
-            self.tenant_filter['project_id'] = self.tenant_id
+            self.tenant_filter['tenant_id'] = self.project_id
 
-    def _filter_by_tenant_id(self, item_list):
+        self.project_filter = {}
+        if hasattr(self, 'project_id'):
+            self.project_filter['project_id'] = self.project_id
+
+    def _filter_by_project_id(self, item_list):
         if (item_list is None or
                 not item_list or
-                not hasattr(self, 'tenant_id') or
-                self.tenant_id is None or
-                'tenant_id' not in item_list[0]):
+                not hasattr(self, 'project_id') or
+                self.project_id is None or
+                'project_id' not in item_list[0]):
             return item_list
 
         return [item for item in item_list
-                if item['tenant_id'] == self.tenant_id]
+                if item['project_id'] == self.project_id]
 
     def _filter_by_prefix(self, item_list, top_key=None):
         items = []
@@ -490,7 +498,7 @@ class NetworkService(BaseNetworkService):
 
     def list(self):
         client = self.networks_client
-        networks = client.list_networks(**self.tenant_filter)
+        networks = client.list_networks(**self.project_filter)
         networks = networks['networks']
 
         if self.prefix:
@@ -534,7 +542,7 @@ class NetworkFloatingIpService(BaseNetworkService):
 
     def list(self):
         client = self.floating_ips_client
-        flips = client.list_floatingips(**self.tenant_filter)
+        flips = client.list_floatingips(**self.project_filter)
         flips = flips['floatingips']
 
         if self.prefix:
@@ -576,7 +584,7 @@ class NetworkRouterService(BaseNetworkService):
 
     def list(self):
         client = self.routers_client
-        routers = client.list_routers(**self.tenant_filter)
+        routers = client.list_routers(**self.project_filter)
         routers = routers['routers']
 
         if self.prefix:
@@ -633,7 +641,6 @@ class NetworkMeteringLabelRuleService(NetworkService):
         client = self.metering_label_rules_client
         rules = client.list_metering_label_rules()
         rules = rules['metering_label_rules']
-        rules = self._filter_by_tenant_id(rules)
 
         if self.prefix:
             # this means we're cleaning resources based on a certain prefix,
@@ -643,9 +650,9 @@ class NetworkMeteringLabelRuleService(NetworkService):
             rules = self._filter_by_resource_list(
                 rules, 'metering_label_rules')
         elif not self.is_save_state:
+            # recreate list removing saved rules
             rules = self._filter_out_ids_from_saved(
                 rules, 'metering_label_rules')
-            # recreate list removing saved rules
         LOG.debug("List count, %s Metering Label Rules", len(rules))
         return rules
 
@@ -678,7 +685,7 @@ class NetworkMeteringLabelService(BaseNetworkService):
         client = self.metering_labels_client
         labels = client.list_metering_labels()
         labels = labels['metering_labels']
-        labels = self._filter_by_tenant_id(labels)
+        labels = self._filter_by_project_id(labels)
 
         if self.prefix:
             labels = self._filter_by_prefix(labels)
@@ -719,7 +726,7 @@ class NetworkPortService(BaseNetworkService):
     def list(self):
         client = self.ports_client
         ports = [port for port in
-                 client.list_ports(**self.tenant_filter)['ports']
+                 client.list_ports(**self.project_filter)['ports']
                  if port["device_owner"] == "" or
                  port["device_owner"].startswith("compute:")]
 
@@ -760,11 +767,25 @@ class NetworkPortService(BaseNetworkService):
 class NetworkSecGroupService(BaseNetworkService):
     def list(self):
         client = self.security_groups_client
-        filter = self.tenant_filter
+        filter = self.project_filter
         # cannot delete default sec group so never show it.
         secgroups = [secgroup for secgroup in
                      client.list_security_groups(**filter)['security_groups']
                      if secgroup['name'] != 'default']
+
+        # TODO(haleyb): Since neutron is transitioning to only return
+        # the project_id key in SG objects, support legacy branches by
+        # checking for tenant_id if nothing was returned.
+        if not secgroups:
+            filter = self.tenant_filter
+            try:
+                secgroups = [
+                    secgroup for secgroup in
+                    client.list_security_groups(**filter)['security_groups']
+                    if secgroup['name'] != 'default']
+            except Exception:
+                LOG.debug("List security_group exception with tenant_id "
+                          "filter, ignoring.")
 
         if self.prefix:
             secgroups = self._filter_by_prefix(secgroups)
@@ -810,7 +831,7 @@ class NetworkSubnetService(BaseNetworkService):
 
     def list(self):
         client = self.subnets_client
-        subnets = client.list_subnets(**self.tenant_filter)
+        subnets = client.list_subnets(**self.project_filter)
         subnets = subnets['subnets']
 
         if self.prefix:
@@ -851,7 +872,7 @@ class NetworkSubnetPoolsService(BaseNetworkService):
 
     def list(self):
         client = self.subnetpools_client
-        pools = client.list_subnetpools(**self.tenant_filter)['subnetpools']
+        pools = client.list_subnetpools(**self.project_filter)['subnetpools']
 
         if self.prefix:
             pools = self._filter_by_prefix(pools)

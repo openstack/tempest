@@ -318,7 +318,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                 kwargs['networks'] = ports
             self.ports = ports
 
-        tenant_network = self.get_tenant_network()
+        project_network = self.get_tenant_network()
 
         if CONF.compute.compute_volume_common_az:
             kwargs.setdefault('availability_zone',
@@ -348,7 +348,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         body, _ = compute.create_test_server(
             clients,
-            tenant_network=tenant_network,
+            tenant_network=project_network,
             wait_until=wait_until,
             name=name, flavor=flavor,
             image_id=image_id, **kwargs)
@@ -655,7 +655,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         Create a rule in a secgroup. if secgroup not defined will search for
         default secgroup in project_id.
         :param secgroup: the security group.
-        :param project_id: if secgroup not passed -- the tenant in which to
+        :param project_id: if secgroup not passed -- the project in which to
             search for default secgroup
         :param kwargs: a dictionary containing rule parameters:
             for example, to allow incoming ssh:
@@ -1454,7 +1454,7 @@ class NetworkScenarioTest(ScenarioTest):
         """Create a subnet for the given network
 
         This utility creates subnet for the given network
-        within the cidr block configured for tenant networks.
+        within the cidr block configured for project networks.
 
         :param **kwargs:
             See extra parameters below
@@ -1472,10 +1472,10 @@ class NetworkScenarioTest(ScenarioTest):
         def cidr_in_use(cidr, project_id):
             """Check cidr existence
 
-            :returns: True if subnet with cidr already exist in tenant or
+            :returns: True if subnet with cidr already exist in project or
                   external False else
             """
-            tenant_subnets = self.os_admin.subnets_client.list_subnets(
+            project_subnets = self.os_admin.subnets_client.list_subnets(
                 project_id=project_id, cidr=cidr)['subnets']
             external_nets = self.os_admin.networks_client.list_networks(
                 **{"router:external": True})['networks']
@@ -1484,7 +1484,7 @@ class NetworkScenarioTest(ScenarioTest):
                 external_subnets.extend(
                     self.os_admin.subnets_client.list_subnets(
                         network_id=ext_net['id'], cidr=cidr)['subnets'])
-            return len(tenant_subnets + external_subnets) != 0
+            return len(project_subnets + external_subnets) != 0
 
         def _make_create_subnet_request(namestart, network,
                                         ip_version, subnets_client, **kwargs):
@@ -1517,17 +1517,17 @@ class NetworkScenarioTest(ScenarioTest):
         if not use_default_subnetpool:
 
             if ip_version == 6:
-                tenant_cidr = netaddr.IPNetwork(
+                project_cidr = netaddr.IPNetwork(
                     CONF.network.project_network_v6_cidr)
                 num_bits = CONF.network.project_network_v6_mask_bits
             else:
-                tenant_cidr = netaddr.IPNetwork(
+                project_cidr = netaddr.IPNetwork(
                     CONF.network.project_network_cidr)
                 num_bits = CONF.network.project_network_mask_bits
 
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
-            for subnet_cidr in tenant_cidr.subnet(num_bits):
+            for subnet_cidr in project_cidr.subnet(num_bits):
                 str_cidr = str(subnet_cidr)
                 if cidr_in_use(str_cidr, project_id=network['project_id']):
                     continue
@@ -1542,7 +1542,7 @@ class NetworkScenarioTest(ScenarioTest):
             result = _make_create_subnet_request(
                 namestart, network, ip_version, subnets_client,
                 **kwargs)
-        self.assertIsNotNone(result, 'Unable to allocate tenant network')
+        self.assertIsNotNone(result, 'Unable to allocate project network')
 
         subnet = result['subnet']
         if str_cidr is not None:
@@ -1594,9 +1594,9 @@ class NetworkScenarioTest(ScenarioTest):
                                           private_key,
                                           should_connect=True,
                                           servers_for_debug=None):
-        """Checks tenant network connectivity"""
+        """Checks project network connectivity"""
         if not CONF.network.project_networks_reachable:
-            msg = 'Tenant networks not configured to be reachable.'
+            msg = 'Project networks not configured to be reachable.'
             LOG.info(msg)
             return
         # The target login is assumed to have been configured for
@@ -1609,7 +1609,7 @@ class NetworkScenarioTest(ScenarioTest):
                                                private_key,
                                                should_connect=should_connect)
         except Exception as e:
-            LOG.exception('Tenant network connectivity check failed')
+            LOG.exception('Project network connectivity check failed')
             self.log_console_output(servers_for_debug)
             self._log_net_info(e)
             raise
@@ -1657,12 +1657,12 @@ class NetworkScenarioTest(ScenarioTest):
         self.fail(msg)
 
     def get_router(self, client=None, project_id=None, **kwargs):
-        """Retrieve a router for the given tenant id.
+        """Retrieve a router for the given project id.
 
         If a public router has been configured, it will be returned.
 
         If a public router has not been configured, but a public
-        network has, a tenant router will be created and returned that
+        network has, a project router will be created and returned that
         routes traffic to the public network.
         """
 
@@ -1719,7 +1719,7 @@ class NetworkScenarioTest(ScenarioTest):
         """
 
         if CONF.network.shared_physical_network:
-            # NOTE(Shrews): This exception is for environments where tenant
+            # NOTE(Shrews): This exception is for environments where project
             # credential isolation is available, but network separation is
             # not (the current baremetal case). Likely can be removed when
             # test account mgmt is reworked:

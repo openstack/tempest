@@ -47,7 +47,6 @@ class TestRoutersClient(base.BaseServiceTest):
             "status": "ACTIVE",
             "updated_at": "2018-03-19T19:17:22Z",
             "project_id": "0bd18306d801447bb457a46252d82d13",
-            "tenant_id": "0bd18306d801447bb457a46252d82d13",
             "service_type_id": None,
             "tags": ["tag1,tag2"],
             "conntrack_helpers": []
@@ -88,7 +87,6 @@ class TestRoutersClient(base.BaseServiceTest):
             "status": "ACTIVE",
             "updated_at": "2018-03-19T19:17:22Z",
             "project_id": "0bd18306d801447bb457a46252d82d13",
-            "tenant_id": "0bd18306d801447bb457a46252d82d13",
             "service_type_id": None,
             "tags": ["tag1,tag2"],
             "conntrack_helpers": []
@@ -105,7 +103,6 @@ class TestRoutersClient(base.BaseServiceTest):
             "a2f1f29d-571b-4533-907f-5803ab96ead1"
         ],
         "project_id": "0bd18306d801447bb457a46252d82d13",
-        "tenant_id": "0bd18306d801447bb457a46252d82d13",
         "tags": ["tag1,tag2"]
     }
     FAKE_INTERFACE_KWARGS = {
@@ -149,7 +146,6 @@ class TestRoutersClient(base.BaseServiceTest):
             "status": "ACTIVE",
             "updated_at": "2018-03-19T19:17:22Z",
             "project_id": "0bd18306d801447bb457a46252d82d13",
-            "tenant_id": "0bd18306d801447bb457a46252d82d13",
             "service_type_id": "null",
             "tags": ["tag1,tag2"],
             "conntrack_helpers": []
