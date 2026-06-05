@@ -331,3 +331,88 @@ class ServersListShow2100Test(base.BaseV2ComputeTest):
         self.servers_client.rebuild_server(server['id'], self.image_ref_alt)
         waiters.wait_for_server_status(self.servers_client,
                                        server['id'], 'ACTIVE')
+
+
+class ServersUpdatePinnedAZ2104Test(base.BaseV2ComputeTest):
+    """Test server pinned AZ update with microversion >= 2.104
+
+    Microversion 2.104 adds the ability to update pinned_availability_zone
+    via PUT /servers/{server_id} to unpin or re-pin a server's AZ.
+    """
+
+    min_microversion = '2.104'
+    max_microversion = 'latest'
+    create_default_network = True
+
+    @classmethod
+    def resource_setup(cls):
+        super(ServersUpdatePinnedAZ2104Test, cls).resource_setup()
+        # Discover an available AZ by booting a server and seeing where it
+        # lands. We want to test with a server that was pinned from boot,
+        # so we throw this away and use the AZ name for the next server.
+        server = cls.create_test_server(wait_until='ACTIVE')
+        cls.az_name = server['OS-EXT-AZ:availability_zone']
+        cls.delete_server(server['id'])
+
+    @decorators.idempotent_id('9277c1bd-7d66-4032-9370-eead4ec8461d')
+    def test_unpin_and_repin_availability_zone(self):
+        """Test unpinning and re-pinning a server's availability zone"""
+        # Create server pinned to the AZ
+        server = self.create_test_server(
+            availability_zone=self.az_name, wait_until='ACTIVE')
+
+        # Verify server starts pinned
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        self.assertEqual(self.az_name, server['pinned_availability_zone'])
+
+        # Unpin the server
+        updated = self.servers_client.update_server(
+            server['id'], pinned_availability_zone=None)['server']
+        self.assertIsNone(updated['pinned_availability_zone'])
+
+        # Confirm unpin persisted
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        self.assertIsNone(server['pinned_availability_zone'])
+
+        # Re-pin to current AZ
+        current_az = server['OS-EXT-AZ:availability_zone']
+        self.assertEqual(self.az_name, current_az)
+        updated = self.servers_client.update_server(
+            server['id'],
+            pinned_availability_zone=current_az)['server']
+        self.assertEqual(current_az, updated['pinned_availability_zone'])
+
+        # Confirm re-pin persisted
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        self.assertEqual(current_az, server['pinned_availability_zone'])
+
+    @decorators.idempotent_id('b3a594eb-0056-4bcd-9b62-24a550856b7f')
+    def test_unpin_already_unpinned_server(self):
+        """Test unpinning a server that is already unpinned (no-op)"""
+        server = self.create_test_server(wait_until='ACTIVE')
+
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        if server['pinned_availability_zone'] is not None:
+            # Environment auto-pins via compute_volume_common_az; unpin first
+            self.servers_client.update_server(
+                server['id'], pinned_availability_zone=None)
+
+        # Unpin again -- should be a no-op
+        updated = self.servers_client.update_server(
+            server['id'], pinned_availability_zone=None)['server']
+        self.assertIsNone(updated['pinned_availability_zone'])
+
+    @decorators.idempotent_id('6826e94a-23e9-4255-8253-fd0a8e6379bf')
+    def test_repin_already_pinned_same_az(self):
+        """Test re-pinning to the same AZ is a no-op"""
+        server = self.create_test_server(
+            availability_zone=self.az_name, wait_until='ACTIVE')
+
+        # Re-pin to the same AZ -- should succeed as a no-op
+        updated = self.servers_client.update_server(
+            server['id'], pinned_availability_zone=self.az_name)['server']
+        self.assertEqual(self.az_name, updated['pinned_availability_zone'])
