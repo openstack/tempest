@@ -18,6 +18,7 @@ from tempest.common import waiters
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
+from tempest.lib import exceptions as lib_exc
 
 CONF = config.CONF
 
@@ -137,9 +138,16 @@ class ImageTaskCreate(base.BaseV2ImageAdminTest):
             image_from_format=['qcow2'],
             disk_format=['qcow2'],
             image_location=http_fake_url)
-        body = self.os_admin.tasks_client.create_task(**task[0])
-        task_observed = \
-            waiters.wait_for_tasks_status(self.os_admin.tasks_client,
-                                          body['id'], 'failure')
-        task_observed = task_observed['status']
-        self.assertEqual(task_observed, 'failure')
+        try:
+            body = self.os_admin.tasks_client.create_task(**task[0])
+        except lib_exc.BadRequest:
+            # NOTE(abhishekk): Newer glance rejects invalid import_from URIs
+            # at create time. See bug 2152110:
+            # https://bugs.launchpad.net/glance/+bug/2152110
+            return
+        # NOTE(abhishekk): Older glance accepts the task and fails during
+        # async processing. See bug 2152110:
+        # https://bugs.launchpad.net/glance/+bug/2152110
+        task_observed = waiters.wait_for_tasks_status(
+            self.os_admin.tasks_client, body['id'], 'failure')
+        self.assertEqual(task_observed['status'], 'failure')
