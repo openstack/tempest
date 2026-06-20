@@ -196,6 +196,14 @@ object\_storage.test\_object\_version module
    :show-inheritance:
    :undoc-members:
 
+object\_storage.test\_object\_symlink module
+--------------------------------------------
+
+.. automodule:: tempest.api.object_storage.test_object_symlink
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
