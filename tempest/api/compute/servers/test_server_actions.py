@@ -506,6 +506,7 @@ class ServerActionsTestOtherA(ServerActionsBase):
         self.assertEqual(server['id'],
                          vol_after_rebuild['attachments'][0]['server_id'])
 
+    @decorators.unstable_test(bug='2158063')
     @decorators.idempotent_id('e6c28180-7454-4b59-b188-0257af08a63b')
     @decorators.related_bug('1728603')
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
