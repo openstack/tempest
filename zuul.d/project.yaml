@@ -104,7 +104,7 @@
             irrelevant-files: *tempest-irrelevant-files
         - nova-live-migration:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-enforce-scope-new-defaults:
+        - tempest-full-rbac-old-defaults:
             irrelevant-files: *tempest-irrelevant-files
         - nova-ceph-multistore:
             irrelevant-files: *tempest-irrelevant-files
@@ -153,7 +153,7 @@
             irrelevant-files: *tempest-irrelevant-files-3
         - tempest-multinode-full-py3:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-full-enforce-scope-new-defaults:
+        - tempest-full-rbac-old-defaults:
             irrelevant-files: *tempest-irrelevant-files
         - nova-ceph-multistore:
             irrelevant-files: *tempest-irrelevant-files
@@ -173,7 +173,6 @@
             irrelevant-files: *tempest-irrelevant-files
         - tempest-all:
             irrelevant-files: *tempest-irrelevant-files
-        - tempest-all-rbac-old-defaults
         - tempest-full-parallel
         - neutron-ovs-tempest-dvr-ha-multinode-full:
             irrelevant-files: *tempest-irrelevant-files
@@ -219,7 +218,6 @@
     periodic:
       jobs:
         - tempest-all
-        - tempest-all-rbac-old-defaults
         - tempest-full-parallel
         - tempest-full-oslo-master
         - tempest-stestr-master

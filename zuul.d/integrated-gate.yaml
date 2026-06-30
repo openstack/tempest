@@ -418,29 +418,13 @@
         DATABASE_TYPE: postgresql
 
 - job:
-    name: tempest-full-enforce-scope-new-defaults
+    name: tempest-full-rbac-old-defaults
     parent: tempest-full-py3
     description: |
-      This job runs the Tempest tests with scope and new defaults enabled.
+      Integration test that runs tempest tests on RBAC old defaults.
     vars:
       devstack_localrc:
-        KEYSTONE_ENFORCE_SCOPE: true
-        CINDER_ENFORCE_SCOPE: true
-        PLACEMENT_ENFORCE_SCOPE: true
-
-- job:
-    name: tempest-all-rbac-old-defaults
-    parent: tempest-all
-    description: |
-      Integration test that runs all tests on RBAC old defaults.
-    vars:
-      devstack_localrc:
-        # NOTE(gmann): Nova, Glance, and Neutron have enabled the new defaults
-        # and scope by default in devstack so we need some jobs keep testing
-        # the old defaults until they are removed from service side.
-        NOVA_ENFORCE_SCOPE: false
-        GLANCE_ENFORCE_SCOPE: false
-        NEUTRON_ENFORCE_SCOPE: false
+        ENFORCE_NEW_DEFAULTS: false
 
 - project-template:
     name: integrated-gate-networking
