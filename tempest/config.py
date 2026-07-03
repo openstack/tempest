@@ -1166,7 +1166,14 @@ VolumeFeaturesGroup = [
                 deprecated_name='volume_image_dep_tests',
                 default=True,
                 help='Run tests for dependencies between images, volumes '
-                'and instance snapshots')
+                'and instance snapshots'),
+    # TODO(auniyal): Remove this option after stable/2026.2 is no longer
+    # supported, once all remaining supported branches include the Cinder
+    # RBD fix.
+    cfg.BoolOpt('rebuild_preserves_volume_snapshots',
+                default=False,
+                help='Volume snapshots should be preserved when a '
+                     'boot-from-volume server is rebuilt.')
 ]
 
 
