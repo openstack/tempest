@@ -86,10 +86,11 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         return ({'name': source_body['name'], 'host': backend_source},
                 {'name': dest_body['name'], 'host': backend_dest})
 
-    def _volume_retype_with_migration(self, volume_id, new_volume_type):
+    def _volume_retype_with_migration(self, volume_id, new_volume_type,
+                                      policy='on-demand'):
         # NOTE: The 'on-demand' migration requires admin operation, so
         # admin_volumes_client() should be used here.
-        migration_policy = 'on-demand'
+        migration_policy = policy
         self.admin_volumes_client.retype_volume(
             volume_id, new_type=new_volume_type,
             migration_policy=migration_policy)
@@ -195,10 +196,22 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         keypair = self.create_keypair()
         security_group = self.create_security_group()
 
-        LOG.info("Creating volume")
-        # Create a unique volume type to avoid using the backend default
-        migratable_type = self.create_volume_type()['name']
+        # Create a unique volume type for the configured source backend
+        migratable_backend = CONF.volume.backend_names[0]
 
+        migratable_type = self.create_volume_type(
+            backend_name=migratable_backend)['name']
+
+        LOG.info("Created Volume type: %(migratable)s -> "
+                 "%(migratable_backend)s",
+                 {'migratable': migratable_type,
+                     'migratable_backend': migratable_backend
+                  }
+                 )
+
+        unconstrained_type = self.create_volume_type()['name']
+
+        LOG.info("Creating volume")
         if dev_name is None:
             volume_id = self.create_volume(imageRef=CONF.compute.image_ref,
                                            volume_type=migratable_type)['id']
@@ -219,13 +232,16 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
         volume = self.admin_volumes_client.show_volume(volume_id)['volume']
         src_host = volume['os-vol-host-attr:host']
 
+        dest_host_backend = '@{backend}'.format(
+            backend=CONF.volume.backend_names[1])
         # Select the first c-vol host that isn't hosting the volume as the dest
         # host['host_name'] should take the format of host@backend.
         # src_host should take the format of host@backend#type
         hosts = self.admin_volumes_client.list_hosts()['hosts']
         for host in hosts:
             if (host['service'] == 'cinder-volume' and
-                not src_host.startswith(host['host_name'])):
+                not src_host.startswith(host['host_name']) and
+                host['host_name'].endswith(dest_host_backend)):
                 dest_host = host['host_name']
                 break
 
@@ -234,6 +250,13 @@ class TestVolumeMigrateRetypeAttached(manager.ScenarioTest):
                                           dev_name=dev_name,
                                           private_key=keypair['private_key'],
                                           server=instance)
+
+        # Move the volume to a volume type which does not set
+        # a specific backend, otherwise the migration to a host
+        # with a different backend fails
+        LOG.info("Retype without migration to a Volume type without backend")
+        self._volume_retype_with_migration(volume_id, unconstrained_type,
+                                           'never')
 
         LOG.info("Migrating Volume %s from host %s to host %s",
                  volume_id, src_host, dest_host)
