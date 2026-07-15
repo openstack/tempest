@@ -118,6 +118,19 @@
         TEMPEST_USE_TEST_ACCOUNTS: True
 
 - job:
+    name: tempest-full-ubuntu-resolute
+    parent: tempest-full-py3
+    description: Ubuntu 26.04 LTS (resolute) platform test
+    nodeset: openstack-single-node-resolute
+    vars:
+      configure_swap_size: 8192
+      devstack_local_conf:
+        post-config:
+          $NOVA_CONF:
+            DEFAULT:
+              concurrency_backend: threading
+
+- job:
     name: tempest-full-centos-9-stream
     parent: tempest-full-py3
     nodeset: devstack-single-node-centos-9-stream
