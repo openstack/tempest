@@ -26,7 +26,12 @@ def run_concurrent_tasks(target, resource_count, **kwargs):
     :return: List of results collected from all processes.
     :raises RuntimeError: If any worker process fails during execution.
     """
-    manager = multiprocessing.Manager()
+    # Use the 'fork' start method explicitly. Since Python 3.14 the
+    # default start method is 'forkserver', which requires the process
+    # target to be picklable. wrapped_target below is a nested closure
+    # so it cannot be pickled.
+    ctx = multiprocessing.get_context('fork')
+    manager = ctx.Manager()
     resource_ids = manager.list()
     errors = manager.list()  # Capture exceptions from workers
 
@@ -38,7 +43,7 @@ def run_concurrent_tasks(target, resource_count, **kwargs):
 
     processes = []
     for i in range(resource_count):
-        p = multiprocessing.Process(
+        p = ctx.Process(
             target=wrapped_target,
             args=(i, resource_ids),
             kwargs=kwargs

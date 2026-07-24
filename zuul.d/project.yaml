@@ -11,6 +11,7 @@
         - openstack-tox-py311
         - openstack-tox-py312
         - openstack-tox-py313
+        - openstack-tox-py314
         - tempest-full-py3:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
@@ -26,6 +27,8 @@
               - ^.gitignore$
               - ^.gitreview$
               - ^.mailmap$
+        - tempest-full-ubuntu-resolute:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-extra-tests:
             irrelevant-files: *tempest-irrelevant-files
         - glance-multistore-cinder-import:
@@ -135,6 +138,9 @@
         - openstack-tox-py311
         - openstack-tox-py312
         - openstack-tox-py313
+        - openstack-tox-py314
+        - tempest-full-ubuntu-resolute:
+            irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-py3:
             irrelevant-files: *tempest-irrelevant-files
         - neutron-ovs-grenade-multinode:
