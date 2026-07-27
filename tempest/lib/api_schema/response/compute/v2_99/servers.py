@@ -18,6 +18,10 @@ from tempest.lib.api_schema.response.compute.v2_98 import servers
 # to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
 # ****** Schemas unchanged since microversion 2.98 ******
+attach_share = copy.deepcopy(servers.attach_share)
+detach_share = copy.deepcopy(servers.detach_share)
+show_share_attachment = copy.deepcopy(servers.show_share_attachment)
+list_share_attachments = copy.deepcopy(servers.list_share_attachments)
 list_servers = copy.deepcopy(servers.list_servers)
 get_server = copy.deepcopy(servers.get_server)
 list_servers_detail = copy.deepcopy(servers.list_servers_detail)

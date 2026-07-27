@@ -119,6 +119,10 @@ update_server['response_body']['properties']['server'][
 # need to keep this schema in this file to have the generic way to select the
 # right schema based on self.schema_versions_info mapping in service client.
 # ****** Schemas unchanged since microversion 2.99***
+attach_share = copy.deepcopy(servers299.attach_share)
+detach_share = copy.deepcopy(servers299.detach_share)
+show_share_attachment = copy.deepcopy(servers299.show_share_attachment)
+list_share_attachments = copy.deepcopy(servers299.list_share_attachments)
 attach_volume = copy.deepcopy(servers299.attach_volume)
 show_volume_attachment = copy.deepcopy(servers299.show_volume_attachment)
 list_volume_attachments = copy.deepcopy(servers299.list_volume_attachments)
