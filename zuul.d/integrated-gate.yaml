@@ -519,7 +519,7 @@
         # centos-9-stream is tested from zed release onwards
         - tempest-integrated-compute-centos-9-stream:
             branches:
-              regex: ^.*/(victoria|wallaby|xena|yoga)$
+              regex: ^.*/(victoria|wallaby|xena|yoga|zed|2023.1|2024.1)$
               negate: true
 
 - project-template:
