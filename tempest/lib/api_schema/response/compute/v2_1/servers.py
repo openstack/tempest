@@ -552,7 +552,7 @@ list_live_migrations = {
                     },
                     'additionalProperties': False,
                     'required': [
-                        'id', 'status', 'instance_uuid', 'source_node',
+                        'id', 'status', 'server_uuid', 'source_node',
                         'source_compute', 'dest_node', 'dest_compute',
                         'dest_host', 'disk_processed_bytes',
                         'disk_remaining_bytes', 'disk_total_bytes',
