@@ -175,9 +175,29 @@ class RemoteClient(remote_client.RemoteClient):
             raise ValueError("need to set 'fixed_ip' for udhcpc client")
         return getattr(self, '_renew_lease_' + dhcp_client)(fixed_ip=fixed_ip)
 
-    def mount(self, dev_name, mount_path='/mnt'):
+    def mount(self, dev_name, mount_path='/mnt', attempts=3, sleep_for=2):
+        """Mount a device, retrying while the guest still holds it.
+
+        Callers commonly mkfs a device and mount it immediately, and each
+        step is a separate ssh round trip. If anything in the guest is still
+        holding the device as mkfs closes it -- a kernel re-read of the
+        device, or mdev reacting to the uevent -- mount fails with
+        "Device or resource busy". Retry a few times before giving up, so a
+        lost race costs a couple of seconds rather than the whole test.
+        """
         cmd_mount = 'sudo mount /dev/%s %s' % (dev_name, mount_path)
-        self.exec_command(cmd_mount)
+        for attempt in range(1, attempts + 1):
+            try:
+                self.exec_command(cmd_mount)
+                return
+            except tempest.lib.exceptions.SSHExecCommandFailed:
+                if attempt == attempts:
+                    raise
+                LOG.warning("Mounting /dev/%s on %s failed on attempt "
+                            "%d of %d, retrying in %d seconds",
+                            dev_name, mount_path, attempt, attempts,
+                            sleep_for)
+                time.sleep(sleep_for)
 
     def umount(self, mount_path='/mnt'):
         self.exec_command('sudo umount %s' % mount_path)

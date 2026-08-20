@@ -148,6 +148,34 @@ a0:b0:c0:d0:e0:f0"""
         self._assert_exec_called_with(
             "ip addr | awk '/ether/ {print $2}'")
 
+    def test_mount(self):
+        self.conn.mount('vdb', '/mnt/vdb')
+        self._assert_exec_called_with('sudo mount /dev/vdb /mnt/vdb')
+        self.assertEqual(1, self.ssh_mock.mock.exec_command.call_count)
+
+    def test_mount_retries_while_device_is_busy(self):
+        self.useFixture(fixtures.MockPatchObject(time, 'sleep'))
+        self.ssh_mock.mock.exec_command.side_effect = [
+            lib_exc.SSHExecCommandFailed(
+                command='mount', exit_status=255, stderr='busy', stdout=''),
+            'mounted',
+        ]
+
+        self.conn.mount('vdb', '/mnt/vdb')
+
+        self._assert_exec_called_with('sudo mount /dev/vdb /mnt/vdb')
+        self.assertEqual(2, self.ssh_mock.mock.exec_command.call_count)
+
+    def test_mount_raises_after_last_attempt(self):
+        self.useFixture(fixtures.MockPatchObject(time, 'sleep'))
+        self.ssh_mock.mock.exec_command.side_effect = (
+            lib_exc.SSHExecCommandFailed(
+                command='mount', exit_status=255, stderr='busy', stdout=''))
+
+        self.assertRaises(lib_exc.SSHExecCommandFailed,
+                          self.conn.mount, 'vdb', '/mnt/vdb', attempts=2)
+        self.assertEqual(2, self.ssh_mock.mock.exec_command.call_count)
+
 
 class TestRemoteClientWithServer(base.TestCase):
 
