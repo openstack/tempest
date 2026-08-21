@@ -14,9 +14,35 @@
 #    under the License.
 
 from http import server
+import ipaddress
 import random
+import socket
 import threading
 import time
+
+
+def get_non_loopback_ipv4():
+    """Return this host's outbound IPv4 address.
+
+    Glance import filtering rejects loopback and link-local hosts on
+    add-location and web-download URIs, so tests that serve payload from
+    the tempest host must advertise a non-loopback address.
+    """
+    # UDP connect does not send packets; it only selects a source address.
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.connect(('1.1.1.1', 80))
+        host = sock.getsockname()[0]
+    except OSError as exc:
+        raise OSError('no non-loopback IPv4 address for HTTP location: %s'
+                      % exc)
+    finally:
+        sock.close()
+
+    addr = ipaddress.ip_address(host)
+    if addr.is_loopback or addr.is_link_local:
+        raise OSError('outbound IPv4 %s is loopback or link-local' % host)
+    return host
 
 
 class RandomDataHandler(server.BaseHTTPRequestHandler):
@@ -52,11 +78,18 @@ class RandomDataServer(object):
         self.handler_class = handler_class
         self.server = None
         self.thread = None
+        self.host = None
         self.port = None
 
-    def start(self):
-        # Bind to port 0 for an unused port
-        self.server = server.HTTPServer(('localhost', 0), self.handler_class)
+    @property
+    def url(self):
+        return 'http://%s:%d' % (self.host, self.port)
+
+    def start(self, host=None):
+        # Bind an ephemeral port on a non-loopback address so Glance can
+        # fetch the payload after import filtering.
+        self.host = host or get_non_loopback_ipv4()
+        self.server = server.HTTPServer((self.host, 0), self.handler_class)
         self.port = self.server.server_address[1]
 
         # Run server in background thread

@@ -1299,15 +1299,33 @@ class HashCalculationRemoteDeletionTest(base.BaseV2ImageTest):
         self.assertEqual(image_name, image['name'])
         self.assertEqual('queued', image['status'])
 
-        # Start http server at random port to simulate the image location
-        # and to provide random data for the image with slow transfer
-        server = image_utils.RandomDataServer()
-        server.start()
+        # Start an HTTP server that streams slowly so hash calculation is
+        # still in flight when we delete. Glance rejects loopback hosts and,
+        # by default, ports other than 80/443, so advertise a non-loopback
+        # address and fall back to image.http_image if filtering rejects
+        # the local URI.
+        try:
+            server = image_utils.RandomDataServer()
+            server.start()
+        except OSError as e:
+            raise self.skipException(
+                'Could not bind HTTP location server: %s' % e)
         self.addCleanup(server.stop)
 
-        # Add a location to the image
-        location = 'http://localhost:%d' % server.port
-        self.client.add_image_location(image['id'], location)
+        location = server.url
+        try:
+            self.client.add_image_location(image['id'], location)
+        except lib_exc.BadRequest as e:
+            if 'does not pass filtering' not in str(e):
+                raise
+            if not CONF.image.http_image:
+                raise self.skipException(
+                    'Glance rejected local HTTP location %s and no '
+                    'image.http_image is configured' % location)
+            LOG.info('Glance rejected local HTTP location %s; falling back '
+                     'to image.http_image', location)
+            location = CONF.image.http_image
+            self.client.add_image_location(image['id'], location)
         waiters.wait_for_image_status(self.client, image['id'], 'active')
 
         # Verify that the hash calculation is initiated
