@@ -109,6 +109,16 @@ class AttachInterfacesTestBase(base.BaseV2ComputeTest):
 class AttachInterfacesTestJSON(AttachInterfacesTestBase):
     """Test attaching interfaces"""
 
+    def detach_and_delete_port(self, port_id):
+        port = self.reader_ports_client.show_port(port_id).get('port')
+        if not port:
+            return
+        device_id = port['device_id']
+        if device_id:
+            self.interfaces_client.delete_interface(device_id, port_id)
+            self.wait_for_port_detach(port_id)
+        self.ports_client.delete_port(port_id)
+
     def wait_for_port_detach(self, port_id):
         """Waits for the port's device_id to be unset.
 
@@ -173,7 +183,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
                 prefix=CONF.resource_name_prefix,
                 name=self.__class__.__name__))
         port_id = port['port']['id']
-        self.addCleanup(self.ports_client.delete_port, port_id)
+        self.addCleanup(self.detach_and_delete_port, port_id)
         iface = self.interfaces_client.create_interface(
             server['id'], port_id=port_id)['interfaceAttachment']
         self._check_interface(iface, server_id=server['id'], port_id=port_id,
@@ -194,7 +204,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
             server['id'], net_id=network_id,
             fixed_ips=fixed_ips)['interfaceAttachment']
         self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.ports_client.delete_port,
+                        self.detach_and_delete_port,
                         iface['port_id'])
         self._check_interface(iface, server_id=server['id'],
                               fixed_ip=ip_list[0])
@@ -339,7 +349,7 @@ class AttachInterfacesTestJSON(AttachInterfacesTestBase):
                 prefix=CONF.resource_name_prefix,
                 name=self.__class__.__name__))
         port_id = port['port']['id']
-        self.addCleanup(self.ports_client.delete_port, port_id)
+        self.addCleanup(self.detach_and_delete_port, port_id)
 
         # add our cleanups for the servers since we bypassed the base class
         for server in servers:
