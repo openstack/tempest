@@ -795,10 +795,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         unschedule_router = (self.os_admin.network_agents_client.
                              delete_router_from_l3_agent)
 
+        l3_agents = self.os_admin.network_agents_client.list_agents(
+            agent_type="L3 Agent")['agents']
+
+        if not l3_agents:
+            msg = ("At least one L3 agent is required to be running in "
+                   "the environment for this test.")
+            raise self.skipException(msg)
+
         agent_list_alive = set(
             a["id"] for a in
-            self.os_admin.network_agents_client.list_agents(
-                agent_type="L3 agent")['agents'] if a["alive"] is True
+            l3_agents if a["alive"] is True
         )
         self._setup_network_and_servers()
 
