@@ -34,7 +34,7 @@ class VolumesCloneTest(base.BaseVolumeTest):
     def _verify_volume_clone(self, source_volume, cloned_volume,
                              bootable='false', extra_size=0):
 
-        cloned_vol_details = self.volumes_client.show_volume(
+        cloned_vol_details = self.reader_volumes_client.show_volume(
             cloned_volume['id'])['volume']
 
         self.assertEqual(source_volume['id'],

@@ -39,7 +39,7 @@ class VolumesExtendTest(base.BaseVolumeTest):
                                           new_size=extend_size)
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        volume = self.reader_volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual(volume['size'], extend_size)
 
     @decorators.idempotent_id('86be1cba-2640-11e5-9c82-635fb964c912')
@@ -58,7 +58,7 @@ class VolumesExtendTest(base.BaseVolumeTest):
 
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'available')
-        resized_volume = self.volumes_client.show_volume(
+        resized_volume = self.reader_volumes_client.show_volume(
             volume['id'])['volume']
         self.assertEqual(extend_size, resized_volume['size'])
 
@@ -77,15 +77,24 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
     # events but will continue to hide the traceback field.
     # TODO(mriedem): Change this to not rely on the admin user to get the event
     # details once that microversion is available in Nova.
-    credentials = ['primary', 'admin']
+    credentials = ['primary', 'admin', 'project_reader']
 
     # NOTE(mriedem): The minimum required volume API version is 3.42 and the
     # minimum required compute API microversion is 2.51, but the compute call
     # is implicit - Cinder calls Nova at that microversion, Tempest does not.
     volume_min_microversion = '3.42'
 
+    @classmethod
+    def setup_clients(cls):
+        super(BaseVolumesExtendAttachedTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_servers_client = (
+                cls.os_project_reader.servers_client)
+        else:
+            cls.reader_servers_client = cls.servers_client
+
     def _find_extend_volume_instance_action(self, server_id):
-        actions = self.servers_client.list_instance_actions(
+        actions = self.reader_servers_client.list_instance_actions(
             server_id)['instanceActions']
         for action in actions:
             if action['action'] == 'extend_volume':
@@ -132,7 +141,7 @@ class BaseVolumesExtendAttachedTest(base.BaseVolumeTest):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
         # Assert that the volume size has changed in the volume API.
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
+        volume = self.reader_volumes_client.show_volume(volume['id'])['volume']
         self.assertEqual(extend_size, volume['size'])
         # Now we wait for the "compute_extend_volume" instance action event
         # to show up for the server instance. This is our indication that the

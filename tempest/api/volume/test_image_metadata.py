@@ -52,7 +52,7 @@ class VolumesImageMetadata(base.BaseVolumeTest):
                                                          **image_metadata)
 
         # Fetch volume's image metadata by show_volume method
-        volume_image_metadata = self.volumes_client.show_volume(
+        volume_image_metadata = self.reader_volumes_client.show_volume(
             self.volume['id'])['volume']['volume_image_metadata']
 
         # Verify image metadata was updated
@@ -65,8 +65,9 @@ class VolumesImageMetadata(base.BaseVolumeTest):
         del image_metadata['ramdisk_id']
 
         # Fetch volume's image metadata by show_volume_image_metadata method
-        volume_image_metadata = self.volumes_client.show_volume_image_metadata(
-            self.volume['id'])['metadata']
+        volume_image_metadata = (
+            self.reader_volumes_client.show_volume_image_metadata(
+                self.volume['id'])['metadata'])
 
         # Verify image metadata was updated after item deletion
         self.assertThat(volume_image_metadata.items(),

@@ -25,11 +25,22 @@ CONF = config.CONF
 class SnapshotMetadataTestJSON(base.BaseVolumeTest):
     """Test snapshot metadata"""
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(SnapshotMetadataTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder snapshot feature disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(SnapshotMetadataTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
 
     @classmethod
     def resource_setup(cls):
@@ -61,7 +72,7 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
         # Get the metadata of the snapshot
-        body = self.snapshots_client.show_snapshot_metadata(
+        body = self.reader_snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()),
                         'Create snapshot metadata failed')
@@ -70,14 +81,14 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
         body = self.snapshots_client.update_snapshot_metadata(
             self.snapshot['id'], metadata=update)['metadata']
         self.assertEqual(update, body)
-        body = self.snapshots_client.show_snapshot_metadata(
+        body = self.reader_snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertEqual(update, body, 'Update snapshot metadata failed')
 
         # Delete one item metadata of the snapshot
         self.snapshots_client.delete_snapshot_metadata_item(
             self.snapshot['id'], "key3")
-        body = self.snapshots_client.show_snapshot_metadata(
+        body = self.reader_snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()),
                         'Delete one item metadata of the snapshot failed')
@@ -97,7 +108,7 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
         self.snapshots_client.create_snapshot_metadata(
             self.snapshot['id'], metadata)
         # Get the metadata of the snapshot
-        body = self.snapshots_client.show_snapshot_metadata(
+        body = self.reader_snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
@@ -106,11 +117,11 @@ class SnapshotMetadataTestJSON(base.BaseVolumeTest):
         self.assertEqual(update_item, body)
 
         # Get a specific metadata item of the snapshot
-        body = self.snapshots_client.show_snapshot_metadata_item(
+        body = self.reader_snapshots_client.show_snapshot_metadata_item(
             self.snapshot['id'], "key3")['meta']
         self.assertEqual({"key3": expect['key3']}, body)
 
         # Get the metadata of the snapshot
-        body = self.snapshots_client.show_snapshot_metadata(
+        body = self.reader_snapshots_client.show_snapshot_metadata(
             self.snapshot['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))

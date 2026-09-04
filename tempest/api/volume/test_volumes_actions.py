@@ -28,6 +28,16 @@ class VolumesActionsTest(base.BaseVolumeTest):
     """Test volume actions"""
 
     create_default_network = True
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesActionsTest, cls).setup_clients()
+        if CONF.service_available.glance:
+            cls.reader_images_client = (
+                cls.os_project_reader.image_client_v2)
+        else:
+            cls.reader_images_client = cls.images_client
 
     @classmethod
     def resource_setup(cls):
@@ -60,7 +70,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
         for bool_bootable in [True, False]:
             self.volumes_client.set_bootable_volume(self.volume['id'],
                                                     bootable=bool_bootable)
-            fetched_volume = self.volumes_client.show_volume(
+            fetched_volume = self.reader_volumes_client.show_volume(
                 self.volume['id'])['volume']
             # Get Volume information
             # NOTE(masayukig): 'bootable' is "true" or "false" in the current
@@ -91,7 +101,8 @@ class VolumesActionsTest(base.BaseVolumeTest):
                         self.volumes_client,
                         self.volume['id'], 'available')
         self.addCleanup(self.volumes_client.detach_volume, self.volume['id'])
-        volume = self.volumes_client.show_volume(self.volume['id'])['volume']
+        volume = self.reader_volumes_client.show_volume(
+            self.volume['id'])['volume']
         attachment = volume['attachments'][0]
 
         self.assertEqual('/dev/%s' %
@@ -130,7 +141,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
                                                     self.volume['id'],
                                                     'available')
 
-            image_info = self.images_client.show_image(image_id)
+            image_info = self.reader_images_client.show_image(image_id)
             self.assertEqual(image_name, image_info['name'])
             self.assertEqual(disk_format, image_info['disk_format'])
 
@@ -140,12 +151,14 @@ class VolumesActionsTest(base.BaseVolumeTest):
         # Mark volume as reserved.
         self.volumes_client.reserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.volumes_client.show_volume(self.volume['id'])['volume']
+        body = self.reader_volumes_client.show_volume(
+            self.volume['id'])['volume']
         self.assertIn('attaching', body['status'])
         # Unmark volume as reserved.
         self.volumes_client.unreserve_volume(self.volume['id'])
         # To get the volume info
-        body = self.volumes_client.show_volume(self.volume['id'])['volume']
+        body = self.reader_volumes_client.show_volume(
+            self.volume['id'])['volume']
         self.assertIn('available', body['status'])
 
     @decorators.idempotent_id('fff74e1e-5bd3-4b33-9ea9-24c103bc3f59')
@@ -156,7 +169,7 @@ class VolumesActionsTest(base.BaseVolumeTest):
             self.volumes_client.update_volume_readonly(self.volume['id'],
                                                        readonly=readonly)
             # Get Volume information
-            fetched_volume = self.volumes_client.show_volume(
+            fetched_volume = self.reader_volumes_client.show_volume(
                 self.volume['id'])['volume']
             # NOTE(masayukig): 'readonly' is "True" or "False" in the current
             # cinder implementation. So we need to cast boolean values to str

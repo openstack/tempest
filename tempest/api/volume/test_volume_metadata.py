@@ -49,7 +49,7 @@ class VolumesMetadataTest(base.BaseVolumeTest):
                                                           metadata)['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(
+        body = self.reader_volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(metadata.items()),
                         'Create metadata for the volume failed')
@@ -58,14 +58,14 @@ class VolumesMetadataTest(base.BaseVolumeTest):
         body = self.volumes_client.update_volume_metadata(
             self.volume['id'], update)['metadata']
         self.assertEqual(update, body)
-        body = self.volumes_client.show_volume_metadata(
+        body = self.reader_volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertEqual(update, body, 'Update metadata failed')
 
         # Delete one item metadata of the volume
         self.volumes_client.delete_volume_metadata_item(
             self.volume['id'], "key1")
-        body = self.volumes_client.show_volume_metadata(
+        body = self.reader_volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertNotIn("key1", body)
         self.assertThat(body.items(), matchers.ContainsAll(expected.items()),
@@ -93,11 +93,11 @@ class VolumesMetadataTest(base.BaseVolumeTest):
         self.assertEqual(update_item, body)
 
         # Get a specific metadata item of the volume
-        body = self.volumes_client.show_volume_metadata_item(
+        body = self.reader_volumes_client.show_volume_metadata_item(
             self.volume['id'], "key3")['meta']
         self.assertEqual({"key3": expect['key3']}, body)
 
         # Get the metadata of the volume
-        body = self.volumes_client.show_volume_metadata(
+        body = self.reader_volumes_client.show_volume_metadata(
             self.volume['id'])['metadata']
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))

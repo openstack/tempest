@@ -14,16 +14,30 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class AvailabilityZoneTestJSON(base.BaseVolumeTest):
     """Tests Availability Zone API List"""
 
+    credentials = ['primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(AvailabilityZoneTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_availability_zone_client = (
+                cls.os_project_reader.volume_availability_zone_client_latest)
+        else:
+            cls.reader_availability_zone_client = cls.availability_zone_client
+
     @decorators.idempotent_id('01f1ae88-eba9-4c6b-a011-6f7ace06b725')
     def test_get_availability_zone_list(self):
         """Test listing volume available zones"""
         availability_zone = (
-            self.availability_zone_client.list_availability_zones()
+            self.reader_availability_zone_client.list_availability_zones()
             ['availabilityZoneInfo'])
         self.assertNotEmpty(availability_zone)

@@ -33,24 +33,36 @@ class VolumesDeleteCascade(base.BaseVolumeTest):
     both for usability and performance reasons.
     """
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(VolumesDeleteCascade, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder snapshot feature disabled")
 
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesDeleteCascade, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
+
     def _assert_cascade_delete(self, volume_id):
         # Fetch volume ids
         volume_list = [
             vol['id'] for vol in
-            self.volumes_client.list_volumes()['volumes']
+            self.reader_volumes_client.list_volumes()['volumes']
             ]
 
         # Verify the parent volume was deleted
         self.assertNotIn(volume_id, volume_list)
 
         # List snapshots
-        snapshot_list = self.snapshots_client.list_snapshots()['snapshots']
+        snapshot_list = (
+            self.reader_snapshots_client.list_snapshots()['snapshots'])
 
         # Verify snapshots were deleted
         self.assertNotIn(volume_id, map(operator.itemgetter('volume_id'),
@@ -96,7 +108,7 @@ class VolumesDeleteCascade(base.BaseVolumeTest):
 
         # Create volume from snapshot
         volume_snap = self.create_volume(snapshot_id=snapshot['id'])
-        volume_details = self.volumes_client.show_volume(
+        volume_details = self.reader_volumes_client.show_volume(
             volume_snap['id'])['volume']
         self.assertEqual(snapshot['id'], volume_details['snapshot_id'])
 

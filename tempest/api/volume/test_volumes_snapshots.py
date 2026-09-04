@@ -28,12 +28,25 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
     """Test volume snapshots"""
 
     create_default_network = True
+    credentials = ['primary', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
         super(VolumesSnapshotTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesSnapshotTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_backups_client = (
+                cls.os_project_reader.backups_client_latest)
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_backups_client = cls.backups_client
+            cls.reader_snapshots_client = cls.snapshots_client
 
     @classmethod
     def resource_setup(cls):
@@ -45,7 +58,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # Check volume and make sure it is in available state before the next
         # test uses it.
         try:
-            vol = self.volumes_client.show_volume(
+            vol = self.reader_volumes_client.show_volume(
                 self.volume_origin['id'])['volume']
             if vol['status'] != 'available':
                 waiters.wait_for_volume_resource_status(
@@ -128,7 +141,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
                                         metadata=metadata)
 
         # Get the snap and check for some of its details
-        snap_get = self.snapshots_client.show_snapshot(
+        snap_get = self.reader_snapshots_client.show_snapshot(
             snapshot['id'])['snapshot']
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
@@ -141,7 +154,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
 
         # Compare also with the output from the list action
         tracking_data = (snapshot['id'], snapshot['name'])
-        snaps_list = self.snapshots_client.list_snapshots()['snapshots']
+        snaps_list = self.reader_snapshots_client.list_snapshots()['snapshots']
         snaps_data = [(f['id'], f['name']) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
@@ -158,7 +171,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         self.assertEqual(new_s_name, update_snapshot['name'])
         self.assertEqual(new_desc, update_snapshot['description'])
         # Assert response body for show_snapshot method
-        updated_snapshot = self.snapshots_client.show_snapshot(
+        updated_snapshot = self.reader_snapshots_client.show_snapshot(
             snapshot['id'])['snapshot']
         self.assertEqual(new_s_name, updated_snapshot['name'])
         self.assertEqual(new_desc, updated_snapshot['description'])
@@ -184,7 +197,8 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
         # is just a relationship between volume and snapshot.
         self.addCleanup(self.delete_volume, self.volumes_client, dst_vol['id'])
 
-        volume = self.volumes_client.show_volume(dst_vol['id'])['volume']
+        volume = self.reader_volumes_client.show_volume(
+            dst_vol['id'])['volume']
         # Should allow
         self.assertEqual(volume['snapshot_id'], src_snap['id'])
         self.assertEqual(volume['size'], size)
@@ -218,6 +232,7 @@ class VolumesSnapshotTestJSON(base.BaseVolumeTest):
                                     snapshot_id=snapshot['id'])
         waiters.wait_for_volume_resource_status(self.snapshots_client,
                                                 snapshot['id'], 'available')
-        backup_info = self.backups_client.show_backup(backup['id'])['backup']
+        backup_info = self.reader_backups_client.show_backup(
+            backup['id'])['backup']
         self.assertEqual(self.volume_origin['id'], backup_info['volume_id'])
         self.assertEqual(snapshot['id'], backup_info['snapshot_id'])

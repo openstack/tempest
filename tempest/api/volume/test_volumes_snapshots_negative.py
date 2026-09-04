@@ -22,11 +22,22 @@ CONF = config.CONF
 class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
     """Negative tests of volume snapshot"""
 
+    credentials = ['primary', 'project_reader']
+
     @classmethod
     def skip_checks(cls):
         super(VolumesSnapshotNegativeTestJSON, cls).skip_checks()
         if not CONF.volume_feature_enabled.snapshot:
             raise cls.skipException("Cinder volume snapshots are disabled")
+
+    @classmethod
+    def setup_clients(cls):
+        super(VolumesSnapshotNegativeTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+        else:
+            cls.reader_snapshots_client = cls.snapshots_client
 
     @decorators.attr(type=['negative'])
     @decorators.idempotent_id('e3e466af-70ab-4f4b-a967-ab04e3532ea7')
@@ -76,7 +87,7 @@ class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
     def test_list_snapshot_invalid_param_limit(self):
         """Test listing snapshots with invalid limit param should fail"""
         self.assertRaises(lib_exc.BadRequest,
-                          self.snapshots_client.list_snapshots,
+                          self.reader_snapshots_client.list_snapshots,
                           limit='invalid')
 
     @decorators.attr(type=['negative'])
@@ -84,7 +95,7 @@ class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
     def test_list_snapshots_invalid_param_sort(self):
         """Test listing snapshots with invalid sort key should fail"""
         self.assertRaises(lib_exc.BadRequest,
-                          self.snapshots_client.list_snapshots,
+                          self.reader_snapshots_client.list_snapshots,
                           sort_key='invalid')
 
     @decorators.attr(type=['negative'])
@@ -92,5 +103,5 @@ class VolumesSnapshotNegativeTestJSON(base.BaseVolumeTest):
     def test_list_snapshots_invalid_param_marker(self):
         """Test listing snapshots with invalid marker should fail"""
         self.assertRaises(lib_exc.NotFound,
-                          self.snapshots_client.list_snapshots,
+                          self.reader_snapshots_client.list_snapshots,
                           marker=data_utils.rand_uuid())
