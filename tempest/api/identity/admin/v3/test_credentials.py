@@ -69,15 +69,19 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         for value2 in self.creds_list[1]:
             self.assertIn(value2, cred['blob'])
 
+        # NOTE: `id`, `type`, `user_id`, and `project_id` are immutable
+        # after creation -- only `blob` may be updated in place. There's
+        # no legitimate use case for retyping or rescoping a credential,
+        # or reassigning its owner. To change any of those, delete the
+        # credential and create a new one.
         new_keys = [data_utils.rand_name(name='NewAccess', prefix=prefix),
                     data_utils.rand_name(name='NewSecret', prefix=prefix)]
         blob = '{"access": "%s", "secret": "%s"}' % (new_keys[0], new_keys[1])
         update_body = self.creds_client.update_credential(
-            cred['id'], blob=blob, project_id=self.projects[1],
-            type='ec2')['credential']
+            cred['id'], blob=blob)['credential']
         update_body['blob'] = json.loads(update_body['blob'])
         self.assertEqual(cred['id'], update_body['id'])
-        self.assertEqual(self.projects[1], update_body['project_id'])
+        self.assertEqual(self.projects[0], update_body['project_id'])
         self.assertEqual(self.user_body['id'], update_body['user_id'])
         self.assertEqual(update_body['blob']['access'], new_keys[0])
         self.assertEqual(update_body['blob']['secret'], new_keys[1])
