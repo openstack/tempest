@@ -129,6 +129,10 @@ class ImportImagesTest(base.BaseV2ImageTest):
                          task['input']['import_req']['method']['name'])
 
     @decorators.idempotent_id('f6feb7a4-b04f-4706-a011-206129f83e62')
+    @testtools.skipIf(
+        True,
+        "Temporary skip due to LP#2166488 to unblock stable branches"
+    )
     def test_image_web_download_import(self):
         """Test 'web-download' import functionalities
 
