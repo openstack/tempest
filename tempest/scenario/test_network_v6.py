@@ -180,6 +180,32 @@ class TestGettingAddress(manager.NetworkScenarioTest):
                           "instance. Error message: %(error)s",
                           {'nic': nic, 'error': e})
         ssh.exec_command("sudo ip link set %s up" % nic)
+        return nic
+
+    def _recover_stuck_dad(self, ssh, nic):
+        """Recover an IPv6 NIC whose DAD is stuck (LP#2069718)
+
+        With ``[ovn]/[ovs] ovs_create_tap=True`` (the default since the
+        2026.2 release) the TAP device is created before it is wired to
+        OVS. During that window the guest may already start IPv6
+        Duplicate Address Detection, which can leave the link-local
+        address stuck in ``dadfailed`` or permanently ``tentative``
+        state, so the kernel never proceeds to RA processing / SLAAC and
+        no global address is ever configured. This is only reproducible
+        with the cirros image, so it likely points to a bug in its DHCP
+        client.
+
+        Disable DAD (``dad_transmits=0``) and bounce the interface so the
+        link-local address goes straight to a valid state.
+
+        @param ssh: RemoteClient ssh instance to server
+        @param nic: network interface name to recover
+        """
+        ssh.exec_command(
+            "sudo sh -c 'echo 0 > "
+            "/proc/sys/net/ipv6/conf/%s/dad_transmits'" % nic)
+        ssh.exec_command("sudo ip link set %s down" % nic)
+        ssh.exec_command("sudo ip link set %s up" % nic)
 
     def _sysconfig_network_scripts_dir_exists(self, ssh):
         return "False" not in ssh.exec_command(
@@ -193,14 +219,48 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         sshv4_1, ips_from_api_1, srv1 = self.prepare_server(networks=net_list)
         sshv4_2, ips_from_api_2, srv2 = self.prepare_server(networks=net_list)
 
-        def guest_has_address(ssh, addr):
-            return addr in ssh.exec_command("ip address")
+        # Number of polls a NIC may stay 'tentative' before we intervene;
+        # a brief tentative state is normal, so give DAD a chance first.
+        tentative_poll_threshold = 3
+        # Per-NIC poll counters and the set of already-recovered NICs, so
+        # the DAD workaround below acts once and does not "bounce storm".
+        dad_polls = {}
+        dad_recovered = set()
+
+        def guest_has_address(ssh, addr, nic=None):
+            if addr in ssh.exec_command("ip address"):
+                return True
+
+            # NOTE(eolivare): with ``ovs_create_tap=True`` (the default since
+            # 2026.2) the TAP is created before it is wired to OVS, and the
+            # guest may start DAD during that window, which can leave the
+            # link-local address stuck 'dadfailed' or 'tentative' so SLAAC
+            # never proceeds (LP#2069718). This is only reproducible with the
+            # cirros image, so it likely points to a bug in its DHCP client.
+            # Recover the NIC once if that happens. Only the dualnet second
+            # NIC is passed here; the SSH session runs over the first NIC, so
+            # bouncing the second one does not break connectivity.
+            if nic and nic not in dad_recovered:
+                dev = ssh.exec_command("ip -o address show dev %s" % nic)
+                recover = False
+                if 'dadfailed' in dev:
+                    recover = True
+                elif 'tentative' in dev:
+                    dad_polls[nic] = dad_polls.get(nic, 0) + 1
+                    recover = dad_polls[nic] >= tentative_poll_threshold
+                if recover:
+                    LOG.debug('IPv6 DAD stuck on %s, disabling DAD and '
+                              'bouncing the interface (LP#2069718)', nic)
+                    self._recover_stuck_dad(ssh, nic)
+                    dad_recovered.add(nic)
+            return False
 
         # Turn on 2nd NIC for Cirros when dualnet
+        nic6_1 = nic6_2 = None
         if dualnet:
             _, network_v6 = net_list
-            self.turn_nic6_on(sshv4_1, srv1['id'], network_v6['id'])
-            self.turn_nic6_on(sshv4_2, srv2['id'], network_v6['id'])
+            nic6_1 = self.turn_nic6_on(sshv4_1, srv1['id'], network_v6['id'])
+            nic6_2 = self.turn_nic6_on(sshv4_2, srv2['id'], network_v6['id'])
 
         # get addresses assigned to vNIC as reported by 'ip address' utility
         ips_from_ip_1 = sshv4_1.exec_command("ip address")
@@ -210,13 +270,13 @@ class TestGettingAddress(manager.NetworkScenarioTest):
         for i in range(n_subnets6):
             # v6 should be configured since the image supports it
             # It can take time for ipv6 automatic address to get assigned
-            for srv, ssh, ips in (
-                    (srv1, sshv4_1, ips_from_api_1),
-                    (srv2, sshv4_2, ips_from_api_2)):
+            for srv, ssh, ips, nic6 in (
+                    (srv1, sshv4_1, ips_from_api_1, nic6_1),
+                    (srv2, sshv4_2, ips_from_api_2, nic6_2)):
                 ip = ips['6'][i]
                 result = test_utils.call_until_true(
                     guest_has_address,
-                    CONF.validation.ping_timeout, 1, ssh, ip)
+                    CONF.validation.ping_timeout, 1, ssh, ip, nic6)
                 if not result:
                     self.log_console_output(servers=[srv])
                     self.fail(
