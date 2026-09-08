@@ -36,6 +36,9 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         cls.projects = list()
         cls.creds_list = [['project_id', 'user_id', 'id'],
                           ['access', 'secret']]
+        cls.user_body = cls.users_client.show_user(
+            cls.os_primary.credentials.user_id)['user']
+        admin_role = cls.get_role_by_name(CONF.identity.admin_role)
         for _ in range(2):
             project = cls.projects_client.create_project(
                 data_utils.rand_name(
@@ -45,9 +48,12 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
                     prefix=CONF.resource_name_prefix))['project']
             cls.addClassResourceCleanup(
                 cls.projects_client.delete_project, project['id'])
+            cls.roles_client.create_user_role_on_project(
+                project['id'], cls.user_body['id'], admin_role['id'])
+            cls.addClassResourceCleanup(
+                cls.roles_client.delete_role_from_user_on_project,
+                project['id'], cls.user_body['id'], admin_role['id'])
             cls.projects.append(project['id'])
-        cls.user_body = cls.users_client.show_user(
-            cls.os_primary.credentials.user_id)['user']
 
     def _delete_credential(self, cred_id):
         self.creds_client.delete_credential(cred_id)
