@@ -906,22 +906,23 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         # Verify that image inside volume is our initial image before rebuild
         self.assertEqual(self.image_ref, image_before_rebuild)
 
-        # Authentication is attempted in the following order of priority:
-        # 1.The key passed in, if one was passed in.
-        # 2.Any key we can find through an SSH agent (if allowed).
-        # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
-        #   ~/.ssh/ (if allowed).
-        # 4.Plain username/password auth, if a password was given.
-        linux_client = remote_client.RemoteClient(
-            self.get_server_ip(server, self.validation_resources),
-            self.ssh_user,
-            password=None,
-            pkey=self.validation_resources['keypair']['private_key'],
-            server=server,
-            servers_client=self.servers_client)
-        output = linux_client.exec_command('touch test_file')
-        # No output means success
-        self.assertEqual('', output.strip())
+        if CONF.validation.run_validation:
+            # Authentication is attempted in the following order of priority:
+            # 1.The key passed in, if one was passed in.
+            # 2.Any key we can find through an SSH agent (if allowed).
+            # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+            #   ~/.ssh/ (if allowed).
+            # 4.Plain username/password auth, if a password was given.
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(server, self.validation_resources),
+                self.ssh_user,
+                password=None,
+                pkey=self.validation_resources['keypair']['private_key'],
+                server=server,
+                servers_client=self.servers_client)
+            output = linux_client.exec_command('touch test_file')
+            # No output means success
+            self.assertEqual('', output.strip())
 
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
@@ -961,23 +962,24 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
         # Verify that image inside volume is our final image after rebuild
         self.assertEqual(self.image_ref_alt, image_after_rebuild)
 
-        # Authentication is attempted in the following order of priority:
-        # 1.The key passed in, if one was passed in.
-        # 2.Any key we can find through an SSH agent (if allowed).
-        # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
-        #   ~/.ssh/ (if allowed).
-        # 4.Plain username/password auth, if a password was given.
-        linux_client = remote_client.RemoteClient(
-            self.get_server_ip(rebuilt_server, self.validation_resources),
-            self.ssh_alt_user,
-            password,
-            self.validation_resources['keypair']['private_key'],
-            server=rebuilt_server,
-            servers_client=self.servers_client)
-        linux_client.validate_authentication()
-        e = self.assertRaises(lib_exc.SSHExecCommandFailed,
-                              linux_client.exec_command,
-                              'cat test_file')
-        # If we rebuilt the boot volume, then we should not find
-        # the file we touched.
-        self.assertIn('No such file or directory', str(e))
+        if CONF.validation.run_validation:
+            # Authentication is attempted in the following order of priority:
+            # 1.The key passed in, if one was passed in.
+            # 2.Any key we can find through an SSH agent (if allowed).
+            # 3.Any "id_rsa", "id_dsa" or "id_ecdsa" key discoverable in
+            #   ~/.ssh/ (if allowed).
+            # 4.Plain username/password auth, if a password was given.
+            linux_client = remote_client.RemoteClient(
+                self.get_server_ip(rebuilt_server, self.validation_resources),
+                self.ssh_alt_user,
+                password,
+                self.validation_resources['keypair']['private_key'],
+                server=rebuilt_server,
+                servers_client=self.servers_client)
+            linux_client.validate_authentication()
+            e = self.assertRaises(lib_exc.SSHExecCommandFailed,
+                                  linux_client.exec_command,
+                                  'cat test_file')
+            # If we rebuilt the boot volume, then we should not find
+            # the file we touched.
+            self.assertIn('No such file or directory', str(e))
