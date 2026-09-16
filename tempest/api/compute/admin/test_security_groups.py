@@ -78,8 +78,14 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
                             securitygroup['id'], admin=False)
             security_group_list.append(securitygroup)
 
-        client_tenant_id = securitygroup['tenant_id']
-        # Create two security groups for admin tenant
+        # TODO(haleyb): Since neutron is transitioning to only return
+        # the project_id key in SG objects, support legacy branches by
+        # checking for tenant_id.
+        try:
+            client_project_id = securitygroup['project_id']
+        except KeyError:
+            client_project_id = securitygroup['tenant_id']
+        # Create two security groups for admin project
         for _ in range(2):
             name = data_utils.rand_name(prefix=prefix, name='securitygroup')
             description = data_utils.rand_name(
@@ -108,7 +114,13 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
         # not all security groups which include security groups created by
         # other users.
         for sec_group in security_group_list:
-            if sec_group['tenant_id'] == client_tenant_id:
+            # TODO(haleyb): Since neutron is transitioning to only return
+            # the project_id key in SG objects, support legacy branches by
+            # checking for tenant_id.
+            project_key = 'project_id'
+            if project_key not in sec_group:
+                project_key = 'tenant_id'
+            if sec_group[project_key] == client_project_id:
                 self.assertIn(sec_group['id'], sec_group_id_list,
                               "Failed to get all security groups for "
                               "non admin user.")

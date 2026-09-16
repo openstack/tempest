@@ -47,7 +47,7 @@ class TestBaseService(base.TestCase):
                   'is_resource_list': False,
                   'is_save_state': True,
                   'prefix': 'tempest',
-                  'tenant_id': 'project_id',
+                  'project_id': 'project_id',
                   'got_exceptions': []}
         base = cleanup_service.BaseService(kwargs)
         self.assertEqual(base.data, kwargs['data'])
@@ -57,7 +57,8 @@ class TestBaseService(base.TestCase):
         self.assertFalse(base.is_preserve)
         self.assertFalse(base.is_resource_list)
         self.assertTrue(base.is_save_state)
-        self.assertEqual(base.tenant_filter['project_id'], kwargs['tenant_id'])
+        self.assertEqual(base.project_filter['project_id'],
+                         kwargs['project_id'])
         self.assertEqual(base.got_exceptions, kwargs['got_exceptions'])
         self.assertEqual(base.prefix, kwargs['prefix'])
 
@@ -70,7 +71,7 @@ class TestBaseService(base.TestCase):
                   'is_resource_list': False,
                   'is_save_state': False,
                   'prefix': 'tempest',
-                  'tenant_id': 'project_id',
+                  'project_id': 'project_id',
                   'got_exceptions': []}
         base = self.TestException(kwargs)
         # delete
@@ -789,14 +790,14 @@ class TestNetworkQuotaService(BaseCmdServiceTests):
             "subnet": 110,
             "network": 100,
             "floatingip": 50,
-            "tenant_id": "81e8490db559474dacb2212fca9cca2d",
             "subnetpool": -1,
             "security_group_rule": 100,
             "trunk": -1,
             "security_group": 10,
             "router": 10,
-            "rbac_policy": 10, "project_id":
-            "81e8490db559474dacb2212fca9cca2d", "port": 500
+            "rbac_policy": 10,
+            "project_id": "81e8490db559474dacb2212fca9cca2d",
+            "port": 500
             }]
     }
 
@@ -845,7 +846,6 @@ class TestNetworkService(BaseCmdServiceTests):
                 "subnets": [
                     "54d6f61d-db07-451c-9ab3-b9609b6b6f0b"
                 ],
-                "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
                 "updated_at": "2016-03-08T20:19:41",
                 "vlan_transparent": True,
                 "description": "",
@@ -898,7 +898,6 @@ class TestNetworkService(BaseCmdServiceTests):
                 "subnets": [
                     "54d6f61d-db07-451c-9ab3-b9609b6b6f0b"
                 ],
-                "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
                 "updated_at": "2018-03-08T20:19:41",
                 "vlan_transparent": True,
                 "is_default": False
@@ -939,7 +938,6 @@ class TestNetworkFloatingIpService(BaseCmdServiceTests):
                 "updated_at": "2016-12-21T10:55:53Z",
                 "revision_number": 1,
                 "project_id": "4969c491a3c74ee4af974e6d800c62de",
-                "tenant_id": "4969c491a3c74ee4af974e6d800c62de",
                 "floating_network_id": "376da547-b977-4cfe-9cba-275c80debf57",
                 "fixed_ip_address": "10.0.0.3",
                 "floating_ip_address": "172.24.4.228",
@@ -1059,7 +1057,6 @@ class TestNetworkRouterService(BaseCmdServiceTests):
                 "status": "ACTIVE",
                 "updated_at": "2018-03-19T19:17:22Z",
                 "project_id": "0bd18306d801447bb457a46252d82d13",
-                "tenant_id": "0bd18306d801447bb457a46252d82d13",
                 "tags": ["tag1,tag2"]
             },
             {
@@ -1122,7 +1119,6 @@ class TestNetworkRouterService(BaseCmdServiceTests):
                 "status": "ACTIVE",
                 "updated_at": "2018-03-19T19:17:22Z",
                 "project_id": "0bd18306d801447bb457a46252d82d13",
-                "tenant_id": "0bd18306d801447bb457a46252d82d13",
                 "tags": ["tag1,tag2"]
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
@@ -1222,14 +1218,14 @@ class TestNetworkMeteringLabelService(BaseCmdServiceTests):
     response = {
         "metering_labels": [
             {
-                "project_id": "45345b0ee1ea477fac0f541b2cb79cd4",
-                "tenant_id": "45345b0ee1ea477fac0f541b2cb79cd4",
+                "project_id": "b8e3ece07bb049138d224436756e3b57",
                 "description": "label1 description",
                 "name": "label1",
                 "id": "a6700594-5b7a-4105-8bfe-723b346ce866",
                 "shared": False
             },
             {
+                "project_id": "b8e3ece07bb049138d224436756e3b57",
                 "name": "saved-label",
                 "id": "723b346ce866-4c7q",
             }
@@ -1318,7 +1314,6 @@ class TestNetworkPortService(BaseCmdServiceTests):
                 "security_groups": [],
                 "status": "ACTIVE",
                 "tags": ["tag1,tag2"],
-                "tenant_id": "",
                 "updated_at": "2016-03-08T20:19:41",
                 "qos_policy_id": "29d5e02e-d5ab-4929-bee4-4a9fc12e22ae",
                 "port_security_enabled": False
@@ -1367,7 +1362,6 @@ class TestNetworkPortService(BaseCmdServiceTests):
                 "security_groups": [],
                 "status": "ACTIVE",
                 "tags": ["tag1,tag2"],
-                "tenant_id": "",
                 "updated_at": "2018-03-08T20:19:41",
             })
         self._test_is_preserve_true([(self.get_method, self.response, 200)])
@@ -1410,7 +1404,6 @@ class TestNetworkSecGroupService(BaseCmdServiceTests):
                         "project_id": "e4f50856753b4dc6afee5fa6b9b6c550",
                         "revision_number": 1,
                         "tags": ["tag1,tag2"],
-                        "tenant_id": "e4f50856753b4dc6afee5fa6b9b6c550",
                         "created_at": "2018-03-19T19:16:56Z",
                         "updated_at": "2018-03-19T19:16:56Z",
                         "description": ""
@@ -1459,7 +1452,6 @@ class TestNetworkSecGroupService(BaseCmdServiceTests):
                         "project_id": cleanup_service.CONF_PROJECTS[0],
                         "revision_number": 1,
                         "tags": ["tag1,tag2"],
-                        "tenant_id": "e4f50856753b4dc6afee5fa6b9b6c550",
                         "created_at": "2018-03-19T19:16:56Z",
                         "updated_at": "2018-03-19T19:16:56Z",
                         "description": ""
@@ -1498,7 +1490,6 @@ class TestNetworkSubnetService(BaseCmdServiceTests):
                 "enable_dhcp": True,
                 "network_id": "db193ab3-96e3-4cb3-8fc5-05f4296d0324",
                 "project_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
-                "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "dns_nameservers": [],
                 "allocation_pools": [
                     {
@@ -1550,7 +1541,6 @@ class TestNetworkSubnetService(BaseCmdServiceTests):
                 "name": "public-subnet",
                 "network_id": cleanup_service.CONF_PUB_NETWORK,
                 "project_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
-                "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "ip_version": 4,
                 "gateway_ip": "10.0.0.1",
                 "cidr": "10.0.0.0/24",
@@ -1595,7 +1585,6 @@ class TestNetworkSubnetPoolsService(BaseCmdServiceTests):
                 "name": "my-subnet-pool-ipv6",
                 "is_default": False,
                 "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
-                "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "prefixes": [
                     "2001:db8:0:2::/64",
                     "2001:db8::/63"
@@ -1763,7 +1752,7 @@ class TestDomainService(BaseCmdServiceTests):
                 "name": "Sky_net"
             },
             {
-                "description": "Owns users and tenants on Identity API",
+                "description": "Owns users and projects on Identity API",
                 "enabled": False,
                 "id": "default",
                 "links": {

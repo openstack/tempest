@@ -48,7 +48,6 @@ class TestNetworksClient(base.BaseServiceTest):
                 "subnets": [
                         "54d6f61d-db07-451c-9ab3-b9609b6b6f0b"
                 ],
-                "tenant_id": "4fd44f30292945e481c7b8a0c8908869",
                 "updated_at": "2016-03-08T20:19:41",
                 "vlan_transparent": True,
                 "description": "",
@@ -78,7 +77,6 @@ class TestNetworksClient(base.BaseServiceTest):
                 "subnets": [
                         "08eae331-0402-425a-923c-34f7cfe39c1b"
                 ],
-                "tenant_id": "26a7980765d0414dbc1fc1f88cdb7e6e",
                 "updated_at": "2016-03-08T20:19:41",
                 "vlan_transparent": False,
                 "description": "",

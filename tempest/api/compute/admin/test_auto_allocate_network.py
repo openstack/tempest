@@ -32,7 +32,7 @@ LOG = log.getLogger(__name__)
 class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     """Tests auto-allocating networks with the v2.37 microversion.
 
-    These tests rely on Neutron being enabled. Also, the tenant must not have
+    These tests rely on Neutron being enabled. Also, the project must not have
     any network resources available to it so we can make sure that Nova
     calls to Neutron to automatically allocate the network topology.
     """
@@ -79,16 +79,16 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     @classmethod
     def resource_setup(cls):
         super(AutoAllocateNetworkTest, cls).resource_setup()
-        # Sanity check that there are no networks available to the tenant.
+        # Sanity check that there are no networks available to the project.
         # This is essentially what Nova does for getting available networks.
-        tenant_id = cls.networks_client.tenant_id
-        # (1) Retrieve non-public network list owned by the tenant.
-        search_opts = {'tenant_id': tenant_id, 'shared': False}
+        project_id = cls.networks_client.project_id
+        # (1) Retrieve non-public network list owned by the project.
+        search_opts = {'project_id': project_id, 'shared': False}
         nets = cls.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
         if nets:
             raise lib_excs.TempestException(
-                'Found tenant networks: %s' % nets)
+                'Found project networks: %s' % nets)
         # (2) Retrieve shared network list.
         search_opts = {'shared': True}
         nets = cls.reader_networks_client.list_networks(
@@ -100,9 +100,9 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
     def resource_cleanup(cls):
         """Deletes any auto_allocated_network and it's associated resources."""
 
-        # Find the auto-allocated router for the tenant.
+        # Find the auto-allocated router for the project.
         # This is a bit hacky since we don't have a great way to find the
-        # auto-allocated router given the private tenant network we have.
+        # auto-allocated router given the private project network we have.
         routers = cls.reader_routers_client.list_routers().get('routers', [])
         if len(routers) > 1:
             # This indicates a race where nova is concurrently calling the
@@ -112,13 +112,13 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
             # automatically clean them up, but there is a window where the API
             # can return multiple and we don't have a good way to filter those
             # out right now, so we'll just handle them.
-            LOG.info('(%s) Found more than one router for tenant.',
+            LOG.info('(%s) Found more than one router for project.',
                      test_utils.find_test_caller())
 
         # Remove any networks, duplicate or otherwise, that these tests
-        # created. All such networks will be in the current tenant. Neutron
+        # created. All such networks will be in the current project. Neutron
         # will cleanup duplicate resources automatically, so ignore 404s.
-        search_opts = {'tenant_id': cls.networks_client.tenant_id}
+        search_opts = {'project_id': cls.networks_client.project_id}
         networks = cls.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
 
@@ -173,13 +173,13 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # automatic network allocation is atomic. Using a minimum of three
         # servers is essential for this scenario because:
         #
-        # - First request sees no networks for the tenant so it auto-allocates
+        # - First request sees no networks for the project so it auto-allocates
         #   one from Neutron, let's call that net1.
-        # - Second request sees no networks for the tenant so it auto-allocates
-        #   one from Neutron. Neutron creates net2 but sees it's a duplicate
-        #   so it queues net2 for deletion and returns net1 from the API and
-        #   Nova uses that for the second server request.
-        # - Third request sees net1 and net2 for the tenant and fails with a
+        # - Second request sees no networks for the project so it
+        #   auto-allocates one from Neutron. Neutron creates net2 but sees
+        #   it's a duplicate so it queues net2 for deletion and returns net1
+        #   from the API and Nova uses that for the second server request.
+        # - Third request sees net1 and net2 for the project and fails with a
         #   NetworkAmbiguous 400 error.
         _, servers = compute.create_test_server(
             self.os_primary, networks='auto', wait_until='ACTIVE',
@@ -198,17 +198,17 @@ class AutoAllocateNetworkTest(base.BaseV2ComputeTest):
         # all servers should be on the same network
         self.assertEqual(1, len(server_nets))
 
-        # List the networks for the tenant; we filter on admin_state_up=True
+        # List the networks for the project; we filter on admin_state_up=True
         # because the auto-allocated-topology code in Neutron won't set that
         # to True until the network is ready and is returned from the API.
         # Duplicate networks created from a race should have
         # admin_state_up=False.
-        search_opts = {'tenant_id': self.networks_client.tenant_id,
+        search_opts = {'project_id': self.networks_client.project_id,
                        'shared': False,
                        'admin_state_up': True}
         nets = self.reader_networks_client.list_networks(
             **search_opts).get('networks', [])
         self.assertEqual(1, len(nets))
-        # verify the single private tenant network is the one that the servers
+        # verify the single private project network is the one that the servers
         # are using also
         self.assertIn(nets[0]['name'], server_nets)

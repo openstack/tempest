@@ -33,7 +33,6 @@ class TestQuotasClient(base.BaseServiceTest):
                 "security_group_rule": 100,
                 "subnet": 10,
                 "subnetpool": -1,
-                "tenant_id": "bab7d5c60cd041a0a36f7c4b6e1dd978"
             }
         ]
     }

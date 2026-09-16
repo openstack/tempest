@@ -29,7 +29,6 @@ class TestLogResourceClient(base.BaseServiceTest):
                 "description": "Log for test demo.",
                 "id": "2f245a7b-796b-4f26-9cf9-9e82d248fda7",
                 "project_id": "92a5a4f4245a4abbafacb7ca73b027b0",
-                "tenant_id": "92a5a4f4245a4abbafacb7ca73b027b0",
                 "created_at": "2018-04-03T21:03:04Z",
                 "updated_at": "2018-04-03T21:03:04Z",
                 "enabled": True,
@@ -44,7 +43,6 @@ class TestLogResourceClient(base.BaseServiceTest):
                 "description": "Log for test demo.",
                 "id": "46ebaec1-0570-43ac-82f6-60d2b03168c4",
                 "project_id": "82a5a4f4245a4abbafacb7ca73b027b0",
-                "tenant_id": "82a5a4f4245a4abbafacb7ca73b027b0",
                 "created_at": "2018-04-03T21:04:04Z",
                 "updated_at": "2018-04-03T21:04:04Z",
                 "enabled": True,
@@ -93,7 +91,7 @@ class TestLogResourceClient(base.BaseServiceTest):
 
     def _test_update_log(self, bytes_body=False):
         update_kwargs = {
-            "tenant_id": "83a5a4f4245a4abbafacb7ca73b027b0"
+            "project_id": "83a5a4f4245a4abbafacb7ca73b027b0"
         }
 
         resp_body = {

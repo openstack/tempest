@@ -54,7 +54,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     def _check_expected_response(self, actual_rule):
         for key in self.expected:
             self.assertEqual(self.expected[key], actual_rule[key],
-                             "Miss-matched key is %s" % key)
+                             "Mis-matched key is %s" % key)
 
     @decorators.attr(type='smoke')
     @decorators.idempotent_id('850795d7-d4d3-4e55-b527-a774c0123d3a')
@@ -112,7 +112,13 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
             to_port=self.to_port,
             group_id=group_id)['security_group_rule']
         self.expected['parent_group_id'] = parent_group_id
-        self.expected['group'] = {'tenant_id': self.client.tenant_id,
+        # TODO(haleyb): Since neutron is transitioning to only return
+        # the project_id key in SG objects, support legacy branches by
+        # checking for tenant_id.
+        project_key = 'project_id'
+        if project_key not in rule['group']:
+            project_key = 'tenant_id'
+        self.expected['group'] = {project_key: self.client.project_id,
                                   'name': group_name}
         self._check_expected_response(rule)
 

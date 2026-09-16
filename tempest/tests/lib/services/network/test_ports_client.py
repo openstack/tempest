@@ -87,7 +87,6 @@ class TestPortsClient(base.BaseServiceTest):
                 "security_groups": [],
                 "status": "ACTIVE",
                 "tags": ["tag1,tag2"],
-                "tenant_id": "d6700c0c9ffa4f1cb322cd4a1f3906fa",
                 "updated_at": "2016-03-08T20:19:41",
                 "qos_network_policy_id":
                     "174dd0c1-a4eb-49d4-a807-ae80246d82f4",
@@ -136,7 +135,6 @@ class TestPortsClient(base.BaseServiceTest):
                 "security_groups": [],
                 "status": "ACTIVE",
                 "tags": ["tag1,tag2"],
-                "tenant_id": "d397de8a63f341818f198abb0966f6f3",
                 "updated_at": "2016-03-08T20:19:41",
                 "qos_network_policy_id": None,
                 "qos_policy_id": None,

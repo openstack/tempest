@@ -24,7 +24,6 @@ class TestMeteringLabelsClient(base.BaseServiceTest):
         "metering_labels": [
             {
                 "project_id": "45345b0ee1ea477fac0f541b2cb79cd4",
-                "tenant_id": "45345b0ee1ea477fac0f541b2cb79cd4",
                 "description": "label1 description",
                 "name": "label1",
                 "id": "a6700594-5b7a-4105-8bfe-723b346ce866",
@@ -32,7 +31,6 @@ class TestMeteringLabelsClient(base.BaseServiceTest):
             },
             {
                 "project_id": "45345b0ee1ea477fac0f541b2cb79cd4",
-                "tenant_id": "45345b0ee1ea477fac0f541b2cb79cd4",
                 "description": "label2 description",
                 "name": "label2",
                 "id": "e131d186-b02d-4c0b-83d5-0c0725c4f812",

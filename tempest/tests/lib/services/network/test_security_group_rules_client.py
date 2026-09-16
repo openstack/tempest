@@ -41,7 +41,6 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
                 "remote_ip_prefix": None,
                 "security_group_id": "85cc3048-abc3-43cc-89b3-377341426ac5",
                 "project_id": "e4f50856753b4dc6afee5fa6b9b6c550",
-                "tenant_id": "e4f50856753b4dc6afee5fa6b9b6c550",
                 "description": ""
             },
             {
@@ -55,7 +54,6 @@ class TestSecurityGroupsClient(base.BaseServiceTest):
                 "remote_ip_prefix": None,
                 "security_group_id": "85cc3048-abc3-43cc-89b3-377341426ac5",
                 "project_id": "e4f50856753b4dc6afee5fa6b9b6c550",
-                "tenant_id": "e4f50856753b4dc6afee5fa6b9b6c550",
                 "description": ""
             }
         ]

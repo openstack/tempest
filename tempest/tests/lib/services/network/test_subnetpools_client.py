@@ -34,7 +34,6 @@ class TestSubnetsClient(base.BaseServiceTest):
                 "default_quota": "null",
                 "is_default": "false",
                 "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
-                "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "prefixes": [
                     "2001:db8:0:2::/64",
                     "2001:db8::/63"
@@ -57,7 +56,6 @@ class TestSubnetsClient(base.BaseServiceTest):
                 "default_quota": "null",
                 "is_default": "false",
                 "project_id": "9fadcee8aa7c40cdb2114fff7d569c08",
-                "tenant_id": "9fadcee8aa7c40cdb2114fff7d569c08",
                 "prefixes": [
                     "10.10.0.0/21",
                     "192.168.0.0/16"
