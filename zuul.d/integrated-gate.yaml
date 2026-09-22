@@ -491,6 +491,7 @@
               - ^.*/2024.1
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-compute
         # Do not run it on ussuri until below issue is fixed
@@ -508,6 +509,7 @@
               - ^.*/2024.1
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-compute
         - openstacksdk-functional-devstack:
@@ -550,6 +552,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-placement
         # Do not run it on ussuri until below issue is fixed
@@ -582,6 +585,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         # Do not run it on ussuri until below issue is fixed
         # https://storyboard.openstack.org/#!/story/2010057
@@ -620,6 +624,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
@@ -636,6 +641,7 @@
             branches:
               - ^.*/2025.2
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         # on stable/2024.1(SLURP) grenade-skip-level is voting which test
         # stable/2023.1 to stable/2024.1 upgrade. This is supposed to run on
@@ -651,6 +657,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-storage
         # Do not run it on ussuri until below issue is fixed
@@ -690,6 +697,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
@@ -721,6 +729,7 @@
             branches:
               - ^.*/2025.1
               - ^.*/2026.1
+              - ^.*/2026.2
               - master
         - tempest-integrated-object-storage
         # Do not run it on ussuri until below issue is fixed
