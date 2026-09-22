@@ -1,0 +1,6 @@
+=====================
+v47.0.0 Release Notes
+=====================
+
+.. release-notes:: 47.0.0 Release Notes
+   :version: 47.0.0
