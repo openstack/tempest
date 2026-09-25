@@ -12,6 +12,7 @@
         - openstack-tox-py312
         - openstack-tox-py313
         - openstack-tox-py314
+        - openstack-tox-py315
         - tempest-full-py3:
             # Define list of irrelevant files to use everywhere else
             irrelevant-files: &tempest-irrelevant-files
@@ -139,6 +140,7 @@
         - openstack-tox-py312
         - openstack-tox-py313
         - openstack-tox-py314
+        - openstack-tox-py315
         - tempest-full-ubuntu-resolute:
             irrelevant-files: *tempest-irrelevant-files
         - tempest-slow-py3:
