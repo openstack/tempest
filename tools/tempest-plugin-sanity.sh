@@ -66,7 +66,13 @@ DEPS="-c${TOX_CONSTRAINTS_FILE}"
 # function to create virtualenv to perform sanity operation
 function prepare_workspace {
     SANITY_DIR=$(pwd)
-    python3 -m venv "$SANITY_DIR"/.venv
+    # NOTE: Use .virtualenv instead of .venv. Recent virtualenv versions
+    # (>=21.12.0) drop a PEP 832 ".venv" redirect file in any directory that
+    # holds a pyproject.toml (the tempest repo root does) when tox builds this
+    # environment. That file would collide with "python3 -m venv .venv", which
+    # fails to create a venv on top of an existing non-directory. Using a
+    # different directory avoids the clash and leaves the redirect alone.
+    python3 -m venv "$SANITY_DIR"/.virtualenv
     export TVENV="$SANITY_DIR/tools/with_venv.sh"
     cd "$SANITY_DIR"
 

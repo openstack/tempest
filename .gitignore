@@ -20,6 +20,7 @@ include/swift_objects/swift_large
 *.egg*
 .tox
 .venv
+.virtualenv
 dist
 build
 .testrepository
