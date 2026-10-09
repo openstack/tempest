@@ -32,11 +32,11 @@ class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
         # Create 3 test volumes
         # NOTE(zhufl): When using pre-provisioned credentials, the project
         # may have volumes other than those created below.
-        cls.volume_list = cls.volumes_client.list_volumes()['volumes']
+        cls.volume_list = cls.reader_volumes_client.list_volumes()['volumes']
         for _ in range(3):
             volume = cls.create_volume()
             # Fetch volume details
-            volume_details = cls.volumes_client.show_volume(
+            volume_details = cls.reader_volumes_client.show_volume(
                 volume['id'])['volume']
             cls.volume_list.append(volume_details)
 
@@ -52,7 +52,7 @@ class VolumesListAdminTestJSON(base.BaseVolumeAdminTest):
         params = {'all_tenants': 1,
                   'project_id': self.volumes_client.tenant_id}
         # Getting volume list from primary tenant using admin credentials
-        fetched_list = self.admin_volume_client.list_volumes(
+        fetched_list = self.reader_volume_client.list_volumes(
             detail=True, params=params)['volumes']
         # Verifying fetched volume ids list is related to primary tenant
         fetched_list_ids = map(operator.itemgetter('id'), fetched_list)

@@ -152,7 +152,7 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
         """
         self.assertRaises(
             lib_exc.NotFound,
-            self.admin_volume_types_client.list_volume_types_extra_specs,
+            self.reader_volume_types_client.list_volume_types_extra_specs,
             data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
@@ -165,7 +165,7 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
         """
         self.assertRaises(
             lib_exc.NotFound,
-            self.admin_volume_types_client.show_volume_type_extra_specs,
+            self.reader_volume_types_client.show_volume_type_extra_specs,
             data_utils.rand_uuid(), "spec1")
 
     @decorators.attr(type=['negative'])
@@ -178,5 +178,5 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
         """
         self.assertRaises(
             lib_exc.NotFound,
-            self.admin_volume_types_client.show_volume_type_extra_specs,
+            self.reader_volume_types_client.show_volume_type_extra_specs,
             self.volume_type['id'], "nonexistent_extra_spec_name")

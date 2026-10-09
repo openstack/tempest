@@ -26,6 +26,16 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
 
     volume_min_microversion = '3.3'
     volume_max_microversion = 'latest'
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(UserMessagesTest, cls).setup_clients()
+        if CONF.enforce_scope.cinder:
+            cls.reader_messages_client = (
+                cls.os_project_reader.volume_messages_client_latest)
+        else:
+            cls.reader_messages_client = cls.messages_client
 
     def _create_user_message(self):
         """Trigger a 'no valid host' situation to generate a message."""
@@ -44,7 +54,7 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
         params = {'volume_type': bogus_type['id'],
                   'size': CONF.volume.volume_size}
         volume = self.create_volume(wait_until="error", **params)
-        messages = self.messages_client.list_messages()['messages']
+        messages = self.reader_messages_client.list_messages()['messages']
         message_id = None
         for message in messages:
             if message['resource_uuid'] == volume['id']:
@@ -61,10 +71,10 @@ class UserMessagesTest(base.BaseVolumeAdminTest):
         self.addCleanup(self.messages_client.delete_message, message_id)
 
         # show message, check response schema
-        self.messages_client.show_message(message_id)
+        self.reader_messages_client.show_message(message_id)
 
         # list messages, check response schema
-        self.messages_client.list_messages()
+        self.reader_messages_client.list_messages()
 
     @decorators.idempotent_id('c6eb6901-cdcc-490f-b735-4fe251842aed')
     def test_delete_message(self):

@@ -49,7 +49,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         # Save the current set of quotas so that some tests may use it
         # to restore the quotas to their original values after they are
         # done.
-        original_quota_set = (cls.admin_quotas_client.show_quota_set(
+        original_quota_set = (cls.reader_quotas_client.show_quota_set(
             cls.demo_tenant_id)['quota_set'])
         cls.cleanup_quota_set = dict(
             (k, v) for k, v in original_quota_set.items() if k in QUOTA_KEYS)
@@ -58,13 +58,14 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
     def test_list_quotas(self):
         """Test showing volume quota set"""
         # Check response schema
-        self.admin_quotas_client.show_quota_set(self.demo_tenant_id)
+        self.reader_quotas_client.show_quota_set(self.demo_tenant_id)
 
     @decorators.idempotent_id('2be020a2-5fdd-423d-8d35-a7ffbc36e9f7')
     def test_list_default_quotas(self):
         """Test showing volume default quota set"""
         # Check response schema
-        self.admin_quotas_client.show_default_quota_set(self.demo_tenant_id)
+        self.reader_quotas_client.show_default_quota_set(
+            self.demo_tenant_id)
 
     @decorators.idempotent_id('3d45c99e-cc42-4424-a56e-5cbd212b63a6')
     def test_update_all_quota_resources_for_tenant(self):
@@ -102,29 +103,30 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
         self.addCleanup(self.admin_quotas_client.update_quota_set,
                         self.demo_tenant_id, **self.cleanup_quota_set)
 
-        quota_set_default = self.admin_quotas_client.show_default_quota_set(
-            self.demo_tenant_id)['quota_set']
+        quota_set_default = (
+            self.reader_quotas_client.show_default_quota_set(
+                self.demo_tenant_id)['quota_set'])
         volume_default = quota_set_default['volumes']
 
         self.admin_quotas_client.update_quota_set(
             self.demo_tenant_id, volumes=(volume_default + 5))
 
         self.admin_quotas_client.delete_quota_set(self.demo_tenant_id)
-        quota_set_new = (self.admin_quotas_client.show_quota_set(
+        quota_set_new = (self.reader_quotas_client.show_quota_set(
             self.demo_tenant_id)['quota_set'])
         self.assertEqual(volume_default, quota_set_new['volumes'])
 
     @decorators.idempotent_id('ae8b6091-48ad-4bfa-a188-bbf5cc02115f')
     def test_quota_usage(self):
         """Test volume quota usage is updated after creating volume"""
-        quota_usage = self.admin_quotas_client.show_quota_set(
+        quota_usage = self.reader_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         volume = self.create_volume()
         self.addCleanup(self.delete_volume,
                         self.volumes_client, volume['id'])
 
-        new_quota_usage = self.admin_quotas_client.show_quota_set(
+        new_quota_usage = self.reader_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         self.assertEqual(quota_usage['volumes']['in_use'] + 1,
@@ -143,7 +145,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
                         self.admin_volume_client, volume['id'])
 
         # List of tenants quota usage pre-transfer
-        primary_quota = self.admin_quotas_client.show_quota_set(
+        primary_quota = self.reader_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         alt_quota = self.admin_quotas_client.show_quota_set(
@@ -165,7 +167,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeAdminTest):
             self.os_alt.volumes_client_latest, volume['id'], 'available')
 
         # List of tenants quota usage post transfer
-        new_primary_quota = self.admin_quotas_client.show_quota_set(
+        new_primary_quota = self.reader_quotas_client.show_quota_set(
             self.demo_tenant_id, params={'usage': True})['quota_set']
 
         new_alt_quota = self.admin_quotas_client.show_quota_set(

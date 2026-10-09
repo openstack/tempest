@@ -349,6 +349,22 @@ class BaseVolumeAdminTest(BaseVolumeTest):
             cls.os_admin.volume_capabilities_client_latest
         cls.admin_scheduler_stats_client = \
             cls.os_admin.volume_scheduler_stats_client_latest
+        if CONF.enforce_scope.cinder and hasattr(cls, 'os_project_reader'):
+            cls.reader_volume_types_client = (
+                cls.os_project_reader.volume_types_client_latest)
+            # To handle cases which require both admin and non-admin personas
+            # to use the latest volume client
+            cls.reader_volume_client = (
+                cls.os_project_reader.volumes_client_latest)
+            cls.reader_snapshots_client = (
+                cls.os_project_reader.snapshots_client_latest)
+            cls.reader_quotas_client = (
+                cls.os_project_reader.volume_quotas_client_latest)
+        else:
+            cls.reader_volume_types_client = cls.admin_volume_types_client
+            cls.reader_volume_client = cls.admin_volume_client
+            cls.reader_snapshots_client = cls.admin_snapshots_client
+            cls.reader_quotas_client = cls.admin_quotas_client
 
     @cleanup_order
     def create_test_qos_specs(self, name=None, consumer=None, **kwargs):

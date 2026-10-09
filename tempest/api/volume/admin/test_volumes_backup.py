@@ -116,7 +116,7 @@ class VolumesBackupsAdminTest(base.BaseVolumeAdminTest):
             self.volumes_client, restore['volume_id'], 'available')
 
         # Verify if restored volume is there in volume list
-        volumes = self.volumes_client.list_volumes()['volumes']
+        volumes = self.reader_volumes_client.list_volumes()['volumes']
         self.assertIn(restore['volume_id'], [v['id'] for v in volumes])
 
     @decorators.idempotent_id('47a35425-a891-4e13-961c-c45deea21e94')

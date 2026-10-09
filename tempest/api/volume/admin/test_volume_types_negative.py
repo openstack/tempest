@@ -35,7 +35,7 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
     def test_get_nonexistent_type_id(self):
         """Test getting volume type with nonexistent type id will fail"""
         self.assertRaises(lib_exc.NotFound,
-                          self.admin_volume_types_client.show_volume_type,
+                          self.reader_volume_types_client.show_volume_type,
                           data_utils.rand_uuid())
 
     @decorators.attr(type=['negative'])
