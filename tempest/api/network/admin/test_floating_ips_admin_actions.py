@@ -25,7 +25,7 @@ CONF = config.CONF
 class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     """Test floating ips"""
 
-    credentials = ['primary', 'alt', 'admin']
+    credentials = ['primary', 'alt', 'admin', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -43,6 +43,11 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     def setup_clients(cls):
         super(FloatingIPAdminTestJSON, cls).setup_clients()
         cls.alt_floating_ips_client = cls.os_alt.floating_ips_client
+        if CONF.enforce_scope.neutron:
+            cls.reader_floating_ips_client = (
+                cls.os_project_reader.floating_ips_client)
+        else:
+            cls.reader_floating_ips_client = cls.floating_ips_client
 
     @classmethod
     def resource_setup(cls):
@@ -88,7 +93,7 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
                       floating_ip_ids_admin)
         self.assertIn(floating_ip_alt['id'], floating_ip_ids_admin)
         # List floating ips from nonadmin
-        body = self.floating_ips_client.list_floatingips()
+        body = self.reader_floating_ips_client.list_floatingips()
         floating_ip_ids = [f['id'] for f in body['floatingips']]
         # Check that nonadmin user doesn't see floating ip created from admin
         # and floating ip that is created in another project (alt user)

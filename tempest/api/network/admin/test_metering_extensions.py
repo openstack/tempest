@@ -29,6 +29,22 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
         List, Show, Create, Delete Metering labels rules
     """
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MeteringTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_metering_labels_client = (
+                cls.os_project_reader.metering_labels_client)
+            cls.reader_metering_label_rules_client = (
+                cls.os_project_reader.metering_label_rules_client)
+        else:
+            cls.reader_metering_labels_client = (
+                cls.admin_metering_labels_client)
+            cls.reader_metering_label_rules_client = (
+                cls.admin_metering_label_rules_client)
+
     @classmethod
     def skip_checks(cls):
         super(MeteringTestJSON, cls).skip_checks()
@@ -122,7 +138,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     @decorators.idempotent_id('30abb445-0eea-472e-bd02-8649f54a5968')
     def test_show_metering_label(self):
         """Verifies the details of a metering label"""
-        body = self.admin_metering_labels_client.show_metering_label(
+        body = self.reader_metering_labels_client.show_metering_label(
             self.metering_label['id'])
         metering_label = body['metering_label']
         self.assertEqual(self.metering_label['id'], metering_label['id'])
@@ -163,7 +179,7 @@ class MeteringTestJSON(base.BaseAdminNetworkTest):
     @decorators.idempotent_id('b7354489-96ea-41f3-9452-bace120fb4a7')
     def test_show_metering_label_rule(self):
         """Verifies the metering details of a rule"""
-        client = self.admin_metering_label_rules_client
+        client = self.reader_metering_label_rules_client
         body = (client.show_metering_label_rule(
                 self.metering_label_rule['id']))
         metering_label_rule = body['metering_label_rule']

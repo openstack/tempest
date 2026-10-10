@@ -25,6 +25,20 @@ CONF = config.CONF
 class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
     """Test external networks"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(ExternalNetworksTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_networks_client = (
+                cls.os_project_reader.networks_client)
+            cls.reader_subnets_client = (
+                cls.os_project_reader.subnets_client)
+        else:
+            cls.reader_networks_client = cls.networks_client
+            cls.reader_subnets_client = cls.admin_subnets_client
+
     @classmethod
     def resource_setup(cls):
         super(ExternalNetworksTestJSON, cls).resource_setup()
@@ -78,7 +92,7 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         # List networks as a normal user and confirm the external
         # network extension attribute is returned for those networks
         # that were created as external
-        body = self.networks_client.list_networks()
+        body = self.reader_networks_client.list_networks()
         networks_list = [net['id'] for net in body['networks']]
         self.assertIn(external_network['id'], networks_list)
         self.assertIn(self.network['id'], networks_list)
@@ -95,12 +109,12 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         external_network = self._create_network()
         # Show an external network as a normal user and confirm the
         # external network extension attribute is returned.
-        body = self.networks_client.show_network(external_network['id'])
+        body = self.reader_networks_client.show_network(external_network['id'])
         show_ext_net = body['network']
         self.assertEqual(external_network['name'], show_ext_net['name'])
         self.assertEqual(external_network['id'], show_ext_net['id'])
         self.assertTrue(show_ext_net['router:external'])
-        body = self.networks_client.show_network(self.network['id'])
+        body = self.reader_networks_client.show_network(self.network['id'])
         show_net = body['network']
         # Verify with show that router:external is False for network
         self.assertEqual(self.network['name'], show_net['name'])
@@ -148,6 +162,6 @@ class ExternalNetworksTestJSON(base.BaseAdminNetworkTest):
         self.assertNotIn(created_floating_ip['id'],
                          (f['id'] for f in floatingip_list['floatingips']))
         # Verifies subnet is deleted
-        subnet_list = self.admin_subnets_client.list_subnets()
+        subnet_list = self.reader_subnets_client.list_subnets()
         self.assertNotIn(subnet['id'],
                          (s['id'] for s in subnet_list))

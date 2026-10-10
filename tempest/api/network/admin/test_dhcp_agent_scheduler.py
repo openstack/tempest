@@ -15,11 +15,16 @@
 from tempest.api.network import base
 from tempest.common import utils
 from tempest.common import waiters
+from tempest import config
 from tempest.lib import decorators
+
+CONF = config.CONF
 
 
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     """Test network DHCP agent scheduler extension"""
+
+    credentials = ['primary', 'admin', 'project_reader']
 
     @classmethod
     def skip_checks(cls):
@@ -29,12 +34,26 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
             raise cls.skipException(msg)
 
     @classmethod
+    def setup_clients(cls):
+        super(DHCPAgentSchedulersTestJSON, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_agents_client = (
+                cls.os_project_reader.network_agents_client)
+            cls.reader_ports_client = cls.os_project_reader.ports_client
+            cls.reader_networks_client = (
+                cls.os_project_reader.networks_client)
+        else:
+            cls.reader_agents_client = cls.admin_agents_client
+            cls.reader_ports_client = cls.admin_ports_client
+            cls.reader_networks_client = cls.admin_networks_client
+
+    @classmethod
     def resource_setup(cls):
         super(DHCPAgentSchedulersTestJSON, cls).resource_setup()
         # NOTE(slaweq): In some cases (like default ML2/OVN deployment)
         # extension is enabled but there may not be any DHCP agent available.
         # In such case those tests should be also skipped.
-        dhcp_agents = cls.admin_agents_client.list_agents(
+        dhcp_agents = cls.reader_agents_client.list_agents(
             agent_type="DHCP Agent")['agents']
         if not dhcp_agents:
             msg = ("At least one DHCP agent is required to be running in "
@@ -48,7 +67,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @decorators.idempotent_id('f164801e-1dd8-4b8b-b5d3-cc3ac77cfaa5')
     def test_dhcp_port_status_active(self):
-        dhcp_ports = self.admin_ports_client.list_ports(
+        dhcp_ports = self.reader_ports_client.list_ports(
             device_owner='network:dhcp',
             network_id=self.network['id'])['ports']
         for dhcp_port in dhcp_ports:
@@ -60,14 +79,15 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     @decorators.idempotent_id('5032b1fe-eb42-4a64-8f3b-6e189d8b5c7d')
     def test_list_dhcp_agent_hosting_network(self):
         """Test Listing DHCP agents hosting a network"""
-        self.admin_networks_client.list_dhcp_agents_on_hosting_network(
+        self.reader_networks_client.list_dhcp_agents_on_hosting_network(
             self.network['id'])
 
     @decorators.idempotent_id('30c48f98-e45d-4ffb-841c-b8aad57c7587')
     def test_list_networks_hosted_by_one_dhcp(self):
         """Test Listing networks hosted by a DHCP agent"""
-        body = self.admin_networks_client.list_dhcp_agents_on_hosting_network(
-            self.network['id'])
+        body = (
+            self.reader_networks_client
+            .list_dhcp_agents_on_hosting_network(self.network['id']))
         agents = body['agents']
         self.assertNotEmpty(agents, "no dhcp agent")
         agent = agents[0]
@@ -76,8 +96,9 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     def _check_network_in_dhcp_agent(self, network_id, agent):
         network_ids = []
-        body = self.admin_agents_client.list_networks_hosted_by_one_dhcp_agent(
-            agent['id'])
+        body = (
+            self.reader_agents_client
+            .list_networks_hosted_by_one_dhcp_agent(agent['id']))
         networks = body['networks']
         for network in networks:
             network_ids.append(network['id'])
@@ -90,7 +111,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         self.ports_client.delete_port(self.port['id'])
         agent = dict()
         agent['agent_type'] = None
-        body = self.admin_agents_client.list_agents()
+        body = self.reader_agents_client.list_agents()
         agents = body['agents']
         for a in agents:
             if a['agent_type'] == 'DHCP agent':

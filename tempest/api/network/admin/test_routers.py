@@ -29,6 +29,16 @@ CONF = config.CONF
 class RoutersAdminTest(base.BaseAdminNetworkTest):
     """Test routers operation supported by admin"""
 
+    credentials = ['primary', 'admin', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(RoutersAdminTest, cls).setup_clients()
+        if CONF.enforce_scope.neutron:
+            cls.reader_networks_client = cls.os_project_reader.networks_client
+        else:
+            cls.reader_networks_client = cls.admin_networks_client
+
     # NOTE(salv-orlando): This class inherits from BaseAdminNetworkTest
     # as some router operations, such as enabling or disabling SNAT
     # require admin credentials by default
@@ -128,7 +138,7 @@ class RoutersAdminTest(base.BaseAdminNetworkTest):
         self.assertNotEmpty(fixed_ips)
         # Assert that all of the IPs from the router gateway port
         # are allocated from a valid public subnet.
-        public_net_body = self.admin_networks_client.show_network(
+        public_net_body = self.reader_networks_client.show_network(
             CONF.network.public_network_id)
         public_subnet_ids = public_net_body['network']['subnets']
         for fixed_ip in fixed_ips:
