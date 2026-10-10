@@ -76,7 +76,7 @@ class BasicOperationsImagesAdminTest(base.BaseV2ImageAdminTest):
         self.assertEqual(image['id'], created_image['id'])
         self.addCleanup(self.admin_client.delete_image, image['id'])
 
-        images_list = self.client.list_images()['images']
+        images_list = self.reader_image_client.list_images()['images']
         fetched_images_id = [img['id'] for img in images_list]
         self.assertIn(image['id'], fetched_images_id)
 
@@ -124,7 +124,7 @@ class ImportCopyImagesTest(base.BaseV2ImageAdminTest):
         image_file = io.BytesIO(file_content)
         self.client.store_image_file(image['id'], image_file)
 
-        body = self.client.show_image(image['id'])
+        body = self.reader_image_client.show_image(image['id'])
         self.assertEqual(image['id'], body['id'])
         self.assertEqual(len(file_content), body.get('size'))
         self.assertEqual('active', body['status'])
@@ -164,7 +164,7 @@ class ImageLocationsAdminTest(base.BaseV2ImageAdminTest):
             dict(remove='/locations/0')])
 
         # The image should now have only the one location we did not delete
-        image = self.client.show_image(image['id'])
+        image = self.reader_image_client.show_image(image['id'])
         self.assertEqual(1, len(image['locations']),
                          'Image should have one location but has %i' % (
                          len(image['locations'])))
@@ -224,7 +224,7 @@ class MultiStoresImagesTest(base.BaseV2ImageAdminTest, base.BaseV2ImageTest):
         waiters.wait_for_image_imported_to_stores(
             self.client,
             image['id'], stores)
-        observed_image = self.client.show_image(image['id'])
+        observed_image = self.reader_image_client.show_image(image['id'])
 
         # Image will be deleted from first store
         first_image_store_deleted = (observed_image['stores'].split(","))[0]

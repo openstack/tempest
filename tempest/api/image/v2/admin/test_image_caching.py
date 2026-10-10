@@ -76,7 +76,7 @@ class ImageCachingTest(base.BaseV2ImageTest):
         image_file = io.BytesIO(file_content)
         self.client.store_image_file(image['id'], image_file)
 
-        image = self.client.show_image(image['id'])
+        image = self.reader_image_client.show_image(image['id'])
         return image
 
     def _assertCheckCache(self, cached_images, cached):

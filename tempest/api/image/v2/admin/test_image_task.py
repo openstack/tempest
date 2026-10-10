@@ -116,7 +116,7 @@ class ImageTaskCreate(base.BaseV2ImageAdminTest):
         self._verify_disk_format(task_body)
 
         # Verify disk format
-        image_body = self.client.show_image(task_image_id)
+        image_body = self.reader_image_client.show_image(task_image_id)
         task_disk_format = \
             task_body['input']['image_properties']['disk_format']
         image_disk_format = image_body['disk_format']

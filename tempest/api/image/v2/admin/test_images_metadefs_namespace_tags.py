@@ -35,6 +35,17 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
     ]
     tag_list = ["sample-tag1", "sample-tag2", "sample-tag3"]
 
+    credentials = ['admin', 'primary', 'project_reader']
+
+    @classmethod
+    def setup_clients(cls):
+        super(MetadataNamespaceTagsTest, cls).setup_clients()
+        if CONF.enforce_scope.glance:
+            cls.reader_namespace_tags_client = (
+                cls.os_project_reader.namespace_tags_client)
+        else:
+            cls.reader_namespace_tags_client = cls.namespace_tags_client
+
     def _create_namespace_tags(self, namespace):
         # Create a namespace
         namespace_tags = self.namespace_tags_client.create_namespace_tags(
@@ -51,7 +62,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
         namespace = self.create_namespace()
         self._create_namespace_tags(namespace)
         # List namespace tags
-        body = self.namespace_tags_client.list_namespace_tags(
+        body = self.reader_namespace_tags_client.list_namespace_tags(
             namespace['namespace'])
         self.assertEqual(3, len(body['tags']))
         self.assertIn(body['tags'][0]['name'], self.tag_list)
@@ -60,7 +71,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
         # Delete all tag definitions
         self.namespace_tags_client.delete_namespace_tags(
             namespace['namespace'])
-        body = self.namespace_tags_client.list_namespace_tags(
+        body = self.reader_namespace_tags_client.list_namespace_tags(
             namespace['namespace'])
         self.assertEmpty(body['tags'])
 
@@ -76,7 +87,7 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
         self.namespace_tags_client.create_namespace_tag(
             namespace=namespace['namespace'], tag_name=tag_name)
 
-        body = self.namespace_tags_client.show_namespace_tag(
+        body = self.reader_namespace_tags_client.show_namespace_tag(
             namespace['namespace'], tag_name)
         self.assertEqual(tag_name, body['name'])
         # Update tag definition
@@ -92,6 +103,6 @@ class MetadataNamespaceTagsTest(base.BaseV2ImageAdminTest):
         # List namespace tags and validate deletion
         namespace_tags = [
             namespace_tag['name'] for namespace_tag in
-            self.namespace_tags_client.list_namespace_tags(
+            self.reader_namespace_tags_client.list_namespace_tags(
                 namespace['namespace'])['tags']]
         self.assertNotIn(update_tag_definition, namespace_tags)

@@ -256,7 +256,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
 
 class BaseV2ImageAdminTest(BaseV2ImageTest):
 
-    credentials = ['admin', 'primary']
+    credentials = ['admin', 'primary', 'project_reader']
 
     @classmethod
     def setup_clients(cls):
