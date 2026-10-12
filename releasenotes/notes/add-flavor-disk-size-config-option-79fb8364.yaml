@@ -1,0 +1,7 @@
+---
+features:
+  - Add a new config option flavor_disk_size in the compute section, which
+    sets the disk size (in GB) of the flavors created by the tests. This
+    allows adjusting the size of the tempest-owned flavors to the
+    environment, e.g. to fit images requiring a bigger min_disk, or to save
+    resources in CI.

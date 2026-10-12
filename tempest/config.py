@@ -429,6 +429,13 @@ ComputeGroup = [
                help="When aggregating available hypervisors for testing,"
                " avoid migrating to and booting any test VM on hosts with"
                " a name that matches the provided pattern"),
+    cfg.IntOpt('flavor_disk_size',
+               default=1,
+               min=1,
+               help="Disk size in GB for the flavors created by tests. Some "
+                    "tests may create their own flavors, this allows "
+                    "configuring their disk size, e.g. to make it fit "
+                    "images with a bigger min_disk, or to save resources."),
 ]
 
 placement_group = cfg.OptGroup(name='placement',
