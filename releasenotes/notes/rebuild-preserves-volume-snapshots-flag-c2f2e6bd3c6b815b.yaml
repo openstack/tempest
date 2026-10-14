@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Add a new config option
+    ``[volume-feature-enabled] rebuild_preserves_volume_snapshots`` that gates
+    the boot-from-volume rebuild snapshot-preservation test. It requires the
+    Cinder RBD reimage fix (LP#2160473), which is only on master, so it
+    defaults to ``False`` and should be enabled only on branches that have the
+    fix.

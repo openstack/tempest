@@ -983,3 +983,53 @@ class ServerActionsV293TestJSON(base.BaseV2ComputeTest):
             # If we rebuilt the boot volume, then we should not find
             # the file we touched.
             self.assertIn('No such file or directory', str(e))
+
+    @decorators.idempotent_id('7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c')
+    @testtools.skipUnless(
+        CONF.volume_feature_enabled.rebuild_preserves_volume_snapshots,
+        'Requires the Cinder RBD reimage fix (LP#2160473).')
+    def test_rebuild_bfv_server_with_snapshot(self):
+        """Test rebuilding a BFV server preserves volume snapshots"""
+        server = self.create_test_server(volume_backed=True,
+                                         wait_until='ACTIVE')
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        volume_id = server['os-extended-volumes:volumes_attached'][0]['id']
+
+        # Stop server before snapshotting, as per LP#2160473
+        # not required for the test, but keeps it aligned with the bug report.
+        self.servers_client.stop_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'SHUTOFF')
+
+        # Create volume snapshot
+        snapshot = self.create_volume_snapshot(volume_id, force=True)
+
+        # Cinder bug(LP#2160473), where the snapshot existed in the DB
+        # but not in the ceph backend.
+        # so a get/show API call is not enough to know if the snapshot
+        # really exists. Create a volume from the snapshot to confirm it is
+        # backed by real data before the rebuild.
+        self.create_volume(snapshot_id=snapshot['id'])
+
+        # Start server before rebuild
+        self.servers_client.start_server(server['id'])
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        # Rebuild server with a different image to force a boot volume reimage
+        self.servers_client.rebuild_server(
+            server['id'],
+            self.image_ref_alt)
+        waiters.wait_for_server_status(self.servers_client,
+                                       server['id'], 'ACTIVE')
+
+        # Verify boot volume ID remains same after rebuild
+        server = self.reader_servers_client.show_server(
+            server['id'])['server']
+        attached_vol_id = (
+            server['os-extended-volumes:volumes_attached'][0]['id'])
+        self.assertEqual(volume_id, attached_vol_id)
+
+        # Verify snapshot still exists and is usable after rebuild
+        self.create_volume(snapshot_id=snapshot['id'])
