@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Updating ``CONF.compute-feature-enabled[nova_policy_roles]`` default value
+    as per the latest releases:
+
+    New defaults: ['admin', 'manager', 'member', 'reader', 'service']

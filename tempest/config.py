@@ -634,13 +634,11 @@ ComputeFeaturesGroup = [
                 default=False,
                 help='Does the test environment support unified limits?'),
     cfg.ListOpt('nova_policy_roles',
-                default=['admin', 'member', 'reader'],
+                default=['admin', 'manager', 'member', 'reader', 'service'],
                 help='Compute service API policies roles list. List all the '
                      'roles which are used as default in Nova policy rules. '
                      'This config option value is used to run the tests with '
-                     'the available roles in Nova. For example, if manager '
-                     'role is not present in the nova release then tempest '
-                     'will use old defaults role token to call nova APIs'),
+                     'the available roles in Nova.'),
     cfg.BoolOpt('vtpm_live_migration',
                 default=False,
                 help='Does the test environment support vTPM live migration?'),
