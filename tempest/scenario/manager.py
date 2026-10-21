@@ -1585,7 +1585,7 @@ class NetworkScenarioTest(ScenarioTest):
                 floatingip_id)['floatingip']
             self.assertEqual(status, floating_ip['status'],
                              message="FloatingIP: {fp} is at status: {cst}. "
-                                     "failed  to reach status: {st}"
+                                     "failed to reach status: {st}"
                              .format(fp=floating_ip, cst=floating_ip['status'],
                                      st=status))
 
