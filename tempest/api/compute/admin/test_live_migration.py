@@ -652,7 +652,9 @@ class LiveMigrationWithVTPMTest(LiveMigrationTestBase):
         """
         return secrets_client.get_secret_payload(secret_uuid)
 
-    def _create_flavor(self, ram=64, vcpus=2, disk=1, extra_specs=None):
+    def _create_flavor(self, ram=64, vcpus=2, disk=None, extra_specs=None):
+        if disk is None:
+            disk = CONF.compute.flavor_disk_size
         flavor = self.create_flavor(ram, vcpus, disk)
         if extra_specs:
             self.os_admin.flavors_client.set_flavor_extra_spec(

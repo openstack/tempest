@@ -202,5 +202,6 @@ class MigrationsAdminTest(base.BaseV2ComputeAdminTest):
     def test_cold_migration_with_swap(self):
         """Test cold migrating server with swap in flavor"""
         flavor_id = self.create_flavor(
-            ram=1024, vcpus=1, disk=1, swap=1)['id']
+            ram=1024, vcpus=1, disk=CONF.compute.flavor_disk_size,
+            swap=1)['id']
         self._test_cold_migrate_server(flavor_id=flavor_id)
