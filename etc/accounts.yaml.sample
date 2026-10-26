@@ -1,6 +1,8 @@
 # The number of accounts required can be estimated as CONCURRENCY x 2
-# It is expected that each user provided here will be in a different tenant.
-# This is required to provide isolation between test for running in parallel
+# It is generally expected that each user provided here will be in a different
+# project to provide isolation between tests running in parallel. Some
+# project-scoped credentials require users with different roles in the same
+# project, as shown below.
 #
 # Valid fields for credentials are defined in the descendants of
 # lib.auth.Credentials - see KeystoneV[2|3]Credentials.ATTRIBUTES
@@ -45,6 +47,19 @@
     - 'fun_role'
     - 'not_an_admin'
     - 'an_admin'
+
+# To specify project-scoped member and reader credentials in the same project
+- username: 'project_member_user'
+  project_name: 'shared_project'
+  password: 'test_password'
+  roles:
+    - 'member'
+
+- username: 'project_reader_user'
+  project_name: 'shared_project'
+  password: 'test_password'
+  roles:
+    - 'reader'
 
 # To specify a domain-scoped admin
 - username: 'user_3'
