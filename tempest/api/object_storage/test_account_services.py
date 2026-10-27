@@ -156,28 +156,35 @@ class AccountTest(base.BaseObjectTest):
             self.assertEqual(len(container_list), limit)
 
     @decorators.idempotent_id('638f876d-6a43-482a-bbb3-0840bca101c6')
-    @testtools.skipIf(not CONF.auth.use_dynamic_credentials,
-                      'Skipped because of bug#2147232.')
     def test_list_containers_with_marker(self):
         """Test listing containers with marker parameter
 
-        First expect to get 0 container as we specified the last container
-        as marker, second expect to get the bottom half of the containers.
+        First, verify that no test containers are returned when the last
+        container is used as the marker. Then verify that only test containers
+        after the middle marker are returned.
         """
+        test_containers = [
+            str(name).encode('utf-8') for name in self.containers]
+
         params = {'marker': self.containers[-1]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
 
-        self.assertEmpty(container_list)
+        actual_containers = [
+            name for name in container_list if name in test_containers]
+        self.assertEmpty(actual_containers)
 
         params = {'marker': self.containers[self.containers_count // 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
         self.assertHeaders(resp, 'Account', 'GET')
 
-        self.assertEqual(len(container_list),
-                         self.containers_count // 2 - 1)
+        actual_containers = [
+            name for name in container_list if name in test_containers]
+        expected_containers = test_containers[
+            self.containers_count // 2 + 1:]
+        self.assertEqual(expected_containers, actual_containers)
 
     @decorators.idempotent_id('5ca164e4-7bde-43fa-bafb-913b53b9e786')
     def test_list_containers_with_end_marker(self):
