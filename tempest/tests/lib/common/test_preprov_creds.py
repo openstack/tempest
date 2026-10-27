@@ -414,6 +414,123 @@ class TestPreProvisionedCredentials(base.TestCase):
         admin_creds = test_accounts_class.get_admin_creds()
         self.assertIn('test_admin', admin_creds.username)
 
+    def test_admin_type_project_scope_registration(self):
+        admin_role = 'cloud-admin'
+        accounts = [
+            {'username': 'project-type', 'project_name': 'project',
+             'password': 'p', 'types': ['admin']},
+            {'username': 'tenant-type', 'tenant_name': 'tenant',
+             'password': 'p', 'types': ['admin']},
+            {'username': 'project-role', 'project_name': 'project',
+             'password': 'p', 'roles': [admin_role]},
+            {'username': 'role-and-type', 'project_name': 'project',
+             'password': 'p', 'roles': [admin_role], 'types': ['admin']},
+            {'username': 'domain-role', 'domain_name': 'domain',
+             'password': 'p', 'roles': [admin_role]},
+            {'username': 'domain-type', 'domain_name': 'domain',
+             'password': 'p', 'types': ['admin']},
+            {'username': 'system-type', 'system': 'all',
+             'password': 'p', 'types': ['admin']},
+            {'username': 'no-project', 'password': 'p',
+             'types': ['admin']},
+            {'username': 'other-types', 'project_name': 'project',
+             'password': 'p', 'types': ['operator', 'reseller_admin']}]
+        for ordered in (accounts, list(reversed(accounts))):
+            hash_dict = preprov_creds.PreProvisionedCredentialProvider.\
+                get_hash_dict([dict(account) for account in ordered],
+                              admin_role, 'operator', 'reseller')
+            usernames = {key: value['username']
+                         for key, value in hash_dict['creds'].items()}
+            scoped = hash_dict['scoped_roles']
+            self.assertCountEqual(
+                ['project-type', 'tenant-type', 'project-role',
+                 'role-and-type'],
+                [usernames[key] for key in scoped['project_' + admin_role]])
+            self.assertEqual(1, sum(
+                usernames[key] == 'role-and-type'
+                for key in scoped['project_' + admin_role]))
+            self.assertCountEqual(
+                ['project-type', 'tenant-type', 'project-role',
+                 'role-and-type', 'role-and-type', 'domain-role',
+                 'domain-type', 'system-type', 'no-project'],
+                [usernames[key] for key in hash_dict['roles'][admin_role]])
+            self.assertEqual(['domain-role'],
+                             [usernames[key] for key in
+                              scoped['domain_' + admin_role]])
+            self.assertNotIn('system_' + admin_role, scoped)
+            self.assertEqual(['other-types'],
+                             [usernames[key] for key in
+                              hash_dict['roles']['operator']])
+            self.assertEqual(['other-types'],
+                             [usernames[key] for key in
+                              hash_dict['roles']['reseller']])
+
+    def test_project_admin_type_selection_ignores_domain_account_order(self):
+        accounts = [
+            {'username': 'domain-admin', 'domain_name': 'domain',
+             'password': 'p', 'roles': ['admin']},
+            {'username': 'project-admin', 'project_name': 'project',
+             'password': 'p', 'types': ['admin']}]
+        for ordered in (accounts, list(reversed(accounts))):
+            self.patchobject(preprov_creds, 'read_accounts_yaml',
+                             return_value=[dict(account) for account in
+                                           ordered])
+            provider = preprov_creds.PreProvisionedCredentialProvider(
+                **self.fixed_params)
+
+            def prefer_domain(hashes):
+                domain_hashes = [key for key in hashes if
+                                 provider.hash_dict['creds'][key]
+                                 ['username'] == 'domain-admin']
+                return (domain_hashes or list(hashes))[0]
+
+            self.patchobject(provider, '_get_free_hash',
+                             side_effect=prefer_domain)
+            self.patchobject(provider, '_wrap_creds_with_network',
+                             side_effect=lambda key: mock.Mock(
+                                 username=provider.hash_dict['creds'][key]
+                                 ['username']))
+            self.assertEqual('project-admin',
+                             provider.get_project_admin_creds().username)
+            self.assertIs(provider.get_project_admin_creds(),
+                          provider.get_project_admin_creds())
+
+    def test_project_admin_type_uses_configured_admin_role(self):
+        for project_field in ('project_name', 'tenant_name'):
+            accounts = [{'username': 'project-admin',
+                         project_field: 'project', 'password': 'p',
+                         'types': ['admin']}]
+            self.patchobject(preprov_creds, 'read_accounts_yaml',
+                             return_value=accounts)
+            params = dict(self.fixed_params, admin_role='cloud-admin')
+            provider = preprov_creds.PreProvisionedCredentialProvider(**params)
+            self.patchobject(provider, '_get_free_hash',
+                             side_effect=lambda hashes: list(hashes)[0])
+            self.patchobject(provider, '_wrap_creds_with_network',
+                             return_value=mock.Mock(username='project-admin'))
+            self.assertEqual('project-admin',
+                             provider.get_project_admin_creds().username)
+
+    def test_project_admin_role_when_admin_role_omitted(self):
+        params = dict(self.fixed_params)
+        params.pop('admin_role')
+        for account_role in ({'roles': ['admin']}, {'types': ['admin']}):
+            account = {'username': 'project-admin',
+                       'project_name': 'project', 'password': 'p'}
+            account.update(account_role)
+            self.patchobject(preprov_creds, 'read_accounts_yaml',
+                             return_value=[account])
+            provider = preprov_creds.PreProvisionedCredentialProvider(
+                **params)
+            self.patchobject(provider, '_get_free_hash',
+                             side_effect=lambda hashes: list(hashes)[0])
+            self.patchobject(provider, '_wrap_creds_with_network',
+                             return_value=mock.Mock(username='project-admin'))
+            self.assertEqual('project-admin',
+                             provider.get_project_admin_creds().username)
+            if 'types' in account_role:
+                self.assertIn(None, provider.hash_dict['roles'])
+
     def test_get_admin_creds_by_role(self):
         test_accounts = [
             {'username': 'test_user10', 'project_name': 'test_tenant10',

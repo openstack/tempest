@@ -160,6 +160,13 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
                 if type == 'admin':
                     hash_dict = cls._append_role(admin_role, temp_hash_key,
                                                  hash_dict)
+                    if scope == 'project':
+                        scoped_role = admin_role or 'admin'
+                        scoped_key = 'project_%s' % scoped_role
+                        if temp_hash_key not in hash_dict['scoped_roles'].get(
+                                scoped_key, []):
+                            hash_dict = cls._append_scoped_role(
+                                scope, scoped_role, temp_hash_key, hash_dict)
                 elif type == 'operator':
                     if object_storage_operator_role:
                         hash_dict = cls._append_role(
@@ -276,7 +283,7 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
         # not allocate admin.
         admin_hashes = self.hash_dict['roles'].get(self.admin_role,
                                                    None)
-        if ((not roles or self.admin_role not in roles) and
+        if ((not roles or (self.admin_role or 'admin') not in roles) and
                 admin_hashes):
             useable_hashes = [x for x in hashes if x not in admin_hashes]
         else:
@@ -430,7 +437,8 @@ class PreProvisionedCredentialProvider(cred_provider.CredentialProvider):
     def get_project_admin_creds(self):
         if self._creds.get('project_admin'):
             return self._creds.get('project_admin')
-        project_admin = self._get_creds(['admin'], scope='project')
+        project_admin = self._get_creds([self.admin_role or 'admin'],
+                                        scope='project')
         self._creds['project_admin'] = project_admin
         return project_admin
 
