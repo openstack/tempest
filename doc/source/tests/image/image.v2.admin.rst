@@ -12,14 +12,6 @@ image.v2.admin.test\_image\_caching module
    :show-inheritance:
    :undoc-members:
 
-image.v2.admin.test\_image\_task module
----------------------------------------
-
-.. automodule:: tempest.api.image.v2.admin.test_image_task
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
 image.v2.admin.test\_images module
 ----------------------------------
 
