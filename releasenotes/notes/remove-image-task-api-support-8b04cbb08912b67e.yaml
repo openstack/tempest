@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Removed the deprecated Glance v2 image task API tests and the
+    ``tasks_client`` service client. Plugins using ``Manager.tasks_client``
+    or ``TaskClient`` should remove that dependency.
+
