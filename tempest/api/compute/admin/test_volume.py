@@ -68,11 +68,6 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
         :param return image_id: The UUID of the newly created image.
         """
         image = self.reader_image_client.show_image(CONF.compute.image_ref)
-        # NOTE(danms): We need to stream this, so chunked=True means we get
-        # back a urllib3.HTTPResponse and have to carefully pass it to
-        # store_image_file() to upload it in pieces.
-        image_data_resp = self.admin_image_client.show_image_file(
-            CONF.compute.image_ref, chunked=True)
         create_dict = {
             'container_format': image['container_format'],
             'disk_format': image['disk_format'],
@@ -86,13 +81,18 @@ class BaseAttachSCSIVolumeTest(base.BaseV2ComputeAdminTest):
             create_dict['ramdisk_id'] = image['ramdisk_id']
 
         create_dict.update(kwargs)
+        new_image = self.admin_image_client.create_image(**create_dict)
+        self.addCleanup(
+            self.reader_image_client.wait_for_resource_deletion,
+            new_image['id'])
+        self.addCleanup(
+            self.admin_image_client.delete_image, new_image['id'])
+        # Open the source stream only when ready to upload it. Leaving it
+        # unread during image creation can time out the server's writes.
+        # chunked=True returns a urllib3.HTTPResponse for streaming upload.
+        image_data_resp = self.admin_image_client.show_image_file(
+            CONF.compute.image_ref, chunked=True)
         try:
-            new_image = self.admin_image_client.create_image(**create_dict)
-            self.addCleanup(
-                self.reader_image_client.wait_for_resource_deletion,
-                new_image['id'])
-            self.addCleanup(
-                self.admin_image_client.delete_image, new_image['id'])
             self.admin_image_client.store_image_file(new_image['id'],
                                                      image_data_resp)
         finally:
