@@ -193,16 +193,15 @@ class VolumesSnapshotListTestJSON(base.BaseVolumeTest):
 
     @decorators.idempotent_id('ca96d551-17c6-4e11-b0e8-52d3bb8a63c7')
     def test_snapshot_list_param_offset(self):
-        """Test listing snapshots with offset and limit
+        """Test that offset skips the first two snapshots."""
+        sort_params = {'sort_key': 'id', 'sort_dir': 'asc'}
+        snapshots = self.reader_snapshots_client.list_snapshots(
+            limit=5, **sort_params)['snapshots']
+        self.assertGreaterEqual(len(snapshots), 3)
 
-        If listing snapshots with offset=2 and limit=3, then at most 3(limit)
-        snapshots located in the position 2(offset) in the all snapshots list
-        should be returned.
-        (The items in the all snapshots list start from position 0.)
-        """
-        params = {'offset': 2, 'limit': 3}
-        snap_list = self.reader_snapshots_client.list_snapshots(
-            **params)['snapshots']
-        # Verify the list of snapshots skip offset=2 from the first element
-        # (total 3 elements), therefore only one snapshot should display
-        self.assertEqual(1, len(snap_list))
+        paged_snapshots = self.reader_snapshots_client.list_snapshots(
+            offset=2, limit=3, **sort_params)['snapshots']
+
+        expected_ids = [snapshot['id'] for snapshot in snapshots[2:5]]
+        actual_ids = [snapshot['id'] for snapshot in paged_snapshots]
+        self.assertEqual(expected_ids, actual_ids)
